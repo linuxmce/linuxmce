@@ -116,6 +116,18 @@ void NvrCameraBase::doConnections()
     emit initialized();
 
 }
+bool NvrCameraBase::getMotionEnabled() const
+{
+    return m_motionEnabled;
+}
+
+void NvrCameraBase::setMotionEnabled(bool motionEnabled)
+{
+    if(m_motionEnabled==motionEnabled)return;
+    m_motionEnabled = motionEnabled;
+    emit motionEnabledChanged();
+}
+
 int NvrCameraBase::dceDeviceId() const
 {
     return m_dceDeviceId;
@@ -134,6 +146,16 @@ std::string NvrCameraBase::getImage()
 void NvrCameraBase::getImage(char **pD, int *dataLength)
 {
 
+}
+
+void NvrCameraBase::disableMotionDetection()
+{
+   setMotionEnabled(false);
+}
+
+void NvrCameraBase::enableMotionDetection()
+{
+    setMotionEnabled(true);
 }
 
 QString NvrCameraBase::managerPort() const

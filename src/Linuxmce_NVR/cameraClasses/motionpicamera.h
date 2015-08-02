@@ -67,6 +67,7 @@ private slots:
     void handleControlReply(QNetworkReply*p);
     void handleRequest(QNetworkRequest q);
     void parseStream(QByteArray st);
+    void refreshImage();
 public slots:
     void setCameraType(CameraType t);
     void setAudioType(AudioType a);

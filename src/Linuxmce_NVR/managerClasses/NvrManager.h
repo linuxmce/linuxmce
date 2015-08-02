@@ -33,6 +33,8 @@ public slots:
     void startUp(int listenPort);
     string getImageFrame(int camId);
 
+    void setDetectionStatus(bool enabled, int camId);
+
 
 private:
     void log(QString logMsg);

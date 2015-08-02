@@ -107,156 +107,147 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 
 
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Taking Snapshot...");
-
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking file existance...");
-
         string FilePath = mp_manager->getImageFrame(pMessage->m_dwPK_Device_To); //  "/tmp/" + StringUtils::itos(pMessage->m_dwPK_Device_To) + "/lastsnap.jpg";
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking file existance...");
 
         if(FileUtils::FileExists(FilePath)) {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "File exists. Reading and sending snapshot picture...");
-            size_t nDataLength;
-            char *pFileData = FileUtils::ReadFileIntoBuffer(FilePath, nDataLength);
-
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Reply message to sender.");
-
-            pMessage->m_bRespondedToMessage=true;
-            Message *pMessageOut=new Message(pMessage->m_dwPK_Device_To, pMessage->m_dwPK_Device_From,
-                                             PRIORITY_NORMAL, MESSAGETYPE_REPLY, 0, 0);
-            pMessageOut->m_mapData_Parameters[19]=pFileData;
-            pMessageOut->m_mapData_Lengths[19]=nDataLength;
-            pMessageOut->m_mapParameters[0]=sCMD_Result;
-            SendMessage(pMessageOut);
-
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sent %d bytes to command sender.", nDataLength);
         } else {
-
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "Missing snapshot file: %s.", FilePath.c_str());
-             FilePath = "/tmp/please_wait.png";
-
-            if(FileUtils::FileExists(FilePath)) {
-                LoggerWrapper::GetInstance()->Write(LV_STATUS, "File exists. Reading and sending snapshot picture...");
-                size_t nDataLength;
-                char *pFileData = FileUtils::ReadFileIntoBuffer(FilePath, nDataLength);
-
-                LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Reply message to sender.");
-
-                pMessage->m_bRespondedToMessage=true;
-                Message *pMessageOut=new Message(pMessage->m_dwPK_Device_To, pMessage->m_dwPK_Device_From,
-                                                 PRIORITY_NORMAL, MESSAGETYPE_REPLY, 0, 0);
-                pMessageOut->m_mapData_Parameters[19]=pFileData;
-                pMessageOut->m_mapData_Lengths[19]=nDataLength;
-                pMessageOut->m_mapParameters[0]=sCMD_Result;
-                SendMessage(pMessageOut);
-
-                LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sent %d bytes to command sender.", nDataLength);
-            }
+            FilePath = "/tmp/please_wait.png";
         }
+
+        size_t nDataLength;
+        char *pFileData = FileUtils::ReadFileIntoBuffer(FilePath, nDataLength);
+
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Reply message to sender.");
+
+        pMessage->m_bRespondedToMessage=true;
+        Message *pMessageOut=new Message(pMessage->m_dwPK_Device_To, pMessage->m_dwPK_Device_From,
+                                         PRIORITY_NORMAL, MESSAGETYPE_REPLY, 0, 0);
+        pMessageOut->m_mapData_Parameters[19]=pFileData;
+        pMessageOut->m_mapData_Lengths[19]=nDataLength;
+        pMessageOut->m_mapParameters[0]=sCMD_Result;
+        SendMessage(pMessageOut);
+
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sent %d bytes to command sender.", nDataLength);
+    }
         break;
-    }
-    default:
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unknown command %d received.", pMessage->m_dwID);
-        }
-    }
+    case COMMAND_Generic_On_CONST: {
+        emit setDetectionState(true, pMessage->m_dwPK_Device_To);
 
-    /*
+    }
+        break;
+    case COMMAND_Generic_Off_CONST: {
+        emit setDetectionState(false, pMessage->m_dwPK_Device_To);
+
+    }
+        break;
+    default:
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unknown command %d received.", pMessage->m_dwID);
+        qDebug() << QString( "Unknown command %1 received.").arg( pMessage->m_dwID);
+    }
+}
+
+/*
     When you received a valid command, but it wasn't for one of your children,
     then ReceivedUnknownCommand gets called.  If you handle the message, you
     should change the sCMD_Result to OK
 */
-    //<-dceag-cmduk-b->
-    void Linuxmce_NVR::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
-            //<-dceag-cmduk-e->
+//<-dceag-cmduk-b->
+void Linuxmce_NVR::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
+//<-dceag-cmduk-e->
+{
+    sCMD_Result = "UNKNOWN COMMAND";
+}
+
+bool Linuxmce_NVR::OnReplaceHandler(string r)
+{
+    this->m_bQuit_set(true);
+
+    return true;
+
+}
+
+void Linuxmce_NVR::CreateChildren()
+{
+    qDebug() << this->thread();
+    if(!createManager()) return;
+
+    for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
     {
-        sCMD_Result = "UNKNOWN COMMAND";
-    }
+        DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
 
-    bool Linuxmce_NVR::OnReplaceHandler(string r)
-    {
-        this->m_bQuit_set(true);
-
-        return true;
-
-    }
-
-    void Linuxmce_NVR::CreateChildren()
-    {
-        qDebug() << this->thread();
-        if(!createManager()) return;
-
-        for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
+        // This device was marked as disabled
+        if (pDeviceData_Impl_Child->m_bDisabled)
         {
-            DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
-
-            // This device was marked as disabled
-            if (pDeviceData_Impl_Child->m_bDisabled)
-            {
-                qDebug() << "Disabled device.";
-                LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
-                continue;
-            }
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Creating child %d", pDeviceData_Impl_Child->m_dwPK_Device);
-
-            // This device has it's own executible. Try to spawn it. If that fails, we will try to create it ourselves
-            if( pDeviceData_Impl_Child->m_bImplementsDCE && !pDeviceData_Impl_Child->m_bIsEmbedded )
-            {
-                qDebug() << "Own Executable device.";
-                if( SpawnChildDevice(pDeviceData_Impl_Child->m_dwPK_Device,pDeviceData_Impl_Child->m_sCommandLine) )
-                    continue;
-            }
-            Event_Impl *pEvent = m_pEvent->CreateEvent( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
-            if ( !pEvent )
-            {
-                pEvent = new Event_Impl( m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
-                LoggerWrapper::GetInstance()->Write( LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom event handler for.  It will not fire events.",
-                                                     pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
-            }
-            Command_Impl *pCommand = m_pPrimaryDeviceCommand->CreateCommand( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent );
-            if ( !pCommand )
-            {
-                pCommand = new Command_Impl(m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent, m_pRouter);
-                pCommand->m_bGeneric=true;
-                LoggerWrapper::GetInstance()->Write(LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom handler for.  This is normal for IR.", pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
-            }
-            pCommand->m_pParent = this;
-            pCommand->CreateChildren();
-            m_mapCommandImpl_Children[pDeviceData_Impl_Child->m_dwPK_Device] = pCommand;
-
-            QString userName= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_AuthUser_CONST));
-            QString pass= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Password_CONST));
-            QString cameraType=QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Type_CONST)).toLower();
-            QString cameraIp ="http://"+QString::fromStdString( pDeviceData_Impl_Child->GetIPAddress());
-            int cameraId = pDeviceData_Impl_Child->m_dwPK_Device;
-            int imagePort=QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Port_CONST)).toInt();
-            int commandPort =8080;
-            QString name =QString::fromStdString(pDeviceData_Impl_Child->m_sDescription);
-            QUrl url(cameraIp);
-            if(cameraType=="motion"){
-                commandPort= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_TCP_Port_CONST)).toInt();
-
-                MotionPiCamera *p = new MotionPiCamera
-                        (name,
-                         userName,
-                         pass,
-                         imagePort,
-                         commandPort,
-                         url,
-                         cameraId
-                         );
-
-                //    mpManager->addCamera(p);
-                addCamera(p);
-
-            } else if(cameraType=="http"){
-
-            } else if(cameraType=="rtsp"){
-
-            };
-            //create proxy
+            qDebug() << "Disabled device.";
+            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
+            continue;
         }
-    }
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Creating child %d", pDeviceData_Impl_Child->m_dwPK_Device);
 
-    //<-dceag-sample-b->
-    /*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
+        // This device has it's own executible. Try to spawn it. If that fails, we will try to create it ourselves
+        if( pDeviceData_Impl_Child->m_bImplementsDCE && !pDeviceData_Impl_Child->m_bIsEmbedded )
+        {
+            qDebug() << "Own Executable device.";
+            if( SpawnChildDevice(pDeviceData_Impl_Child->m_dwPK_Device,pDeviceData_Impl_Child->m_sCommandLine) )
+                continue;
+        }
+        Event_Impl *pEvent = m_pEvent->CreateEvent( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
+        if ( !pEvent )
+        {
+            pEvent = new Event_Impl( m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
+            LoggerWrapper::GetInstance()->Write( LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom event handler for.  It will not fire events.",
+                                                 pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
+        }
+        Command_Impl *pCommand = m_pPrimaryDeviceCommand->CreateCommand( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent );
+        if ( !pCommand )
+        {
+            pCommand = new Command_Impl(m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent, m_pRouter);
+            pCommand->m_bGeneric=true;
+            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom handler for.  This is normal for IR.", pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
+        }
+        pCommand->m_pParent = this;
+        pCommand->CreateChildren();
+        m_mapCommandImpl_Children[pDeviceData_Impl_Child->m_dwPK_Device] = pCommand;
+
+        QString userName= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_AuthUser_CONST));
+        QString pass= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Password_CONST));
+        QString cameraType=QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Type_CONST)).toLower();
+        QString cameraIp ="http://"+QString::fromStdString( pDeviceData_Impl_Child->GetIPAddress());
+        int cameraId = pDeviceData_Impl_Child->m_dwPK_Device;
+        int imagePort=QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Port_CONST)).toInt();
+        int commandPort =8080;
+        QString name =QString::fromStdString(pDeviceData_Impl_Child->m_sDescription);
+        QUrl url(cameraIp);
+        if(cameraType=="motion"){
+            commandPort= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_TCP_Port_CONST)).toInt();
+
+            MotionPiCamera *p = new MotionPiCamera
+                    (name,
+                     userName,
+                     pass,
+                     imagePort,
+                     commandPort,
+                     url,
+                     cameraId
+                     );
+
+            //    mpManager->addCamera(p);
+            addCamera(p);
+
+        } else if(cameraType=="http"){
+
+        } else if(cameraType=="rtsp"){
+
+        };
+        //create proxy
+    }
+}
+
+//<-dceag-sample-b->
+/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
 
 **** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
 **** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
@@ -336,127 +327,126 @@ void Linuxmce_NVR::SomeFunction()
     EVENT_Touch_or_click(10,150);
 }
 */
-    //<-dceag-sample-e->
+//<-dceag-sample-e->
 
-    /*
+/*
 
     COMMANDS TO IMPLEMENT
 
 */
 
-    //<-dceag-c277-b->
+//<-dceag-c277-b->
 
-    /** @brief COMMAND: #277 - Get Capture Video Frame */
-    /** Get a video frame from a specified camera number */
-    /** @param #19 Data */
-    /** The pointer to the video frame */
-    /** @param #112 CameraID */
-    /** The number (ID) of the camera where to capture from */
+/** @brief COMMAND: #277 - Get Capture Video Frame */
+/** Get a video frame from a specified camera number */
+/** @param #19 Data */
+/** The pointer to the video frame */
+/** @param #112 CameraID */
+/** The number (ID) of the camera where to capture from */
 
-    void Linuxmce_NVR::CMD_Get_Capture_Video_Frame(int iCameraID,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
-            //<-dceag-c277-e->
-    {
-        qDebug() << "gimmie camera frame for " << iCameraID;
-        cout << "Need to implement command #277 - Get Capture Video Frame" << endl;
-        cout << "Parm #19 - Data  (data value)" << endl;
-        cout << "Parm #112 - CameraID=" << iCameraID << endl;
-    }
+void Linuxmce_NVR::CMD_Get_Capture_Video_Frame(int iCameraID,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
+//<-dceag-c277-e->
+{
+    qDebug() << "gimmie camera frame for " << iCameraID;
+    cout << "Need to implement command #277 - Get Capture Video Frame" << endl;
+    cout << "Parm #19 - Data  (data value)" << endl;
+    cout << "Parm #112 - CameraID=" << iCameraID << endl;
+}
 
-    //<-dceag-c756-b->
+//<-dceag-c756-b->
 
-    /** @brief COMMAND: #756 - Report Child Devices */
-    /** Report all the child sensors this has by firing an event 'Reporting Child Devices' */
+/** @brief COMMAND: #756 - Report Child Devices */
+/** Report all the child sensors this has by firing an event 'Reporting Child Devices' */
 
-    void Linuxmce_NVR::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
-            //<-dceag-c756-e->
-    {
-        cout << "Need to implement command #756 - Report Child Devices" << endl;
+void Linuxmce_NVR::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
+//<-dceag-c756-e->
+{
+    cout << "Need to implement command #756 - Report Child Devices" << endl;
 
-    }
+}
 
-    //<-dceag-c757-b->
+//<-dceag-c757-b->
 
-    /** @brief COMMAND: #757 - Download Configuration */
-    /** Download new configuration data for this device */
-    /** @param #9 Text */
-    /** Any information the device may want to do the download */
+/** @brief COMMAND: #757 - Download Configuration */
+/** Download new configuration data for this device */
+/** @param #9 Text */
+/** Any information the device may want to do the download */
 
-    void Linuxmce_NVR::CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage)
-            //<-dceag-c757-e->
-    {
-        cout << "Need to implement command #757 - Download Configuration" << endl;
-        cout << "Parm #9 - Text=" << sText << endl;
-    }
+void Linuxmce_NVR::CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage)
+//<-dceag-c757-e->
+{
+    cout << "Need to implement command #757 - Download Configuration" << endl;
+    cout << "Parm #9 - Text=" << sText << endl;
+}
 
-    //<-dceag-c760-b->
+//<-dceag-c760-b->
 
-    /** @brief COMMAND: #760 - Send Command To Child */
-    /** After reporting new child devices, there may be children we want to test, but we haven't done a quick reload router and can't send them messages directly.  This way we can send 'live' messages to children */
-    /** @param #10 ID */
-    /** The internal ID used for this device--not the Pluto device ID. */
-    /** @param #154 PK_Command */
-    /** The command to send */
-    /** @param #202 Parameters */
-    /** Parameters for the command in the format:
+/** @brief COMMAND: #760 - Send Command To Child */
+/** After reporting new child devices, there may be children we want to test, but we haven't done a quick reload router and can't send them messages directly.  This way we can send 'live' messages to children */
+/** @param #10 ID */
+/** The internal ID used for this device--not the Pluto device ID. */
+/** @param #154 PK_Command */
+/** The command to send */
+/** @param #202 Parameters */
+/** Parameters for the command in the format:
 PK_CommandParameter|Value|... */
 
-    void Linuxmce_NVR::CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage)
-            //<-dceag-c760-e->
-    {
-        cout << "Need to implement command #760 - Send Command To Child" << endl;
-        cout << "Parm #10 - ID=" << sID << endl;
-        cout << "Parm #154 - PK_Command=" << iPK_Command << endl;
-        cout << "Parm #202 - Parameters=" << sParameters << endl;
-    }
+void Linuxmce_NVR::CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage)
+//<-dceag-c760-e->
+{
+    cout << "Need to implement command #760 - Send Command To Child" << endl;
+    cout << "Parm #10 - ID=" << sID << endl;
+    cout << "Parm #154 - PK_Command=" << iPK_Command << endl;
+    cout << "Parm #202 - Parameters=" << sParameters << endl;
+}
 
-    //<-dceag-c776-b->
+//<-dceag-c776-b->
 
-    /** @brief COMMAND: #776 - Reset */
-    /** Reset device. */
-    /** @param #51 Arguments */
-    /** Argument string
+/** @brief COMMAND: #776 - Reset */
+/** Reset device. */
+/** @param #51 Arguments */
+/** Argument string
 NOEMON or CANBUS */
 
-    void Linuxmce_NVR::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
-            //<-dceag-c776-e->
-    {
-        cout << "Need to implement command #776 - Reset" << endl;
-        cout << "Parm #51 - Arguments=" << sArguments << endl;
-    }
+void Linuxmce_NVR::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
+//<-dceag-c776-e->
+{
+    cout << "Need to implement command #776 - Reset" << endl;
+    cout << "Parm #51 - Arguments=" << sArguments << endl;
+}
 
-    //<-dceag-c788-b->
+//<-dceag-c788-b->
 
-    /** @brief COMMAND: #788 - StatusReport */
-    /** Test comand. Asq a report */
-    /** @param #51 Arguments */
-    /** Argument string */
+/** @brief COMMAND: #788 - StatusReport */
+/** Test comand. Asq a report */
+/** @param #51 Arguments */
+/** Argument string */
 
-    void Linuxmce_NVR::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMessage)
-            //<-dceag-c788-e->
-    {
-        cout << "Need to implement command #788 - StatusReport" << endl;
-        cout << "Parm #51 - Arguments=" << sArguments << endl;
-    }
+void Linuxmce_NVR::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMessage)
+//<-dceag-c788-e->
+{
+    cout << "Need to implement command #788 - StatusReport" << endl;
+    cout << "Parm #51 - Arguments=" << sArguments << endl;
+}
 
 
-    void Linuxmce_NVR::handleManagerMessage(QString msg)
-    {
-        qDebug() << msg;
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, " %s ", msg.toStdString().c_str());
-    }
+void Linuxmce_NVR::handleManagerMessage(QString msg)
+{
+    qDebug() << msg;
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, " %s ", msg.toStdString().c_str());
+}
 
-    bool Linuxmce_NVR::createManager()
-    {
+bool Linuxmce_NVR::createManager()
+{
 
-        QThread *t = new QThread();
-        int lp = DATA_Get_Listen_Port();
-        qDebug() << lp;
-        mp_manager = new NvrManager( lp);
-
-        QObject::connect(this, &Linuxmce_NVR::addCamera, mp_manager, &NvrManager::addCamera, Qt::QueuedConnection);
-        QObject::connect(mp_manager, &NvrManager::newManagerMessage, this, &Linuxmce_NVR::handleManagerMessage, Qt::QueuedConnection);
-
-        return true;
-    }
+    QThread *t = new QThread();
+    int lp = DATA_Get_Listen_Port();
+    qDebug() << lp;
+    mp_manager = new NvrManager(lp);
+    QObject::connect(this, &Linuxmce_NVR::addCamera, mp_manager, &NvrManager::addCamera, Qt::QueuedConnection);
+    QObject::connect(mp_manager, &NvrManager::newManagerMessage, this, &Linuxmce_NVR::handleManagerMessage, Qt::QueuedConnection);
+    QObject::connect(this, &Linuxmce_NVR::setDetectionState, mp_manager, &NvrManager::setDetectionStatus, Qt::QueuedConnection);
+    return true;
+}
 
 
