@@ -228,7 +228,7 @@ std::string MotionPiCamera::getImage()
     QEventLoop *e = new QEventLoop();
 
     connect(rep, &QNetworkReply::finished, e, &QEventLoop::quit);
-    connect(rep, &QNetworkReply::readyRead, [=](){
+    connect(rep, &QNetworkReply::readyRead, [=](){      //lamda function for slot
 
         d_array.append(rep->readAll());
 
@@ -252,11 +252,11 @@ std::string MotionPiCamera::getImage()
                     qDebug() << "failed to save";
                 }
                 d_array.clear();
-                rep->abort();
+                rep->abort(); //disconnect now that we have an image
             }
         }
     } );
-    e->exec();
+    e->exec(); //start event loop
 
     d_array.clear();
     return fileName.toStdString();
