@@ -33,10 +33,10 @@ const QString MotionPiCamera::ON_MOTION_DETECTED="on_motion_detected";
 const QString MotionPiCamera::ON_MOVIE_END="on_movie_end";
 const QString MotionPiCamera::ON_MOVIE_START="on_movie_start";
 
-const QString MotionPiCamera::CURL_EVENT_START= "curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'started'} }\" http://SERVER_TARGET:SERVER_PORT";
-const QString MotionPiCamera::CURL_EVENT_END="curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'stopped'} }\" http://SERVER_TARGET:SERVER_PORT";
-const QString MotionPiCamera::CURL_MOTION_DETECTED="curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'detected'} }\" SERVER_TARGET:SERVER_PORT";
-const QString MotionPiCamera::CURL_SEND_PICTURE="curl  --form \"fileupload=@%f\" http://SERVER_TARGET:SERVER_PORT";
+const QString MotionPiCamera::CURL_EVENT_START= "curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,  'event': {'type': 'motion','status': 'started'} }\" http://%3:%4";
+const QString MotionPiCamera::CURL_EVENT_END="curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,'event': {'type': 'motion','status': 'stopped'} }\" http://%3:%4";
+const QString MotionPiCamera::CURL_MOTION_DETECTED="curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,'event': {'type': 'motion','status': 'detected'} }\" %3:%4";
+const QString MotionPiCamera::CURL_SEND_PICTURE="curl  --form \"fileupload=@%f\" http://%1:%2";
 
 
 MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url,  int dceId, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
@@ -72,27 +72,26 @@ void MotionPiCamera::setConnections()
 
     log( QString(Q_FUNC_INFO)+" motion camera setting connections"  );
     testControlPort();
-    QString e = CURL_EVENT_END;
+    QString e = CURL_EVENT_END.arg(QString::number(dceDeviceId())).arg(cameraName()).arg(managerUrl()).arg(managerPort());
     e.replace("192.168.80.xxx", controlUrl().host());
     e.replace("SERVER_TARGET",managerUrl());
     e.replace("SERVER_PORT", managerPort());
     QVariant end(e.replace("HOSTNAME", cameraName()));
 
-    QString s = CURL_EVENT_START;
+    QString s = CURL_EVENT_START.arg(QString::number(dceDeviceId())).arg(cameraName()).arg(managerUrl()).arg(managerPort());
     s.replace("192.168.80.xxx", controlUrl().host());
     s.replace("SERVER_TARGET",managerUrl());
     s.replace("SERVER_PORT", managerPort());
     QVariant start(s .replace("HOSTNAME", cameraName()));
 
-    QString m = CURL_MOTION_DETECTED;
+    QString m = CURL_MOTION_DETECTED.arg(QString::number(dceDeviceId())).arg(cameraName()).arg(managerUrl()).arg(managerPort());
     m.replace("192.168.80.xxx", controlUrl().host());
     m.replace("SERVER_TARGET",managerUrl());
     m.replace("SERVER_PORT", managerPort());
     QVariant motion(m.replace("HOSTNAME", cameraName()));
 
-    QString pic = CURL_SEND_PICTURE;
-    pic.replace("SERVER_TARGET",managerUrl());
-    pic.replace("SERVER_PORT", managerPort());
+    QString pic = CURL_SEND_PICTURE.arg(managerUrl()).arg(managerPort()).arg(QString::number(dceDeviceId()));
+
 
     setMotionSetting(MotionPiCamera::ON_EVENT_START, start );
     setMotionSetting(MotionPiCamera::ON_EVENT_END, end);

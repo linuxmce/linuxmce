@@ -66,16 +66,13 @@ void MotionEventListener::log(QString msg)
 void MotionEventListener::handleEvent(QHttpRequest *r, QHttpResponse *a)
 {
 
-    qDebug() << "incoming data";
+   // qDebug() << "incoming data";
     int hdrLength= r->header("content-length").toInt();
-    if(hdrLength > 100){
-        qDebug() << r->header("content-length") << " << content length, likely image.";
-       // qDebug() << r->headers();
-        r->storeBody();
-       // QObject::connect(r, &QHttpRequest::data, this, &MotionEventListener::handleImageData);
+    if(hdrLength > 1000){
+       // qDebug() << r->header("content-length") << " << content length, likely image.";
+        r->storeBody();      
         QByteArray standardResponse("OK");
         // a->setHeader("Content-Length", QString::number(standardResponse.length()));
-
         connect(r, &QHttpRequest::end, [=](){
             a->writeHead(200);
             a->end(standardResponse);
@@ -133,30 +130,17 @@ void MotionEventListener::handleImageData(QByteArray imgData)
     int fEnd = parts.indexOf("jpg")+3;
 
 
-    QString fileName = parts.mid(fName ,fEnd-fName).remove("\"");
-   // qDebug() <<fEnd;
-   //qDebug() << parts;
+    QString fileName = parts.mid(fName ,fEnd-fName).remove("\"");   
     imgData.remove(0,brk);
-   // imgData.replace("\r","");
-
-
-
     QImage t;
 
     if(t.loadFromData(imgData)){
-       // qDebug() << " image !"  << t.size();
-
 
         if(t.save("/tmp/"+fileName, "JPEG"))
             qDebug() << " image saved ::" << fileName;
-
-
-
         return;
     } else {
-       // qDebug() << t.size();
-       // qDebug() << imgData.size();
-       // qDebug() << imgData;
+         qDebug() << " image save failed ::" << fileName;
     }
 }
 
