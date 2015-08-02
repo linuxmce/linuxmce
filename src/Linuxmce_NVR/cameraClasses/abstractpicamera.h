@@ -19,6 +19,7 @@ public:
                                quint16 port,
                                quint16 control_port,
                                QUrl url,
+                               int linuxmceId,
                                QObject *parent = 0);
 
     enum CameraType{
@@ -78,6 +79,9 @@ public:
     QString managerPort() const;
     void setManagerPort(const QString &managerPort);
 
+    int dceDeviceId() const;
+    void setDceDeviceId(int dceDeviceId);
+
 signals:
     void cameraNameChanged();
     void cameraTypeChanged();
@@ -93,7 +97,8 @@ signals:
     void initialized();
 
 public slots:
-
+    virtual std::string getImage();
+    virtual void getImage(char**pD, int*dataLength);
 
 protected:
     CameraType m_cameraType;
@@ -117,6 +122,7 @@ private:
     bool m_constructed;
     QString m_managerUrl;
     QString m_managerPort;
+    int m_dceDeviceId;
 };
 //Q_DECLARE_METATYPE(NvrCameraBase)
 

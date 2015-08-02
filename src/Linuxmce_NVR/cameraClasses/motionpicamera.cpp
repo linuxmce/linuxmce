@@ -5,7 +5,9 @@
 #include "qvariant.h"
 #include "qurlquery.h"
 #include "qeventloop.h"
-
+#include "qbytearray.h"
+#include "qimage.h"
+#include "qdir.h"
 const QString MotionPiCamera::WRITE_SETTINGS="/0/config/writeyes";
 const QString MotionPiCamera::ALL_CAMERAS="/0";
 const QString MotionPiCamera::CAMERA_DETECTION_START="/0/detection/start";
@@ -37,14 +39,24 @@ const QString MotionPiCamera::CURL_MOTION_DETECTED="curl --data \"{'ip':'192.168
 const QString MotionPiCamera::CURL_SEND_PICTURE="curl  --form \"fileupload=@%f\" http://SERVER_TARGET:SERVER_PORT";
 
 
-MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
-    NvrCameraBase( cameraName, userName, password,port, control_port, url, parent = 0) {
+MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url,  int dceId, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
+    NvrCameraBase( cameraName, userName, password,port, control_port, url, dceId, parent = 0) {
 
-    qDebug() << "MotionPiCamera" << this->thread();
     QObject::connect(this,&MotionPiCamera::initialized, this, &MotionPiCamera::setConnections);
-
     setAudioType(a);
     setCameraType(t);
+
+    //need to set this up in dce
+    QDir out("/tmp/"+QString::number(dceId)+"/");
+
+    if(!out.exists()){
+
+        if(out.mkpath(out.path()))
+            log("Output path created");
+
+    }
+
+
 
     if(constructed())
         initialized();
@@ -130,6 +142,11 @@ void MotionPiCamera::handleControlReply(QNetworkReply *p)
 
 }
 
+void MotionPiCamera::parseStream(QByteArray st)
+{
+
+}
+
 void MotionPiCamera::setCameraType(NvrCameraBase::CameraType t)
 {
     if(m_cameraType==t)
@@ -197,5 +214,53 @@ void MotionPiCamera::writeSettings()
     QNetworkRequest req(writeUrl);
     httpManager->get(req);
 
+}
+
+std::string MotionPiCamera::getImage()
+{
+    qDebug() << Q_FUNC_INFO;
+    QNetworkAccessManager *imgMgr= new QNetworkAccessManager();
+    qDebug()<< this->Url();
+    QNetworkRequest q(this->Url());
+
+    QNetworkReply *rep = imgMgr->get(q);
+    QString fileName ="/tmp/"+QString::number(dceDeviceId())+"/lastsnap.jpg";
+    QEventLoop *e = new QEventLoop();
+
+    connect(rep, &QNetworkReply::finished, e, &QEventLoop::quit);
+    connect(rep, &QNetworkReply::readyRead, [=](){
+
+        d_array.append(rep->readAll());
+
+        int b = d_array.indexOf("BoundaryString",0);
+        int end = d_array.indexOf("BoundaryString", b+1);
+        int brk = d_array.indexOf("\xFF\xD8\xFF");
+        int len = d_array.indexOf("Content-Length:");
+
+        if( (b!=-1 && end!=-1) && b!=end ){ //should have complete packet now
+
+            if(brk!=-1){
+                QByteArray imgData = d_array.mid(brk, (brk-end));
+                qDebug() << d_array.mid(brk, (brk-end));
+                d_array.remove(0,brk);
+                QImage t;
+
+                if(t.loadFromData(imgData)){
+
+                    if(t.save(fileName, "JPEG"))
+                        log(" image saved ::" + fileName;)
+
+                } else {
+                    qDebug() << "failed to save";
+                }
+                d_array.clear();
+                rep->abort();
+            }
+        }
+    } );
+    e->exec();
+
+    d_array.clear();
+    return fileName.toStdString();
 }
 

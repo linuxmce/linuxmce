@@ -31,6 +31,7 @@ public slots:
     void addCamera(NvrCameraBase* c);
     void shutDown();
     void startUp(int listenPort);
+    string getImageFrame(int camId);
 
 
 private:

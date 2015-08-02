@@ -140,6 +140,7 @@ signals:
     void removeCamera();
     void commandForCamera();
     void newListenPort(int p);
+    void requestCameraImage(int camId);
 
 public slots:
 
