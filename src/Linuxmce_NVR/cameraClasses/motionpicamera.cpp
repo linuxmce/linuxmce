@@ -241,14 +241,12 @@ std::string MotionPiCamera::getImage()
 
             if(brk!=-1){
                 QByteArray imgData = d_array.mid(brk, (brk-end));
-                qDebug() << d_array.mid(brk, (brk-end));
                 d_array.remove(0,brk);
                 QImage t;
-
                 if(t.loadFromData(imgData)){
 
                     if(t.save(fileName, "JPEG"))
-                        log(" image saved ::" + fileName;)
+                        log(" image saved ::" + fileName);
 
                 } else {
                     qDebug() << "failed to save";
