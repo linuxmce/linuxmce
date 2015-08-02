@@ -66,3 +66,15 @@ void NvrManager::startUp(int listenPort)
     m_listener->setListenPort(listenPort);
 }
 
+std::string NvrManager::getImageFrame(int camId)
+{
+
+
+for(int t=0;t<cam_list.length();t++){
+    if(cam_list.at(t)->dceDeviceId()==camId){
+   NvrCameraBase * camera = cam_list.at(t);
+   return camera->getImage();
+    }
+}
+}
+

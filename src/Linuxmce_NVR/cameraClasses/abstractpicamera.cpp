@@ -8,8 +8,9 @@ NvrCameraBase::NvrCameraBase(QObject *parent)
     Q_UNUSED(parent);
 }
 
-NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, QObject *parent) : QObject(parent)
+NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, int linuxmceId, QObject *parent) : QObject(parent)
 {
+    m_dceDeviceId=linuxmceId;
     m_constructed=false;
     setCameraName(cameraName);
     setUserName(userName);
@@ -115,6 +116,26 @@ void NvrCameraBase::doConnections()
     emit initialized();
 
 }
+int NvrCameraBase::dceDeviceId() const
+{
+    return m_dceDeviceId;
+}
+
+void NvrCameraBase::setDceDeviceId(int dceDeviceId)
+{
+    m_dceDeviceId = dceDeviceId;
+}
+
+std::string NvrCameraBase::getImage()
+{
+    return QString("/tmp/please_wait.png").toStdString();
+}
+
+void NvrCameraBase::getImage(char **pD, int *dataLength)
+{
+
+}
+
 QString NvrCameraBase::managerPort() const
 {
     return m_managerPort;

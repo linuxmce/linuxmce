@@ -8,13 +8,13 @@ class QVariant;
 class MotionPiCamera : public NvrCameraBase
 {
 public:
-    MotionPiCamera(
-            QString cameraName,
+    MotionPiCamera(QString cameraName,
             QString userName,
             QString password,
             quint16 port,
             quint16 control_port,
             QUrl url,
+            int dceId,
             CameraType t= PI_MOTION_STREAM, AudioType a =NO_AUDIO, QObject *parent=0);
 
     enum DetectionCommand{
@@ -54,8 +54,6 @@ public:
     static const QString CURL_MOTION_DETECTED;
     static const QString CURL_SEND_PICTURE;
 
-
-
 signals:
     void motionStarted();
     void motionEnded();
@@ -68,17 +66,19 @@ private slots:
     void testControlPort();
     void handleControlReply(QNetworkReply*p);
     void handleRequest(QNetworkRequest q);
-
+    void parseStream(QByteArray st);
 public slots:
     void setCameraType(CameraType t);
     void setAudioType(AudioType a);
     void sendDetectionCommand(DetectionCommand d);
     void getMotionSetting(QString s);
     void setMotionSetting(QString Setting, QVariant val);
-void writeSettings();
+    void writeSettings();
+    std::string getImage();
 
 private:
     QNetworkAccessManager *httpManager;
+    QByteArray d_array;
 
 
 private:
