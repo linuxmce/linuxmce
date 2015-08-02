@@ -141,6 +141,7 @@ signals:
     void commandForCamera();
     void newListenPort(int p);
     void requestCameraImage(int camId);
+    void setDetectionState(bool enabled, int camId);
 
 public slots:
 

@@ -82,6 +82,9 @@ public:
     int dceDeviceId() const;
     void setDceDeviceId(int dceDeviceId);
 
+    bool getMotionEnabled() const;
+    void setMotionEnabled(bool motionEnabled);
+
 signals:
     void cameraNameChanged();
     void cameraTypeChanged();
@@ -95,10 +98,13 @@ signals:
     void usingPasswordChanged();
     void isOnlineChanged();
     void initialized();
+    void motionEnabledChanged();
 
 public slots:
     virtual std::string getImage();
     virtual void getImage(char**pD, int*dataLength);
+    virtual void disableMotionDetection();
+    virtual void enableMotionDetection();
 
 protected:
     CameraType m_cameraType;
@@ -116,14 +122,18 @@ private:
     QUrl m_controlUrl;
     QString m_userName;
     QString m_passWord;
-    bool m_isOnline;
-    NvrManager *m_manager;
     bool m_usingPass;
     bool m_constructed;
     QString m_managerUrl;
     QString m_managerPort;
     int m_dceDeviceId;
+
+    NvrManager *m_manager;
+
+    //private common properties
+    bool m_isOnline;
+    bool m_motionEnabled;
 };
-//Q_DECLARE_METATYPE(NvrCameraBase)
+
 
 #endif // ABSTRACTPICAMERA_H

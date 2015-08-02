@@ -43,6 +43,8 @@ MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString pas
     NvrCameraBase( cameraName, userName, password,port, control_port, url, dceId, parent = 0) {
 
     QObject::connect(this,&MotionPiCamera::initialized, this, &MotionPiCamera::setConnections);
+    QObject::connect(this, &MotionPiCamera::motionEnabledChanged, [=](){ sendDetectionCommand(getMotionEnabled() ? COMMAND_START : COMMAND_PAUSE); } );
+
     setAudioType(a);
     setCameraType(t);
 
@@ -147,6 +149,50 @@ void MotionPiCamera::parseStream(QByteArray st)
 
 }
 
+void MotionPiCamera::refreshImage()
+{
+
+    QNetworkAccessManager *imgMgr= new QNetworkAccessManager();
+
+    QNetworkRequest q(this->Url());
+
+    QNetworkReply *rep = imgMgr->get(q);
+    QString fileName ="/tmp/"+QString::number(dceDeviceId())+"/lastsnap.jpg";
+    QEventLoop *e = new QEventLoop();
+
+    connect(rep, &QNetworkReply::finished, e, &QEventLoop::quit);
+    connect(rep, &QNetworkReply::readyRead, [=](){      //lamda function for slot
+
+        d_array.append(rep->readAll());
+
+        int b = d_array.indexOf("BoundaryString",0);
+        int end = d_array.indexOf("BoundaryString", b+1);
+        int brk = d_array.indexOf("\xFF\xD8\xFF");
+
+        if( (b!=-1 && end!=-1) && b!=end ){ //should have complete packet now
+
+            if(brk!=-1){
+                QByteArray imgData = d_array.mid(brk, (brk-end));
+                d_array.remove(0,brk);
+                QImage t;
+                if(t.loadFromData(imgData)){
+
+                    if(t.save(fileName, "JPEG"))
+                        log(" image saved ::" + fileName);
+
+                } else {
+                    log("failed to save");
+                }
+                d_array.clear();
+                rep->abort(); //disconnect now that we have an image
+            }
+        }
+    } );
+    e->exec(); //start event loop
+
+    d_array.clear();
+}
+
 void MotionPiCamera::setCameraType(NvrCameraBase::CameraType t)
 {
     if(m_cameraType==t)
@@ -219,46 +265,9 @@ void MotionPiCamera::writeSettings()
 std::string MotionPiCamera::getImage()
 {
     qDebug() << Q_FUNC_INFO;
-    QNetworkAccessManager *imgMgr= new QNetworkAccessManager();
-    qDebug()<< this->Url();
-    QNetworkRequest q(this->Url());
 
-    QNetworkReply *rep = imgMgr->get(q);
-    QString fileName ="/tmp/"+QString::number(dceDeviceId())+"/lastsnap.jpg";
-    QEventLoop *e = new QEventLoop();
+    refreshImage();
+    return QString("/tmp/"+QString::number(dceDeviceId())+"/lastsnap.jpg").toStdString();
 
-    connect(rep, &QNetworkReply::finished, e, &QEventLoop::quit);
-    connect(rep, &QNetworkReply::readyRead, [=](){      //lamda function for slot
-
-        d_array.append(rep->readAll());
-
-        int b = d_array.indexOf("BoundaryString",0);
-        int end = d_array.indexOf("BoundaryString", b+1);
-        int brk = d_array.indexOf("\xFF\xD8\xFF");
-        int len = d_array.indexOf("Content-Length:");
-
-        if( (b!=-1 && end!=-1) && b!=end ){ //should have complete packet now
-
-            if(brk!=-1){
-                QByteArray imgData = d_array.mid(brk, (brk-end));
-                d_array.remove(0,brk);
-                QImage t;
-                if(t.loadFromData(imgData)){
-
-                    if(t.save(fileName, "JPEG"))
-                        log(" image saved ::" + fileName);
-
-                } else {
-                    qDebug() << "failed to save";
-                }
-                d_array.clear();
-                rep->abort(); //disconnect now that we have an image
-            }
-        }
-    } );
-    e->exec(); //start event loop
-
-    d_array.clear();
-    return fileName.toStdString();
 }
 
