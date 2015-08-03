@@ -6,18 +6,27 @@
 #include "../cameraClasses/motionpicamera.h"
 #include "../Linuxmce_NVR.h"
 #include "qdebug.h"
-
+#include "qdir.h"
+#include "qimage.h"
 NvrManager::NvrManager(QObject *parent) : QObject(parent), m_listener(new MotionEventListener())
 {
     verbose=false;
-
     log(QString(Q_FUNC_INFO)+"::Started");
+
+
+
 }
 
 NvrManager::NvrManager(int listenPort, QObject *parent) :QObject(parent), m_listener(new MotionEventListener())
 {
 
     startUp(listenPort);
+    QImage waitImage;
+    waitImage.load(":/resources/please_wait.png");
+    if(waitImage.isNull())
+        qDebug() << "failed to load wait image";
+else
+    waitImage.save("/tmp/please_wait.png", "PNG");
 }
 
 int NvrManager::cameraCount()
@@ -27,10 +36,9 @@ int NvrManager::cameraCount()
 
 void NvrManager::addCamera(NvrCameraBase *c)
 {
-    qDebug() << Q_FUNC_INFO;
+
     cam_list.append(c);
     c->setManager(this);
-
     emit cameraCountChanged();
 
 }

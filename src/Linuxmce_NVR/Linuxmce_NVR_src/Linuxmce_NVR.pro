@@ -45,7 +45,8 @@ HEADERS += ../LinuxMCE_NVR.h \
     ../cameraClasses/motionpicamera.h \
     ../managerClasses/eventlistener.h \
     ../managerClasses/httpresponder.h \
-    ../managerClasses/NvrManager.h
+    ../managerClasses/NvrManager.h \
+    ../cameraClasses/httpsnapshotcamera.h
 
 SOURCES += ../Main.cpp \
            ../Linuxmce_NVR.cpp \
@@ -82,4 +83,8 @@ SOURCES += ../Main.cpp \
     ../cameraClasses/motionpicamera.cpp \
     ../managerClasses/eventlistener.cpp \
     ../managerClasses/httpresponder.cpp \
-    ../managerClasses/NvrManager.cpp
+    ../managerClasses/NvrManager.cpp \
+    ../cameraClasses/httpsnapshotcamera.cpp
+
+RESOURCES += \
+    static-art.qrc

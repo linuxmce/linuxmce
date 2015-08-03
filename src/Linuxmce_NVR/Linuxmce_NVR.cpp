@@ -23,8 +23,9 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
-
+#include "cameraClasses/abstractpicamera.h"
 #include "cameraClasses/motionpicamera.h"
+#include "cameraClasses/httpsnapshotcamera.h"
 #include "managerClasses/NvrManager.h"
 #include "qurl.h"
 #include "qdebug.h"
@@ -103,14 +104,15 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 
     switch(pMessage->m_dwID) {
     case COMMAND_Get_Video_Frame_CONST: {
-        emit requestCameraImage(pMessage->m_dwPK_Device_To);
 
+        qDebug() << QString("COMMAND_Get_Video_Frame_CONST for device %1").arg(pMessage->m_dwID);
+        emit requestCameraImage(pMessage->m_dwPK_Device_To);
 
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Taking Snapshot...");
         string FilePath = mp_manager->getImageFrame(pMessage->m_dwPK_Device_To); //  "/tmp/" + StringUtils::itos(pMessage->m_dwPK_Device_To) + "/lastsnap.jpg";
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking file existance...");
 
-        if(FileUtils::FileExists(FilePath)) {
+        if(FileUtils::FileExists(FilePath)){
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "File exists. Reading and sending snapshot picture...");
         } else {
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "Missing snapshot file: %s.", FilePath.c_str());
@@ -135,7 +137,6 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
         break;
     case COMMAND_Generic_On_CONST: {
         emit setDetectionState(true, pMessage->m_dwPK_Device_To);
-
     }
         break;
     case COMMAND_Generic_Off_CONST: {
@@ -213,12 +214,13 @@ void Linuxmce_NVR::CreateChildren()
         m_mapCommandImpl_Children[pDeviceData_Impl_Child->m_dwPK_Device] = pCommand;
 
         QString userName= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_AuthUser_CONST));
-        QString pass= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Password_CONST));
+        QString pass= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_AuthPassword_CONST));
         QString cameraType=QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Type_CONST)).toLower();
         QString cameraIp ="http://"+QString::fromStdString( pDeviceData_Impl_Child->GetIPAddress());
         int cameraId = pDeviceData_Impl_Child->m_dwPK_Device;
         int imagePort=QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Port_CONST)).toInt();
         int commandPort =8080;
+        QString cPath = QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Path_CONST));
         QString name =QString::fromStdString(pDeviceData_Impl_Child->m_sDescription);
         QUrl url(cameraIp);
         if(cameraType=="motion"){
@@ -231,13 +233,26 @@ void Linuxmce_NVR::CreateChildren()
                      imagePort,
                      commandPort,
                      url,
-                     cameraId
+                     cameraId,
+                      cPath
                      );
 
             //    mpManager->addCamera(p);
             addCamera(p);
 
         } else if(cameraType=="http"){
+
+            HttpSnapshotCamera *h = new HttpSnapshotCamera(
+                        name,
+                        userName,
+                        pass,
+                        imagePort,
+                        commandPort,
+                        url,
+                        cameraId,
+                         cPath
+                        );
+            addCamera(h);
 
         } else if(cameraType=="rtsp"){
 
@@ -438,8 +453,6 @@ void Linuxmce_NVR::handleManagerMessage(QString msg)
 
 bool Linuxmce_NVR::createManager()
 {
-
-    QThread *t = new QThread();
     int lp = DATA_Get_Listen_Port();
     qDebug() << lp;
     mp_manager = new NvrManager(lp);

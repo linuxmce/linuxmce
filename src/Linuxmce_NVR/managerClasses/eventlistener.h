@@ -30,7 +30,7 @@ public slots:
 private slots:
     void handleEvent(QHttpRequest*r, QHttpResponse *a );
     void spitFire(QByteArray d);
-    void handleImageData(QByteArray imgData);
+    void handleImageData(QByteArray imgData, int device);
     void replyEnded();
 
 private:
