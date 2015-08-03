@@ -237,7 +237,7 @@ void Linuxmce_NVR::CreateChildren()
                      commandPort,
                      url,
                      cameraId,
-                      cPath
+                     cPath
                      );
 
             //    mpManager->addCamera(p);
@@ -253,7 +253,7 @@ void Linuxmce_NVR::CreateChildren()
                         commandPort,
                         url,
                         cameraId,
-                         cPath
+                        cPath
                         );
             addCamera(h);
 
@@ -447,6 +447,37 @@ void Linuxmce_NVR::CMD_StatusReport(string sArguments,string &sCMD_Result,Messag
     cout << "Parm #51 - Arguments=" << sArguments << endl;
 }
 
+void Linuxmce_NVR::handleMotionEvent(int device, bool motionDetected)
+{
+    qDebug() << device;
+    DCE::Message *st = new Message(
+                device,
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_Movement_Detected_CONST,
+                1 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_OnOff_CONST,
+                QString::number(motionDetected ? 1 : 0).toStdString().c_str()
+                );
+    this->m_pEvent->SendMessage(st);
+
+    DCE::Message *tripped = new Message(
+                device,
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_Sensor_Tripped_CONST,
+                1 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_Tripped_CONST,
+                QString::number(motionDetected ? 1 : 0).toStdString().c_str()
+                );
+
+
+    this->m_pEvent->SendMessage(tripped);
+
+}
+
 
 void Linuxmce_NVR::handleManagerMessage(QString msg)
 {
@@ -462,6 +493,7 @@ bool Linuxmce_NVR::createManager()
     QObject::connect(this, &Linuxmce_NVR::addCamera, mp_manager, &NvrManager::addCamera, Qt::QueuedConnection);
     QObject::connect(mp_manager, &NvrManager::newManagerMessage, this, &Linuxmce_NVR::handleManagerMessage, Qt::QueuedConnection);
     QObject::connect(this, &Linuxmce_NVR::setDetectionState, mp_manager, &NvrManager::setDetectionStatus, Qt::QueuedConnection);
+    QObject::connect(mp_manager->listener(), &MotionEventListener::motionEvent, this, &Linuxmce_NVR::handleMotionEvent, Qt::QueuedConnection);
     return true;
 }
 
