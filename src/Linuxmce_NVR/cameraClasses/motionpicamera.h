@@ -44,6 +44,7 @@ public:
     static const QString CAMERA_CONFIG_TIMELAPSE_FILENAME;
     static const QString CAMERA_CONFIG_LOCATE;
     static const QString CAMERA_CONFIG_ROTATE;
+    static const QString CAMERA_CONFIG_GAP;
 
     static const QString ON_EVENT_START;
     static const QString ON_EVENT_END;

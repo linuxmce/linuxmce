@@ -19,7 +19,7 @@ public:
 
 
 signals:
-    void newEvent(QString event);
+    void motionEvent(int device, bool motionDetected);
     void listenPortChanged();
     void isReadyChanged();
 

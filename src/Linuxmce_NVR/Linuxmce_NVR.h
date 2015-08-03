@@ -145,6 +145,7 @@ signals:
 
 public slots:
 
+   void handleMotionEvent(int device, bool motionDetected);
    void handleManagerMessage(QString msg);
 
 private:

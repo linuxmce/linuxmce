@@ -26,6 +26,7 @@ const QString MotionPiCamera::CAMERA_CONFIG_JPG_FILENAME="jpeg_filename";
 const QString MotionPiCamera::CAMERA_CONFIG_TIMELAPSE_FILENAME="timelapse_filename";
 const QString MotionPiCamera::CAMERA_CONFIG_LOCATE="locate";
 const QString MotionPiCamera::CAMERA_CONFIG_ROTATE="rotate";
+const QString MotionPiCamera::CAMERA_CONFIG_GAP="gap";
 
 const QString MotionPiCamera::ON_CAMERA_LOST="on_camera_lost";
 const QString MotionPiCamera::ON_EVENT_END="on_event_end";
@@ -85,6 +86,7 @@ void MotionPiCamera::setConnections()
 
     setMotionSetting(MotionPiCamera::ON_EVENT_START, start );
     setMotionSetting(MotionPiCamera::ON_EVENT_END, end);
+    setMotionSetting(MotionPiCamera::CAMERA_CONFIG_GAP, QVariant(1));
     setMotionSetting(MotionPiCamera::ON_MOTION_DETECTED, motion);
     setMotionSetting(MotionPiCamera::ON_PICTURE_SAVE, QVariant(pic));
     sendDetectionCommand(COMMAND_PAUSE);

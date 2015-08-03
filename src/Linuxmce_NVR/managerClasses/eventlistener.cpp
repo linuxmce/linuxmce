@@ -114,8 +114,14 @@ void MotionEventListener::spitFire(QByteArray d)
             eventCode["status"].toString(),
             eventCode["status"].toString()=="stopped" ? CameraEvent::MOTION_ENDED : CameraEvent::MOTION_STARTED
                                                         );
+
+    QTime t;
+
+    if(eventCode["status"].toString()=="detected"){
+        return;
+    }
     qDebug() << evt.eventTime() << evt.name() << evt.status();
-    // qDebug() << eventCode.value("status");
+    emit motionEvent( eventData["deviceId"].toInt(), eventCode["status"].toString()=="stopped" ? false : true );
 
 }
 
