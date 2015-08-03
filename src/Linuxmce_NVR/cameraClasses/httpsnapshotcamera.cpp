@@ -25,10 +25,8 @@ std::string HttpSnapshotCamera::getImage()
 
     QNetworkRequest q(this->Url());
     q.url().setPath(getImagePath());
-   // q.url().setPassword(passWord());
-   // q.url().setUserName(userName());
-    q.url().setAuthority( QString("%1:%2").arg(userName().arg( passWord() ) ) );
-    qDebug() << q.url().authority();
+    q.url().setAuthority( QString("%1:%2").arg(userName()).arg( passWord() )  );
+
     QNetworkReply *rep = imgMgr->get(q);
     QString fileName ="/tmp/"+QString::number(dceDeviceId())+"/lastsnap.jpg";
     QEventLoop *e = new QEventLoop();
@@ -49,8 +47,6 @@ std::string HttpSnapshotCamera::getImage()
             } else {
                 log("failed to save");
             }
-
-
         }
 
 

@@ -4,6 +4,7 @@
 #include "qdatetime.h"
 #include "qdebug.h"
 #include "qdir.h"
+#include "qtimer.h"
 NvrCameraBase::NvrCameraBase(QObject *parent)
 {
     Q_UNUSED(parent);
@@ -11,6 +12,7 @@ NvrCameraBase::NvrCameraBase(QObject *parent)
 
 NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, QString path, int linuxmceId, QObject *parent) : QObject(parent)
 {
+    setCurrentFileName("/tmp/please_wait/png");
     m_dceDeviceId=linuxmceId;
     m_constructed=false;
     m_imagePath =path;
@@ -129,6 +131,32 @@ void NvrCameraBase::doConnections()
     emit initialized();
 
 }
+
+void NvrCameraBase::removeOld()
+{
+
+ QFile file(oldFile);
+ if(file.exists())
+     file.remove();
+
+
+}
+QString NvrCameraBase::getCurrentFileName() const
+{
+    return m_currentFileName;
+}
+
+void NvrCameraBase::setCurrentFileName(const QString &currentFileName)
+{
+
+    if(m_currentFileName==currentFileName)return;
+
+    oldFile = m_currentFileName;
+      m_currentFileName = currentFileName;
+      QTimer::singleShot(10000, this, SLOT(removeOld()));
+
+}
+
 QString NvrCameraBase::getImagePath() const
 {
     return m_imagePath;
@@ -165,7 +193,7 @@ void NvrCameraBase::setDceDeviceId(int dceDeviceId)
 
 std::string NvrCameraBase::getImage()
 {
-    return QString("/tmp/please_wait.png").toStdString();
+    return getCurrentFileName().toStdString();
 }
 
 void NvrCameraBase::getImage(char **pD, int *dataLength)
