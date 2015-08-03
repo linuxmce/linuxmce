@@ -89,6 +89,9 @@ public:
     QString getImagePath() const;
     void setImagePath(const QString &imagePath);
 
+    QString getCurrentFileName() const;
+    void setCurrentFileName(const QString &currentFileName);
+
 signals:
     void cameraNameChanged();
     void cameraTypeChanged();
@@ -119,6 +122,10 @@ private:
     void doConnections();
 
 
+private slots:
+     void removeOld();
+
+
 private:
     quint16 m_port;
     quint16 m_controlPort;
@@ -139,6 +146,9 @@ private:
     //private common properties
     bool m_isOnline;
     bool m_motionEnabled;
+
+    QString m_currentFileName;
+    QString oldFile;
 };
 
 

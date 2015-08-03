@@ -8,6 +8,8 @@
 #include "qbytearray.h"
 #include "qimage.h"
 #include "qdir.h"
+#include "qthread.h"
+#include "qdatetime.h"
 const QString MotionPiCamera::WRITE_SETTINGS="/0/config/writeyes";
 const QString MotionPiCamera::ALL_CAMERAS="/0";
 const QString MotionPiCamera::CAMERA_DETECTION_START="/0/detection/start";
@@ -117,7 +119,7 @@ void MotionPiCamera::handleControlReply(QNetworkReply *p)
         if(preParsed.indexOf("write done")!=-1){
 
         } else {
-          //  qDebug() << "Writing Settings " << setting.remove("set?").remove(">") << "::" << val.cap(1) <<"\n\n";
+            //  qDebug() << "Writing Settings " << setting.remove("set?").remove(">") << "::" << val.cap(1) <<"\n\n";
             writeSettings();
         }
     }
@@ -139,7 +141,8 @@ void MotionPiCamera::refreshImage()
     QNetworkRequest q(this->Url());
 
     QNetworkReply *rep = imgMgr->get(q);
-    QString fileName ="/tmp/"+QString::number(dceDeviceId())+"/lastsnap.jpg";
+    QDateTime ti;
+    QString fileName =QString("/tmp/"+QString::number(dceDeviceId())+"/lastsnap-%1.jpg").arg(ti.currentDateTime().currentMSecsSinceEpoch());
     QEventLoop *e = new QEventLoop();
 
     connect(rep, &QNetworkReply::finished, e, &QEventLoop::quit);
@@ -147,32 +150,36 @@ void MotionPiCamera::refreshImage()
 
         d_array.append(rep->readAll());
 
-        int b = d_array.indexOf("BoundaryString",0);
-        int end = d_array.indexOf("BoundaryString", b+1);
-        int brk = d_array.indexOf("\xFF\xD8\xFF");
+        int b = d_array.indexOf("--BoundaryString",0);
+        int end = d_array.indexOf("--BoundaryString", b+1);
+        int brk = d_array.indexOf("\xFF\xD8\xFF", 0);
+        int brk2 = d_array.indexOf("\xFF\xD8\xFF", brk+1);
 
-        if( (b!=-1 && end!=-1) && b!=end ){ //should have complete packet now
+        if( (b!=-1 && end!=-1) && b!=end && brk !=-1){ //should have complete packet now
 
             if(brk!=-1){
-                QByteArray imgData = d_array.mid(brk, (brk-end));
-                d_array.remove(0,brk);
-                QImage t;
-                if(t.loadFromData(imgData)){
 
-                    if(t.save(fileName, "JPEG"))
+                QImage t;
+                if(t.loadFromData (d_array.mid(brk, (end-brk)) ) ){
+                    qDebug() << t.height();
+                    if(t.save(fileName, "JPEG")) {
                         log(" image saved ::" + fileName);
+                        setCurrentFileName(fileName);
+                        this->thread()->msleep(750);
+                    }
 
                 } else {
                     log("failed to save");
                 }
                 d_array.clear();
                 rep->abort(); //disconnect now that we have an image
+
             }
         }
     } );
     e->exec(); //start event loop
 
-    d_array.clear();
+
 }
 
 void MotionPiCamera::setCameraType(NvrCameraBase::CameraType t)
@@ -246,8 +253,9 @@ void MotionPiCamera::writeSettings()
 
 std::string MotionPiCamera::getImage()
 {
-    refreshImage();
-    return QString("/tmp/"+QString::number(dceDeviceId())+"/lastsnap.jpg").toStdString();
+   //refreshImage();
+  QMetaObject::invokeMethod(this, "refreshImage", Qt::QueuedConnection);
+    return getCurrentFileName().toStdString();
 
 }
 

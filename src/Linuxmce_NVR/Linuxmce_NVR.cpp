@@ -102,14 +102,17 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command %d received for child.", pMessage->m_dwID);
 
+
     switch(pMessage->m_dwID) {
     case COMMAND_Get_Video_Frame_CONST: {
 
-        qDebug() << QString("COMMAND_Get_Video_Frame_CONST for device %1").arg(pMessage->m_dwID);
+        qDebug() << QString("COMMAND_Get_Video_Frame_CONST for device %1").arg(pMessage->m_dwPK_Device_To);
         emit requestCameraImage(pMessage->m_dwPK_Device_To);
 
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Taking Snapshot...");
         string FilePath = mp_manager->getImageFrame(pMessage->m_dwPK_Device_To); //  "/tmp/" + StringUtils::itos(pMessage->m_dwPK_Device_To) + "/lastsnap.jpg";
+
+
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking file existance...");
 
         if(FileUtils::FileExists(FilePath)){
