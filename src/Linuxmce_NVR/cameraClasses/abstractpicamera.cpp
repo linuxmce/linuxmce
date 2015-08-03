@@ -3,15 +3,17 @@
 #include "../managerClasses/NvrManager.h"
 #include "qdatetime.h"
 #include "qdebug.h"
+#include "qdir.h"
 NvrCameraBase::NvrCameraBase(QObject *parent)
 {
     Q_UNUSED(parent);
 }
 
-NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, int linuxmceId, QObject *parent) : QObject(parent)
+NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, QString path, int linuxmceId, QObject *parent) : QObject(parent)
 {
     m_dceDeviceId=linuxmceId;
     m_constructed=false;
+    m_imagePath =path;
     setCameraName(cameraName);
     setUserName(userName);
     setPassWord(password);
@@ -19,8 +21,19 @@ NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString passw
     setControlPort(control_port);
     setUrl(url);
 
+
     if(userName.isEmpty())
         setUsingPass(false);
+
+    //need to set this up in dce
+    QDir out("/tmp/"+QString::number(linuxmceId)+"/");
+
+    if(!out.exists()){
+        if(out.mkpath(out.path()))
+            log(QString("Output path created for device %1").arg(linuxmceId));
+    } else {
+         log(QString("Output path created for device %1 exists").arg(linuxmceId));
+    }
 }
 
 
@@ -43,7 +56,7 @@ QUrl NvrCameraBase::Url() const
 
 void NvrCameraBase::setUrl(QUrl Url)
 {
-    qDebug()<<Url.toString();
+
     if(m_Url==Url) return;
 
     QUrl  u = QUrl(Url);
@@ -54,10 +67,10 @@ void NvrCameraBase::setUrl(QUrl Url)
     } else {
         setUsingPass(false);
     }
-    u.setPath("/");
+    u.setPath(getImagePath());
 
     m_Url = u;emit urlChanged();
-    log(Q_FUNC_INFO+m_Url.toString());
+   // log(Q_FUNC_INFO+m_Url.toString());
     setControlUrl(Url);
 }
 QString NvrCameraBase::userName() const
@@ -111,11 +124,23 @@ void NvrCameraBase::setManager(NvrManager *manager)
 
 void NvrCameraBase::doConnections()
 {
-    log(QString(Q_FUNC_INFO)+cameraName()+ "::setting connections");
+   // log(QString(Q_FUNC_INFO)+cameraName()+ "::setting connections");
     m_constructed=true;
     emit initialized();
 
 }
+QString NvrCameraBase::getImagePath() const
+{
+    return m_imagePath;
+
+}
+
+void NvrCameraBase::setImagePath(const QString &imagePath)
+{
+    m_imagePath = imagePath;
+    emit imagePathChanged();
+}
+
 bool NvrCameraBase::getMotionEnabled() const
 {
     return m_motionEnabled;
@@ -208,7 +233,7 @@ void NvrCameraBase::setControlUrl(const QUrl &controlUrl)
     }
     u.setPath("/");
     m_controlUrl = u;    emit controlUrlChanged();
-    log(Q_FUNC_INFO+m_controlUrl.toString());
+   // log(Q_FUNC_INFO+m_controlUrl.toString());
 
 }
 

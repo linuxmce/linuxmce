@@ -1,5 +1,5 @@
 #include "motionpicamera.h"
-#include <QNetworkAccessManager>
+#include "qnetworkaccessmanager.h"
 #include "qnetworkrequest.h"
 #include "qnetworkreply.h"
 #include "qvariant.h"
@@ -36,29 +36,17 @@ const QString MotionPiCamera::ON_MOVIE_START="on_movie_start";
 const QString MotionPiCamera::CURL_EVENT_START= "curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,  'event': {'type': 'motion','status': 'started'} }\" http://%3:%4";
 const QString MotionPiCamera::CURL_EVENT_END="curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,'event': {'type': 'motion','status': 'stopped'} }\" http://%3:%4";
 const QString MotionPiCamera::CURL_MOTION_DETECTED="curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,'event': {'type': 'motion','status': 'detected'} }\" %3:%4";
-const QString MotionPiCamera::CURL_SEND_PICTURE="curl  --form \"fileupload=@%f\" http://%1:%2";
+const QString MotionPiCamera::CURL_SEND_PICTURE="curl --header \"X-dcedevice:%3\"  --form \"fileupload=@%f\" http://%1:%2";
 
 
-MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url,  int dceId, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
-    NvrCameraBase( cameraName, userName, password,port, control_port, url, dceId, parent = 0) {
+MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url,  int dceId, QString camPath, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
+    NvrCameraBase( cameraName, userName, password,port, control_port, url,camPath, dceId,  parent = 0) {
 
     QObject::connect(this,&MotionPiCamera::initialized, this, &MotionPiCamera::setConnections);
     QObject::connect(this, &MotionPiCamera::motionEnabledChanged, [=](){ sendDetectionCommand(getMotionEnabled() ? COMMAND_START : COMMAND_PAUSE); } );
 
     setAudioType(a);
     setCameraType(t);
-
-    //need to set this up in dce
-    QDir out("/tmp/"+QString::number(dceId)+"/");
-
-    if(!out.exists()){
-
-        if(out.mkpath(out.path()))
-            log("Output path created");
-
-    }
-
-
 
     if(constructed())
         initialized();
@@ -110,8 +98,6 @@ void MotionPiCamera::testControlPort()
 void MotionPiCamera::handleControlReply(QNetworkReply *p)
 {
 
-    log(Q_FUNC_INFO);
-
     QString preParsed= p->readAll();
 
     if(preParsed.indexOf("<b>Done</b>")!=-1 || preParsed.indexOf(" write done !")!=-1 ){
@@ -123,18 +109,15 @@ void MotionPiCamera::handleControlReply(QNetworkReply *p)
 
         if(i!=-1){
             setting=r.cap(0);
-            //   qDebug() << "setting::" << setting.remove("set?").remove(">") ;
         }
 
         QRegExp val(" = (.*.)</li>");
         val.setMinimal(true);
-        int valCheck = val.indexIn(preParsed);
-        //   qDebug() << "value::" << val.cap(1)<< "\n";
 
         if(preParsed.indexOf("write done")!=-1){
 
         } else {
-            qDebug() << "Writing Settings " << setting.remove("set?").remove(">") << "::" << val.cap(1) <<"\n\n";
+          //  qDebug() << "Writing Settings " << setting.remove("set?").remove(">") << "::" << val.cap(1) <<"\n\n";
             writeSettings();
         }
     }
@@ -263,8 +246,6 @@ void MotionPiCamera::writeSettings()
 
 std::string MotionPiCamera::getImage()
 {
-    qDebug() << Q_FUNC_INFO;
-
     refreshImage();
     return QString("/tmp/"+QString::number(dceDeviceId())+"/lastsnap.jpg").toStdString();
 

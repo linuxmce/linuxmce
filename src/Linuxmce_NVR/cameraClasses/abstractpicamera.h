@@ -19,13 +19,14 @@ public:
                                quint16 port,
                                quint16 control_port,
                                QUrl url,
+                               QString path,
                                int linuxmceId,
                                QObject *parent = 0);
 
     enum CameraType{
-        PI_VLC_STREAM,
-        PI_MOTION_STREAM,
-        PI_JPEG_STREAM
+        STREAM_TYPE_x264,
+        STREAM_TYPE_MOTION_MJPEG,
+        STREAM_TYPE_JPEG_SNAP
     };
     enum AudioType{
         NO_AUDIO,
@@ -85,6 +86,9 @@ public:
     bool getMotionEnabled() const;
     void setMotionEnabled(bool motionEnabled);
 
+    QString getImagePath() const;
+    void setImagePath(const QString &imagePath);
+
 signals:
     void cameraNameChanged();
     void cameraTypeChanged();
@@ -99,6 +103,7 @@ signals:
     void isOnlineChanged();
     void initialized();
     void motionEnabledChanged();
+    void imagePathChanged();
 
 public slots:
     virtual std::string getImage();
@@ -122,6 +127,7 @@ private:
     QUrl m_controlUrl;
     QString m_userName;
     QString m_passWord;
+    QString m_imagePath;
     bool m_usingPass;
     bool m_constructed;
     QString m_managerUrl;

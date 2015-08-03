@@ -69,14 +69,14 @@ void MotionEventListener::handleEvent(QHttpRequest *r, QHttpResponse *a)
    // qDebug() << "incoming data";
     int hdrLength= r->header("content-length").toInt();
     if(hdrLength > 1000){
-       // qDebug() << r->header("content-length") << " << content length, likely image.";
+      int device = r->header("X-dcedevice").toInt();
         r->storeBody();      
         QByteArray standardResponse("OK");
         // a->setHeader("Content-Length", QString::number(standardResponse.length()));
         connect(r, &QHttpRequest::end, [=](){
             a->writeHead(200);
             a->end(standardResponse);
-            handleImageData(r->body());
+            handleImageData(r->body(), device);
         } );
 
     } else {
@@ -119,7 +119,7 @@ void MotionEventListener::spitFire(QByteArray d)
 
 }
 
-void MotionEventListener::handleImageData(QByteArray imgData)
+void MotionEventListener::handleImageData(QByteArray imgData, int device)
 {
    // qDebug() << Q_FUNC_INFO;
    // qDebug() << imgData;
@@ -137,10 +137,10 @@ void MotionEventListener::handleImageData(QByteArray imgData)
     if(t.loadFromData(imgData)){
 
         if(t.save("/tmp/"+fileName, "JPEG"))
-            qDebug() << " image saved ::" << fileName;
+            qDebug() << QString("Image saved for device %1 using filename %2").arg(device).arg(fileName);
         return;
     } else {
-         qDebug() << " image save failed ::" << fileName;
+         qDebug() << QString("Image saved for device %1 using filename %2 failed.").arg(device).arg(fileName);
     }
 }
 

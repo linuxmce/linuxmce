@@ -1,21 +1,26 @@
 #ifndef MOTIONPICAMERA_H
 #define MOTIONPICAMERA_H
 #include "abstractpicamera.h"
-#include "qnetworkaccessmanager.h"
-class QVariant;
-
+#include "qvariant.h"
+class QNetworkAccessManager;
+class QNetworkReply;
+class QNetworkRequest;
 //picture save
 class MotionPiCamera : public NvrCameraBase
 {
+    Q_OBJECT
 public:
     MotionPiCamera(QString cameraName,
-            QString userName,
-            QString password,
-            quint16 port,
-            quint16 control_port,
-            QUrl url,
-            int dceId,
-            CameraType t= PI_MOTION_STREAM, AudioType a =NO_AUDIO, QObject *parent=0);
+                   QString userName,
+                   QString password,
+                   quint16 port,
+                   quint16 control_port,
+                   QUrl url,
+                   int dceId,
+                   QString camPath,
+                   CameraType t= STREAM_TYPE_MOTION_MJPEG,
+                   AudioType a =NO_AUDIO,
+                   QObject *parent=0);
 
     enum DetectionCommand{
         COMMAND_PAUSE,
@@ -65,7 +70,6 @@ private slots:
     void setConnections();
     void testControlPort();
     void handleControlReply(QNetworkReply*p);
-    void handleRequest(QNetworkRequest q);
     void parseStream(QByteArray st);
     void refreshImage();
 public slots:
