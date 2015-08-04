@@ -1,8 +1,8 @@
 #include "abstractcameraevent.h"
 
-CameraEvent::CameraEvent(QString host, QString name, QString url, QString status, CameraEvent::SensorState stat, QObject *parent) :
+CameraEvent::CameraEvent(QString host, QString name, QString url, QString status, CameraEvent::SensorState stat, int deviceId, QObject *parent) :
     QObject(parent),
-    m_host(host), m_name(name), m_url(url), m_status(status), m_sensorState(stat)
+    m_host(host), m_name(name), m_url(url), m_status(status), m_sensorState(stat), m_deviceId(deviceId)
 {
     setEventTime(QDateTime::currentDateTime().toLocalTime());
     if(m_status=="detected"){
@@ -73,6 +73,16 @@ void CameraEvent::setEventTime(const QDateTime &eventTime)
 {
     m_eventTime = eventTime;
 }
+int CameraEvent::deviceId() const
+{
+    return m_deviceId;
+}
+
+void CameraEvent::setDeviceId(int deviceId)
+{
+    m_deviceId = deviceId;
+}
+
 
 
 

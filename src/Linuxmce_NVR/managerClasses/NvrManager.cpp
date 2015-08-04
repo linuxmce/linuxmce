@@ -8,7 +8,7 @@
 #include "qdebug.h"
 #include "qdir.h"
 #include "qimage.h"
-NvrManager::NvrManager(QObject *parent) : QObject(parent), m_listener(new MotionEventListener())
+NvrManager::NvrManager(QObject *parent) : QObject(parent)
 {
     verbose=false;
     log(QString(Q_FUNC_INFO)+"::Started");
@@ -17,7 +17,7 @@ NvrManager::NvrManager(QObject *parent) : QObject(parent), m_listener(new Motion
 
 }
 
-NvrManager::NvrManager(int listenPort, QObject *parent) :QObject(parent), m_listener(new MotionEventListener())
+NvrManager::NvrManager(int listenPort, QObject *parent) :QObject(parent)
 {
 
     startUp(listenPort);
@@ -25,8 +25,8 @@ NvrManager::NvrManager(int listenPort, QObject *parent) :QObject(parent), m_list
     waitImage.load(":/resources/please_wait.png");
     if(waitImage.isNull())
         qDebug() << "failed to load wait image";
-else
-    waitImage.save("/tmp/please_wait.png", "PNG");
+    else
+        waitImage.save("/tmp/please_wait.png", "PNG");
 }
 
 int NvrManager::cameraCount()
@@ -52,15 +52,6 @@ void NvrManager::log(QString logMsg)
     if(verbose)
         qDebug()<< logMsg;
 }
-MotionEventListener *NvrManager::listener() const
-{
-    return m_listener;
-}
-
-void NvrManager::setListener(MotionEventListener *listener)
-{
-    m_listener = listener;
-}
 
 
 void NvrManager::shutDown()
@@ -71,7 +62,7 @@ void NvrManager::shutDown()
 
 void NvrManager::startUp(int listenPort)
 {
-    m_listener->setListenPort(listenPort);
+    Q_UNUSED(listenPort);
 }
 
 std::string NvrManager::getImageFrame(int camId)

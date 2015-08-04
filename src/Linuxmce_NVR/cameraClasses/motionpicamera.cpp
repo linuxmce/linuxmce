@@ -10,6 +10,8 @@
 #include "qdir.h"
 #include "qthread.h"
 #include "qdatetime.h"
+#include "../managerClasses/eventlistener.h"
+#include "abstractcameraevent.h"
 const QString MotionPiCamera::WRITE_SETTINGS="/0/config/writeyes";
 const QString MotionPiCamera::ALL_CAMERAS="/0";
 const QString MotionPiCamera::CAMERA_DETECTION_START="/0/detection/start";
@@ -45,9 +47,14 @@ const QString MotionPiCamera::CURL_SEND_PICTURE="curl --header \"X-dcedevice:%3\
 MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url,  int dceId, QString camPath, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
     NvrCameraBase( cameraName, userName, password,port, control_port, url,camPath, dceId,  parent = 0) {
 
+    int listenerPort =4200+dceId;
+    setManagerPort(QString::number(listenerPort));
+    setListener(new MotionEventListener(listenerPort));
+
+
     QObject::connect(this,&MotionPiCamera::initialized, this, &MotionPiCamera::setConnections);
     QObject::connect(this, &MotionPiCamera::motionEnabledChanged, [=](){ sendDetectionCommand(getMotionEnabled() ? COMMAND_START : COMMAND_PAUSE); } );
-
+    QObject::connect(this->getListener(), SIGNAL(motionEvent(CameraEvent*)), this, SLOT(handleMotionEvent(CameraEvent*)), Qt::QueuedConnection);
     setAudioType(a);
     setCameraType(t);
 
@@ -184,6 +191,17 @@ void MotionPiCamera::refreshImage()
 
 }
 
+void MotionPiCamera::handleMotionEvent(int device, bool detected)
+{
+    Q_UNUSED(device);
+
+}
+
+void MotionPiCamera::handleMotionEvent(CameraEvent *e)
+{
+    emit dispatchMotionEvent(e->deviceId(), e->sensorState()==CameraEvent::MOTION_DETECTED ? true : false);
+}
+
 void MotionPiCamera::setCameraType(NvrCameraBase::CameraType t)
 {
     if(m_cameraType==t)
@@ -255,8 +273,8 @@ void MotionPiCamera::writeSettings()
 
 std::string MotionPiCamera::getImage()
 {
-   //refreshImage();
-  QMetaObject::invokeMethod(this, "refreshImage", Qt::QueuedConnection);
+    //refreshImage();
+    QMetaObject::invokeMethod(this, "refreshImage", Qt::QueuedConnection);
     return getCurrentFileName().toStdString();
 
 }

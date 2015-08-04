@@ -30,6 +30,7 @@ using namespace DCE;
 #include "qurl.h"
 #include "qdebug.h"
 #include "qthread.h"
+#include "qvector.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -102,6 +103,15 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command %d received for child.", pMessage->m_dwID);
 
+    NvrCameraBase *base;
+
+    for (int i = 0; i < cam_list.size(); ++i) {
+        if (cam_list.at(i)->dceDeviceId() == pMessage->m_dwPK_Device_To){
+            base=cam_list.at(i);
+            break;
+        }
+
+    }
 
     switch(pMessage->m_dwID) {
     case COMMAND_Get_Video_Frame_CONST: {
@@ -110,7 +120,7 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
         emit requestCameraImage(pMessage->m_dwPK_Device_To);
 
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Taking Snapshot...");
-        string FilePath = mp_manager->getImageFrame(pMessage->m_dwPK_Device_To); //  "/tmp/" + StringUtils::itos(pMessage->m_dwPK_Device_To) + "/lastsnap.jpg";
+        string FilePath =base->getImage(); //  "/tmp/" + StringUtils::itos(pMessage->m_dwPK_Device_To) + "/lastsnap.jpg";
 
 
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking file existance...");
@@ -241,7 +251,9 @@ void Linuxmce_NVR::CreateChildren()
                      );
 
             //    mpManager->addCamera(p);
-            addCamera(p);
+            connect(p, &MotionPiCamera::dispatchMotionEvent, this, &Linuxmce_NVR::handleMotionEvent, Qt::QueuedConnection);
+
+            cam_list.append(p);
 
         } else if(cameraType=="http"){
 
@@ -255,13 +267,19 @@ void Linuxmce_NVR::CreateChildren()
                         cameraId,
                         cPath
                         );
-            addCamera(h);
+            connect(h, &MotionPiCamera::dispatchMotionEvent, this, &Linuxmce_NVR::handleMotionEvent, Qt::QueuedConnection);
+            cam_list.append(h);
 
         } else if(cameraType=="rtsp"){
 
         };
         //create proxy
     }
+}
+
+void Linuxmce_NVR::OnReload()
+{
+   this->deleteLater();
 }
 
 //<-dceag-sample-b->
@@ -493,7 +511,8 @@ bool Linuxmce_NVR::createManager()
     QObject::connect(this, &Linuxmce_NVR::addCamera, mp_manager, &NvrManager::addCamera, Qt::QueuedConnection);
     QObject::connect(mp_manager, &NvrManager::newManagerMessage, this, &Linuxmce_NVR::handleManagerMessage, Qt::QueuedConnection);
     QObject::connect(this, &Linuxmce_NVR::setDetectionState, mp_manager, &NvrManager::setDetectionStatus, Qt::QueuedConnection);
-    QObject::connect(mp_manager->listener(), &MotionEventListener::motionEvent, this, &Linuxmce_NVR::handleMotionEvent, Qt::QueuedConnection);
+
+   // QObject::connect(mp_manager->listener(), &MotionEventListener::motionEvent, this, &Linuxmce_NVR::handleMotionEvent, Qt::QueuedConnection);
     return true;
 }
 

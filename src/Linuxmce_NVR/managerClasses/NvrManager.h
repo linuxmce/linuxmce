@@ -15,8 +15,8 @@ public:
     NvrManager(int listenPort, QObject*parent=0);
     int cameraCount();
 
-    MotionEventListener *listener() const;
-    void setListener(MotionEventListener *listener);
+   // MotionEventListener *listener() const;
+   // void setListener(MotionEventListener *listener);
 
 signals:
     void cameraCountChanged();
@@ -44,7 +44,7 @@ private:
 
 private:
 
-    MotionEventListener *m_listener;
+    //MotionEventListener *m_listener;
     DCE::Linuxmce_NVR *mp_Linuxmce_NVR;
     QList<NvrCameraBase*> cam_list;
 };

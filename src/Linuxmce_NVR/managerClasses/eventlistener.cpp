@@ -10,6 +10,7 @@
 #include "../cameraClasses/abstractcameraevent.h"
 #include "qimage.h"
 #include "qfile.h";
+#include "../cameraClasses/abstractcameraevent.h"
 MotionEventListener::MotionEventListener(int listen_port, QObject *parent) : m_listenPort(listen_port)
 {
     server = new QHttpServer();
@@ -87,9 +88,6 @@ void MotionEventListener::handleEvent(QHttpRequest *r, QHttpResponse *a)
         a->end(standardResponse);
         QObject::disconnect(r, SIGNAL(data(QByteArray)), this, SLOT(spitFire(QByteArray)));
     }
-
-
-
 }
 
 void MotionEventListener::spitFire(QByteArray d)
@@ -107,21 +105,18 @@ void MotionEventListener::spitFire(QByteArray d)
     QVariantMap eventData = data.value<QVariantMap>();
     QVariantMap eventCode = eventData["event"].toMap();
 
-    CameraEvent evt(
+    CameraEvent *evt = new CameraEvent(
                 eventData["ip"].toString(),
             eventData["host"].toString(),
             eventData["ip"].toString(),
             eventCode["status"].toString(),
-            eventCode["status"].toString()=="stopped" ? CameraEvent::MOTION_ENDED : CameraEvent::MOTION_STARTED
-                                                        );
+            eventCode["status"].toString()=="stopped" ? CameraEvent::MOTION_ENDED : CameraEvent::MOTION_STARTED,
+            eventData["deviceId"].toInt()
+            );
 
-    QTime t;
-
-    if(eventCode["status"].toString()=="detected"){
-        return;
-    }
-    qDebug() << evt.eventTime() << evt.name() << evt.status();
-    emit motionEvent( eventData["deviceId"].toInt(), eventCode["status"].toString()=="stopped" ? false : true );
+  //  qDebug() << evt.eventTime() << evt.name() << evt.status();
+   // emit motionEvent( eventData["deviceId"].toInt(), eventCode["status"].toString()=="stopped" ? false : true );
+    emit motionEvent(evt);
 
 }
 

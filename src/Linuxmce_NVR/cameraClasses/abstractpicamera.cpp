@@ -12,6 +12,7 @@ NvrCameraBase::NvrCameraBase(QObject *parent)
 
 NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, QString path, int linuxmceId, QObject *parent) : QObject(parent)
 {
+
     setCurrentFileName("/tmp/please_wait/png");
     m_dceDeviceId=linuxmceId;
     m_constructed=false;
@@ -34,8 +35,10 @@ NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString passw
         if(out.mkpath(out.path()))
             log(QString("Output path created for device %1").arg(linuxmceId));
     } else {
-         log(QString("Output path created for device %1 exists").arg(linuxmceId));
+        log(QString("Output path created for device %1 exists").arg(linuxmceId));
     }
+
+    doConnections();
 }
 
 
@@ -72,7 +75,7 @@ void NvrCameraBase::setUrl(QUrl Url)
     u.setPath(getImagePath());
 
     m_Url = u;emit urlChanged();
-   // log(Q_FUNC_INFO+m_Url.toString());
+    // log(Q_FUNC_INFO+m_Url.toString());
     setControlUrl(Url);
 }
 QString NvrCameraBase::userName() const
@@ -116,17 +119,17 @@ void NvrCameraBase::setManager(NvrManager *manager)
     if(m_manager==manager) return;
     m_manager = manager;
 
-    int pr = manager->listener()->listenPort();
+    //int pr = manager->listener()->listenPort();
 
-    setManagerPort(QString::number(pr));
-    setManagerUrl(manager->listener()->currentHost());
+    //   setManagerPort(QString::number(pr));
+    //  setManagerUrl(manager->listener()->currentHost());
     doConnections();
 
 }
 
 void NvrCameraBase::doConnections()
 {
-   // log(QString(Q_FUNC_INFO)+cameraName()+ "::setting connections");
+    // log(QString(Q_FUNC_INFO)+cameraName()+ "::setting connections");
     m_constructed=true;
     emit initialized();
 
@@ -135,12 +138,24 @@ void NvrCameraBase::doConnections()
 void NvrCameraBase::removeOld()
 {
 
- QFile file(oldFile);
- if(file.exists())
-     file.remove();
+    QFile file(oldFile);
+    if(file.exists())
+        file.remove();
 
 
 }
+MotionEventListener *NvrCameraBase::getListener() const
+{
+    return mListener;
+}
+
+void NvrCameraBase::setListener(MotionEventListener *listener)
+{
+    mListener = listener;
+
+
+}
+
 QString NvrCameraBase::getCurrentFileName() const
 {
     return m_currentFileName;
@@ -152,8 +167,8 @@ void NvrCameraBase::setCurrentFileName(const QString &currentFileName)
     if(m_currentFileName==currentFileName)return;
 
     oldFile = m_currentFileName;
-      m_currentFileName = currentFileName;
-      QTimer::singleShot(10000, this, SLOT(removeOld()));
+    m_currentFileName = currentFileName;
+    QTimer::singleShot(10000, this, SLOT(removeOld()));
 
 }
 
@@ -203,7 +218,7 @@ void NvrCameraBase::getImage(char **pD, int *dataLength)
 
 void NvrCameraBase::disableMotionDetection()
 {
-   setMotionEnabled(false);
+    setMotionEnabled(false);
 }
 
 void NvrCameraBase::enableMotionDetection()
@@ -261,7 +276,7 @@ void NvrCameraBase::setControlUrl(const QUrl &controlUrl)
     }
     u.setPath("/");
     m_controlUrl = u;    emit controlUrlChanged();
-   // log(Q_FUNC_INFO+m_controlUrl.toString());
+    // log(Q_FUNC_INFO+m_controlUrl.toString());
 
 }
 
@@ -292,7 +307,7 @@ bool NvrCameraBase::usingPass() const
 void NvrCameraBase::setUsingPass(bool value)
 {
     if(m_usingPass==value)return;
-   m_usingPass = value; emit usingPasswordChanged();
+    m_usingPass = value; emit usingPasswordChanged();
 }
 
 quint16 NvrCameraBase::controlPort() const
