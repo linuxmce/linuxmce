@@ -377,6 +377,8 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	string sVideoInfo = "";
 	EVENT_Playback_Started(m_sMediaURL, m_iStreamID, sMediaInfo, sAudioInfo, sVideoInfo);
 
+	m_bIsMute = false;
+
 	sCMD_Result="OK";
 }
 
@@ -1353,6 +1355,19 @@ void OMX_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
 {
         cout << "Need to implement command #97 - Mute" << endl;
+
+	if (m_bIsMute)
+	{
+		m_pOMXPlayer->setUnMute(sCMD_Result);
+		m_bIsMute = false;
+	}
+	else
+	{
+		m_pOMXPlayer->setMute(sCMD_Result);
+		m_bIsMute = true;
+	}
+
+	return;
 }
 //<-dceag-c29-b->
 
