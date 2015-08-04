@@ -1,0 +1,29 @@
+From 6c9da8840b6964f33d2306b3ae9bf76310434205 Mon Sep 17 00:00:00 2001
+From: Balint Reczey <balint@balintreczey.hu>
+Date: Sat, 8 Nov 2014 20:23:18 +0100
+Subject: [PATCH] Provide a cec_set_configuration() taking non-const parameter
+ to keep old ABI
+
+---
+ src/lib/LibCECC.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/lib/LibCECC.cpp b/src/lib/LibCECC.cpp
+index ecf4565..43f3aef 100644
+--- a/src/lib/LibCECC.cpp
++++ b/src/lib/LibCECC.cpp
+@@ -346,6 +346,11 @@ int cec_persist_configuration(libcec_configuration *configuration)
+   return cec_parser ? (cec_parser->PersistConfiguration(configuration) ? 1 : 0) : -1;
+ }
+ 
++int cec_set_configuration(libcec_configuration *configuration)
++{
++  return cec_set_configuration(static_cast<const libcec_configuration*>(configuration));
++}
++
+ int cec_set_configuration(const libcec_configuration *configuration)
+ {
+   return cec_parser ? (cec_parser->SetConfiguration(configuration) ? 1 : 0) : -1;
+-- 
+2.1.1
+
