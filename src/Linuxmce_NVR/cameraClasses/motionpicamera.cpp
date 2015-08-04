@@ -41,12 +41,14 @@ const QString MotionPiCamera::ON_MOVIE_START="on_movie_start";
 const QString MotionPiCamera::CURL_EVENT_START= "curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,  'event': {'type': 'motion','status': 'started'} }\" http://%3:%4";
 const QString MotionPiCamera::CURL_EVENT_END="curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,'event': {'type': 'motion','status': 'stopped'} }\" http://%3:%4";
 const QString MotionPiCamera::CURL_MOTION_DETECTED="curl --data \"{'ip':'192.168.80.xxx','host': '%2','deviceId':%1,'event': {'type': 'motion','status': 'detected'} }\" %3:%4";
-const QString MotionPiCamera::CURL_SEND_PICTURE="curl --header \"X-dcedevice:%3\"  --form \"fileupload=@%f\" http://%1:%2";
+const QString MotionPiCamera::CURL_SEND_PICTURE="curl --header \"X-dcedevice:%3\"  --form \"fileupload=@%f\" http://%1:%2 && rm %f";
+
 
 
 MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url,  int dceId, QString camPath, QString callback_address, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
     NvrCameraBase( cameraName, userName, password,port, control_port, url,camPath, dceId,  parent = 0) {
 
+    setMotionState(0);
     int listenerPort =5100+dceId;
     setManagerPort(QString::number(listenerPort));
     setListener(new MotionEventListener(listenerPort));
@@ -96,8 +98,9 @@ void MotionPiCamera::setConnections()
     setMotionSetting(MotionPiCamera::ON_EVENT_END, end);
     setMotionSetting(MotionPiCamera::CAMERA_CONFIG_GAP, QVariant(1));
     setMotionSetting(MotionPiCamera::ON_MOTION_DETECTED, motion);
-    setMotionSetting(MotionPiCamera::ON_PICTURE_SAVE, QVariant(pic));
-    sendDetectionCommand(COMMAND_PAUSE);
+    setMotionSetting(MotionPiCamera::ON_PICTURE_SAVE, QVariant("rm -rf %f") );
+    //setMotionSetting(MotionPiCamera::ON_PICTURE_SAVE, QVariant(pic));
+    sendDetectionCommand(COMMAND_START);
 }
 
 void MotionPiCamera::testControlPort()
@@ -200,6 +203,17 @@ void MotionPiCamera::handleMotionEvent(int device, bool detected)
 
 void MotionPiCamera::handleMotionEvent(CameraEvent *e)
 {
+    if(e->status()=="detected"){
+        if(getMotionState()==2){
+            return;
+        } else {
+            setMotionState(2);
+        }
+    } else if(e->status()=="started"){
+        setMotionState(1);
+    } else if(e->status()=="stopped"){
+        setMotionState(0);
+    }
     emit dispatchMotionEvent(e->deviceId(), e->sensorState()==CameraEvent::MOTION_DETECTED ? true : false);
 }
 

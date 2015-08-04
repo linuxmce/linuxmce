@@ -143,6 +143,16 @@ void NvrCameraBase::removeOld()
 
 
 }
+int NvrCameraBase::getMotionState() const
+{
+    return m_motionState;
+}
+
+void NvrCameraBase::setMotionState(int motionState)
+{
+    m_motionState = motionState;
+}
+
 MotionEventListener *NvrCameraBase::getListener() const
 {
     return mListener;
