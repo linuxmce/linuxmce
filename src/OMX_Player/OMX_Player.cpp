@@ -117,11 +117,12 @@ bool OMX_Player::GetConfig()
 	int PK_MD = m_pData->m_dwPK_Device_MD;
 	m_sAudioDevice = m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Audio_settings_CONST);
 	// m_sAudioDevice = "hdmi";
-        if (m_sAudioDevice == "S") {
-        	m_bPassthrough = false;
-        } else {
+       	m_bPassthrough = false;
+	if (m_sAudioDevice.length() >=2 && m_sAudioDevice[1] == '3')
+	{
+		m_sAudioDevice = m_sAudioDevice[0];
                 m_bPassthrough = true;
-        }
+	}
 
 	m_sGpuDeInt = "";
 	m_pOMXPlayer = new OMXPlayerStream(m_sAudioDevice, m_bPassthrough, m_sGpuDeInt, this, DATA_Get_Time_Code_Report_Frequency());
@@ -368,11 +369,13 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	string sDuration = TimeFromUSec(m_xDuration);
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - sDuration = %s", sDuration.c_str());
 
-//	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Send EVENT_Playback_Started()");
-//	string sMediaInfo = "";
-//	string sAudioInfo = "";
-//	string sVideoInfo = "";
-//	EVENT_Playback_Started(m_sMediaURL, m_iStreamID, sMediaInfo, sAudioInfo, sVideoInfo);
+
+	// TODO: set up this data properly
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Send EVENT_Playback_Started()");
+	string sMediaInfo = "";
+	string sAudioInfo = "";
+	string sVideoInfo = "";
+	EVENT_Playback_Started(m_sMediaURL, m_iStreamID, sMediaInfo, sAudioInfo, sVideoInfo);
 
 	sCMD_Result="OK";
 }
@@ -1207,7 +1210,6 @@ void OMX_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
 	mediaInfo.m_sFileName = m_pOMXPlayer->Get_CurrentFile();
 	mediaInfo.m_sMediaType = m_pOMXPlayer->Get_MediaType();
 	mediaInfo.m_iMediaID = m_pOMXPlayer->Get_MediaID();
-//
 
 	string sIPTimeCodeInfo = mediaInfo.ToString();
 
