@@ -500,6 +500,20 @@ void Linuxmce_NVR::handleMotionEvent(int device, bool motionDetected)
 
     this->m_pEvent->SendMessage(tripped);
 
+    DCE::Message *status = new Message(
+                device,
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_State_Changed_CONST,
+                1 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_State_CONST,
+                QString(motionDetected ? "100" :"0").toStdString().c_str()
+                );
+
+
+    this->m_pEvent->SendMessage(status);
+
 }
 
 

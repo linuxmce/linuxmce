@@ -96,6 +96,9 @@ public:
     MotionEventListener *getListener() const;
     void setListener(MotionEventListener *listener);
 
+    int getMotionState() const;
+    void setMotionState(int motionState);
+
 signals:
     void cameraNameChanged();
     void cameraTypeChanged();
@@ -160,6 +163,8 @@ private:
 
     QString m_currentFileName;
     QString oldFile;
+
+    int m_motionState;
 
      MotionEventListener *mListener;
 };

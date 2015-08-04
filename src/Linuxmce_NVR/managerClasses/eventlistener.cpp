@@ -112,7 +112,7 @@ void MotionEventListener::spitFire(QByteArray d)
             eventData["deviceId"].toInt()
             );
 
-   qDebug() << data;
+  // qDebug() << data;
    // emit motionEvent( eventData["deviceId"].toInt(), eventCode["status"].toString()=="stopped" ? false : true );
     emit motionEvent(evt);
 
