@@ -119,6 +119,10 @@ ExtractIPv6Data()
 				v6DNS=$(CommaField 5- "$ExtPart")
 			fi
 		fi
+		
+		IFS='|' read -a IPv6_interfaces_array <<< "$R"
+                amount_ipv6_Interfaces=${#IPv6_interfaces_array[@]}
+                amount_other6Interfaces=$[$amount_ipv6_Interfaces-2]
 		Netv6IfConf=1
 		#CalculateNetworkAddress
 	fi
