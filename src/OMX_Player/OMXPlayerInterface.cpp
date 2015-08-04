@@ -420,12 +420,12 @@ int64_t OMXPlayerInterface::Send_SetPosition(string sMediaURL, int64_t xPos) {
 }
 
 void OMXPlayerInterface::Do_DecreaseSpeed() {
-    Log("Do_DecreaseVolume() - calling Send_Action(KeyConfig::ACTION_DECREASE_SPEED)");
+    Log("Do_DecreaseSpeedVolume() - calling Send_Action(KeyConfig::ACTION_DECREASE_SPEED)");
     Send_Action(KeyConfig::ACTION_DECREASE_SPEED);
 }
 
 void OMXPlayerInterface::Do_IncreaseSpeed() {
-    Log("Do_IncreaseVolume() - calling Send_Action(KeyConfig::ACTION_INCREASE_SPEED)");
+    Log("Do_IncreaseSpeed() - calling Send_Action(KeyConfig::ACTION_INCREASE_SPEED)");
     Send_Action(KeyConfig::ACTION_INCREASE_SPEED);
 }
 
