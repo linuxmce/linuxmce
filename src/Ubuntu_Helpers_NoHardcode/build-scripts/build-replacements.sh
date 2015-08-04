@@ -268,22 +268,8 @@ function Build_Replacements_Common_raspbian
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}" && \
  	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
 
-	# ola needs to be configured to the current build environment
-	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
-	if Changed_Since_Last_Build "$dir_" ;then
-		pushd "$dir_"
-if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/\~${build_name}1)/" debian/changelog
-fi
-		DisplayMessage "Building ola-0.9.0"
-		autoreconf -i && \
-		dpkg-buildpackage -uc -b -tc $make_jobs && \
-		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
-		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
-		Update_Changed_Since_Last_Build "$dir_" || :
-		popd
-	fi
-
+	#Package: tee-pluto
+	Build_Replacement_Package tee-pluto misc_utils/tee-pluto || :
 	# qhttpserver (for LinuxMCE NVR)
 	Build_Replacement_Package libqhttpserver external/qhttpserver && \
 	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}" && \
@@ -305,12 +291,11 @@ function Build_Replacements_raspbian_jessie
 {
 	mkdir -pv "$replacements_dir"
 
-	# not in svn yet
-	##Package: libcec
-	#Build_Replacement_Package libcec raspbian/libcec-2.2.0 && \
-	#dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb && \
-	#cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.deb ${replacements_dir} && \
-	#cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.changes ${replacements_dir} || :
+	#Package: libcec
+	Build_Replacement_Package libcec raspbian/libcec-2.2.0 && \
+	dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb && \
+	cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.deb ${replacements_dir} && \
+	cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.changes ${replacements_dir} || :
 }
 
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
