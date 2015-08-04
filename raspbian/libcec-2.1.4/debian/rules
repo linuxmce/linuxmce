@@ -1,8 +1,0 @@
-#!/usr/bin/make -f
-
-%:
-	dh $@ --parallel
-
-override_dh_auto_configure:
-	dh_auto_configure -- --enable-rpi --with-rpi-include-path=/opt/vc/include --with-rpi-lib-path=/opt/vc/lib
-
