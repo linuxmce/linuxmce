@@ -313,6 +313,20 @@ bool OMXPlayerStream::setVolumeDown(int iRepeat_Command, string &sCMD_Result)
 	return true;
 }
 
+bool OMXPlayerStream::setMute(string &sCMD_Result)
+{
+	OMXPlayerInterface::Do_Mute();
+	sCMD_Result="OK";
+	return true;
+}
+
+bool OMXPlayerStream::setUnMute(string &sCMD_Result)
+{
+	OMXPlayerInterface::Do_UnMute();
+	sCMD_Result="OK";
+	return true;
+}
+
 /*
 int OMXPlayerStream::setVideo(int track) {
 	if ( track < ( OMXPlayerInterface::getMaxVideo() ) )

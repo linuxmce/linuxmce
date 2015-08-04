@@ -420,7 +420,7 @@ int64_t OMXPlayerInterface::Send_SetPosition(string sMediaURL, int64_t xPos) {
 }
 
 void OMXPlayerInterface::Do_DecreaseSpeed() {
-    Log("Do_DecreaseSpeedVolume() - calling Send_Action(KeyConfig::ACTION_DECREASE_SPEED)");
+    Log("Do_DecreaseSpeed() - calling Send_Action(KeyConfig::ACTION_DECREASE_SPEED)");
     Send_Action(KeyConfig::ACTION_DECREASE_SPEED);
 }
 
@@ -437,6 +437,24 @@ void OMXPlayerInterface::Do_DecreaseVolume() {
 void OMXPlayerInterface::Do_IncreaseVolume() {
     Log("Do_IncreaseVolume() - calling Send_Action(KeyConfig::ACTION_INCREASE_VOLUME)");
     Send_Action(KeyConfig::ACTION_INCREASE_VOLUME);
+}
+
+void OMXPlayerInterface::Do_Mute() {
+  try {
+    g_props_client->Mute();
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Do_Mute() - D-Bus error - omxplayer has gone away?");
+  }
+}
+
+void OMXPlayerInterface::Do_UnMute() {
+  try {
+    g_props_client->UnMute();
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Do_Mute() - D-Bus error - omxplayer has gone away?");
+  }
 }
 
 void OMXPlayerInterface::Do_SeekBackSmall() {

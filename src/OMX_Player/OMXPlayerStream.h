@@ -65,6 +65,8 @@ class OMXPlayerStream : public OMXPlayerInterface
 
     bool setVolumeUp(int iRepeat_Command, string &sCMD_Result);
     bool setVolumeDown(int iRepeat_Command, string &sCMD_Result);
+    bool setMute(string &sCMD_Result);
+    bool setUnMute(string &sCMD_Result);
     string GetPosition();
     void ReportTimecode();
     int CalculatePosition(string &sMediaPosition,string *sMRL,int *Subtitle,int *Angle,int *AudioTrack);

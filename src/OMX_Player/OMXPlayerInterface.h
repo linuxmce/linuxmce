@@ -164,6 +164,8 @@ public:
   void Do_IncreaseSpeed();
   void Do_VolumeUp();
   void Do_VolumeDown();
+  void Do_Mute();
+  void Do_UnMute();
   void Do_SetPosition(std::string sMediaURL, int64_t xPos);
   std::vector< std::string > Get_ListAudio();
   std::vector< std::string > Get_ListVideo();

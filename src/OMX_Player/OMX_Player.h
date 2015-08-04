@@ -44,6 +44,7 @@ private:
 		string m_sAudioDevice;
 		bool m_bPassthrough;
 		string m_sGpuDeInt;
+		bool m_bIsMute;
 
 		bool stopped = true;
 		int64_t m_xDuration;
