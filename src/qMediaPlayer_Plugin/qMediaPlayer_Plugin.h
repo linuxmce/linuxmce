@@ -36,7 +36,7 @@ namespace DCE
 //<-dceag-decl-e->
         pluto_pthread_mutex_t m_QMediaMediaMutex; //protect us from ourselves --holdover from pluto because we are in their ecosystem
         map<int, int> m_mapDevicesToStreams;
-        int m_iPriority;
+
         // Private member variables
 protected:
         class Orbiter_Plugin *m_pOrbiter_Plugin;
