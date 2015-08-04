@@ -195,12 +195,6 @@ int OMXPlayerInterface::getMaxSubtitle() {
 }
 
 std::vector< std::string > OMXPlayerInterface::Do_ListSubtitles() {
-	std::vector< std::string > ret;
-	ret = Get_ListSubtitles();
-	return ret;
-}
-
-std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
   std::vector< std::string > ret;
   try {
     ret = g_player_client->ListSubtitles();
@@ -209,6 +203,12 @@ std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
   }
   return ret;
+}
+
+std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
+	std::vector< std::string > ret;
+	ret = Do_ListSubtitles();
+	return ret;
 }
 
 
@@ -260,12 +260,6 @@ int OMXPlayerInterface::getMaxVideo() {
 }
 
 std::vector< std::string > OMXPlayerInterface::Do_ListVideo() {
-	std::vector< std::string > ret;
-	ret = Get_ListVideo();
-	return ret;
-}
-
-std::vector< std::string > OMXPlayerInterface::Get_ListVideo() {
   std::vector< std::string > ret;
   try {
     ret = g_player_client->ListVideo();
@@ -274,6 +268,12 @@ std::vector< std::string > OMXPlayerInterface::Get_ListVideo() {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
   }
   return ret;
+}
+
+std::vector< std::string > OMXPlayerInterface::Get_ListVideo() {
+	std::vector< std::string > ret;
+	ret = Do_ListVideo();
+	return ret;
 }
 
 
@@ -325,13 +325,6 @@ int OMXPlayerInterface::getMaxAudio() {
 }
 
 std::vector< std::string > OMXPlayerInterface::Do_ListAudio() {
-//	Log("OMXPlayerInterface::Do_ListAudio - called");
-	std::vector< std::string > ret;
-	ret = Get_ListAudio();
-	return ret;
-}
-
-std::vector< std::string > OMXPlayerInterface::Get_ListAudio() {
   std::vector< std::string > ret;
   try {
     ret = g_player_client->ListAudio();
@@ -342,15 +335,18 @@ std::vector< std::string > OMXPlayerInterface::Get_ListAudio() {
   return ret;
 }
 
+std::vector< std::string > OMXPlayerInterface::Get_ListAudio() {
+	Log("OMXPlayerInterface::Go_ListAudio - called");
+	std::vector< std::string > ret;
+	ret = Do_ListAudio();
+	return ret;
+}
+
 int OMXPlayerInterface::Get_Subtitle() {
-	// FIXME: GET THIS DATA
-	// we cannot access this data currently in omxplayer
 	return getCurrentSubtitle();
 }
 
 int OMXPlayerInterface::Get_Audio() {
-	// FIXME: GET THIS DATA
-	// we cannot access this data currently in omxplayer
 	return getCurrentAudio();
 }
 
@@ -382,10 +378,6 @@ string OMXPlayerInterface::Get_CurrentFile() {
 
 
 void OMXPlayerInterface::Do_Seek(int64_t usecs) {
-    // TODO: MUST!!!
-    //  Add checks for seeking past end, omxplayer
-    //  does not check this and idles if you seek
-    //  past the end of the stream.
     Log("Do_Seek() - calling Seek(" + to_string(usecs) + ")");
     Send_Seek(usecs);
 }
@@ -409,7 +401,6 @@ int64_t OMXPlayerInterface::Send_Seek(int64_t usecs) {
 }
 
 void OMXPlayerInterface::Do_SetPosition(string sMediaURL, int64_t xPos) {
-    // FIXME: need to check for seek past end
     Log("Do_SetPosition() - calling SetPosition('" + sMediaURL + "', " + to_string(xPos) + ") [" + TimeFromUSec(xPos) + "]");
     if (Send_SetPosition(sMediaURL, xPos) != xPos)
 	Log("Do_SetPosition() - error setting position!");
@@ -459,19 +450,11 @@ void OMXPlayerInterface::Do_SeekBackLarge() {
 }
 
 void OMXPlayerInterface::Do_SeekForwardSmall() {
-    // TODO: MUST!!!
-    //  Add checks for seeking past end, omxplayer
-    //  does not check this and idles if you seek
-    //  past the end of the stream.
     Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL)");
     Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL);
 }
 
 void OMXPlayerInterface::Do_SeekForwardLarge() {
-    // TODO: MUST!!!
-    //  Add checks for seeking past end, omxplayer
-    //  does not check this and idles if you seek
-    //  past the end of the stream.
     Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE)");
     Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE);
 }
