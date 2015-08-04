@@ -303,7 +303,7 @@ function firewall($output,$dbADO) {
 					<input type="submit" class="button" name="'.$chains[$i].'Policy" value="REJECT" />';
 				}
 
-			} elseif ($chains[$i] == 'nat' || strpos($chains[$i], 'VPN') !== false || strpos($chains[$i], 'LOGGING') !== false || strpos($chains[$i], 'MD\'s') !== false || strpos($chains[$i], 'fail2ban-') !== false) {
+			} elseif ($chains[$i] == 'port_forward (NAT)' || strpos($chains[$i], 'VPN') !== false || strpos($chains[$i], 'LOGGING') !== false || strpos($chains[$i], 'MD\'s') !== false || strpos($chains[$i], 'fail2ban-') !== false) {
 			
 			} else {
 						$out.='<td colspan="30%" align="right" >
