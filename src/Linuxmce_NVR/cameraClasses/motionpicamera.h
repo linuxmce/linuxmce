@@ -2,6 +2,7 @@
 #define MOTIONPICAMERA_H
 #include "abstractpicamera.h"
 #include "qvariant.h"
+class CameraEvent;
 class QNetworkAccessManager;
 class QNetworkReply;
 class QNetworkRequest;
@@ -60,12 +61,9 @@ public:
     static const QString CURL_MOTION_DETECTED;
     static const QString CURL_SEND_PICTURE;
 
-signals:
-    void motionStarted();
-    void motionEnded();
+signals:    
     void newPicture();
     void newMovie();
-
 
 private slots:
     void setConnections();
@@ -73,7 +71,10 @@ private slots:
     void handleControlReply(QNetworkReply*p);
     void parseStream(QByteArray st);
     void refreshImage();
+
 public slots:
+    void handleMotionEvent(int device, bool detected);
+    void handleMotionEvent(CameraEvent *e);
     void setCameraType(CameraType t);
     void setAudioType(AudioType a);
     void sendDetectionCommand(DetectionCommand d);

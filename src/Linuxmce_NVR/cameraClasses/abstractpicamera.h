@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "qurl.h"
+class MotionEventListener;
 class NvrManager;
 /*!
  * \brief The NvrCameraBase class. Base object for different version of the camera to use
@@ -33,6 +34,8 @@ public:
         STREAM_AUDIO,
         FILE_AUIDO
     };
+
+
 
     quint16 port() const;
     void setPort(const quint16 &port);
@@ -67,9 +70,7 @@ public:
     void setCameraType(CameraType t) ;
     CameraType camType();
 
-
     void setAudioType(AudioType a) ;
-
 
     bool constructed() const;
     void setConstructed(bool constructed);
@@ -92,6 +93,9 @@ public:
     QString getCurrentFileName() const;
     void setCurrentFileName(const QString &currentFileName);
 
+    MotionEventListener *getListener() const;
+    void setListener(MotionEventListener *listener);
+
 signals:
     void cameraNameChanged();
     void cameraTypeChanged();
@@ -107,6 +111,13 @@ signals:
     void initialized();
     void motionEnabledChanged();
     void imagePathChanged();
+
+    void motionStarted();
+    void motionEnded();
+    void motionDetected();
+
+    void dispatchMotionEvent(int device, bool motion);
+
 
 public slots:
     virtual std::string getImage();
@@ -149,6 +160,8 @@ private:
 
     QString m_currentFileName;
     QString oldFile;
+
+     MotionEventListener *mListener;
 };
 
 

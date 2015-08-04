@@ -4,6 +4,7 @@
 #include <QObject>
 #include "qtcpserver.h"
 #include "qhttpserver.h"
+class CameraEvent;
 
 class MotionEventListener : public QObject
 {
@@ -20,6 +21,7 @@ public:
 
 signals:
     void motionEvent(int device, bool motionDetected);
+    void motionEvent(CameraEvent * e);
     void listenPortChanged();
     void isReadyChanged();
 

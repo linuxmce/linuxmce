@@ -23,7 +23,7 @@ public:
     };
     Q_ENUMS(NotificationStatus)
 
-     CameraEvent(QString host, QString name, QString url, QString status, CameraEvent::SensorState stat,  QObject *parent = 0);
+     CameraEvent(QString host, QString name, QString url, QString status, CameraEvent::SensorState stat, int deviceId,  QObject *parent = 0);
 
     QString host() const;
     void setHost(const QString &host);
@@ -46,6 +46,9 @@ public:
     QDateTime eventTime() const;
     void setEventTime(const QDateTime &eventTime);
 
+    int deviceId() const;
+    void setDeviceId(int deviceId);
+
 signals:
 
 
@@ -57,6 +60,7 @@ private:
     QString m_url;
     QString m_status;
     QDateTime m_eventTime;
+    int m_deviceId;
 
     NotificationStatus m_notificationStatus;
     SensorState m_sensorState;
