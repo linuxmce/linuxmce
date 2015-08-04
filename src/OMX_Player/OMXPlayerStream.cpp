@@ -24,7 +24,7 @@ void OMXPlayerStream::Stop(int iStreamID) {
 //	Log("OMXPlayerStream::Stop - iStreamID: " + to_string(iStreamID));
 
 	// stop the event thread first
-	if ( threadEventLoop )
+	if ( threadEventLoop != 0)
 	{
 		Log("OMXPlayerStream::Stop - Stopping event processor." );
 
@@ -66,7 +66,7 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 
 	m_xDuration = OMXPlayerInterface::Get_Duration();
 
-	if (!threadEventLoop)
+	if (threadEventLoop != 0)
 	{
 		Log("OMXPlayerStream::Play - Creating event processor" );
 		pthread_create( &threadEventLoop, NULL, EventProcessingLoop, this );
@@ -269,6 +269,24 @@ string OMXPlayerStream::Get_MediaType() {
 int OMXPlayerStream::Get_MediaID() {
 	return m_iMediaID;
 }
+
+bool OMXPlayerStream::GetScreenShot(int iWidth, int iHeight, string& sCMD_Result)
+{
+	string cmd("");
+	cmd += "raspi2png ";
+	cmd += "--pngname /tmp/shot.png ";
+	cmd += "--width " + to_string(iWidth) + " ";
+	cmd += "--height " + to_string(iHeight) + " ";
+	if (system(cmd.c_str()) != 0)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OMXPlayerStream::GetScreenShot(): Could not take snapshot.");
+		sCMD_Result="ERROR";
+		return false;
+	}
+	sCMD_Result="OK";
+	return true;
+}
+
 
 /*
 int OMXPlayerStream::setVideo(int track) {

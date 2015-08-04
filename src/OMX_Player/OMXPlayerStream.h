@@ -55,6 +55,7 @@ class OMXPlayerStream : public OMXPlayerInterface
     int Get_iStreamID();
     string Get_MediaType();
     int Get_MediaID();
+    bool GetScreenShot(int iWidth, int iHeight, string& sCMD_Result);
 
 //    int setVideo(int track);
     int setAudio(int track);

@@ -1406,7 +1406,34 @@ void OMX_Player::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pM
 void OMX_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
-        cout << "Need to implement command #XXX - Get Video Frame" << endl;
+	cout << "Need to implement command #84 - Get Video Frame" << endl;
+	cout << "Parm #19 - Data  (data value)" << endl;
+	cout << "Parm #20 - Format=" << sFormat << endl;
+	cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #60 - Width=" << iWidth << endl;
+	cout << "Parm #61 - Height=" << iHeight << endl;
+
+	size_t size=0;
+
+	if (!m_pOMXPlayer)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OMX_Player::CMD_Get_Video_Frame(sDisable_Aspect_Lock=%s,iStreamID=%d,iWidth=%d,iHeight=%d,iData_Size=%d) - m_pVLC == NULL",sDisable_Aspect_Lock.c_str(),iStreamID,iWidth,iHeight,iData_Size);
+		sCMD_Result="ERROR";
+		return;
+	}
+
+	if (!m_pOMXPlayer->GetScreenShot(iWidth,iHeight,sCMD_Result))
+	{
+		return;
+	}
+
+	*pData = FileUtils::ReadFileIntoBuffer("/tmp/shot.png",size);
+	*iData_Size = size;
+	FileUtils::DelFile("/tmp/shot.png");
+	return;
+
+
 }
 //<-dceag-c87-b->
 
