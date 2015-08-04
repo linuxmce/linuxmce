@@ -1,6 +1,7 @@
+#include "../PlutoUtils/StringUtils.h"
+
 #include "OMX_Player.h"
 #include "OMXPlayerStream.h"
-
 
 namespace DCE
 {
@@ -73,6 +74,62 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 	}
 	else
 		Log("OMXPlayerStream::Play - Event processor not false?!?!?" );
+
+	// Get/Set Subtitles
+	std::string sSubtitles("");
+	std::vector< std::string > vsSubtitles;
+	vsSubtitles = OMXPlayerInterface::Get_ListSubtitles();
+	for(std::vector<std::string>::iterator it = vsSubtitles.begin(); it < vsSubtitles.end(); it++)
+	{
+		string::size_type tokenPos;
+		// <index>:<language>:<name>:<codec>:<active>
+		string index = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string language = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string name = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string codec = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string active = StringUtils::Tokenize(*it, string(":"), tokenPos);
+
+		sSubtitles += index + " " + language + " " + name + "\n";
+	}
+	m_pPlayer->DATA_Set_Subtitles(sSubtitles);
+
+	// Get/Set Audio
+	std::string sAudio("");
+	std::vector< std::string > vsAudio;
+	vsAudio = OMXPlayerInterface::Get_ListAudio();
+	for(std::vector<std::string>::iterator it = vsAudio.begin(); it < vsAudio.end(); it++)
+	{
+		string::size_type tokenPos;
+		// <index>:<language>:<name>:<codec>:<active>
+		string index = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string language = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string name = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string codec = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string active = StringUtils::Tokenize(*it, string(":"), tokenPos);
+
+		sSubtitles += index + " " + language + " " + name + "\n";
+	}
+	m_pPlayer->DATA_Set_Audio_Tracks(sAudio);
+
+/*
+	// Get/Set Video
+	std::string sVideo("");
+	std::vector< std::string > vsVideo;
+	vsAudio = OMXPlayerInterface::Get_ListVideo();
+	for(std::vector<std::string>::iterator it = vsVideo.begin(); it < vsVideo.end(); it++)
+	{
+		string::size_type tokenPos;
+		// <index>:<language>:<name>:<codec>:<active>
+		string index = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string language = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string name = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string codec = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string active = StringUtils::Tokenize(*it, string(":"), tokenPos);
+
+		sSubtitles += index + " " + language + " " + name + "\n";
+	}
+	m_pPlayer->DATA_Set_Angles(sVideo);
+*/
 
 	return true;
 }
@@ -205,7 +262,7 @@ int OMXPlayerStream::Get_iStreamID() {
 }
 
 string OMXPlayerStream::Get_MediaType() {
-	// this is the string version of the MediaID, not to be consused with the lmce MediaType.
+	// this is the string version of the MediaID, not to be confused with the lmce MediaType.
 	return m_sMediaType;
 }
 
