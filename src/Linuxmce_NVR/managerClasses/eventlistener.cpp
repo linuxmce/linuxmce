@@ -11,11 +11,11 @@
 #include "qimage.h"
 #include "qfile.h";
 #include "../cameraClasses/abstractcameraevent.h"
-MotionEventListener::MotionEventListener(int listen_port, QObject *parent) : m_listenPort(listen_port)
+MotionEventListener::MotionEventListener(int listen_port, QObject *parent) : m_listenPort(0)
 {
     server = new QHttpServer();
     connect(server, &QHttpServer::newRequest, this, &MotionEventListener::handleEvent);
-   // setListenPort(listen_port);
+  setListenPort(listen_port);
 }
 
 bool MotionEventListener::isReady() const
@@ -35,11 +35,9 @@ int MotionEventListener::listenPort() const
 
 void MotionEventListener::setListenPort(const int &listenPort)
 {
+
     if(m_listenPort==listenPort)return;
-
     m_listenPort = listenPort; emit listenPortChanged();
-
-
 
     if(server->listen(QHostAddress::Any, m_listenPort) ){
         setIsReady(true);
@@ -114,7 +112,7 @@ void MotionEventListener::spitFire(QByteArray d)
             eventData["deviceId"].toInt()
             );
 
-  //  qDebug() << evt.eventTime() << evt.name() << evt.status();
+   qDebug() << data;
    // emit motionEvent( eventData["deviceId"].toInt(), eventCode["status"].toString()=="stopped" ? false : true );
     emit motionEvent(evt);
 

@@ -44,12 +44,13 @@ const QString MotionPiCamera::CURL_MOTION_DETECTED="curl --data \"{'ip':'192.168
 const QString MotionPiCamera::CURL_SEND_PICTURE="curl --header \"X-dcedevice:%3\"  --form \"fileupload=@%f\" http://%1:%2";
 
 
-MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url,  int dceId, QString camPath, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
+MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url,  int dceId, QString camPath, QString callback_address, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
     NvrCameraBase( cameraName, userName, password,port, control_port, url,camPath, dceId,  parent = 0) {
 
-    int listenerPort =4200+dceId;
+    int listenerPort =5100+dceId;
     setManagerPort(QString::number(listenerPort));
     setListener(new MotionEventListener(listenerPort));
+    setManagerUrl(callback_address);
 
 
     QObject::connect(this,&MotionPiCamera::initialized, this, &MotionPiCamera::setConnections);

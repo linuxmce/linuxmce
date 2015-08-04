@@ -24,7 +24,6 @@ NvrCameraBase::NvrCameraBase(QString cameraName, QString userName, QString passw
     setControlPort(control_port);
     setUrl(url);
 
-
     if(userName.isEmpty())
         setUsingPass(false);
 
@@ -152,7 +151,7 @@ MotionEventListener *NvrCameraBase::getListener() const
 void NvrCameraBase::setListener(MotionEventListener *listener)
 {
     mListener = listener;
-
+    qDebug() <<Q_FUNC_INFO << mListener->listenPort();
 
 }
 

@@ -85,7 +85,7 @@ public:
     void setDceDeviceId(int dceDeviceId);
 
     bool getMotionEnabled() const;
-    void setMotionEnabled(bool motionEnabled);
+ Q_INVOKABLE void setMotionEnabled(bool motionEnabled);
 
     QString getImagePath() const;
     void setImagePath(const QString &imagePath);
