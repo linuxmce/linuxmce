@@ -149,11 +149,15 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
     }
         break;
     case COMMAND_Generic_On_CONST: {
-        emit setDetectionState(true, pMessage->m_dwPK_Device_To);
+        QMetaObject::invokeMethod(base, "setMotionEnabled",  Qt::QueuedConnection, Q_ARG(bool, true));
+       // base->setMotionEnabled(true);
+       // emit setDetectionState(true, pMessage->m_dwPK_Device_To);
     }
         break;
     case COMMAND_Generic_Off_CONST: {
-        emit setDetectionState(false, pMessage->m_dwPK_Device_To);
+          QMetaObject::invokeMethod(base, "NvrCameraBase::setMotionEnabled",  Qt::QueuedConnection, Q_ARG(bool, true));
+     //   base->setMotionEnabled(false);
+      //  emit setDetectionState(false, pMessage->m_dwPK_Device_To);
 
     }
         break;
@@ -236,6 +240,7 @@ void Linuxmce_NVR::CreateChildren()
         QString cPath = QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Path_CONST));
         QString name =QString::fromStdString(pDeviceData_Impl_Child->m_sDescription);
         QUrl url(cameraIp);
+       QString callbackAddr = QString::fromStdString(m_sMyIPAddress);
         if(cameraType=="motion"){
             commandPort= QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_TCP_Port_CONST)).toInt();
 
@@ -247,7 +252,8 @@ void Linuxmce_NVR::CreateChildren()
                      commandPort,
                      url,
                      cameraId,
-                     cPath
+                     cPath,
+                     callbackAddr
                      );
 
             //    mpManager->addCamera(p);

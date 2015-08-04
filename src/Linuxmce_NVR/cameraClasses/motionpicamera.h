@@ -19,6 +19,7 @@ public:
                    QUrl url,
                    int dceId,
                    QString camPath,
+                   QString callback_address,
                    CameraType t= STREAM_TYPE_MOTION_MJPEG,
                    AudioType a =NO_AUDIO,
                    QObject *parent=0);
