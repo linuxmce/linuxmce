@@ -1322,7 +1322,11 @@ void OMX_Player::CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Re
 void OMX_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
 //<-dceag-c89-e->
 {
-        cout << "Need to implement command #XXX - Vol Up" << endl;
+        cout << "Need to implement command #89 - Vol Up" << endl;
+	cout << "Parm #72 - Repeat_Command=" << iRepeat_Command << endl;
+
+	m_pOMXPlayer->setVolumeUp(iRepeat_Command, sCMD_Result);
+	return;
 }
 //<-dceag-c90-b->
 
@@ -1334,7 +1338,11 @@ void OMX_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMe
 void OMX_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
 //<-dceag-c90-e->
 {
-        cout << "Need to implement command #XXX - Vol Down" << endl;
+        cout << "Need to implement command #90 - Vol Down" << endl;
+	cout << "Parm #72 - Repeat_Command=" << iRepeat_Command << endl;
+
+	m_pOMXPlayer->setVolumeDown(iRepeat_Command, sCMD_Result);
+	return;
 }
 //<-dceag-c97-b->
 
@@ -1344,7 +1352,7 @@ void OMX_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *p
 void OMX_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
 {
-        cout << "Need to implement command #XXX - Mute" << endl;
+        cout << "Need to implement command #97 - Mute" << endl;
 }
 //<-dceag-c29-b->
 

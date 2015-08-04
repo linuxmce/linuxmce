@@ -287,6 +287,31 @@ bool OMXPlayerStream::GetScreenShot(int iWidth, int iHeight, string& sCMD_Result
 	return true;
 }
 
+bool OMXPlayerStream::setVolumeUp(int iRepeat_Command, string &sCMD_Result)
+{
+	OMXPlayerInterface::Do_IncreaseVolume();
+	for (int repeats = iRepeat_Command - 1; repeats > 1; --repeats)
+	{
+		// FIXME: get the repeat delay from the db?
+		sleep(50);
+		OMXPlayerInterface::Do_IncreaseVolume();
+	}
+	sCMD_Result="OK";
+	return true;
+}
+
+bool OMXPlayerStream::setVolumeDown(int iRepeat_Command, string &sCMD_Result)
+{
+	OMXPlayerInterface::Do_DecreaseVolume();
+	for (int repeats = iRepeat_Command - 1; repeats > 1; --repeats)
+	{
+		// FIXME: get the repeat delay from the db?
+		sleep(50);
+		OMXPlayerInterface::Do_DecreaseVolume();
+	}
+	sCMD_Result="OK";
+	return true;
+}
 
 /*
 int OMXPlayerStream::setVideo(int track) {
