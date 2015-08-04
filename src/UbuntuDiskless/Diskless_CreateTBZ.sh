@@ -273,7 +273,6 @@ MD_System_Level_Prep () {
 				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
 				deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
 				deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
-				deb http://debian.slimdevices.com/ stable  main
 				deb http://download.videolan.org/pub/debian/stable/ /
 				EOF
 			;;
