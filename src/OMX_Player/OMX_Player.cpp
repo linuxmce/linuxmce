@@ -1354,15 +1354,17 @@ void OMX_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *p
 void OMX_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
 {
-        cout << "Need to implement command #97 - Mute" << endl;
-
 	if (m_bIsMute)
 	{
+	        cout << "Command #97 - Mute - UnMuting" << endl;
+
 		m_pOMXPlayer->setUnMute(sCMD_Result);
 		m_bIsMute = false;
 	}
 	else
 	{
+	        cout << "Command #97 - Mute - Muting" << endl;
+
 		m_pOMXPlayer->setMute(sCMD_Result);
 		m_bIsMute = true;
 	}
