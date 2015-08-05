@@ -724,7 +724,7 @@ for ForwardType in "${ForwardTypeArr[@]}"; do
 				SrcPort2=$(Field 8 "$Port")
 				DestIP=$(Field 9 "$Port")
 				DestPort=$(Field 10 "$Port")
-				#RPolicy=$(Field 11 "$Port")
+				RPolicy=$(Field 11 "$Port")
 				Description=$(Field 12 "$Port")
 				
 				if [[ "$DestPort" == "" ]] || [[ "$DestPort" == "NULL" ]] || [[ "$DestPort" == "NULL:NULL" ]]; then
@@ -739,6 +739,7 @@ for ForwardType in "${ForwardTypeArr[@]}"; do
 					else
 						parmDPort=""
 						DestPort="$DestPort"
+						DestPort2=""
 					fi
 				fi				
 				if [[ "$DestIP" != "" ]] && [[ "$DestIP" != "NULL" ]]; then
@@ -766,7 +767,7 @@ for ForwardType in "${ForwardTypeArr[@]}"; do
 				fi
 				
 				#change RPolicy to what the rule needs
-				if [[ "$RuleType" == "POSTROUTING" ]]; then
+				if [[ "$RuleType" == "POSTROUTING" ]] && [[ "$RPolicy" != "MASQUERADE"  ]]; then
 					RPolicy="SNAT $parmDest"
 				elif [[ "$RuleType" == "PREROUTING" ]]; then
 					RPolicy="DNAT $parmDest"
