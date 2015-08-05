@@ -1,9 +1,9 @@
 #!/bin/bash
 
 if [[ $1 != "background" ]] ;then
-        echo "Backgrounding ..."
-        screen -d -m -S "StorageStatusRadar" "$0" "background"
-        exit 0
+echo "Backgrounding ..."
+screen -d -m -S "StorageStatusRadar" "$0" "background"
+exit 0
 fi
 
 
@@ -76,10 +76,9 @@ function SetDeviceOnline() {
 
 		/usr/pluto/bin/MessageSend "$DCERouter" -targetType template $Device_ID $TPL_MEDIA_PLUGIN 1 $CMD_REFRESH_LIST_OF_ONLINE_DEVICES	
 
-		Log "----------------- DEVICE $Device_ID $OnlineValue"		
+		Log "----------------- DEVICE $Device_ID $OnlineValue"
 	else
-	
-		Log "----------------- DEVICE $Device_ID $OnlineValue (unchanged)"	
+		Log "----------------- DEVICE $Device_ID $OnlineValue (unchanged)"
 	fi
 }
 
@@ -89,7 +88,7 @@ function SetKidsOnline() {
 	local Q=""
 	local R=""
 	local Device_Child=""
-	
+
 	Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia = '$Device_ID' AND FK_DeviceTemplate IN ($TPL_INTERNAL_DRIVE, $TPL_WINDOWS_SHARE, $TPL_NFS_SHARE)"
 	R=$(RunCSQL "$Q")
 	for Device_Child in $R ;do
@@ -100,7 +99,7 @@ function SetKidsOnline() {
 
 function Log() {
 	local Message=$1
-	
+
 	echo "$(date -R) $Message"
 }
 
@@ -129,7 +128,6 @@ while : ;do
 				LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
 			WHERE 
 				Device.FK_DeviceTemplate IN ($TPL_BUFFALO, $TPL_FILESERVER)
-			
 		"
 		FileServerList=$(RunCSQL "$Q")
 
@@ -139,7 +137,7 @@ while : ;do
 			Device_IP=$(Field 2 "$FileServer")
 			Device_Username=$(Field 3 "$FileServer")
 			Device_Password=$(Field 4 "$FileServer")
-	
+
 			if [[ "$Device_IP" == "" ]] ;then
 				SetKidsOnline "$Device_ID" "0"
 				Log "Device $Device_ID has no IP address associated with it."
@@ -155,7 +153,6 @@ while : ;do
 				continue
 			fi
 
-		
 			Log "Device $Device_ID ($Device_IP) is online trying each of samba kids to see it they are still available"
 			## Get a list of samba shares related to this device
 			Q="
@@ -178,11 +175,11 @@ while : ;do
 
 			## Test each samba share to see if is available or not
 			for SambaShare in $SambaShareList ;do
-			
+
 				if [[ "$SambaShare" == "" ]] ;then
 					continue
 				fi
-			
+
 				Share_ID=$(Field "1" "$SambaShare")
 				Share_Name=$(Field "2" "$SambaShare")
 				Share_Username=$(Field "3" "$SambaShare")
@@ -191,7 +188,7 @@ while : ;do
 				## Test if the share is still in the list
 				smbclient -U $Device_Username%$Device_Password --list=//$Device_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^${Share_Name}$"
 				isShareInList=$?
-	
+
 				## Try with the listing the shares with the username/password of the share
 				if [[ "$isShareInList" != 0 ]] ;then
 					set -x
@@ -199,7 +196,7 @@ while : ;do
 					isShareInList=$?
 					set +x
 				fi
-			
+
 				if [[ "$isShareInList" != "0" ]] ;then
 					Log "Share $Share_ID ($Share_Name) is not advertised by the smb server, trying any how"
 				#	SetDeviceOnline "$Share_ID" "0"
@@ -209,7 +206,7 @@ while : ;do
 				## Test if the share is still mountable with the username/password that we have
 				smbclient -U $Share_Username%$Share_Password "//$Device_IP/$Share_Name" -c 'pwd' 1>/dev/null 2>/dev/null
 				isShareMountable=$?
-			
+
 				if [[ "$isShareMountable" != "0" ]] ;then
 					Msg="Share $Share_ID ($Share_Name) is not mountable with the username/pass that i have"
 					Log "$Msg"
@@ -224,21 +221,21 @@ while : ;do
 
 			## Get a list of nfs shares related to this device
 			Q="
-                	SELECT 
-                	        PK_Device,
-                	        ShareName.IK_DeviceData,
-                	        Username.IK_DeviceData,
-                	        Password.IK_DeviceData
-                	FROM
-                	        Device
-                	        LEFT JOIN Device_DeviceData ShareName ON ShareName.FK_Device = Device.PK_Device AND ShareName.FK_DeviceData = '$DD_SHARE_NAME'
-                	        LEFT JOIN Device_DeviceData Username ON Username.FK_Device = Device.PK_Device AND Username.FK_DeviceData = '$DD_USERNAME'
-                	        LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
-                	WHERE
-                	        FK_Device_ControlledVia = '$Device_ID'
-                	        AND
-                	        FK_DeviceTemplate = '$TPL_NFS_SHARE'
-                	"
+	SELECT 
+	PK_Device,
+	ShareName.IK_DeviceData,
+	Username.IK_DeviceData,
+	Password.IK_DeviceData
+	FROM
+	Device
+	LEFT JOIN Device_DeviceData ShareName ON ShareName.FK_Device = Device.PK_Device AND ShareName.FK_DeviceData = '$DD_SHARE_NAME'
+	LEFT JOIN Device_DeviceData Username ON Username.FK_Device = Device.PK_Device AND Username.FK_DeviceData = '$DD_USERNAME'
+	LEFT JOIN Device_DeviceData Password ON Password.FK_Device = Device.PK_Device AND Password.FK_DeviceData = '$DD_PASSWORD'
+	WHERE
+	FK_Device_ControlledVia = '$Device_ID'
+	AND
+	FK_DeviceTemplate = '$TPL_NFS_SHARE'
+	"
 			NFSShareList=$(RunCSQL "$Q")
 
 			## Test each nfs share to see if is available on not
@@ -246,12 +243,12 @@ while : ;do
 				if [[ "$NFSShare" == "" ]] ;then 
 					continue
 				fi
-			
+
 				Share_ID=$(Field "1" "$NFSShare")
-	                        Share_Name=$(Field "2" "$NFSShare")
-	                        Share_Username=$(Field "3" "$NFSShare")
-	                        Share_Password=$(Field "4" "$NFSShare")
-								
+	Share_Name=$(Field "2" "$NFSShare")
+	Share_Username=$(Field "3" "$NFSShare")
+	Share_Password=$(Field "4" "$NFSShare")
+
 				## Test if the share is still in the list
 				showmount -e $Device_IP | cut -d ' ' -f1 | grep "^${Share_Name}$"
 				isShareInList=$?
@@ -262,20 +259,20 @@ while : ;do
 					continue
 				fi
 
-	                        ## See if the share is mountable
-	                        mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)
-	                        mount ${Device_IP}:${Share_Name} $mountDirTemp 1>/dev/null 2>/dev/null
-	                        isShareMountable=$?
+	## See if the share is mountable
+	mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)
+	mount ${Device_IP}:${Share_Name} $mountDirTemp 1>/dev/null 2>/dev/null
+	isShareMountable=$?
 
-	                        if [[ "$isShareMountable" != "0" ]] ;then
-	                                Log "Share $Share_ID ($Share_Name) cannot be mounted"
-	                                SetDeviceOnline "$Share_ID" "0"
+	if [[ "$isShareMountable" != "0" ]] ;then
+	Log "Share $Share_ID ($Share_Name) cannot be mounted"
+	SetDeviceOnline "$Share_ID" "0"
 					rmdir $mountDirTemp
 					continue
-	                        else
-	                                umount -lf $mountDirTemp 1>/dev/null 2>/dev/null
-	                                rmdir $mountDirTemp
-	                        fi
+	else
+	umount -lf $mountDirTemp 1>/dev/null 2>/dev/null
+	rmdir $mountDirTemp
+	fi
 
 				SetDeviceOnline "$Share_ID" "1"
 			done
@@ -297,7 +294,7 @@ while : ;do
 			FK_DeviceTemplate IN ($TPL_INTERNAL_DRIVE, $TPL_RAID_0, $TPL_RAID_1, $TPL_RAID_5)
 	"
 	InternalDriveList=$(RunCSQL "$Q")
-	
+
 	## Test each internal drive and see if is available
 	for InternalDrive in $InternalDriveList ;do
 		if [[ "$InternalDrive" == "" ]] ;then
@@ -326,29 +323,36 @@ while : ;do
 		fi
 
 		## Is one of our internal drives
-		if [[ "$IDrive_Parent" == "$PK_Device" ]] ;then
-
-			if [[ "$IDrive_DeviceTemplate" == "$TPL_INTERNAL_DRIVE" ]] ;then
-				## See if a device with that UUID can be found in the hal tree
-				IDrive_HalUDI=$(hal-find-by-property --key 'volume.uuid' --string "$IDrive_UUID")
-				if [[ "$IDrive_HalUDI" == "" ]] ;then
-					Log "Drive $IDrive_ID ($IDrive_UUID) cannot be found in hal tree"
-					SetDeviceOnline "$IDrive_ID" "0"
-					continue
+		if [[ "$IDrive_Parent" == "$PK_Device" ]] ; then
+			if [[ "$IDrive_DeviceTemplate" == "$TPL_INTERNAL_DRIVE" ]] ; then
+				## See if a device with that UUID can be found in udev
+				## Find the drive
+				if [[ ! -e "/dev/disk/by-uuid/$Drive_UUID" ]] ; then
+					Log "Cannot find disk $IDrive_ID with uuid=$Drive_UUID"
+					# as in the StorageDevices_Radar.sh script, fall back to serial number and storage_device
+					if [[ ! -e "/dev/disk/by-id/$Drive_UUID" ]] ; then
+						Log "Cannot find disk $IDrive_ID with id = $Drive_UUID either"
+						if [[ ! -e "/dev/disk/by-label/$Drive_UUID" ]] ; then
+							Log "Cannot find disk $IDrive_ID with label = $Drive_UUID either, aborting!"
+							SetDeviceOnline "$IDrive_ID" "0"
+							continue
+						fi
+					fi
 				fi
 
-				## See if we have a block device associated with that UUID
-				IDrive_BlockDev=$(hal-get-property --udi "$IDrive_HalUDI" --key 'block.device')
-				if [[ "$IDrive_BlockDev" == "" ]] ;then
-					Log "Drive $IDrive_ID ($IDrive_UUID) doesn't have a block device associated"
-					SetDeviceOnline "$IDrive_ID" "0"
-				fi
+				# TODO: support block device detectio
+#				## See if we have a block device associated with that UUID
+#				IDrive_BlockDev=$(hal-get-property --udi "$IDrive_HalUDI" --key 'block.device')
+#				if [[ "$IDrive_BlockDev" == "" ]] ;then
+#					Log "Drive $IDrive_ID ($IDrive_UUID) doesn't have a block device associated"
+#					SetDeviceOnline "$IDrive_ID" "0"
+#				fi
 			fi
-			
+
 			## See if is still available in /proc/partitions
 			cat /proc/partitions | grep -q "${IDrive_BlockDev##/dev/}$"
 			isDriveAvailable=$?
-			
+
 			if [[ "$isDriveAvailable" != "0" ]] ;then
 				Log "Drive $IDrive_ID ($IDrive_UUID) that's associated with $IDrive_BlockDev cannot be found in /proc/partitions"
 				SetDeviceOnline "$IDrive_ID" "0"
@@ -356,10 +360,10 @@ while : ;do
 			fi
 
 			## See if the drive is mountable
-			mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)			
+			mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)
 			mount ${IDrive_BlockDev} $mountDirTemp 1>/dev/null 2>/dev/null
 			isDriveMountable=$?
-			
+
 			if [[ "$isDriveMountable" != "0" ]] ;then
 				Log "Drive $IDrive_ID ($IDrive_UUID) that's associated with $IDrive_BlockDev cannot be mounted"
 				SetDeviceOnline "$IDrive_ID" "0"
@@ -371,7 +375,7 @@ while : ;do
 			fi
 
 			SetDeviceOnline "$IDrive_ID" "1"
-			
+
 
 		## Is a internal drive located on a remote computer
 		elif [[ "$PK_Device" -eq "1" ]]; then
@@ -380,7 +384,7 @@ while : ;do
 			IDrive_IP=$(RunCSQL "SELECT IPaddress FROM Device WHERE PK_Device='${IDrive_Parent}'")
 			IDrive_IP=$(Field "1" "$IDrive_IP")
 
-                        ## Test to see if the parent is online or not
+			## Test to see if the parent is online or not
 			ping -qnc 1 -W 1 "$IDrive_IP" &> /dev/null
 			HostIsUp=$?
 			if [[ "$HostIsUp" != "0" ]] ;then
@@ -389,31 +393,30 @@ while : ;do
 				continue
 			fi
 
-                        ## Test if the share is still in the list
-                        smbclient -A /usr/pluto/var/sambaCredentials.secret --list=//$IDrive_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^Storage$IDrive_ID\$$"
-                        isShareInList=$?
+			## Test if the share is still in the list
+			smbclient -A /usr/pluto/var/sambaCredentials.secret --list=//$IDrive_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^Storage$IDrive_ID\$$"
+			isShareInList=$?
 
-                        if [[ "$isShareInList" != "0" ]] ;then
-                                Log "Drive $IDrive_ID ($IDrive_UUID) is not advertised by it's parent smb server ($IDrive_IP)"
-                                SetDeviceOnline "$IDrive_ID" "0"
-                                continue
-                        fi
+			if [[ "$isShareInList" != "0" ]] ;then
+				Log "Drive $IDrive_ID ($IDrive_UUID) is not advertised by it's parent smb server ($IDrive_IP)"
+				SetDeviceOnline "$IDrive_ID" "0"
+				continue
+			fi
 
-                        ## Test if the share is still mountable with the username/password that we have
-                        smbclient -A /usr/pluto/var/sambaCredentials.secret "//$IDrive_IP/Storage$IDrive_ID\$" -c 'pwd' 1>/dev/null 2>/dev/null
-                        isShareMountable=$?
+			## Test if the share is still mountable with the username/password that we have
+			smbclient -A /usr/pluto/var/sambaCredentials.secret "//$IDrive_IP/Storage$IDrive_ID\$" -c 'pwd' 1>/dev/null 2>/dev/null
+			isShareMountable=$?
 
-                        if [[ "$isShareMountable" != "0" ]] ;then
-                                Msg="Drive $IDrive_ID ($IDrive_IP $IDrive_UUID) cannot be mounted"
-                                Log "$Msg"
-                                SetDeviceOnline "$IDrive_ID" "0"
-                                continue
-                        fi
+			if [[ "$isShareMountable" != "0" ]] ;then
+				Msg="Drive $IDrive_ID ($IDrive_IP $IDrive_UUID) cannot be mounted"
+				Log "$Msg"
+				SetDeviceOnline "$IDrive_ID" "0"
+				continue
+			fi
 
-                        SetDeviceOnline "$IDrive_ID" "1"
+			SetDeviceOnline "$IDrive_ID" "1"
 		fi
 	done
-	
 
 	sleep 5
 done
