@@ -538,16 +538,12 @@ void HueController::CreateChildren()
                     if(hueBulbs.at(n)->getController()->getIpAddress() == p.at(0)&& hueBulbs.at(n)->id()==lightID ){
                         hueBulbs.at(n)->setLinuxmceId(linuxmceID);
                         hueBulbs.at(n)->setBrightness(0);
-                        hueBulbs.at(n)->setPowerOn(true);
+                        hueBulbs.at(n)->setPowerOn(false);
                         qDebug() << "Linked existing light with linuxmce db. " << hueBulbs.at(n)->displayName();
                     }
                 }
             }
 
-        }
-
-        for (int n = 0; n < hueBulbs.size(); n++){
-            hueBulbs.at(n)->setPowerOn(true);
         }
 
         pCommand->m_pParent = this;

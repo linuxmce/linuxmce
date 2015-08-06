@@ -123,6 +123,7 @@ public slots:
      void setController(HueControllerHardware * c);
 
      virtual void proccessStateInformation(QVariantMap d)=0;
+     virtual void resetColor() { setColor(QColor("#90C638")); }
 
 
 private:
@@ -154,7 +155,6 @@ private:
     QVariant m_colorMap;
 
     HueControllerHardware *mp_controller;
-
 
      QMap<QString, int> deviceMap;
 

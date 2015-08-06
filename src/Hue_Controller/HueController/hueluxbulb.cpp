@@ -1,18 +1,14 @@
-#include "huebulb.h"
+#include "hueluxbulb.h"
 #include <QDebug>
 #include <QVariant>
-
-HueBulb::HueBulb(HueControllerHardware *hw)
+HueLuxBulb::HueLuxBulb(HueControllerHardware *hw)
 {
     setController(hw);
-
     setBrightness(0);
 }
 
-void HueBulb::proccessStateInformation(QVariantMap d)
+void HueLuxBulb::proccessStateInformation(QVariantMap d)
 {
-   // qDebug() << Q_FUNC_INFO << QString("Device %1").arg(linuxmceId());
-   // qDebug() << d["name"];
     QVariantMap stateInfo = d["state"].toMap();
     setDisplayName(d["name"].toString());
     setBrightness(stateInfo["bri"].toDouble());
@@ -24,7 +20,4 @@ void HueBulb::proccessStateInformation(QVariantMap d)
     setSoftwareVersion(d["swversion"].toString());
     setLightModel(d["modelid"].toString());
     setLightType(d["type"].toString());
-   // qDebug() << "\n\r";
 }
-
-
