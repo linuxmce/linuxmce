@@ -349,12 +349,6 @@ function firewall($output,$dbADO) {
 			}
 		}
 	}
-
-	function url_edit_Chain(ID)
-	{
-		document.getElementById(\'firewall\').Chain_url_Id.value=ID;
-		document.getElementById(\'firewall\').submit();
-	}
 	
 	function edit_Chain(ID)
 	{
@@ -367,6 +361,13 @@ function firewall($output,$dbADO) {
 	{
 		document.getElementById(\'firewall\').add_Chain.type="submit";
 		document.getElementById(\'firewall\').New_Chain.value;
+		document.getElementById(\'firewall\').submit();
+	}
+	
+	function delete_chain(Del_ID)
+	{
+		document.getElementById(\'firewall\').del_chain.value;
+		document.getElementById(\'firewall\').Chain_Id.value=Del_ID;
 		document.getElementById(\'firewall\').submit();
 	}
 	</script>
@@ -407,7 +408,7 @@ function firewall($output,$dbADO) {
 		$chain=1;
 		}
 		while ( $i < $chain) {
-		if (isset($_POST[$chains[$i].'name']) && $_POST[$chains[$i].'name'] == $chains[$i] ){
+		if (isset($_GET['edit_Chain']) && $_GET['edit_Chain'] == $explode['1']) {
 			$out.= '<tr><td colspan="100%"></td></tr>
 			<tr><td colspan="4" align="left"><input type="text" name="chain_name" value="'.$chains[$i].'" />';
 			$out.= '</B></td><td colspan="5" align="Left">';
@@ -417,7 +418,7 @@ function firewall($output,$dbADO) {
 			if (isset($_GET['edit_Chain']) && $_GET['edit_Chain'] == $explode['1']) {
 				$out.='<tr><td colspan="4" align="left"><input type="text" name="edit_chain" value="'.$explode['0'].'" /></td><td colspan="5" align="Left">';
 			} else {
-				$out.='<tr><td colspan="4" align="left"><B>'.$explode['0'].'</B></td><td colspan="5" align="Left">';
+				$out.='<tr><td colspan="4" align="left"><B>'.$chains[$i].'</B></td><td colspan="5" align="Left">';
 			}
 		if ($chains[$i] == 'input' || $chains[$i] == 'forward' || $chains[$i] == 'output'){
 				if (@$AdvancedFirewall == 1){
@@ -436,13 +437,12 @@ function firewall($output,$dbADO) {
 		} elseif (strpos($chains[$i], 'port_forward (NAT)') !== false || strpos($chains[$i], 'VPN') !== false || strpos($chains[$i], 'LOGGING') !== false || strpos($chains[$i], 'MD\'s') !== false || strpos($chains[$i], 'fail2ban-') !== false) {
 			
 			} else {
-					$out.='<td colspan="30%" align="right" >
-						<input type="hidden" name="'.$explode['0'].'name" value="'.$explode['0'].'" />';
+					$out.='<td colspan="30%" align="right" >';
 						if (isset($_GET['edit_Chain']) && $_GET['edit_Chain'] == $explode['1']) {
 							$out.='<input type="submit" class="button" name="save" value="save" onclick="edit_Chain('.$explode['1'].')" />
 							<input type="submit" class="button" name="del_chain" value="DELETE" onClick="delete_chain('.$explode['1'].')" />';
 						} else {
-							$out.='<input type="submit" class="button" name="edit" value="Edit" onclick="url_edit_Chain('.$explode['1'].')" />
+							$out.='<input type="button" class="button" name="edit" value="Edit" onclick="window.location.href=\'index.php?section=firewall&edit_Chain='.$explode['1'].'\';" />
 							<input type="submit" class="button" name="del_chain" value="DELETE" onClick="delete_chain('.$explode['1'].')" />';
 						}
 				}
