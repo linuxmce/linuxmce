@@ -18,7 +18,7 @@ INCLUDEPATH += ../../ ../../DCE/
 
 TEMPLATE = app
 
-HEADERS += ../LinuxMCE_NVR.h \
+HEADERS += ../Linuxmce_NVR.h \
         ../../Gen_Devices/Linuxmce_NVRBase.h \
         ../../PlutoUtils/ThreadedClass.h \
         ../../PlutoUtils/MultiThreadIncludes.h \

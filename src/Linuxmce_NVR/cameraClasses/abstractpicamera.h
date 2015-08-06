@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "qurl.h"
+#include "qvector.h"
 class MotionEventListener;
 class NvrManager;
 /*!
@@ -14,15 +15,15 @@ class NvrCameraBase : public QObject
     Q_OBJECT
 public:
     explicit NvrCameraBase(QObject*parent=0);
-     NvrCameraBase(QString cameraName,
-                               QString userName,
-                               QString password,
-                               quint16 port,
-                               quint16 control_port,
-                               QUrl url,
-                               QString path,
-                               int linuxmceId,
-                               QObject *parent = 0);
+    NvrCameraBase(QString cameraName,
+                  QString userName,
+                  QString password,
+                  quint16 port,
+                  quint16 control_port,
+                  QUrl url,
+                  QString path,
+                  int linuxmceId,
+                  QObject *parent = 0);
 
     enum CameraType{
         STREAM_TYPE_x264,
@@ -85,7 +86,7 @@ public:
     void setDceDeviceId(int dceDeviceId);
 
     bool getMotionEnabled() const;
- Q_INVOKABLE void setMotionEnabled(bool motionEnabled);
+    Q_INVOKABLE void setMotionEnabled(bool motionEnabled);
 
     QString getImagePath() const;
     void setImagePath(const QString &imagePath);
@@ -137,7 +138,7 @@ private:
 
 
 private slots:
-     void removeOld();
+    void removeOld();
 
 
 private:
@@ -166,7 +167,8 @@ private:
 
     int m_motionState;
 
-     MotionEventListener *mListener;
+    MotionEventListener *mListener;
+    QVector<QString> oldFiles;
 };
 
 

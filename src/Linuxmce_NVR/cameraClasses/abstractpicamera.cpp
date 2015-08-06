@@ -5,6 +5,7 @@
 #include "qdebug.h"
 #include "qdir.h"
 #include "qtimer.h"
+#include "QVector"
 NvrCameraBase::NvrCameraBase(QObject *parent)
 {
     Q_UNUSED(parent);
@@ -137,11 +138,19 @@ void NvrCameraBase::doConnections()
 void NvrCameraBase::removeOld()
 {
 
-    QFile file(oldFile);
-    if(file.exists())
-        file.remove();
+    if(oldFiles.isEmpty()) return;
 
+    QFile *file = new QFile();
 
+    for (int i = 0; i < oldFiles.size(); ++i) {
+        file->setFileName(oldFiles.at(i));
+
+        if(file->exists())
+        file->remove();
+
+    }
+    oldFiles.clear();
+    file->close();
 }
 int NvrCameraBase::getMotionState() const
 {
@@ -175,9 +184,10 @@ void NvrCameraBase::setCurrentFileName(const QString &currentFileName)
 
     if(m_currentFileName==currentFileName)return;
 
-    oldFile = m_currentFileName;
+    oldFiles.append(m_currentFileName);
+
     m_currentFileName = currentFileName;
-    QTimer::singleShot(10000, this, SLOT(removeOld()));
+    QTimer::singleShot(5000, this, SLOT(removeOld()));
 
 }
 
