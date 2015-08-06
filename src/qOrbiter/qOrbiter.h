@@ -1944,7 +1944,7 @@ public slots:
     QImage getfileForDG(string filename);
     void GetFileInfoForQml(QString qs_file_reference);
     void GetMediaAttributeGrid(QString qs_fk_fileno);
-    void GetSecurityCam(int i_inc_pkdevice);
+    void GetSecurityCam(int i_inc_pkdevice, bool showScreen);
 
     void stop_AV();
 
@@ -1962,7 +1962,7 @@ public slots:
 
     void setNowPlayingDetails();
     void SetSecurityStatus(string pin, string mode, int user, string special);
-    void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
+    void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth, bool showScreen);
     void GetMultipleSecurityCams(QStringList cams);
     void GetNowPlayingAttributes();
     void TuneToChannel(QString channel, QString chanid);
