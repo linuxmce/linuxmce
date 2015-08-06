@@ -31,7 +31,7 @@ public:
     explicit HueBulb(HueControllerHardware *hw);
     HueBulb(){}
 
-    const QString resetColor="#90C638";
+     QString resetColor;
 signals:
     
 public slots:
