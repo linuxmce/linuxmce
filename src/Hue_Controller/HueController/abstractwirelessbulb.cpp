@@ -7,11 +7,11 @@
 AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, QObject *parent) :
     QObject(parent),
     mp_controller(p_controller),
-    m_CurrentLevel(0.0)
+    m_CurrentLevel(0.0),
+    m_powerOn(false),
+    m_brightness(0)
 {
-    setPowerOn(false);
-    setBrightness(0);
-    qDebug() << Q_FUNC_INFO << "ctor";
+   qDebug() << Q_FUNC_INFO << "ctor";
     if(mp_controller){
         qDebug() << Q_FUNC_INFO << "contoller IP::" << mp_controller->getIpAddress();
     } else {
