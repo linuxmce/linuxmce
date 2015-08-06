@@ -1324,7 +1324,7 @@ void OMX_Player::CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Re
 void OMX_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
 //<-dceag-c89-e->
 {
-        cout << "Need to implement command #89 - Vol Up" << endl;
+        cout << "Command #89 - Vol Up" << endl;
 	cout << "Parm #72 - Repeat_Command=" << iRepeat_Command << endl;
 
 	m_pOMXPlayer->setVolumeUp(iRepeat_Command, sCMD_Result);
@@ -1340,7 +1340,7 @@ void OMX_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMe
 void OMX_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
 //<-dceag-c90-e->
 {
-        cout << "Need to implement command #90 - Vol Down" << endl;
+        cout << "Command #90 - Vol Down" << endl;
 	cout << "Parm #72 - Repeat_Command=" << iRepeat_Command << endl;
 
 	m_pOMXPlayer->setVolumeDown(iRepeat_Command, sCMD_Result);
