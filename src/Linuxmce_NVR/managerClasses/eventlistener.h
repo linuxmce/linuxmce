@@ -10,7 +10,7 @@ class MotionEventListener : public QObject
 {
     Q_OBJECT
 public:
-    explicit MotionEventListener(int listen_port=8001 , QObject *parent = 0);
+    explicit MotionEventListener(int dceId,int listen_port=8001 ,  QObject *parent = 0);
 
     bool isReady() const;
     void setIsReady(bool isReady);
@@ -40,6 +40,7 @@ private:
     int m_listenPort;
     bool m_isReady;
     QList<QPair<QHttpRequest*, QHttpResponse*> > qued_http_requests;
+    int dceDevice;
 
 };
 

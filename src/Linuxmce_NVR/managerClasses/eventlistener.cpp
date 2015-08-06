@@ -11,7 +11,7 @@
 #include "qimage.h"
 #include "qfile.h";
 #include "../cameraClasses/abstractcameraevent.h"
-MotionEventListener::MotionEventListener(int listen_port, QObject *parent) : m_listenPort(0)
+MotionEventListener::MotionEventListener(int dceId, int listen_port, QObject *parent) : m_listenPort(0), dceDevice(dceId)
 {
     server = new QHttpServer();
     connect(server, &QHttpServer::newRequest, this, &MotionEventListener::handleEvent);
@@ -64,8 +64,6 @@ void MotionEventListener::log(QString msg)
 
 void MotionEventListener::handleEvent(QHttpRequest *r, QHttpResponse *a)
 {
-
-   // qDebug() << "incoming data";
     int hdrLength= r->header("content-length").toInt();
     if(hdrLength > 1000){
       int device = r->header("X-dcedevice").toInt();
@@ -135,7 +133,7 @@ void MotionEventListener::handleImageData(QByteArray imgData, int device)
 
     if(t.loadFromData(imgData)){
 
-        if(t.save("/tmp/"+fileName, "JPEG"))
+        if(t.save("/tmp/"+QString::number(dceDevice)+"/event-"+fileName, "JPEG"))
             qDebug() << QString("Image saved for device %1 using filename %2").arg(device).arg(fileName);
         return;
     } else {

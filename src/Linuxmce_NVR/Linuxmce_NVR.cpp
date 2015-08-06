@@ -32,6 +32,7 @@ using namespace DCE;
 #include "qthread.h"
 #include "qvector.h"
 
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Linuxmce_NVR::Linuxmce_NVR(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -132,8 +133,10 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
             FilePath = "/tmp/please_wait.png";
         }
 
+
         size_t nDataLength;
         char *pFileData = FileUtils::ReadFileIntoBuffer(FilePath, nDataLength);
+
 
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Reply message to sender.");
 
@@ -146,6 +149,7 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
         SendMessage(pMessageOut);
 
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sent %d bytes to command sender.", nDataLength);
+
     }
         break;
     case COMMAND_Generic_On_CONST: {
@@ -473,7 +477,7 @@ void Linuxmce_NVR::CMD_StatusReport(string sArguments,string &sCMD_Result,Messag
 
 void Linuxmce_NVR::handleMotionEvent(int device, bool motionDetected)
 {
-    qDebug() << device;
+
     DCE::Message *st = new Message(
                 device,
                 DEVICEID_EVENTMANAGER,

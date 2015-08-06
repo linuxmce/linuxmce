@@ -51,7 +51,7 @@ MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString pas
     setMotionState(0);
     int listenerPort =5100+dceId;
     setManagerPort(QString::number(listenerPort));
-    setListener(new MotionEventListener(listenerPort));
+    setListener(new MotionEventListener( dceId, listenerPort));
     setManagerUrl(callback_address);
 
 
@@ -186,13 +186,10 @@ void MotionPiCamera::refreshImage()
                 }
                 d_array.clear();
                 rep->abort(); //disconnect now that we have an image
-
             }
         }
     } );
     e->exec(); //start event loop
-
-
 }
 
 void MotionPiCamera::handleMotionEvent(int device, bool detected)
