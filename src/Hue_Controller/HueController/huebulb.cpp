@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QVariant>
 
-HueBulb::HueBulb(HueControllerHardware *hw)
+HueBulb::HueBulb(HueControllerHardware *hw): resetColor("#90C638")
 {
     setController(hw);
 
