@@ -66,7 +66,7 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 
 	m_xDuration = OMXPlayerInterface::Get_Duration();
 
-	if (threadEventLoop != 0)
+	if (threadEventLoop == 0)
 	{
 		Log("OMXPlayerStream::Play - Creating event processor" );
 		pthread_create( &threadEventLoop, NULL, EventProcessingLoop, this );
