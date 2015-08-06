@@ -11,7 +11,7 @@ StyledScreen {
     property int tick:0
 
     onScreenClosing: {
-         manager.setActiveRoom(roomList.currentRoom, roomList.currentEA);
+        manager.setActiveRoom(roomList.currentRoom, roomList.currentEA);
     }
 
     Timer{
@@ -89,6 +89,10 @@ StyledScreen {
             ContentHeader{
                 label: qsTr("Camera # %1").arg(camera)
                 opacity: .65
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: { manager.requestSingleView(camera) }
             }
 
         }

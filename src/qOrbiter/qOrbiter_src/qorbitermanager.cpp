@@ -2067,6 +2067,7 @@ void qorbiterManager::mediaItemSelected(QString itemID)
     mp_fileDetails->setFile(itemID);
 }
 
+
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 {
     emit getSingleCam(i_pk_camera_device,  h,  w);
@@ -2967,6 +2968,11 @@ void qorbiterManager::setCurrentScreen(int s)
         currentScreen = i;
         emit screenChange(i);
     }
+}
+
+void qorbiterManager::requestSingleView(int camera)
+{
+    emit getSingleCam(camera, 600,800, true);
 }
 
 void qorbiterManager::connectionWatchdog()

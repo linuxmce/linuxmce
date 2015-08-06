@@ -134,17 +134,19 @@ public:
         case 4:
             if (!param.contains("!D")){                                                           //not browsing by directory
                 qDebug() << "Browse by file not engaged.";
-                if(param.contains("!F") || param.contains("!P"))  {  emit itemSelected(param);  } // we found a file or playlist marker
-                else  {  q_pk_attribute = param.remove("!A"); }                                   // we found an attribute marker
-            } else{
-                                                                                                  // 5||||1,2	!D'/home/public/data/videos/1.82 TB (sdd1) ST2000DL003-9VT [51]'|0|0|0 | 2 |
+                if(param.contains("!F") || param.contains("!P"))  {
+                    emit itemSelected(param);               // we found a file or playlist marker
+                } else  {
+                    q_pk_attribute = param.remove("!A");    // we found an attribute marker
+                }
+            } else{                                                                                                  // 5||||1,2	!D'/home/public/data/videos/1.82 TB (sdd1) ST2000DL003-9VT [51]'|0|0|0 | 2 |
                 qDebug() << "Browsing by file";
                 int t = param.indexOf("\t");
                 QString apnd = param.mid(t);
                 q_mediaSources.append(apnd);
                 qDebug() << "mediaFilter()::Current Media sources "<< q_mediaSources;
             }
-                                             break;
+            break;
         case 5: q_usersPrivate = "0,"+param; break;
         case 6: if (param.contains("!P")) { emit itemSelected(param);  break; }
             else { q_attributetype_sort = param;  break; }
@@ -153,16 +155,17 @@ public:
         case 9:
             if(param.contains("!F") || param.contains("!P")) { emit itemSelected(param); break; }
             else { q_pk_attribute = param.remove("!A");  }
-                                            break;
+            break;
         default: qDebug() << "No Parameter set for media filter!"; break;
         }
 
         // Does this new filter parameter cause a change in the attribute to list?
+        if(param.contains("!F") || param.contains("!P")) {
+            return;
+        }
         updateAttributeToList();
-
         emit filterChanged(q_mediaType);
         emit filterStringChanged(dataGridId);
-
         newMediaFilter();
     }
 

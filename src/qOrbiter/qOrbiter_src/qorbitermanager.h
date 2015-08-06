@@ -763,7 +763,7 @@ signals:
     void reloadRouter();
     void executeCMD(int);
     void setAlarm(QString dataGridId,int row,int role,bool s, int g);
-    void getSingleCam(int i_pk_camera_device, int h, int w);
+    void getSingleCam(int i_pk_camera_device, int h, int w, bool showScreen=false);
     void dceGridSepChanged(int d);
     void commandCompleted();
     void setDceVar(int variable, QString valToAssign);
@@ -1025,7 +1025,7 @@ public slots:
     void setCurrentScreen(QString s);
     void setCurrentScreen(int s);
     //security related
-
+   Q_INVOKABLE void requestSingleView(int camera);
     /*!
      * \brief Qml invokable slot for the purpose of asking for a security picture.
      * \param i_pk_camera_device : The camera device from getScreenParams(2)

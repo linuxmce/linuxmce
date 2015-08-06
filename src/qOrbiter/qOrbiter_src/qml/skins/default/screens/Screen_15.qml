@@ -1,10 +1,12 @@
 import QtQuick 2.2
 import "../components"
+import "../"
 /*
 screen params for this screen are
 2 - value of the device
 159 - the Screen
 */
+
 StyledScreen{
     id:singlecameraview
     property int camera:screenparams.getParam(2)
@@ -36,8 +38,8 @@ StyledScreen{
     Rectangle{
 
         id:securitycamrect
-        height: scaleY(50)
-        width: scaleX(50)
+        height: Style.scaleY(75)
+        width: Style.scaleX(75)
         border.color: "black"
         border.width: 2
         anchors.centerIn: parent
@@ -47,14 +49,12 @@ StyledScreen{
             id: securityimage
             fillMode: Image.PreserveAspectFit
             source: "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
-            anchors.centerIn: parent
-            height: scaleY(50)
-            width: scaleX(50)
+          anchors.fill: parent
         }
 
         Row{
-            height: scaleY(10)
-            width: scaleX(15)
+            height: Style.scaleY(10)
+            width: Style.scaleX(15)
             anchors.top: securityimage.bottom
             anchors.bottom: securitycamrect.bottom
 

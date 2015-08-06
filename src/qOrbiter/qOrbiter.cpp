@@ -29,8 +29,9 @@
 using namespace std;
 using namespace DCE;
 
-#include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+#include "Gen_Devices/AllScreens.h"
+#include "Gen_Devices/AllCommandsRequests.h"
 #include <QDebug>
 #include <iostream>
 #include <pthread.h>
@@ -261,6 +262,7 @@ void qOrbiter::CMD_Display_OnOff(string sOnOff,bool bAlready_processed,string &s
     cout << "Need to implement command #3 - Display On/Off" << endl;
     cout << "Parm #8 - OnOff=" << sOnOff << endl;
     cout << "Parm #125 - Already_processed=" << bAlready_processed << endl;
+
 }
 
 //<-dceag-c4-b->
@@ -1833,7 +1835,7 @@ bool DCE::qOrbiter::initialize(){
     }
     emit commandResponseChanged("Initialization IP::"+ dceIP);
 
-    qDebug() << "INITIALIZE!!!!!!!!!";
+
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
         m_dwMaxRetries = 1;
@@ -2877,7 +2879,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
 }
 
-void DCE::qOrbiter::GetSecurityCam(int i_inc_pkdevice)
+void DCE::qOrbiter::GetSecurityCam(int i_inc_pkdevice, bool showScreen)
 {
 
 }
@@ -3117,9 +3119,18 @@ void DCE::qOrbiter::SetSecurityStatus(string pin, string mode, int user, string 
     SendCommand(set_security_mode);
 }
 
-void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth) //shows security camera, needs to be threaded as it blocks the ui
+void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth, bool showScreen) //shows security camera, needs to be threaded as it blocks the ui
 {
+    //screen 17 is multi camera
+    //screen 15 is single
+    if(showScreen && currentScreen!="Screen_15.qml"){
+        SCREEN_SingleCameraViewOnly singleSwitch(m_dwPK_Device,m_dwPK_Device, cam_device);
+        SendCommand(singleSwitch);
+        return;
+
+    }
     if(currentScreen=="Screen_15.qml" || currentScreen=="Screen_17.qml"){
+
         char *sData;
         int sData_size= 0;
         string imgtype;
@@ -3128,7 +3139,6 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
 
         QImage returnedFrame;
         returnedFrame.loadFromData(QByteArray(sData, sData_size));
-        qDebug()<< Q_FUNC_INFO << "Returned security frame " << returnedFrame.size();
         emit securityImageReady(cam_device, returnedFrame);
     } else {
 
@@ -4997,7 +5007,7 @@ void qOrbiter::getFloorplanDeviceStatus(int device)
     string cResponse="";
     if(SendCommand(getDeviceStatus, &cResponse) && cResponse=="OK"){
 
-  //  qDebug() << Q_FUNC_INFO << "Status::" << status.c_str();
+        //  qDebug() << Q_FUNC_INFO << "Status::" << status.c_str();
     }
     cResponse="";
     string state="UNKNOWN";
@@ -5005,7 +5015,7 @@ void qOrbiter::getFloorplanDeviceStatus(int device)
     CMD_Get_Device_State getDeviceState(m_dwPK_Device, iPK_Device_GeneralInfoPlugin, device, &state);
     if(SendCommand(getDeviceState, &cResponse) && cResponse=="OK"){
 
-   // qDebug() << Q_FUNC_INFO << "State:"<<state.c_str();
+        // qDebug() << Q_FUNC_INFO << "State:"<<state.c_str();
     }
 
     emit floorplanDeviceStatus(QString::fromStdString(status), QString::fromStdString(state), device);
