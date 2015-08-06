@@ -19,3 +19,4 @@ cat <<-EOF > /etc/lsb-release
 	DISTRIB_CODENAME=$TARGET_DISTRO
 	EOF
 
+echo "gpu_mem=128" >> /boot/config.txt
