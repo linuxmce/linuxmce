@@ -18,13 +18,16 @@
 //	DCE Implemenation for #2315 Cloud Interface
 
 #include "Gen_Devices/Cloud_InterfaceBase.h"
-//<-dceag-d-e->
 
+//<-dceag-d-e->
+#include "QObject"
+#include "QVariant"
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Cloud_Interface : public Cloud_Interface_Command
+    class Cloud_Interface : public QObject, public Cloud_Interface_Command
 	{
+        Q_OBJECT
 //<-dceag-decl-e->
 		// Private member variables
 
@@ -67,9 +70,20 @@ public:
 	*/
 
 //<-dceag-h-e->
+            signals:
+        void dceReady();
+        void commandForPlugin(int dt, QVariant cmd);
+
+
+    private:
+      QString m_configurationString;
+
 	};
 
 //<-dceag-end-b->
+
+
+
 }
 #endif
 //<-dceag-end-e->
