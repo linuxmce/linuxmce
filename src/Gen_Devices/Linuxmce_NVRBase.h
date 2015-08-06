@@ -128,6 +128,7 @@ public:
 	Linuxmce_NVR_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
 	: Command_Impl(DeviceID, ServerAddress, bLocalMode, pRouter)
 	{
+
 	}
 	virtual bool GetConfig()
 	{
