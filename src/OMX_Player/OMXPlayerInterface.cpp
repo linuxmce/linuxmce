@@ -263,6 +263,7 @@ void OMXPlayerInterface::Do_HideSubtitles() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_HideSubtitles() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
 }
 
@@ -278,6 +279,7 @@ void OMXPlayerInterface::Do_ShowSubtitles() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_ShowSubtitles() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
 }
 
@@ -293,6 +295,7 @@ bool OMXPlayerInterface::Do_SelectSubtitle(int track) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_SelectSubtitle() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
   return ret;
 }
@@ -334,6 +337,7 @@ std::vector< std::string > OMXPlayerInterface::Do_ListSubtitles() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
   return ret;
 }
@@ -358,6 +362,7 @@ bool OMXPlayerInterface::Do_SelectVideo(int track) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_SelectVideo() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
   return ret;
 }
@@ -400,6 +405,7 @@ std::vector< std::string > OMXPlayerInterface::Do_ListVideo() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
   return ret;
 }
@@ -424,6 +430,7 @@ bool OMXPlayerInterface::Do_SelectAudio(int track) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_SelectAudio() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
   return ret;
 }
@@ -466,6 +473,7 @@ std::vector< std::string > OMXPlayerInterface::Do_ListAudio() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
   return ret;
 }
@@ -525,6 +533,7 @@ int64_t OMXPlayerInterface::Send_Seek(int64_t usecs) {
     }
     catch (DBus::Error &dbus_err) {
       Log("Send_Seek() - D-Bus error - seek failed.");
+      Reconnect_Player();
     }
     if (!sought)
         Log("Send_Seek() - FAILED!");
@@ -549,6 +558,7 @@ int64_t OMXPlayerInterface::Send_SetPosition(string sMediaURL, int64_t xPos) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_SetPosition() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
   m_sMediaURL = sMediaURL;
   return ret;
@@ -580,6 +590,7 @@ void OMXPlayerInterface::Do_Mute() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_Mute() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Properties();
   }
 }
 
@@ -589,6 +600,7 @@ void OMXPlayerInterface::Do_UnMute() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_Mute() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Properties();
   }
 }
 
@@ -630,6 +642,7 @@ void OMXPlayerInterface::Send_Action(int Action) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
 }
 
@@ -645,6 +658,7 @@ void OMXPlayerInterface::Send_Pause() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Pause() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
 }
 
@@ -655,6 +669,7 @@ void OMXPlayerInterface::Send_Stop() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Stop() - D-Bus error - omxplayer has gone away?");
+    Reconnect_Player();
   }
 }
 
@@ -751,6 +766,7 @@ void OMXPlayerInterface::Send_Quit() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Quit() - can't send, has omxplayer gone away?");
+    Reconnect_Root();
   }
 }
 
@@ -1148,6 +1164,7 @@ string OMXPlayerInterface::Get_PlaybackStatus(void) {
     Set_ErrCount(0);
   }
   catch (DBus::Error &dbus_err) {
+    Reconnect_Properties();
     Inc_Error();
     ret = "";
   }
@@ -1161,6 +1178,7 @@ uint64_t OMXPlayerInterface::Get_Position(void) {
     Set_ErrCount(0);
   }
   catch (DBus::Error &dbus_err) {
+    Reconnect_Properties();
     Inc_Error();
   }
   return ret;
@@ -1173,6 +1191,7 @@ uint64_t OMXPlayerInterface::Get_Duration(void) {
     Set_ErrCount(0);
   }
   catch (DBus::Error &dbus_err) {
+    Reconnect_Properties();
     Inc_Error();
   }
   return ret;
