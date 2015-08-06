@@ -55,7 +55,7 @@
       <arg type="d" direction="out"/>
     </method>
     <method name="Mute"></method>
-    <method name="UnMute"></method>
+    <method name="Unmute"></method>
     <method name="Position">
       <arg type="x" direction="out"/>
     </method>
