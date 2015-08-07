@@ -524,6 +524,12 @@ void USB_Game_Pad::HandleEvent(string sCode, int joytype)
   string sFinalCode = sPrefix+sCode;
   map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sFinalCode);
 
+  if (it==m_mapCodesToButtons.end())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Could not find code for %s",sFinalCode.c_str());
+      return;
+    }
+
   if (m_cCurrentScreen == 'G')
     {
       if (it->second.first == "start")
@@ -540,19 +546,12 @@ void USB_Game_Pad::HandleEvent(string sCode, int joytype)
 	}
     }
 
-  if (it==m_mapCodesToButtons.end())
+  ReceivedCode(it->second.second,it->second.first.c_str());
+  if (m_dwPK_Device==DEVICEID_MESSAGESEND)
     {
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Can't find a mapping for button %s",sFinalCode.c_str());
+      ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
     }
-  else
-    {
-      ReceivedCode(it->second.second,it->second.first.c_str());
-      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
-	{
-	  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
-	}
-    }
-
+  
   return;
 
 }
