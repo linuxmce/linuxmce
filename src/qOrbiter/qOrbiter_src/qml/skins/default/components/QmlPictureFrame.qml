@@ -46,43 +46,7 @@ Item{
 
     function getNextImage(){ //Only used for debug. must uncomment return for it to function
         return;
-        console.log("get next image of " +pictureList.length+" images")
-        // var picIndex=Math.floor((Math.random()* pictureList.length)+1)
-        if(currentPic==pictureList.length){
-            currentPic=0
-            getNextImage()
-        }
 
-        currentPic++
-
-
-        console.log("Getting next image")
-        screenSaverTimer.stop()
-        var nextImg = new XMLHttpRequest();
-        nextImg.onreadystatechange= function(){
-            if(nextImg.readyState == XMLHttpRequest.HEADERS_RECIEVED){
-                console.log("recieving image headers");
-            } else if (nextImg.readyState == XMLHttpRequest.DONE){
-                var docData = nextImg.responseText
-
-                if(docData){
-                    console.log("Image data valid, setting to image element")
-                    var link = "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+pictureList[currentPic]
-                    if(img1.closing) { img2.source= link; img1.opacity=0; }
-                    else {img1.source=link; img2.opacity=0;}
-
-                } else {
-                    console.log("No Image Data. striking image " +currentPic +" from the list ")
-                    pictureList.unshift()
-                    getNextImage()
-                }
-
-                screenSaverTimer.restart()
-            }
-        }
-
-        nextImg.open("GET", "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+pictureList[currentPic])
-        nextImg.send()
     }
 
 

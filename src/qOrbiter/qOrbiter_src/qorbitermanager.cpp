@@ -1133,6 +1133,11 @@ void qorbiterManager::seekGrid(QString dataGridId, QString s)
 
 void qorbiterManager::mediaFilterChanged(QString dataGridId)
 {
+    if(currentScreen=="Screen_1.qml"){
+        clearDataGrid(dataGridId);
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Screen_1, ignoring mediaFilterChanged(), clearing model ");
+        return;
+    }
     qDebug() << "mediaFilterChanged() for " << dataGridId;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::mediaFilterChanged() start");
     GenericFlatListModel* pModel = NULL;

@@ -8,8 +8,11 @@ Item {
     Keys.onTabPressed: header.forceActiveFocus()
    Timer{
     id:failSafe
+    interval: 8000
+    onTriggered: state="open"
 
    }
+
     Component.onCompleted: {
         console.log("screen opening")
         forceActiveFocus()
@@ -31,6 +34,7 @@ Item {
     }
 
     onScreenOpening: {
+        state="opened"
         //raiseNavigation(false)
         //        raiseNavigation(manager.currentScreen==="Screen_1.qml" ? true :keepHeader )
         //        if(keepHeader){
@@ -46,9 +50,9 @@ Item {
     }
 
     onStateChanged: {
+
         if(state==="closed"){
             console.log("screen closed.")
-
 
         } else if(state==="closing"){
             raiseNavigation(true)
@@ -80,7 +84,7 @@ Item {
             name: "opening"
             PropertyChanges {
                 target: screen_root
-                opacity:1
+                opacity:.5
             }
 
         },

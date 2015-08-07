@@ -48,7 +48,7 @@ Item{
         console.log("getting model "+dataGrid)
         view.model=manager.getDataGridModel(dataGridLabel, dataGrid, dataGridOptions)
     }
-    onVisibleChanged: if(!visible) manager.clearDataGrid(dataGrid)
+   // onVisibleChanged: if(!visible) manager.clearDataGrid(dataGrid)
 
     Rectangle{
         id:hdr
