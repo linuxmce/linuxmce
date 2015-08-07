@@ -82,7 +82,7 @@ Loader {
     }
     
     function loadNext(){
-recovery.stop()
+        recovery.stop()
 
         if(nextScreen===""){
             console.log("Next Screen error!")
