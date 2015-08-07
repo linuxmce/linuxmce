@@ -111,12 +111,12 @@ void OMXPlayerInterface::Init() {
 
 /* */
 bool OMXPlayerInterface::Connect_Player() {
-    bool bPrivate(true);
     const char *dbus_addr = m_s_dbus_addr.c_str();
 
     // setup the dbus 'Player' connection and client
     if (g_player_conn == NULL) {
       Log("Reconnect_Player() - Creating connection to 'Player' bus");
+      bool bPrivate(true);
       g_player_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_player_conn->connected()) {
         Log("Reconnect_Player() - g_player_conn not connected(), exiting.");
@@ -155,12 +155,12 @@ bool OMXPlayerInterface::Reconnect_Player() {
 
 /* */
 bool OMXPlayerInterface::Connect_Properties() {
-    bool bPrivate(true);
     const char *dbus_addr = m_s_dbus_addr.c_str();
 
     // setup the dbus 'Player' connection and client
     if (g_props_conn == NULL) {
       Log("Reconnect_Properties() - Creating connection to 'Player' bus");
+      bool bPrivate(true);
       g_props_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_props_conn->connected()) {
         Log("Reconnect_Properties() - g_props_conn not connected(), exiting.");
@@ -199,12 +199,12 @@ bool OMXPlayerInterface::Reconnect_Properties() {
 
 /* */
 bool OMXPlayerInterface::Connect_Root() {
-    bool bPrivate(true);
     const char *dbus_addr = m_s_dbus_addr.c_str();
 
     // setup the dbus 'Player' connection and client
     if (g_root_conn == NULL) {
       Log("Reconnect_Root() - Creating connection to 'Player' bus");
+      bool bPrivate(true);
       g_root_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_root_conn->connected()) {
         Log("Reconnect_Root() - g_root_conn not connected(), exiting.");
@@ -289,7 +289,7 @@ bool OMXPlayerInterface::setSubtitle(int track) {
 }
 
 bool OMXPlayerInterface::Do_SelectSubtitle(int track) {
-  bool ret;
+  bool ret(false);
   try {
     ret = g_player_client->SelectSubtitle(track);
   }
@@ -297,10 +297,12 @@ bool OMXPlayerInterface::Do_SelectSubtitle(int track) {
     Log("Do_SelectSubtitle() - D-Bus error - omxplayer has gone away?");
     Reconnect_Player();
   }
+  // TODO: cache this?
   return ret;
 }
 
 int OMXPlayerInterface::getCurrentSubtitle() {
+	// TODO: cache this?
 	std::vector< std::string > vsSubtitleTracks = Do_ListSubtitles();
 	for(std::vector<std::string>::iterator it = vsSubtitleTracks.begin(); it < vsSubtitleTracks.end(); it++)
 	{
@@ -933,7 +935,9 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
     const char *dbus_addr;
     string line("");
     ifstream infile;
+/*
     bool bPrivate(true);
+*/
 
     // Don't get dbus_addr if we already know it, changes on rpi reboot only
     if ( m_s_dbus_addr.empty() ) {
