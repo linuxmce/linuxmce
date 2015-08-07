@@ -16,7 +16,8 @@
 /*
 Need to get children devices and do the same as the parent.
 */
-
+echo "Starting";
+ $deviceName="Mobile QOrbiter";
  $mobileRoom=-1;
  $mobileEa=-1;
  $server = "localhost";
@@ -30,30 +31,38 @@ Need to get children devices and do the same as the parent.
   $installSql = "SELECT * FROM `Installation` ";
   $iRes=mysql_query($installSql, $conn) or die(mysql_error($conn));
   $inst="";
+  
     while($row=mysql_fetch_array($iRes)){
-    $inst=$row['PK_Installation'];
-    //print_r($row);
+    $inst=$row['PK_Installation'];    
+    }
+    
+    $nameSql = "SELECT `Description` FROM `Device` WHERE `PK_Device` =".$deviceID." LIMIT 0, 30 ";
+    $nameRes = mysql_query($nameSql, $conn) or die(mysql_error($conn));
+    
+    while($row=mysql_fetch_array($nameRes)){
+    $deviceName=$row['Description'];   
     }
 
   $installation=$inst;
-  echo "Installation is ".$installation."<br>Device is ".$deviceID;
+  echo "Installation is ".$installation."<br>Device: ".$deviceName." <br> ID::".$deviceID."<br>";
+  
     if($installation==""){
     return;
   }
   echo "Connection Found, Starting<br>";
 
-  $roomSql = "SELECT * FROM `Room` WHERE `Description` like 'Mobile QOrbiters' LIMIT 0, 30 ";
+  $roomSql = "SELECT * FROM `Room` WHERE `Description` like 'Mobile' LIMIT 0, 30 ";
   echo "Checking for existing mobile orbiter room <br>";
   $result = mysql_query($roomSql,  $conn) or die (mysql_error($conn));
   $cnt = mysql_num_rows($result);
   
     if($cnt===0){
       global $mobileRoom;
-      $iRoomSql ="INSERT INTO `pluto_main`.`Room` (`PK_Room`, `FK_Installation`, `FK_RoomType`, `Description`, `FK_Icon`, `ManuallyConfigureEA`, `HideFromOrbiter`, `FK_FloorplanObjectType`, `FloorplanInfo`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_mod`, `psc_restrict`) VALUES (NULL, ".$installation.", '13', 'Mobile QOrbiters', NULL, '0', '0', NULL, NULL, NULL, NULL, NULL, '0', CURRENT_TIMESTAMP, NULL);";
+      $iRoomSql ="INSERT INTO `pluto_main`.`Room` (`PK_Room`, `FK_Installation`, `FK_RoomType`, `Description`, `FK_Icon`, `ManuallyConfigureEA`, `HideFromOrbiter`, `FK_FloorplanObjectType`, `FloorplanInfo`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_mod`, `psc_restrict`) VALUES (NULL, ".$installation.", '9', 'Mobile', NULL, '1', '1', NULL, NULL, NULL, NULL, NULL, '0', CURRENT_TIMESTAMP, NULL);";
       $result2=mysql_query($iRoomSql,  $conn) or die (mysql_error($conn));
       $lastId = mysql_insert_id($conn);
 
-      $chkSql=$roomSql = "SELECT * FROM 'Room' WHERE PK_Room = '".$lastId."'";
+      $chkSql=$roomSql = "SELECT * FROM `Room` WHERE `PK_Room` = ".$lastId;
       $result3 = mysql_query($chkSql, $conn) or die(mysql_error($conn));
 	while ($row = mysql_fetch_array($result3)){
 	  if($row['PK_Room']){
@@ -86,8 +95,8 @@ function checkForDupe($connect, $device){
 global $mobileRoom;
 global $mobileEa; 
 $status = false;
-echo "<b>Checking for duplicate Ea for device:: " . $device. "</b><br>";
-$sql = "SELECT * FROM `EntertainArea` WHERE `Description` LIKE '".$device."' LIMIT 0, 30 ";
+echo "<b>Checking for duplicate Ea for device:: " . $deviceName. "</b><br>";
+$sql = "SELECT * FROM `EntertainArea` WHERE `Description` LIKE '".$deviceName."' LIMIT 0, 30 ";
 $result = mysql_query($sql, $connect) or die(mysql_error($connect));
 $i= 0;
 $eaRoom=-1;
@@ -115,7 +124,7 @@ while ($row = mysql_fetch_array($result)){
      
       $rc= mysql_affected_rows();
       echo $rc;
-      echo "Updated EA for device ".$device."<br>";
+      echo "Updated EA for device ".$deviceName."<br>";
       die("no mas trabajo.");
       
   }
@@ -123,8 +132,9 @@ return false;
 }
 
 function setEntertainArea($connect, $device, $location){
-echo "Setting device ".$device." to EA: ".$location."<br>";
-$sql = "INSERT INTO `pluto_main`.`EntertainArea` (`PK_EntertainArea`, `FK_Room`, `Only1Stream`, `Description`, `Private`, `FK_FloorplanObjectType`, `FloorplanInfo`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_mod`, `psc_restrict`) VALUES (NULL, ".$location.", '0',".$device." , '0', NULL, NULL, NULL, NULL, NULL, '0', CURRENT_TIMESTAMP, NULL);";
+global $deviceName;
+echo "Setting device ".$deviceName." to EA: ".$location."<br>";
+$sql = "INSERT INTO `pluto_main`.`EntertainArea` (`PK_EntertainArea`, `FK_Room`, `Only1Stream`, `Description`, `Private`, `FK_FloorplanObjectType`, `FloorplanInfo`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_mod`, `psc_restrict`) VALUES (NULL, ".$location.", '0','".$deviceName."' ,'0', NULL, NULL, NULL, NULL, NULL, '0', CURRENT_TIMESTAMP, NULL);";
 $result = mysql_query($sql, $connect) or die(mysql_error($connect));
 $id=mysql_insert_id($conn);
 echo $id;
@@ -143,4 +153,5 @@ $updatesql = "UPDATE `pluto_main`.`Device_EntertainArea` SET `FK_EntertainArea` 
 $result = mysql_query($updatesql, $connect) or die(mysql_error($conn));
 echo "updated. <br>";
 }
+
 ?>
