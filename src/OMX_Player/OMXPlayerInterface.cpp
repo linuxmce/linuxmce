@@ -115,20 +115,20 @@ bool OMXPlayerInterface::Connect_Player() {
 
     // setup the dbus 'Player' connection and client
     if (g_player_conn == NULL) {
-      Log("Reconnect_Player() - Creating connection to 'Player' bus");
+      Log("Connect_Player() - Creating connection to 'Player' bus");
       bool bPrivate(true);
       g_player_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_player_conn->connected()) {
-        Log("Reconnect_Player() - g_player_conn not connected(), exiting.");
+        Log("Connect_Player() - g_player_conn not connected(), exiting.");
         return false;
       }
       if (!g_player_conn->register_bus()) {
-        Log("Reconnect_Player() - g_player_conn unable to register_bus(), exiting.");
+        Log("Connect_Player() - g_player_conn unable to register_bus(), exiting.");
         return false;
       }
     }
     if (g_player_client == NULL) {
-      Log("Reconnect_Player() - Creating Player_proxy client interface");
+      Log("Connect_Player() - Creating Player_proxy client interface");
       g_player_client = new OMXPlayerClient(*g_player_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
       return true;
     }
@@ -159,20 +159,20 @@ bool OMXPlayerInterface::Connect_Properties() {
 
     // setup the dbus 'Player' connection and client
     if (g_props_conn == NULL) {
-      Log("Reconnect_Properties() - Creating connection to 'Player' bus");
+      Log("Connect_Properties() - Creating connection to 'Player' bus");
       bool bPrivate(true);
       g_props_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_props_conn->connected()) {
-        Log("Reconnect_Properties() - g_props_conn not connected(), exiting.");
+        Log("Connect_Properties() - g_props_conn not connected(), exiting.");
         return false;
       }
       if (!g_props_conn->register_bus()) {
-        Log("Reconnect_Properties() - g_props_conn unable to register_bus(), exiting.");
+        Log("Connect_Properties() - g_props_conn unable to register_bus(), exiting.");
         return false;
       }
     }
     if (g_props_client == NULL) {
-      Log("Reconnect_Properties() - Creating Player_proxy client interface");
+      Log("Connect_Properties() - Creating Player_proxy client interface");
       g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
       return true;
     }
@@ -203,20 +203,20 @@ bool OMXPlayerInterface::Connect_Root() {
 
     // setup the dbus 'Player' connection and client
     if (g_root_conn == NULL) {
-      Log("Reconnect_Root() - Creating connection to 'Player' bus");
+      Log("Connect_Root() - Creating connection to 'Player' bus");
       bool bPrivate(true);
       g_root_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_root_conn->connected()) {
-        Log("Reconnect_Root() - g_root_conn not connected(), exiting.");
+        Log("Connect_Root() - g_root_conn not connected(), exiting.");
         return false;
       }
       if (!g_root_conn->register_bus()) {
-        Log("Reconnect_Root() - g_root_conn unable to register_bus(), exiting.");
+        Log("Connect_Root() - g_root_conn unable to register_bus(), exiting.");
         return false;
       }
     }
     if (g_root_client == NULL) {
-      Log("Reconnect_Root() - Creating Player_proxy client interface");
+      Log("Connect_Root() - Creating Player_proxy client interface");
       g_root_client = new OMXRootClient(*g_root_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
       return true;
     }
