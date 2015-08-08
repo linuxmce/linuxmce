@@ -11,6 +11,7 @@
         <file>qml/images/login-bg.png</file>
         <file>qml/+linux/+xlarge/IndexContent.qml</file>
         <file>qml/Themes.json</file>
+        <file>qml/skins/default/screens/Screen_209.qml</file>
     </qresource>
     <qresource prefix="/">
         <file>config.xml</file>

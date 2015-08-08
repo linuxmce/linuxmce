@@ -15,6 +15,7 @@ Item {
     property Component content
     property alias buttonContent:control_row.children
     clip:true
+    anchors.centerIn: parent
 
     Rectangle{
         id:bgfill

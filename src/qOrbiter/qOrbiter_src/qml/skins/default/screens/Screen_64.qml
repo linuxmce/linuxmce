@@ -5,5 +5,5 @@ import "../components"
 StyledScreen {
     navigation: "ScenarioComponent.qml"
     keepHeader: true
-    screen:"Current Location"
+    screen:qsTr("Current Location")
 }

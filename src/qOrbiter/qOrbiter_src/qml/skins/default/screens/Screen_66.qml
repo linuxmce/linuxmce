@@ -3,7 +3,6 @@ import "../components"
 
 
 StyledScreen {
-    screen:"Attribute Search Result"
-    navigation: "ScenarioComponent.qml"
-    keepHeader: true
+    screen:qsTr("Attribute Search Result")
+
 }
