@@ -1,10 +1,41 @@
 import QtQuick 2.2
 import "../components"
-
+import "../."
 
 StyledScreen {
-    navigation: "ScenarioComponent.qml"
-    keepHeader: true
+
     screen: "Power"
+
+    Panel{
+        headerTitle: qsTr("Power and Reboot Options")
+        Flow{
+            width: Style.appButtonWidth *2+10
+            height: Style.appButtonHeight *2+10
+            spacing: 4
+            anchors.centerIn: parent
+
+            StyledButton{
+                buttonText:dcenowplaying.b_mediaPlaying ? qsTr("Stop Media:%1").arg("\n"+dcenowplaying.mediatitle): qsTr("Power off Display")
+                onActivated: {
+                    if(dcenowplaying.b_mediaPlaying)
+                        manager.stopMedia()
+                    else
+                        manager.toggleDisplay(false)
+                }
+            }
+            StyledButton{
+                buttonText: qsTr("Power off MD")
+            }
+            StyledButton{
+                buttonText: qsTr("Reboot Core")
+            }
+            StyledButton{
+                buttonText: qsTr("Reboot MD")
+            }
+        }
+
+    }
+
+
 
 }
