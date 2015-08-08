@@ -12,7 +12,7 @@
     }
   } else {
     die("Please specify the device ID with d=xxxx");
-  }
+  }	
 /*
 Need to get children devices and do the same as the parent.
 */
@@ -94,6 +94,7 @@ echo "Starting";
 function checkForDupe($connect, $device){
 global $mobileRoom;
 global $mobileEa; 
+global $deviceName;
 $status = false;
 echo "<b>Checking for duplicate Ea for device:: " . $deviceName. "</b><br>";
 $sql = "SELECT * FROM `EntertainArea` WHERE `Description` LIKE '".$deviceName."' LIMIT 0, 30 ";
