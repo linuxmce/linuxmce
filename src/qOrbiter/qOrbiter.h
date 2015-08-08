@@ -268,12 +268,14 @@ public:
     virtual void OnUnexpectedDisconnect();
     virtual void OnReload();
 
+    ReceivedMessageResult ReceivedMessage( Message *pMessage );
     virtual bool OnReplaceHandler(string msg);
     virtual int PromptFor(std::string sToken);
     virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
     virtual void CreateChildren();
+
 
 
     //<-dceag-const-e->

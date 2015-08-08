@@ -5,7 +5,7 @@ import org.linuxmce.grids 1.0
 
 StyledScreen {
     id:alarms_screen
-    screen:qsTr("Sleeping Alarms")
+    screen:qsTr("Sleeping Menu")
     keepHeader: true
     focus:true
 

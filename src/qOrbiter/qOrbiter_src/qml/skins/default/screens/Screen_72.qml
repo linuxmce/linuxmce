@@ -7,4 +7,8 @@ StyledScreen {
     navigation: "ScenarioComponent.qml"
     keepHeader: true
     screen:"Generic two button dialog screen"
+    Panel{
+        headerTitle: screen
+
+    }
 }

@@ -6,12 +6,13 @@ Item {
     opacity: 0
     anchors.fill: parent
     Keys.onTabPressed: header.forceActiveFocus()
-   Timer{
-    id:failSafe
-    interval: 8000
-    onTriggered: state="open"
+    property variant screen_params:[]
+    Timer{
+        id:failSafe
+        interval: 8000
+        onTriggered: state="open"
 
-   }
+    }
 
     Component.onCompleted: {
         console.log("screen opening")
@@ -24,7 +25,6 @@ Item {
             console.log("screen_root has focus")
             raiseNavigation(false)
         }
-
 
     }
     Behavior on opacity {
@@ -40,6 +40,10 @@ Item {
         //        if(keepHeader){
         //            setNavigation(navigation)
         //        }
+
+        for(var param in screen_params){
+            console.log("Screen parameter property %1 -- %2").arg(param).arg(screenparams.getParam(param))
+        }
     }
 
     onOpacityChanged: {

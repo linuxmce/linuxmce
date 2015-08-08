@@ -215,5 +215,55 @@
         <file>qml/skins/default/components/FloorplanDefaultControl.qml</file>
         <file>qml/skins/default/components/FloorplanHeatCool.qml</file>
         <file>qml/skins/default/components/FloorplanSetTemp.qml</file>
+        <file>qml/skins/default/screens/Screen_206.qml</file>
+        <file>qml/skins/default/screens/Screen_20.qml</file>
+        <file>qml/skins/default/screens/Screen_24.qml</file>
+        <file>qml/skins/default/screens/Screen_25.qml</file>
+        <file>qml/skins/default/screens/Screen_26.qml</file>
+        <file>qml/skins/default/screens/Screen_27.qml</file>
+        <file>qml/skins/default/screens/Screen_28.qml</file>
+        <file>qml/skins/default/screens/Screen_30.qml</file>
+        <file>qml/skins/default/screens/Screen_31.qml</file>
+        <file>qml/skins/default/screens/Screen_32.qml</file>
+        <file>qml/skins/default/screens/Screen_33.qml</file>
+        <file>qml/skins/default/screens/Screen_34.qml</file>
+        <file>qml/skins/default/screens/Screen_36.qml</file>
+        <file>qml/skins/default/screens/Screen_37.qml</file>
+        <file>qml/skins/default/screens/Screen_38.qml</file>
+        <file>qml/skins/default/screens/Screen_39.qml</file>
+        <file>qml/skins/default/screens/Screen_41.qml</file>
+        <file>qml/skins/default/screens/Screen_42.qml</file>
+        <file>qml/skins/default/screens/Screen_45.qml</file>
+        <file>qml/skins/default/screens/Screen_46.qml</file>
+        <file>qml/skins/default/screens/Screen_48.qml</file>
+        <file>qml/skins/default/screens/Screen_51.qml</file>
+        <file>qml/skins/default/screens/Screen_52.qml</file>
+        <file>qml/skins/default/screens/Screen_55.qml</file>
+        <file>qml/skins/default/screens/Screen_56.qml</file>
+        <file>qml/skins/default/screens/Screen_58.qml</file>
+        <file>qml/skins/default/screens/Screen_57.qml</file>
+        <file>qml/skins/default/screens/Screen_59.qml</file>
+        <file>qml/skins/default/screens/Screen_61.qml</file>
+        <file>qml/skins/default/screens/Screen_62.qml</file>
+        <file>qml/skins/default/screens/Screen_68.qml</file>
+        <file>qml/skins/default/screens/Screen_69.qml</file>
+        <file>qml/skins/default/screens/Screen_71.qml</file>
+        <file>qml/skins/default/screens/Screen_73.qml</file>
+        <file>qml/skins/default/screens/Screen_74.qml</file>
+        <file>qml/skins/default/screens/Screen_80.qml</file>
+        <file>qml/skins/default/screens/Screen_81.qml</file>
+        <file>qml/skins/default/screens/Screen_83.qml</file>
+        <file>qml/skins/default/screens/Screen_85.qml</file>
+        <file>qml/skins/default/screens/Screen_86.qml</file>
+        <file>qml/skins/default/screens/Screen_87.qml</file>
+        <file>qml/skins/default/screens/Screen_88.qml</file>
+        <file>qml/skins/default/screens/Screen_89.qml</file>
+        <file>qml/skins/default/screens/Screen_90.qml</file>
+        <file>qml/skins/default/screens/Screen_93.qml</file>
+        <file>qml/skins/default/screens/Screen_94.qml</file>
+        <file>qml/skins/default/screens/Screen_95.qml</file>
+        <file>qml/skins/default/screens/Screen_96.qml</file>
+        <file>qml/skins/default/screens/Screen_98.qml</file>
+        <file>qml/skins/default/screens/Screen_99.qml</file>
     </qresource>
 </RCC>

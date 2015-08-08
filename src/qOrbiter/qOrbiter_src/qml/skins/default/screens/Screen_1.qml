@@ -5,17 +5,17 @@ import org.linuxmce.screens 1.0
 StyledScreen {
     id:screen
     onScreenOpen: manager.setBoundStatus(false)
-function showFloorplan(idx){
+    function showFloorplan(idx){
 
-    switch(idx){
-    case 0:manager.currentScreen=Number(Screens.Lights);   break;
-    case 1:manager.currentScreen =Screens.Media;    break;
-    case 2:manager.currentScreen=Screens.Climate;  break
-    case 3:manager.currentScreen=Screens.Telephony;  break
-    case 4:manager.currentScreen=Screens.Security; break;
-    default: break;
+        switch(idx){
+        case 0:manager.currentScreen=Number(Screens.Lights);   break;
+        case 1:manager.currentScreen =Screens.Media;    break;
+        case 2:manager.currentScreen=Screens.Climate;  break
+        case 3:manager.currentScreen=Screens.Telephony;  break
+        case 4:manager.currentScreen=Screens.Security; break;
+        default: break;
+        }
     }
-}
     NowPlayingButton {
         id: now_playing_button
     }
