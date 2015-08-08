@@ -1,5 +1,6 @@
 import QtQuick 2.4
 import QtGraphicalEffects 1.0
+import org.linuxmce.screens 1.0
 
 import "."
 import "components"
@@ -114,7 +115,7 @@ Item {
                     bottom:parent.bottom
                     margins: 5
                 }
-                onActivated:manager.currentScreen="Screen_29.qml"
+                onActivated: manager.currentScreen=Screens.Sleeping
             }
             StyledButton{
                 anchors{
@@ -123,9 +124,10 @@ Item {
                     margins: 5
                 }
                 buttonText: qsTr("Advanced Menu")
-                onActivated: manager.currentScreen = "Screen_44.qml"
+                onActivated: manager.currentScreen = Screens.AdvancedOptions
             }
             StyledButton{
+
                 anchors{
                     top:parent.top
                     bottom:parent.bottom
@@ -133,6 +135,16 @@ Item {
                 }
 
                 buttonText: qsTr("Power")
+                onActivated: manager.currentScreen=Screens.Power
+            }
+            StyledButton{
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+                buttonText: qsTr("ToggleUI")
+                onActivated: qmlRoot.screenSaverActivated()
             }
 
         }
