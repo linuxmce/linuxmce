@@ -1,8 +1,14 @@
+logitechmediaserver (7.8.1+lmce12) unstable; urgency=low
+
+  * add perl version check
+
+ -- developers <developers@linuxmce.org>  Sat, 08 Aug 2015 22:22:22 -0500
+
 logitechmediaserver (7.8.1+lmce11) unstable; urgency=low
 
   * Rebuild for LinuxMCE
 
- -- developers <developers@linuxmce.org>  Tues, 27 Jul 2015 04:00:02 -0500
+ -- developers <developers@linuxmce.org>  Tue, 27 Jul 2015 04:00:02 -0500
 
 logitechmediaserver (7.8.1+dianemo1) unstable; urgency=low
 
