@@ -99,6 +99,7 @@ QVariant GenericFlatListModel::data(const QModelIndex &index, int role) const
     const_cast<GenericFlatListModel*>(this)->m_iLastRow = index.row();
     // Only return Loading... for the first role
     if (role == Qt::UserRole+1) {
+        qDebug() << "not loaded";
         return QString("Loading...");
     } else {
         return QVariant("");
@@ -235,7 +236,7 @@ void GenericFlatListModel::reset()
     //    emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
-    setProgress(0.0);   
+    setProgress(0.0);
     endResetModel();
     //    emit modelReset();
     QApplication::processEvents(QEventLoop::AllEvents);

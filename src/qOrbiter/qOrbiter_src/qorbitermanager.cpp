@@ -919,9 +919,10 @@ void qorbiterManager::prepareDataGrid(QString dataGridId, QString dgName, int he
 
 }
 
+//not really adding an item so much as parsing an entire grid, slowing down GUI
 void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int indexStart, int numRows, DataGridTable* pTable)
 {
-    qDebug() << "Adding item";
+
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() start");
     // Make sure datagrid is still in the active map
     modelPoolLock.lockForRead();
@@ -943,7 +944,6 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
                 GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
                 // TODO: stop if datagrid model is reset or request stopped
                 m_mapDataGridModels[dataGridId]->insertRow(row, pItem);
-                QApplication::processEvents(QEventLoop::AllEvents);
                 count++;
             }
         }

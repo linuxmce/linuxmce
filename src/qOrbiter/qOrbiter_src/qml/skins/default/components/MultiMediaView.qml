@@ -81,6 +81,7 @@ Item{
         }
 
 
+
         GridView{
             id:media_grid
             clip:true
@@ -91,7 +92,7 @@ Item{
                 top:parent.top
             }
 
-            cacheBuffer: 50
+
             cellHeight: currentCellHeight
             cellWidth:currentCellWidth
             visible:true //current_view_type===1
@@ -149,7 +150,7 @@ Item{
                 PropertyChanges {
                     target: multi_view_list
                     currentCellHeight: currentCellWidth*hdPosterRatio
-                    currentCellWidth:manager.isProfile ? Style.scaleX(10) : Style.scaleX(14.25)
+                    currentCellWidth:Style.scaleY(25) //manager.isProfile ? Style.scaleX(10) : Style.scaleX(14.25)
                 }
             },
             State {

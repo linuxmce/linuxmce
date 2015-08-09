@@ -42,15 +42,7 @@ Item{
         color:"black"
         opacity:.65
     }
-    RectangularGlow{
-        anchors.fill: bg_fill
-      //  radius:16
-      //  samples:24
-        spread:0.1
-        color:Style.appcolor_background_medium
-       // source:bg_fill
-        visible:videoDelegate.active
-    }
+
 
     StyledText{
         id:titleBlock        
@@ -66,15 +58,7 @@ Item{
         color: "White"
         height: titleBlock.lineCount * Style.dpRatio*25
     }
-    Glow{
-        anchors.fill: titleBlock
-        radius:16
-        samples:24
-        spread:0.1
-        color:Style.appcolor_background_medium
-        source:titleBlock
-        visible:videoDelegate.active
-    }
+
     Keys.onEnterPressed: {
         if(name==="back (..)"){
             manager.goBackGrid()

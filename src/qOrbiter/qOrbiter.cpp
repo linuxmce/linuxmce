@@ -2698,8 +2698,11 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
     std::string pRes="";
     if(SendCommand(requestGrid, &pRes) && pRes=="OK" )
     {
-
+        //we should be doing any adding, sorting, searching in this thread, not the gui thread
+        //Sending the whole table still leaves us with parsing it on the main gui thread.
         DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+
+        //this isnt emitting an item so much as an entire grid to be parsed.
         emit addDataGridItem(dataGridId, PK_DataGrid, GridCurRow, rows, pDataGridTable);
         delete[] pData;
         pData=NULL;
