@@ -55,6 +55,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QQmlExtensionPlugin>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
+#include "QQmlApplicationEngine"
 #include <QtCore/QThread>
 #include <contextobjects/settinginterface.h>
 

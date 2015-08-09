@@ -1,31 +1,14 @@
 TEMPLATE = lib
 TARGET = AudioVisual
 
-CONFIG += qt plugin
+CONFIG += qt plugin console
 CONFIG += warn_off
+CONFIG -= android_install
+ QT += quick multimedia network opengl core
+ DEFINES+=QT5
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 INCLUDEPATH += ../../../../ ../../../../DCE/
 
-
-contains(QT_VERSION,4.*.*){
-
-         message("$$QT_VERSION DCE-Av-Plugin")
-         QT += declarative phonon network opengl
-
-        android-g++{
-         QT-= phonon
-        DEFINES+=ANDROID
-        message("For Android")
-         }
-
-	DEFINES+=QT4
-}
-
-contains(QT_VERSION,5.*.*){
-	message("$$QT_VERSION DCE-Av-Plugin")
-        QT += quick multimedia network opengl core
-        DEFINES+=QT5
-}
 
 
 uri = AudioVisual
@@ -55,13 +38,8 @@ linux-rasp-pi-g++{
 }
 
 android-g++{
-
-    contains(QT_VERSION,5.*.*){
     DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
-    } else {
-    DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
-    }
-}
+  }
 
 macx-g++{
 message( Building for OS x )
@@ -147,34 +125,13 @@ HEADERS += \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
         ../../../../Gen_Devices/qOrbiterBase.h
 
-!macx-ios-clang  || !QT5{
 
-SOURCES+= \
-colorfilterproxywidget.cpp
-
-}
-
-android-g++{
-    contains(QT_VERSION,4.*.*){
-    HEADERS+= \
-        androidjniplayer.h \
-        androidvideosurface.h
-
-    SOURCES+= \
-         androidjniplayer.cpp \
-        androidvideosurface.cpp
-    }
-}
 
 
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {
 
 android-g++{
-   QMLDIR_TARGET=../../../platforms/Android/androidComponents/Qt5/AudioVisual/qmldir
-    QT5{
-    } else{
-    QMLDIR_TARGET=../../../platforms/Android/androidComponents/AudioVisual/qmldir
-    }
+   QMLDIR_TARGET=../../../platforms/Android/androidComponents/AudioVisual/qmldir
 }
 
 linux-g++{
