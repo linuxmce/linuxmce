@@ -88,9 +88,9 @@ Item{
 
     Rectangle {
         id: connectbutton
-        height: theme.appButtonHeight*theme.dpRatio
+        height: routerInput.height
         width: theme.appButtonWidth*theme.dpRatio
-        radius:height
+        radius:5
         color:theme.appbutton_confirm_color
 
         anchors.right: parent.right

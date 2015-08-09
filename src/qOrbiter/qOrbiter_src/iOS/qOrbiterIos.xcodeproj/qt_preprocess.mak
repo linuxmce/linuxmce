@@ -330,6 +330,7 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/splash/SplashView.qml \
 		../qml/splash/NewOrbiterButton.qml \
 		../qml/splash/Style.qml \
+		../qml/splash/ConnectionElement.qml \
 		../qml/splash/ConnectionBox.qml \
 		../qml/splash/Splash.qml \
 		../qml/splash/qmldir \

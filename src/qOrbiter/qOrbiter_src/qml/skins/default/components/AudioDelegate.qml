@@ -55,15 +55,7 @@ Item{
         color: "White"
         height: titleBlock.lineCount * 50
     }
-    Glow{
-        anchors.fill: titleBlock
-        radius:16
-        samples:24
-        spread:0.1
-        color:Style.appcolor_background_medium
-        source:titleBlock
-        visible:videoDelegate.active
-    }
+
     Keys.onEnterPressed: {
         if(name==="back (..)"){
             manager.goBackGrid()
