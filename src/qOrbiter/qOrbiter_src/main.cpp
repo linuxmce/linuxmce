@@ -243,8 +243,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("LinuxMCE");
-    // qRegisterMetaType<SettingsInterfaceType>("SettingsInterfaceType");
-    // qRegisterMetaType<SettingsKeyType >("SettingKeyType");
+
 
 
     SettingInterface settings;

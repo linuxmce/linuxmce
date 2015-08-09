@@ -57,6 +57,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
     QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);
     m_bIsOSD=false;
+
 }
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
@@ -4271,28 +4272,6 @@ void qOrbiter::OnReload()
     Disconnect();
 }
 
-ReceivedMessageResult qOrbiter::ReceivedMessage(Message *pMessage)
-{
-
-    qDebug() << QString("Recieved message  from %3 with id %1 to device %2").arg(pMessage->m_MessageID).arg(pMessage->m_dwPK_Device_From).arg(pMessage->m_dwPK_Device_To);
-    map<long, string>::iterator itRepeat;
-    if( Command_Impl::ReceivedMessage(pMessage)==rmr_Processed )
-    {
-        if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
-        {
-            pMessage->m_bRespondedToMessage=true;
-            Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-            pMessageOut->m_mapParameters[0]="OK";
-            SendMessage(pMessageOut);
-        }
-        else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
-        {
-            pMessage->m_bRespondedToMessage=true;
-            SendString("OK");
-        }
-        return rmr_Processed;
-    }
-}
 
 bool qOrbiter::OnReplaceHandler(string msg)
 {

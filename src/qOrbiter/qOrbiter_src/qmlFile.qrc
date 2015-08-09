@@ -265,5 +265,6 @@
         <file>qml/skins/default/screens/Screen_96.qml</file>
         <file>qml/skins/default/screens/Screen_98.qml</file>
         <file>qml/skins/default/screens/Screen_99.qml</file>
+        <file>qml/splash/ConnectionElement.qml</file>
     </qresource>
 </RCC>

@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.screeninfo 1.0
+import org.linuxmce.settings 1.0
 
 Item{
     id: connectionBox
@@ -30,95 +31,47 @@ Item{
     }
     Text {
         id: connectionlabel
-        text: qsTr("Set Connection Details")
+        text: qsTr("Set Connection Details for Device %1").arg(settings.getOption(SettingsType.Settings_Network, SettingsKey.Setting_Network_Device_ID))
         font.pixelSize: theme.appFontSize_header
         font.weight: Font.Light
         width:parent.width
-         horizontalAlignment: Text.AlignHCenter
-         verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color:theme.apptext_color_active
         anchors.top: connectionBox.top
         anchors.horizontalCenter: parent.horizontalCenter
         font.family: myFont.name
     }
-
-    Item{
-        id:connectionVars
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: connectionlabel.bottom
-        width: parent.width *.85
-        height: parent.height *.65
-
-        Text {
-            id:host_label
-            text: qsTr("Host:")
-            font.pixelSize: theme.appFontSize_title
-            color:theme.apptext_color_active
-            font.family: myFont.name
-            font.weight: Font.Light
-            anchors.verticalCenter: parent.verticalCenter
-            anchors. left:parent.left
+    Column{
+        id:connetion_layout
+        anchors{
+            left:parent.left
+            right:parent.right
+            top:connectionlabel.bottom
+            bottom:goBox.top
         }
-
-        Rectangle{
-            anchors.fill: routerip
+        ConnectionElement {
+            id: connectionVars
+            location: qsTr("Home")
+            onValueSet: {
+                settings.setOption(SettingsType.Settings_Network, SettingsKey.Setting_Network_Hostname, router)
+            }
         }
-
-        TextInput {
-            id: routerip
-            width: scaleX(17) * theme.dpRatio
-            color: "#030000"
-            clip: true
-            text: window.router
-            font.pixelSize:theme.appFontSize_list
-            font.family: myFont.name
-            anchors{
-                top:host_label.bottom
-                left: host_label.left
+        ConnectionElement{
+            id:connection_away
+            location: qsTr("Away")
+            router: settings.getOption(SettingsType.Settings_Network, SettingsKey.Setting_Network_ExternalHostname)
+            onValueSet: {
+                 settings.setOption(SettingsType.Settings_Network, SettingsKey.Setting_Network_ExternalHostname, router)
             }
         }
 
-        TextInput {
-            id: ext_routerip
-            width: 80
-            text: extip
-            font.pixelSize: theme.appFontSize_list
-            font.family: myFont.name
-            //  onTextChanged: setRouterIp(routerip.text)
-            color:theme.apptext_color_active
-            anchors.verticalCenter: parent.verticalCenter
-            visible: false
-        }
-
-        Text {
-            id:device_label
-            text: qsTr("Device:")
-            color:theme.apptext_color_active
-            font.pixelSize: theme.appFontSize_title
-            font.family: myFont.name
-            anchors{
-                right:parent.right
-                verticalCenter: parent.verticalCenter
-            }
-        }
-        TextInput {
-            id: devicenumber
-            width: scaleX(10)
-            color:theme.apptext_color_active
-            text: window.deviceno
-            font.family: myFont.name
-            font.pixelSize: theme.appFontSize_list
-            anchors{
-                right:device_label.right
-                top:device_label.bottom
-            }
-        }
     }
 
     Row{
         id:goBox
-        anchors.top: connectionVars.bottom
+        height:theme.appButtonHeight*theme.dpRatio
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width *.65
@@ -148,7 +101,7 @@ Item{
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(devicenumber.text, routerip.text)
+                onClicked: { window.qmlSetupLmce(devicenumber.text, routerip.text) }
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -189,7 +142,7 @@ Item{
         },
         State {
             name: "hidden"
-             when:orbiterList.count!==0 || window.b_connectionPresent
+            when:orbiterList.count!==0 || window.b_connectionPresent
             PropertyChanges {
                 target: connectionBox
                 opacity:0
