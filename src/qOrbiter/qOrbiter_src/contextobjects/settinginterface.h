@@ -11,6 +11,7 @@ class SettingsInterfaceType : public QObject
 public:
     SettingsInterfaceType() {}
     virtual ~SettingsInterfaceType() {}
+
     enum SettingsType{
         Settings_Network,
         Settings_UI,

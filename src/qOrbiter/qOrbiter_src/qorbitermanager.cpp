@@ -97,8 +97,9 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     mp_securityVideo( new SecurityVideoClass (qOrbiter_ptr, this)),
     userList(new UserModel( new UserItem, this)),
     myOrbiters(new ExistingOrbiterModel(new ExistingOrbiter(), this)),
-    attribFilter( new AttributeSortModel(new AttributeSortItem,6, this))
-{
+    attribFilter( new AttributeSortModel(new AttributeSortItem,6, this)),
+    currentScreen("Screen_1.qml")
+    {
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
@@ -3192,7 +3193,7 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     // Media filter
     QObject::connect(ptr, SIGNAL(showFileListMediaType(int)), &mediaFilter, SLOT(setMediaType(int)), Qt::QueuedConnection);
     QObject::connect(ptr, SIGNAL(showFileListMediaType(int)), this, SLOT(setGridMediaType(QString)), Qt::QueuedConnection);
-   // QObject::connect(&mediaFilter, &MediaFilter::backIndexChanged, this, &qorbiterManager::setCurrentIndex);
+    // QObject::connect(&mediaFilter, &MediaFilter::backIndexChanged, this, &qorbiterManager::setCurrentIndex);
 
     //        QObject::connect(ptr, SIGNAL(showFileListMediaType(int)), this, SLOT(prepareFileList()), Qt::QueuedConnection);
     //QObject::connect(this.mediaFilter, SIGNAL(filterChanged(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
