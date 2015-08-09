@@ -42,7 +42,7 @@
 
 #include <QKeyEvent>
 #include <QObject>
-#include <QProcess>
+
 #include <qMediaPlayer/qMediaPlayer.h>
 
 #include <QTime>
@@ -104,7 +104,7 @@ public:
 #elif QT5
     explicit MediaManager(QQuickItem *parent = 0);
 #endif
-    ~MediaManager(){this->deleteLater();}
+
     //media info
     int currentTime;
     qint64 totalTime;
@@ -174,7 +174,7 @@ public:
     QTcpSocket*lastClient;
     QTcpSocket*callbackClient;
 
-    QProcess *mountProcess;
+
 
     QString serverAddress;
     int deviceNumber;

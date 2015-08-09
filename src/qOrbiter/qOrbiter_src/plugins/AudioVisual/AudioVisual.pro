@@ -68,7 +68,7 @@ message( Building for OS x )
 DESTDIR=../../imports/AudioVisual #$$[QT_INSTALL_PREFIX]/qml
 }
 
-macx-ios-clang{
+macx-ios-clang {
 message("Building in static mode for iOS")
 QMAKE_CXXFLAGS+=-Wno-c++11-narrowing
 TARGET= audiovisualplugin
@@ -147,7 +147,7 @@ HEADERS += \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
         ../../../../Gen_Devices/qOrbiterBase.h
 
-!macx-ios-clang || !QT5{
+!macx-ios-clang  || !QT5{
 
 SOURCES+= \
 colorfilterproxywidget.cpp

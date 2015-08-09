@@ -198,10 +198,7 @@ static QObject *mediatypes_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
     return helper;
 }
 #ifdef Q_OS_IOS
-
-Q_IMPORT_PLUGIN(DceScreenSaverPlugin)
 Q_IMPORT_PLUGIN(AudioVisualPlugin)
-
 #endif
 
 
@@ -236,7 +233,7 @@ int main(int argc, char* argv[])
     QApplication  a(argc, argv);
 #endif
 #ifdef Q_OS_IOS
-    qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_DceScreenSaverPlugin().instance())->registerTypes("DceScreenSaver");
+//qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_DceScreenSaverPlugin().instance())->registerTypes("DceScreenSaver");
     qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_AudioVisualPlugin().instance())->registerTypes("AudioVisual");
 #endif
 
@@ -355,7 +352,7 @@ int main(int argc, char* argv[])
     try
     {
 #ifdef Q_OS_IOS
-        qDebug() << qt_static_plugin_DceScreenSaverPlugin().metaData();
+        //qDebug() << qt_static_plugin_DceScreenSaverPlugin().metaData();
         deviceType=3;
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif

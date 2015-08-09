@@ -33,7 +33,7 @@ linux-rasp-pi-g++{
     RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/DceScreenSaver
 }
 
-macx-g++{
+macx-clang{
 message( Building for OS x )
 DESTDIR=../../imports/DceScreenSaver#$$[QT_INSTALL_IMPORTS]/DceScreenSaver
 QMLDIR_TARGET = $$DESTDIR
