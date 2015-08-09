@@ -474,6 +474,8 @@ void MediaManager::transmit(QString d)
 
 
 bool MediaManager::mountDrive(long device){
+    return false;
+    /*
     qDebug() << "Mounting Media storage device==>" <<device;
 
     QString dirCmd = "";
@@ -531,6 +533,7 @@ bool MediaManager::mountDrive(long device){
     else{
         qWarning() <<  mntDir.path() << " is mounted. done";
     }
+    */
 }
 
 void MediaManager::infoConnectHandler()
@@ -603,6 +606,7 @@ bool MediaManager::initViews(bool flipped)
 
 void MediaManager::setupDirectories()
 {
+    /*
     QString dirCmd = "gksudo";
     QDir dvdDir;
     dvdDir.setPath("/mnt/remote/dvd");
@@ -635,6 +639,7 @@ void MediaManager::setupDirectories()
             qDebug() << mkPath->readAllStandardOutput();
         }
     }
+    */
 }
 
 

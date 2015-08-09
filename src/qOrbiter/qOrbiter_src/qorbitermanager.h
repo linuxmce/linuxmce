@@ -60,12 +60,12 @@
 #include "datamodels/attributeobject.h"
 #include "datamodels/genericflatlistmodel.h"
 
-#include <QStringList>
-#include <QThread>
-#include <QFile>
-#include <QDir>
-#include <QDataStream>
-#include <QKeyEvent>
+#include "qstringlist.h"
+#include "qthread.h"
+#include "qfile.h"
+#include "qdir.h"
+#include "qdatastream.h"
+#include "QKeyEvent"
 #include <QProcess>
 #include <QtXml/QDomDocument>
 
@@ -1633,7 +1633,7 @@ public slots:
     //initialization related
     void regenOrbiter(int deviceNo);
     void regenComplete(int i);
-    void regenError(QProcess::ProcessError);
+
     QString adjustPath(const QString&);
     void checkConnection();
     void processError(QString msg);

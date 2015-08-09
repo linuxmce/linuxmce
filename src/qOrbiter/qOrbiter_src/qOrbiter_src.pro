@@ -82,6 +82,9 @@ symbian:TARGET.UID3 = 0xE15A481D
 # Allow network access on Symbian
 symbian:TARGET.CAPABILITY += NetworkServices
 
+# Default rules for deployment.
+include(deployment.pri)
+
 # When we do stuff for Symbian, why not define the target in here...
 symbian {
         DEFINES += for_symbian
@@ -199,7 +202,7 @@ WIN32{
 
 
 #mac desktop config
-macx-g++{
+macx-clang{
         APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
         ICON = ../platforms/osx/osxicons.icns
         plugins_folder.source = imports
@@ -231,7 +234,7 @@ linux-rasp-pi-g++{
 	DEPLOYMENTFOLDERS -= plugins_folder
 }
 
-macx-g++{
+macx-clang{
         index.target=$$APP_RESOURCES_PATH
 
         folder_02.source=qml/skins
@@ -264,7 +267,7 @@ RESOURCES+=qmlFile.qrc
 
 
 
-!macx{
+!macx-clang{
         contains(QT_VERSION,4.*.*){
         LIBS += -lQtXml
         LIBS += -lQtNetwork

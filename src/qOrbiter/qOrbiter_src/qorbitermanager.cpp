@@ -2253,12 +2253,6 @@ void qorbiterManager::checkConnection()
 
 
 
-void qorbiterManager::regenError(QProcess::ProcessError)
-{
-    setDceResponse("Error! Reloading existing config for device " + iPK_Device);
-    //processConfig(iPK_Device);
-}
-
 bool qorbiterManager::cleanupData()
 {
     qDebug() << "Cleaning up data";
@@ -2587,8 +2581,8 @@ void qorbiterManager::setupUiSelectors(){
 #elif defined WIN32
     m_localQmlPath=qApp->applicationDirPath()+"/";
 #elif defined MACBUILD
-
-    m_localQmlPath=qApp->applicationDirPath()+"/../Resources/";
+    m_localQmlPath="qrc:/qml";
+    // m_localQmlPath=qApp->applicationDirPath()+"/../Resources/";
 #ifdef simulate
     m_localQmlPath=qApp->applicationDirPath();
     m_localQmlPath.remove("/build-output/");

@@ -34,7 +34,7 @@ CONFIG += thread static
 TRANSLATIONS += app_de.ts
 
 #Configuration & Flags
-                QT+= qml quick script widgets xml network multimedia
+                QT+= qml quick script widgets xml network multimedia core
 
                 folder_01.source = ImportedItems.qml
                 folder_01.path =/
@@ -79,7 +79,7 @@ QML_IMPORT_TRACE = 1
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../../ ../../../../DCE/ ../
 
-LIBS+=-L$$[QT_INSTALL_IMPORTS]/DceScreenSaver -lDceScreenSaverPlugin
+#LIBS+=-L$$[QT_INSTALL_IMPORTS]/DceScreenSaver -lDceScreenSaverPlugin
 LIBS+=-L$$[QT_INSTALL_IMPORTS]/AudioVisual -lAudioVisualPlugin
 
 
