@@ -401,6 +401,7 @@ function device_test_buttons($type,$deviceID,$dbADO){
 	define('LIGHT_SWITCH_RGB', 1993);
 	define('STANDARD_SPRINKLER', 1637);
 	define('STANDARD_IRRIGATION_SPRINKLER', 1780);
+	define('LIGHT_HUE', 2257);
 
 	$query='SELECT FK_DeviceTemplate FROM Device WHERE PK_Device='.$deviceID.'';
 	$res=$dbADO->Execute($query);
@@ -426,7 +427,7 @@ function device_test_buttons($type,$deviceID,$dbADO){
 			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">';
 		}
 
-		else if ($deviceTemplate==LIGHT_SWITCH_DIMMABLE or $deviceTemplate==LIGHT_SWITCH_RGB) {
+		else if ($deviceTemplate==LIGHT_SWITCH_DIMMABLE or $deviceTemplate==LIGHT_SWITCH_RGB or $deviceTemplate==LIGHT_HUE) {
 			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_ON_CONST').'"> 
 			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">
 			<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"><br>';
