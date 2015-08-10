@@ -917,14 +917,14 @@ function firewall($output,$dbADO) {
 			$RPolicy=@$_POST['RPolicy'];
 			$Description=@$_POST['Description'];
 			if ( $RuleType != "PREROUTING"){ // check if Ruletype is prerouting if not input one rule.
-				$insert='INSERT INTO Firewall (Place,IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
+				$insert='INSERT INTO Firewall (Place,IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
 				$dbADO->Execute($insert,array($place,$IntIF,$ExtIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
 			} else {
 					// Check for destinationip of it is the external interface ip then input or a system on the network(s) then forward.
 					 if ($coreIPv4 == $DestinationIP) {
 						//Insert the input rule.
 						$input='input';
-						$insert='INSERT INTO Firewall (Place,IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
+						$insert='INSERT INTO Firewall (Place,IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
 						$dbADO->Execute($insert,array('1',$IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$input,$SourceIP,$RPolicy,$Description));
 					} else {
 						if ($_POST['Chain'] == "port_forward (NAT)") {
@@ -934,17 +934,17 @@ function firewall($output,$dbADO) {
 							$queryChain='SELECT * FROM Firewall WHERE RuleType=? AND RPolicy=?';
 							$resChain=$dbADO->Execute($queryChain,array("forward",$forward));
 							if($resChain->RecordCount() ==0){
-								$insert='INSERT INTO Firewall (Place,Protocol, RuleType,RPolicy,Description) VALUES (?,?,?,?)';
+								$insert='INSERT INTO Firewall (Place,Protocol, RuleType,RPolicy,Description) VALUES (?,?,?,?,?)';
 								$dbADO->Execute($insert,array('0','all-'.$_POST['IPVersion'],'forward',$forward,'LINK TO '.$forward));
 							}
 						}
 						//Insert the forward rule.
 						$msg.=$forward;
-						$insert='INSERT INTO Firewall (Place,IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
+						$insert='INSERT INTO Firewall (Place,IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
 						$dbADO->Execute($insert,array('1',$IntIF,$ExtIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$forward,$SourceIP,$RPolicy,$Description));
 					}
 				//Insert the prerouting rule.
-				$insert='INSERT INTO Firewall (Place,IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
+				$insert='INSERT INTO Firewall (Place,IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
 				$dbADO->Execute($insert,array('1',$IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
 			}
 		}
