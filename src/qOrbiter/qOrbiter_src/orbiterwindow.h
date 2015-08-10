@@ -24,7 +24,7 @@
 #ifdef ANDROID
 #include <QKeyEvent>
 #endif
-
+class PromptData;
 /*!
  * \brief orbiterWindow - Responsible for the initial setup of the application window.
 
@@ -180,7 +180,7 @@ public slots:
      * \param pList
      *Returns the last requested prompt data.
      */
-    void displayPromptResponse(int type, QList<QObject *> pList);
+    void displayPromptResponse(int type, QList<PromptData*> *pList);
 
     /*!
      * \brief setupNewOrbiter - Sets up a new orbiter given the params

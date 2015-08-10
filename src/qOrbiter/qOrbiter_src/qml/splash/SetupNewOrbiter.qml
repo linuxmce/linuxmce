@@ -1,10 +1,26 @@
 // import QtQuick 2.2 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.2
-
-Rectangle {
+ import "."
+Item {
     width: appW
     height: appH
-    color: "transparent"
+
+    ListModel{
+        id:langMdl
+        ListElement{
+            name:"English"
+            code:"en"
+        }
+        ListElement{
+            name:qsTr("German")
+            code:"de"
+        }
+    }
+
+    property int userSelection:-1
+    property int roomSelection:-1
+    property int langSelection:-1
+
     //palette?
     property string orangeRed: "#993300"
     property string deYork: "#99CC99"
@@ -17,7 +33,6 @@ Rectangle {
         return y/100*appW
     }
     Component.onCompleted: window.showSetup()
-
 
     Timer{
         id:effectTimer
@@ -75,7 +90,7 @@ Rectangle {
         Row{
             Text {
                 id: welcome
-                text: qsTr("Setup A New Orbiter")
+                text: qsTr("Setup A New Orbiter.")
                 color:"white"
                 font.pointSize: 18
                 font.bold: true
@@ -83,114 +98,88 @@ Rectangle {
             }
         }
 
-        Column{
+        Row{
             id:contentColumn
-            height: parent.height *.55
-            width: parent.width *.75
+            height: parent.height *.75
+            width:parent.width
             anchors.centerIn: newOrbiterSetupContainer
-            spacing: 75
+            spacing:5
 
-            ListView{
-                id:usersView
-                height: 75
-                width: parent.width
-                orientation: ListView.Horizontal
-                spacing: 20
+            GenericSplashList{
+                label:qsTr("User Selection")
                 model:users
-                Component.onCompleted: currentIndex = -1
-                delegate:Rectangle{
-                    height:newOrbiterSetupContainer.height *.15
-                    width: newOrbiterSetupContainer.width *.09
-                    radius:10
-                    border.color:usersView.currentIndex === index ? midnightBlue : orangeRed
-                    color: usersView.currentIndex === index ? deYork : "white"
-                    Text {
-                        text: dataTitle
-                        font.pointSize: 12
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                        width: parent.width *.75
-                        anchors.centerIn: parent
-                        font.family: myFont.name
-                    }
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-                            usersView.currentIndex = index
-                            selectedUser.text = "You Selected: "+ dataTitle
-                        }
-                        hoverEnabled: true
-                    }
-
-                }
-            }
-
-            ListView{
-                id:roomsView
-                height: 75
-                width: parent.width
-                orientation: ListView.Horizontal
-                model:rooms
-                contentHeight: newOrbiterSetupContainer.height *.15
-                contentWidth: newOrbiterSetupContainer.width *.09
-                spacing:20
-                  Component.onCompleted: currentIndex = -1
-                delegate:
+                delegate: Item{
+                    width: parent.width
+                    height: contentColumn.height*.12
                     Rectangle{
-                    height:newOrbiterSetupContainer.height *.15
-                    width: newOrbiterSetupContainer.width *.09
-                    radius:10
-                    border.color:roomsView.currentIndex === index ? midnightBlue : orangeRed
-                    color: roomsView.currentIndex === index ? deYork : "white"
+                        anchors.fill: parent
+                       color:userSelection==index ? "darkgrey" : "lightgrey"
+                    }
                     Text {
+                        id: userText
                         text: dataTitle
-                        font.pointSize: 12
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                        width: parent.width *.75
-                        anchors.centerIn: parent
-                        font.family: myFont.name
+                        anchors.fill: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                     }
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-                            roomsView.currentIndex = index
-                            selectedRoom.text = dataTitle
+                          userSelection=index
                         }
-                        hoverEnabled: true
                     }
-
                 }
             }
 
-            ListView{
-                id:langView
-                height: 75
-                width: parent.width
-                orientation: ListView.Horizontal
-                model:languages
-                spacing:20
-                  Component.onCompleted: currentIndex = -1
-                delegate:Rectangle{
-                    height:newOrbiterSetupContainer.height *.15
-                    width: newOrbiterSetupContainer.width *.09
-                    radius:10
-                    border.color:langView.currentIndex === index ? midnightBlue : orangeRed
-                    color: langView.currentIndex === index ? deYork : "white"
-
+            GenericSplashList{
+                id:rm
+                label:qsTr("Room Selection")
+                model:rooms
+                delegate: Item{
+                    width: parent.width
+                    height: contentColumn.height*.12
+                    Rectangle{
+                        anchors.fill: parent
+                        color:roomSelection===index ? "green" : "lightgrey"
+                    }
                     Text {
-                        text: lang
-                        font.pointSize: 12
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                        width: parent.width *.75
-                        anchors.centerIn: parent
-                        font.family: myFont.name
+                        id: roomText
+                        text: dataTitle
+                        anchors.fill: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                     }
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-                            langView.currentIndex = index
-                            selectedLang.text = lang
+                            roomSelection=index
                         }
-                        hoverEnabled: true
+                    }
+                }
+            }
+
+            GenericSplashList{
+                label:qsTr("Language Selection")
+                model:langMdl
+                delegate: Item{
+                    width: parent.width
+                    height: contentColumn.height*.12
+                    Rectangle{
+                        anchors.fill: parent
+                        color:langSelection==index ? "darkgrey" : "lightgrey"
+                    }
+                    Text {
+                        id: lang
+                        text: name
+                        anchors.fill: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            langSelection=index
+                        }
                     }
                 }
             }
@@ -212,7 +201,7 @@ Rectangle {
             id:setupButton
             height: scaleY(8)
             width: scaleX(14)
-            color: "blue"
+            color: "lightgreen"
             radius: 8
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
@@ -233,7 +222,7 @@ Rectangle {
             id:exitButton
             height: scaleY(8)
             width: scaleX(14)
-            color: "blue"
+            color: "red"
             radius: 8
             anchors.bottom: parent.bottom
             anchors.left: setupButton.right
@@ -251,69 +240,5 @@ Rectangle {
             }
 
         }
-
-//        Column{
-//            id:confirmCol
-//            anchors.bottom: parent.bottom
-//            anchors.left: parent.left
-//            height: parent.height *.15
-//            width: parent.width / 3
-//            spacing:5
-
-//                Text {
-//                    id: selectedUser
-//                    text: qsTr("Please Select a Default User")
-//                    font.bold: true
-//                    color: deYork
-//                    font.pointSize: 14
-//                    font.family: myFont.name
-//                    x:0
-//                    onTextChanged: {
-//                        x = -50
-//                        userSelected.restart()
-//                    }
-//                }
-//                ParallelAnimation{
-//                    id:userSelected
-
-//                    PropertyAnimation{
-//                        target: selectedUser
-//                        property:"x"
-//                        to:confirmCol.width
-//                        duration: 2500
-//                    }
-
-//                    PropertyAnimation{
-//                        target:selectedUser
-//                        property: "opacity"
-//                        from:0
-//                        to:1
-//                        duration:1000
-//                    }
-//                }
-
-
-//                Text {
-//                    id: selectedRoom
-//                    text: qsTr("Please Select A Default Room")
-//                    font.family: myFont.name
-//                }
-
-
-
-//                Text{
-//                    id:selectedLang
-//                    text:qsTr("Please Select a Default Language")
-//                    font.family: myFont.name
-//                }
-
-
-//                Text {
-//                    id: selectedResolution
-//                    text:"Size "+newOrbiterSetupContainer.height
-//                    font.family: myFont.name
-//                }
-//        }
-
     }
 }
