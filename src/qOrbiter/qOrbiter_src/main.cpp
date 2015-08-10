@@ -509,7 +509,7 @@ int main(int argc, char* argv[])
         //QObject::connect(&pqOrbiter, SIGNAL(configReady(QByteArray)), &w, SLOT(processConfig(QByteArray)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
         QObject::connect(&w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
-        QObject::connect(&pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(promptResponse(int,QList<PromptData*>*)), &orbiterWin, SLOT(displayPromptResponse(int, QList<PromptData*>* )), Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), &pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)), Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(beginSetupNewOrbiter()), &pqOrbiter,SLOT(populateSetupInformation()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::QueuedConnection);

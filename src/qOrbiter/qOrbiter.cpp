@@ -4555,7 +4555,7 @@ int qOrbiter::PromptFor(std::string sToken)
     map<int,string> mapResponse;
     vector<string> Choices;
     StringUtils::Tokenize(sResults,"\n",Choices);
-    QList <QObject*> promptList;
+    QList <PromptData*> *promptList = new QList<PromptData*>();
     if( sToken=="Size" )
         mapResponse[0]="Default";
 
@@ -4566,7 +4566,8 @@ int qOrbiter::PromptFor(std::string sToken)
         int Choice = atoi(StringUtils::Tokenize(sChoise,"\t",pos).c_str());
         string sDescription = StringUtils::Tokenize(sChoise,"\t",pos);
         QString t = QString::fromStdString(sDescription);
-        promptList.append(new PromptData(QString::fromStdString(sDescription), Choice));
+        PromptData *p = new PromptData(QString::fromStdString(sDescription), Choice);
+       promptList->append(p);
 
         if( Choice && sDescription.size() )
             mapResponse[Choice]=sDescription;

@@ -302,7 +302,7 @@ void orbiterWindow::prepareExistingOrbiters(){
  * \param type
  * \param pList
  */
-void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
+void orbiterWindow::displayPromptResponse(int type, QList<PromptData*> *pList)
 {
 #ifdef QT_DEBUG
     qDebug() << "Prompt for response" << type;
@@ -310,13 +310,19 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
     userList.clear();
     if(type==1){
         userList.clear();
-        userList = pList;
+        for(int i=0; i < pList->length(); i++){
+           PromptData *p = pList->at(i);
+            userList.append( new PromptData(p->dataTitle,p->data_id) );
+        }
         mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     }
     else
     {
         roomList.clear();
-        roomList = pList;
+        for(int i=0; i < pList->length(); i++){
+            PromptData *p = pList->at(i);
+           roomList.append( new PromptData(p->dataTitle,p->data_id) );
+        }
         mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     }
     emit showList();

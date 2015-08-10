@@ -1410,7 +1410,7 @@ signals:
     /*!
      * \brief promptResponse. Sends a signal to prompt the user with a prompt type and list of options.
      */
-    void promptResponse(int, QList<QObject*>);
+    void promptResponse(int, QList<PromptData*>*p);
     /*!
      * \brief routerInvalid. Invalid router, no DCE connection available.
      */

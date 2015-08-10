@@ -21,6 +21,13 @@ Item {
     }
 
     Component{
+        id:newOrbiter
+        SetupNewOrbiter{
+
+        }
+    }
+
+    Component{
         id:loadingViewComp
         LoadingView{}
     }
@@ -50,7 +57,7 @@ Item {
 
 
     function screenchange(screenname ){
-        console.log(screenname)
+        splashLogic.state="new-orbiter"
     }
 
     Image {
@@ -72,7 +79,6 @@ Item {
         id:splash_content
         anchors.fill: parent
         sourceComponent: splashViewComp
-
     }
 
 
@@ -111,8 +117,8 @@ Item {
         State {
             name: "new-orbiter"
             PropertyChanges {
-                // target: object
-
+               target: splash_content
+               sourceComponent:newOrbiter
             }
         },
 
