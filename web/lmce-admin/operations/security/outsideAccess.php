@@ -1,4 +1,4 @@
-<?php
+<?
 
 	// include language files
 	includeLangFile('common.lang.php');
@@ -34,18 +34,18 @@ function outsideAccess($output,$dbADO) {
 		$coreID=$rowDSS['PK_Device'];
 	}
 	
-	$resAllow80=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND SourcePort=80','core_input');
+	$resAllow80=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND DestinationPort=80','input');
 	$allowAccessOn80=($resAllow80->RecordCount()>0)?1:0;
 		
-	$resAllowPort=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND DestinationPort=80 AND DestinationIP=?',array('port_forward','127.0.0.1'));
+	$resAllowPort=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND DestinationPort=80 AND DestinationIP=?',array('port_forward (NAT)','127.0.0.1'));
 	$allowAccessOnPort=($resAllowPort->RecordCount()>0)?1:0;
 	$rowAccessOnPort=$resAllowPort->FetchRow();
 	$port=$rowAccessOnPort['SourcePort'];
 
-	$resAllowSSL443=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND SourcePort=443','core_input');
+	$resAllowSSL443=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND DestinationPort=443','input');
 	$allowSSLAccessOn443=($resAllowSSL443->RecordCount()>0)?1:0;
 
-	$resAllowSSLPort=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND DestinationPort=443 AND DestinationIP=?',array('port_forward','127.0.0.1'));
+	$resAllowSSLPort=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND DestinationPort=443 AND DestinationIP=?',array('port_forward (NAT)','127.0.0.1'));
 	$allowSSLAccessOnPort=($resAllowSSLPort->RecordCount()>0)?1:0;
 	$rowSSLAccessOnPort=$resAllowSSLPort->FetchRow();
 	$sslport=$rowSSLAccessOnPort['SourcePort'];
@@ -204,42 +204,42 @@ function outsideAccess($output,$dbADO) {
 
 			if($oldAllow80==0){
 				if($allow80==1){
-					$dbADO->Execute('INSERT INTO Firewall (Protocol,SourcePort,RuleType) VALUES (?,?,?)',array('tcp','80','core_input'));
+					$dbADO->Execute('INSERT INTO Firewall (Protocol,SourcePort,RuleType) VALUES (?,?,?)',array('tcp','80','input'));
 				}
 			}else{
 				if($allow80==0){
-					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=?',array('core_input','80'));
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=?',array('input','80'));
 				}
 			}
 			if($oldAllowOnPort==0){
 				if($allowOnPort==1){
-					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','80','port_forward',$port,'127.0.0.1'));
+					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','80','port_forward (NAT)',$port,'127.0.0.1'));
 				}
 			}else{
 				if($allowOnPort==0){
-					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('port_forward',$oldPort,'80','127.0.0.1'));
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('port_forward (NAT)',$oldPort,'80','127.0.0.1'));
 				}elseif($port!=$oldPort){
-					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($port,'port_forward','80','127.0.0.1'));
+					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($port,'port_forward (NAT)','80','127.0.0.1'));
 				}
 			}
 			if($oldAllow443==0){
 				if($allow443==1){
-					$dbADO->Execute('INSERT INTO Firewall (Protocol,SourcePort,RuleType) VALUES (?,?,?)',array('tcp','443','core_input'));
+					$dbADO->Execute('INSERT INTO Firewall (Protocol,SourcePort,RuleType) VALUES (?,?,?)',array('tcp','443','input'));
 				}
 			}else{
 				if($allow443==0){
-					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=?',array('core_input','443'));
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=?',array('input','443'));
 				}
 			}
 			if($oldAllowSSLOnPort==0){
 				if($allowSSLOnPort==1){
-					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','443','port_forward',$sslport,'127.0.0.1'));
+					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','443','port_forward (NAT)',$sslport,'127.0.0.1'));
 				}
 			}else{
 				if($allowSSLOnPort==0){
-					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('port_forward',$oldSSLPort,'443','127.0.0.1'));
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('port_forward (NAT)',$oldSSLPort,'443','127.0.0.1'));
 				}elseif($sslport!=$oldSSLPort){
-					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($sslport,'port_forward','443','127.0.0.1'));
+					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($sslport,'port_forward (NAT)','443','127.0.0.1'));
 				}
 			}
 			exec('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
