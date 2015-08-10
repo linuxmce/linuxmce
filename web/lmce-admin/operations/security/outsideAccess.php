@@ -214,12 +214,15 @@ function outsideAccess($output,$dbADO) {
 			if($oldAllowOnPort==0){
 				if($allowOnPort==1){
 					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','80','port_forward (NAT)',$port,'127.0.0.1'));
+					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','80','forward',$port,'127.0.0.1'));
 				}
 			}else{
 				if($allowOnPort==0){
 					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('port_forward (NAT)',$oldPort,'80','127.0.0.1'));
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('forward',$oldPort,'80','127.0.0.1'));
 				}elseif($port!=$oldPort){
 					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($port,'port_forward (NAT)','80','127.0.0.1'));
+					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($port,'forward','80','127.0.0.1')); 
 				}
 			}
 			if($oldAllow443==0){
@@ -234,12 +237,15 @@ function outsideAccess($output,$dbADO) {
 			if($oldAllowSSLOnPort==0){
 				if($allowSSLOnPort==1){
 					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','443','port_forward (NAT)',$sslport,'127.0.0.1'));
+					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','443','forward',$sslport,'127.0.0.1'));
 				}
 			}else{
 				if($allowSSLOnPort==0){
 					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('port_forward (NAT)',$oldSSLPort,'443','127.0.0.1'));
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('forward',$oldSSLPort,'443','127.0.0.1'));
 				}elseif($sslport!=$oldSSLPort){
 					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($sslport,'port_forward (NAT)','443','127.0.0.1'));
+					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($sslport,'forward','443','127.0.0.1'));
 				}
 			}
 			exec('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
