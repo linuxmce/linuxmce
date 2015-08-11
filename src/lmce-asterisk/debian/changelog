@@ -1,4 +1,10 @@
-lmce-asterisk (0+0.3.3-5~trusty1) precise; urgency=low
+lmce-asterisk (0+0.3.3-6) precise; urgency=low
+
+  * Fixes #2373 - disable autoloading modules, only load required modules
+
+ -- phenigma <phenigma@linuxmce.org>  Tue, 11 Aug 2015 11:08:00 -0500
+
+lmce-asterisk (0+0.3.3-5) precise; urgency=low
 
   * Fixes #2347 - permit autoloading modules
 
