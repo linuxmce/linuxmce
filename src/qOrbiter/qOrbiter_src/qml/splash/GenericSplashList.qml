@@ -3,8 +3,6 @@ import "."
 
 Item{
     id:genericListContainer
-    width: parent.width*.20
-    height: parent.height
 
     property alias listView:view
     property alias currentItem:view.currentItem
@@ -44,12 +42,7 @@ Item{
     }
     Text{
         id:itemlabel
-        anchors{
-            top:hdr.top
-            left:hdr.left
-            right:hdr.right
-            bottom:hdr.bottom
-        }
+       anchors.fill: hdr
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text:genericListContainer.label

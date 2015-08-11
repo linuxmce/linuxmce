@@ -49,10 +49,11 @@ using namespace DCE;
 #include "QVariantMap"
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter, QObject*parent)
+qOrbiter::qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter, QObject*parent)
     : qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
     //<-dceag-const-e->
 {
+    deviceName = name;
     qDebug() << "Constructing";
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
     QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);
@@ -1966,6 +1967,10 @@ void DCE::qOrbiter::deinitialize()
 bool qOrbiter::getConfiguration()
 {
 
+    httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)).append("&label="+deviceName));
+    qDebug() << "Ea url::" <<httpSettingsRequest->url();
+    httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
+
     /*------ScreenSaver-----------*/
     QStringList *t = new QStringList(QString::fromStdString(DATA_Get_Timeout().c_str()).split(","));
     if(!t->isEmpty()){
@@ -2045,11 +2050,11 @@ void qOrbiter::setCurrentScreen(QString s){
     currentScreen = s;
 }
 
-void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width)
+void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width, QString name)
 {
     httpOrbiterSettings = new QNetworkAccessManager();
     httpSettingsRequest = new QNetworkRequest();
-
+    deviceName=name;
 
     qDebug() << "Room ::" << room;
     qDebug() << "User ::" << users;
@@ -2073,8 +2078,11 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
         } else {
             emit commandResponseChanged("New Device ID:" +QString::number(t));
             m_dwPK_Device = t ;
+            if(m_dwPK_Device==-1)
+                return;
+
             emit commandResponseChanged("Setting up Ea");
-            httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)));
+            httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)).append("&label="+name));
             qDebug() << "Ea url::" <<httpSettingsRequest->url();
             httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
             QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(finishSetup()));
@@ -2101,12 +2109,13 @@ void qOrbiter::finishSetup()
     httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
     QObject::connect(httpSettingsReply,SIGNAL(finished()), this, SLOT(setupEa())); //server side code should be set to spit out JSON to provide proper replies.
     emit commandResponseChanged("Setup Complete, restarting");
+    emit creationComplete(true);
 }
 
 void qOrbiter::setupEa()
 {
     httpSettingsReply->disconnect(this,SLOT(setupEa()));
-    httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)));
+    httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)).append("&label="+deviceName));
     qDebug() << "Ea url::" <<httpSettingsRequest->url();
     httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
     QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(initialize()));
@@ -2332,7 +2341,7 @@ void qOrbiter::beginSetup()
     m_bOrbiterConnected = false;
     setGridStatus(true);
     initializeGrid();
-    setOrbiterSetupVars(0,0,0,0,0,0);
+    setOrbiterSetupVars(0,0,0,0,0,0, deviceName);
 #ifndef for_harmattan
     qRegisterMetaType< QList<ExistingOrbiter*> >("QList<ExistingOrbiter*>");
     //  qRegisterMetaType<SleepingAlarm>("SleepingAlarm");
@@ -4685,9 +4694,7 @@ int qOrbiter::SetupNewOrbiter()
 
     CMD_New_Orbiter_DT.ParseResponse( pResponse );
     delete pResponse;
-    qDebug() << "Device ID::" << PK_Device;
-
-
+    qDebug() << "Device ID::" << PK_Device; 
 
     if( !PK_Device )
     {

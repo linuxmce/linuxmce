@@ -3,6 +3,8 @@
 #include "qdatetime.h"
 #include "defineObjects/mediatypehelper.h"
 #include "qdebug.h"
+#include "qhostinfo.h"
+#include "QSysInfo"
 
 SettingInterface::SettingInterface(QObject *parent) :
     QObject(parent),
@@ -11,7 +13,8 @@ SettingInterface::SettingInterface(QObject *parent) :
 {
     /** Note that application name, org, and domain are set via QCoreApplication in main.cpp */
 
-    m_settings.setFallbacksEnabled(false);
+    m_settings.setFallbacksEnabled(false);    
+    m_lookup.insert(SettingsKeyType::Setting_Network_DeviceName, "deviceName");
     m_lookup.insert(SettingsKeyType::Setting_Network_Router, "router");
     m_lookup.insert(SettingsKeyType::Setting_Network_Device_ID, "device");
     m_lookup.insert(SettingsKeyType::Setting_Network_Hostname, "hostname");
@@ -45,6 +48,7 @@ void SettingInterface::initializeSettings()
     if(!m_settings.childGroups().contains("network")){
         log(tr("Initializing network Settings"));
         m_settings.beginGroup("network");
+        m_settings.setValue("deviceName", QHostInfo::localHostName());
         m_settings.setValue("router","192.168.80.1");
         m_settings.setValue("hostname", "dcerouter.linuxmce");
         m_settings.setValue("externalhostname", "");
@@ -166,9 +170,19 @@ QVariant SettingInterface::getOption(SettingsInterfaceType::SettingsType st, Set
     m_settings.beginGroup(grp);
 
     if(!m_settings.contains(key)){
-        emit writeError(tr("No  settings option for -=%1=-").arg(key));
-        log(QString("Options for this key are %1").arg(m_settings.childKeys().join("\n")));
-        m_settings.endGroup();
+
+        if(key=="deviceName"){
+            QString d = QHostInfo::localHostName();
+            if(d=="localhost"){
+                d= QSysInfo::prettyProductName();
+            }
+            setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName, d);
+            rtrn = d;
+        } else {
+            emit writeError(tr("No  settings option for -=%1=-").arg(key));
+            log(QString("Options for this key are %1").arg(m_settings.childKeys().join("\n")));
+            m_settings.endGroup();
+        }
 
     } else {
         qDebug() << Q_FUNC_INFO << "Returning settings value for key" << key;

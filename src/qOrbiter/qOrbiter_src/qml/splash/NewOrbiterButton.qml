@@ -8,7 +8,8 @@ Item{
         right:parent.right
         bottom:parent.bottom
     }
-    Component.onCompleted: state="hidden"
+    state:"hidden"
+    Component.onCompleted: state="showing"
 
 
     Rectangle{

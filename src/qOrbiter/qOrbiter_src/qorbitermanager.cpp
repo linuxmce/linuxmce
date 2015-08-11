@@ -1332,7 +1332,8 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-    setCurrentScreen("WebRegen.qml");
+    setCurrentScreen("Screen_Reload.qml");
+
 }
 
 void qorbiterManager::regenComplete(int i)
@@ -3180,7 +3181,7 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     QObject::connect(ptr,SIGNAL(routerReload()), this, SLOT(reloadHandler()), Qt::QueuedConnection);
     QObject::connect(ptr, SIGNAL(replaceDevice()), this, SLOT(replaceHandler()), Qt::QueuedConnection);
     QObject::connect(ptr, SIGNAL(routerDisconnect()), this, SLOT(disconnectHandler()),Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(reInitialize()), ptr, SLOT(initialize()), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(reInitialize()), ptr, SLOT(setupEa()), Qt::QueuedConnection);
     //   QObject::connect(this, SIGNAL(deviceNumberChanged(int)), ptr, SLOT(setDeviceId(int)));
 
 

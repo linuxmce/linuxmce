@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     QApplication  a(argc, argv);
 #endif
 #ifdef Q_OS_IOS
-//qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_DceScreenSaverPlugin().instance())->registerTypes("DceScreenSaver");
+    //qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_DceScreenSaverPlugin().instance())->registerTypes("DceScreenSaver");
     qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_AudioVisualPlugin().instance())->registerTypes("AudioVisual");
 #endif
 
@@ -377,8 +377,11 @@ int main(int argc, char* argv[])
 
         QThread dceThread;
 
-        qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-        qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
+
+        QString name = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
+        qOrbiter pqOrbiter(name, PK_Device, sRouter_IP,true,bLocalMode );
+
+         qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
         //qmlRegisterSingletonType<MediaTypesHelper>("media.enums",1,0,"MediaTypesHelper", "Data Only for linuxMCE MediaTypes");
         qmlRegisterSingletonType<MediaTypesHelper>("enums.media", 1, 0, "MediaHelper", MediaTypesHelper::mediatypes_provider);
@@ -509,8 +512,9 @@ int main(int argc, char* argv[])
         //QObject::connect(&pqOrbiter, SIGNAL(configReady(QByteArray)), &w, SLOT(processConfig(QByteArray)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
         QObject::connect(&w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
+        QObject::connect(&pqOrbiter, &qOrbiter::creationComplete, &orbiterWin, &orbiterWindow::creationComplete, Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(promptResponse(int,QList<PromptData*>*)), &orbiterWin, SLOT(displayPromptResponse(int, QList<PromptData*>* )), Qt::QueuedConnection);
-        QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), &pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)), Qt::QueuedConnection);
+        QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int, QString )), &pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int, QString)), Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(beginSetupNewOrbiter()), &pqOrbiter,SLOT(populateSetupInformation()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &orbiterWin, SLOT(setRouterAddress(QString)));
@@ -557,27 +561,25 @@ int main(int argc, char* argv[])
             PK_Device=w.getDeviceNumber();
         }
 
-        QList<QString*> myHosts;
-        QString badMatch = orbiterWin.getInternalIp();
+
+        QString badMatch = w.getInternalIp(); // SettingInterface::getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName  );
         int f = badMatch.lastIndexOf(".");
         qDebug() << badMatch.length() - f ;
         badMatch.remove(f, badMatch.length() - f);
 
-        //        foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
-        //            QNetworkInterface t =  QNetworkInterface::interfaceFromIndex(0);
-        //             pqOrbiter.m_localMac= t.hardwareAddress();
-        //             qDebug() << "My Mac is:: " << pqOrbiter.m_localMac;
-        //            if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)){
-        //                if(address.toString().contains(badMatch)){
-        //                    qDebug() << "My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
-        //                    w.setLocalAddress(address.toString());
-        //                    pqOrbiter.setLocalIp(address.toString());
-        //                    w.setHomeNetwork(true);
-        //                    break;
-        //                }
-        //            }
-
-        //        }
+        foreach (const QNetworkInterface &iface, QNetworkInterface::allInterfaces()) {
+            qDebug() << "Network Interface Scan-----------------------------------------------------------------";
+            qDebug() << QString("Interface : %1").arg(iface.humanReadableName());
+            qDebug() << QString("Ip address:: %1").arg(iface.addressEntries().at(0).ip().toString());
+            qDebug() << QString("Mac Address:: %1").arg(iface.hardwareAddress());
+            //pqOrbiter.m_localMac= t.hardwareAddress();
+            //                     qDebug() << "My Mac is:: " << t.hardwareAddress();
+            if(iface.addressEntries().at(0).ip().toString().contains(badMatch)){
+                pqOrbiter.m_sMacAddress=iface.hardwareAddress().toStdString();
+                qDebug() << QString("Mac Address Set to %1").arg(iface.hardwareAddress());
+                break;
+            }
+        }
 
         orbiterWin.initView();
 #ifdef __ANDROID__

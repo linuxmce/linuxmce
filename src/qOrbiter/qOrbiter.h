@@ -134,7 +134,7 @@ public:
     bool m_bOrbiterConnected;
     QString currentScreen;
     //@}
-
+QString deviceName;
     /*! @name Child Device Member Variables */
     //@{
     int qMediaPlayerID;/**< qMediaPlayer device ID */
@@ -255,7 +255,7 @@ public:
     //<-dceag-const-b->
 public:
     // Constructors/Destructor
-    qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent = 0);
+    qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent = 0);
 
     //virtual bool GetConfig();
 
@@ -1333,6 +1333,8 @@ light, climate, media, security, telecom */
 
 signals:
 
+     void creationComplete(bool finished);
+
     void transmitDceCommand(PreformedCommand cmd);
 
     void deviceTemplateChanged(int dt);
@@ -1857,10 +1859,11 @@ public slots:
     void registerDevice(int user, QString ea, int room);
     void qmlSetup(int device, QString ip);
     void setCurrentScreen(QString s);
-    void setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width);
+    void setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width, QString name);
     void finishSetup();
     void setupEa();
     void getMountDevices();
+
 
     void pingCore();
     void checkPing(QHostInfo info);
@@ -2006,6 +2009,9 @@ public slots:
     }
 
     //child devices
+
+private:
+
 
 protected:
     /*! @name logging slots*/

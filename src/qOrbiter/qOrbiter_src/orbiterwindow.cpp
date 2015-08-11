@@ -337,12 +337,12 @@ void orbiterWindow::displayPromptResponse(int type, QList<PromptData*> *pList)
  * \param height
  * \param w
  */
-void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w)
+void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w, QString deviceName)
 {
 #ifdef QT_DEBUG
     qDebug() << "Setup message recieved";
 #endif
-    emit newOrbiterData(user, room, skin, lang, height, w);
+    emit newOrbiterData(user, room, skin, lang, height, w, deviceName);
 }
 
 
