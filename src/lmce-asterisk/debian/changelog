@@ -1,4 +1,4 @@
-lmce-asterisk (0+0.3.3-5) precise; urgency=low
+lmce-asterisk (0+0.3.3-5~trusty1) precise; urgency=low
 
   * Fixes #2347 - permit autoloading modules
 
