@@ -560,10 +560,12 @@ function firewall($output,$dbADO) {
 								<option value="3">Last</option>
 							</select></td>';
 						}
-						$out.='</td><td align="center"><select name="save_Chain">
+						$out.='<input type="hidden" name="save_place" value="'.$row['Place'].'" />
+						</td><td align="center"><select name="save_Chain">
 							'.$save_chain_options.'
 							
 							</select>';
+							
 					if (@$AdvancedFirewall == 1){	
 						if ($RuleTypearr[1] == 'PREROUTING' || $RuleTypearr[1] == 'POSTROUTING' || $RuleTypearr[1] == 'OUTPUT' ) {
 							$out.='<select name="save_RuleType">
@@ -651,10 +653,9 @@ function firewall($output,$dbADO) {
                                 	        }
 						$out.='<td><input type="text" name="save_Matchname" value="'.$row['Matchname'].'" STYLE="width:100%" /></td>';
 					} else {
-                			    $out.='<input type="hidden" name="save_RuleType" value="" />
-								<input type="hidden" name="save_IntIf" value="" />
-								<input type="hidden" name="save_ExtIf" value="" />
-								<input type="hidden" name="save_Matchname" value="" />';   
+                			    $out.='<input type="hidden" name="save_IntIf" value="'.$row['IntIF'].'" />
+								<input type="hidden" name="save_ExtIf" value="'.$row['ExtIF'].'" />
+								<input type="hidden" name="save_Matchname" value="'.$row['Matchname'].'" />';   
 		                        }
 					$out.='<td align="center"><select name="save_protocol" STYLE="width:70px">';
 						foreach ($protocolarr as $string){
@@ -671,7 +672,9 @@ function firewall($output,$dbADO) {
 								}$out.='>'.$string.'</option>';
 							}
 						}
-						$out.='</select></td></td>
+						$save_RuleType=explode('-', $row['RuleType']);
+						$out.='</select></td>
+					<input type="hidden" name="save_RuleType" value="'.$save_RuleType[1].'" />
 					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /> to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" /></B></td>
                     <td align="center"><input type="text" name="save_DestinationPort" value="'.$row['DestinationPort'].'" size="4" /></td>
 					<td align="center"><input type="text" name="save_DestinationIP" value="'.$row['DestinationIP'].'" size="8" /></td>
@@ -742,7 +745,7 @@ function firewall($output,$dbADO) {
 						$row['SourcePort'].($row['SourcePortEnd'] > 0 ? ' to '.$row['SourcePortEnd'] : '').'</B></td>';
                        	                        }
                                	                $out.='<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>
-						<td align="center">'.($row['DestinationIP'] > 0 ? $row['DestinationIP']:'').'</td>
+						<td align="center">'.$row['DestinationIP'].'</td>
 						<td align="center">'.$row['SourceIP'].'</td>';
 						if (@$AdvancedFirewall == 1){
 							$out.='<td align="center">'.$row['RPolicy'].'</td>';
@@ -799,9 +802,9 @@ function firewall($output,$dbADO) {
 			$out.='
 			place<br />
 			<select name="place" STYLE="width:70px">
-			<option value="1">Middle</option>
-			<option value="0">First</option>
-			<option value="2">Last</option>
+			<option value="2">Middle</option>
+			<option value="1">First</option>
+			<option value="3">Last</option>
 			</select></td>';
 			}
 			$out.='<td align="center" width="110"><select name="Chain" onChange="enableDestination()">
@@ -888,7 +891,7 @@ function firewall($output,$dbADO) {
 			$ExtIF=@$_POST['ExtIf'];
 			$Matchname=@$_POST['Matchname'];
 			if (!isset($_POST['place'])) {
-				$place='1';
+				$place='2';
 			} else {
 				$place=$_POST['place'];
 			}
@@ -955,7 +958,7 @@ function firewall($output,$dbADO) {
 			$ExtIF=@$_POST['save_ExtIf'];
 			$Matchname=@$_POST['save_Matchname'];
 			if (!isset($_POST['save_place'])) {
-				$place='1';
+				$place='2';
 			} else {
 				$place=$_POST['save_place'];
 			}
@@ -1128,7 +1131,7 @@ function firewall($output,$dbADO) {
 		}
 		
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
-			header("Location: index.php?section=firewall&msg=".$msg.translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
+			header("Location: index.php?section=firewall&msg=".translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
 	}
 
 	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
