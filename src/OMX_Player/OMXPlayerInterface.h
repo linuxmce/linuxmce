@@ -160,7 +160,7 @@ public:
   void Do_HideSubtitles();
   void Do_ShowSubtitles();
   bool Do_SelectSubtitle(int track);
-//  bool Do_SelectVideo(int track);
+  bool Do_SelectVideo(int track);
   bool Do_SelectAudio(int track);
   void Do_Seek(int64_t);
   void Do_Rewind(void);
@@ -189,7 +189,7 @@ public:
   int getMaxAudio();
   int getCurrentSubtitle();
   int getMaxSubtitle();
-//  bool setVideo(int track);
+  bool setVideo(int track);
   bool setAudio(int track);
   bool setSubtitle(int track);
   void ShowSubtitles();

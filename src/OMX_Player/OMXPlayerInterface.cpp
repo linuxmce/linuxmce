@@ -352,15 +352,16 @@ std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
 }
 
 
-/*
+
 bool OMXPlayerInterface::setVideo(int track) {
 	return Do_SelectVideo(track);
 }
 
 bool OMXPlayerInterface::Do_SelectVideo(int track) {
-  bool ret;
+  bool ret(false);
   try {
-    ret = g_player_client->SelectVideo(track);
+    Log("Do_SelectVideo() - SelectVideo(track) does not exist in dbus interface.");
+    //ret = g_player_client->SelectVideo(track);
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_SelectVideo() - D-Bus error - omxplayer has gone away?");
@@ -368,7 +369,7 @@ bool OMXPlayerInterface::Do_SelectVideo(int track) {
   }
   return ret;
 }
-*/
+
 
 int OMXPlayerInterface::getCurrentVideo() {
 	std::vector< std::string > vsVideoTracks = Do_ListVideo();
