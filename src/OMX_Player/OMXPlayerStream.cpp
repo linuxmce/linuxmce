@@ -75,31 +75,33 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 	else
 		Log("OMXPlayerStream::Play - Event processor not false?!?!?" );
 
-	// Get/Set Subtitles
-	std::string sSubtitles("");
+	// Get/Set Subtitles DD
+	std::string sSubtitles("\n");
 	std::vector< std::string > vsSubtitles;
 	vsSubtitles = OMXPlayerInterface::Get_ListSubtitles();
 	for(std::vector<std::string>::iterator it = vsSubtitles.begin(); it < vsSubtitles.end(); it++)
 	{
-		string::size_type tokenPos;
+		string::size_type tokenPos=0;
 		// <index>:<language>:<name>:<codec>:<active>
-		string index = StringUtils::Tokenize(*it, string(":"), tokenPos);
+		string index = StringUtils::Tokenize(*it, ":", tokenPos);
 		string language = StringUtils::Tokenize(*it, string(":"), tokenPos);
 		string name = StringUtils::Tokenize(*it, string(":"), tokenPos);
 		string codec = StringUtils::Tokenize(*it, string(":"), tokenPos);
 		string active = StringUtils::Tokenize(*it, string(":"), tokenPos);
 
-		sSubtitles += index + " " + language + " " + name + "\n";
+		sSubtitles += index + " " + language + " " + name + " " + codec + "\n";
+		//Log("OMXPlayerStream::Play - Adding Subtitle : " + index + " " + language + " " + name + " " + codec);
 	}
+	Log("OMXPlayerStream::Play - DATA_Set_Subtitles : " + sSubtitles );
 	m_pPlayer->DATA_Set_Subtitles(sSubtitles);
 
-	// Get/Set Audio
-	std::string sAudio("");
+	// Get/Set Audio DD
+	std::string sAudio("\n");
 	std::vector< std::string > vsAudio;
 	vsAudio = OMXPlayerInterface::Get_ListAudio();
 	for(std::vector<std::string>::iterator it = vsAudio.begin(); it < vsAudio.end(); it++)
 	{
-		string::size_type tokenPos;
+		string::size_type tokenPos=0;
 		// <index>:<language>:<name>:<codec>:<active>
 		string index = StringUtils::Tokenize(*it, string(":"), tokenPos);
 		string language = StringUtils::Tokenize(*it, string(":"), tokenPos);
@@ -107,18 +109,19 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 		string codec = StringUtils::Tokenize(*it, string(":"), tokenPos);
 		string active = StringUtils::Tokenize(*it, string(":"), tokenPos);
 
-		sSubtitles += index + " " + language + " " + name + "\n";
+		sAudio += index + " " + language + " " + name + " " + codec + "\n";
+		//Log("OMXPlayerStream::Play - Adding Audio Track : " + index + " " + language + " " + name + " " + codec);
 	}
+	Log("OMXPlayerStream::Play - DATA_Set_Audio_Tracks : " + sAudio );
 	m_pPlayer->DATA_Set_Audio_Tracks(sAudio);
 
-/*
-	// Get/Set Video
-	std::string sVideo("");
+	// Get/Set Video DD
+	std::string sVideo("\n");
 	std::vector< std::string > vsVideo;
 	vsAudio = OMXPlayerInterface::Get_ListVideo();
 	for(std::vector<std::string>::iterator it = vsVideo.begin(); it < vsVideo.end(); it++)
 	{
-		string::size_type tokenPos;
+		string::size_type tokenPos=0;
 		// <index>:<language>:<name>:<codec>:<active>
 		string index = StringUtils::Tokenize(*it, string(":"), tokenPos);
 		string language = StringUtils::Tokenize(*it, string(":"), tokenPos);
@@ -126,10 +129,11 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 		string codec = StringUtils::Tokenize(*it, string(":"), tokenPos);
 		string active = StringUtils::Tokenize(*it, string(":"), tokenPos);
 
-		sSubtitles += index + " " + language + " " + name + "\n";
+		sVideo += index + " " + language + " " + name + " " + codec + "\n";
+		//Log("OMXPlayerStream::Play - Adding Audio Track : " + index + " " + language + " " + name + " " + codec);
 	}
+	Log("OMXPlayerStream::Play - DATA_Set_Angles : " + sVideo );
 	m_pPlayer->DATA_Set_Angles(sVideo);
-*/
 
 	return true;
 }
@@ -289,6 +293,7 @@ bool OMXPlayerStream::GetScreenShot(int iWidth, int iHeight, string& sCMD_Result
 
 bool OMXPlayerStream::setVolumeUp(int iRepeat_Command, string &sCMD_Result)
 {
+	OMXPlayerInterface::Do_UnMute();
 	OMXPlayerInterface::Do_IncreaseVolume();
 	for (int repeats = iRepeat_Command - 1; repeats > 1; --repeats)
 	{
