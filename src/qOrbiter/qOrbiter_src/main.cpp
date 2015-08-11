@@ -570,11 +570,11 @@ int main(int argc, char* argv[])
         foreach (const QNetworkInterface &iface, QNetworkInterface::allInterfaces()) {
             qDebug() << "Network Interface Scan-----------------------------------------------------------------";
             qDebug() << QString("Interface : %1").arg(iface.humanReadableName());
-            qDebug() << QString("Ip address:: %1").arg(iface.addressEntries().at(0).ip().toString());
+            qDebug() << QString("Ip address:: %1").arg(iface.addressEntries().size() > 0 ? iface.addressEntries().at(0).ip().toString() : "<none>");
             qDebug() << QString("Mac Address:: %1").arg(iface.hardwareAddress());
             //pqOrbiter.m_localMac= t.hardwareAddress();
             //                     qDebug() << "My Mac is:: " << t.hardwareAddress();
-            if(iface.addressEntries().at(0).ip().toString().contains(badMatch)){
+            if(iface.addressEntries().size() > 0 && iface.addressEntries().at(0).ip().toString().contains(badMatch)){
                 pqOrbiter.m_sMacAddress=iface.hardwareAddress().toStdString();
                 qDebug() << QString("Mac Address Set to %1").arg(iface.hardwareAddress());
                 break;
