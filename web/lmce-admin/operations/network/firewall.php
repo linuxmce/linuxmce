@@ -208,9 +208,10 @@ function firewall($output,$dbADO) {
 	"0"=>"ACCEPT",
 	"1"=>"DROP",
 	"2"=>"REJECT",
-	"3"=>"RETURN",
-	"4"=>"REDIRECT",
-	"5"=>"LOG",
+	"3"=>"MASQUERADE",
+	"4"=>"RETURN",
+	"5"=>"REDIRECT",
+	"6"=>"LOG",
 	);
 	
 	if(count($more_chains)!=0){
