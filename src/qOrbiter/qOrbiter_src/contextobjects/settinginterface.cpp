@@ -174,7 +174,7 @@ QVariant SettingInterface::getOption(SettingsInterfaceType::SettingsType st, Set
         if(key=="deviceName"){
             QString d = QHostInfo::localHostName();
             if(d=="localhost"){
-                d= QSysInfo::prettyProductName();
+                d= "QOrbiter Generic";
             }
             setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName, d);
             rtrn = d;
