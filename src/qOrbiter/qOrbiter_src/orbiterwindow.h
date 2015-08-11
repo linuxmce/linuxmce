@@ -194,7 +194,7 @@ public slots:
      *After this is done, a regen occurs to generate to configurations
      * \warning This function needs more testing and implementing it is not recommended at this time
      */
-    void setupNewOrbiter(int user, int room, int skin, int lang, int height, int w);
+    void setupNewOrbiter(int user, int room, int skin, int lang, int height, int w, QString deviceName);
 
     bool getReloadStatus() {return b_reloadStatus;}
     void setReloadStatus(bool b) {b_reloadStatus = b ; emit reloadStatusChanged();}
@@ -215,7 +215,7 @@ signals:
     void showExternal();
     void beginSetupNewOrbiter();
     void reloadStatusChanged();
-    void newOrbiterData(int u, int r, int s, int l, int h, int w);
+    void newOrbiterData(int u, int r, int s, int l, int h, int w, QString dev);
     void pageChanged();
     void routerChanged();
     void backButtonPressed();
@@ -223,6 +223,7 @@ signals:
     void internalIpChanged();
     void externalIpChanged();
     void usingExternalChanged();
+    void creationComplete(bool complete);
 };
 #endif
 

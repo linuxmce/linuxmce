@@ -25,8 +25,8 @@ Item{
     Rectangle{
         id:bg_fill
         anchors.fill: parent
-        color:Style.appcolor_background_light
-        opacity: Style.appHeader_opacity        
+        color:manager.connectedState ?  Style.appcolor_background_light : "red"
+        opacity:manager.connectedState ? Style.appHeader_opacity : .55
     }
 
     Glow{

@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
+import org.linuxmce.screens 1.0
 import "."
 import "components"
 /*! This File is designed to be the main layout that can be switched in and out for various forms */

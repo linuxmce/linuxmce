@@ -267,5 +267,8 @@
         <file>qml/skins/default/screens/Screen_99.qml</file>
         <file>qml/splash/ConnectionElement.qml</file>
         <file>qml/splash/GenericSplashList.qml</file>
+        <file>qml/splash/SetupScreen.qml</file>
+        <file>qml/skins/default/screens/Screen_204.qml</file>
+        <file>qml/skins/default/screens/Screen_Reload.qml</file>
     </qresource>
 </RCC>

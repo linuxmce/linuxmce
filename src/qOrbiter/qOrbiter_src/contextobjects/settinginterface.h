@@ -36,6 +36,7 @@ public:
         Setting_Network_Hostname,
         Setting_Network_ExternalHostname,
         Setting_Network_WebPort,
+        Setting_Network_DeviceName,
         Setting_Ui_Skin,
         Setting_Ui_NetworkLoading,
         Setting_Ui_PrefSize,
