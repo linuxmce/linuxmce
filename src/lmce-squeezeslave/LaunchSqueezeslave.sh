@@ -5,6 +5,7 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
+DEVICEDATA_Configuration=59
 DEVICEDATA_Alsa_Output_Device=74
 DEVICEDATA_Pnp_Create_Without_Prompting=164
 DEVICETEMPLATE_Squeezebox_Player=58
@@ -108,11 +109,12 @@ if [[ "$SQUEEZESLAVE" = "$SQUEEZELITE" ]]; then
 	[[ -n "$OUTPUT" ]] && OUTPUT="-o $OUTPUT"
 	[[ -n "$SERVER" ]] && SERVER="-s $SERVER"
 	[[ -n "$MAC" ]] && MAC="-m $MAC"
+	CONFIGURATION=$(GetDeviceData "$DEVICE" "$DEVICEDATA_Configuration")
 else
 	[[ -n "$OUTPUT" ]] && OUTPUT="-o$OUTPUT"
 	[[ -n "$MAC" ]] && MAC="-m$MAC"
 fi
-PARAMS="$OUTPUT $MAC $SERVER"
+PARAMS="$OUTPUT $MAC $SERVER $CONFIGURATION"
 
 echo "Starting squeezeslave: $SQUEEZESLAVE $PARAMS"
 $SQUEEZESLAVE $PARAMS
