@@ -95,7 +95,7 @@ Item {
 
     Footer {
         id: footer
-
+        active:
         FocusRow{
             spacing:5
             anchors.fill: parent
