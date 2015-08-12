@@ -312,12 +312,34 @@ Setup_AsoundConf()
 	# Replace template values with choices
 	sed -r "s#%CONNECT_TYPE%#${ConnectType}#g; s#%SOUND_OUT%#${SoundOut}#g; s#%MAIN_CARD%#${SoundCard}#g; s#%PLAYBACK_PCM%#${PlaybackPCM}#g;" "$AsoundConf" > /etc/asound.conf
 	Setup_XineConf "$AudioSetting" "$PlaybackCard"
+	Setup_LibVLCConf "$AudioSetting" "$PlaybackCard"
 
 	alsa force-reload
 
 	if pgrep AVWizard_Run.sh > /dev/null; then 
 		Enable_Audio_Channels
 	fi
+}
+
+Setup_LibVLCConf()
+{
+	local AudioSetting="$1" PlaybackCard="$2"
+
+        if [ -f "/etc/pluto/libvlc.conf" ]; then 
+		rm /etc/pluto/libvlc.conf
+        fi
+	
+	touch /etc/pluto/libvlc.conf
+
+	echo "--alsa-audio-device" >/etc/pluto/libvlc.conf
+	echo "$PlaybackCard" >>/etc/pluto/libvlc.conf
+
+	case "$AudioSetting" in
+	*[COH]*)
+		echo "--spdif" >>/etc/pluto/libvlc.conf
+		;;
+	esac
+
 }
 
 Setup_XineConf()
