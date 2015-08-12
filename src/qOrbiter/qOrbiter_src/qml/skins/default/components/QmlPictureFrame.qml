@@ -2,6 +2,7 @@ import QtQuick 2.2
 import QtGraphicalEffects 1.0
 import QtMultimedia 5.0
 import "."
+import "../."
 
 /*! QML based screensaver optimized for qt5 */
 Item{
@@ -12,6 +13,7 @@ Item{
     property bool useList:true
     property bool random:true
     property int currentPic:0
+
 
     property int switchTimer:60000
     readonly property int transitionTime:switchTimer-4500
@@ -64,7 +66,7 @@ Item{
         if(useList){
 
             if(random){
-              currentPic=Math.floor((Math.random()* pictureList.length)+1)
+                currentPic=Math.floor((Math.random()* pictureList.length)+1)
 
             }else {
                 if(currentPic==pictureList.length){
@@ -73,7 +75,7 @@ Item{
                 currentPic++
             }
 
-           return pictureUrl+pictureList[currentPic]
+            return pictureUrl+pictureList[currentPic]
         } else {
             return pictureUrl
         }
@@ -85,7 +87,7 @@ Item{
         if(pictureList.length==0)
             return
 
-      img1.source=getImage();
+        img1.source=getImage();
         screenSaverTimer.start()
         console.log("Orbiter Consume Screensaver images")
         console.log("Orbiter counts " + pictureList.length)
@@ -97,7 +99,7 @@ Item{
             return;
 
         var link = getImage()
-       // console.log("Getting "+link)
+        // console.log("Getting "+link)
         if(img1.closing) {
             img2.source= link;
         }
@@ -125,7 +127,55 @@ Item{
     FadeImage{
         id:img2
         onBadImageError: loadNextImage()
-        onReadyToShow: transitionPlanes()       
+        onReadyToShow: transitionPlanes()
+    }
+
+    Item{
+        id:clock
+        clip:false
+        property bool longDate:true
+        property bool verticalMirror: false
+        property color clockColor:"white"
+        property bool boldClock:false
+
+        width:parent.width/1.5
+        height: 50
+        opacity: qmlRoot.screensaverActive ? 1 : 0
+        function getDate(){
+            if(!longDate)
+                return  new Date().toTimeString()
+            else
+                return Qt.formatDateTime(new Date(), "dddd ,MMMM d yyyy \n hh:mm:ss ");
+        }
+        anchors{
+            bottom:parent.bottom
+            bottomMargin: Style.scaleX(10)
+            left:parent.left
+        }
+
+        Behavior on opacity{
+            PropertyAnimation{
+                duration: Style.transitionFadeTime
+            }
+        }
+
+        Timer { // Update the clock element periodically
+            interval: 1000; running: clock.opacity==1; repeat: true
+            onTriggered: txtDate.text = clock.getDate()
+        }
+
+
+        StyledText{
+            id: txtDate
+            text: clock.getDate()
+            color: clock.clockColor
+            font.letterSpacing: 2
+            smooth: true
+            width: parent.width
+            anchors.centerIn: parent
+            font.pointSize: 32
+            horizontalAlignment: Text.AlignHCenter
+        }
     }
 
     states: [
@@ -134,6 +184,7 @@ Item{
         },
         State {
             name: "inactive"
+
         }
     ]
 

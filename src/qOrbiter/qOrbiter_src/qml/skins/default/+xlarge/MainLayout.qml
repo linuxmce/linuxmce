@@ -17,6 +17,13 @@ Item {
     focus:true
     activeFocusOnTab: false
 
+    //    onUiOnChanged: {
+    //        if(uiOn)
+    //           // qmlRoot.resetTimeout()
+    //        else
+    //            qmlRoot.screenSaverActivated()
+    //    }
+
     function raiseNavigation(raise){
         uiOn=raise;
     }
@@ -24,12 +31,14 @@ Item {
     Connections{
         target: qmlRoot
         onScreenSaverActivated:{
+            console.log("screen saver activated")
             uiOn=false
             pageLoader.toggleContent(false)
 
         }
         onResetTimeout:{
             pageLoader.toggleContent(true)
+            uiOn=true
         }
         onUnhandledKey: {
             console.log("Recovering key...")
@@ -62,14 +71,16 @@ Item {
     Keys.onEscapePressed: uiOn=false
 
     Keys.onTabPressed: {
-        uiOn=true
+
         console.log("Shift Focus")
         if(layout.activeFocus){
+            qmlRoot.resetTimeout();
             header.forceActiveFocus()
         } else if (header.activeFocus){
             footer.forceActiveFocus()
         } else {
             layout.forceActiveFocus()
+
         }
     }
 
@@ -109,9 +120,7 @@ Item {
 
         onActiveFocusChanged:{
             if(activeFocus){
-                uiOn=true
-                currentItem=0
-                active=true
+                uiOn=true ; currentItem=0; active=true
             } else {
                 currentItem=0
             }
@@ -174,7 +183,7 @@ Item {
             property int commandToExecute:-1
 
             function executeItem(itemIndex){
-                children[commandToExecute].execute()
+                // children[commandToExecute].execute()
                 manager.execGrp(commandToExecute)
                 commandToExecute=-1
                 currentIndex=-1
@@ -184,6 +193,7 @@ Item {
                 focus:true
                 onCurrentSelectionChanged:{
                     current_scenarios.commandToExecute=params
+
                 }
 
                 function execute(){
@@ -195,8 +205,6 @@ Item {
                 buttonText:title
                 height:Style.scaleY(13)
                 width:Style.scaleX(15)
-                //Keys.onEnterPressed: manager.execGrp(params)
-                //                Keys.onReturnPressed: manager.execGrp(params)
                 MouseArea{
                     anchors.fill: parent
                     onClicked: execute()
@@ -207,7 +215,7 @@ Item {
 
     Footer {
         id: footer
-        state:uiOn ? "open" : "closed"
+        state: header.state
         focus:true
         onActiveFocusChanged:{
             if(activeFocus){
@@ -219,7 +227,7 @@ Item {
 
         ListView{
             id:scenarioList
-
+            Keys.priority:Keys.BeforeItem
             focus:true
             spacing: 5
             onActiveFocusChanged: {
@@ -248,20 +256,23 @@ Item {
                 bottom:parent.bottom
                 margins: 5
             }
-            Keys.onUpPressed: {
-                current_scenarios.decrementCurrentIndex()
-            }
-
-            Keys.onDownPressed: {
-                current_scenarios.incrementCurrentIndex()
+            Keys.onPressed: {
+                switch(event.key){
+                case Qt.Key_Enter: console.log("enter ");
+                case Qt.Key_Return:console.log("return key"); current_scenarios.currentItem.execute(); event.accepted=true; console.log("command executed") ;break;
+                case Qt.Key_1: current_scenarios.currentItem.execute(); event.accepted=true; console.log("command executed") ;break;
+                case Qt.Key_Down: console.log("down key"); event.accepted=true;current_scenarios.incrementCurrentIndex();break;
+                case Qt.Key_Up: console.log("up arrow"); event.accepted=true;  current_scenarios.decrementCurrentIndex(); break;
+                default: console.log(event.key); break;
+                }
             }
 
             Component.onCompleted: {
-              scenarios.append({
-                    "name":"Advanced",
-                    "modelName":5,
-                    "floorplantype":-1}
-                )
+                scenarios.append({
+                                     "name":"Advanced",
+                                     "modelName":5,
+                                     "floorplantype":-1}
+                                 )
             }
 
 
@@ -272,10 +283,8 @@ Item {
                 buttonText:name
                 arrow:false
 
-                Keys.onEnterPressed: {
-                    console.log("executing command group "+current_scenarios.commandToExecute)
-                    manager.execGrp(current_scenarios.commandToExecute)
-                }
+                Keys.forwardTo: [ scenarioList ]
+
                 onActiveFocusChanged:{
                     if(activeFocus){
                         scenarioList.setModel(floorplantype)
