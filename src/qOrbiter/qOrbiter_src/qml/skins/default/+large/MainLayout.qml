@@ -18,6 +18,7 @@ Item {
         }
 
         onResetTimeout:{
+            uiOn=true
             pageLoader.toggleContent(true)
         }
 

@@ -7,18 +7,20 @@ Item{
     height: manager.appHeight
     width: manager.appWidth
     focus:true
+
     property bool screensaverActive:false
     signal screenSaverActivated()
     signal resetTimeout()
     signal unhandledKey(int key)
     property int lastKey:-1
     onResetTimeout: {
+        console.log("timer reset")
         screenSaverTimeout.restart()
         screensaverActive=false
     }
 
-
     onScreenSaverActivated: {
+        console.log("Screen saver is active")
         screensaverActive=true
     }
 
@@ -34,6 +36,7 @@ Item{
 
     function createPopup(comp){
         comp.createObject(layout)
+        scenarios.append()
     }
 
 
@@ -96,12 +99,15 @@ Item{
     MouseArea{
         anchors.fill: parent
         onPressed: {
-            console.log("pressed")
-            if(!screensaverActive)
-                mouse.accepted=false
 
-
-            qmlRoot.resetTimeout()
+            if(!screensaverActive){
+                 mouse.accepted=false
+                console.log("event filter ignored click event")
+            }   else {
+                qmlRoot.resetTimeout()
+                console.log("event filter ignored click event")
+            }
+            console.log("Click Event Filter Pressed, screensaver state is "+screensaverActive)
         }
     }
 }

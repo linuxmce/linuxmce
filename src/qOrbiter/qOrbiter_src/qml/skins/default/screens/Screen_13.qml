@@ -100,7 +100,7 @@ StyledScreen{
 
             TextInput {
                 id: text_input1
-                height: scaleY(8)
+                height: Style.scaleY(8)
                 anchors.top: keypadSection.top
                 anchors.topMargin: keypadSection.panelHeaderHeight+10
                 anchors.left: parent.left

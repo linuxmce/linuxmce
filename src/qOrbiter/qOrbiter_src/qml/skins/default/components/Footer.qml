@@ -53,7 +53,7 @@ Item{
         },
         State {
             name: "closed"
-            when:manager.currentScreen!=="Screen_1.qml" || !uiOn || qmlRoot.screensaverActive
+            when:manager.currentScreen!=="Screen_1.qml" ||  qmlRoot.screensaverActive
             AnchorChanges{
                 target: footer
                 anchors{
