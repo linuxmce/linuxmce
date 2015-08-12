@@ -24,8 +24,20 @@
 #include "VLC_Player.h"
 #include "Position.h"
 
+#include <algorithm>
+
 // #define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
 #define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
+
+/**
+ * Convert a string to a c string for use in char** array. 
+ */
+char *convert(const std::string & s)
+{
+   char *pc = new char[s.size()+1];
+   std::strcpy(pc, s.c_str());
+   return pc; 
+}
 
 namespace DCE
 {
@@ -74,10 +86,36 @@ namespace DCE
 	return false;
       }
 
-//    static const char* const args[] = {"--alsa-audio-device","hdmi:CARD=Card0PCH,DEV=1","--spdif"};
-//    m_pInst = libvlc_new(3,args);
-    m_pInst = libvlc_new(NULL,NULL);
+    if (FileUtils::FileExists("/etc/pluto/libvlc.conf"))
+      {
+	vector<string> vs;
+	vector<char*> vc;
+	FileUtils::ReadFileIntoVector("/etc/pluto/libvlc.conf",vs);
+	if (vs.size()>0)
+	  {
+	    std::transform(vs.begin(), vs.end(), std::back_inserter(vc), convert);
+	    
+	    // Pass parameters to libvlc.
+	    m_pInst=libvlc_new(vc.size(),&vc[0]);
 
+	    // char** parameter array no longer needed, blast it. 
+	    for (size_t i=0; i<vc.size(); i++)
+	      {
+		delete [] vc[i];
+	      }
+	  }
+	else
+	  {
+	    // Empty configuration file found, assume default parameters.
+	    m_pInst=libvlc_new(NULL,NULL);
+	  }
+      }
+    else
+      {
+	// No configuration file found, assume default parameters.
+	m_pInst=libvlc_new(NULL,NULL);
+      }
+    
     if (!m_pInst)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Videolan::init() failed.");
@@ -305,7 +343,7 @@ namespace DCE
 	string sDrive = StringUtils::Tokenize(sMediaURL,"/",pos);
 	int iTrack = atoi(StringUtils::Tokenize(sMediaURL,"/",pos).c_str());
 	char cTrack[16];
-	char cDev[16];
+	char cDev[16]; 
 	sprintf(cTrack,"cdda-track=%d",iTrack);
 	sprintf(cDev,"cdda:///dev/%s",sDrive.c_str());
 	m = libvlc_media_new_location(m_pInst,cDev);
