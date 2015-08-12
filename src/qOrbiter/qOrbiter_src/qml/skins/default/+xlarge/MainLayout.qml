@@ -12,11 +12,26 @@ Item {
     id:layout
     anchors.fill: qmlRoot
 
-    property bool uiOn:true
+    property bool uiOn:false
     property alias scenarioModel:current_scenarios.model
+    focus:true
+    activeFocusOnTab: false
 
     function raiseNavigation(raise){
         uiOn=raise;
+    }
+
+    Connections{
+        target: qmlRoot
+        onScreenSaverActivated:{
+            uiOn=false
+            pageLoader.toggleContent(false)
+
+        }
+        onResetTimeout:{
+            pageLoader.toggleContent(true)
+        }
+
     }
 
     Component{
@@ -27,8 +42,6 @@ Item {
     }
 
     Component.onCompleted: forceActiveFocus()
-    focus:true
-    activeFocusOnTab: false
     onActiveFocusChanged: {
         console.log("Layout has focus ? "+ activeFocus)
         if(pageLoader.item)
@@ -59,6 +72,13 @@ Item {
         }
     }
 
+    MediaInterface{
+        id:mediaPlayer
+        anchors.centerIn: parent
+        height:parent.height
+        width:parent.width
+
+    }
 
     PageLoader {
         id: pageLoader
@@ -165,11 +185,14 @@ Item {
 
     Footer {
         id: footer
-
+            state:uiOn ? "open" : "closed"
         focus:true
         onActiveFocusChanged:{
-            header.active=false
-            if(activeFocus)scenarioList.forceActiveFocus()
+            if(activeFocus){
+                header.active=false
+                if(activeFocus)scenarioList.forceActiveFocus()
+            }
+
         }
 
         ListView{

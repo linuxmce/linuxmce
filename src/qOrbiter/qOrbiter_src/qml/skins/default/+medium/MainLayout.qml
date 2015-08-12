@@ -44,7 +44,6 @@ Item {
         anchors.centerIn: parent
         height:parent.height
         width:parent.width
-
     }
 
     PageLoader {
