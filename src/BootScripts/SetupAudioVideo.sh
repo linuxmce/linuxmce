@@ -335,7 +335,7 @@ Setup_LibVLCConf()
 	echo "$PlaybackCard" >>/etc/pluto/libvlc.conf
 
 	case "$AudioSetting" in
-	*[COH]*)
+	*3*)
 		echo "--spdif" >>/etc/pluto/libvlc.conf
 		;;
 	esac
