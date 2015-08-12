@@ -571,6 +571,8 @@ int main(int argc, char* argv[])
             qDebug() << "Network Interface Scan-----------------------------------------------------------------";
             qDebug() << QString("Interface : %1").arg(iface.humanReadableName());
             qDebug() << QString("Ip address:: %1").arg(iface.addressEntries().size() > 0 ? iface.addressEntries().at(0).ip().toString() : "<none>");
+
+
             qDebug() << QString("Mac Address:: %1").arg(iface.hardwareAddress());
             //pqOrbiter.m_localMac= t.hardwareAddress();
             //                     qDebug() << "My Mac is:: " << t.hardwareAddress();
