@@ -10,11 +10,13 @@ Item{
     property bool screensaverActive:false
     signal screenSaverActivated()
     signal resetTimeout()
-
+    signal unhandledKey(int key)
+    property int lastKey:-1
     onResetTimeout: {
         screenSaverTimeout.restart()
         screensaverActive=false
     }
+
 
     onScreenSaverActivated: {
         screensaverActive=true
@@ -80,7 +82,7 @@ Item{
         case Qt.Key_R: console.log("Rotating"); manager.setDesiredOrientation(manager.isProfile ? Qt.LandscapeOrientation : Qt.PortraitOrientation); break;
         case Qt.Key_Backspace: console.log("Back Button Hard Key"); manager.goBacktoQScreen();break;
         case Qt.Key_Back: console.log("Back Key pressed"); manager.goBacktoQScreen(); event.accepted=true; break;
-        default:console.log("RootObject::Key "+event.key+" is unhandled."); break;
+        default:console.log("qmlRoot::Key "+event.key+" is unhandled."); qmlRoot.unhandledKey( event.key ); break;
         }
 
     }

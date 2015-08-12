@@ -31,6 +31,14 @@ Item {
         onResetTimeout:{
             pageLoader.toggleContent(true)
         }
+        onUnhandledKey: {
+            console.log("Recovering key...")
+            if(key==Qt.Key_Enter){
+                uiOn=true
+            } else {
+                console.log("Not handling recovered Key")
+            }
+        }
 
     }
 
@@ -41,7 +49,10 @@ Item {
         }
     }
 
-    Component.onCompleted: forceActiveFocus()
+    Component.onCompleted:{
+        forceActiveFocus()
+
+    }
     onActiveFocusChanged: {
         console.log("Layout has focus ? "+ activeFocus)
         if(pageLoader.item)
@@ -160,21 +171,32 @@ Item {
             anchors.fill: parent
             spacing:5
             anchors.margins: Style.buttonSpacing
+            property int commandToExecute:-1
 
+            function executeItem(itemIndex){
+                children[commandToExecute].execute()
+                manager.execGrp(commandToExecute)
+                commandToExecute=-1
+                currentIndex=-1
+            }
             delegate: LargeStyledButton{
                 id:scenario_delegate
+                focus:true
+                onCurrentSelectionChanged:{
+                    current_scenarios.commandToExecute=params
+                }
+
                 function execute(){
                     console.log(title+" is executing")
                     manager.execGrp(params)
                 }
                 arrow:current_scenarios.currentIndex===index
-
                 currentSelection:arrow
                 buttonText:title
                 height:Style.scaleY(13)
                 width:Style.scaleX(15)
-//                Keys.onEnterPressed: manager.execGrp(params)
-//                Keys.onReturnPressed: manager.execGrp(params)
+                //Keys.onEnterPressed: manager.execGrp(params)
+                //                Keys.onReturnPressed: manager.execGrp(params)
                 MouseArea{
                     anchors.fill: parent
                     onClicked: execute()
@@ -185,7 +207,7 @@ Item {
 
     Footer {
         id: footer
-            state:uiOn ? "open" : "closed"
+        state:uiOn ? "open" : "closed"
         focus:true
         onActiveFocusChanged:{
             if(activeFocus){
@@ -233,25 +255,33 @@ Item {
             Keys.onDownPressed: {
                 current_scenarios.incrementCurrentIndex()
             }
-            Keys.onDigit1Pressed: {
-                current_scenarios.currentItem.execute()
+
+            Component.onCompleted: {
+              scenarios.append({
+                    "name":"Advanced",
+                    "modelName":5,
+                    "floorplantype":-1}
+                )
             }
+
 
             orientation: ListView.Horizontal
             model:qmlRoot.scenarios
             delegate:  LargeStyledButton{
                 id:btn
                 buttonText:name
-                arrow:true
-                onActiveFocusChanged:{
+                arrow:false
 
+                Keys.onEnterPressed: {
+                    console.log("executing command group "+current_scenarios.commandToExecute)
+                    manager.execGrp(current_scenarios.commandToExecute)
+                }
+                onActiveFocusChanged:{
                     if(activeFocus){
                         scenarioList.setModel(floorplantype)
-                        console.log(btn.x)
                         centralScenarios.x = x
                     }
                 }
-
                 onActivated:{
                     forceActiveFocus()
                     if(floorplantype===-1)

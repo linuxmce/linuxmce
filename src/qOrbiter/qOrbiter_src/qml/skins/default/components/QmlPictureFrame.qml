@@ -13,7 +13,7 @@ Item{
     property bool random:true
     property int currentPic:0
 
-    property int switchTimer:20000
+    property int switchTimer:60000
     readonly property int transitionTime:switchTimer-4500
 
     Rectangle{

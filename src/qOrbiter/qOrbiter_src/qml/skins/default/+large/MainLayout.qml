@@ -8,17 +8,27 @@ import "components"
 Item {
     id:layout
     anchors.fill: qmlRoot
+
     Connections{
         target: qmlRoot
+
         onScreenSaverActivated:{
             uiOn=false
             pageLoader.toggleContent(false)
-
         }
+
         onResetTimeout:{
             pageLoader.toggleContent(true)
         }
 
+        onUnhandledKey: {
+            console.log("Recovering key...")
+            if(key==Qt.Key_Enter){
+                qmlRoot.resetTimeout();
+            } else {
+                console.log("Not handling recovered Key")
+            }
+        }
     }
 
     Rectangle{
