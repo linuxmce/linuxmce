@@ -82,7 +82,7 @@ StyledScreen {
             height:parent.height / 2
             width: parent.width *.85
             model:mediatypefilter
-            cellWidth:manager.isProfile ? Style.scaleX(30) : Style.scaleX(20)
+            cellWidth:width /3
             cellHeight:manager.isProfile ? Style.scaleY(15) : Style.scaleY(22)
             cacheBuffer:25
             delegate:
