@@ -65,37 +65,6 @@ else
 //echo "could not connect";
 }
 
-
-    
- 
-
-  function checkForDupe($connect, $device){
-$status = false;
- $deviceID = $_GET['d'];
-    $sql = "SELECT * FROM `EntertainArea` WHERE `Description` LIKE '".$deviceID."' LIMIT 0, 30 ";
-  //  echo "<b>Checking for duplicate Ea for device " . $device. "</b><br>";
-    $result = mysql_query($sql, $connect) or die(mysql_error($connect));
-    $i= 0;
-  while ($row = mysql_fetch_array($result))
-	{
-	  if($row['Description']){
-	   $status = true;
-	  }
-	}
-
-return $status;
-}
-
- function setEntertainArea($connect, $device, $location){
- 	$device= $deviceID = $_GET['d'];
-//echo "Setting device ".$device." to new EA in room : ".$location."<br>";
-$sql = "INSERT INTO `pluto_main`.`EntertainArea` (`PK_EntertainArea`, `FK_Room`, `Only1Stream`, `Description`, `Private`, `FK_FloorplanObjectType`, `FloorplanInfo`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_mod`, `psc_restrict`) VALUES (NULL, ".$location.", '0',".$device." , '0', '52', NULL, NULL, NULL, NULL, '0', CURRENT_TIMESTAMP, NULL);";
-$result = mysql_query($sql, $connect) or die(mysql_error($connect));
-$id=mysql_insert_id($conn);
-echo $id;
-}
-
-
 		$doc = new DOMDocument();
 		$doc->formatOutput = true;
 		$orbiterData = $doc->createElement("Orbiter".$deviceID);
@@ -340,27 +309,10 @@ $result = mysql_query($defaultLocationSql,$conn) or die(mysql_error($conn));
 		$attrib2= $dElement->setAttribute("DefaultLocation", $row2['Description']);
 		$attrib2= $dElement->setAttribute("DefaultEA", $row2['PK_EntertainArea']);
 		$attrib2= $dElement->setAttribute("DefaultRoom", $row['FK_Room']);
-		$room = $row['FK_Room'];
-		
-    $dupe = checkForDupe($conn, $deviceID);
-	if($dupe)
-	{
-//	echo "Duplicate, will set to ea for device<br>\n";
+		$room = $row['FK_Room'];		
+
 	}
-	else
-	{
-//	echo "No Matching Ea found, will set to new EA<br>\n";
-	
-	if($room){
-	//setEntertainArea($conn, $deviceID, $room);	
-	}
-	
-	
-	}
-		
-	}
-	$orbiterData->appendChild($dElement);
-			
+	$orbiterData->appendChild($dElement);			
 	return true;
 
 }
@@ -889,38 +841,9 @@ $paramArray["params"] = $p1Array;
 
 
 function sendMedia($fkFile){
-	
-$stream=NULL;
-			
-$path_parts=pathinfo($fkFile);
 
-$data="/tmp/".$path_parts['filename'].".mp4";
 
-switch ($path_parts['extension']) {
-	case 'mp3':
-	case 'aac':
-	case 'ogg':
-case 'flac':
-		$stream= new AudioStream($fkFile);
-		break;
-		
-case 'mkv':
-case 'mpeg':
-case "avi":
-// shell_exec("/var/www/lmce-admin/./remux.sh -f '".$fkFile."' 2>&1");	
-	$stream=new VideoStream($fkFile);
-	break;
-	
-	case 'mp4':
-	case 'm4v':
-	$stream=new VideoStream($fkFile);
-	break;
-	
-	default:
-		
-		break;
-}
-
+$stream=new VideoStream($fkFile);
 $stream.start();
 
 /*
