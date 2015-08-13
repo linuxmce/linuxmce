@@ -159,7 +159,7 @@ void Linuxmce_NVR::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
     }
         break;
     case COMMAND_Generic_Off_CONST: {
-          QMetaObject::invokeMethod(base, "NvrCameraBase::setMotionEnabled",  Qt::QueuedConnection, Q_ARG(bool, true));
+          QMetaObject::invokeMethod(base, "setMotionEnabled",  Qt::QueuedConnection, Q_ARG(bool, false));
      //   base->setMotionEnabled(false);
       //  emit setDetectionState(false, pMessage->m_dwPK_Device_To);
 
@@ -289,7 +289,7 @@ void Linuxmce_NVR::CreateChildren()
 
 void Linuxmce_NVR::OnReload()
 {
-   this->deleteLater();
+   exit(0);
 }
 
 //<-dceag-sample-b->
