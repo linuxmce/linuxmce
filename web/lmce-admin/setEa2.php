@@ -23,9 +23,6 @@ if (isset($_GET['label'])) {
 	die("No description");
 }
 
-if($deviceName=="QOrbiter-Generic")
-die("not changing");
-
 /*
  Need to get children devices and do the same as the parent.
  */
@@ -56,6 +53,10 @@ if ($conn) {
 	if ($installation == "") {
 		die("Cant Find Installation");
 	}
+	
+	if(checkIfDupe($conn)){
+		echo "checked duplicates<br>";
+	}
 
 	if (setParentDescription($conn)) {
 		echo "<br>Set Device Parent Name/Description<br>";
@@ -80,15 +81,74 @@ if ($conn) {
 	echo "finished";
 }
 
+function checkIfDupe($conn) {
+	global $deviceID;
+	 $deviceName =mysql_real_escape_string($_GET['label']);
+	global $mediaPlayerID;
+
+echo "checking dupe for $deviceName<br>";
+	$sql = "SELECT * from Device_EntertainArea where FK_Device= $mediaPlayerID ;";
+	echo "$sql<br>";
+	$result = mysql_query($sql);
+	$existingEa = NULL;
+	if (mysql_numrows($result) == 0) {
+		echo "no device found <br>";
+		return true;
+	} else {
+		echo "Found device matching criteria <br>";
+		while ($row = mysql_fetch_array($result)) {
+			$existingEa = $row['FK_EntertainArea'];
+			echo "Existing EntertainArea::$existingEa<br>";
+		}
+
+		if ($existingEa == NULL) {
+			die("Logical Error in finding existing ea in device_entertainarea");
+		}
+
+		$query = "SELECT * from EntertainArea WHERE PK_EntertainArea=$existingEa";
+		$result = mysql_query($query);
+
+		if (mysql_num_rows($result == 0)) {
+			die("Missing Poper EA all together!");
+		} else {
+			while ($row = mysql_fetch_array($result)) {
+				
+				if($row['Description'] == $deviceName){
+					echo "nothing wrong with duplicate check<br> ";
+					return true;
+				} else {
+					if($deviceName=="localhost"){
+						echo "<h2>Detected 'localhost' for device name, leaving existing device name in place</h2><br>";
+					global $deviceName;
+					$deviceName=$row['Description'];
+					} else {
+						global $deviceName;
+					$deviceName=$row['Description'];
+						echo "Device name is being updated to  ".$deviceName;
+						return true; 
+					}
+				}	
+			}
+		}
+
+	}
+
+}
+
 function setParentDescription($conn) {
 	global $deviceID;
-	$deviceName = mysql_real_escape_string($_GET['label']);
-	
-if($deviceName=="QOrbiter-Generic")
-return true;
+	 $deviceName = mysql_real_escape_string($_GET['label']);
+	$GLOBALS['deviceName'] = $deviceName;
+echo "Setting Parent device to ".$GLOBALS['deviceName'];
 
-	echo "Setting parent device description label to " . $deviceName;
-	$sql = "UPDATE Device SET Description='" . $deviceName . "' WHERE PK_Device='" . $deviceID . "';";
+
+	if ($deviceName == "QOrbiter-Generic" || $deviceName=="localhost"){
+			return true;
+	}
+	
+
+	echo "Setting parent device description label to " . $GLOBALS['deviceName']."<br>";
+	$sql = "UPDATE Device SET Description='" . $GLOBALS['deviceName'] . "' WHERE PK_Device='" . $deviceID . "';";
 	$result = mysql_query($sql, $conn);
 	return true;
 }
@@ -96,17 +156,19 @@ return true;
 function setEntertainArea($connect) {
 	global $mediaPlayerID;
 	global $mobileRoom;
+	$deviceN = $GLOBALS['deviceName'];
+	
 	$d = mysql_real_escape_string($_GET['label']);
-	echo "Creating EA " . $d . " in room: " . $mobileRoom . "<br>";
+	echo "Creating EA " . $GLOBALS['deviceName'] . " in room: " . $mobileRoom . "<br>";
 
-	$sql="INSERT INTO EntertainArea (FK_Room, Only1Stream,Description,Private,FK_FloorplanObjectType) Values ($mobileRoom,0,'$d',0,52);";
+	$sql = "INSERT INTO EntertainArea (FK_Room, Only1Stream,Description,Private,FK_FloorplanObjectType) Values ($mobileRoom,0,'$deviceN',0,52);";
 	echo "<br>$sql<br>";
 	mysql_query($sql, $connect);
 	$id = mysql_insert_id($connect);
 	echo "last insert id $id<br>";
-	
-	$ea=$id;
-	
+
+	$ea = $id;
+
 	if (is_null($ea)) {
 		echo "invalid EA ";
 		die("cannot continue");
@@ -165,7 +227,7 @@ function setupMobileRoom($conn) {
 
 function fixIntEa($conn) {
 	global $mobileRoom;
-	$deviceName = mysql_real_escape_string($_GET['label']);
+	global $deviceName; // = mysql_real_escape_string($_GET['label']);
 
 	$mp = $_GET['d'];
 	$mediaPlayerID = $mp + 1;
@@ -176,12 +238,12 @@ function fixIntEa($conn) {
 	$result = mysql_query($sql, $conn) or die(mysql_error($conn));
 
 	if (mysql_num_rows($result) == 0) {
-		echo "No int EntertainArea for " . $deviceName . " to fix<br>";
+		echo "No int EntertainArea for " . $GLOBALS['deviceName'] . " to fix<br>";
 		return true;
 	} else {
 		while ($row = mysql_fetch_array($result)) {
 			echo "Found int EntertainArea. Incorrect setting  for device " . $deviceName . " in " . $row['PK_EntertainArea'] . "<br>";
-			$correctionSql = "UPDATE EntertainArea SET Description='" . $deviceName . "', FK_Room='" . $mobileRoom . "'  WHERE PK_EntertainArea = '" . $row['PK_EntertainArea'] . "'";
+			$correctionSql = "UPDATE EntertainArea SET Description='" . $GLOBALS['deviceName'] . "', FK_Room='" . $mobileRoom . "'  WHERE PK_EntertainArea = '" . $row['PK_EntertainArea'] . "'";
 			$correctionResult = mysql_query($correctionSql, $conn);
 			echo "Setting Corrected.<br>";
 			return true;
@@ -192,23 +254,23 @@ function fixIntEa($conn) {
 
 function fixRoomEa($conn) {
 	global $mobileRoom;
-	$deviceName = mysql_real_escape_string($_GET['label']);
+	$deviceName; // = mysql_real_escape_string($_GET['label']);
 	$mp = $_GET['d'];
 	$mediaPlayerID = $mp + 1;
-	echo "<br>Checking named EntertainAreas for correct Settings for device " . $deviceName . "<br>";
+	echo "<br>Checking named EntertainAreas for correct Settings for device " . $GLOBALS['deviceName'] . "<br>";
 
-	$sql = "SELECT * FROM `EntertainArea` WHERE `Description` LIKE '" . $deviceName . "' LIMIT 0, 30 ";
+	$sql = "SELECT * FROM `EntertainArea` WHERE `Description` LIKE '" . $GLOBALS['deviceName'] . "' LIMIT 0, 30 ";
 	$result = mysql_query($sql, $conn) or die(mysql_error($conn));
 
 	if (mysql_num_rows($result) == 0) {
-		echo "No EntertainArea present, will create one for device " . $deviceName . "<br>";
+		echo "No EntertainArea present, will create one for device " . $GLOBALS['deviceName'] . "<br>";
 		setEntertainArea($conn);
 		return true;
 	} else {
 		echo "Existing EntertainArea found, will validate ...";
 		while ($row = mysql_fetch_array($result)) {
 			echo " . ";
-			$correctionSql = "UPDATE EntertainArea SET Description = " . $deviceName . " , FK_Room=" . $mobileRoom . "  WHERE PK_EntertainArea = " . $row["PK_EntertainArea"] . ";";
+			$correctionSql = "UPDATE EntertainArea SET Description = " . $GLOBALS['deviceName'] . " , FK_Room=" . $mobileRoom . "  WHERE PK_EntertainArea = " . $row["PK_EntertainArea"] . ";";
 			$correctionResult = mysql_query($corrctionSql, $conn);
 
 		}
@@ -218,11 +280,11 @@ function fixRoomEa($conn) {
 }
 
 function precheckDeviceEntertainArea($conn) {
-	$deviceName = mysql_real_escape_string($_GET['label']);
+	global $deviceName; // = mysql_real_escape_string($_GET['label']);
 	$mp = $_GET['d'];
 	$mediaPlayerID = $mp + 1;
 
-	echo "<br>Checking Device_EntertainArea to validate qMediaPlayer Settings for QOrbiter on device::" . $deviceName . "<br>";
+	echo "<br>Checking Device_EntertainArea to validate qMediaPlayer Settings for QOrbiter on device::" . $GLOBALS['deviceName'] . "<br>";
 
 	$sql2 = "SELECT * FROM `Device_EntertainArea` WHERE `FK_Device` =" . $mp . " LIMIT 0, 30 ";
 	$result2 = mysql_query($sql2, $conn) or die(mysql_error($conn));
@@ -233,7 +295,7 @@ function precheckDeviceEntertainArea($conn) {
 		$result = mysql_query($sql, $conn) or die(mysql_error($conn));
 
 		if (mysql_num_rows($result) == 0) {
-			echo "Missing Entry, needs to be added for " . $deviceName . "<br> ";
+			echo "Missing Entry, needs to be added for " . $GLOBALS['deviceName'] . "<br> ";
 
 			$check = "SELECT * FROM EntertainArea WHERE Description LIKE '" . $_GET['label'] . "' ";
 			$checkResult = mysql_query($check, $conn) or die(mysql_error($conn));			$ea;
@@ -274,7 +336,7 @@ function precheckDeviceEntertainArea($conn) {
 function updateEntertainArea($connect, $device, $location) {
 	echo "Updating device to existing EA <br>";
 
-	$deviceName = mysql_real_escape_string($_GET['label']);
+	global $deviceName; // = mysql_real_escape_string($_GET['label']);
 	$mp = $_GET['d'];
 	$mediaPlayerID = $mp + 1;
 
