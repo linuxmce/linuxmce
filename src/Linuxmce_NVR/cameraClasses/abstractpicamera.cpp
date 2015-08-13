@@ -213,6 +213,7 @@ void NvrCameraBase::setMotionEnabled(bool motionEnabled)
     if(m_motionEnabled==motionEnabled)return;
     m_motionEnabled = motionEnabled;
     emit motionEnabledChanged();
+    qDebug() << "Motion state for device " << m_dceDeviceId << " set to " << motionEnabled;
 }
 
 int NvrCameraBase::dceDeviceId() const
