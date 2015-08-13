@@ -352,7 +352,7 @@ $result = mysql_query($defaultLocationSql,$conn) or die(mysql_error($conn));
 //	echo "No Matching Ea found, will set to new EA<br>\n";
 	
 	if($room){
-	setEntertainArea($conn, $deviceID, $room);	
+	//setEntertainArea($conn, $deviceID, $room);	
 	}
 	
 	
@@ -889,9 +889,38 @@ $paramArray["params"] = $p1Array;
 
 
 function sendMedia($fkFile){
+	
+$stream=NULL;
+			
+$path_parts=pathinfo($fkFile);
 
+$data="/tmp/".$path_parts['filename'].".mp4";
 
-$stream=new VideoStream($fkFile);
+switch ($path_parts['extension']) {
+	case 'mp3':
+	case 'aac':
+	case 'ogg':
+case 'flac':
+		$stream= new AudioStream($fkFile);
+		break;
+		
+case 'mkv':
+case 'mpeg':
+case "avi":
+// shell_exec("/var/www/lmce-admin/./remux.sh -f '".$fkFile."' 2>&1");	
+	$stream=new VideoStream($fkFile);
+	break;
+	
+	case 'mp4':
+	case 'm4v':
+	$stream=new VideoStream($fkFile);
+	break;
+	
+	default:
+		
+		break;
+}
+
 $stream.start();
 
 /*
