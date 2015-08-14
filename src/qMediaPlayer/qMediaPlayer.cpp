@@ -39,8 +39,10 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *man
     //<-dceag-const-e->
 {
     setCommandResponse("Created media player as standalone with device number " + QString::number(DeviceID));
+    qDebug() << "Created media player as standalone with device number " << QString::number(DeviceID);
     qWarning() << "Standalone Constructor";
     mp_manager = manager;
+    qDebug() << Q_FUNC_INFO;
 
     if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
         setCommandResponse("qMediaPlayer::Device "+QString::number(m_dwPK_Device)+" Connected.");
@@ -49,7 +51,7 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *man
         setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
         setConnectionStatus(false);
     }
-
+    qWarning() << Q_FUNC_INFO << "end";
 }
 
 //<-dceag-const2-b->
@@ -78,8 +80,13 @@ qMediaPlayer::~qMediaPlayer()
 //<-dceag-getconfig-b->
 bool qMediaPlayer::GetConfig()
 {
-    if( !qMediaPlayer_Command::GetConfig() )
+    qDebug() << Q_FUNC_INFO << " enter ";
+    if( !qMediaPlayer_Command::GetConfig() ){
+
+        qWarning() << "QMediaPlayer is screwed up!";
         return false;
+    }
+
     //<-dceag-getconfig-e->
 
     // Put your code here to initialize the data in this class
@@ -97,11 +104,13 @@ bool qMediaPlayer::GetConfig()
                 qDebug() << "QMediaPlayer::My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
                 QString t = address.toString();
                 DATA_Set_TCP_Address(t.toStdString(), true);
+                 qDebug() << Q_FUNC_INFO << " exit ";
                 return true;
             }
         //CMD_Set_Device_Data setIp(this->m_dwPK_Device, 8, m_dwPK_Device, t.toStdString(), )
     }
     m_bPaused = false;
+    qDebug() << Q_FUNC_INFO << " exit ";
     return true;
 }
 
@@ -359,6 +368,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     setCommandResponse("Recieved play command!");
     setMediaType(iPK_MediaType);
     setStreamID(iStreamID);
+    setInternalMediaUrl(QString::fromStdString(sMediaURL));
     setStartPosition(QString::fromStdString(sMediaPosition));
 
     qWarning() << "Need to implement command #37 - Play Media" << endl;
@@ -568,19 +578,11 @@ void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iS
     setCommandResponse(" Jump to Position in Stream");
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
-    // emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
+    emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
     qDebug() << "qMediaPlayer::Jump_to_position_in_stream "<< sValue_To_Assign.c_str();
-    quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
 
-#if defined(ANDROID) || defined(Q_OS_IOS)
-    emit newMediaPosition(QString::fromStdString(sValue_To_Assign.c_str()).toInt());
-#endif
-
-#ifndef RPI
-#if defined (QT4) && ! defined (ANDROID)
-    mp_manager->mediaObject->seek(tg*1000);
-#endif
-#endif
+  //  quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
+   //  emit newMediaPosition(QString::fromStdString(sValue_To_Assign.c_str()).toInt());
     sCMD_Result="OK";
 }
 
@@ -1665,6 +1667,36 @@ void qMediaPlayer::setCommandResponse(QString r)
 {
     {commandResponse = QTime::currentTime().toString()+"-QMediaPlayer:: "+ r; emit commandResponseChanged(commandResponse);}
 }
+int qMediaPlayer::getCurrentFkFileType() const
+{
+    return m_currentFkFileType;
+}
+
+void qMediaPlayer::setCurrentFkFileType(int currentFkFileType)
+{
+    m_currentFkFileType = currentFkFileType;
+}
+
+int qMediaPlayer::getCurrentSpeed() const
+{
+    return m_currentSpeed;
+}
+
+void qMediaPlayer::setCurrentSpeed(int currentSpeed)
+{
+    m_currentSpeed = currentSpeed;
+}
+
+QString qMediaPlayer::getInternalMediaUrl() const
+{
+    return m_internalMediaUrl;
+}
+
+void qMediaPlayer::setInternalMediaUrl(const QString &internalMediaUrl)
+{
+    m_internalMediaUrl = internalMediaUrl;
+}
+
 
 //<-dceag-c102-b->
 
@@ -1949,8 +1981,39 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 
 void qMediaPlayer::updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen)
 {
+   // EVENT_Media_Description_Changed(mediaTitle.toStdString());
     DeviceData_Base *p = this->m_pData->m_pDevice_Core->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
     QString whatisthis(",4962,47,244,224,230");
     whatisthis.prepend(QString::number(screen));
     CMD_Set_Now_Playing setNowPlaying(this->m_dwPK_Device,p->m_dwPK_Device, whatisthis.toStdString() ,mediaTitle.toStdString(),mediaSubtitle.toStdString(),this->i_pkMediaType,this->i_StreamId,0,name.toStdString(),QString::number(this->m_dwPK_Device).toStdString().c_str(), false);
+    SendCommand(setNowPlaying);
+
+    EVENT_Playback_Info_Changed(mediaTitle.toStdString(), mediaSubtitle.toStdString(), name.toStdString());
+}
+
+void qMediaPlayer::confirmMediaStarted(QString description)
+{
+    EVENT_Playback_Started(getInternalMediaUrl().toStdString(), i_StreamId, description.toStdString(), "true", "true");
+}
+
+void qMediaPlayer::confirmMediaEnded(bool witherror)
+{
+    EVENT_Playback_Completed(getInternalMediaUrl().toStdString(), i_StreamId, witherror);
+}
+
+void qMediaPlayer::positionChanged(QString total, QString current)
+{
+    SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+        EVENT_Media_Position_Changed_CONST,
+        7 /* number of parameter's pairs (id, value) */,
+        EVENTPARAMETER_FK_MediaType_CONST, StringUtils::itos(getMediaType()).c_str(),
+        EVENTPARAMETER_MRL_CONST, getCurrentMediaUrl().toStdString().c_str(),
+        EVENTPARAMETER_ID_CONST, getMediaId().toStdString().c_str(),
+        EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(i_StreamId).c_str(),
+        EVENTPARAMETER_DateTime_CONST, total.toStdString().c_str(),
+        EVENTPARAMETER_Current_Time_CONST, current.toStdString().c_str(),
+        EVENTPARAMETER_Speed_CONST, StringUtils::itos(getCurrentSpeed()).c_str()
+                            )
+                );
+
 }
