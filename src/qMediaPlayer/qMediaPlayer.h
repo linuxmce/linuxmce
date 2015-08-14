@@ -949,6 +949,15 @@ public:
 
 //<-dceag-h-e->
 
+        QString getInternalMediaUrl() const;
+        void setInternalMediaUrl(const QString &internalMediaUrl);
+
+        int getCurrentSpeed() const;
+        void setCurrentSpeed(int currentSpeed);
+
+        int getCurrentFkFileType() const;
+        void setCurrentFkFileType(int currentFkFileType);
+
     signals:
         void commandResponseChanged(QString);
         void mediaResponseChanged(QString);
@@ -980,8 +989,13 @@ public:
 
 
     public slots:
-
+        //playback info changed event
         void updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen);
+
+        void confirmMediaStarted(QString description );
+        void confirmMediaEnded(bool witherror);
+
+        void positionChanged(QString total, QString current);
 
         void setConnectionStatus(bool b) {connected = b; emit connectionStatusChanged(connected);}
 
@@ -990,6 +1004,7 @@ public:
         void mediaEnded(bool status);
 
         void setMediaID(QString id) {mediaID = id; emit mediaIdChanged(mediaID);}
+        QString getMediaId(){return mediaID;}
 
         void setStartPosition(QString s) {startPosition = s; emit startPositionChanged(startPosition);}
         QString getStartPosition() {return startPosition;}
@@ -1011,8 +1026,10 @@ public:
 
 
     private:
-
+        int m_currentSpeed;
+        int m_currentFkFileType;
         MediaManager * mp_manager;
+        QString m_internalMediaUrl;
 
     };
 
