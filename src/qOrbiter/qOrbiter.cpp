@@ -1840,6 +1840,8 @@ bool DCE::qOrbiter::initialize(){
 
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
+        PurgeInterceptors();
+        RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
         m_dwMaxRetries = 1;
         m_bRouterReloading = false;
         m_bReload = false;
@@ -2021,6 +2023,9 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  StringUtils::itos(i_room) ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
+
+
+
         emit commandResponseChanged("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         GetScreenSaverImages();
     }
@@ -2302,6 +2307,12 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
 void qOrbiter::shutdown()
 {
     // Closing and deleting of superclass member variables are done by superclass
+}
+
+bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceData_Base *pDeviceFrom, DeviceData_Base *pDeviceTo)
+{
+    qDebug() << Q_FUNC_INFO<<"Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str();
+    return false;
 }
 
 void qOrbiter::beginSetup()
@@ -4576,7 +4587,7 @@ int qOrbiter::PromptFor(std::string sToken)
         string sDescription = StringUtils::Tokenize(sChoise,"\t",pos);
         QString t = QString::fromStdString(sDescription);
         PromptData *p = new PromptData(QString::fromStdString(sDescription), Choice);
-       promptList->append(p);
+        promptList->append(p);
 
         if( Choice && sDescription.size() )
             mapResponse[Choice]=sDescription;
@@ -4694,7 +4705,7 @@ int qOrbiter::SetupNewOrbiter()
 
     CMD_New_Orbiter_DT.ParseResponse( pResponse );
     delete pResponse;
-    qDebug() << "Device ID::" << PK_Device; 
+    qDebug() << "Device ID::" << PK_Device;
 
     if( !PK_Device )
     {
