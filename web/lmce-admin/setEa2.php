@@ -53,7 +53,7 @@ if ($conn) {
 	if ($installation == "") {
 		die("Cant Find Installation");
 	}
-	
+	//check for duplicate ea, and obtain existing
 	if(checkIfDupe($conn)){
 		echo "checked duplicates<br>";
 	}
@@ -83,8 +83,11 @@ if ($conn) {
 
 function checkIfDupe($conn) {
 	global $deviceID;
-	 $deviceName =mysql_real_escape_string($_GET['label']);
 	global $mediaPlayerID;
+	
+	 $GLOBALS['deviceName']=mysql_real_escape_string($_GET['label']);
+	 $deviceName= $GLOBALS['deviceName'];
+	
 
 echo "checking dupe for $deviceName<br>";
 	$sql = "SELECT * from Device_EntertainArea where FK_Device= $mediaPlayerID ;";
@@ -118,12 +121,13 @@ echo "checking dupe for $deviceName<br>";
 					return true;
 				} else {
 					if($deviceName=="localhost"){
-						echo "<h2>Detected 'localhost' for device name, leaving existing device name in place</h2><br>";
-					global $deviceName;
-					$deviceName=$row['Description'];
+						
+						echo "<h2>Detected 'localhost' for device name, leaving existing device name ".$row['Description']." in place</h2><br>";
+					
+					$GLOBALS['deviceName']=$row['Description'];
 					} else {
-						global $deviceName;
-					$deviceName=$row['Description'];
+						
+					$GLOBALS['deviceName']=$row['Description'];
 						echo "Device name is being updated to  ".$deviceName;
 						return true; 
 					}
@@ -137,8 +141,8 @@ echo "checking dupe for $deviceName<br>";
 
 function setParentDescription($conn) {
 	global $deviceID;
-	 $deviceName = mysql_real_escape_string($_GET['label']);
-	$GLOBALS['deviceName'] = $deviceName;
+	 $deviceName =$GLOBALS['deviceName'];
+	
 echo "Setting Parent device to ".$GLOBALS['deviceName'];
 
 
