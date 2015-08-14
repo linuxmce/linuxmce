@@ -112,6 +112,9 @@ Item{
 
         onErrorStringChanged: {
             console.log(errorString)
+            if(qmlPlayer.error===MediaPlayer.NetworkError){
+
+            }
         }
 
         onStopped: {
@@ -136,6 +139,9 @@ Item{
         }
         onErrorChanged: {
             console.log("QML Media player error::"+error)
+            if(error===1){
+                play()
+            }
         }
 
         onPositionChanged: {

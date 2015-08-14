@@ -84,6 +84,7 @@ private slots:
 
 
 private:
+    QString m_persistentName;
     QSettings m_settings;
     QMap <SettingsKeyType::SettingKey, QString> m_lookup;
 
