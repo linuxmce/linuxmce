@@ -92,6 +92,7 @@ Item {
             anchors.fill: parent
             onClicked: uiOn=!uiOn
         }
+
     }
 
     MediaInterface{

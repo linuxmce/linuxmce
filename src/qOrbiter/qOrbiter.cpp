@@ -2972,7 +2972,7 @@ void qOrbiter::checkTimeCode(int npDevice)
                 }
             }
 
-        } else if(pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qOrbiter_CONST ){
+        } else if(pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qMediaPlayer_CONST ){
             sIPAddress = GetCurrentDeviceData(m_dwPK_Device_NowPlaying, DEVICEDATA_TCP_Address_CONST);
         }
         else
