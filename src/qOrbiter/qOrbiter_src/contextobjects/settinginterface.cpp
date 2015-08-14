@@ -9,6 +9,7 @@
 SettingInterface::SettingInterface(QObject *parent) :
     QObject(parent),
     m_settings(0),
+    m_persistentName(""),
     ready(false)
 {
     /** Note that application name, org, and domain are set via QCoreApplication in main.cpp */
@@ -45,10 +46,14 @@ SettingInterface::SettingInterface(QObject *parent) :
 
 void SettingInterface::initializeSettings()
 {
+    //device name is tricky because it used as an Entertain area identifier. We want to ensure its always read correctly so we do our best to maintain it.
+    //the problem case is when the user clears settings. the device name should remain the same but there is nowhere to place it in a simple manner, so we do it behind the scenes.
+
+
     if(!m_settings.childGroups().contains("network")){
         log(tr("Initializing network Settings"));
         m_settings.beginGroup("network");
-        m_settings.setValue("deviceName", QHostInfo::localHostName());
+        m_settings.setValue("deviceName", m_persistentName.isEmpty() ? "QOrbiter Device" : m_persistentName);
         m_settings.setValue("router","192.168.80.1");
         m_settings.setValue("hostname", "dcerouter.linuxmce");
         m_settings.setValue("externalhostname", "");
@@ -94,6 +99,7 @@ void SettingInterface::initializeSettings()
 
 void SettingInterface::destroySettingsData()
 {
+    m_persistentName = getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
     m_settings.clear();
     qDebug() << m_settings.allKeys();
     initializeSettings();
@@ -134,6 +140,9 @@ void SettingInterface::setOption(SettingsInterfaceType::SettingsType st, Setting
         emit writeError(tr("Invalid settings option"));
         log(QString("Options for this key are %1").arg(m_settings.childKeys().join("\n")));
     } else {
+        if(sk==SettingsKeyType::Setting_Network_DeviceName){
+            m_persistentName=sval.toString();
+        }
         m_settings.setValue(key, sval);
     }
     log("Option set");

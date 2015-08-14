@@ -101,7 +101,7 @@ Item{
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-                onClicked: { window.qmlSetupLmce(devicenumber.text, routerip.text) }
+                onClicked: { window.qmlSetupLmce(window.deviceno, routerip.text) }
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
