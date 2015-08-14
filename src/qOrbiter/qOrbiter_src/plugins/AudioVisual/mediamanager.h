@@ -65,6 +65,7 @@ class MediaManager :
         #endif
 {
 
+
     Q_PROPERTY(bool connected READ getConnectionStatus WRITE setConnectionStatus NOTIFY connectedChanged)
     Q_PROPERTY(QString pluginUrl READ getPluginUrl NOTIFY pluginUrlUpdated)
     Q_PROPERTY(QString currentStatus READ getCurrentStatus WRITE setCurrentStatus NOTIFY currentStatusChanged)
@@ -288,8 +289,8 @@ public slots:
         setMediaPlaying(false);
     }
 
-    void qmlPlaybackEnded(bool ended){
-        mediaPlayer->mediaEnded(ended);
+    void qmlPlaybackEnded(bool ended){        
+        mediaPlayer->EVENT_Playback_Completed(mediaPlayer->getCurrentMediaUrl().toStdString(),mediaPlayer->getStreamID(), ended);
     }
 
 
@@ -603,6 +604,10 @@ qDebug() << "Updating file url.";
 
 #endif
 #endif
+
+    //Event slots
+    void playbackInfoUpdated(QVariant playbackData);
+
 
 private:
     void initializePlayer();

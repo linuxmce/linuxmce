@@ -159,15 +159,14 @@ void MediaManager::initializeConnections()
    // QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
 
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
-    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));
-    QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
+    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));    
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
 #endif
 
-
-    QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
     QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
+
+    QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(mediaStarted()));
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopTimeCodeServer()));
     QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)));
@@ -224,8 +223,9 @@ void MediaManager::startTimeCodeServer(){
         return;
     }
     setCurrentStatus("Starting timecode server on port 12000");
-    timeCodeServer->listen(QHostAddress::Any,12000);
+    timeCodeServer->listen(QHostAddress(QString::fromStdString(mediaPlayer->DATA_Get_TCP_Address()) ),12000);
     QObject::connect(timeCodeServer, SIGNAL(newConnection()), this , SLOT(newClientConnected()));
+
 }
 
 void MediaManager::stopTimeCodeServer()
@@ -390,6 +390,8 @@ void MediaManager::processTimeCode(qint64 f)
 
     transmit(timeCodeTick);
     current_position=timeCodeTick;
+  //  mediaPlayer->positionChanged(qs_totalTime, t);
+
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
 
@@ -449,6 +451,11 @@ void MediaManager::processSocketdata()
         }
     }
     lastClient->disconnectFromHost();
+}
+
+void MediaManager::playbackInfoUpdated(QVariant playbackData)
+{
+    qDebug() << Q_FUNC_INFO << playbackData;
 }
 
 
