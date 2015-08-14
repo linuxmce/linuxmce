@@ -13,7 +13,7 @@ Item{
 
     function prepareMedia(mediaUrl){
         processLabel.text="Please Wait, pre-processing media for mobile device."
-        var url = mediaUrl+"&pre";
+        var url = mediaUrl+"&pre=1";
         console.log("Prepare url-->"+url );
         var request = new XMLHttpRequest();
         request.onreadystatechange=function(){
@@ -145,20 +145,24 @@ Item{
         onPlaybackStateChanged: console.log(qmlPlayer.source)
 
         onErrorStringChanged: {
-            console.log(errorString)
-            if(qmlPlayer.error===MediaPlayer.NetworkError){
 
+            if(qmlPlayer.error===MediaPlayer.NetworkError){
+                console.log(errorString+"::NetworkError")
             } else if(qmlPlayer.error==MediaPlayer.ResourceError){
+                console.log(errorString+"::ResourceError")
                 lmceData.pluginNotifyEnd()
             }
         }
 
         onStopped: {
 
-            //            if(duration==position){
-            //                lmceData.qmlPlaybackEnded(false)
-            //            }
-
+            if(qmlPlayer.errorString!==""){
+                console.log("ended with errors");
+                console.log(qmlPlayer.errorString)
+                lmceData.pluginNotifyEnd(true)
+            } else {
+               // lmceData.pluginNotifyEnd(false)
+            }
         }
 
         onMediaObjectChanged: {
@@ -172,11 +176,14 @@ Item{
             console.log("Track duration "+duration)
             lmceData.setQmlTotalTime(Number(duration))
             //   lmceData.setTotalTime(duration)
+
+            console.log("current mediaObeject MetaData")
+            console.log(JSON.stringify(metaData, null, "\t"))
         }
         onErrorChanged: {
             console.log("QML Media player error::"+error)
             if(error===1){
-                play()
+              //  play()
             }
         }
 

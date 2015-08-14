@@ -2010,6 +2010,8 @@ public slots:
 
     //child devices
 
+    bool timeCodeInterceptor(class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo);
+
 private:
 
 

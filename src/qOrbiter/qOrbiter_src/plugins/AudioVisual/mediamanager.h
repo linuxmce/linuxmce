@@ -597,7 +597,7 @@ qDebug() << "Updating file url.";
     }
 
     void pluginNotifyStart(){startTimeCodeServer(); mediaPlayer->EVENT_Playback_Started(this->fileReference.toStdString(), mediaPlayer->i_StreamId, "", "", "");}
-    void pluginNotifyEnd(){mediaPlayer->EVENT_Playback_Completed(this->fileReference.toStdString(), mediaPlayer->i_StreamId, true);}
+    void pluginNotifyEnd(bool withError){mediaPlayer->EVENT_Playback_Completed(this->fileReference.toStdString(), mediaPlayer->i_StreamId, withError);}
 
 #ifndef __ANDROID__
 #ifdef QT4

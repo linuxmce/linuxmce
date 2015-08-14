@@ -342,6 +342,7 @@ void MediaManager::setMediaUrl(QString url)
 
 void MediaManager::processTimeCode(qint64 f)
 {
+
     if(!f ){
         f=0;
         return;
@@ -390,7 +391,7 @@ void MediaManager::processTimeCode(qint64 f)
 
     transmit(timeCodeTick);
     current_position=timeCodeTick;
-  //  mediaPlayer->positionChanged(qs_totalTime, t);
+   mediaPlayer->positionChanged(qs_totalTime, t);
 
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
