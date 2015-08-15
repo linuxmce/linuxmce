@@ -104,7 +104,7 @@ bool qMediaPlayer::GetConfig()
                 qDebug() << "QMediaPlayer::My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
                 QString t = address.toString();
                 DATA_Set_TCP_Address(t.toStdString(), true);
-                 qDebug() << Q_FUNC_INFO << " exit ";
+                qDebug() << Q_FUNC_INFO << " exit ";
                 return true;
             }
         //CMD_Set_Device_Data setIp(this->m_dwPK_Device, 8, m_dwPK_Device, t.toStdString(), )
@@ -581,8 +581,8 @@ void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iS
     emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
     qDebug() << "qMediaPlayer::Jump_to_position_in_stream "<< sValue_To_Assign.c_str();
 
-  //  quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
-   //  emit newMediaPosition(QString::fromStdString(sValue_To_Assign.c_str()).toInt());
+    //  quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
+    //  emit newMediaPosition(QString::fromStdString(sValue_To_Assign.c_str()).toInt());
     sCMD_Result="OK";
 }
 
@@ -1981,7 +1981,7 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 
 void qMediaPlayer::updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen)
 {
-   // EVENT_Media_Description_Changed(mediaTitle.toStdString());
+    // EVENT_Media_Description_Changed(mediaTitle.toStdString());
     DeviceData_Base *p = this->m_pData->m_pDevice_Core->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
     QString whatisthis(",4962,47,244,224,230");
     whatisthis.prepend(QString::number(screen));
@@ -2003,17 +2003,22 @@ void qMediaPlayer::confirmMediaEnded(bool witherror)
 
 void qMediaPlayer::positionChanged(QString total, QString current)
 {
-    SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
-        EVENT_Media_Position_Changed_CONST,
-        7 /* number of parameter's pairs (id, value) */,
-        EVENTPARAMETER_FK_MediaType_CONST, StringUtils::itos(getMediaType()).c_str(),
-        EVENTPARAMETER_MRL_CONST, getCurrentMediaUrl().toStdString().c_str(),
-        EVENTPARAMETER_ID_CONST, getMediaId().toStdString().c_str(),
-        EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(i_StreamId).c_str(),
-        EVENTPARAMETER_DateTime_CONST, total.toStdString().c_str(),
-        EVENTPARAMETER_Current_Time_CONST, current.toStdString().c_str(),
-        EVENTPARAMETER_Speed_CONST, StringUtils::itos(getCurrentSpeed()).c_str()
-                            )
+
+    DCE::Message *tc = new Message(
+                m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+                EVENT_Media_Position_Changed_CONST,
+                7 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_FK_MediaType_CONST, StringUtils::itos(getMediaType()).c_str(),
+                EVENTPARAMETER_MRL_CONST, getCurrentMediaUrl().toStdString().c_str(),
+                EVENTPARAMETER_ID_CONST, getMediaId().toStdString().c_str(),
+                EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(i_StreamId).c_str(),
+                EVENTPARAMETER_DateTime_CONST, total.toStdString().c_str(),
+                EVENTPARAMETER_Current_Time_CONST, current.toStdString().c_str(),
+                EVENTPARAMETER_Speed_CONST, StringUtils::itos(getCurrentSpeed()).c_str()
                 );
+
+    this->m_pEvent->SendMessage(tc);
+
+
 
 }
