@@ -42,6 +42,7 @@ public:
 	~DB();
 	//connect to databse
 	bool connect(string sHost, string sUser, string sPass, string sDatabase);
+	void reconnect();
 	void close();
 	DBResult query(string sQuery);
 	bool connected();

@@ -16,6 +16,13 @@ bool DB::connect(string sHost, string sUser, string sPass, string sDatabase)
 	mysql_options(&m_mysqlInit, MYSQL_OPT_RECONNECT, &reconnect);
 	if ( m_pConnection = mysql_real_connect(&m_mysqlInit,sHost.c_str(),sUser.c_str(),sPass.c_str(),sDatabase.c_str(),0,0,0) ) {
 		m_bConnected = true;
+		
+		// Save parameters for possible reconnect.
+                m_sHost=sHost;
+	        m_sUser=sUser;
+		m_sPass=sPass;
+		m_sDatabase=sDatabase;
+		
 		return true;
 	} else {
 		m_bConnected = false;
@@ -23,6 +30,12 @@ bool DB::connect(string sHost, string sUser, string sPass, string sDatabase)
 	}
 	
 }
+
+void DB::reconnect()
+{
+  connect(m_sHost,m_sUser,m_sPass,m_sDatabase);
+}
+
 void DB::close()
 {
 	if( m_pConnection )
@@ -40,9 +53,32 @@ bool DB::connected()
 DBResult DB::query(string sQuery)
 {
 	DBResult result;
-	
-	mysql_query(m_pConnection,sQuery.c_str());
-	result.m_pResult = mysql_store_result(m_pConnection);
+
+	if (sQuery.empty())
+	  {
+	    result.m_pResult=NULL;
+	    return result;
+	  }
+
+	if (!m_pConnection)
+	  {
+	    reconnect();
+	    if (m_pConnection)
+	      {
+		mysql_query(m_pConnection,sQuery.c_str());
+		result.m_pResult = mysql_store_result(m_pConnection);
+	      }
+	    else
+	      {
+		result.m_pResult=NULL;
+	      }
+	  }
+	else
+	  {
+	    mysql_query(m_pConnection,sQuery.c_str());
+	    result.m_pResult = mysql_store_result(m_pConnection);
+	  }
+
 	return result;
 }
 string DB::quickQuery(string sQuery) 
