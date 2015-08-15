@@ -1955,6 +1955,7 @@ void DCE::qOrbiter::deinitialize()
     int iSize;
     pData = NULL;
     iSize = 0;
+    PurgeInterceptors();
     BindMediaRemote(false);
     //DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     // SendCommand(CMD_OrbiterUnRegistered);
@@ -2311,7 +2312,19 @@ void qOrbiter::shutdown()
 
 bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceData_Base *pDeviceFrom, DeviceData_Base *pDeviceTo)
 {
-    qDebug() << Q_FUNC_INFO<<"Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str();
+    Q_UNUSED(pSocket);
+    Q_UNUSED(pDeviceTo);
+
+    string time = pMessage->m_mapParameters[EVENTPARAMETER_Current_Time_CONST];
+    QString deviceEa;
+    if(pDeviceFrom->m_dwPK_DeviceTemplate==DEVICETEMPLATE_qOrbiter_CONST){
+        deviceEa = QString::fromStdString(pDeviceFrom->GetTopMostDevice()->m_sDescription);
+    } else {
+        deviceEa = QString::fromStdString(pDeviceFrom->m_sDescription);
+    }
+
+
+    qDebug() <<  Q_FUNC_INFO << "Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str() << "::"<< time.c_str();
     return false;
 }
 
