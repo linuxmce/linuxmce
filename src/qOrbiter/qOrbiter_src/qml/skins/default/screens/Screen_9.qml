@@ -1,6 +1,8 @@
 import QtQuick 2.2
 import "../components"
 import "../."
+import org.linuxmce.grids 1.0
+
 StyledScreen{
     id:makecallphonebook
 
@@ -26,7 +28,7 @@ StyledScreen{
             ListView {
                 id: phoneBookList
                 property int level: 0
-                model: manager.getDataGridModel("phoneBook", 21)
+                model: manager.getDataGridModel("phoneBook", DataGrids.Phone_Book_Auto_Compl, '')
                 Connections {
                     target: phoneBookList.model
                     onScrollToItem: {
@@ -43,7 +45,11 @@ StyledScreen{
                     textSize: Style.appFontSize_list
                     onActivated:   {
                         if (phoneBookList.level == 0) {
-                            phoneBookList.model = manager.getDataGridModel("phoneNumber", 22)
+                            phoneBookList.level = 1
+                            manager.clearDataGrid("phoneNumber")
+                            phoneBookList.model = manager.getDataGridModel("phoneNumber", DataGrids.Phone_Book_List_of_Nos, value)
+                        } else if (phoneBookList.level == 1) {
+                            // Make call
                         }
                     }
                 }
@@ -84,7 +90,9 @@ StyledScreen{
                 readOnly: false
                 horizontalAlignment: TextInput.AlignHCenter
                 font.pixelSize: Style.appFontSize_list
-                onTextChanged:manager.getDataGridModel("phoneBook", 21).setOption("1|%"+text) //manager.seekGrid("phoneBook", text)
+                onTextChanged: {
+                    manager.refreshDataGrid("phoneBook", DataGrids.Phone_Book_Auto_Compl, "1|%"+text)
+                }
             }
         }
     }
