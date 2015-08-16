@@ -400,6 +400,7 @@ int main(int argc, char* argv[])
         qmlRegisterType<SettingsKeyType>("org.linuxmce.settings", 1,0, "SettingsKey");
         qmlRegisterType<GenericFlatListModel>();
 
+
         QQmlApplicationEngine engine;
         engine.load("qrc:/qml/Index.qml");
 

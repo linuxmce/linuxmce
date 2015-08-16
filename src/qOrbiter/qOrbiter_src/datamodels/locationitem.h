@@ -51,8 +51,7 @@ public:
         p.insert("ea_name", name);
         p.insert("room",roomVal());
         ea_list.append(p);
-        emit dataChanged();
-        qDebug() << ea_list;
+        emit dataChanged();       
     }
 
 private:

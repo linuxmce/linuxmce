@@ -51,6 +51,11 @@ QString TimeCodeManager::ObjectToString(const QObject *obj)
     return result.join("\n");
 }
 
+void TimeCodeManager::eventTimeCode(QString time)
+{
+    setStringTime(time);
+}
+
 
 void TimeCodeManager::start(QString server, int iport)
 {
@@ -264,5 +269,10 @@ void TimeCodeManager::showDragTime(int seconds)
         reverse = false;
     }
     setDragTime(QString::number(displayHours)+":"+QString::number(minutes)+":"+QString::number(forseconds) );
+
+}
+
+void TimeCodeManager::setEventTimeCode(QString eaName, QString qsTime, QString qsTotalTime)
+{
 
 }

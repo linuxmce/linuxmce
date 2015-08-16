@@ -867,14 +867,6 @@ public slots:
 
 
     /*!
-     * \brief setupMobileStorage Sets up the mobile storage location for Android devices.
-     * Returns true if sucessfull, false if not.
-     * @param externalStorage : This is set by the AndroidSytem code that gets this from the JNI interface.
-     * \return
-     */
-    bool setupMobileStorage(QString externalStorage);
-
-    /*!
      * \brief setMobileStorage
      * \param s
      */
@@ -928,7 +920,7 @@ public slots:
     void showUI(bool b);
     int loadSplash();
     void startOrbiter();
-    bool createMobileConfig();
+
     void processConfig(QNetworkReply* config);
     void getConfiguration();
     bool writeConfig();
@@ -1250,7 +1242,7 @@ public slots:
      * \brief mountMediaDevices
      * \param d
      */
-    void mountMediaDevices();
+
     void getMediaDevices();
     void setMediaDevices(QNetworkReply* d);
     //@}
@@ -1904,7 +1896,7 @@ private slots:
 private slots:
     bool registerConnections(QObject *qOrbiter_ptr);
     bool restoreSettings();
-    bool setupNetworkSkins();
+
     bool setupLocalSkins();
     void handleViewError(QList<QQmlError>);
     void initializeConnections();

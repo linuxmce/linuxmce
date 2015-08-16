@@ -5,8 +5,7 @@
 #include <datamodels/locationitem.h>
 #include <QList>
 #include <QVariant>
-
-
+#include "../contextobjects/entertainareatimecode.h"
 /*!
  * \brief The LocationModel class.
  * QAbstractListmodel based class for storing the various items relating to locations in the home and the current users location.
@@ -18,6 +17,8 @@ class LocationModel : public QAbstractListModel
     Q_PROPERTY(QString currentRoom READ getStringRoom NOTIFY roomChanged)/*!< The current location, string format */
     Q_PROPERTY(QString currentEA READ getStringEa NOTIFY eaChanged)/*!< The current entertain area, string format */
     Q_PROPERTY(int currentItem READ getCurrentItem WRITE setCurrentItem NOTIFY locationChanged)
+    Q_PROPERTY(EntertainAreaTimeCode* currentEaTimecode READ currentEaTimecode  NOTIFY currentEaTimecodeChanged)
+
     Q_OBJECT
 
 public:
@@ -34,6 +35,7 @@ public:
     LocationItem* find(const QString &id) const;
     void sortModel(int column, Qt::SortOrder order);
     bool check(int room);
+
 #ifdef QT5
  QHash<int, QByteArray> roleNames() const;
 #endif
@@ -56,7 +58,13 @@ public:
 
     int currentItem;
 
+    EntertainAreaTimeCode *currentEaTimecode() const;
+    void setCurrentEaTimecode(EntertainAreaTimeCode *currentEaTimecode);
+
 public slots:
+    void setEaTimeCode(QString ea, QMap<long, std::string> data);
+    bool addTimeCodeTrack(QString ea, int intEa);
+    Q_INVOKABLE QList<EntertainAreaTimeCode *> allTimeCode();
 
     void setCurrentItem(int i) {currentItem=i;emit locationChanged();}
     int getCurrentItem() {return currentItem;}
@@ -81,6 +89,7 @@ signals:
     void roomChanged();
     void userChanged();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+    void currentEaTimecodeChanged();
 
     void locationChanged();
 
@@ -90,6 +99,9 @@ private slots:
 private:
     LocationItem* m_prototype;
     QList<LocationItem*> m_list;
+
+    EntertainAreaTimeCode *m_currentEaTimecode;
+    QVector <EntertainAreaTimeCode*> eaTimecodeItems;
 
 };
 

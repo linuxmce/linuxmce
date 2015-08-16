@@ -1,8 +1,10 @@
 #include "locationmodel.h"
 
+
 LocationModel::LocationModel(LocationItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
+    qRegisterMetaType<EntertainAreaTimeCode*>("EntertainAreaTimeCode*");
  #ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
@@ -57,17 +59,62 @@ void LocationModel::handleItemChange()
   if(index.isValid())
     emit dataChanged(index, index);
 }
+EntertainAreaTimeCode *LocationModel::currentEaTimecode() const
+{
+    if(!m_currentEaTimecode)
+        return new EntertainAreaTimeCode();
+    else
+    return m_currentEaTimecode;
+}
+
+void LocationModel::setCurrentEaTimecode(EntertainAreaTimeCode *currentEaTimecode)
+{
+    if(m_currentEaTimecode->eaId()==currentEaTimecode->eaId())return;
+    m_currentEaTimecode = currentEaTimecode;
+    emit currentEaTimecodeChanged();
+}
+
+void LocationModel::setEaTimeCode(QString ea, QMap<long, std::string> data)
+{
+
+    for (int i = 0; i < eaTimecodeItems.size(); ++i) {
+        if(eaTimecodeItems.at(i)->eaName() ==ea){
+             eaTimecodeItems.at(i)->setCurrentTimeCode(QString::fromStdString(data[74]) );
+             eaTimecodeItems.at(i)->setTotalTimeCode( QString::fromStdString(data[57]));
+        }
+    }
+}
+
+bool LocationModel::addTimeCodeTrack(QString ea, int intEa)
+{
+    EntertainAreaTimeCode *t  = new EntertainAreaTimeCode(intEa, ea);
+    eaTimecodeItems.append(t);
+    return true;
+}
+
+QList<EntertainAreaTimeCode *> LocationModel::allTimeCode()
+{
+    QList<EntertainAreaTimeCode*> ret;
+    for (int i = 0; i < eaTimecodeItems.size(); ++i) {
+        ret.append(eaTimecodeItems.at(i));
+
+    }
+    return ret;
+
+}
+
 
 LocationItem * LocationModel::find(const QString &id) const
 {
-  foreach(LocationItem* item, m_list) {
-    if(item->id() == id) return item;
-  }
-  return 0;
+    foreach(LocationItem* item, m_list) {
+        if(item->id() == id) return item;
+    }
+    return 0;
 }
 
 void LocationModel::sortModel(int column, Qt::SortOrder order)
 {
+
 }
 
 bool LocationModel::check(int room)
@@ -77,6 +124,8 @@ bool LocationModel::check(int room)
     }
     return false;
 }
+
+
 
 #ifdef QT5
 QHash<int, QByteArray> LocationModel::roleNames() const
@@ -121,6 +170,17 @@ void LocationModel::setLocation(int ea, int room)
       }
     }
 
+    if(eaTimecodeItems.isEmpty()) return;
+
+      for (int i = 0; i < eaTimecodeItems.size(); ++i) {
+        qDebug() << "wtf";
+          if(eaTimecodeItems.at(i)->eaId()==ea){
+              qDebug() << "double wtf";
+              m_currentEaTimecode = eaTimecodeItems.at(i);
+              emit currentEaTimecodeChanged();
+
+        }
+      }
 }
 
 bool LocationModel::removeRow(int row, const QModelIndex &parent)

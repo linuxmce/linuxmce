@@ -94,6 +94,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     nowPlayingButton( new NowPlayingClass(qOrbiter_ptr, this)),
     mp_screenParameters( new ScreenParamsClass(this)),
     floorplans( new FloorPlanModel ( new FloorplanDevice, this) ),
+    m_lRooms(new LocationModel(new LocationItem, this)),
     mp_securityVideo( new SecurityVideoClass (qOrbiter_ptr, this)),
     userList(new UserModel( new UserItem, this)),
     myOrbiters(new ExistingOrbiterModel(new ExistingOrbiter(), this)),
@@ -112,22 +113,14 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 #endif
     if(settingsInterface->ready){
 
-        if(restoreSettings()){
-            qDebug() << "Settings Restored.";
-        }
+        if(restoreSettings()){  }
     }
     m_testScreenSize =testSize;
     m_fontDir.setPath(QStandardPaths::standardLocations(QStandardPaths::FontsLocation).first());
-    qDebug() <<m_fontDir.entryList();
 
     QString mlocale = QLocale::system().name().append(".qm");
-    qDebug() << "Local set to "<< mlocale;
-    if(  translator.load(":/lang/translations/"+mlocale) ) {
-        qDebug() << "Translator loaded default translation";
-    } else {
-        qDebug() << translator.isEmpty();
-    }
 
+    if(  translator.load(":/lang/translations/"+mlocale) ) {  }
     qApp->installTranslator(&translator);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
@@ -202,6 +195,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     //    QObject::connect(&mediaFilter, SIGNAL(pkUsersChanged(QString)), this, SLOT(setGridPkUsers(QString)));
     //    QObject::connect(&mediaFilter, SIGNAL(usersPrivateChanged(QString)), this, SLOT(setGridUsersPrivate(QString)));
     //    QObject::connect(&mediaFilter, SIGNAL(lastViewedChanged(QString)), this, SLOT(setGridLastViewed(QString)));
+ qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
+
 
     emit orbiterInitialized();
 }
@@ -267,24 +262,16 @@ void qorbiterManager::goBacktoQScreen()
         } else {
             setDceResponse(" backwards screenchange() FAILED");
         }
-
-    } else {
-        qDebug() << Q_FUNC_INFO << "No screens to go back to";
     }
 }
 
 void qorbiterManager::addScreenToHistory(QString s)
 {
+    if(gotoScreenList->isEmpty()) gotoScreenList->append(s); return;
 
-    if(gotoScreenList->isEmpty()){
-        qDebug() << Q_FUNC_INFO << s << " added to history.";
-        gotoScreenList->append(s);
-    } else if( gotoScreenList->last() == s){
-        qDebug() << Q_FUNC_INFO << "Not adding duplicate screen in consecutive order.";
-    } else {
-        qDebug() << Q_FUNC_INFO << s << " added to history.";
-        gotoScreenList->append(s);
-    }
+    if( gotoScreenList->last()==s) return;
+    gotoScreenList->append(s);
+
 }
 
 /*!
@@ -298,7 +285,7 @@ void qorbiterManager::addScreenToHistory(QString s)
 bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
 
-    qDebug() << Q_FUNC_INFO << "Enter";
+
     setDeviceNumber(device_id);
     setDceResponse("Starting Manager with connection to :"+QString::fromStdString(sRouterIP));
 
@@ -308,12 +295,12 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     }
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
     if(mb_useNetworkSkins){
-        setupNetworkSkins();
+     //   setupNetworkSkins(); no longer a thing.
     } else {
         swapSkins("default");
         emit setSkinStatus(true);
     }
-    qDebug() << Q_FUNC_INFO << "Exit";
+
 }
 
 void qorbiterManager::initiateRestart(){
@@ -353,7 +340,7 @@ void qorbiterManager::refreshUI(QUrl url){
 void qorbiterManager::processConfig(QNetworkReply *config)
 {
 
-    qDebug() << "Processing config.";
+
     if(!alreadyConfigured){
         iPK_Device_DatagridPlugIn =  long(6);
         iPK_Device_OrbiterPlugin = long(9);
@@ -379,7 +366,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         setDceResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device)) ;
         setDceResponse("Invalid Config");
         emit orbiterConfigReady(false);
-        qDebug() << "Error in config";
+
         return;
     }
 
@@ -443,11 +430,6 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
         if (fpType == 4)  fpType = 1;// Move cameras to the security floorplan
 
-
-        QImage icon;
-
-        qDebug() << Q_FUNC_INFO << fpType;
-
         floorplans->appendRow(new FloorplanDevice( name,
                                                    fp_deviceno,
                                                    fp_deviceType,
@@ -482,7 +464,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
     //-----ROOMS-AND-ENTERTAIN-AREAS-------------------------------------------------------------------
     QDomElement roomXml = root.firstChildElement("Rooms");  //rooms
-    m_lRooms = new LocationModel(new LocationItem, this);   //roomlistmodel
+
     QMap <QString, int> RroomMapping;                       //map for later reference
     QDomNodeList roomListXml = roomXml.childNodes();
     m_lRooms->clear();
@@ -497,6 +479,8 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
         if (ea.isEmpty()){
             ea = roomListXml.at(index).attributes().namedItem("Description").nodeValue().append(QString::number(m_iEA));
+        } else {
+            m_lRooms->addTimeCodeTrack(ea, m_iEA);
         }
 
         RroomMapping.insert(m_name, m_val);
@@ -504,15 +488,20 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         if(m_lRooms->check(m_val)){
             LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
+
         }
         else{
             m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imgFile, m_isHidden, m_lRooms));
             LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
+
+
         }
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
     m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
+
+
 
     setDceResponse("Room Done");
 
@@ -752,8 +741,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 void qorbiterManager::getConfiguration()
 {
     QNetworkRequest updateDevice;
-    QNetworkAccessManager *ud= new QNetworkAccessManager();
-    qDebug() << "Getting config";
+    QNetworkAccessManager *ud= new QNetworkAccessManager();  
     updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfig(QNetworkReply*)));
     ud->get(updateDevice);
@@ -797,8 +785,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         emit skinMessage("Setting Skin to:" +incSkin);
         emit skinMessage("Got it from the model : " + tskinModel->m_baseUrl.toString());
         setImagePath(tskinModel->m_baseUrl.toString()+"/"+incSkin+"/img/");
-        //load the actual skin entry point
-        qDebug() << "skin break";
+        //load the actual skin entry point     
         currentSkin = incSkin;
         m_style=tskinModel->currentItem;
 #ifdef __ANDROID__
@@ -860,7 +847,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
 
 void qorbiterManager::updateSelectedAttributes(QString attributes)
 {
-    qDebug() << "Updated Attributes::" << attributes.split("|");
+
     QStringList ta = attributes.split("|");
     setSubType(ta.at(1));
     setGridMediaType(ta.at(0));
@@ -976,10 +963,8 @@ void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVar
 
 void qorbiterManager::clearDataGrid(QString dataGridId)
 {
-    qDebug() << "manager.clearDataGrid() " << dataGridId;
-
     if(!modelPoolLock.tryLockForWrite()){
-        qDebug() << "clearDatagrid("<<dataGridId<<"):: failed to lock mutex.";
+      //  qDebug() << "clearDatagrid("<<dataGridId<<"):: failed to lock mutex.";
         return;
     }
 
@@ -998,13 +983,13 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
 
     }
     modelPoolLock.unlock();
-    qDebug() << "manager.clearDataGrid() end";
+   // qDebug() << "manager.clearDataGrid() end";
     emit modelChanged();
 }
 
 void qorbiterManager::clearAllDataGrid()
 {
-    qDebug() << "manager.clearAllDataGrid()";
+
     modelPoolLock.lockForWrite();
     foreach (QString id, m_mapDataGridModels.keys())
     {
@@ -1015,7 +1000,7 @@ void qorbiterManager::clearAllDataGrid()
         m_modelPool.push(pModel);
     }
     modelPoolLock.unlock();
-    qDebug() << "manager.clearAllDataGrid() end";
+
 }
 
 void qorbiterManager::prepareModelPool(int poolSize)
@@ -1035,10 +1020,10 @@ void qorbiterManager::prepareModelPool(int poolSize)
 GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int PK_DataGrid, QString initOption)
 
 {
-    qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
+   // qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
     GenericFlatListModel* pModel = NULL;
-    qDebug() <<" Searching for model, id ::" << dataGridId;
+   // qDebug() <<" Searching for model, id ::" << dataGridId;
     if (!m_mapDataGridModels.contains(dataGridId))
     {
         // GenericFlatListModels are kept in a pool in qorbitermanager, because we want the
@@ -1046,10 +1031,10 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
         // this method. Creating them in this method would create them in the QML thread.
         // lock this section so we don't prepare the same model more than once
 
-        qDebug() <<dataGridId << " doesnt exist creating new one.";
+       // qDebug() <<dataGridId << " doesnt exist creating new one.";
 
         if(!modelPoolLock.tryLockForWrite()){
-            qDebug() << "Mutex locked, comeback later.";
+          //  qDebug() << "Mutex locked, comeback later.";
             return pModel;
         }
         // Check that the model still is not in map
@@ -1101,7 +1086,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
             pModel->setOption(option);
 
             LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid  ");
-            qDebug() << "Checks complete, fetching grid " << dataGridId ;
+           // qDebug() << "Checks complete, fetching grid " << dataGridId ;
             emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
         } else {
             pModel = m_mapDataGridModels[dataGridId];
@@ -1111,7 +1096,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 
     } else {
         pModel = m_mapDataGridModels[dataGridId];
-        qDebug() << "Model found with " << pModel->rowCount() << "row, returning;";
+       // qDebug() << "Model found with " << pModel->rowCount() << "row, returning;";
     }
 
     return pModel;
@@ -1155,13 +1140,13 @@ void qorbiterManager::mediaFilterChanged(QString dataGridId)
 
 void qorbiterManager::genericFilterChanged(QString dataGridId)
 {
-    qDebug() << "genericFilterChanged() for " << dataGridId;
+
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::genericFilterChanged() start");
     GenericFlatListModel* pModel = NULL;
     if (m_mapDataGridModels.contains(dataGridId))
     {
-        qDebug() << "genericFilterChanged()::" << "existing model type, checking filter of " << mediaFilter.getGenericOptions();
+       // qDebug() << "genericFilterChanged()::" << "existing model type, checking filter of " << mediaFilter.getGenericOptions();
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::genericFilterChanged() model exists");
         pModel = m_mapDataGridModels[dataGridId];
         //      pModel->setOption(mediaFilter.getGenericOptions());
@@ -1302,6 +1287,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
+
 }
 
 
@@ -1350,9 +1336,6 @@ void qorbiterManager::regenComplete(int i)
 
 QString qorbiterManager::adjustPath(const QString &path)
 {
-
-    qDebug() <<Q_FUNC_INFO << "::Incoming Path" << path;
-
 #ifdef __ANDROID__
     return path+"android";
 #elif defined(Q_OS_UNIX) && !defined(Q_OS_IOS)
@@ -1385,126 +1368,10 @@ void qorbiterManager::setNowPlayingIcon(bool b)
 
 
 
-void qorbiterManager::mountMediaDevices()
-{
-    /* Set to be refactored */
-
-    //    qDebug() << "Mounting LinuxMCE Home Dir";
-
-    //    QString dirCmd = "";
-    //#ifndef RPI
-    //    dirCmd  = "gksudo";
-    //#endif
-    //    QDir mntDir;
-    //    mntDir.setPath("/mnt/remote/LinuxMCE");
-    //    qDebug() << "Mount directory exists? " << mntDir.exists();
-    //    if(!mntDir.exists()){
-    //        QProcess *mkPath = new QProcess(this);
-    //        QStringList dArgs;
-    //        dArgs.append("mkdir -p /mnt/remote/LinuxMCE");
-    //        mkPath->start(dirCmd, dArgs);
-    //        mkPath->waitForFinished(10000);
-    //        while(mkPath->state()==QProcess::Running){
-    //            qDebug() << mkPath->readAllStandardOutput();
-    //        }
-    //    }
-
-    //    qWarning() << mntDir.entryList().count();
-    //    if(mntDir.exists() && mntDir.entryList().length() ==2){
-    //       qWarning() << mntDir.path() << " is not mounted, mounting";
-
-    //        QString mountProg = "gksudo";
-    //#ifdef RPI
-    //        mountProg="";
-    //#endif
-    //        QStringList args;
-    //        args.append(QString("mount -t nfs "+m_ipAddress+":/home "+ mntDir.path()+"" ));
-    //        QProcess *mountProcess = new QProcess(this);
-    //        mountProcess->start(mountProg, args);
-    //        mountProcess->waitForFinished(10000);
-
-    //        qDebug() << "Process Status ::" <<mountProcess->state();
-    //        if(mountProcess->state()== QProcess::FailedToStart){
-    //            qWarning() << "command failed to start!";
-    //            qDebug() << mountProcess->readAllStandardError();
-    //            qDebug() << mountProcess->errorString();
-    //        }
-    //        qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
-    //        qWarning() << "Process exited with::"<< mountProcess->exitCode();
-    //    }
-
-
-    //    if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
-    //        qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
-    //
-    //    }
-
-    //    for(int dc =0; dc < storageDevices.count(); dc++){
-    //        qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
-    //        int d = storageDevices.at(dc).toMap()["Device"].toInt();
-    //        QString dirCmd = "";
-    //#ifndef RPI
-    //        dirCmd  = "gksudo";
-    //#endif
-    //        QDir mntDir;
-    //        mntDir.setPath("/mnt/remote/"+QString::number(d));
-    //        qDebug() << mntDir.exists();
-    //        if(!mntDir.exists()){
-    //            QProcess *mkPath = new QProcess(this);
-    //            QStringList dArgs;
-    //            dArgs.append("mkdir -p /mnt/remote/"+QString::number(d));
-    //            mkPath->start(dirCmd, dArgs);
-    //            mkPath->waitForFinished(10000);
-
-    //        }
-    //        else{
-
-    //        }
-
-    //        if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
-    //            qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
-    //            QString mountProg = "gksudo";
-    //#ifdef RPI
-    //            mountProg="";
-    //#endif
-    //            QStringList args;
-
-    //            args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
-    //            QProcess *mountProcess = new QProcess(this);
-    //            mountProcess->start(mountProg, args);
-    //            mountProcess->waitForFinished(10000);
-    //            qDebug() << "Process Status ::" <<mountProcess->state();
-    //            if(mountProcess->state()== QProcess::FailedToStart){
-    //                qWarning() << "command failed to start!";
-    //                qDebug() << mountProcess->readAllStandardError();
-    //                qDebug() << mountProcess->errorString();
-    //            }
-    //            qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
-    //            qWarning() << "Process exited with::"<< mountProcess->exitCode();
-    //        }
-    //    }
-
-    //    QString dirCmd = "gksudo";
-    //    QDir mntDir;
-    //    mntDir.setPath("/mnt/remote/dvd");
-    //    qDebug() << mntDir.exists();
-    //#ifdef RPI
-    //    dirCmd="";
-    //#endif
-    //    if(!mntDir.exists()){
-    //        QProcess *mkPath = new QProcess(this);
-    //        QStringList dArgs;
-    //        dArgs.append("mkdir -p /mnt/remote/dvd");
-    //        mkPath->start(dirCmd, dArgs);
-    //        mkPath->waitForFinished(10000);
-    //    }
-
-
-}
 
 void qorbiterManager::getMediaDevices()
 {
-    qDebug() << "Getting mount devices";
+
     QNetworkAccessManager * m = new QNetworkAccessManager();
     QNetworkRequest req;
     req.setUrl(QUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?m"));
@@ -1515,22 +1382,9 @@ void qorbiterManager::getMediaDevices()
 void qorbiterManager::setMediaDevices(QNetworkReply *d)
 {
     QString str= d->readAll().replace("\n", "");
-    qDebug() <<"Recieved mount devices";
-    qDebug() <<"Devices" << str;
-
     QScriptEngine script;
-    QVariantList p = script.evaluate(str).toVariant().toList();
-    foreach (QVariant x, p){
-        QVariantMap l = x.toMap();
-        qDebug() << l["Device"].toString();
-    }
+    QVariantList p = script.evaluate(str).toVariant().toList();   
     storageDevices = p;
-
-#ifndef ANDROID
-    //    if(!storageDevices.isEmpty()){
-    //        mountMediaDevices();
-    //    }
-#endif
 }
 
 
@@ -1645,8 +1499,7 @@ void qorbiterManager::getFloorplanDevices(int floorplantype){
         //qDebug() << Q_FUNC_INFO << floorplans->get(i)->floorplanType() << "::" << floorplantype;
         if(floorplans->index(i).data(6).toInt() == floorplantype)  {
             QString markerID = floorplans->index(i).data(1).toString();
-            current_floorplan_devices.append(floorplans->find(markerID));
-            qDebug() << markerID;
+            current_floorplan_devices.append(floorplans->find(markerID));           
         }
     }
     qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
@@ -1659,11 +1512,7 @@ void qorbiterManager::setFloorplanType(int t)
 }
 
 
-void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
-{
-    qDebug() << Q_FUNC_INFO << "Enter--" << " Current Status ==> " << status;
-
-
+void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip){
     if(status=="starting"){
         setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
         setInternalIp(incrouterip);
@@ -1675,12 +1524,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
         setDceResponse("Re -Initializing Local Manager");
         setCurrentScreen("Screen_1.qml");
         setReloadStatus(false);
-    } else {
-
     }
-    qDebug() << Q_FUNC_INFO << "Exit ";
-
-    //  getConfiguration(); /* Connect to skins ready signal */
 }
 
 /*!
@@ -1706,209 +1550,6 @@ bool qorbiterManager::readLocalConfig(){
     } else {
 
         return false;
-    }
-
-    QDomDocument localConfig;
-    QString xmlPath;
-
-    QFile test(":///config.xml");
-    if(test.exists()){
-        qDebug() << "QRC file found";
-    } else {
-        qDebug() << "QRC file not found at " << test.fileName();
-    }
-
-#ifdef Q_OS_IOS
-
-    QDir dir;
-    dir.setPath(QDir::homePath());
-    qDebug() << dir.absolutePath()+"/Library/Application_Support";
-    xmlPath =dir.absolutePath()+"/Library/Application_Support/LinuxMCE/config.xml";
-
-    setMobileStorage(dir.absolutePath()+"/Library/Application_Support/LinuxMCE");
-    if(createMobileConfig()){
-        xmlPath=mobileStorageLocation+"/config.xml";
-    }
-
-#elif defined(Q_OS_ANDROID)
-#ifdef NECESSITAS
-
-    qDebug() << "Mobile Storage Location::" << mobileStorageLocation;
-    if(setupMobileStorage(androidHelper->externalStorageLocation)){
-        xmlPath = mobileStorageLocation+"/config.xml" ;
-    }
-    else{
-
-    }
-#elif QT5 && ANDROID
-    if(setupMobileStorage(androidHelper->externalStorageLocation)){
-        xmlPath = mobileStorageLocation+"/config.xml" ;
-        qCritical() <<xmlPath;
-    }
-#endif
-#elif defined(WIN32)
-    xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
-#elif RPI
-    xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
-#else
-    xmlPath = QDir::homePath()+"/linuxmce/config.xml";
-#endif
-
-    QFile localConfigFile;
-    //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
-    qDebug() << "Xml Path is " << xmlPath;
-
-
-#ifdef __ANDROID__
-    if (createMobileConfig())
-    {
-        localConfigFile.setFileName(xmlPath);
-        if (!localConfigFile.exists())
-        {
-            setDceResponse("android config absent!");
-            return false;
-        }
-
-    }
-    else
-    {
-        return false;
-    }
-#endif
-
-
-
-    // existence check
-    QFileInfo chk(xmlPath);
-
-    if(!chk.exists()){
-
-        setDceResponse("Did not find config.xml file in application path, searching /usr/pluto/bin");
-        this->logQtMessage("Did not find config.xml file in application path, searching /usr/pluto/bin");
-        localConfigFile.setFileName("/usr/pluto/bin/config.xml");
-        appConfigPath="/usr/pluto/bin/config.xml";
-    } else {
-        localConfigFile.setFileName(xmlPath);
-        setDceResponse("Found config.xml in app path, reading "+localConfigFile.fileName());
-        appConfigPath=xmlPath;
-    }
-
-    if (!localConfigFile.open(QFile::ReadWrite)) {
-        setDceResponse(localConfigFile.errorString());
-        setDceResponse("Not Able to read config::"+localConfigFile.fileName());
-        setInternalIp("192.168.80.1");
-        currentSkin="default";
-        setDceResponse("Failed to read config, exiting func");
-        return false;
-    } else {
-        setDceResponse("Reading Local Config");
-        QByteArray tDoc;
-        tDoc = localConfigFile.readAll();
-        //  localConfigFile.close();
-
-        if (!localConfig.setContent(tDoc))
-        {
-
-            setDceResponse("Could not parse config!");
-            return false;
-        }
-        else
-        {
-            setDceResponse("Reading elements");
-            QDomElement configVariables = localConfig.documentElement().toElement();
-            if(configVariables.namedItem("firstrun").attributes().namedItem("id").nodeValue()=="true")
-            {
-                setRunStatus(true);
-            }
-            else {
-                setRunStatus(false);
-            }
-
-
-            if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
-            {
-
-                setInternalIp(configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue());}
-            else
-            {
-                setInternalIp("192.168.80.1");
-
-            }
-#ifdef QT5
-            QString configSkin = configVariables.namedItem("qt5skin").attributes().namedItem("id").nodeValue();
-#else
-            QString configSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-#endif
-            if (configSkin.isEmpty()){
-                currentSkin = "default";
-            }
-
-            QString tRp = configVariables.namedItem("routerport").attributes().namedItem("id").nodeValue();
-            if(tRp.isEmpty()){
-                setRouterPort("80");
-            }
-            else{
-                setRouterPort(tRp);
-            }
-
-            if(configVariables.namedItem("networkload").attributes().namedItem("id").nodeValue()=="true"){
-                b_localLoading=false;
-            } else {
-                b_localLoading=true;
-            }
-
-            qDebug() << Q_FUNC_INFO << "Reading device number ";
-            if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
-            {
-                setDeviceNumber(iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong());}
-            else
-            {
-                setDeviceNumber(iPK_Device = -1)
-                        ;}
-
-            if(!configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue().isEmpty() )
-            {setExternalIp(configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue());}
-            else
-            {setExternalIp("fill.me.in.com");}
-
-            if(!configVariables.namedItem("debug").attributes().namedItem("id").nodeValue().toInt() == 0 )
-            {setDebugMode(false);}
-            else
-            {setDebugMode(true);}
-
-            if(!first_run){
-                int ty = configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt();
-                qDebug() << "Type::"<<ty;
-                switch(ty){
-                case 1:
-                    qDebug() << "Phone read from config.";
-                    setFormFactor(1);
-                    break;
-                case 2:
-                    qDebug() << "Tablet read from config.";
-                    setFormFactor(2);
-                    break;
-                default:
-                    qDebug() << "error, setting default.";
-                    setFormFactor(1);
-                    break;
-
-                }
-            }
-
-            QString ext = configVariables.namedItem("lastconnect").attributes().namedItem("id").nodeValue();
-            if(ext=="internal"){
-                setUsingExternal(false);
-            } else {
-                setUsingExternal(true);
-            }
-        }
-#ifdef __ANDROID__
-        setDceResponse("Finished READ of config.xml at::"+mobileStorageLocation);
-#else
-        setDceResponse("Finished READ of config.xml at::"+appConfigPath);
-#endif
-        return true;
     }
 }
 
@@ -2628,124 +2269,6 @@ bool qorbiterManager::restoreSettings()
     return true;
 }
 
-bool qorbiterManager::setupNetworkSkins()
-{
-    if(m_ipAddress.isEmpty()){
-        m_ipAddress="192.168.80.1";
-    }
-#ifdef __ANDROID__
-
-#ifdef QT5
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/android"+buildType+"/qt5";
-#endif
-    qWarning()<< remoteDirectoryPath;
-#elif defined Q_OS_MACX
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/qt5-desktop";
-#elif defined for_desktop
-#ifdef defined QT5
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/qt5-desktop";
-#elif defined QT4
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/desktop";
-#endif
-
-#elif defined WIN32
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/desktop";
-#elif defined RPI
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/qt5-desktop";
-#elif defined for_harmattan
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/harmattan";
-#elif defined for_android
-
-
-#else
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+qmlPath;
-#endif
-
-    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("bin"));
-    finalPath = remoteDirectoryPath;
-    QUrl base(finalPath);
-    tskinModel = new SkinDataModel(base, new SkinDataItem, this);
-    qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
-    QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
-    QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
-
-    setDceResponse("initializeManager()::Loading Skins");
-#ifdef __ANDROID__
-    setDceResponse("initializeManager()::For Android");
-#ifdef QT5
-    setDceResponse("initializeManager()::Loading Qt Quick 2 Skins for Qt5");
-
-    finalPath = remoteDirectoryPath;
-    setDceResponse("initializeManager()::"+finalPath);
-#else
-    setDceResponse("initializeManager()::Loading Qt Quick 1 Skins for Qt 4");
-#endif
-
-    if( !loadSkins(QUrl(finalPath))){
-        emit skinIndexReady(false);
-        b_skinReady = false;
-        return false;
-    }
-#elif defined Q_OS_MACX
-
-    if( !loadSkins(QUrl(finalPath)))
-    {   emit skinIndexReady(false);
-        b_skinReady = false;
-        return false;
-    }
-
-#elif defined for_android
-    setDceResponse("Loading skins");
-    if( !loadSkins(QUrl(finalPath)))
-    {   emit skinIndexReady(false);
-        return false;
-    }
-#elif defined WIN32
-    setDceResponse("Loading skins");
-    if( !loadSkins(QUrl::fromLocalFile(finalPath)))
-    {   emit skinIndexReady(false);
-        return false;
-    }
-#elif defined for_desktop
-    if( !loadSkins(QUrl(finalPath)))
-    {
-        emit skinIndexReady(false);
-        return false;
-    }
-
-#elif for_harmattan
-    if(b_localLoading == true)
-    {
-        if( !loadSkins(QUrl(finalPath)))
-        {
-            emit skinIndexReady(false);
-            return false;
-        }
-    }
-    else
-    {
-        if( !loadSkins(QUrl(finalPath)))
-        {
-            emit skinIndexReady(false);
-            return false;
-        }
-    }
-
-#elif defined RPI
-
-    if( !loadSkins(QUrl(finalPath)))
-    {
-        emit skinIndexReady(false);
-        return false;
-    }
-#else
-    if( !loadSkins(QUrl(finalPath)))
-    {
-        emit skinIndexReady(false);
-        return false;
-    }
-#endif
-}
 
 bool qorbiterManager::setupLocalSkins()
 {
@@ -2819,65 +2342,6 @@ int qorbiterManager::loadSplash()
 }
 
 /*!
- * \brief qorbiterManager::createAndroidConfig
- *This function tries to determine the external storage location for a given android device so that it can read / write the user settings.
- * \return
- */
-bool qorbiterManager::createMobileConfig()
-{
-
-
-    QFile droidConfig(mobileStorageLocation+"/config.xml");
-    setDceResponse("Config File Path::"+droidConfig.fileName());
-    if (droidConfig.exists() && droidConfig.size() != 0)
-    {
-        setDceResponse("Data exists, exiting 1st run");
-        return true;
-    }
-    else
-    {
-        QDir filePath;
-        if(filePath.mkpath(mobileStorageLocation)){
-            setDceResponse("Made path");
-        }
-
-        QFile defaultConfig(":///config.xml");
-        if(!defaultConfig.open(QFile::ReadOnly)){
-            qDebug() << "Cannot find config in QRC";
-            qDebug() << defaultConfig.errorString();
-            return false;
-        }
-
-        if(defaultConfig.copy(mobileStorageLocation+"/config.xml"))
-        {
-            setDceResponse("file copied, verifying");
-
-            droidConfig.setPermissions(QFile::WriteOther);
-            setDceResponse(droidConfig.errorString());
-            droidConfig.setPermissions(QFile::ReadOther);
-            setDceResponse(droidConfig.errorString());
-            droidConfig.setPermissions(QFile::ExeOwner);
-            setDceResponse(droidConfig.errorString());
-
-            if (droidConfig.exists() && droidConfig.size() !=0)
-            {
-                setDceResponse("config size: "+ QString::number(droidConfig.size()));
-                return true;
-            }
-            else{
-                setDceResponse("Config copying error.");
-                setDceResponse(droidConfig.errorString());
-            }
-        }
-        else{
-            setDceResponse("Cannot install configuration!!");
-            setDceResponse(defaultConfig.errorString());
-            return false;
-        }
-    }
-    return false;
-}
-/*!
  * \brief This function is called when the application window size changes. When it does,
  * the \ref setOrientation() function is called.
  *
@@ -2910,7 +2374,7 @@ void qorbiterManager::checkOrientation(QSize s)
     }
 
 #endif
-    qDebug() <<"QOrbiter Window size::"<< qorbiterUIwin->size();
+
 
 }
 
@@ -2947,7 +2411,7 @@ QString qorbiterManager::getCurrentScreen(){
 
 void qorbiterManager::setCurrentScreen(QString s)
 {
-    qDebug() << Q_FUNC_INFO;
+
     if(!s.contains(".qml")){
         setCurrentScreen(s.toInt());
         return;
@@ -2962,7 +2426,7 @@ void qorbiterManager::setCurrentScreen(QString s)
 
 void qorbiterManager::setCurrentScreen(int s)
 {
-    qDebug() << Q_FUNC_INFO;
+
     QString i = QString("Screen_%1.qml").arg(QString::number(s));
 
     if(i!=currentScreen){
@@ -2989,49 +2453,7 @@ void qorbiterManager::showExistingOrbiter(const QList<QObject*> l )
     Q_UNUSED(l);
 }
 
-/*!
- * \brief qorbiterManager::setupMobileStorage
- * \return
- * this function saves the mobile storage devices external storage path.
- */
-bool qorbiterManager::setupMobileStorage(QString externalStorage)
-{
 
-#ifdef ANDROID
-    QStringList androidStorageLocation;
-    androidStorageLocation <<"/mnt/sdcard"<< "/data"<< "/mnt/external"<< "/mnt/sdcard/ext_sd" << "/mnt/sdcard-ext"<< "/mnt/sdcard/external_sd"<< "/mnt/extSdCard"<< "/mnt/external1"<< "/Removable/MicroSD";
-
-    QDir extLocation;
-
-    extLocation.setPath(externalStorage+"/LinuxMCE");
-
-    if(extLocation.exists() && extLocation.isReadable()){
-        setMobileStorage(extLocation.path());
-        return true;
-    }
-    else
-    {
-        qCritical("Falling back to guessing location method");
-        for(int i = 0; i < androidStorageLocation.count(); i++)
-        {
-            extLocation.setPath(androidStorageLocation.at(i));
-
-            if(extLocation.isReadable())
-            {
-                setMobileStorage(androidStorageLocation.at(i)+"/LinuxMCE");
-                return true;
-            }
-        }
-    }
-
-    return false;
-#elif defined(Q_OS_IOS)
-    setMobileStorage(externalStorage);
-    return true;
-
-#endif
-
-}
 
 void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text)
 {
@@ -3043,16 +2465,14 @@ void qorbiterManager::makeCall(int iPK_Users,string sPhoneExtension,string sPK_D
 }
 
 QVariant qorbiterManager::systemFontList()
-{
-    qDebug() << m_fontDir.entryList();
+{   
     return QVariant(m_fontDir.entryList());
 }
 
 void qorbiterManager::handleScreenChanged(QScreen *screen)
 {
+    Q_UNUSED(screen);
     resetScreenSize();
-    qDebug() << Q_FUNC_INFO << screen->name() << " changed";
-
 }
 
 bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
@@ -3231,6 +2651,8 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
 
     /*Remote command signal */
     QObject::connect(ptr, SIGNAL(dceGuiCommand(int)), this, SLOT(handleDceGuiCommand(int)), Qt::QueuedConnection);
+
+ QObject::connect(ptr, &qOrbiter::timecodeEvent, m_lRooms, &LocationModel::setEaTimeCode, Qt::QueuedConnection);
 
     return true;
 
