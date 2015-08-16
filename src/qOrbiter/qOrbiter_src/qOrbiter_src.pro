@@ -418,7 +418,8 @@ SOURCES += main.cpp \
         defineObjects/mediatypehelper.cpp \
         defineObjects/datagrids.cpp \
     contextobjects/screeninfo.cpp \
-    contextobjects/settinginterface.cpp
+    contextobjects/settinginterface.cpp \
+    contextobjects/entertainareatimecode.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -530,16 +531,14 @@ HEADERS += \
         RemoteCommands.h \
         defineObjects/datagrids.h \
     contextobjects/screeninfo.h \
-    contextobjects/settinginterface.h
+    contextobjects/settinginterface.h \
+    contextobjects/entertainareatimecode.h
 
 
 
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
-        config.xml \
-    qml/skins/default/components/FadeImage.qml \
-    qml/skins/default/components/FocusRow.qml
-
+        config.xml
 
 for_harmattan{
         OTHER_FILES= \

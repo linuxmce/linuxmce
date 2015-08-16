@@ -24,6 +24,8 @@
 #include <QStringList>
 #include <QRegExp>
 #include <QTime>
+#include <QVector>
+#include "entertainareatimecode.h"
 
 /*!
  * \brief The TimeCodeManager class processes timecode from other media players.
@@ -99,6 +101,9 @@ signals:
 
     
 public slots:
+
+    void eventTimeCode(QString time);
+
     //! Starts the timecode server.
     /*!
      * \brief Starts the timecodeserver with the params.
@@ -164,6 +169,12 @@ public slots:
 
     void setPortConnected (bool isConnected) { if(port != isConnected ) {portConnected= isConnected; emit portConnectedChanged(); } }
     bool getPortConnected() {return portConnected;}
+
+    void setEventTimeCode(QString eaName, QString qsTime, QString qsTotalTime);
+
+
+
+
 };
 
 #endif // TIMECODEMANAGER_H

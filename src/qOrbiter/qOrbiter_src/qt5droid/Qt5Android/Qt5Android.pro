@@ -217,7 +217,8 @@ SOURCES += ../../main.cpp \
         ../../datamodels/ActiveMediaStreams.cpp \
         ../../datamodels/listitembase.cpp \
         ../../defineObjects/linuxmcedata.cpp \
-../../defineObjects/mediatypehelper.h
+        ../../contextobjects/entertainareatimecode.cpp
+
 
 
 
@@ -335,7 +336,9 @@ HEADERS += \
     ../../datamodels/listitembase.h \
         ../../defineObjects/linuxmcedata.h \
 ../../defineObjects/mediatypehelper.h \
-../../datamodels/DataGridHandler.h
+../../datamodels/DataGridHandler.h \
+../../defineObjects/mediatypehelper.h \
+   ../../contextobjects/entertainareatimecode.h
 
 RESOURCES += \
         ../../skinData.qrc \

@@ -46,6 +46,8 @@
 #include <QtNetwork/QNetworkReply>
 #include <QVariant>
 
+
+
 #if !defined(QT5) && !defined(Q_OS_ANDROID)
 #include <QX11EmbedWidget>
 #endif
@@ -1332,6 +1334,8 @@ light, climate, media, security, telecom */
 
 
 signals:
+
+    void timecodeEvent(QString ea, QMap<long, std::string> mp);
 
      void creationComplete(bool finished);
 

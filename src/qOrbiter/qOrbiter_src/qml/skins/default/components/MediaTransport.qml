@@ -6,7 +6,7 @@ import "../."
 Item{
     id:mediaScrollerTarget
     clip:false
-    property int slidertimer: (dragHandle.x / width) * dceTimecode.tcTotalTime
+    property int slidertimer: (dragHandle.x / width) * roomList.currentEaTimecode.totalTimeCode
     Rectangle{
         id:bg
         width: parent.width
@@ -54,7 +54,7 @@ Item{
         anchors.verticalCenter: bg.verticalCenter
         width: height
         radius: height
-        x: dg.drag.active ? dg.x : ( dceTimecode.runningTimer / dceTimecode.tcTotalTime) * bg.width
+        x: dg.drag.active ? dg.x : ( dceTimecode.runningTimer / roomList.currentEaTimecode.totalTimeCode) * bg.width
         MouseArea{
             id:dg
             anchors.fill: parent
@@ -73,5 +73,11 @@ Item{
                 dceTimecode.finishDragging()
             }
         }
+    }
+
+    StyledText{
+        anchors.centerIn: parent
+        color:"black"
+        text:roomList.currentEaTimecode.currentTimeCode
     }
 }
