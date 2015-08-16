@@ -64,9 +64,9 @@ function advancedZWave($output,$dbADO){
 			    $(\'nodedisplay\').appendChild(hover);
 			    hover.id = "hover_"+node.id;
 			    hover.className = "nodeHover";
-			    hover.style = "display:none;";
 			    hover.style.left = (50)+"px";
 			    hover.style.top = (50)+"px";
+			    hover.style.display = "none";
 
 			    $(hover).insert("<p>"+node.manufacturerName+"</p>");
 			    $(hover).insert("<p>"+node.productName+"</p>");
@@ -110,7 +110,7 @@ function advancedZWave($output,$dbADO){
 
 			    var ct = document.createElement("div");
 			    ct.id = "commandTab_"+node.id;
-			    ct.style = "display:none;";
+			    ct.style.display = "none";
 			    tabSectionEl.appendChild(ct);
 			    ct.insert("<p class=\"command\" onclick=\"healNode("+node.id+");\">Heal node</p>");
 			    ct.insert("<p class=\"command\" onclick=\"updateNodeNeighbors("+node.id+");\">Update node neighbors</p>");
@@ -119,7 +119,7 @@ function advancedZWave($output,$dbADO){
 			    // Config and Values tab
 			    var vt = document.createElement("div");
 			    vt.id = "valuesTab_"+node.id;
-			    vt.style = "display:none;";
+			    vt.style.display = "none";
 			    tabSectionEl.appendChild(vt);
 			    vt.insert("<p>Values</p>");
 			    var t = "<table><tr>";
@@ -127,7 +127,7 @@ function advancedZWave($output,$dbADO){
 
 			    var configEl = document.createElement("div");
 			    configEl.id = "configTab_"+node.id;
-			    configEl.style = "display:none;";
+			    configEl.style.display = "none";
 			    tabSectionEl.appendChild(configEl);
 			    var configt = "<table><tr>";
 			    configt += "<td>Index</td><td>Label</td><td>Value</td><td>Units</td></tr>";
@@ -162,7 +162,7 @@ function advancedZWave($output,$dbADO){
 
 			    var assocEl = document.createElement("div");
 			    assocEl.id = "associationTab_"+node.id;
-			    assocEl.style = "display:none;";
+			    assocEl.style.display = "none";
 			    tabSectionEl.appendChild(assocEl);
 			    var assoct = "<table><tr>";
 			    assoct += "<td>Group</td><td>Nodes</td><td>Add</td><td>Remove</td></tr>";
