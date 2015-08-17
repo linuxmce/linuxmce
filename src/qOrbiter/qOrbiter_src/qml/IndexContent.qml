@@ -1,15 +1,17 @@
 import QtQuick 2.2
-
-
 /*
   Root Item.
   */
 Item{
     id:indexContent
     anchors.fill: parent
+    Image{
+        source: "images/splash-bg.png"
+        anchors.fill:parent
+    }
     Rectangle{
         anchors.fill: parent
-        opacity:.85
+
         gradient: Gradient{
             GradientStop{
                 position: 0.0
@@ -26,10 +28,6 @@ Item{
         }
     }
     
-    Image{
-        source: "images/splash-bg.png"
-        anchors.fill:parent
-    }
     
     Text {
         id: splashText

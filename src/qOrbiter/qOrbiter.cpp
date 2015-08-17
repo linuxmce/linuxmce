@@ -1887,7 +1887,7 @@ bool DCE::qOrbiter::initialize(){
 
             emit commandResponseChanged("QOrbiter Connect() Failed for "+QString::number(this->m_dwPK_Device) );
             this->m_bRunning = true;
-            DisconnectAndWait();
+            Disconnect();
             emit routerConnectionChanged(false);
             return false;
         }
@@ -1965,6 +1965,7 @@ void DCE::qOrbiter::deinitialize()
     // SendCommand(CMD_OrbiterUnRegistered);
     emit routerConnectionChanged(false);
     emit closeOrbiter();
+    Disconnect();
 
 }
 
@@ -3501,7 +3502,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to channel based on input, need some reworking for myth
 {
 
-  //  qDebug() << Q_FUNC_INFO << "MediaType::"<< i_current_mediaType << "\nchannel:: " << channel << "\nchannelid::"<<chanid;
+    //  qDebug() << Q_FUNC_INFO << "MediaType::"<< i_current_mediaType << "\nchannel:: " << channel << "\nchannelid::"<<chanid;
     if(i_current_mediaType = 11)
     {
         emit mediaResponseChanged("Setting Channel! " + channel);
@@ -4214,6 +4215,7 @@ void qOrbiter::OnDisconnect(){
     emit routerConnectionChanged(false);
     m_bOrbiterConnected = false;
     setNowPlaying(false);
+    Disconnect();
     emit eventResponseChanged("Connection Lost");
     emit routerDisconnect();
 }
@@ -4223,7 +4225,7 @@ void qOrbiter::OnUnexpectedDisconnect()
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"QOrbiter::onUnexpectedDisconnect %d", m_dwPK_Device);
     emit routerConnectionChanged(false);
     pthread_cond_broadcast( &m_listMessageQueueCond );
-    DisconnectAndWait();
+    Disconnect();
 }
 
 void qOrbiter::OnReload()
@@ -4609,7 +4611,7 @@ int qOrbiter::DeviceIdInvalid(){
 int qOrbiter::SetupNewOrbiter()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"start SetupNewOrbiter");
-  //  qDebug() << "Opening setup connection via Event_Impl to " << dceIP.toStdString().c_str();
+    //  qDebug() << "Opening setup connection via Event_Impl to " << dceIP.toStdString().c_str();
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, dceIP.toStdString().c_str());
     while(true)
     {
@@ -4617,7 +4619,7 @@ int qOrbiter::SetupNewOrbiter()
         if( !event_Impl.m_pClientSocket->SendString("READY") || !event_Impl.m_pClientSocket->ReceiveString(sResponse) || sResponse.size()==0 )
         {
             emit commandResponseChanged("Setup connection hung");
-           // qDebug() << "setup error in socket";
+            // qDebug() << "setup error in socket";
             commandResponseChanged(QString::fromStdString(sResponse));
             return 0;  // Something went wrong
         }
@@ -4660,7 +4662,7 @@ int qOrbiter::SetupNewOrbiter()
             delete pResponse;
         emit commandResponseChanged("SetupNewOrbiter unable to create orbiter");
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SetupNewOrbiter unable to create orbiter");
-       emit commandResponseChanged("Sorry.  There is a problem creating the new orbiter.  Please check the logs.");
+        emit commandResponseChanged("Sorry.  There is a problem creating the new orbiter.  Please check the logs.");
         return 0;
     }
 
@@ -5255,17 +5257,19 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
 {
     if(r->bytesAvailable() !=0 && this->m_bOrbiterConnected == false)
     {
+        emit routerFound(true);
         emit commandResponseChanged("Found installation, connecting.");
         if ( initialize() == true )
         {
-            emit routerConnectionChanged(true);
-            //              setm_sIPAddress(m_sIPAddress);
 
+            emit routerConnectionChanged(true);
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 
             if( m_bLocalMode )
                 RunLocalMode();
         }
+    } else {
+        emit routerFound(false);
     }
 
 }
@@ -5376,9 +5380,9 @@ void qOrbiter::executeMessageSend(QVariantMap outGoing)
     m->m_eRetry = MR_None;
     m->m_dwPriority = 1;
     string *msgResponse;
-  //  qDebug() <<"Message content";
-  //  qDebug() <<"Device From ==>" << m->m_dwPK_Device_From;
-  //  qDebug() <<"Device to ==>" << m->m_sPK_Device_List_To.c_str();
+    //  qDebug() <<"Message content";
+    //  qDebug() <<"Device From ==>" << m->m_dwPK_Device_From;
+    //  qDebug() <<"Device to ==>" << m->m_sPK_Device_List_To.c_str();
 
     if(m->m_dwPK_Device_To != -1 && m->m_dwPK_Device_Template != -1 && m->m_dwPK_Device_Category_To !=-1)
         this->m_pPrimaryDeviceCommand->SendMessageToRouter(m);
@@ -5388,7 +5392,7 @@ void qOrbiter::executeMessageSend(QVariantMap outGoing)
 void qOrbiter::checkRouterConnection()
 {
     if(m_bQuit_get() == false){
-        DisconnectAndWait();
+
     }
     if(RouterNeedsReload()){
 
@@ -5444,7 +5448,7 @@ void qOrbiter::reInitialize(){
 
 
     if(this->m_pPrimaryDeviceCommand->m_bQuit_get() == true ){
-    emit commandResponseChanged("Device set to quit");
+        emit commandResponseChanged("Device set to quit");
     }
 
     this->m_pPrimaryDeviceCommand->Close();

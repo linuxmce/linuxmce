@@ -259,6 +259,7 @@ int main(int argc, char* argv[])
          << "Visit www.linuxmce.org for source code and license information" << endl << endl;
     string sRouter_IP="";
     string graphicsmode="raster";
+    QString overrideDir="";
     string screen = "";
     int PK_Device=-1;
     int screenSize=-1;
@@ -300,6 +301,9 @@ int main(int argc, char* argv[])
         case 'z':
             screenSize=atoi(argv[++optnum]);
             break;
+        case 'x':
+           overrideDir= QString::fromStdString( argv[++optnum]);
+            break;
         default:
             bError=true;
             break;
@@ -316,7 +320,8 @@ int main(int argc, char* argv[])
              << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
              << "-o --Switch for frameless MD and desktops." << endl
              << "-s --Switch for fullscreen." << endl
-             << "-z --Screen size setting for testing 4 - small \n 7 - medium\n 10 - large" << endl;
+             << "-z --Screen size setting for testing 4 - small \n 7 - medium\n 10 - large" << endl
+             << "-x --Point to custom skins directory." << endl;
 
     }
 
@@ -402,10 +407,8 @@ int main(int argc, char* argv[])
 
 
         QQmlApplicationEngine engine;
-        engine.load("qrc:/qml/Index.qml");
 
-
-        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize);
+        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize, &engine);
         orbiterWin.mainView.rootContext()->setContextProperty("settings", &settings);
 #ifdef __ANDROID__
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
@@ -415,7 +418,7 @@ int main(int argc, char* argv[])
 
 #ifndef ANDROID
 
-        qorbiterManager  w(&pqOrbiter, &orbiterWin.mainView, screenSize, &settings);
+        qorbiterManager  w(&pqOrbiter, &orbiterWin.mainView, &engine, screenSize, &settings, overrideDir);
         if(!sRouter_IP.empty()){
             w.setInternalIp(QString::fromStdString(sRouter_IP));
             orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
@@ -431,14 +434,14 @@ int main(int argc, char* argv[])
             qDebug() <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!SETTING ON SCREEN FLAG!!!!!!!!!!!!!!!!!!!!!!!!";
         }
 #else
-        qorbiterManager w(&pqOrbiter, &orbiterWin.mainView, &androidHelper, &settings);
+        qorbiterManager w(&pqOrbiter, &orbiterWin.mainView, &engine, &androidHelper, &settings, overrideDir);
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
 #endif
         orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
+
 #if defined(Q_OS_IOS)
         w.setMobileStorage(localLogger.logLocation);
 #endif
-
 
         AbstractImageProvider* modelimageprovider = new AbstractImageProvider(&w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
@@ -484,6 +487,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(handleDceCommand(DCE::PreformedCommand)), Qt::QueuedConnection); //this somehow still blocks btw. this is why i had a painful but explict bridge. the must be a middle ground. possibly look at posting the event instead of connections.
         //  NO! QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
+       QObject::connect(&pqOrbiter, &qOrbiter::routerFound, &orbiterWin, &orbiterWindow::setConnectionState, Qt::QueuedConnection );
         // QObject::connect (&w, SIGNAL(orbiterClosing()), &dceThread, SLOT(quit()),Qt::QueuedConnection);
         //  QObject::connect (&w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
         //  QObject::connect (&w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);

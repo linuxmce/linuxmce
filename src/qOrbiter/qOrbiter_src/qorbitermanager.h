@@ -226,6 +226,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged) /*! \brief if the device is on it's 'Home network' */
     Q_PROPERTY(int hostDevice READ getHostDevice WRITE setHostDevice NOTIFY hostDeviceChanged)
     Q_PROPERTY(bool useNetworkSkins READ useNetworkSkins WRITE setUseNetworkSkins NOTIFY useNetworkSkinsChanged)
+    Q_PROPERTY(QString skinEntryFile READ skinEntryFile NOTIFY skinEntryFileChanged)
+    Q_PROPERTY(bool uiReady READ getUiReady NOTIFY uiReadyChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -234,13 +236,13 @@ class qorbiterManager : public QObject
 
 public:
 #if QT5 && !ANDROID
-    qorbiterManager(QObject *qOrbiter_ptr, QQuickView * view, int testSize, SettingInterface *appSettings, QObject *parent=0);  //constructor
+    qorbiterManager(QObject *qOrbiter_ptr, QQuickView * view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings,QString overridePath, QObject *parent=0);  //constructor
 #elif ANDROID && QT5
-    qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, AndroidSystem *jniHelper, SettingInterface *appSettings, QObject *parent=0);
+    qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath,QObject *parent=0);
 #elif ANDROID
-    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,   QObject *parent =0);
+    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings,QString overridePath,   QObject *parent =0);
 #elif   QT4_8
-    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView * view, int testSize,SettingInterface *appSettings, QObject *parent=0);  //constructor
+    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView * view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath, QObject *parent=0);  //constructor
 #endif
 
     ~qorbiterManager();
@@ -557,8 +559,15 @@ Param 10 - pk_attribute
     int communicatorID;
     int hostDevice;
     SettingInterface *settingsInterface;
-signals:
+    QString skinEntryFile() const;
+    void setSkinEntryFile(const QString &skinEntryFile);
 
+    bool getUiReady() const;
+    void setUiReady(bool value);
+
+signals:
+    void uiReadyChanged();
+    void skinEntryFileChanged();
     void useNetworkSkinsChanged();
     void skinSelectorChanged();
     void hostDeviceChanged();
@@ -733,7 +742,7 @@ signals:
     void osdChanged(bool);
     void newLightLevel(QString l);
     void populate_floorplan_device_commands(int d);
-     void getDeviceStatus(int PK_Device);
+    void getDeviceStatus(int PK_Device);
 
     //setup related
     void orbiterReady(bool);
@@ -1017,7 +1026,7 @@ public slots:
     void setCurrentScreen(QString s);
     void setCurrentScreen(int s);
     //security related
-   Q_INVOKABLE void requestSingleView(int camera);
+    Q_INVOKABLE void requestSingleView(int camera);
     /*!
      * \brief Qml invokable slot for the purpose of asking for a security picture.
      * \param i_pk_camera_device : The camera device from getScreenParams(2)
@@ -1255,7 +1264,7 @@ public slots:
         }
         //changed to remove media type as that is decided on by the media plugin and passed back
         CMD_MH_Play_Media cmd(iPK_Device, iMediaPluginID, 0 , FK_Media.toStdString(), 0, 0, sEntertainArea, false, false, false, false, false);
-         emit sendDceCommand(cmd);
+        emit sendDceCommand(cmd);
     }
 
     void mythTvPlay(){
@@ -1829,6 +1838,7 @@ public slots:
 
 private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
+
     void reloadQml(){
 
         if(m_style && !mb_useNetworkSkins ){
@@ -1836,29 +1846,48 @@ private slots:
             m_style->deleteLater();
         }
 
+
         QString filePath = m_selector->select(m_localQmlPath+"skins/"+currentSkin+"/Style.qml");
         filePath.replace("qrc:/", "qrc:///");
-        qDebug() << filePath;
+        filePath.replace("file:", "file:///");
+        qDebug() << "Style file path " << filePath;
+
         QQmlComponent nustyle(qorbiterUIwin->engine(), QUrl(filePath), QQmlComponent::PreferSynchronous);
         m_style = nustyle.create();
+
         if(m_style){
             qDebug() << Q_FUNC_INFO << " New style applied. ";
         } else {
             qDebug() << nustyle.errors();
             qDebug() << "Failed to create style!";
         }
+
+
+
+        m_appEngine->rootContext()->setContextProperty("Style", m_style);
         qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
+
         QString returnLocation=qorbiterUIwin->source().toString();
+
         qorbiterUIwin->engine()->clearComponentCache();
-#ifdef simulate
-        qorbiterUIwin->setSource(QUrl(m_selector->select(m_localQmlPath+"Index.qml")));
+        m_appEngine->clearComponentCache();
+
+#ifdef simulate || defined (NOQRC)
+        qorbiterUIwin->setSource(QUrl(m_selector->select(m_localQmlPath+"splash/Splash.qml")));
+        QString p = m_selector->select(m_localQmlPath+"splash/Splash.qml");
+        qDebug() << "Splash Url::" << p;
 
 #else
-        qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
+        qorbiterUIwin->setSource(QUrl("qrc:/qml/Index.qml"));
+
 
 #endif
+
+        qDebug() << "Return location " << returnLocation;
         qorbiterUIwin->setSource(QUrl(m_selector->select(returnLocation)));
-        qDebug() << Q_FUNC_INFO << qorbiterUIwin->source();
+
+
+        qDebug() << Q_FUNC_INFO <<  " end ";
         emit screenChange(currentScreen);
     }
     void handleScreenChanged(QScreen* screen);
@@ -1889,7 +1918,7 @@ private slots:
         m_selector->setExtraSelectors(t);
         qDebug() << Q_FUNC_INFO << "QQml File Selector Set to "<< m_selector->allSelectors();
         delayedReloadQml();
-        // qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
+        // qorbiterUIwin->setSource(QUrl("qrc:/qml/Index.qml"));
         // qorbiterUIwin->setSource(qorbiterUIwin->source());
     }
 
@@ -1922,10 +1951,18 @@ private:
 
     QString m_remoteQmlPath;
     QString m_localQmlPath;
-    QList<QVariant> m_localSkins;
+    QVector<QVariant> m_localSkins;
     QObject *m_style;
+    QObject *m_appStyle;
     QDir m_fontDir;
 
+    QQmlApplicationEngine *m_appEngine;
+    QQuickWindow *m_window;
+    QString m_skinOverridePath;
+
+    QString m_skinEntryFile;
+
+    bool uiReady;
 
 };
 

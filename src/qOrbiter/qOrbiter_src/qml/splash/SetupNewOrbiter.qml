@@ -155,10 +155,10 @@ Item {
     property string midnightBlue: "#003366"
     //---------
     function scaleX(x){
-        return x/100*appH
+        return x/100*manager.appHeight
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*manager.appWidth
     }
 
 

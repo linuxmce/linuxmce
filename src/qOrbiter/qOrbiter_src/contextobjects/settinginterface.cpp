@@ -42,13 +42,25 @@ SettingInterface::SettingInterface(QObject *parent) :
 
 
 }
+bool SettingInterface::getReady() const
+{
+    return ready;
+}
+
+void SettingInterface::setReady(bool value)
+{
+    if(ready ==value )return;
+    ready = value;
+    emit readyChanged();
+}
+
 
 
 void SettingInterface::initializeSettings()
 {
     //device name is tricky because it used as an Entertain area identifier. We want to ensure its always read correctly so we do our best to maintain it.
     //the problem case is when the user clears settings. the device name should remain the same but there is nowhere to place it in a simple manner, so we do it behind the scenes.
-
+setReady(false);
 
     if(!m_settings.childGroups().contains("network")){
         log(tr("Initializing network Settings"));
@@ -94,11 +106,12 @@ void SettingInterface::initializeSettings()
     }
 
     log(tr("Settings are ready"));
-    ready=true;
+   setReady(true);
 }
 
 void SettingInterface::destroySettingsData()
 {
+    setReady(false);
     m_persistentName = getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
     m_settings.clear();
     qDebug() << m_settings.allKeys();

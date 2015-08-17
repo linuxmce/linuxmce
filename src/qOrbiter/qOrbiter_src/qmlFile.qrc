@@ -270,5 +270,7 @@
         <file>qml/splash/SetupScreen.qml</file>
         <file>qml/skins/default/screens/Screen_204.qml</file>
         <file>qml/skins/default/screens/Screen_Reload.qml</file>
+        <file>qml/Index.qml</file>
+        <file>qml/IndexContent.qml</file>
     </qresource>
 </RCC>

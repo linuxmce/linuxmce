@@ -256,11 +256,11 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 INCLUDEPATH += ../../ ../../DCE/
 
 
-RESOURCES+=\
-        skinData.qrc
+RESOURCES+= skinData.qrc
 
 noqrc{
 DEFINES+=NOQRC
+RESOURCES+=qmlFile.qrc
 } else {
 RESOURCES+=qmlFile.qrc
 }
