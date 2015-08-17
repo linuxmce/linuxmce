@@ -20,6 +20,7 @@ ApplicationWindow {
     Connections{
         target:manager
         onUiReadyChanged:appContent.state="app"
+        onSplashReady:{appContent.state = "splash" }
     }
 
 

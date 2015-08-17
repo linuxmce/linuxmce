@@ -9,6 +9,8 @@ Item{
     anchors.fill: parent
 
 
+
+
     Image{
         source: "images/splash-bg.png"
         anchors.fill:parent
@@ -58,26 +60,14 @@ Item{
 
         height: parent.height*.75
         width: parent.width *.35
-        property int startupCount:3
-        onStartupCountChanged: {if(startupCount==0) appContent.state="splash"; console.log("changing startup state")}
-        Text {
-            id: topLbl
-            text: qsTr("Waiting for Startup of %1").arg(parent.startupCount+" items")
-            color:"yellow"
-        }
+
+
         Text {
             id: deviceSettings
             text: qsTr("Device Settings")
-            color:settings.ready ? "green" : "red"
-            onColorChanged: parent.startupCount--
+            color:settings.ready ? "green" : "red"          
         }
 
-        Text {
-            id: routerConnection
-            text: qsTr("Connection to Router")
-            color:window.b_connectionPresent? "green" : "red"
-             onColorChanged: parent.startupCount--
-        }
     }
     PropertyAnimation{
         target: spinner

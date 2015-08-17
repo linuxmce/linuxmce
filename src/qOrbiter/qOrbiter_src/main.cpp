@@ -455,6 +455,7 @@ int main(int argc, char* argv[])
 
         orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
+        engine.rootContext()->setContextProperty("dceTimecode", timecode);
         // orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
         qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");

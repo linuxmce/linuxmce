@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.enums 1.0
-import "../"
+import "../."
 Item{
     id:styled_button
     height: Style.appButtonHeight
