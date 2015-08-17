@@ -140,7 +140,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
             mainView.setHeight(600);
             break;
         }
-        mainView.showNormal();
+     //   mainView.showNormal();
     } else {
 
 #ifdef ANDROID

@@ -135,7 +135,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         if(restoreSettings()){  }
     }
 
-    m_appEngine->load(path);
+   m_appEngine->load(path);
     m_testScreenSize =testSize;
     m_fontDir.setPath(QStandardPaths::standardLocations(QStandardPaths::FontsLocation).first());
 
@@ -236,7 +236,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
         qDebug() << "Set QQuickWindow Ptr";
     }
-
+emit splashReady();
 
 }
 
@@ -1363,10 +1363,12 @@ void qorbiterManager::setActiveRoom(int room,int ea)
 void qorbiterManager::execGrp(int grp)
 {
     i_current_command_grp = grp;
-    qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
-    m_appEngine->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
+
+
     QApplication::processEvents(QEventLoop::AllEvents);
     emit executeCMD(grp);
+    qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
+    m_appEngine->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
 }
 
 

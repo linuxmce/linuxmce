@@ -3,8 +3,7 @@ import "." //used to import the style object as singleton
 
 Item{
     id:qmlRoot
-    height: manager.appHeight
-    width: manager.appWidth
+   anchors.fill: parent
     focus:true
 
     property bool screensaverActive:false

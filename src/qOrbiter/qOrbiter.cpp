@@ -1835,6 +1835,7 @@ bool DCE::qOrbiter::initDceVars(){
 bool DCE::qOrbiter::initialize(){
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
+
     if(m_sIPAddress==""){
         m_sIPAddress=dceIP.toStdString();
         m_sHostName=dceIP.toStdString();
@@ -1851,7 +1852,6 @@ bool DCE::qOrbiter::initialize(){
         m_bReload = false;
         m_bOrbiterConnected = true;
 
-
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), dceIP);
@@ -1860,6 +1860,7 @@ bool DCE::qOrbiter::initialize(){
             exit(99);
         }
 
+        registerDevice(i_user,QString(i_ea), i_room);
         CreateChildren();
         return true;
     } else {
@@ -1868,6 +1869,7 @@ bool DCE::qOrbiter::initialize(){
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
             emit commandResponseChanged("No Connection to Router");
             emit routerInvalid();
+
             QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         } else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice ) {
@@ -1955,17 +1957,19 @@ void qOrbiter::processConfigData(QNetworkReply *r)
 
 void DCE::qOrbiter::deinitialize()
 {
+    qDebug() << Q_FUNC_INFO;
     char *pData;
     int iSize;
     pData = NULL;
     iSize = 0;
     PurgeInterceptors();
     BindMediaRemote(false);
-    //DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
-    // SendCommand(CMD_OrbiterUnRegistered);
+    DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
+     SendCommand(CMD_OrbiterUnRegistered);
     emit routerConnectionChanged(false);
     emit closeOrbiter();
     Disconnect();
+   emit closeOrbiter();
 
 }
 
@@ -2014,6 +2018,7 @@ bool qOrbiter::getConfiguration()
 
 void qOrbiter::registerDevice(int user, QString ea, int room)
 {
+    qDebug() << Q_FUNC_INFO;
     emit commandResponseChanged("registering");
 
     char *pData;
@@ -2029,20 +2034,18 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  StringUtils::itos(i_room) ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
-
-
-
         emit commandResponseChanged("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         GetScreenSaverImages();
     }
     else
     {
-
+        qWarning() << "Failed to register orbiter!";
     }
 }
 
 void qOrbiter::qmlSetup(int device, QString address)
 {
+    qDebug() << Q_FUNC_INFO;
     m_dwPK_Device = device;
     m_sHostName = address.toStdString();
     dceIP = address;
@@ -2469,11 +2472,15 @@ void qOrbiter::jumpMobileGrid(int page)
 void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 {
 
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Executing Command Group %d", cmdGrp);
-    string pResponse="";
-    CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);
-    if(SendCommand(execCommandGroup) ){
 
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Executing Command Group %d", cmdGrp);
+
+    CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);
+    if( SendCommand(execCommandGroup) ){
+        qDebug() << "Sent CommandGrp " << cmdGrp;
+    } else {
+        registerDevice(i_user,QString(i_ea), i_room);
+        qDebug() << "Failed to Send command!";
     }
     emit commandComplete();
 }
@@ -4230,6 +4237,7 @@ void qOrbiter::OnUnexpectedDisconnect()
 
 void qOrbiter::OnReload()
 {
+    qDebug() << "On Reload Triggered@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"Command_Impl::OnReload %d", m_dwPK_Device);
     m_bOrbiterConnected = false;
     m_bRouterReloading = true;
@@ -4261,9 +4269,13 @@ void qOrbiter::OnReload()
 
 bool qOrbiter::OnReplaceHandler(string msg)
 {
+   // qDebug() << Q_FUNC_INFO;
     emit commandResponseChanged("Disconnecting due to device with same ID connecting.");
+  //  qDebug() << "Message " << msg.c_str();
+    registerDevice(i_user,QString(i_ea), i_room);
     emit routerReplace();
-    deinitialize();
+   // deinitialize();
+    return true;
 
 }
 
@@ -5267,6 +5279,9 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
 
             if( m_bLocalMode )
                 RunLocalMode();
+        } else{
+            qDebug() << "Cannot Connect to router";
+            this->m_bCancelSocketOp = true;
         }
     } else {
         emit routerFound(false);
@@ -5446,7 +5461,7 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 
 void qOrbiter::reInitialize(){
 
-
+qDebug() << "Initialize !!!!!!!!!!!!";
     if(this->m_pPrimaryDeviceCommand->m_bQuit_get() == true ){
         emit commandResponseChanged("Device set to quit");
     }
@@ -5470,8 +5485,10 @@ void qOrbiter::reInitialize(){
         if(!getConfiguration()){
             exit(99);
         }
+
         registerDevice(i_user,QString(i_ea), i_room);
         CreateChildren();
+
         emit routerConnectionChanged(true);
     }else {
         emit routerConnectionChanged(false);
