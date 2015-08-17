@@ -55,6 +55,7 @@ public:
 class SettingInterface : public QObject
 {
     Q_OBJECT
+      Q_PROPERTY(bool ready READ getReady NOTIFY readyChanged)
 public:
     explicit SettingInterface(QObject *parent = 0);
     bool ready;
@@ -62,10 +63,14 @@ public:
     void setOption(SettingsInterfaceType::SettingsType st,  SettingsKeyType::SettingKey sk, QVariant sval);
     QVariant getOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk);
 
+    bool getReady() const;
+    void setReady(bool value);
+
 signals:
     void newLogMessage(QString msg);
     void settingsDataCleared();
     void writeError(QString error);
+    void readyChanged();
 
 public slots:
     void log(QString message);

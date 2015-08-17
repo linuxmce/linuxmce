@@ -8,6 +8,7 @@
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <qtquick2applicationviewer/qtquick2applicationviewer.h>
+#include "qqmlapplicationengine.h"
 #else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
@@ -63,7 +64,7 @@ public:
  * \param frameless - set to true of no frame is desired.
  * \param parent
      */
-    explicit orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, int simScreenSize,  QObject *parent = 0);
+    explicit orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, int simScreenSize, QQmlApplicationEngine *engine,  QObject *parent = 0);
     //public members
 
     QString message;
@@ -224,6 +225,9 @@ signals:
     void externalIpChanged();
     void usingExternalChanged();
     void creationComplete(bool complete);
+
+private :
+    QQmlApplicationEngine *m_appEngine;
 };
 #endif
 

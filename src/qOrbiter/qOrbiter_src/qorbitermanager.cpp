@@ -72,16 +72,17 @@ using namespace DCE;
   messaging system will be the initial method of communication
 */
 #if (QT5) && !defined (ANDROID)
-qorbiterManager::qorbiterManager(QObject * qOrbiter_ptr, QQuickView *view, int testSize, SettingInterface *appSettings, QObject *parent) :
+qorbiterManager::qorbiterManager(QObject * qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings, QString overridePath, QObject *parent) :
     #elif ANDROID && QT5
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, AndroidSystem *jniHelper,SettingInterface *appSettings,  QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper,SettingInterface *appSettings, QString overridePath, QObject *parent) :
     #elif ANDROID
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,  QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath, QObject *parent) :
     #else
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, int testSize,SettingInterface *appSettings,  QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath,  QObject *parent) :
 
     #endif
     QObject(parent),qorbiterUIwin(view), tskinModel(NULL),
+    m_appEngine(engine),
     appHeight(view->height()),
     appWidth(view->width()),
     settingsInterface(appSettings),
@@ -99,11 +100,29 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     userList(new UserModel( new UserItem, this)),
     myOrbiters(new ExistingOrbiterModel(new ExistingOrbiter(), this)),
     attribFilter( new AttributeSortModel(new AttributeSortItem,6, this)),
-    currentScreen("Screen_1.qml")
-    {
+    currentScreen("Screen_1.qml"),
+    m_skinOverridePath(overridePath)
+{
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
+
+    m_appEngine->rootContext()->setContextProperty("manager", this);
+    m_appEngine->rootContext()->setContextProperty("settings", settingsInterface);
+
+    currentSkin="default";
+    QString path;
+
+    if(m_skinOverridePath==""){
+        path=qApp->applicationDirPath()+"/../qOrbiter_src/qml/Index.qml";
+        setSkinEntryFile(qApp->applicationDirPath()+"/../qOrbiter_src/qml/skins/"+currentSkin+"/Main.qml");
+    } else {
+        path = m_skinOverridePath+"/Index.qml";
+        setSkinEntryFile(m_skinOverridePath+"/"+currentSkin+"/Main.qml");
+    }
+
+    qDebug() << path;
+
     if( registerConnections(qOrbiter_ptr) ){
 
     }
@@ -115,6 +134,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
         if(restoreSettings()){  }
     }
+
+    m_appEngine->load(path);
     m_testScreenSize =testSize;
     m_fontDir.setPath(QStandardPaths::standardLocations(QStandardPaths::FontsLocation).first());
 
@@ -128,6 +149,19 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_selector=new QFileSelector(this);
     selector->setSelector(m_selector);
     m_screenInfo = new ScreenInfo();
+#endif
+
+#ifdef ANDROID
+    m_appEngine->addImportPath("assets:/imports/androidComponents");
+    m_appEngine->addPluginPath(QDir::homePath()+"/../lib");
+    m_appEngine->addPluginPath("assets:/lib");
+#endif
+
+    m_appEngine->addPluginPath("lib");
+    m_appEngine->addPluginPath("imports");
+    m_appEngine->addImportPath(QApplication::applicationDirPath()+"/imports");
+    m_appEngine->addImportPath("lib");
+    m_appEngine->addImportPath("qml");
 
     connect(m_screenInfo, SIGNAL(screenSizeChanged()), this, SLOT(resetScreenSize()));
     connect(qorbiterUIwin, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
@@ -136,11 +170,11 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     connect(qorbiterUIwin->engine(), SIGNAL(warnings(QList<QQmlError>)), this, SLOT(handleViewError(QList<QQmlError>)));
     resetScreenSize();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
+    m_appEngine->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 
-#endif
 
 #ifdef __ANDROID__ || defined(Q_OS_IOS)
-    //qorbiterUIwin->showMaximized();
+    qorbiterUIwin->showMaximized();
     checkOrientation(Qt::LandscapeOrientation);
 #endif
 
@@ -176,8 +210,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
 
-    // ScreenSaver = new ScreenSaverClass(this);
-    // qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
     // Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
     prepareModelPool(5);
 
@@ -195,10 +227,17 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     //    QObject::connect(&mediaFilter, SIGNAL(pkUsersChanged(QString)), this, SLOT(setGridPkUsers(QString)));
     //    QObject::connect(&mediaFilter, SIGNAL(usersPrivateChanged(QString)), this, SLOT(setGridUsersPrivate(QString)));
     //    QObject::connect(&mediaFilter, SIGNAL(lastViewedChanged(QString)), this, SLOT(setGridLastViewed(QString)));
- qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
-
+    qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
+    m_appEngine->rootContext()->setContextProperty("roomList", m_lRooms);
 
     emit orbiterInitialized();
+
+    if(m_appEngine->rootObjects().length()!=0){
+        m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
+        qDebug() << "Set QQuickWindow Ptr";
+    }
+
+
 }
 
 qorbiterManager::~qorbiterManager(){
@@ -295,7 +334,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     }
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
     if(mb_useNetworkSkins){
-     //   setupNetworkSkins(); no longer a thing.
+        //   setupNetworkSkins(); no longer a thing.
     } else {
         swapSkins("default");
         emit setSkinStatus(true);
@@ -670,11 +709,31 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
         qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
         qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
+
+        m_appEngine->rootContext()->setContextObject(this);
+        m_appEngine->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
+        m_appEngine->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
+        m_appEngine->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
+        m_appEngine->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
+        m_appEngine->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
+        m_appEngine->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
+        m_appEngine->rootContext()->setContextProperty("floorplan_devices", floorplans);                  //floorplan devices
+        m_appEngine->rootContext()->setContextProperty("floorplan_pages", QVariant::fromValue(pages));    //pages for floorplans
+        m_appEngine->rootContext()->setContextProperty("currentFloorplanType", QVariant::fromValue(i_currentFloorplanType));
+        m_appEngine->rootContext()->setContextProperty("currentuser", sPK_User);
+        m_appEngine->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
+        m_appEngine->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
+        m_appEngine->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
+        m_appEngine->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
+        m_appEngine->rootContext()->setContextProperty("gmediaType", q_mediaType);
+        m_appEngine->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
+        m_appEngine->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
+        m_appEngine->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
+        m_appEngine->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
     }
 
 
     setDceResponse("Properties Done");
-
     setDceResponse("Setting location");
     setActiveRoom(iFK_Room, iea_area);
     setCurrentUser(QString::number(iPK_User));
@@ -684,18 +743,17 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
     if(!alreadyConfigured){
         this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
+        m_appEngine->rootContext()->setContextProperty("fileformatmodel", uiFileFilter );
+
         connect(uiFileFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
         connect(this, SIGNAL(resetFilter()), uiFileFilter, SLOT(clear()));
 
         //-----setting up the MEDIASUBTYPE model------------------------------------------------------------------------
         this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
-
+        m_appEngine->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter);
         connect(mediaTypeFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
         connect(this, SIGNAL(resetFilter()), mediaTypeFilter, SLOT(clear()));
     }
-
-
-
 
     //-----setting up the GENRE model------------------------------------------------------------------------
     QDomElement genreElement = root.firstChildElement("GenreList");
@@ -712,11 +770,15 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     if(!alreadyConfigured){
 
         this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
+        m_appEngine->rootContext()->setContextProperty("genrefilter", genreFilter);
+
         connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
         QObject::connect(this, SIGNAL(resetFilter()), genreFilter, SLOT(resetStates()));
 
         //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
         this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
+       m_appEngine->rootContext()->setContextProperty("attribfilter", attribFilter);
+
         connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
         QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(clear()) );
     }
@@ -734,14 +796,12 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     }
 
     alreadyConfigured=true;
-
-
 }
 
 void qorbiterManager::getConfiguration()
 {
     QNetworkRequest updateDevice;
-    QNetworkAccessManager *ud= new QNetworkAccessManager();  
+    QNetworkAccessManager *ud= new QNetworkAccessManager();
     updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfig(QNetworkReply*)));
     ud->get(updateDevice);
@@ -771,6 +831,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         m_style=styleData.create();
 
         refreshUI(QUrl(m_localQmlPath+"skins/"+incSkin+"/Main.qml"));
+        setUiReady(true);
         return;
     }
 
@@ -785,14 +846,16 @@ void qorbiterManager::swapSkins(QString incSkin)
         emit skinMessage("Setting Skin to:" +incSkin);
         emit skinMessage("Got it from the model : " + tskinModel->m_baseUrl.toString());
         setImagePath(tskinModel->m_baseUrl.toString()+"/"+incSkin+"/img/");
-        //load the actual skin entry point     
+        //load the actual skin entry point
         currentSkin = incSkin;
         m_style=tskinModel->currentItem;
 #ifdef __ANDROID__
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", tskinModel->currentItem);
         qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
+        m_appEngine->rootContext()->setContextProperty("Style", m_style);
 #else
         qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
+        m_appEngine->rootContext()->setContextProperty("Style", m_style);
 #endif
 
 #if (QT5)
@@ -964,7 +1027,7 @@ void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVar
 void qorbiterManager::clearDataGrid(QString dataGridId)
 {
     if(!modelPoolLock.tryLockForWrite()){
-      //  qDebug() << "clearDatagrid("<<dataGridId<<"):: failed to lock mutex.";
+        //  qDebug() << "clearDatagrid("<<dataGridId<<"):: failed to lock mutex.";
         return;
     }
 
@@ -983,7 +1046,7 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
 
     }
     modelPoolLock.unlock();
-   // qDebug() << "manager.clearDataGrid() end";
+    // qDebug() << "manager.clearDataGrid() end";
     emit modelChanged();
 }
 
@@ -1020,10 +1083,10 @@ void qorbiterManager::prepareModelPool(int poolSize)
 GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int PK_DataGrid, QString initOption)
 
 {
-   // qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
+    // qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
     GenericFlatListModel* pModel = NULL;
-   // qDebug() <<" Searching for model, id ::" << dataGridId;
+    // qDebug() <<" Searching for model, id ::" << dataGridId;
     if (!m_mapDataGridModels.contains(dataGridId))
     {
         // GenericFlatListModels are kept in a pool in qorbitermanager, because we want the
@@ -1031,10 +1094,10 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
         // this method. Creating them in this method would create them in the QML thread.
         // lock this section so we don't prepare the same model more than once
 
-       // qDebug() <<dataGridId << " doesnt exist creating new one.";
+        // qDebug() <<dataGridId << " doesnt exist creating new one.";
 
         if(!modelPoolLock.tryLockForWrite()){
-          //  qDebug() << "Mutex locked, comeback later.";
+            //  qDebug() << "Mutex locked, comeback later.";
             return pModel;
         }
         // Check that the model still is not in map
@@ -1086,7 +1149,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
             pModel->setOption(option);
 
             LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid  ");
-           // qDebug() << "Checks complete, fetching grid " << dataGridId ;
+            // qDebug() << "Checks complete, fetching grid " << dataGridId ;
             emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
         } else {
             pModel = m_mapDataGridModels[dataGridId];
@@ -1096,7 +1159,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 
     } else {
         pModel = m_mapDataGridModels[dataGridId];
-       // qDebug() << "Model found with " << pModel->rowCount() << "row, returning;";
+        // qDebug() << "Model found with " << pModel->rowCount() << "row, returning;";
     }
 
     return pModel;
@@ -1146,7 +1209,7 @@ void qorbiterManager::genericFilterChanged(QString dataGridId)
     GenericFlatListModel* pModel = NULL;
     if (m_mapDataGridModels.contains(dataGridId))
     {
-       // qDebug() << "genericFilterChanged()::" << "existing model type, checking filter of " << mediaFilter.getGenericOptions();
+        // qDebug() << "genericFilterChanged()::" << "existing model type, checking filter of " << mediaFilter.getGenericOptions();
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::genericFilterChanged() model exists");
         pModel = m_mapDataGridModels[dataGridId];
         //      pModel->setOption(mediaFilter.getGenericOptions());
@@ -1288,6 +1351,12 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
 
+    m_appEngine->rootContext()->setContextProperty("currentRoomLights", roomLights);
+    m_appEngine->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
+    m_appEngine->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
+    m_appEngine->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
+    m_appEngine->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
+
 }
 
 
@@ -1295,6 +1364,7 @@ void qorbiterManager::execGrp(int grp)
 {
     i_current_command_grp = grp;
     qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
+    m_appEngine->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit executeCMD(grp);
 }
@@ -1383,7 +1453,7 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
 {
     QString str= d->readAll().replace("\n", "");
     QScriptEngine script;
-    QVariantList p = script.evaluate(str).toVariant().toList();   
+    QVariantList p = script.evaluate(str).toVariant().toList();
     storageDevices = p;
 }
 
@@ -1486,6 +1556,7 @@ void qorbiterManager::showUI(bool b){
 
 void qorbiterManager::displayModelPages(QList<QObject *> pages){
     qorbiterUIwin->rootContext()->setContextProperty("pageList", QVariant::fromValue(pages));
+    m_appEngine->rootContext()->setContextProperty("pageList", QVariant::fromValue(pages));
 }
 
 
@@ -1499,10 +1570,11 @@ void qorbiterManager::getFloorplanDevices(int floorplantype){
         //qDebug() << Q_FUNC_INFO << floorplans->get(i)->floorplanType() << "::" << floorplantype;
         if(floorplans->index(i).data(6).toInt() == floorplantype)  {
             QString markerID = floorplans->index(i).data(1).toString();
-            current_floorplan_devices.append(floorplans->find(markerID));           
+            current_floorplan_devices.append(floorplans->find(markerID));
         }
     }
     qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
+    m_appEngine->rootContext()->setContextProperty("current_floorplan_device", QVariant::fromValue(current_floorplan_devices));
 }
 
 void qorbiterManager::setFloorplanType(int t)
@@ -1700,6 +1772,7 @@ void qorbiterManager::initializeGridModel()
 {
     basicProvider = new basicImageProvider();
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+    m_appEngine->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     setDceResponse("Grid Initialized");
 }
 
@@ -1820,6 +1893,7 @@ void qorbiterManager::setCommandList(QList<QObject *> &l)
 
 void qorbiterManager::toggleSkinType()
 {
+    return;
     {
         qDebug() << tskinModel->m_baseUrl;
         QString newPath= tskinModel->m_baseUrl.toString();
@@ -1988,7 +2062,7 @@ void qorbiterManager::setActiveSkin(QString name){
 
     }
     else {
-        tskinModel->setActiveSkin(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "default" : name);
+    //    tskinModel->setActiveSkin(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "default" : name);
     }
 
     qDebug("Setting Skin");
@@ -2013,13 +2087,18 @@ void qorbiterManager::setupContextObjects()
     //file details object and imageprovider setup
 
     qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,mp_fileDetails);
+    m_appEngine->rootContext()->setContextProperty("filedetailsclass", mp_fileDetails);
+
     qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
+    m_appEngine->rootContext()->setContextProperty("dcenowplaying", nowPlayingButton);
 
     //screen parameters class that could be extended as needed to fetch other data
     qorbiterUIwin->rootContext()->setContextProperty("screenparams", mp_screenParameters);
+    m_appEngine->rootContext()->setContextProperty("screenparams", mp_screenParameters);
 
     //----------------Security Video setup
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", mp_securityVideo);
+    m_appEngine->rootContext()->setContextProperty("securityvideo", mp_securityVideo);
 
 
 
@@ -2039,6 +2118,12 @@ void qorbiterManager::setupEarlyContexts()
     qorbiterUIwin->rootContext()->setContextProperty("orbiterList", myOrbiters);
     qorbiterUIwin->rootContext()->setContextProperty("deviceList", devices);
     qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
+
+    m_appEngine->rootContext()->setContextProperty("dcemessage", dceResponse);
+    m_appEngine->rootContext()->setContextProperty("orbiterList", myOrbiters);
+    m_appEngine->rootContext()->setContextProperty("deviceList", devices);
+    m_appEngine->rootContext()->setContextProperty("deviceCommands", deviceCommands);
+
     //Resize to view as opposed to the root item
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
     // qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
@@ -2063,7 +2148,7 @@ void qorbiterManager::setupEarlyContexts()
 #endif
 
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
-    QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
+  // QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
     QObject::connect(qorbiterUIwin->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
 }
 
@@ -2216,6 +2301,8 @@ void qorbiterManager::setupUiSelectors(){
     localDir = qmlPath.append(buildType.remove("/qml"));
     remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
     m_remoteQmlPath = remoteDirectoryPath;
+
+
 #ifdef __ANDROID__
     m_localQmlPath="qrc:/qml/";
 #elif defined Q_OS_IOS
@@ -2247,10 +2334,37 @@ void qorbiterManager::setupUiSelectors(){
 
 #endif
 
+    if(m_skinOverridePath!=""){
+        m_localQmlPath = m_skinOverridePath;
+    }
+
     skinMessage("build type set to:: "+buildType);
     qDebug() << "Local path set to " << m_localQmlPath;
     qorbiterUIwin->setSource(m_localQmlPath+"splash/Splash.qml");
 }
+bool qorbiterManager::getUiReady() const
+{
+    return uiReady;
+}
+
+void qorbiterManager::setUiReady(bool value)
+{
+    if(uiReady==value) return;
+    uiReady = value; emit uiReadyChanged();
+}
+
+QString qorbiterManager::skinEntryFile() const
+{
+    return m_skinEntryFile;
+}
+
+void qorbiterManager::setSkinEntryFile(const QString &skinEntryFile)
+{
+    if(m_skinEntryFile==skinEntryFile) return;
+    m_skinEntryFile = skinEntryFile; emit skinEntryFileChanged();
+    qDebug() << m_skinEntryFile;
+}
+
 
 bool qorbiterManager::restoreSettings()
 {
@@ -2652,7 +2766,7 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     /*Remote command signal */
     QObject::connect(ptr, SIGNAL(dceGuiCommand(int)), this, SLOT(handleDceGuiCommand(int)), Qt::QueuedConnection);
 
- QObject::connect(ptr, &qOrbiter::timecodeEvent, m_lRooms, &LocationModel::setEaTimeCode, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::timecodeEvent, m_lRooms, &LocationModel::setEaTimeCode, Qt::QueuedConnection);
 
     return true;
 

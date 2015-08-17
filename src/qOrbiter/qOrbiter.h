@@ -1523,6 +1523,7 @@ signals:
     void routerDisconnect();
     void routerReplace();
     void routerConnectionChanged(bool s);
+    void routerFound(bool found);
     ///@}
 
     /** @name Floorplan Signals
