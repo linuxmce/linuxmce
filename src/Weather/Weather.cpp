@@ -35,6 +35,7 @@ using namespace DCE;
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/curlbuild.h>
+#include <stdexcept>      // std::out_of_range
 
 void * msgThread(void * Arg);
 void * initThread(void * Arg);
@@ -89,55 +90,142 @@ bool Weather::GetConfig()
 	use_OWM_ = false;
 	use_WWO_ = false;
 
-	if(config.size()){
-		vector<string> v_conf=split_C(config,',');
-		for(vector<string>::iterator it=v_conf.begin();it!=v_conf.end();++it){
-		vector<string> elem=split_C((*it),':');
-		if(elem[0]=="API"){
-				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Config: %s",elem[1].c_str());
-        			if(elem[1]=="NOAA"){
-					use_NOAA_=true;
-				        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA");
-					lang_=elem[2];
-                                        units_=elem[3];
-					lat_=elem[4];
-                                        lon_=elem[5];
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA language %s", lang_.c_str());        
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA units %s", units_.c_str());        
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA Lat %s", lat_.c_str());        
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA Lon %s", lon_.c_str());        
-				}else if(elem[1]=="WWO"){
-					use_WWO_=true;
-				        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online");
-					lang_=elem[2];
-                                        api_key_=elem[3];
-					units_=elem[4];
-					city_=elem[5];
-					radar_=elem[6];
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online language %s", lang_.c_str());        
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online api key %s", api_key_.c_str());        
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online units %s", units_.c_str());        
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online city %s", city_.c_str());        
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online Radaar %s", radar_.c_str());        
-				}else if(elem[1]=="OWM"){
-					use_OWM_=true;
-				}else {
-					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather: No API Selected");
-				}
-			}else if(elem[0]=="lat"){
-				lat_=elem[1];
-			}else if(elem[0]=="lon"){
-				lon_=elem[1];
-			}else if(elem[0]=="units"){
-				units_=elem[1];
-			}else if(elem[0]=="lang"){
-				lang_=elem[1];
-			}else if(elem[0]=="timer"){
-				timer_= strtod(elem[1].c_str(), NULL)*60;
-			}
-		}
-	}
+	if (config.empty())
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Refusing to start with empty configuration. Please specify a proper configuration string.");
+	    return false;
+	  }
 
+	vector<string> vectConfiguration;
+	
+	StringUtils::Tokenize(config,",",vectConfiguration);
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Parsing %d configuration entries.",vectConfiguration.size());
+
+	// Parse each entity
+	for (vector<string>::iterator it=vectConfiguration.begin();it!=vectConfiguration.end();++it)
+	  {
+	    string sConfigurationItem = *it;
+	    vector<string> vectConfigurationItems;
+	    
+	    StringUtils::Tokenize(config,":",vectConfigurationItems);
+
+	    if (sConfigurationItem.find("API") != string::npos)
+	      {
+		try
+		  {
+		    string sApiType = vectConfigurationItems.at(1);
+		    if (sApiType == "NOAA")
+		      {
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: NOAA API Selected");
+			use_NOAA_=true;
+			lang_=vectConfigurationItems.at(2);
+			units_=vectConfigurationItems.at(3);
+			lat_=vectConfigurationItems.at(4);
+			lon_=vectConfigurationItems.at(5);
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: NOAA: Language: %s",lang_.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: NOAA: Units: %s",units_.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: NOAA: Use %s as latitude",lat_.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: NOAA: Use %s as Longitude",lon_.c_str());
+		      }
+		    else if (sApiType == "WWO")
+		      {
+			use_WWO_=true;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online");
+			lang_=vectConfigurationItems.at(2);
+			api_key_=vectConfigurationItems.at(3);
+			units_=vectConfigurationItems.at(4);
+			city_=vectConfigurationItems.at(5);
+			radar_=vectConfigurationItems.at(6);
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online language %s", lang_.c_str());        
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online api key %s", api_key_.c_str());        
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online units %s", units_.c_str());        
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online city %s", city_.c_str());        
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online Radaar %s", radar_.c_str());        
+		      }
+		    else if (sApiType == "OWM")
+		      {
+			use_OWM_=true;
+			// Am assuming this needs to be fleshed out? -tschak
+		      }
+		    else
+		      {
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather: Invalid API Specified: %s",sApiType.c_str());
+		      }
+		  }
+		catch (const std::out_of_range& oor)
+		  {
+		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather: Out of Range Error for API item %s - error: %s",sConfigurationItem.c_str(), oor.what());
+		    return false;
+		  }
+	      }
+	    else if (sConfigurationItem.find("lat") != string::npos)
+	      {
+		try
+		  {
+		    string sValue = vectConfigurationItems.at(1);
+		    lat_=sValue;
+		  }
+		catch (const std::out_of_range& oor)
+		  {
+		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Incorrectly formed latitude configuration item: %s - Out of range error: %s",sConfigurationItem.c_str(),oor.what());
+		    return false;
+		  }
+	      }
+	    else if (sConfigurationItem.find("lon") != string::npos)
+	      {
+		try
+		  {
+		    string sValue = vectConfigurationItems.at(1);
+		    lon_=sValue;
+		  }
+		catch (const std::out_of_range& oor)
+		  {
+		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Incorrectly formed longitude configuration item: %s - Out of range error: %s",sConfigurationItem.c_str(),oor.what());
+		    return false;
+		  }	      
+	      }
+	    else if (sConfigurationItem.find("units") != string::npos)
+	      {
+		try
+		  {
+		    string sValue = vectConfigurationItems.at(1);
+		    units_=sValue;
+		  }
+		catch (const std::out_of_range& oor)
+		  {
+		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Incorrectly formed units (measurement units) configuration item: %s - Out of range error: %s",sConfigurationItem.c_str(),oor.what());
+		    return false;
+		  }	      
+	      }
+	    else if (sConfigurationItem.find("lang") != string::npos)
+	      {
+		try
+		  {
+		    string sValue = vectConfigurationItems.at(1);
+		    lang_=sValue;
+		  }
+		catch (const std::out_of_range& oor)
+		  {
+		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Incorrectly formed language configuration item: %s - Out of range error: %s",sConfigurationItem.c_str(),oor.what());
+		    return false;
+		  }	      
+	      }
+	    else if (sConfigurationItem.find("timer") != string::npos)
+	      {
+		try
+		  {
+		    string sValue = vectConfigurationItems.at(1);
+		    timer_=strtod(sValue.c_str(),NULL)*60;
+		  }
+		catch (const std::out_of_range& oor)
+		  {
+		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Incorrectly formed timer configuration item: %s - Out of range error: %s",sConfigurationItem.c_str(),oor.what());
+		    return false;
+		  }	      
+	      }
+	  }
+	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Weather: Starting Init Thread");
 	if (pthread_create(&i_thr_,NULL, initThread,(void *) this)) {
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather: Error creating initThread");
