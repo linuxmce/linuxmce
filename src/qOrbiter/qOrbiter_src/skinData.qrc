@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/qml">
+    <qresource prefix="/">
         <file>qml/Index.qml</file>
         <file>qml/images/splash-bg.png</file>
         <file>qml/IndexContent.qml</file>
@@ -16,6 +16,7 @@
     <qresource prefix="/">
         <file>config.xml</file>
         <file>qml/SkinError.qml</file>
+        <file>qml/RegenScreen.qml</file>
     </qresource>
     <qresource prefix="/lang">
         <file>translations/de_DE.qm</file>

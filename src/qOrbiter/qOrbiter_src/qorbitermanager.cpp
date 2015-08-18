@@ -114,14 +114,24 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     QString path;
 
     if(m_skinOverridePath==""){
+#ifdef NOQRC
         path=qApp->applicationDirPath()+"/../qOrbiter_src/qml/Index.qml";
         setSkinEntryFile(qApp->applicationDirPath()+"/../qOrbiter_src/qml/skins/"+currentSkin+"/Main.qml");
-    } else {
-        path = m_skinOverridePath+"/Index.qml";
-        setSkinEntryFile(m_skinOverridePath+"/"+currentSkin+"/Main.qml");
-    }
+        m_appEngine->setBaseUrl(QUrl::fromLocalFile(qApp->applicationDirPath()+"/../qOrbiter_src/qml/"));
+#else
+        path="qrc:/qml/Index.qml";
+        setSkinEntryFile("qrc:///qml/skins/"+currentSkin+"/Main.qml");
+        m_appEngine->setBaseUrl(QUrl::fromLocalFile("qrc:/qml/"));
+#endif
 
-    qDebug() << path;
+    } else {
+        qDebug() << "Override Path detected :: " << m_skinOverridePath;
+        path = m_skinOverridePath+"/Index.qml";
+        setSkinEntryFile(m_skinOverridePath+"/skins/"+currentSkin+"/Main.qml");
+        m_appEngine->setBaseUrl(QUrl::fromLocalFile(m_skinOverridePath));
+    }
+    qDebug() << "Base URL for loading qml " << m_appEngine->baseUrl();
+    qDebug() << "Initial Loading Path" << path;
 
     if( registerConnections(qOrbiter_ptr) ){
 
@@ -135,7 +145,12 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         if(restoreSettings()){  }
     }
 
-   m_appEngine->load(path);
+#ifdef NOQRC
+    m_appEngine->load(path);
+#else
+    m_appEngine->load(QUrl(path));
+#endif
+
     m_testScreenSize =testSize;
     m_fontDir.setPath(QStandardPaths::standardLocations(QStandardPaths::FontsLocation).first());
 
@@ -145,9 +160,12 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     qApp->installTranslator(&translator);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
-    selector=new QQmlFileSelector(view->engine());
-    m_selector=new QFileSelector(this);
-    selector->setSelector(m_selector);
+    selector=new QQmlFileSelector(m_appEngine);
+    m_selector=new QFileSelector(m_appEngine);
+
+    qDebug() << m_selector->allSelectors().join("\n");
+
+    //  selector->setSelector(m_selector);
     m_screenInfo = new ScreenInfo();
 #endif
 
@@ -236,7 +254,9 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
         qDebug() << "Set QQuickWindow Ptr";
     }
-emit splashReady();
+
+    emit splashReady();
+
 
 }
 
@@ -336,8 +356,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     if(mb_useNetworkSkins){
         //   setupNetworkSkins(); no longer a thing.
     } else {
-        swapSkins("default");
-        emit setSkinStatus(true);
+        // swapSkins("default");
+        //  emit setSkinStatus(true);
     }
 
 }
@@ -379,6 +399,7 @@ void qorbiterManager::refreshUI(QUrl url){
 void qorbiterManager::processConfig(QNetworkReply *config)
 {
 
+    qDebug() << Q_FUNC_INFO;
 
     if(!alreadyConfigured){
         iPK_Device_DatagridPlugIn =  long(6);
@@ -710,7 +731,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
         qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 
-        m_appEngine->rootContext()->setContextObject(this);
+
         m_appEngine->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
         m_appEngine->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
         m_appEngine->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
@@ -731,13 +752,6 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         m_appEngine->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
         m_appEngine->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
     }
-
-
-    setDceResponse("Properties Done");
-    setDceResponse("Setting location");
-    setActiveRoom(iFK_Room, iea_area);
-    setCurrentUser(QString::number(iPK_User));
-
 
     //-----setting up the FILEFORMAT model------------------------------------------------------------------------
 
@@ -777,7 +791,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
         //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
         this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
-       m_appEngine->rootContext()->setContextProperty("attribfilter", attribFilter);
+        m_appEngine->rootContext()->setContextProperty("attribfilter", attribFilter);
 
         connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
         QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(clear()) );
@@ -796,6 +810,11 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     }
 
     alreadyConfigured=true;
+    setDceResponse("Properties Done");
+    setDceResponse("Setting location");
+    setActiveRoom(iFK_Room, iea_area);
+    setCurrentUser(QString::number(iPK_User));
+    swapSkins("default");
 }
 
 void qorbiterManager::getConfiguration()
@@ -820,20 +839,54 @@ bool qorbiterManager::OrbiterGen()
  */
 void qorbiterManager::swapSkins(QString incSkin)
 {
+    qDebug() << Q_FUNC_INFO;
     emit skinMessage("swapping skin to::" + incSkin);
 
-    if(!mb_useNetworkSkins){
+    if(currentSkin==incSkin) return;
+    currentSkin= incSkin;
 
-        incSkin="default";
-        currentSkin=incSkin;
+//    if(!mb_useNetworkSkins){
 
-        QQmlComponent styleData(qorbiterUIwin->engine(), QUrl(m_localQmlPath+"skins/"+incSkin+"/Style.qml"), QQmlComponent::PreferSynchronous);
-        m_style=styleData.create();
+//        if(m_style  ){
+//            qDebug() << Q_FUNC_INFO << "Deleting style";
+//            m_style->deleteLater();
+//        }
 
-        refreshUI(QUrl(m_localQmlPath+"skins/"+incSkin+"/Main.qml"));
-        setUiReady(true);
-        return;
-    }
+//        QStringList extra;
+//        extra.append("skins");
+//        extra.append(currentSkin);
+//        extra.append("medium");
+//        m_selector->setExtraSelectors(extra);
+//        incSkin="default";
+//        currentSkin=incSkin;
+//       // QQmlFileSelector localSelector(m_appEngine);
+//       // localSelector.setExtraSelectors(m_selector->allSelectors());
+
+//        QString filePath = m_selector->select("/home/langston/lmce/src/qOrbiter/qOrbiter_src/qml/Style.qml");
+//        qDebug() << Q_FUNC_INFO << m_selector->allSelectors();
+//        qDebug() << Q_FUNC_INFO << filePath;
+//        qDebug() << Q_FUNC_INFO << m_appEngine->baseUrl();
+
+//        QQmlComponent styleData(m_appEngine, QUrl(filePath), QQmlComponent::PreferSynchronous);
+//        m_style=styleData.create();
+
+//        if(!m_style){
+//            qDebug() << "Couldnt create style! " << filePath;
+//        } else {
+//            qDebug() << "Style Created!"  << filePath;;
+//            qDebug() << m_selector->allSelectors().join("\n");
+//            //  m_appEngine->rootContext()->setContextProperty("Style", m_style);
+//        }
+
+
+//        m_appEngine->clearComponentCache();
+//        m_appEngine->rootContext()->setContextProperty("Style", m_style);
+
+//       // qDebug() << m_localQmlPath+"skins/"+incSkin+"/Style.qml";
+//        refreshUI(QUrl(m_localQmlPath+"skins/"+incSkin+"/Main.qml"));
+//        setUiReady(true);
+//        return;
+//    }
 
 #ifdef WIN32
     incSkin = "default";
@@ -849,14 +902,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         //load the actual skin entry point
         currentSkin = incSkin;
         m_style=tskinModel->currentItem;
-#ifdef __ANDROID__
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("style", tskinModel->currentItem);
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
-        m_appEngine->rootContext()->setContextProperty("Style", m_style);
-#else
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
-        m_appEngine->rootContext()->setContextProperty("Style", m_style);
-#endif
+         m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
 #if (QT5)
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QQuickView::Status)),
@@ -1345,11 +1391,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     roomTelecom = roomTelecomScenarios.value(room);
     roomSecurity = roomSecurityScenarios.value(room);
 
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
+
 
     m_appEngine->rootContext()->setContextProperty("currentRoomLights", roomLights);
     m_appEngine->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
@@ -1587,18 +1629,22 @@ void qorbiterManager::setFloorplanType(int t)
 
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip){
+    getConfiguration();
+
     if(status=="starting"){
         setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
         setInternalIp(incrouterip);
         setDeviceNumber(incdeviceid.toInt());
         setDceResponse("Initializing Local Manager");
         initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
+
     } else if (status=="reconnect") {
         status="running";
         setDceResponse("Re -Initializing Local Manager");
         setCurrentScreen("Screen_1.qml");
         setReloadStatus(false);
     }
+
 }
 
 /*!
@@ -2064,7 +2110,7 @@ void qorbiterManager::setActiveSkin(QString name){
 
     }
     else {
-    //    tskinModel->setActiveSkin(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "default" : name);
+        //    tskinModel->setActiveSkin(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "default" : name);
     }
 
     qDebug("Setting Skin");
@@ -2150,7 +2196,7 @@ void qorbiterManager::setupEarlyContexts()
 #endif
 
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
-  // QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
+    // QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
     QObject::connect(qorbiterUIwin->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
 }
 

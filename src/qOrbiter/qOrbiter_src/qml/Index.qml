@@ -19,7 +19,7 @@ ApplicationWindow {
 
     Connections{
         target:manager
-        onUiReadyChanged:appContent.state="app"
+        onUiReadyChanged:{ if(manager.uiReady) {appContent.state="app"} else {appContent.state="regen"}  }
         onSplashReady:{appContent.state = "splash" }
     }
 
@@ -35,6 +35,13 @@ ApplicationWindow {
     Component{
         id:indexRootComponent
         IndexContent{
+
+        }
+    }
+
+    Component{
+        id:regenComponent
+        RegenScreen{
 
         }
     }
@@ -125,7 +132,18 @@ ApplicationWindow {
                     target: app
                     source:appEntryQml
                 }
+            },
+            State {
+                name: "regen"
+                PropertyChanges {
+                    target: bootStrap
+                    sourceComponent:undefined
+                }
 
+                PropertyChanges {
+                    target: app
+                    sourceComponent:regenComponent
+                }
             }
         ]
     }

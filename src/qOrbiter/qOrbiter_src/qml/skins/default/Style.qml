@@ -15,7 +15,7 @@ QtObject{
         console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
     }
 
-    readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
+  readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
 
     //picture ratios - will be moved to cpp class
     property double dvdPosterRatio:955/1080
@@ -25,10 +25,9 @@ QtObject{
     property double vcdRatio:1080/1080
     property double vhsRatio:1280/620
 
-
     /* Transitions */
     readonly property int transition_animationTime:350
-    readonly property int transition_accentTime:500
+    readonly property int transition_accentTime:350
     readonly property int transitionFadeTime:350
 
     /* Application Colors */
@@ -44,8 +43,8 @@ QtObject{
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
     readonly property color appbutton_color:appcolor_background
-    readonly property int appButtonHeight:manager.isProfile ? scaleY(10) : scaleY(11)
-    readonly property int appButtonWidth: manager.isProfile ? scaleX(10) : scaleX(6)
+    property int appButtonHeight:manager.isProfile ? scaleY(12) : scaleY(16)
+    property int appButtonWidth: manager.isProfile ? scaleX(26) : scaleX(15)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
     readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
     readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(9) : scaleY(15)
@@ -58,22 +57,22 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:14*screenInfo.primaryScreen.pixelRatio//manager.isProfile ? scaleY(2) : scaleY(4)
-    readonly property int appFontSize_header:20*screenInfo.primaryScreen.pixelRatio//scaleY(5)
-    readonly property int appFontSize_description:16*screenInfo.primaryScreen.pixelRatio//manager.isProfile ? scaleY(2) : scaleY(3.5)
-    readonly property int appFontSize_title:22*screenInfo.primaryScreen.pixelRatio//manager.isProfile ? scaleY(3) :scaleY(4)
-    property int fontSize_small:14*screenInfo.primaryScreen.pixelRatio
-    property int fontSize_medium:16*screenInfo.primaryScreen.pixelRatio
-    property int fontSize_large:22*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_list:11*dpRatio
+    readonly property int appFontSize_header:16*dpRatio
+    readonly property int appFontSize_description:12*dpRatio
+    readonly property int appFontSize_title:14*dpRatio
 
-    property int fontSize_listItem:14*screenInfo.primaryScreen.pixelRatio
-    property int fontSize_listTitle:20*screenInfo.primaryScreen.pixelRatio
-    property int fontSize_listAccent:12*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_small:6*dpRatio
+    property int fontSize_medium:appFontSize_description
+    property int fontSize_large:appFontSize_title
 
+    property int fontSize_listItem:9*dpRatio
+    property int fontSize_listTitle:11*dpRatio
+    property int fontSize_listAccent:10*dpRatio
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
-    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(7) : scaleY(8)
+    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(7) : scaleY(9)
 
     /* Application Menu Panels */
     readonly property int appMenuPanel_height:scaleY(90)
@@ -83,7 +82,7 @@ QtObject{
 
     /* Application List Views */
     readonly property int listViewWidth_large:scaleX(55)
-    readonly property int listViewWidth_medium:manager.isProfile? scaleX(45) : scaleX(20)
+    readonly property int listViewWidth_medium:manager.isProfile ? scaleX(35): scaleX(20)
     readonly property int listViewWidth_small:scaleX(15)
     readonly property int listViewItemHeight:manager.isProfile ? scaleY(12) : scaleY(15)
     readonly property int listViewMargin:manager.isProfile ? scaleX(5) : scaleX(2.5)

@@ -1,7 +1,7 @@
 import QtQuick 2.2
 import org.linuxmce.enums 1.0
 import QtGraphicalEffects 1.0
-import "../"
+import "../."
 Item{
     id:videoDelegate
     clip:true
@@ -22,7 +22,7 @@ Item{
     Image{
         id:imdbImg
         fillMode: Image.PreserveAspectCrop
-        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+        source:path !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
         anchors.fill: bgExtent
         anchors.margins: 10
         smooth: true

@@ -558,10 +558,13 @@ int main(int argc, char* argv[])
 
         }else if(!w.getInternalIp().isEmpty() && w.getDeviceNumber() != -1){
             qDebug() << "No Command line opt set but config file located for device " << w.getDeviceNumber();
+
             sRouter_IP = w.getInternalIp().toStdString();                                          //use internal ip first
             PK_Device = w.getDeviceNumber();
+
             orbiterWin.setDeviceNumber(PK_Device);
             orbiterWin.setRouterAddress(w.getInternalIp());
+            pqOrbiter.qmlSetup(PK_Device,w.getInternalIp());
         }
         else{
             qDebug() << "Nothing set, using defaults.";

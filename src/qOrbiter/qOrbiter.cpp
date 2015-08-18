@@ -1833,6 +1833,7 @@ bool DCE::qOrbiter::initDceVars(){
 }
 
 bool DCE::qOrbiter::initialize(){
+    qDebug() << Q_FUNC_INFO;
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
 
@@ -1854,6 +1855,7 @@ bool DCE::qOrbiter::initialize(){
 
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
+        qDebug() << "Starting Manager";
         emit startManager(QString::number(m_dwPK_Device), dceIP);
 
         if(!getConfiguration()){
@@ -1978,6 +1980,8 @@ void DCE::qOrbiter::deinitialize()
 
 bool qOrbiter::getConfiguration()
 {
+
+
 
     httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)).append("&label="+deviceName));
     qDebug() << "Ea url::" <<httpSettingsRequest->url();
