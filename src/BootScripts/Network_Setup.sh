@@ -273,6 +273,7 @@ while [ $i -lt $amount_otherInterfaces ] #traverse trough elements
                         otherinterfaceNM=$(CommaField 3 "${interfaces_array[$j]}")
                 fi
         auto=("${auto[@]}" $otherinterfaceIf)
+	otheripv6IP=$otherinterfaceIP
 	if [ $otherinterfaceModus != "bridged" ]; then
 
 echo "
@@ -281,7 +282,7 @@ iface $otherinterfaceIf inet $otherinterfaceModus" >>"$File"
                         if [ $otherinterfaceModus == "static" ]; then
 echo "  address $otherinterfaceIP
         netmask $otherinterfaceNM" >>"$File"
-        if [[ "$Intv6IP" == "disabled" ]]; then
+        if [[ "$otherv6IP" == "disabled" ]]; then
                 echo "  pre-up sysctl -q -e -w  net.ipv6.conf.$otherinterfaceIf.disable_ipv6=1" >>"$File"
         else
                 echo "  pre-up sysctl -q -e -w  net.ipv6.conf.$otherinterfaceIf.disable_ipv6=0" >>"$File"
