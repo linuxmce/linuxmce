@@ -213,15 +213,39 @@ case $ExtIP in
 esac
 
 auto=("${auto[@]}" $IntIf)
+if [[ $IntIf == br* ]]; then
+        #find the interfacces for this bridge
+i="0"
+j="2"
+while [ $i -lt $amount_otherInterfaces ] #traverse trough elements
+  do
+        otherinterfaceIf=$(CommaField 1 "${interfaces_array[$j]}")
+        otherinterfaceIP=$(CommaField 2 "${interfaces_array[$j]}")
+         if [ $otherinterfaceIP == $IntIf ]; then
+                echo "$otherinterfaceIf"
+                BridgedIF=("${BridgedIF[@]}" $otherinterfaceIf)
+        fi
+    i=$[$i+1]
+    j=$[$j+1]
+  done
+        echo "
+# --- Internal NIC ---
+iface $IntIf inet static
+        bridge_ports ${BridgedIF[@]}
+        address $IntIP
+        netmask $IntNetmask" >>"$File"
+
+else
 echo "
 # --- Internal NIC ---
 iface $IntIf inet static
-	address $IntIP
-	netmask $IntNetmask" >>"$File"
+        address $IntIP
+        netmask $IntNetmask" >>"$File"
+fi
 if [[ "$Intv6IP" == "disabled" ]]; then
-	echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$IntIf.disable_ipv6=1" >>"$File"
+        echo "  pre-up sysctl -q -e -w  net.ipv6.conf.$IntIf.disable_ipv6=1" >>"$File"
 else
-	echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$IntIf.disable_ipv6=0" >>"$File"
+        echo "  pre-up sysctl -q -e -w  net.ipv6.conf.$IntIf.disable_ipv6=0" >>"$File"
 fi
 echo "        # DNS Settings for Internal Net
         dns-nameservers $IntIP
@@ -233,28 +257,45 @@ i="0"
 j="2"
 while [ $i -lt $amount_otherInterfaces ] #traverse trough elements
   do
-	otherinterfaceIf=$(CommaField 1 "${interfaces_array[$j]}")
-	otherinterfaceIP=$(CommaField 2 "${interfaces_array[$j]}")
+        otherinterfaceIf=$(CommaField 1 "${interfaces_array[$j]}")
+        otherinterfaceIP=$(CommaField 2 "${interfaces_array[$j]}")
         if [ -n $otherinterfaceIP  -a $otherinterfaceIP != $otherinterfaceIf ]; then
-		if [ $otherinterfceIP == "DHCP" -a $otherinterfaceIP == "dhcp" ]; then
-			otherinterfaceModus="dhcp"
-        	elif [ $otherinterfaceIP == "vlan" ]; then
-			otherinterfaceModus="static"
-			otherinterfaceIP=$(CommaField 3 "${interfaces_array[$j]}")
-			otherinterfaceNM=$(CommaField 4 "${interfaces_array[$j]}")
-		else
-			otherinterfaceModus="static"
-			otherinterfaceNM=$(CommaField 3 "${interfaces_array[$j]}")
-		fi
-			auto=("${auto[@]}" $otherinterfaceIf)
+                if [[ $otherinterfaceIP == br* ]]; then
+                        otherinterfaceModus="bridged"
+                elif [ $otherinterfceIP == "DHCP" -a $otherinterfaceIP == "dhcp" ]; then
+                        otherinterfaceModus="dhcp"
+                elif [ $otherinterfaceIP == "vlan" ]; then
+                        otherinterfaceModus="static"
+                        otherinterfaceIP=$(CommaField 3 "${interfaces_array[$j]}")
+                        otherinterfaceNM=$(CommaField 4 "${interfaces_array[$j]}")
+                else
+                        otherinterfaceModus="static"
+                        otherinterfaceNM=$(CommaField 3 "${interfaces_array[$j]}")
+                fi
+        auto=("${auto[@]}" $otherinterfaceIf)
+	if [ $otherinterfaceModus != "bridged" ]; then
+
 echo "
 # --- $otherinterfaceIf  ---
 iface $otherinterfaceIf inet $otherinterfaceModus" >>"$File"
-			if [ $otherinterfaceModus == "static" ]; then
-echo "	address $otherinterfaceIP
+                        if [ $otherinterfaceModus == "static" ]; then
+echo "  address $otherinterfaceIP
         netmask $otherinterfaceNM" >>"$File"
-			fi
+        if [[ "$Intv6IP" == "disabled" ]]; then
+                echo "  pre-up sysctl -q -e -w  net.ipv6.conf.$otherinterfaceIf.disable_ipv6=1" >>"$File"
+        else
+                echo "  pre-up sysctl -q -e -w  net.ipv6.conf.$otherinterfaceIf.disable_ipv6=0" >>"$File"
+        fi
+        echo "        # DNS Settings for Internal Net
+        dns-nameservers $otherinterfaceIP
+        dns-search $DomainName" >>"$File"
+                        fi
+        else
+echo "
+# --- $otherinterfaceIf  ---
+iface $otherinterfaceIf inet manual" >>"$File"
 	fi
+        fi
     i=$[$i+1]
     j=$[$j+1]
   done
