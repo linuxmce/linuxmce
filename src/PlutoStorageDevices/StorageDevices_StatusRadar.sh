@@ -327,26 +327,25 @@ while : ;do
 			if [[ "$IDrive_DeviceTemplate" == "$TPL_INTERNAL_DRIVE" ]] ; then
 				## See if a device with that UUID can be found in udev
 				## Find the drive
-				if [[ ! -e "/dev/disk/by-uuid/$Drive_UUID" ]] ; then
-					Log "Cannot find disk $IDrive_ID with uuid=$Drive_UUID"
+				if [[ ! -e "/dev/disk/by-uuid/$IDrive_UUID" ]] ; then
+					Log "Cannot find disk $IDrive_ID with uuid=$IDrive_UUID"
 					# as in the StorageDevices_Radar.sh script, fall back to serial number and storage_device
-					if [[ ! -e "/dev/disk/by-id/$Drive_UUID" ]] ; then
-						Log "Cannot find disk $IDrive_ID with id = $Drive_UUID either"
-						if [[ ! -e "/dev/disk/by-label/$Drive_UUID" ]] ; then
-							Log "Cannot find disk $IDrive_ID with label = $Drive_UUID either, aborting!"
+					if [[ ! -e "/dev/disk/by-id/$IDrive_UUID" ]] ; then
+						Log "Cannot find disk $IDrive_ID with id = $IDrive_UUID either"
+						if [[ ! -e "/dev/disk/by-label/$IDrive_UUID" ]] ; then
+							Log "Cannot find disk $IDrive_ID with label = $IDrive_UUID either, aborting!"
 							SetDeviceOnline "$IDrive_ID" "0"
 							continue
 						fi
 					fi
 				fi
 
-				# TODO: support block device detectio
-#				## See if we have a block device associated with that UUID
-#				IDrive_BlockDev=$(hal-get-property --udi "$IDrive_HalUDI" --key 'block.device')
-#				if [[ "$IDrive_BlockDev" == "" ]] ;then
-#					Log "Drive $IDrive_ID ($IDrive_UUID) doesn't have a block device associated"
-#					SetDeviceOnline "$IDrive_ID" "0"
-#				fi
+				## See if we have a block device associated with that UUID
+				IDrive_BlockDev=$(blkid -U "$IDrive_UUID")
+				if [[ "$IDrive_BlockDev" == "" ]] ;then
+					Log "Drive $IDrive_ID ($IDrive_UUID) doesn't have a block device associated"
+					SetDeviceOnline "$IDrive_ID" "0"
+				fi
 			fi
 
 			## See if is still available in /proc/partitions
