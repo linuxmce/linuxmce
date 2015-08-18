@@ -1,5 +1,5 @@
 import QtQuick 2.2
-import "../."
+
 Item {
     id:panelRoot
     height: Style.scaleY(99)

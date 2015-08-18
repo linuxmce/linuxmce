@@ -37,7 +37,7 @@ Item{
     
     Text {
         id: splashText
-        text: qsTr("QOrbiter For Android - Small UI")
+        text: qsTr("QOrbiter For Android\n\tSmall UI")
         color:"black"
         font.weight:Font.Light
         anchors{

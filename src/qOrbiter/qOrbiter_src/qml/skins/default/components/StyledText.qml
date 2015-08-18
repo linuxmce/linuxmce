@@ -1,5 +1,5 @@
 import QtQuick 2.2
-import "../"
+import "../../../."
 Text {
     property string textLabel:"ipsum"
     property int textHeight

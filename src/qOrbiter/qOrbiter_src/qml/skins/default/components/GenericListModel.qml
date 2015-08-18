@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import "../components"
-import "../"
+import "../."
 import org.linuxmce.screens 1.0
 import org.linuxmce.grids 1.0
 Item{

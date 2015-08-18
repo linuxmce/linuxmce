@@ -144,16 +144,16 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     } else {
 
 #ifdef ANDROID
-        mainView.showFullScreen();
+       // mainView.showFullScreen();
 #elif defined(Q_OS_IOS)
-        mainView.showFullScreen();
+       // mainView.showFullScreen();
 #else
         if(fullScreen){
-            mainView.showFullScreen();
+          //  mainView.showFullScreen();
         } else {
             mainView.setWidth(800);
             mainView.setHeight(600);
-            mainView.showNormal();
+          //  mainView.showNormal();
         }
 
 #endif

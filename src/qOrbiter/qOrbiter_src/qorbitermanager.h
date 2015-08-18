@@ -990,7 +990,7 @@ public slots:
     void setFloorPlanCommand(QVariantMap t);
     //@}
 
-    void setSkinStatus(bool status) { b_skinReady = status ; emit skinDataLoaded(b_skinReady); if(status)getConfiguration(); }
+    void setSkinStatus(bool status) { b_skinReady = status ; emit skinDataLoaded(b_skinReady); /*if(status)getConfiguration();*/ }
     void setOrbiterStatus(bool status) {b_orbiterReady = status ; emit orbiterReady(b_orbiterReady);}
 
     /*Runtime Screen handling*/
@@ -1840,54 +1840,54 @@ private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
 
     void reloadQml(){
-
+           setUiReady(false);
+    qDebug() << Q_FUNC_INFO ;
         if(m_style && !mb_useNetworkSkins ){
             qDebug() << Q_FUNC_INFO << "Deleting style";
             m_style->deleteLater();
         }
 
+        selector->setSelector(m_selector);
+        qDebug() << m_selector->select("skins/"+currentSkin+"/Main.qml");
 
-        QString filePath = m_selector->select(m_localQmlPath+"skins/"+currentSkin+"/Style.qml");
-        filePath.replace("qrc:/", "qrc:///");
-        filePath.replace("file:", "file:///");
+        QThread::sleep(2);
+        qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n");
+        QString fp = "skins/"+currentSkin+"/Style.qml";
+        QString filePath = m_selector->select(fp);
+
+     #ifdef NOQRC
+     //  filePath.replace("qrc:/", "qrc:///");
+     //   filePath.replace("file:", "file:///");
+
+#else
+     //   filePath.replace("qrc:///", "qrc:/");
+     //   filePath.replace("file:///", "file:/");
+
+        if(m_skinOverridePath.isEmpty()){
+            filePath.prepend("qrc:///qml/");
+        } else{
+            filePath.prepend("qml/");
+        }
+
+#endif
         qDebug() << "Style file path " << filePath;
 
-        QQmlComponent nustyle(qorbiterUIwin->engine(), QUrl(filePath), QQmlComponent::PreferSynchronous);
+
+
+        QQmlComponent nustyle(m_appEngine , QUrl(filePath), QQmlComponent::PreferSynchronous);
         m_style = nustyle.create();
 
         if(m_style){
-            qDebug() << Q_FUNC_INFO << " New style applied. ";
+            qDebug() << Q_FUNC_INFO << " New style applied. " << filePath;
         } else {
-            qDebug() << nustyle.errors();
-            qDebug() << "Failed to create style!";
+            qDebug() << Q_FUNC_INFO << nustyle.errors();
+            qDebug() << "New style failed application! " << filePath;
         }
 
-
-
-        m_appEngine->rootContext()->setContextProperty("Style", m_style);
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
-
-        QString returnLocation=qorbiterUIwin->source().toString();
-
-        qorbiterUIwin->engine()->clearComponentCache();
         m_appEngine->clearComponentCache();
+        m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
-#ifdef simulate || defined (NOQRC)
-        qorbiterUIwin->setSource(QUrl(m_selector->select(m_localQmlPath+"splash/Splash.qml")));
-        QString p = m_selector->select(m_localQmlPath+"splash/Splash.qml");
-        qDebug() << "Splash Url::" << p;
-
-#else
-        qorbiterUIwin->setSource(QUrl("qrc:/qml/Index.qml"));
-
-
-#endif
-
-        qDebug() << "Return location " << returnLocation;
-        qorbiterUIwin->setSource(QUrl(m_selector->select(returnLocation)));
-
-
-        qDebug() << Q_FUNC_INFO <<  " end ";
+        setUiReady(true);
         emit screenChange(currentScreen);
     }
     void handleScreenChanged(QScreen* screen);
@@ -1916,7 +1916,7 @@ private slots:
         }
 
         m_selector->setExtraSelectors(t);
-        qDebug() << Q_FUNC_INFO << "QQml File Selector Set to "<< m_selector->allSelectors();
+        qDebug() << Q_FUNC_INFO << "QQml File Selector Set to "<< m_selector->allSelectors().join("\n");
         delayedReloadQml();
         // qorbiterUIwin->setSource(QUrl("qrc:/qml/Index.qml"));
         // qorbiterUIwin->setSource(qorbiterUIwin->source());
@@ -1935,7 +1935,7 @@ private slots:
 
     void setSkinSelector(QString s){if(m_skinSelector==s)return ; m_skinSelector=s; emit skinSelectorChanged(); }
     void reloadQmlSkin() { }
-    void setSelectors(QStringList selections){selector->setExtraSelectors(selections);}
+    void setSelectors(QStringList selections){  selector->setExtraSelectors(selections); }
 
 private:
     QString m_skinSelector;
