@@ -24,14 +24,6 @@ ApplicationWindow {
     }
 
 
-    menuBar: MenuBar{
-
-        Menu{
-            title: qsTr("&File")
-        }
-
-    }
-
     Component{
         id:indexRootComponent
         IndexContent{
