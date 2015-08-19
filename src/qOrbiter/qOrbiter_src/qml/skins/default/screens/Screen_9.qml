@@ -8,6 +8,9 @@ StyledScreen{
 
     Panel{
         id: phonebookcall
+        property string numberToCall: ''
+        property int level: 0
+
         headerTitle: "Make Call from phonebook."
         anchors.centerIn: parent
 
@@ -22,12 +25,11 @@ StyledScreen{
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.topMargin: Style.scaleY(10)
+            anchors.topMargin: 4
             anchors.bottomMargin: Style.scaleY(10)
 
             ListView {
                 id: phoneBookList
-                property int level: 0
                 model: manager.getDataGridModel("phoneBook", DataGrids.Phone_Book_Auto_Compl, '')
                 Connections {
                     target: phoneBookList.model
@@ -41,23 +43,46 @@ StyledScreen{
                 delegate: StyledButton{
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    buttonText: description
+                    buttonText: phonebookcall.level == 1 ? description + ': ' + value :  description
                     textSize: Style.appFontSize_list
+                    height: Style.appButtonHeight / 2
                     onActivated:   {
-                        if (phoneBookList.level == 0) {
-                            phoneBookList.level = 1
+                        if (phonebookcall.level == 0) {
+                            // Switch to phone number list
+                            phonebookcall.level = 1
                             manager.clearDataGrid("phoneNumber")
                             phoneBookList.model = manager.getDataGridModel("phoneNumber", DataGrids.Phone_Book_List_of_Nos, value)
-                        } else if (phoneBookList.level == 1) {
-                            // Make call
+                        } else if (phonebookcall.level == 1) {
+                            // switch to call from device list
+                            phonebookcall.numberToCall = value
+                            phonebookcall.level = 2
+                            telecomDevices.visible = true
+                            searchArea.visible = false
                         }
                     }
                 }
             }
         }
 
+        TelecomDevices {
+            id: telecomDevices
+            visible: false
+            anchors.fill: parent
+            anchors.bottomMargin: 20
+            z: 100
+            showCallToDevices: false
+            onSelected: {
+                visible = false
+                manager.makeCall(currentuser, phonebookcall.numberToCall, selectedDevice, 0)
+                phonebookcall.level = 1
+            }
+            onClose: {
+                phonebookcall.level = 1
+            }
+        }
 
         Rectangle {
+            id: searchArea
             border.color : "white"
             border.width : 1
             color: "black"
