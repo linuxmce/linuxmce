@@ -22,15 +22,19 @@ sources = Main.cpp OMX_Player.cpp $(Gen_Dev_Files)
 CFLAGS+=-std=c++11 -DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CMAKE_CONFIG -D__VIDEOCORE4__ -U_FORTIFY_SOURCE -Wall -DHAVE_OMXLIB -DUSE_EXTERNAL_FFMPEG  -DHAVE_LIBAVCODEC_AVCODEC_H -DHAVE_LIBAVUTIL_OPT_H -DHAVE_LIBAVUTIL_MEM_H -DHAVE_LIBAVUTIL_AVUTIL_H -DHAVE_LIBAVFORMAT_AVFORMAT_H -DHAVE_LIBAVFILTER_AVFILTER_H -DHAVE_LIBSWRESAMPLE_SWRESAMPLE_H -DOMX -DOMX_SKIP64BIT -ftree-vectorize -DUSE_EXTERNAL_OMX -DTARGET_RASPBERRY_PI -DUSE_EXTERNAL_LIBBCM_HOST
 
 LDFLAGS+=
-INCLUDES+=`pkg-config --cflags dbus-c++-1`
+INCLUDES+=`pkg-config --cflags dbus-c++-1` `pkg-config --cflags glib-2.0`
 
 CXXFLAGS +=
 CPPFLAGS += $(INCLUDES) $(CFLAGS)
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r `pkg-config --libs dbus-c++-1`
+XTRALDLIBS = -lmysqlclient_r `pkg-config --libs dbus-c++-1` `pkg-config --libs glib-2.0` -lX11 -lXmu
 
 Gen_Dev_Files +=
-sources += OMXPlayerStream.cpp OMXPlayerInterface.cpp ../Xine_Player/XineMediaInfo.cpp
+sources += OMXPlayerStream.cpp \
+	OMXPlayerInterface.cpp \
+	../utilities/linux/window_manager/WMController/WMController.cpp \
+        ../utilities/linux/window_manager/wmctrl/wmctrl.cpp \
+	../Xine_Player/XineMediaInfo.cpp \
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

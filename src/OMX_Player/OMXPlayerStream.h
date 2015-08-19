@@ -2,6 +2,7 @@
 
 #include "OMXPlayerInterface.h"
 #include "OMX_Player.h"
+#include <X11/Xlib.h>
 
 namespace DCE
 {
@@ -30,6 +31,12 @@ class OMXPlayerStream : public OMXPlayerInterface
 
     mutex m_mtxLog;
 
+    // display (X window) related
+    Display* m_pDisplay;
+    Window m_Window;
+    XEvent *m_Event;
+    Cursor m_Cursor;
+
     // methods
     void Log(string txt);
 
@@ -46,10 +53,18 @@ class OMXPlayerStream : public OMXPlayerInterface
     int m_iMediaID = -1;
     string m_sMediaType = ""; // this is actually the MediaID, not to be confused with the LMCE MediaType above.
 
+    string m_sWindowTitle;
+
     // methods
     OMXPlayerStream(string sAudioDevice, bool bPassthrough, string sGpuDeInt, OMX_Player *pOwner, int iTimeCodeReportFrequency);
     ~OMXPlayerStream(void);
 
+    // x window control
+    bool Init();
+    bool CreateWindow();
+    bool Minimize();
+
+    // media control
     bool Play(int iStreamID, string sMediaURL, string sMediaPosition, int iMediaType);
     void Stop(int iStreamID);
     int Get_iStreamID();
