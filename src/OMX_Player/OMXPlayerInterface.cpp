@@ -254,32 +254,42 @@ bool OMXPlayerInterface::getSubtitlesShowing() {
 void OMXPlayerInterface::HideSubtitles() {
 	Log("OMXPlayerInterface::HideSubtitles");
 	Do_HideSubtitles();
-	m_bSubtitlesShowing = false;
 }
 
 void OMXPlayerInterface::Do_HideSubtitles() {
-  try {
-    g_player_client->HideSubtitles();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Do_HideSubtitles() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      g_player_client->HideSubtitles();
+      m_bSubtitlesShowing = false;
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Do_HideSubtitles() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
 }
 
 void OMXPlayerInterface::ShowSubtitles() {
 	Log("OMXPlayerInterface::ShowSubtitles");
 	Do_ShowSubtitles();
-	m_bSubtitlesShowing = true;
 }
 
 void OMXPlayerInterface::Do_ShowSubtitles() {
-  try {
-    g_player_client->ShowSubtitles();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Do_ShowSubtitles() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      g_player_client->ShowSubtitles();
+      m_bSubtitlesShowing = true;
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Do_ShowSubtitles() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
 }
 
@@ -290,12 +300,17 @@ bool OMXPlayerInterface::setSubtitle(int track) {
 
 bool OMXPlayerInterface::Do_SelectSubtitle(int track) {
   bool ret(false);
-  try {
-    ret = g_player_client->SelectSubtitle(track);
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Do_SelectSubtitle() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_player_client->SelectSubtitle(track);
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Do_SelectSubtitle() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
   // TODO: cache this?
   return ret;
@@ -336,7 +351,7 @@ std::vector< std::string > OMXPlayerInterface::Do_ListSubtitles() {
   std::vector< std::string > ret;
   int err_count=0;
   bool done=false;
-  while ( !done && (err_count < DBUS_RETRIES)) {
+  while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
       ret = g_player_client->ListSubtitles();
       done = true;
@@ -362,13 +377,18 @@ bool OMXPlayerInterface::setVideo(int track) {
 
 bool OMXPlayerInterface::Do_SelectVideo(int track) {
   bool ret(false);
-  try {
-    Log("Do_SelectVideo() - SelectVideo(track) does not exist in dbus interface.");
-    //ret = g_player_client->SelectVideo(track);
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Do_SelectVideo() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      Log("Do_SelectVideo() - SelectVideo(track) does not exist in dbus interface.");
+      //ret = g_player_client->SelectVideo(track);
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Do_SelectVideo() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
   return ret;
 }
@@ -408,7 +428,7 @@ std::vector< std::string > OMXPlayerInterface::Do_ListVideo() {
   std::vector< std::string > ret;
   int err_count=0;
   bool done=false;
-  while ( !done && (err_count < DBUS_RETRIES)) {
+  while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
       ret = g_player_client->ListVideo();
       done = true;
@@ -436,12 +456,17 @@ bool OMXPlayerInterface::setAudio(int track) {
 
 bool OMXPlayerInterface::Do_SelectAudio(int track) {
   bool ret;
-  try {
-    ret = g_player_client->SelectAudio(track);
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Do_SelectAudio() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_player_client->SelectAudio(track);
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Do_SelectAudio() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
   return ret;
 }
@@ -481,7 +506,7 @@ std::vector< std::string > OMXPlayerInterface::Do_ListAudio() {
   std::vector< std::string > ret;
   int err_count=0;
   bool done=false;
-  while ( !done && (err_count < DBUS_RETRIES)) {
+  while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
       ret = g_player_client->ListAudio();
       done = true;
@@ -544,12 +569,17 @@ void OMXPlayerInterface::Do_Seek(int64_t usecs) {
 int64_t OMXPlayerInterface::Send_Seek(int64_t usecs) {
     int64_t sought;
     Log("Send_Seek(" + to_string(usecs) + ")");
-    try {
-      sought = g_player_client->Seek(usecs);
-    }
-    catch (DBus::Error &dbus_err) {
-      Log("Send_Seek() - D-Bus error - seek failed.");
-      Reconnect_Player();
+    int err_count=0;
+    bool done=false;
+    while ( !done && (++err_count < DBUS_RETRIES)) {
+      try {
+        sought = g_player_client->Seek(usecs);
+        done = true;
+      }
+      catch (DBus::Error &dbus_err) {
+        Log("Send_Seek() - D-Bus error - seek failed.");
+        Reconnect_Player();
+      }
     }
     if (!sought)
         Log("Send_Seek() - FAILED!");
@@ -569,12 +599,17 @@ void OMXPlayerInterface::Do_SetPosition(string sMediaURL, int64_t xPos) {
 int64_t OMXPlayerInterface::Send_SetPosition(string sMediaURL, int64_t xPos) {
   int64_t ret;
   Log("Send_SetPosition() - sending SetPosition('" + sMediaURL + "', " + to_string(xPos) + ") [" + TimeFromUSec(xPos) + "]");
-  try {
-    ret = g_player_client->SetPosition(sMediaURL, xPos);
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Send_SetPosition() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_player_client->SetPosition(sMediaURL, xPos);
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_SetPosition() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
   m_sMediaURL = sMediaURL;
   return ret;
@@ -601,22 +636,32 @@ void OMXPlayerInterface::Do_IncreaseVolume() {
 }
 
 void OMXPlayerInterface::Do_Mute() {
-  try {
-    g_props_client->Mute();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Do_Mute() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Properties();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      g_props_client->Mute();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Do_Mute() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Properties();
+    }
   }
 }
 
 void OMXPlayerInterface::Do_UnMute() {
-  try {
-    g_props_client->Unmute();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Do_Mute() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Properties();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      g_props_client->Unmute();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Do_Mute() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Properties();
+    }
   }
 }
 
@@ -653,12 +698,17 @@ void OMXPlayerInterface::Do_FastForward() {
 
 void OMXPlayerInterface::Send_Action(int Action) {
   Log("Send_Action() - sending Action(" + to_string(Action) + ")");
-  try {
-    g_player_client->Action(Action);
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Send_Action() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      g_player_client->Action(Action);
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
 }
 
@@ -669,23 +719,33 @@ void OMXPlayerInterface::Do_Pause() {
 
 void OMXPlayerInterface::Send_Pause() {
   Log("Send_Pause() - sending Pause()");
-  try {
-    g_player_client->Pause();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Send_Pause() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      g_player_client->Pause();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_Pause() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
 }
 
 void OMXPlayerInterface::Send_Stop() {
   Log("Send_Stop() - sending Stop()");
-  try {
-    g_player_client->Stop();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Send_Stop() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      g_player_client->Stop();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_Stop() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
 }
 
@@ -762,27 +822,33 @@ void OMXPlayerInterface::Stop() {
 
 void OMXPlayerInterface::Send_Quit() {
   Log("Send_Quit() - sending Quit()");
-  try {
 
-    if (!g_props_client) {
-      Log("Send_Quit() - FUBAR! (props) - Stop() pressed when not PLAYING?");
-      return;
-    }
-
-    if (!g_props_client->CanQuit() ) {
-      Log("Send_Quit() - player unable to quit");
-      return; // false;
-    }
-
-    if (!g_root_client) {
-      Log("Send_Quit() - FUBAR! (root) - Stop() pressed when not PLAYING?");
-      return;
-    }
-    g_root_client->Quit();
+  if (!g_props_client) {
+    Log("Send_Quit() - FUBAR! (props) - Stop() pressed when not PLAYING?");
+    return;
   }
-  catch (DBus::Error &dbus_err) {
-    Log("Send_Quit() - can't send, has omxplayer gone away?");
-    Reconnect_Root();
+
+  if (!g_props_client->CanQuit() ) {
+    Log("Send_Quit() - player unable to quit");
+    return; // false;
+  }
+
+  if (!g_root_client) {
+    Log("Send_Quit() - FUBAR! (root) - Stop() pressed when not PLAYING?");
+    return;
+  }
+
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      g_root_client->Quit();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_Quit() - can't send, has omxplayer gone away?");
+      Reconnect_Root();
+    }
   }
 }
 
@@ -1172,45 +1238,50 @@ void OMXPlayerInterface::Set_ErrCount(int count) {
 }
 
 string OMXPlayerInterface::Get_PlaybackStatus(void) {
-  string ret;
+  string ret("");
 
-  if (!g_props_client)
-      Log("Get_PlaybackStatus() - FUBAR! Please report this to the author!");
-
-  try {
-    ret = g_props_client->PlaybackStatus();
-    Set_ErrCount(0);
-  }
-  catch (DBus::Error &dbus_err) {
-    Reconnect_Properties();
-    Inc_Error();
-    ret = "";
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_props_client->PlaybackStatus();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Reconnect_Properties();
+    }
   }
   return ret;
 }
 
 uint64_t OMXPlayerInterface::Get_Position(void) {
   uint64_t ret = -1;
-  try {
-    ret = g_props_client->Position();
-    Set_ErrCount(0);
-  }
-  catch (DBus::Error &dbus_err) {
-    Reconnect_Properties();
-    Inc_Error();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_props_client->Position();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Reconnect_Properties();
+    }
   }
   return ret;
 }
 
 uint64_t OMXPlayerInterface::Get_Duration(void) {
   uint64_t ret = -1;
-  try {
-    ret = g_props_client->Duration();
-    Set_ErrCount(0);
-  }
-  catch (DBus::Error &dbus_err) {
-    Reconnect_Properties();
-    Inc_Error();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (++err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_props_client->Duration();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Reconnect_Properties();
+    }
   }
   return ret;
 }

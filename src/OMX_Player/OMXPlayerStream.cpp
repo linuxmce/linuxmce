@@ -72,7 +72,8 @@ void OMXPlayerStream::SetDeviceData_SubtitleTracks() {
 
 void OMXPlayerStream::SetDeviceData_AudioTracks() {
 	// Get/Set Audio DD
-	std::string sAudio(OMXPlayerInterface::getCurrentAudio() + "\n");
+	std::string sAudio("");
+	sAudio = std::to_string(OMXPlayerInterface::getCurrentAudio()) + "\n";
 	std::vector< std::string > vsAudio;
 	vsAudio = OMXPlayerInterface::Get_ListAudio();
 	for(std::vector<std::string>::iterator it = vsAudio.begin(); it < vsAudio.end(); it++)
@@ -94,7 +95,8 @@ void OMXPlayerStream::SetDeviceData_AudioTracks() {
 
 void OMXPlayerStream::SetDeviceData_VideoTracks() {
 	// Get/Set Video DD
-	std::string sVideo(OMXPlayerInterface::getCurrentVideo() + "\n");
+	std::string sVideo("");
+	sVideo = std::to_string(OMXPlayerInterface::getCurrentVideo()) + "\n";
 	std::vector< std::string > vsVideo;
 	vsVideo = OMXPlayerInterface::Get_ListVideo();
 	for(std::vector<std::string>::iterator it = vsVideo.begin(); it < vsVideo.end(); it++)
