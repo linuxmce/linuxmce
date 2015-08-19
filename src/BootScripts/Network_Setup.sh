@@ -222,7 +222,6 @@ while [ $i -lt $amount_otherInterfaces ] #traverse trough elements
         otherinterfaceIf=$(CommaField 1 "${interfaces_array[$j]}")
         otherinterfaceIP=$(CommaField 2 "${interfaces_array[$j]}")
          if [ $otherinterfaceIP == $IntIf ]; then
-                echo "$otherinterfaceIf"
                 BridgedIF=("${BridgedIF[@]}" $otherinterfaceIf)
         fi
     i=$[$i+1]
@@ -366,35 +365,34 @@ j=2;
 
 while [ $i -lt $amount_other6Interfaces ] #traverse trough elements
  do
-	
-	other6interfaceIf=$(CommaField 1 "${interfacesIPv6_array[$j]}")
-        other6interfaceIP=$(CommaField 2 "${interfacesIPv6_array[$j]}")
-	case $other6interfaceIP in
-	        "disabled")
-        	        IntSetting="disabled"
-        	;;
-        	"ra")
-        	        IntSetting="ra"
-        	;;
-	
-	        *)
-        	        IntSetting="error"
-        	        if [[ "$other6interfaceIP" != "" && "$other6interfaceIP" != "$other6interfaceIf" ]]; then
-        	                IntSetting="static"
-        	                auto=("${auto[@]}" $other6interfaceIf)
-                	        v6="$v6
+        other6interfaceIf=$(CommaField 1 "${IPv6_interfaces_array[$j]}")
+        other6interfaceIP=$(CommaField 2 "${IPv6_interfaces_array[$j]}")
+        case $other6interfaceIP in
+                "disabled")
+                        IntSetting="disabled"
+                ;;
+                "ra")
+                        IntSetting="ra"
+                ;;
+
+                *)
+                        IntSetting="error"
+                        if [[ "$other6interfaceIP" != "" && "$other6interfaceIP" != "$other6interfaceIf" ]]; then
+                                IntSetting="static"
+                                #auto=("${auto[@]}" $other6interfaceIf)
+                                v6="$v6
+
 # --- $other6interfaceIf
 iface $other6interfaceIf inet6 static
         address $other6interfaceIP
-        netmask $(CommaField 3 "${interfacesIPv6_array[$j]}")"
+        netmask $(CommaField 3 "${IPv6_interfaces_array[$j]}")"
                 fi
         ;;
 esac
-
-
    i=$[$i+1]
    j=$[$j+1]
  done
+
 
 if [[ "$ExtSetting" == "static" ||  "$IntSetting" == "static" || "$IPv6TunnelActive" == "on" ]]
 then
@@ -419,7 +417,8 @@ if [[ "$IPv6TunnelActive" == "on" ]]; then
 	echo "IPv6 tunnel activated ($IPv6TunnelBroker), configuring interface"
 	auto=("${auto[@]}" $IPv6If)
 	if [[ $IPv6TunnelBroker == SIXXS ]]; then
-			IfConf="# --- IPv6 tunnel to $IPv6TunnelBroker
+			IfConf="
+	# --- IPv6 tunnel to $IPv6TunnelBroker
 		iface $IPv6If inet6 v4tunnel
 		address $IPv6IP
 		netmask $IPv6Netmask
