@@ -334,12 +334,17 @@ int OMXPlayerInterface::getMaxSubtitle() {
 
 std::vector< std::string > OMXPlayerInterface::Do_ListSubtitles() {
   std::vector< std::string > ret;
-  try {
-    ret = g_player_client->ListSubtitles();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Send_Action() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_player_client->ListSubtitles();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
   return ret;
 }
@@ -350,8 +355,6 @@ std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
 	ret = Do_ListSubtitles();
 	return ret;
 }
-
-
 
 bool OMXPlayerInterface::setVideo(int track) {
 	return Do_SelectVideo(track);
@@ -403,12 +406,17 @@ int OMXPlayerInterface::getMaxVideo() {
 
 std::vector< std::string > OMXPlayerInterface::Do_ListVideo() {
   std::vector< std::string > ret;
-  try {
-    ret = g_player_client->ListVideo();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Send_Action() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_player_client->ListVideo();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
   return ret;
 }
@@ -471,12 +479,17 @@ int OMXPlayerInterface::getMaxAudio() {
 
 std::vector< std::string > OMXPlayerInterface::Do_ListAudio() {
   std::vector< std::string > ret;
-  try {
-    ret = g_player_client->ListAudio();
-  }
-  catch (DBus::Error &dbus_err) {
-    Log("Send_Action() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
+  int err_count=0;
+  bool done=false;
+  while ( !done && (err_count < DBUS_RETRIES)) {
+    try {
+      ret = g_player_client->ListAudio();
+      done = true;
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+      Reconnect_Player();
+    }
   }
   return ret;
 }

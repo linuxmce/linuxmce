@@ -62,6 +62,9 @@ class OMXPlayerStream : public OMXPlayerInterface
     int setSubtitle(int track);
     int getCurrentSubtitle();
     int getCurrentAudioTrack();
+    void SetDeviceData_SubtitleTracks();
+    void SetDeviceData_AudioTracks();
+    void SetDeviceData_VideoTracks();
 
     bool setVolumeUp(int iRepeat_Command, string &sCMD_Result);
     bool setVolumeDown(int iRepeat_Command, string &sCMD_Result);
