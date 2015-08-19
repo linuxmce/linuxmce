@@ -272,5 +272,6 @@
         <file>qml/skins/default/screens/Screen_Reload.qml</file>
         <file>qml/Index.qml</file>
         <file>qml/IndexContent.qml</file>
+        <file>qml/skins/default/components/TelecomDevices.qml</file>
     </qresource>
 </RCC>

@@ -407,6 +407,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         iPK_Device_GeneralInfoPlugin = long(4);
         iPK_Device_SecurityPlugin = long(13);
         iPK_Device_LightingPlugin = long(8);
+        iPK_Device_TelecomPlugin = long(11);
         m_dwIDataGridRequestCounter = 0;
         iOrbiterPluginID = 9;
         iMediaPluginID = 10;
@@ -2622,8 +2623,9 @@ void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text)
     emit textChanged(sDesignObj, sValue, iPK_Text);
 }
 
-void qorbiterManager::makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To) {
-    emit CMD_makeCall(iPK_Users, sPhoneExtension, sPK_Device_From, iPK_Device_To);
+void qorbiterManager::makeCall(int iPK_Users, QString sPhoneExtension, QString sPK_Device_From,int iPK_Device_To) {
+    CMD_Make_Call makeCall(iPK_Device, iPK_Device_TelecomPlugin, iPK_Users, sPhoneExtension.toStdString(), sPK_Device_From.toStdString(), iPK_Device_To);
+    sendDceCommand(makeCall);
 }
 
 QVariant qorbiterManager::systemFontList()
