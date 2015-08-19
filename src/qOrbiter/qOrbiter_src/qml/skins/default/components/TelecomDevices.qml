@@ -15,20 +15,26 @@ Item {
 
     property bool showCallToDevices: true
     property int selectedDevice: 0
+    property bool showClose : true
     signal selected()
+    signal close()
 
     StyledButton {
         id: closeBt
+        visible: showClose
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         label: 'Close'
-        onActivated: telecomDevices.visible = false
+        onActivated: {
+            telecomDevices.visible = false
+            close()
+        }
     }
 
     GridView {
         id: deviceGrid
-        anchors.top: closeBt.bottom
+        anchors.top: showClose ? closeBt.bottom : parent.top
         anchors.topMargin: 10
         anchors.left: parent.left
         anchors.right: parent.right
