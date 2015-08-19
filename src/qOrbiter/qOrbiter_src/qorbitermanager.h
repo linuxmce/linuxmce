@@ -545,6 +545,7 @@ Param 10 - pk_attribute
     long iPK_Device_GeneralInfoPlugin;
     long iPK_Device_SecurityPlugin;
     long iPK_Device_LightingPlugin;
+    long iPK_Device_TelecomPlugin;
     long iPK_Device_eventPlugin;
     long iMediaPluginID;
     int m_pDevice_ScreenSaver;
@@ -1679,7 +1680,7 @@ public slots:
 
 
     // telecom
-    void makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
+    void makeCall(int iPK_Users, QString sPhoneExtension, QString sPK_Device_From,int iPK_Device_To);
 
     void handleDceGuiCommand(int c){
         QString cmdOut;
