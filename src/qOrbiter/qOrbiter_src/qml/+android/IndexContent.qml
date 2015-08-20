@@ -35,7 +35,7 @@ Item{
     }
     Text {
         id: splashText
-        text: qsTr("QOrbiter For Android")
+        text: qsTr("QOrbiter For Linux")
         anchors{
             top:parent.top
             horizontalCenter: parent.horizontalCenter

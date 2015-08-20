@@ -115,18 +115,21 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
     if(m_skinOverridePath==""){
 #ifdef NOQRC
+        qDebug() << "Using NOQRC";
         path=qApp->applicationDirPath()+"/../qOrbiter_src/qml/Index.qml";
         setSkinEntryFile(qApp->applicationDirPath()+"/../qOrbiter_src/qml/skins/"+currentSkin+"/Main.qml");
         m_appEngine->setBaseUrl(QUrl::fromLocalFile(qApp->applicationDirPath()+"/../qOrbiter_src/qml/"));
 #else
-        path="qrc:/qml/Index.qml";
-        setSkinEntryFile("qrc:///qml/skins/"+currentSkin+"/Main.qml");
-        m_appEngine->setBaseUrl(QUrl::fromLocalFile("qrc:/qml/"));
+        qDebug() << "Using QRC";
+        path="Index.qml";
+       setSkinEntryFile("qrc:/qml/skins/"+currentSkin+"/Main.qml");
+        m_appEngine->setBaseUrl(QUrl("qrc:/qml/"));
 #endif
 
     } else {
+        qDebug() << "Using Override";
         qDebug() << "Override Path detected :: " << m_skinOverridePath;
-        path = m_skinOverridePath+"/Index.qml";
+        path = m_skinOverridePath+"Index.qml";
         setSkinEntryFile(m_skinOverridePath+"/skins/"+currentSkin+"/Main.qml");
         m_appEngine->setBaseUrl(QUrl::fromLocalFile(m_skinOverridePath));
     }
@@ -140,6 +143,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 #ifdef __ANDROID__
     int testSize=-1;
 #endif
+
+
     if(settingsInterface->ready){
 
         if(restoreSettings()){  }
@@ -160,13 +165,12 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     qApp->installTranslator(&translator);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
-    selector=new QQmlFileSelector(m_appEngine);
-    m_selector=new QFileSelector(m_appEngine);
-
-    qDebug() << m_selector->allSelectors().join("\n");
-
-    //  selector->setSelector(m_selector);
     m_screenInfo = new ScreenInfo();
+    m_selector=new QFileSelector(m_appEngine);
+    selector=new QQmlFileSelector(m_appEngine);
+    selector->setSelector(m_selector);
+    qDebug() << m_selector->allSelectors().join("\n");
+    //  selector->setSelector(m_selector);
 #endif
 
 #ifdef ANDROID
@@ -183,18 +187,11 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
     connect(m_screenInfo, SIGNAL(screenSizeChanged()), this, SLOT(resetScreenSize()));
     connect(qorbiterUIwin, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
-    connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
-    connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
-    connect(qorbiterUIwin->engine(), SIGNAL(warnings(QList<QQmlError>)), this, SLOT(handleViewError(QList<QQmlError>)));
-    resetScreenSize();
-    qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
+
+
+   // connect(qorbiterUIwin->engine(), SIGNAL(warnings(QList<QQmlError>)), this, SLOT(handleViewError(QList<QQmlError>)));
     m_appEngine->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 
-
-#ifdef __ANDROID__ || defined(Q_OS_IOS)
-    qorbiterUIwin->showMaximized();
-    checkOrientation(Qt::LandscapeOrientation);
-#endif
 
     mediaPlayerID=-1; orbiterInit=true; m_ipAddress="";  m_bStartingUp= true;  homeNetwork=false;  alreadyConfigured = false;  iFK_Room = -1;
     iea_area= -1; bAppError = false; isPhone = 0; hostDevice=HostSystemData::OTHER_EMBEDDED; appConfigPath=""; status="starting";
@@ -225,8 +222,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     initializeGridModel();
     setupContextObjects();
 
-    appHeight = qorbiterUIwin->height() ;
-    appWidth = qorbiterUIwin->width() ;
 
     // Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
     prepareModelPool(5);
@@ -245,7 +240,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     //    QObject::connect(&mediaFilter, SIGNAL(pkUsersChanged(QString)), this, SLOT(setGridPkUsers(QString)));
     //    QObject::connect(&mediaFilter, SIGNAL(usersPrivateChanged(QString)), this, SLOT(setGridUsersPrivate(QString)));
     //    QObject::connect(&mediaFilter, SIGNAL(lastViewedChanged(QString)), this, SLOT(setGridLastViewed(QString)));
-    qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
+
     m_appEngine->rootContext()->setContextProperty("roomList", m_lRooms);
 
     emit orbiterInitialized();
@@ -253,11 +248,24 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     if(m_appEngine->rootObjects().length()!=0){
         m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
         qDebug() << "Set QQuickWindow Ptr";
+
+        connect(m_window, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
+        connect(m_window, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
+
+#ifdef Q_OS_LINUX || defined(Q_OS_OSX) || defined(Q_OS_WIN32)
+
+        if(m_testScreenSize==0){
+            m_window->setVisibility(QWindow::FullScreen);
+        }
+#else
+        m_window->setVisibility(QWindow::FullScreen);
+
+#endif
+
     }
-
-    emit splashReady();
-
-
+    QTimer::singleShot(2000, this, SLOT(beginSetup()));
+    ///beginSetup();
+    checkOrientation(m_window->size());
 }
 
 qorbiterManager::~qorbiterManager(){
@@ -383,6 +391,7 @@ void qorbiterManager::refreshUI(QUrl url){
     qorbiterUIwin->engine()->clearComponentCache();
     qorbiterUIwin->rootContext()->setBaseUrl(url);
     qorbiterUIwin->setSource(url);
+
     emit currentSkinChanged();
 }
 
@@ -846,48 +855,48 @@ void qorbiterManager::swapSkins(QString incSkin)
     if(currentSkin==incSkin) return;
     currentSkin= incSkin;
 
-//    if(!mb_useNetworkSkins){
+    //    if(!mb_useNetworkSkins){
 
-//        if(m_style  ){
-//            qDebug() << Q_FUNC_INFO << "Deleting style";
-//            m_style->deleteLater();
-//        }
+    //        if(m_style  ){
+    //            qDebug() << Q_FUNC_INFO << "Deleting style";
+    //            m_style->deleteLater();
+    //        }
 
-//        QStringList extra;
-//        extra.append("skins");
-//        extra.append(currentSkin);
-//        extra.append("medium");
-//        m_selector->setExtraSelectors(extra);
-//        incSkin="default";
-//        currentSkin=incSkin;
-//       // QQmlFileSelector localSelector(m_appEngine);
-//       // localSelector.setExtraSelectors(m_selector->allSelectors());
+    //        QStringList extra;
+    //        extra.append("skins");
+    //        extra.append(currentSkin);
+    //        extra.append("medium");
+    //        m_selector->setExtraSelectors(extra);
+    //        incSkin="default";
+    //        currentSkin=incSkin;
+    //       // QQmlFileSelector localSelector(m_appEngine);
+    //       // localSelector.setExtraSelectors(m_selector->allSelectors());
 
-//        QString filePath = m_selector->select("/home/langston/lmce/src/qOrbiter/qOrbiter_src/qml/Style.qml");
-//        qDebug() << Q_FUNC_INFO << m_selector->allSelectors();
-//        qDebug() << Q_FUNC_INFO << filePath;
-//        qDebug() << Q_FUNC_INFO << m_appEngine->baseUrl();
+    //        QString filePath = m_selector->select("/home/langston/lmce/src/qOrbiter/qOrbiter_src/qml/Style.qml");
+    //        qDebug() << Q_FUNC_INFO << m_selector->allSelectors();
+    //        qDebug() << Q_FUNC_INFO << filePath;
+    //        qDebug() << Q_FUNC_INFO << m_appEngine->baseUrl();
 
-//        QQmlComponent styleData(m_appEngine, QUrl(filePath), QQmlComponent::PreferSynchronous);
-//        m_style=styleData.create();
+    //        QQmlComponent styleData(m_appEngine, QUrl(filePath), QQmlComponent::PreferSynchronous);
+    //        m_style=styleData.create();
 
-//        if(!m_style){
-//            qDebug() << "Couldnt create style! " << filePath;
-//        } else {
-//            qDebug() << "Style Created!"  << filePath;;
-//            qDebug() << m_selector->allSelectors().join("\n");
-//            //  m_appEngine->rootContext()->setContextProperty("Style", m_style);
-//        }
+    //        if(!m_style){
+    //            qDebug() << "Couldnt create style! " << filePath;
+    //        } else {
+    //            qDebug() << "Style Created!"  << filePath;;
+    //            qDebug() << m_selector->allSelectors().join("\n");
+    //            //  m_appEngine->rootContext()->setContextProperty("Style", m_style);
+    //        }
 
 
-//        m_appEngine->clearComponentCache();
-//        m_appEngine->rootContext()->setContextProperty("Style", m_style);
+    //        m_appEngine->clearComponentCache();
+    //        m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
-//       // qDebug() << m_localQmlPath+"skins/"+incSkin+"/Style.qml";
-//        refreshUI(QUrl(m_localQmlPath+"skins/"+incSkin+"/Main.qml"));
-//        setUiReady(true);
-//        return;
-//    }
+    //       // qDebug() << m_localQmlPath+"skins/"+incSkin+"/Style.qml";
+    //        refreshUI(QUrl(m_localQmlPath+"skins/"+incSkin+"/Main.qml"));
+    //        setUiReady(true);
+    //        return;
+    //    }
 
 #ifdef WIN32
     incSkin = "default";
@@ -903,7 +912,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         //load the actual skin entry point
         currentSkin = incSkin;
         m_style=tskinModel->currentItem;
-         m_appEngine->rootContext()->setContextProperty("Style", m_style);
+        m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
 #if (QT5)
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QQuickView::Status)),
@@ -2202,148 +2211,7 @@ void qorbiterManager::setupEarlyContexts()
 }
 
 void qorbiterManager::setupUiSelectors(){
-    /*!
-     * \todo move buildtype / qrc path code to its own function and return it here
-     */
 
-#ifdef for_desktop
-
-#ifdef QT4_8
-    buildType = "/qml/desktop";
-    setHostDevice(3);
-#elif QT5 && defined RPI
-    buildType = "/qml/qt5-desktop";
-    setHostDevice(1);
-#elif QT5 && !defined RPI && !defined ANDROID
-    setHostDevice(3);
-    buildType="/qml/qt5-desktop";
-#endif
-    qrcPath = buildType+"/Splash.qml";
-#elif  WIN32
-    setHostDevice(HostSystemData::WINDOWS_DESKTOP);
-    buildType="/qml/desktop";
-    qrcPath = "qrc:desktop/Splash.qml";
-#elif defined (for_freemantle)
-    buildType = "/qml/freemantle";
-    qrcPath = "qrc:freemantle/Splash.qml";
-#elif defined (for_harmattan)
-    buildType="/qml/harmattan";
-    qrcPath = "qrc:harmattan/Splash.qml";
-#elif defined (Q_OS_MACX)
-    setHostDevice(HostSystemData::OSX_DESKTOP);
-    buildType="/qml/qt5-desktop";
-    qrcPath = "qrc:osx/Splash.qml";
-#elif defined (RPI)
-    buildType="/qml/qt5-desktop";
-    setHostDevice(HostSystemData::RASPBERRY_PI);
-#elif defined ANDROID
-
-#ifndef QT5
-    qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
-    int h = QApplication::desktop()->height();
-    int w = QApplication::desktop()->width();
-    int pixelsX = QApplication::desktop()->physicalDpiX();
-    int pixelsY= QApplication::desktop()->physicalDpiY();
-    qDebug() << "Guessed DPI\n x::" << pixelsX << " Y::"<<pixelsY;
-
-    if(isPhone==0){ //no default set
-        setCommandResponse("No default form factor set, making initial selection");
-        if (w > 480 && h > 854 || h > 480 && w > 854 ){
-            setFormFactor(2);
-            buildType = "/qml/android/tablet";
-            setHostDevice(HostSystemData::ANDROID_TABLET);
-        }
-        else{
-            setFormFactor(1);
-            setHostDevice(HostSystemData::ANDROID_PHONE);
-            buildType = "/qml/android/phone";
-        }
-    } else{         //its set, overide setting
-
-        switch(isPhone){
-        case 1:
-            buildType = "/qml/android/phone";
-            qDebug() << buildType;
-            break;
-        case 2:
-            buildType = "/qml/android/tablet";
-            qDebug() << buildType;
-            break;
-        default:
-            setCommandResponse("Should not have gotten here, selecting phone for default");
-            buildType = "/qml/android/phone";
-            break;
-        }
-        setCommandResponse("Form factor set from config, using "+ buildType);
-    }
-    qrcPath = ":android/Splash.qml";
-    droidPath = "/";
-#endif
-#elif defined (for_android)
-    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
-    {
-        buildType = "/qml/android/tablet";
-    }
-    else
-    {
-        buildType = "/qml/android/phone";
-
-    }
-
-    qrcPath = ":android/Splash.qml";
-    droidPath = "/";
-#elif defined Q_OS_IOS
-    setHostDevice(HostSystemData::IOS_TABLET);
-    buildType = "/qml/ios";
-    qrcPath = "qrc:main/IosWelcome.qml";
-#else
-
-    buildType = "/qml/desktop";
-    qrcPath = ":desktop/Splash.qml";
-#endif
-
-
-#ifdef QANDROID
-    // qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
-    int h = qorbiterUIwin->height();
-    int w = qorbiterUIwin->width();
-    if(isPhone==0){ //no default set
-        setCommandResponse("No default form factor set, making initial selection");
-        if (w > 480 && h > 854 || h > 480 && w > 854 ){
-            setFormFactor(2);
-            buildType = "/tablet";
-            setHostDevice(HostSystemData::ANDROID_TABLET);
-        }
-        else{
-            setFormFactor(1);
-            setHostDevice(HostSystemData::ANDROID_PHONE);
-            buildType = "/phone";
-        }
-    } else{         //its set, overide setting
-
-        switch(isPhone){
-        case 1:
-            buildType = "/phone";
-            qDebug() << buildType;
-            setHostDevice(HostSystemData::ANDROID_PHONE);
-            break;
-        case 2:
-            buildType = "/tablet";
-
-            setHostDevice(HostSystemData::ANDROID_TABLET);
-            qDebug() << buildType;
-            break;
-        default:
-            setCommandResponse("Should not have gotten here, selecting phone for default");
-            buildType = "/phone";
-            setHostDevice(HostSystemData::ANDROID_PHONE);
-            break;
-        }
-        setCommandResponse("Form factor for Qt5 set from config, using "+ buildType);
-    }
-    qrcPath = ":android/Splash.qml";
-    droidPath = "/";
-#endif
 
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
@@ -2355,7 +2223,7 @@ void qorbiterManager::setupUiSelectors(){
 #ifdef __ANDROID__
     m_localQmlPath="qrc:/qml/";
 #elif defined Q_OS_IOS
-    m_localQmlPath="qrc:/qml/"; // m_localQmlPath=QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first()+"/";
+    m_localQmlPath="qrc:/qml/";
 #elif defined WIN32
     m_localQmlPath=qApp->applicationDirPath()+"/";
 #elif defined MACBUILD
@@ -2391,6 +2259,140 @@ void qorbiterManager::setupUiSelectors(){
     qDebug() << "Local path set to " << m_localQmlPath;
     qorbiterUIwin->setSource(m_localQmlPath+"splash/Splash.qml");
 }
+
+void qorbiterManager::beginSetup()
+{
+    if(getDeviceNumber()==-1){
+        emit splashReady();
+        return;
+    }
+
+    if(setSizeSelector() ){
+
+    }
+
+    if(createThemeStyle()){
+setUiReady(true);
+    }
+
+}
+
+bool qorbiterManager::setSizeSelector()
+{
+
+
+    if(!m_window){
+        qWarning() << " Window Not Set ";
+        return false;
+    } else {
+        qWarning() << " Window Set, resetting screen size";
+    }
+
+    QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
+    QStringList t;
+
+
+    if(m_testScreenSize==-1){
+        qDebug () << Q_FUNC_INFO << "Using device information ";
+        t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+        m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
+
+    } else {
+
+        qDebug() << Q_FUNC_INFO << "Using test screen size";
+        QString testDeviceString;
+        switch(m_testScreenSize){
+        case ScreenData::Device_Small: testDeviceString="small";m_deviceSize = ScreenData::Device_Small;        break;
+        case ScreenData::Device_Medium: testDeviceString="medium";m_deviceSize = ScreenData::Device_Medium;     break;
+        case ScreenData::Device_Large: testDeviceString="large";m_deviceSize = ScreenData::Device_Large;        break;
+        case ScreenData::Device_XLarge:testDeviceString="xlarge";m_deviceSize = ScreenData::Device_XLarge;      break;
+        default: testDeviceString="large"; break;
+        }
+
+        t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
+    }
+
+    m_selector->setExtraSelectors(t);
+    selector->setSelector(m_selector);
+    setCurrentTheme(t.join("|"));
+
+    qDebug() << Q_FUNC_INFO << "QFile Selector Set to "<< m_selector->allSelectors().join("\n");
+    return true;
+}
+
+bool qorbiterManager::createThemeStyle()
+{
+    if(!m_window){
+        qWarning() << " Window Not Set cannot create theme ";
+        return false ;
+    } else {
+        qWarning() << " Window Set, loading theme style";
+    }
+
+    qDebug() << Q_FUNC_INFO ;
+
+m_appEngine->load("");
+
+
+
+ selector->setSelector(m_selector);
+    if(m_style ){
+        qDebug() << Q_FUNC_INFO << "Deleting style";
+        m_style->deleteLater();
+    }
+
+    setSkinEntryFile(selectPath( "skins/"+currentSkin+"/Main.qml"));
+    QString fp ="skins/"+currentSkin+"/Style.qml";
+#ifdef NOQRC
+    filePath.prepend(m_localQmlPath);
+#else
+    qDebug() << "QRC Enabled, checking " << fp;
+
+    if(m_skinOverridePath==""){
+      // fp.prepend("qrc:/qml/");
+
+         qDebug() << "QRC Enabled, adjusted file path " << fp;
+    } else{
+
+    }
+
+#endif
+    qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
+
+
+    qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
+    QString filePath =  selectPath(fp);
+
+    qDebug() << "Style file path " << filePath;
+    QQmlComponent nustyle(m_appEngine , QUrl(filePath), QQmlComponent::PreferSynchronous);
+    m_style = nustyle.create();
+
+    if(m_style){
+        qDebug() << Q_FUNC_INFO << " New style applied. " << filePath;
+    } else {
+        qDebug() << Q_FUNC_INFO << nustyle.errors();
+        qDebug() << "New style failed application! " << filePath;
+    }
+
+    m_appEngine->clearComponentCache();
+    m_appEngine->rootContext()->setContextProperty("Style", m_style);
+    m_appEngine->load(skinEntryFile());
+    return true;
+}
+
+QString qorbiterManager::getCurrentTheme() const
+{
+    return m_currentTheme;
+}
+
+void qorbiterManager::setCurrentTheme(const QString &currentTheme)
+{
+    if(m_currentTheme==currentTheme)return;
+    m_currentTheme = currentTheme;
+    emit currentThemeChanged();
+}
+
+
 bool qorbiterManager::getUiReady() const
 {
     return uiReady;
@@ -2546,8 +2548,8 @@ void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
     Q_UNUSED(o);
 
-    appHeight=qorbiterUIwin->size().height();
-    appWidth=qorbiterUIwin->size().width();
+    appHeight=m_window->size().height();
+    appWidth=m_window->size().width();
 
 
     if(appHeight < appWidth){
@@ -2633,10 +2635,119 @@ QVariant qorbiterManager::systemFontList()
     return QVariant(m_fontDir.entryList());
 }
 
+void qorbiterManager::reloadQml()
+{
+    setUiReady(false);
+
+    if(!m_window){
+        qWarning() << " Window Not Set ";
+        return;
+    } else {
+        qWarning() << " Window Set, reloading QML";
+    }
+
+    qDebug() << Q_FUNC_INFO ;
+
+
+    if(m_style && !mb_useNetworkSkins ){
+        qDebug() << Q_FUNC_INFO << "Deleting style";
+        m_style->deleteLater();
+    }
+
+    selector->setSelector(m_selector);
+
+
+
+    qDebug() << m_selector->select("skins/"+currentSkin+"/Main.qml");
+    qDebug() << m_appEngine->baseUrl();
+
+    qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
+    QString fp ="skins/"+currentSkin+"/Style.qml";
+    qDebug () << Q_FUNC_INFO << selectPath(fp);
+    QString filePath = m_selector->select(fp);
+
+#ifdef NOQRC
+    filePath.prepend(m_localQmlPath);
+#else
+    if(m_skinOverridePath.isEmpty()){
+
+    } else{
+        filePath.prepend("qrc:///");
+    }
+
+#endif
+    qDebug() << "Style file path " << filePath;
+
+
+
+    QQmlComponent nustyle(m_appEngine , QUrl(filePath), QQmlComponent::PreferSynchronous);
+    m_style = nustyle.create();
+
+    if(m_style){
+        qDebug() << Q_FUNC_INFO << " New style applied. " << filePath;
+    } else {
+        qDebug() << Q_FUNC_INFO << nustyle.errors();
+        qDebug() << "New style failed application! " << filePath;
+    }
+
+    m_appEngine->clearComponentCache();
+    m_appEngine->rootContext()->setContextProperty("Style", m_style);
+
+    setUiReady(true);
+    emit screenChange(currentScreen);
+}
+
 void qorbiterManager::handleScreenChanged(QScreen *screen)
 {
     Q_UNUSED(screen);
     resetScreenSize();
+}
+
+void qorbiterManager::resetScreenSize(){
+
+    if(m_testScreenSize==-1){
+        return;
+    }
+
+    if(!m_window){
+        qWarning() << " Window Not Set ";
+        return;
+    } else {
+        qWarning() << " Window Set, resetting screen size";
+    }
+
+    QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
+    QStringList t;
+    // m_testScreenSize = m_screenInfo->primaryScreen()->deviceSize();
+
+    if(m_testScreenSize==-1){
+        qDebug () << Q_FUNC_INFO << "Using device information ";
+        t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+        m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
+
+    } else {
+
+        qDebug() << Q_FUNC_INFO << "Using test screen size";
+        QString testDeviceString;
+        switch(m_testScreenSize){
+        case ScreenData::Device_Small: testDeviceString="small";m_deviceSize = ScreenData::Device_Small;        break;
+        case ScreenData::Device_Medium: testDeviceString="medium";m_deviceSize = ScreenData::Device_Medium;     break;
+        case ScreenData::Device_Large: testDeviceString="large";m_deviceSize = ScreenData::Device_Large;        break;
+        case ScreenData::Device_XLarge:testDeviceString="xlarge";m_deviceSize = ScreenData::Device_XLarge;      break;
+        default: testDeviceString="large"; break;
+        }
+
+        t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
+    }
+
+    m_selector->setExtraSelectors(t);
+    selector->setSelector(m_selector);
+
+    qDebug() << Q_FUNC_INFO << "QFile Selector Set to "<< m_selector->allSelectors().join("\n");
+    delayedReloadQml();
+    // qorbiterUIwin->setSource(QUrl("qrc:/qml/Index.qml"));
+    // qorbiterUIwin->setSource(qorbiterUIwin->source());
+
 }
 
 bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)

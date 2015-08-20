@@ -64,51 +64,23 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 {
     m_appEngine->rootContext()->setContextProperty("window", this);
 #ifdef ANDROID
-    mainView.engine()->addImportPath("assets:/imports/androidComponents");
-    mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
-    mainView.engine()->addPluginPath("assets:/lib");
+    m_appEngine->addImportPath("assets:/imports/androidComponents");
+    m_appEngine->addPluginPath(QDir::homePath()+"/../lib");
+    m_appEngine->addPluginPath("assets:/lib");
 #endif
-    mainView.engine()->addPluginPath("lib");
-    mainView.engine()->addPluginPath("imports");
+    m_appEngine->addPluginPath("lib");
+    m_appEngine->addPluginPath("imports");
 
-    mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports");
-    mainView.engine()->addImportPath("lib");
-    mainView.engine()->addImportPath("qml");
+    m_appEngine->addImportPath(QApplication::applicationDirPath()+"/imports");
+    m_appEngine->addImportPath("lib");
+    m_appEngine->addImportPath("qml");
 
-    qDebug() << "Qt Import Paths::"<<mainView.engine()->importPathList();
-#ifdef QT4_8
-#ifndef ANDROID
-    mainView.setAttribute(Qt::WA_TranslucentBackground);
-    QPalette palette;
-    palette.setColor(QPalette::Base, Qt::transparent);
-    mainView.setPalette(palette);
-    mainView.setAutoFillBackground(false);
-#endif
-    if(frameless==true){
-        mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
-    }
-#elif QT5
-#ifndef  ANDROID
-#ifndef Q_OS_IOS
-    //    mainView.setSurfaceType(QSurface::OpenGLSurface);
+    qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();
 
-    //    QSurfaceFormat format;
-    //    format.setAlphaBufferSize(8);
-    //    format.setRenderableType(QSurfaceFormat::OpenGL);
-
-    //    mainView.setFormat(format);
-    mainView.setColor(QColor(Qt::transparent));
-    //    mainView.setClearBeforeRendering(true);
-#endif
-#endif
-    if(frameless == true){
-        mainView.setFlags(Qt::FramelessWindowHint);
-    }
-#endif
 
     mainView.setResizeMode(QQuickView::SizeRootObjectToView);
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
-    mainView.rootContext()->setContextProperty("window", this);
+    m_appEngine->rootContext()->setContextProperty("window", this);
 #ifdef NOQRC
     qrcPath="../qOrbiter_src/qml/Index.qml";
 #else
@@ -119,12 +91,15 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     // mainView.setSource( qrcPath ); /* Sets the initial qml file based on all the above switching */
 
     if(simScreenSize!=-1){
+
+        int testH;
+        int testW;
+
         switch (simScreenSize) {
         case ScreenData::Device_Small:
-            mainView.setWidth(480);
-            mainView.setHeight(854);
-            // mainView.rootObject()->setScale(.75);
-            mainView.setGeometry(0,0,480*.75, 854*.75);
+            testW=480;
+            testH=854;
+           // mainView.setGeometry(0,0,480*.75, 854*.75);
             break;
         case ScreenData::Device_Medium:
             mainView.setWidth(1280);
@@ -140,26 +115,26 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
             mainView.setHeight(600);
             break;
         }
-     //   mainView.showNormal();
+        //   mainView.showNormal();
     } else {
 
 #ifdef ANDROID
-       // mainView.showFullScreen();
+        // mainView.showFullScreen();
 #elif defined(Q_OS_IOS)
-       // mainView.showFullScreen();
+        // mainView.showFullScreen();
 #else
         if(fullScreen){
-          //  mainView.showFullScreen();
+            //  mainView.showFullScreen();
         } else {
             mainView.setWidth(800);
             mainView.setHeight(600);
-          //  mainView.showNormal();
+            //  mainView.showNormal();
         }
 
 #endif
     }
-    mainView.rootContext()->setContextProperty("appW", mainView.width());
-    mainView.rootContext()->setContextProperty("appH", mainView.height());
+    mainView.rootContext()->setContextProperty("appW", 800);
+    mainView.rootContext()->setContextProperty("appH", 600);
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
 
@@ -175,7 +150,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
 #if defined (GLENABLED) || (QT5)
     fileReader = new FileReader();
-    mainView.rootContext()->setContextProperty("fileReader", fileReader);
+
     m_appEngine->rootContext()->setContextProperty("fileReader", fileReader);
 #endif
 
@@ -243,7 +218,7 @@ void orbiterWindow::forceResponse(QString forced)
 }
 
 void orbiterWindow::loadSetupPage(){
-    mainView.setSource(QUrl("qrc:main/SetupNewOrbiter.qml"));
+
 }
 
 QString orbiterWindow::getMessage(){
@@ -264,7 +239,7 @@ bool orbiterWindow::getOrbiterState(){
  * \brief orbiterWindow::showSplash Shows the initial loading page, which then loads the splash.
  */
 void orbiterWindow::showSplash(){
-    mainView.setSource(QUrl(qrcPath));
+
 }
 
 void orbiterWindow::setSkinDataState(bool b)
@@ -331,8 +306,8 @@ void orbiterWindow::displayPromptResponse(int type, QList<PromptData*> *pList)
             PromptData *p = pList->at(i);
             userList.append( new PromptData(p->dataTitle,p->data_id) );
         }
-        mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
-         m_appEngine->rootContext()->setContextProperty("users", QVariant::fromValue(userList));
+
+        m_appEngine->rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     }
     else
     {
@@ -341,8 +316,8 @@ void orbiterWindow::displayPromptResponse(int type, QList<PromptData*> *pList)
             PromptData *p = pList->at(i);
             roomList.append( new PromptData(p->dataTitle,p->data_id) );
         }
-        mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
-         m_appEngine->rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
+
+        m_appEngine->rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     }
     emit showList();
 }
