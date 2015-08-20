@@ -354,9 +354,10 @@ stop() {
 	#StopService "Stopping Storage Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "StorageStatusRadar"
 	#StopService "Stopping Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
 	#StopService "Stopping PNP MD Plugin (interactor)" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
-	StopService "Stopping Dhcpd Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
+	#StopService "Stopping Dhcpd Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
 
 	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh"
+	StartService "Halt MDs" "/usr/pluto/bin/HaltMDs.sh"
 
 	:
 	return $?
