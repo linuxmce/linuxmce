@@ -10,12 +10,24 @@ import "skins"
   */
 ApplicationWindow {
     id:qml_root_item
-    height: manager.appHeight
-    width: manager.appWidth
+    height: 640
+    width: 480
 
     visible: true
     color:"transparent"
     property string appEntryQml:  manager.skinEntryFile
+    property int currentStage:deviceSettingsReady+orbiterReady
+
+    //startup properties
+    property int deviceSettingsReady: settings.ready ? 1 : 0
+    property int orbiterReady:manager.uiReady ? 1 : 0
+
+
+    Text {
+        id: deviceSettings
+        text: qsTr("Device Settings")
+        color:settings.ready ? "green" : "red"
+    }
 
     Connections{
         target:manager
@@ -79,6 +91,9 @@ ApplicationWindow {
         Loader{
             id:app
             anchors.fill: parent
+            onSourceChanged: {
+                console.log(source)
+            }
         }
 
 
@@ -115,15 +130,22 @@ ApplicationWindow {
             },
             State {
                 name: "app"
-                PropertyChanges {
-                    target: bootStrap
-                    sourceComponent:undefined
-                }
 
                 PropertyChanges {
                     target: app
-                    source:appEntryQml
+                    source:manager.selectPath(appEntryQml)
                 }
+
+                StateChangeScript{
+                    script:manager.clearSkinCache()
+                }
+
+                PropertyChanges {
+                    target: bootStrap
+                    source:""
+                }
+
+
             },
             State {
                 name: "regen"

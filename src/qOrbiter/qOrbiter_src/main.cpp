@@ -242,8 +242,6 @@ int main(int argc, char* argv[])
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("LinuxMCE");
 
-
-
     SettingInterface settings;
 
 #ifdef __ANDROID__
@@ -252,7 +250,6 @@ int main(int argc, char* argv[])
 #endif
 
     QOrbiterLogger localLogger;
-
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
     cout << "qOrbiter, v." << VERSION << endl
@@ -293,16 +290,17 @@ int main(int argc, char* argv[])
             break;
         case 's':
             screen="fullscreen";
-            deviceType=0;
+            screenSize=0;
             break;
         case 'o':
             screen="fullscreen";
+            screenSize=0;
             break;
         case 'z':
             screenSize=atoi(argv[++optnum]);
             break;
         case 'x':
-           overrideDir= QString::fromStdString( argv[++optnum]);
+            overrideDir= QString::fromStdString( argv[++optnum]);
             break;
         default:
             bError=true;
@@ -318,10 +316,10 @@ int main(int argc, char* argv[])
              << "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
              << "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
              << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
-             << "-o --Switch for frameless MD and desktops." << endl
-             << "-s --Switch for fullscreen." << endl
-             << "-z --Screen size setting for testing 4 - small \n 7 - medium\n 10 - large" << endl
-             << "-x --Point to custom skins directory." << endl;
+             << "-o --Switch for frameless MD and desktops. " << endl
+             << "-s --Switch for fullscreen. " << endl
+             << "-z --Screen size setting for testing 4 - small \n 7 - medium\n 10 - large " << endl
+             << "-x --Point to custom skins directory. " << endl;
 
     }
 
@@ -386,7 +384,7 @@ int main(int argc, char* argv[])
         QString name = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
         qOrbiter pqOrbiter(name, PK_Device, sRouter_IP,true,bLocalMode );
 
-         qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
+        qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
         //qmlRegisterSingletonType<MediaTypesHelper>("media.enums",1,0,"MediaTypesHelper", "Data Only for linuxMCE MediaTypes");
         qmlRegisterSingletonType<MediaTypesHelper>("enums.media", 1, 0, "MediaHelper", MediaTypesHelper::mediatypes_provider);
@@ -403,15 +401,20 @@ int main(int argc, char* argv[])
         qmlRegisterType<ScreenData>("org.linuxmce.screeninfo", 1,0, "ScreenData");
         qmlRegisterType<SettingsInterfaceType>("org.linuxmce.settings", 1,0, "SettingsType");
         qmlRegisterType<SettingsKeyType>("org.linuxmce.settings", 1,0, "SettingsKey");
+        qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
+        qRegisterMetaType<DCE::PreformedCommand>("DCE::PreformedCommand");
         qmlRegisterType<GenericFlatListModel>();
 
 
         QQmlApplicationEngine engine;
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize, &engine);
-        orbiterWin.mainView.rootContext()->setContextProperty("settings", &settings);
+
+        engine.rootContext()->setContextProperty("settings", &settings);
+
 #ifdef __ANDROID__
-        orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
+        engine.rootContext()->setContextProperty("androidSystem", &androidHelper);
+
 #endif
         orbiterWin.setMessage("Setting up Lmce");
 
@@ -435,16 +438,16 @@ int main(int argc, char* argv[])
         }
 #else
         qorbiterManager w(&pqOrbiter, &orbiterWin.mainView, &engine, &androidHelper, &settings, overrideDir);
-        orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
+        engine.rootContext()->setContextProperty("androidSystem", &androidHelper);
 #endif
-        orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
+        engine.rootContext()->setContextProperty("manager", &w);
 
 #if defined(Q_OS_IOS)
         w.setMobileStorage(localLogger.logLocation);
 #endif
 
         AbstractImageProvider* modelimageprovider = new AbstractImageProvider(&w);
-        orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
+        engine.addImageProvider("listprovider", modelimageprovider);
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
         //epg listmodel, no imageprovider as of yet
@@ -453,14 +456,10 @@ int main(int argc, char* argv[])
         qDebug() << "!!!!!!!!!!!BREAK!!!!!!!!!!!!!!!!!!";
         TimeCodeManager *timecode = new TimeCodeManager();
 
-        orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
-        orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
+        engine.rootContext()->setContextProperty("logger", &localLogger);
         engine.rootContext()->setContextProperty("dceTimecode", timecode);
+        engine.rootContext()->setContextProperty("opengl", glpresent);
         // orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
-        orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
-        qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
-        qRegisterMetaType<DCE::PreformedCommand>("DCE::PreformedCommand");
-
 
         // connnect local logger
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
@@ -469,7 +468,7 @@ int main(int argc, char* argv[])
 #ifdef QT4_8
         QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QDeclarativeError>)), &localLogger, SLOT(logQmlErrors(QList<QDeclarativeError>)));
 #elif QT5
-        QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QQmlError>)), &localLogger, SLOT(logQmlErrors(QList<QQmlError>)));
+        QObject::connect(&engine, SIGNAL(warnings(QList<QQmlError>)), &localLogger, SLOT(logQmlErrors(QList<QQmlError>)));
 #endif
         QObject::connect(&w, SIGNAL(skinMessage(QString)), &localLogger, SLOT(logSkinMessage(QString)));
         QObject::connect(&w, SIGNAL(qtMessage(QString)) , &localLogger, SLOT(logQtMessage(QString)));
@@ -488,7 +487,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(handleDceCommand(DCE::PreformedCommand)), Qt::QueuedConnection); //this somehow still blocks btw. this is why i had a painful but explict bridge. the must be a middle ground. possibly look at posting the event instead of connections.
         //  NO! QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
-       QObject::connect(&pqOrbiter, &qOrbiter::routerFound, &orbiterWin, &orbiterWindow::setConnectionState, Qt::QueuedConnection );
+        QObject::connect(&pqOrbiter, &qOrbiter::routerFound, &orbiterWin, &orbiterWindow::setConnectionState, Qt::QueuedConnection );
         // QObject::connect (&w, SIGNAL(orbiterClosing()), &dceThread, SLOT(quit()),Qt::QueuedConnection);
         //  QObject::connect (&w, SIGNAL(orbiterClosing()), mediaThread, SLOT(quit()),Qt::QueuedConnection);
         //  QObject::connect (&w, SIGNAL(orbiterClosing()), epgThread, SLOT(quit()),Qt::QueuedConnection);

@@ -566,7 +566,11 @@ Param 10 - pk_attribute
     bool getUiReady() const;
     void setUiReady(bool value);
 
+    QString getCurrentTheme() const;
+    void setCurrentTheme(const QString &currentTheme);
+
 signals:
+    void currentThemeChanged();
     void uiReadyChanged();
     void skinEntryFileChanged();
     void useNetworkSkinsChanged();
@@ -953,10 +957,10 @@ public slots:
     void setLocation(const int& , const int& ) ;
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
-    void setAppH(int h) {appHeight = h;checkOrientation(qorbiterUIwin->size());}
+    void setAppH(int h) {appHeight = h;checkOrientation(m_window->size());}
     int getAppH() {return appHeight;}
 
-    void setAppW(int w) {appWidth = w; checkOrientation(qorbiterUIwin->size());}
+    void setAppW(int w) {appWidth = w; checkOrientation(m_window->size());}
     int getAppW(){return appWidth; }
 
     /*Network State property functions*/
@@ -1420,14 +1424,14 @@ public slots:
     /*! @name QML Skin Function slots*/
     //@{
     Q_INVOKABLE void clearSkinCache(){
-        QUrl url = qorbiterUIwin->source();
-        qDebug() << "Cached base url " << url.toString();
+
+
 #if (QT5)
         qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
-        qorbiterUIwin->engine()->clearComponentCache();
+        m_appEngine->clearComponentCache();
         qWarning() << "Cache Cleared.";
     }
 
@@ -1796,40 +1800,40 @@ public slots:
     }
 
     Q_INVOKABLE QString selectPath(QString p) {
-        QString pth =p;
-        qDebug() << Q_FUNC_INFO <<  m_selector->select(pth);
+        QString pth =m_selector->select(p);
+        qDebug() << Q_FUNC_INFO << QString("Incoming Path: %1\nOutgoing Path:%2").arg(p).arg(pth);
         return  m_selector->select(pth);
     }
 
     Q_INVOKABLE void setDesiredOrientation(Qt::ScreenOrientation o){
-        int tH = qorbiterUIwin->height();
-        int tW = qorbiterUIwin->width() ;
+        int tH = m_window->height();
+        int tW = m_window->width() ;
 
         switch (o) {
         qDebug() <<Q_FUNC_INFO << "Portrait Setting";
         case Qt::PortraitOrientation:
             if(appHeight < appWidth ){
-                qorbiterUIwin->setHeight(tW);
-                qorbiterUIwin->setWidth(tH);
+                m_window->setHeight(tW);
+                m_window->setWidth(tH);
             }
-            qorbiterUIwin->rootObject()->setRotation(0.0);
+          //  m_window->->rootObject()->setRotation(0.0);
             setOrientation(true);
             break;
         case Qt::LandscapeOrientation:
             qDebug() <<Q_FUNC_INFO << "Landscape Setting";
             if(appWidth < appHeight){
-                qorbiterUIwin->setHeight(tW);
-                qorbiterUIwin->setWidth(tH);
+                m_window->setHeight(tW);
+                m_window->setWidth(tH);
             }
-            qorbiterUIwin->rootObject()->setRotation(0.0);
+           // qorbiterUIwin->rootObject()->setRotation(0.0);
             setOrientation(false);
         default:
             break;
         }
-        appHeight = qorbiterUIwin->height();
-        appWidth= qorbiterUIwin->width();
+        appHeight = m_window->height();
+        appWidth= m_window->width();
         emit orientationChanged();
-        qorbiterUIwin->engine()->clearComponentCache();
+       m_appEngine->clearComponentCache();
         // updateProfileSelector();
     }
 
@@ -1840,88 +1844,10 @@ public slots:
 private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
 
-    void reloadQml(){
-           setUiReady(false);
-    qDebug() << Q_FUNC_INFO ;
-        if(m_style && !mb_useNetworkSkins ){
-            qDebug() << Q_FUNC_INFO << "Deleting style";
-            m_style->deleteLater();
-        }
-
-        selector->setSelector(m_selector);
-        qDebug() << m_selector->select("skins/"+currentSkin+"/Main.qml");
-
-        QThread::sleep(2);
-        qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n");
-        QString fp = "skins/"+currentSkin+"/Style.qml";
-        QString filePath = m_selector->select(fp);
-
-     #ifdef NOQRC
-     //  filePath.replace("qrc:/", "qrc:///");
-     //   filePath.replace("file:", "file:///");
-
-#else
-     //   filePath.replace("qrc:///", "qrc:/");
-     //   filePath.replace("file:///", "file:/");
-
-        if(m_skinOverridePath.isEmpty()){
-            filePath.prepend("qrc:///qml/");
-        } else{
-            filePath.prepend("qml/");
-        }
-
-#endif
-        qDebug() << "Style file path " << filePath;
-
-
-
-        QQmlComponent nustyle(m_appEngine , QUrl(filePath), QQmlComponent::PreferSynchronous);
-        m_style = nustyle.create();
-
-        if(m_style){
-            qDebug() << Q_FUNC_INFO << " New style applied. " << filePath;
-        } else {
-            qDebug() << Q_FUNC_INFO << nustyle.errors();
-            qDebug() << "New style failed application! " << filePath;
-        }
-
-        m_appEngine->clearComponentCache();
-        m_appEngine->rootContext()->setContextProperty("Style", m_style);
-
-        setUiReady(true);
-        emit screenChange(currentScreen);
-    }
+    void reloadQml();
     void handleScreenChanged(QScreen* screen);
-    void resetScreenSize(){
 
-        QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
-        QStringList t;
-        // m_testScreenSize = m_screenInfo->primaryScreen()->deviceSize();
-
-        if(m_testScreenSize==-1){
-            qDebug () << Q_FUNC_INFO << "Using device information ";
-            t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
-            m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
-        } else {
-            qDebug() << Q_FUNC_INFO << "Using test screen size";
-            QString testDeviceString;
-            switch(m_testScreenSize){
-            case ScreenData::Device_Small: testDeviceString="small";m_deviceSize = ScreenData::Device_Small;break;
-            case ScreenData::Device_Medium: testDeviceString="medium";m_deviceSize = ScreenData::Device_Medium;break;
-            case ScreenData::Device_Large: testDeviceString="large";m_deviceSize = ScreenData::Device_Large; break;
-            case ScreenData::Device_XLarge:testDeviceString="xlarge";m_deviceSize = ScreenData::Device_XLarge;break;
-            default: testDeviceString="large"; break;
-            }
-
-            t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
-        }
-
-        m_selector->setExtraSelectors(t);
-        qDebug() << Q_FUNC_INFO << "QQml File Selector Set to "<< m_selector->allSelectors().join("\n");
-        delayedReloadQml();
-        // qorbiterUIwin->setSource(QUrl("qrc:/qml/Index.qml"));
-        // qorbiterUIwin->setSource(qorbiterUIwin->source());
-    }
+    void resetScreenSize();
 
 private slots:
     bool registerConnections(QObject *qOrbiter_ptr);
@@ -1938,6 +1864,10 @@ private slots:
     void reloadQmlSkin() { }
     void setSelectors(QStringList selections){  selector->setExtraSelectors(selections); }
 
+    void beginSetup();
+    bool setSizeSelector();
+    bool createThemeStyle();
+
 private:
     QString m_skinSelector;
     QQmlFileSelector *selector;
@@ -1951,10 +1881,11 @@ private:
     bool mb_useNetworkSkins;
 
     QString m_remoteQmlPath;
+
     QString m_localQmlPath;
     QVector<QVariant> m_localSkins;
     QObject *m_style;
-    QObject *m_appStyle;
+    QString m_currentTheme;
     QDir m_fontDir;
 
     QQmlApplicationEngine *m_appEngine;

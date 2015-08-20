@@ -40,6 +40,7 @@ public:
     Q_ENUMS(DeviceSizes)
 
     enum DeviceRange{
+        Device_FullScreen=0,
         Device_Small    = 4,    //Phones small
         Device_Medium   = 7,    //Normal Tablets
         Device_Large    = 10,   //Big Tablets
