@@ -1,15 +1,16 @@
 #!/bin/bash
 ### BEGIN INIT INFO
 # Provides:          linuxmce
-# Required-Start:    $remote_fs $syslog $avwizard
+# Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Should-Start:      $named
 # Default-Start:     2 3 4 5
 # Default-Stop:      1 6
 # Short-Description: LinuxMCE
 # Description:       This script is the entry point to start the LinuxMCE core
-#                    It starts a couple of needed services and daemons, loads X (if running with AutoStartMedia)
-#                    and executes LMCE_Launch_Manager to start devices and taking care of the rest.
+#                    It starts all needed services and daemons, runs AV Wizard & loads X (if running with AutoStartMedia)
+#                    and launches core services (if running with AutoStartCore)
+#                    and executes LMCE_Launch_Manager to take care of the rest.
 ### END INIT INFO #
 
 DD_DISTRO_Raspbian_Wheezy_CONST=19
@@ -41,7 +42,7 @@ StartService() {
 		#fi
 		#echo -n "$ServiceDescription ... "
 
-	        log_daemon_msg "$ServiceDescription" "$ServiceCmd"
+		log_daemon_msg "$ServiceDescription" "$ServiceCmd"
 		if [[ "$ServiceBkg" == "&" ]] ;then
 			$ServiceCmd 1>/dev/null 2>/dev/null &
 		else
@@ -66,12 +67,12 @@ StartDaemon() {
 	ServiceScreen=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
-                #if [[ -x /bin/plymouth ]]; then
-                #        /bin/plymouth update --status="$ServiceDescription ... " || :
-                #fi
+		#if [[ -x /bin/plymouth ]]; then
+			#/bin/plymouth update --status="$ServiceDescription ... " || :
+		#fi
 		#echo -n "$ServiceDescription ... "
 
-	        log_daemon_msg "$ServiceDescription" "$ServiceCmd"
+		log_daemon_msg "$ServiceDescription" "$ServiceCmd"
 		screen -d -m -S "$ServiceScreen" $ServiceCmd
 		err=$?
 		log_end_msg $err
@@ -170,16 +171,21 @@ StartX() {
 
 
 start() {
-#	if [[ -x /bin/plymouth ]]; then
-#	        /bin/plymouth message --text="Starting up LinuxMCE..." || :
-#	fi
-        log_daemon_msg "Starting up LinuxMCE" "linuxmce"
+	#	if [[ -x /bin/plymouth ]]; then
+	#	/bin/plymouth message --text="Starting up LinuxMCE..." || :
+	#	fi
+	if [[ -x /bin/plymouth ]]; then
+	/bin/plymouth --hide-splash || :
+	fi
+
+	log_daemon_msg "Starting up LinuxMCE" "linuxmce"
+	err=0
 
 	setterm -blank >/dev/console             # disable console blanking
+	mkdir -p /var/log/pluto                  # setup log dir
+	chmod 777 /var/log/pluto 2>/dev/null     # setup log dir
 	chmod 777 /etc/pluto.conf 2>/dev/null    # ensure access rights on pluto.conf
-	rm -f /var/log/pluto/running.pids 2>/dev/null
-	chmod 777 /var/log/pluto 2>/dev/null
-	rm -f /dev/ttyS_*                        # remove all ttyS_* (created by gc100s) entries from /dev
+	rm -f /var/log/pluto/running.pids 2>/dev/null # clean running pid list
 	mkdir -p /usr/pluto/locks                # clean up locks
 	rm -f /usr/pluto/locks/*                 # clean up locks
 	rm -f /var/run/plutoX*.pid		 # clean up x11 locks
@@ -188,34 +194,44 @@ start() {
 	        rm -f /etc/logrotate.d/pluto*     # make sure there are not leftover logrotate configuration files
 	fi
 	rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
-	service nis start
 
-	if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then
-		 . /usr/pluto/bin/Config_Ops.sh
-	fi
-	if [[ -f /usr/pluto/bin/pluto.func ]] ;then
-		. /usr/pluto/bin/pluto.func
-	fi
-	if [[ -f /usr/pluto/bin/SQL_Ops.sh ]] ;then
-		. /usr/pluto/bin/SQL_Ops.sh
-	fi
-	if [[ -f /usr/pluto/bin/Utils.sh ]] ;then
-		. /usr/pluto/bin/Utils.sh
+	# TODO: move to gc100 boot-addon script
+	rm -f /dev/ttyS_*                        # remove all ttyS_* (created by gc100s) entries from /dev
+
+	# These helpers are essential to the entire boot process, they *must* exist.
+	. /usr/pluto/bin/Config_Ops.sh
+	. /usr/pluto/bin/pluto.func
+	. /usr/pluto/bin/SQL_Ops.sh
+	. /usr/pluto/bin/Utils.sh
+
+	# Enable SSH asap
+	StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
+
+	# check firstboot completion and launch firstboot from here
+	if [[ "$FirstBoot" != "true" ]] ; then
+		StartService "Starting LinuxMCE Firstboot setup"  "/usr/pluto/bin/Firstboot.sh"
+		err=$?
+		if [[ "$err" != "0" ]]; then
+			return $err
+		fi
 	fi
 
-	# This is done in /usr/pluto/bin/Config_Ops.sh simply by inclusion
-	#ConfEval
+	# check firstboot completion prior to continuing to launch linuxmce.
+	ConfEval;
+	if [[ "$FirstBoot" != "false" ]] ; then
+		Message "FIRSTBOOT NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
+		err=1
+		return $err
+	fi
 
-	# We still need hal for device detection
-	#StartService "Starting HAL daemon" "/usr/sbin/hald --daemon=yes --use-syslog"
-
-	# Start core services
+	# Start core services required for DCERouter and networking
 	if [[ "$AutostartCore" -eq "1" ]] ; then
 		StartService "Starting DHCP Server" "service isc-dhcp-server start" "&"
 		StartService "Starting DNS Server" "service bind9 start" "&"
-		StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh" "&"
-		StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh" "&"
 		StartService "Starting MySQL Server" "service mysql start"
+		StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh" "&"
+		StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
+		StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh" "&"
 
 		if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
 			Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
@@ -227,54 +243,32 @@ start() {
 			ConfSet PK_Users "$R"
 		fi
 
+		# un-set any RegenInProgress values for OrbiterGen status
 		RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
-
-		StartDaemon "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
-		StartDaemon "Start PNP MD Plugin (interactor)" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
-		StartDaemon "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
 	fi
 
+	# Start the update service
+	StartService "Starting LinuxMCE Update" "/usr/pluto/bin/LMCEUpdate_Apply.sh"
+
+	# Load MD modules in case they are needed for AV Output
 	if [[ "$AutostartMedia" -eq "1" ]] ; then
-	        # Load MD modules early in case they are needed for something to work later on
-	        StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
+	StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
 	fi
 
-	#if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
-	#	#StartService "Updating Software Database" "/usr/pluto/bin/getxmls" "&"
-	#	#/usr/pluto/bin/getxmls &> /var/log/pluto/add_software_debug.log &
-	#	#ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
-	#	:
-	#fi
+	# Launch AV Wizard after module loading
+	StartService "Starting LinuxMCE AV Wizard" "/usr/pluto/bin/Start_AVWizard.sh start"
 
-	StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
-	StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh" "&"
-	StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
-	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh" "&"
-	StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
-
-	StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
-	StartService "Starting Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "&"
-	StartService "Starting Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
-	StartService "Starting NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
-
-	#Disable the GamePad Radar, hal takes care of this through udev now
-	#StartService "Starting Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "&"
-
-	# Disable here, but turn into a start-up script for the individual devices.
-	#StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
-	#StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh" "&"
-
-	## Setup ALSA mixers
-	#amixer sset Capture 90%
-	#amixer sset 'Mic Boost (+20dB)' unmute
-	#alsactl store
+	# Check AV Wizard completion prior to continuing to launch linuxmce.
+	ConfEval;
+	if [[ "$AVWizardOverride" != "0" || "$AVWizardDone" != "1" ]] && [[ "$AutostartMedia" == "1" ]] ;then
+		Message "AVWIZARD NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
+		err=1
+		return $err
+	fi
 
 	export DISPLAY=":${Display}"
-
 	/usr/pluto/bin/SetupAudioVideo.sh
-
-	# hack: cleaning lockfile on M/D start to allow
-	# local devices to start
+	# hack: cleaning lockfile on M/D start to allow local devices to start
 	# TODO: remove this when correct locking will be implemented
 	rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
 	if [[ "$AutostartMedia" -eq "1" ]] ; then
@@ -291,8 +285,31 @@ start() {
 		fi
 	fi
 
+	# X is running, run ConfirmDependencies and start LMCE_Launch_Manager (including DCERouter if this is the core)
+	StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh" "&"
 	StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
+	StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
 
+	# Start core services - not required until after DCERouter is running
+	if [[ "$AutostartCore" -eq "1" ]] ; then
+		StartDaemon "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
+		StartDaemon "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
+		StartDaemon "Start PNP MD Plugin (interactor)" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
+		StartService "Waking sleeping MDs" "/usr/pluto/bin/WakeMDs.sh" "&"
+		StartService "Starting Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
+		StartService "Starting NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
+	fi
+
+	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh" "&"
+	StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
+	StartService "Starting Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "&"
+	StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
+
+	# TODO: move to a boot-addon script for the individual devices (firewire/pvr250).
+	#StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
+	#StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh" "&"
+
+	# TODO: move to a vdr boot-addon script
 	# If we are using VDR as our PVR, make sure the video dir is available, and restart VDR
 	# if needed.
 	if VDRInstalled ; then
@@ -308,18 +325,7 @@ start() {
 		fi
 	fi
 
-	if [[ "$AutostartCore" -eq "1" ]] ; then
-		StartService "Waking sleeping MDs" "/usr/pluto/bin/WakeMDs.sh" "&"
-	fi
-
-	StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
-
-	if [[ -x /bin/plymouth ]]; then
-	        /bin/plymouth --hide-splash || :
-	fi
-
-	:
-	return $?
+	return $err
 }
 
 StopService() {
@@ -327,7 +333,7 @@ StopService() {
 	ServiceCmd=$2
 	ServiceName=$3
 
-        log_daemon_msg "$ServiceDescription" "$ServiceCmd"
+log_daemon_msg "$ServiceDescription" "$ServiceCmd"
 
 	screenpid=$(basename $(find /var/run/screen | grep "$ServiceName") 2>/dev/null)
 	err=$?
@@ -345,7 +351,6 @@ StopService() {
 }
 
 stop() {
-        log_daemon_msg "Stopping LinuxMCE" "linuxmce"
 	#StopService "Stopping Restart_Myth_Backend" "/usr/pluto/bin/Restart_Myth_Backend.sh" "Restart_Myth_Backend"
 	#StopService "Stopping discovery" "/usr/pluto/bin/discovery.py" "discovery"
 	#StopService "Stopping Orbiter" "/usr/pluto/bin/Spawn_Device.sh" "OnScreen_Orbiter"
