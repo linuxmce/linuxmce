@@ -122,7 +122,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 #else
         qDebug() << "Using QRC";
         path="Index.qml";
-       setSkinEntryFile("qrc:/qml/skins/"+currentSkin+"/Main.qml");
+        setSkinEntryFile("qrc:/qml/skins/"+currentSkin+"/Main.qml");
         m_appEngine->setBaseUrl(QUrl("qrc:/qml/"));
 #endif
 
@@ -189,7 +189,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     connect(qorbiterUIwin, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
 
 
-   // connect(qorbiterUIwin->engine(), SIGNAL(warnings(QList<QQmlError>)), this, SLOT(handleViewError(QList<QQmlError>)));
+    // connect(qorbiterUIwin->engine(), SIGNAL(warnings(QList<QQmlError>)), this, SLOT(handleViewError(QList<QQmlError>)));
     m_appEngine->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 
 
@@ -2272,7 +2272,7 @@ void qorbiterManager::beginSetup()
     }
 
     if(createThemeStyle()){
-setUiReady(true);
+        setUiReady(true);
     }
 
 }
@@ -2331,11 +2331,9 @@ bool qorbiterManager::createThemeStyle()
 
     qDebug() << Q_FUNC_INFO ;
 
-m_appEngine->load("");
+    m_appEngine->load("");
 
-
-
- selector->setSelector(m_selector);
+    selector->setSelector(m_selector);
     if(m_style ){
         qDebug() << Q_FUNC_INFO << "Deleting style";
         m_style->deleteLater();
@@ -2343,20 +2341,7 @@ m_appEngine->load("");
 
     setSkinEntryFile(selectPath( "skins/"+currentSkin+"/Main.qml"));
     QString fp ="skins/"+currentSkin+"/Style.qml";
-#ifdef NOQRC
-    filePath.prepend(m_localQmlPath);
-#else
-    qDebug() << "QRC Enabled, checking " << fp;
 
-    if(m_skinOverridePath==""){
-      // fp.prepend("qrc:/qml/");
-
-         qDebug() << "QRC Enabled, adjusted file path " << fp;
-    } else{
-
-    }
-
-#endif
     qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
 
 
