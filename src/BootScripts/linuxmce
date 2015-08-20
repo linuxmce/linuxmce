@@ -12,7 +12,8 @@
 #                    and executes LMCE_Launch_Manager to start devices and taking care of the rest.
 ### END INIT INFO #
 
-DD_DISTRO_Raspbian_CONST=19
+DD_DISTRO_Raspbian_Wheezy_CONST=19
+DD_DISTRO_Raspbian_Jessie_CONST=22
 DD_DEVICETEMPLATE_Core=7
 DD_DEVICETEMPLATE_GenericPC_as_MD=28
 DD_DEVICETEMPLATE_GenericPC_as_qMD=2277
@@ -139,7 +140,7 @@ StartX() {
 		VT=vt"$((7+VT))"
 
 		# Start X11
-		if [[ "$PK_Distro" == "$DD_DISTRO_Raspbian_CONST" ]] ;then
+		if [[ "$PK_Distro" == "$DD_DISTRO_Raspbian_Wheezy_CONST" || "$PK_Distro" == "$DD_DISTRO_Raspbian_Jessie_CONST" ]] ;then
 			# Raspbian does not get an xorg.conf
 			Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}")
 		else
@@ -238,12 +239,12 @@ start() {
 	        StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
 	fi
 
-	if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
-		#StartService "Updating Software Database" "/usr/pluto/bin/getxmls" "&"
-		#/usr/pluto/bin/getxmls &> /var/log/pluto/add_software_debug.log &
-		#ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
-		:
-	fi
+	#if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
+	#	#StartService "Updating Software Database" "/usr/pluto/bin/getxmls" "&"
+	#	#/usr/pluto/bin/getxmls &> /var/log/pluto/add_software_debug.log &
+	#	#ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
+	#	:
+	#fi
 
 	StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
 	StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh" "&"
