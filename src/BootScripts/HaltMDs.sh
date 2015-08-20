@@ -21,24 +21,52 @@ fi
 P="$1"
 
 if [ "$P" == "D" ]; then
-	# Selecting diskless MDs only
-	Q="SELECT IPaddress
-	FROM Device_DeviceData
-	JOIN Device ON PK_Device=FK_Device
-	JOIN DeviceTemplate ON PK_DeviceTemplate=FK_DeviceTemplate
-	WHERE FK_DeviceTemplate=28 AND FK_DeviceData=9 AND IPaddress IS NOT NULL AND MACaddress IS NOT NULL AND IK_DeviceData='1'
-
-	UNION
-	SELECT IPaddress FROM Device WHERE FK_DeviceTemplate=1893 AND IPaddress IS NOT NULL AND MACaddress IS NOT NULL
+	# Selecting diskless MDs only with H or S 'PowerOff mode'
+	Q="
+	SELECT IPaddress
+		FROM Device_DeviceData
+		JOIN Device ON PK_Device=FK_Device
+		JOIN DeviceTemplate ON PK_DeviceTemplate=FK_DeviceTemplate
+	WHERE FK_DeviceTemplate=28
+		AND MACaddress IS NOT NULL
+		AND FK_DeviceData=290
+		AND IK_DeviceData IN ('H','S')
+		AND IPaddress IN
+	(
+	SELECT IPaddress
+		FROM Device_DeviceData
+		JOIN Device ON PK_Device=FK_Device
+		JOIN DeviceTemplate ON PK_DeviceTemplate=FK_DeviceTemplate
+	WHERE FK_DeviceTemplate=28
+		AND IPaddress IS NOT NULL
+		AND IPaddress <> ''
+		AND MACaddress IS NOT NULL
+		AND FK_DeviceData=9
+		AND IK_DeviceData='1'
+	)
 	"
 else
-	# Selecting all MDs
-	Q="SELECT IPaddress
-	FROM Device
-	JOIN DeviceTemplate ON PK_DeviceTemplate=FK_DeviceTemplate
-	WHERE FK_DeviceTemplate=28 AND IPaddress IS NOT NULL AND MACaddress IS NOT NULL
-	UNION
-        SELECT IPaddress FROM Device WHERE FK_DeviceTemplate=1893 AND IPaddress IS NOT NULL AND MACaddress IS NOT NULL
+	# Selecting all MDs with H or S 'PowerOff mode'
+	Q="
+
+		SELECT IPaddress
+                FROM Device_DeviceData
+                JOIN Device ON PK_Device=FK_Device
+                JOIN DeviceTemplate ON PK_DeviceTemplate=FK_DeviceTemplate
+        WHERE FK_DeviceTemplate=28
+                AND MACaddress IS NOT NULL
+                AND FK_DeviceData=290
+                AND IK_DeviceData IN ('H','S')
+                AND IPaddress IN
+        (
+        SELECT IPaddress
+                FROM Device
+                JOIN DeviceTemplate ON PK_DeviceTemplate=FK_DeviceTemplate
+        WHERE FK_DeviceTemplate=28
+                AND IPaddress IS NOT NULL
+                AND IPaddress <> ''
+                AND MACaddress IS NOT NULL
+        )
 	"
 fi
 
