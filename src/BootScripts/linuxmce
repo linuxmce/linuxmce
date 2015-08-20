@@ -308,6 +308,10 @@ start() {
 		fi
 	fi
 
+	if [[ "$AutostartCore" -eq "1" ]] ; then
+		StartService "Waking sleeping MDs" "/usr/pluto/bin/WakeMDs.sh" "&"
+	fi
+
 	StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
 
 	if [[ -x /bin/plymouth ]]; then
@@ -358,7 +362,9 @@ stop() {
 	#StopService "Stopping Dhcpd Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
 
 	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh"
-	StartService "Halt MDs" "/usr/pluto/bin/HaltMDs.sh"
+	if [[ "$AutostartCore" -eq "1" ]] ; then
+		StartService "Halt MDs" "/usr/pluto/bin/HaltMDs.sh"
+	fi
 
 	:
 	return $?
