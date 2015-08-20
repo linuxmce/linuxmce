@@ -36,4 +36,5 @@ sed -i 's/master|slave|\[Yy\]/slave|[Yy]/g' /etc/init.d/nis
 
 # Rebuilding NIS database and reloading config
 echo | /usr/lib/yp/ypinit -m
-service nis reload
+service nis stop || :
+service nis start
