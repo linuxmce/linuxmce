@@ -653,7 +653,8 @@ Configure_Network_Options () {
 }
 
 addAdditionalTTYStart () {
-	if [[ "$DISTRO" = "lucid" ]] || [[ "$DISTRO" = "precise" ]] || [[ "$DISTRO" == "trusty" ]]; then
+	# TODO: this is ubuntu specific, alter to fn properly for debian/raspbian as well
+	if [[ "$TARGET_DISTRO" = "lucid" ]] || [[ "$TARGET_DISTRO" = "precise" ]] || [[ "$TARGET_DISTRO" == "trusty" ]]; then
 		sed -i 's/23/235/' /etc/init/tty2.conf
 		sed -i 's/23/235/' /etc/init/tty3.conf
 		sed -i 's/23/235/' /etc/init/tty4.conf
@@ -768,12 +769,12 @@ Setup_Kernel_PostInst () {
 SetupAptSources () {
 	# Build a new sources.list
 	cat <<-EOF >/etc/apt/sources.list
-		deb file:$LOCAL_REPO_BASE ./
-		deb http://deb.linuxmce.org/ubuntu/ $DISTRO main
+		deb file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}
+		deb http://deb.linuxmce.org/ubuntu/ ${TARGET_DISTRO} ${REPO}
 
-		deb http://archive.ubuntu.com/ubuntu/ $DISTRO main restricted universe multiverse
-		deb http://archive.ubuntu.com/ubuntu/ $DISTRO-updates main restricted universe multiverse
-		deb http://archive.ubuntu.com/ubuntu/ $DISTRO-security main restricted universe multiverse
+		deb http://archive.ubuntu.com/ubuntu/ ${TARGET_DISTRO} main restricted universe multiverse
+		deb http://archive.ubuntu.com/ubuntu/ ${TARGET_DISTRO}-updates main restricted universe multiverse
+		deb http://archive.ubuntu.com/ubuntu/ ${TARGET_DISTRO}-security main restricted universe multiverse
 		EOF
 }
 
