@@ -29,6 +29,8 @@ Q="UPDATE settings SET data=1 where value='TruncateDeletesSlowly'"
 UseDB "mythconverg"
 RunSQL "$Q"
 
+## FIXME: DO NOT HARDCODE IP ADDRESS
+
 #Alter mythconverg.settings to force MasterServerIP to the core's internal NIC
 Q="UPDATE settings SET data='192.168.80.1' where value='MasterServerIP'"
 UseDB "mythconverg"
