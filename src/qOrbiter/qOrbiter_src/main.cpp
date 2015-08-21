@@ -201,6 +201,7 @@ static QObject *mediatypes_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
 }
 #ifdef Q_OS_IOS
 Q_IMPORT_PLUGIN(AudioVisualPlugin)
+Q_IMPORT_PLUGIN(QtQuickControlsPlugin)
 #endif
 
 
