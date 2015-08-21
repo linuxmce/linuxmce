@@ -81,7 +81,7 @@ BufferedIOConnection::RecvDelimited(const char* delimbuff, unsigned int delimsiz
 	struct timeval last;
 
 	if(delimsize <= 0 || !isDataAvailable(timeout)) {
-		return ret;
+		return string(""); //ret;
 	}
 	if(timeout<=0)
 	{
