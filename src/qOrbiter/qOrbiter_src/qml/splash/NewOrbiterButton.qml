@@ -48,7 +48,7 @@ Item{
     states: [
         State {
             name: "hidden"
-            when:!window.b_connectionPresent
+            when:!orbiterWindow.b_connectionPresent
             PropertyChanges {
                 target: newOrbiterButton
                 opacity:0
@@ -58,7 +58,7 @@ Item{
         },
         State {
             name: "showing"
-            when:window.b_connectionPresent
+            when:orbiterWindow.b_connectionPresent
             PropertyChanges {
                 target: newOrbiterButton
                 height:theme.appNavigation_panelHeight

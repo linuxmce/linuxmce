@@ -42,7 +42,7 @@ Item {
     Timer{
         id:wait
         interval: 3500
-        onTriggered: {mainContent.source = "http://"+window.router+"/lmce-admin/skins/ios/Splash.qml"; }
+        onTriggered: {mainContent.source = "http://"+orbiterWindow.router+"/lmce-admin/skins/ios/Splash.qml"; }
         running:false
         Component.onCompleted:
         {
@@ -54,7 +54,7 @@ Item {
 
     Text {
         id: loading
-        text: qsTr("Connecting to "+window.router+", please be patient \n" )
+        text: qsTr("Connecting to "+orbiterWindow.router+", please be patient \n" )
         anchors.top: parent.top
         font.pixelSize: 28
         width: parent.width
@@ -119,7 +119,7 @@ Item {
         opacity: 0
         onOpacityChanged: PropertyAnimation {target:mainContent; property: "opacity"; to:1 ; duration: 1500}
         onStatusChanged: if(mainContent.status === Loader.Error){
-                             loading.text = qsTr("Im Sorry I couldnt connect to a LinuxMCE Server at "+window.router+" Please ensure you can reach your core. \n I will continue trying. \n"+ mainContent.sourceComponent.errorString())
+                             loading.text = qsTr("Im Sorry I couldnt connect to a LinuxMCE Server at "+orbiterWindow.router+" Please ensure you can reach your core. \n I will continue trying. \n"+ mainContent.sourceComponent.errorString())
                              console.log(mainContent.sourceComponent.errorString())
                              wait.restart()
                          }

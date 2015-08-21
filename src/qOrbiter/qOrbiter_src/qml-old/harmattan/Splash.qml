@@ -9,7 +9,7 @@ Item {
     width:appW
     property bool orbiterSetup:false
 
-    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
+    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; orbiterWindow.showSetup()}
     onWidthChanged: console.log("detected size change")
 
     function scaleX(x){
@@ -20,7 +20,7 @@ Item {
     }
 
     Connections{
-        target: window      
+        target: orbiterWindow      
         onShowExternal: {
             console.log("showing external ip box")
             ext_routerip.visible = true
@@ -52,8 +52,8 @@ Item {
     }
 
 //    Connections{
-//        target:window
-//        onMessageChanged:loadingStatus.text = window.message
+//        target:orbiterWindow
+//        onMessageChanged:loadingStatus.text = orbiterWindow.message
 //        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
 //    }
 }

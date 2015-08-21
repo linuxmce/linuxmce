@@ -15,7 +15,7 @@ Rectangle {
     property int itemFontSize: manager.isProfile ? manager.appHeight *.04 : manager.appHeight *.05
     property int selectedUser:-1
     property int selectedRoom:-1
-    Component.onCompleted: window.showSetup()
+    Component.onCompleted: orbiterWindow.showSetup()
 
 
     Timer{
@@ -206,7 +206,7 @@ Rectangle {
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked: window.setupNewOrbiter(selectedUser, selectedRoom, 1, 1, appH, appW)
+                onClicked: orbiterWindow.setupNewOrbiter(selectedUser, selectedRoom, 1, 1, appH, appW)
             }
 
         }

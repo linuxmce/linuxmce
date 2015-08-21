@@ -73,7 +73,7 @@ Item{
 
         height: host_label.paintedHeight
         clip: true
-        text: window.router
+        text: orbiterWindow.router
         font.pixelSize:theme.appFontSize_list
         font.family: myFont.name
 
@@ -113,7 +113,7 @@ Item{
             onEntered: parent.color="green"
             onExited: parent.color="red"
             anchors.fill: parent
-            onClicked: { window.qmlSetupLmce(window.deviceno, routerInput.text) ;valueSet() }
+            onClicked: { orbiterWindow.qmlSetupLmce(orbiterWindow.deviceno, routerInput.text) ;valueSet() }
             anchors.verticalCenter: parent.verticalCenter
         }
     }

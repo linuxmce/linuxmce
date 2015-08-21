@@ -8,7 +8,7 @@ Item {
     height: 720
     width: 1280
     Component.onCompleted: {
-        if(window.orbiterInitialized){
+        if(orbiterWindow.orbiterInitialized){
             state="init"
 
         } else {
@@ -52,7 +52,7 @@ Item {
     Loader{
         id:bootStrap
         anchors.fill: parent
-        source:window.orbiterInitialized ? "BaseLoaded.qml" : ""
+        source:orbiterWindow.orbiterInitialized ? "BaseLoaded.qml" : ""
     }
 
     Text {

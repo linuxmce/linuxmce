@@ -11,7 +11,7 @@ Item {
     signal splashLoaded()
 
     Connections{
-        target: window
+        target: orbiterWindow
         onShowList:{
 
             if(existing_orbiters.count === 0){
@@ -43,8 +43,8 @@ Item {
 
 
     Connections{
-        target:window
-        onMessageChanged:loadingStatus.text = window.message
+        target:orbiterWindow
+        onMessageChanged:loadingStatus.text = orbiterWindow.message
         onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
 

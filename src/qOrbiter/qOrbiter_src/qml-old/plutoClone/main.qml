@@ -340,12 +340,12 @@ Item {
         }
 
         Component.onCompleted: {
-            setWindowSize(manager.appHeight, manager.appWidth);
+            setorbiterWindowSize(manager.appHeight, manager.appWidth);
         }
 
         Connections{
             target:manager
-            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+            onOrientationChanged:dceplayer.setorbiterWindowSize(manager.appHeight, manager.appWidth)
             onMediaPlayerIdChanged:{
                 console.log("initializing media player"+manager.mediaPlayerID)
                 dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)

@@ -7,7 +7,7 @@ Item {
     id:setup
     anchors.fill: parent
     Component.onCompleted:{
-        window.showSetup()
+        orbiterWindow.showSetup()
         forceActiveFocus()
     }
     Keys.onPressed: {
@@ -20,7 +20,7 @@ Item {
         }
     }
     Connections{
-        target:window
+        target:orbiterWindow
         onCreationComplete:{
             splashLogic.state="no-connection"
         }
@@ -122,7 +122,7 @@ Item {
                         anchors.fill: parent
                         onClicked: {
                             settings.setOption(SettingsType.Settings_Network, SettingsKey.Setting_Network_DeviceName, nameInput.text)
-                            onClicked: window.setupNewOrbiter(userSelection, roomSelection+1, 1, 1, appH, appW, nameInput.text)
+                            onClicked: orbiterWindow.setupNewOrbiter(userSelection, roomSelection+1, 1, 1, appH, appW, nameInput.text)
                         }
                     }
                 }
@@ -363,7 +363,7 @@ Item {
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked: window.setupNewOrbiter(userSelection, roomSelection, 1, 1, appH, appW)
+                onClicked: orbiterWindow.setupNewOrbiter(userSelection, roomSelection, 1, 1, appH, appW)
             }
 
         }

@@ -3,9 +3,9 @@ import com.nokia.android 1.1
 import Qt.labs.shaders 1.0
 import "components"
 
-Window {  
+orbiterWindow {  
 
-	id: mainWindow
+	id: mainorbiterWindow
 	Component.onCompleted: manager.setBoundStatus(true)
 
 	Image {

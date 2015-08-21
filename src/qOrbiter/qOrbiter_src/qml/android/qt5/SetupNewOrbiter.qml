@@ -16,7 +16,7 @@ Rectangle {
     function scaleY(y){
         return y/100*appW
     }
-    Component.onCompleted: window.showSetup()
+    Component.onCompleted: orbiterWindow.showSetup()
 
 
     Timer{
@@ -225,7 +225,7 @@ Rectangle {
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked: window.setupNewOrbiter(selectedUser, selectedRoom, 1, 1, appH, appW)
+                onClicked: orbiterWindow.setupNewOrbiter(selectedUser, selectedRoom, 1, 1, appH, appW)
             }
 
         }

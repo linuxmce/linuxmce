@@ -18,7 +18,7 @@ Item {
         existing_orbiters.visible = false;
         orbiter_options.visible = true;
         newOrbiterOptionContainer.visible=true;
-        window.showSetup()
+        orbiterWindow.showSetup()
     }
     onWidthChanged: console.log("detected size change")
 
@@ -69,8 +69,8 @@ Item {
     }
 
     //    Connections{
-    //        target:window
-    //        onMessageChanged:loadingStatus.text = window.message
+    //        target:orbiterWindow
+    //        onMessageChanged:loadingStatus.text = orbiterWindow.message
     //        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
     //    }
 }

@@ -6,7 +6,7 @@ Item {
 
     Text {
         id: pres
-        text: window.b_connectionPresent
+        text: orbiterWindow.b_connectionPresent
         color:"white"
         anchors{
             top:parent.top

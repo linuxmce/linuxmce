@@ -1,15 +1,15 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
 
-PageStackWindow {
-    id: appWindow
+PageStackorbiterWindow {
+    id: apporbiterWindow
     initialPage: Splash { }
 
     platformStyle: defaultStyle;
     property bool enableSwipe: true;
 
-    PageStackWindowStyle { id: defaultStyle; }
-    PageStackWindowStyle {
+    PageStackorbiterWindowStyle { id: defaultStyle; }
+    PageStackorbiterWindowStyle {
         id: customStyle;
         background: "image://theme/meegotouch-wallpaper-portrait";
         backgroundFillMode: Image.PreserveAspectCrop

@@ -128,7 +128,7 @@ GenericPopup{
 
             }
             StyledButton{
-                buttonText: qsTr("Close", "Close Window")
+                buttonText: qsTr("Close", "Close orbiterWindow")
                 height: parent.height
 
                 onActivated: fileDetails.close()

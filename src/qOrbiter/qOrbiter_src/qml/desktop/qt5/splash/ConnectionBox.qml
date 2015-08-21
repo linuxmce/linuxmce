@@ -54,7 +54,7 @@ Rectangle{
             TextInput {
                 id: routerip
                 width: 80
-                text: window.router
+                text: orbiterWindow.router
                 font.pointSize: 12
                 font.family: myFont.name
                 //  onTextChanged: setRouterIp(routerip.text)
@@ -84,7 +84,7 @@ Rectangle{
             TextInput {
                 id: devicenumber
                 width: scaleX(10)
-                text: window.deviceno
+                text: orbiterWindow.deviceno
                 font.family: myFont.name
                 font.pointSize: 12
                 //onTextChanged: setDeviceNo(devicenumber.text)
@@ -122,7 +122,7 @@ Rectangle{
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(devicenumber.text, routerip.text)
+                onClicked: orbiterWindow.qmlSetupLmce(devicenumber.text, routerip.text)
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
