@@ -31212,5 +31212,69 @@ namespace DCE
 			1 /* number of parameters */,
 			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
 	};
+	class CMD_Start_Egg_Timer : public PreformedCommand {
+	public:
+		CMD_Start_Egg_Timer(long DeviceIDFrom, long DeviceIDTo,int iDeviceToLink,string sTimeout) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_Start_Egg_Timer_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
+			COMMANDPARAMETER_Timeout_CONST, sTimeout.c_str()); }
+	};
+	class CMD_Start_Egg_Timer_DL : public PreformedCommand {
+	public:
+		CMD_Start_Egg_Timer_DL(long DeviceIDFrom, string DeviceIDTo,int iDeviceToLink,string sTimeout) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Start_Egg_Timer_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
+			COMMANDPARAMETER_Timeout_CONST, sTimeout.c_str()); }
+	};
+	class CMD_Start_Egg_Timer_DT : public PreformedCommand {
+	public:
+		CMD_Start_Egg_Timer_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,int iDeviceToLink,string sTimeout) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Start_Egg_Timer_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
+			COMMANDPARAMETER_Timeout_CONST, sTimeout.c_str()); }
+	};
+	class CMD_Start_Egg_Timer_Cat : public PreformedCommand {
+	public:
+		CMD_Start_Egg_Timer_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,int iDeviceToLink,string sTimeout) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Start_Egg_Timer_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
+			COMMANDPARAMETER_Timeout_CONST, sTimeout.c_str()); }
+	};
+	class CMD_Cancel_Egg_Timer : public PreformedCommand {
+	public:
+		CMD_Cancel_Egg_Timer(long DeviceIDFrom, long DeviceIDTo,int iDeviceToLink,bool bSendOFF) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_Cancel_Egg_Timer_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
+			COMMANDPARAMETER_SendOFF_CONST, (bSendOFF ? "1" : "0")); }
+	};
+	class CMD_Cancel_Egg_Timer_DL : public PreformedCommand {
+	public:
+		CMD_Cancel_Egg_Timer_DL(long DeviceIDFrom, string DeviceIDTo,int iDeviceToLink,bool bSendOFF) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Cancel_Egg_Timer_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
+			COMMANDPARAMETER_SendOFF_CONST, (bSendOFF ? "1" : "0")); }
+	};
+	class CMD_Cancel_Egg_Timer_DT : public PreformedCommand {
+	public:
+		CMD_Cancel_Egg_Timer_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,int iDeviceToLink,bool bSendOFF) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Cancel_Egg_Timer_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
+			COMMANDPARAMETER_SendOFF_CONST, (bSendOFF ? "1" : "0")); }
+	};
+	class CMD_Cancel_Egg_Timer_Cat : public PreformedCommand {
+	public:
+		CMD_Cancel_Egg_Timer_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,int iDeviceToLink,bool bSendOFF) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Cancel_Egg_Timer_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
+			COMMANDPARAMETER_SendOFF_CONST, (bSendOFF ? "1" : "0")); }
+	};
 }
 #endif
