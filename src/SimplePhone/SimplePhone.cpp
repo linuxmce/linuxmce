@@ -153,12 +153,12 @@ bool SimplePhone::GetConfig()
 
 		if (strstr(pcConfigLine, "capture_dev_id=") == pcConfigLine)
 		{
-			vectLinphoneConfig[i] = "capture_dev_id=ALSA:" + sAlsaDevice;		
+			vectLinphoneConfig[i] = "capture_dev_id=ALSA:" + sAlsaDevice;
 		}
 
 	}
 
-        if ( sAlsaDevice != "donttouch" ) {	
+        if ( sAlsaDevice != "donttouch" ) {
             FileUtils::WriteVectorToFile("/etc/pluto/simplephone.conf", vectLinphoneConfig);
         }
 
