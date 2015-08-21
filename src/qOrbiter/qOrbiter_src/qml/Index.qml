@@ -8,7 +8,7 @@ import "skins"
 /*
   Root Item.
   */
-ApplicationWindow {
+Window {
     id:qml_root_item
     height: 640
     width: 480

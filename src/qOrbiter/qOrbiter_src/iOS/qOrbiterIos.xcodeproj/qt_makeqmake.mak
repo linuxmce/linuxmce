@@ -147,7 +147,7 @@ qOrbiterIos.xcodeproj/project.pbxproj: qOrbiterIos.pro ../../../../Qt/5.5/ios/mk
 		../../../../Qt/5.5/ios/mkspecs/macx-ios-clang/qmake.conf \
 		../../../../Qt/5.5/ios/mkspecs/macx-xcode/qmake.conf \
 		../../../../Qt/5.5/ios/mkspecs/features/spec_post.prf \
-		.qmake.stash \
+		../.qmake.stash \
 		../../../../Qt/5.5/ios/mkspecs/features/exclusive_builds.prf \
 		../../../../Qt/5.5/ios/mkspecs/features/default_pre.prf \
 		../../../../Qt/5.5/ios/mkspecs/features/mac/default_pre.prf \
@@ -354,7 +354,7 @@ qOrbiterIos.xcodeproj/project.pbxproj: qOrbiterIos.pro ../../../../Qt/5.5/ios/mk
 ../../../../Qt/5.5/ios/mkspecs/macx-ios-clang/qmake.conf:
 ../../../../Qt/5.5/ios/mkspecs/macx-xcode/qmake.conf:
 ../../../../Qt/5.5/ios/mkspecs/features/spec_post.prf:
-.qmake.stash:
+../.qmake.stash:
 ../../../../Qt/5.5/ios/mkspecs/features/exclusive_builds.prf:
 ../../../../Qt/5.5/ios/mkspecs/features/default_pre.prf:
 ../../../../Qt/5.5/ios/mkspecs/features/mac/default_pre.prf:

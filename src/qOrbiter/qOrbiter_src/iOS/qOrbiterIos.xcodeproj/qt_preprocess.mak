@@ -51,7 +51,7 @@ compilers: qrc_skinData.cpp qrc_qmlFile.cpp moc_qOrbiter.cpp moc_qorbitermanager
 	 moc_genericflatlistmodel.cpp moc_genericmodelitem.cpp moc_ActiveMediaStreams.cpp\
 	 moc_MediaFilter.cpp moc_listitembase.cpp moc_linuxmcedata.cpp\
 	 moc_mediatypehelper.cpp moc_RemoteCommands.cpp moc_datagrids.cpp\
-	 moc_settinginterface.cpp
+	 moc_settinginterface.cpp moc_entertainareatimecode.cpp
 compiler_objective_c_make_all:
 compiler_objective_c_clean:
 compiler_rcc_make_all: qrc_skinData.cpp qrc_qmlFile.cpp
@@ -59,10 +59,11 @@ compiler_rcc_clean:
 	-$(DEL_FILE) qrc_skinData.cpp qrc_qmlFile.cpp
 qrc_skinData.cpp: ../skinData.qrc \
 		../config.xml \
-		../qml/SkinError.qml \
 		../qml/IndexContent.qml \
 		../qml/Index.qml \
+		../qml/SkinError.qml \
 		../qml/Themes.json \
+		../qml/RegenScreen.qml \
 		../qml/skins/default/screens/Screen_209.qml \
 		../qml/images/login-bg.png \
 		../qml/images/splash-bg.png \
@@ -79,6 +80,8 @@ qrc_skinData.cpp: ../skinData.qrc \
 	/Users/Langstonius/Qt/5.5/ios/bin/rcc -name skinData ../skinData.qrc -o qrc_skinData.cpp
 
 qrc_qmlFile.cpp: ../qmlFile.qrc \
+		../qml/IndexContent.qml \
+		../qml/Index.qml \
 		../qml/SkinError.qml \
 		../qml/skins/default/PageLoader.qml \
 		../qml/skins/default/Style.qml \
@@ -167,6 +170,7 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/screens/Screen_68.qml \
 		../qml/skins/default/screens/Screen_74.qml \
 		../qml/skins/default/screens/Screen_36.qml \
+		../qml/skins/default/screens/Screen_Reload.qml \
 		../qml/skins/default/screens/Screen_80.qml \
 		../qml/skins/default/screens/Screen_7.qml \
 		../qml/skins/default/screens/Screen_42.qml \
@@ -174,6 +178,7 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/screens/Screen_95.qml \
 		../qml/skins/default/screens/Screen_10.qml \
 		../qml/skins/default/screens/Screen_57.qml \
+		../qml/skins/default/screens/Screen_204.qml \
 		../qml/skins/default/screens/Screen_63.qml \
 		../qml/skins/default/screens/Screen_25.qml \
 		../qml/skins/default/screens/Screen_78.qml \
@@ -251,6 +256,7 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/screens/+xlarge/Screen_1.qml \
 		../qml/skins/default/screens/+xlarge/Screen_44.qml \
 		../qml/skins/default/components/MultiMediaView.qml \
+		../qml/skins/default/components/TelecomDevices.qml \
 		../qml/skins/default/components/AudioDelegate.qml \
 		../qml/skins/default/components/FloorplanSetTemp.qml \
 		../qml/skins/default/components/FocusRow.qml \
@@ -324,32 +330,34 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/+medium/MainLayout.qml \
 		../qml/skins/default/+large/Style.qml \
 		../qml/skins/default/+large/MainLayout.qml \
-		../qml/splash/LoadingView.qml \
+		../qml/splash/SetupNewOrbiter.qml \
 		../qml/splash/ExistingOrbiters.qml \
-		../qml/splash/LanguageList.qml \
-		../qml/splash/SplashView.qml \
-		../qml/splash/NewOrbiterButton.qml \
 		../qml/splash/Style.qml \
+		../qml/splash/StatusRow.qml \
+		../qml/splash/GenericSplashList.qml \
+		../qml/splash/SplashView.qml \
+		../qml/splash/Switch.qml \
+		../qml/splash/qmldir \
+		../qml/splash/SetupScreen.qml \
+		../qml/splash/NewOrbiterButton.qml \
 		../qml/splash/ConnectionElement.qml \
 		../qml/splash/ConnectionBox.qml \
 		../qml/splash/Splash.qml \
-		../qml/splash/qmldir \
-		../qml/splash/Switch.qml \
-		../qml/splash/SetupNewOrbiter.qml \
 		../qml/splash/OptionMenu.qml \
-		../qml/splash/StatusRow.qml \
+		../qml/splash/LoadingView.qml \
+		../qml/splash/LanguageList.qml \
+		../qml/splash/+large/+ios/Style.qml \
 		../qml/splash/images/vertical_arrow.png \
 		../qml/splash/images/options.png \
 		../qml/splash/images/arrow.png \
 		../qml/splash/images/splash_bg.png \
 		../qml/splash/+small/Style.qml \
-		../qml/splash/+small/qmldir \
-		../qml/splash/+large/+ios/Style.qml
+		../qml/splash/+small/qmldir
 	/Users/Langstonius/Qt/5.5/ios/bin/rcc -name qmlFile ../qmlFile.qrc -o qrc_qmlFile.cpp
 
-compiler_moc_header_make_all: moc_qOrbiter.cpp moc_qorbitermanager.cpp moc_listModel.cpp moc_gridItem.cpp moc_gridimageprovider.cpp moc_locationmodel.cpp moc_locationitem.cpp moc_usermodel.cpp moc_useritem.cpp moc_lightingscenariomodel.cpp moc_lightingscenarioitem.cpp moc_mediascenariomodel.cpp moc_mediascenarioitem.cpp moc_telecomscenariomodel.cpp moc_climatescenariomodel.cpp moc_securityscenariomodel.cpp moc_climatescenarioitem.cpp moc_securityscenarioitem.cpp moc_telecomscenarioitem.cpp moc_screensavermodule.cpp moc_skindatamodel.cpp moc_skindataitem.cpp moc_filtermodelitem.cpp moc_genreitem.cpp moc_attributesortitem.cpp moc_attributesortmodel.cpp moc_mediatypeitem.cpp moc_filedetailsclass.cpp moc_nowplayingclass.cpp moc_screenparamsclass.cpp moc_playlistclass.cpp moc_playlistitemclass.cpp moc_securityvideoclass.cpp moc_epgchannellist.cpp moc_screeninfo.cpp moc_epgitemclass.cpp moc_floorplanmodel.cpp moc_sleepingalarm.cpp moc_avcodegrid.cpp moc_floorplanimageitem.cpp moc_floorplandevice.cpp moc_screenshotattributes.cpp moc_orbiterwindow.cpp moc_screensaverclass.cpp moc_skinloader.cpp moc_genericsetupmodel.cpp moc_genericsetupitem.cpp moc_avdevice.cpp moc_existingorbiter.cpp moc_modelpage.cpp moc_avcommand.cpp moc_filereader.cpp moc_timecodemanager.cpp moc_floorplandeviceprovider.cpp moc_bookmarkitem.cpp moc_promptdata.cpp moc_existingorbitermodel.cpp moc_devicemodel.cpp moc_attributeobject.cpp moc_qorbiterlogger.cpp moc_genericflatlistmodel.cpp moc_genericmodelitem.cpp moc_ActiveMediaStreams.cpp moc_MediaFilter.cpp moc_listitembase.cpp moc_linuxmcedata.cpp moc_mediatypehelper.cpp moc_RemoteCommands.cpp moc_datagrids.cpp moc_settinginterface.cpp
+compiler_moc_header_make_all: moc_qOrbiter.cpp moc_qorbitermanager.cpp moc_listModel.cpp moc_gridItem.cpp moc_gridimageprovider.cpp moc_locationmodel.cpp moc_locationitem.cpp moc_usermodel.cpp moc_useritem.cpp moc_lightingscenariomodel.cpp moc_lightingscenarioitem.cpp moc_mediascenariomodel.cpp moc_mediascenarioitem.cpp moc_telecomscenariomodel.cpp moc_climatescenariomodel.cpp moc_securityscenariomodel.cpp moc_climatescenarioitem.cpp moc_securityscenarioitem.cpp moc_telecomscenarioitem.cpp moc_screensavermodule.cpp moc_skindatamodel.cpp moc_skindataitem.cpp moc_filtermodelitem.cpp moc_genreitem.cpp moc_attributesortitem.cpp moc_attributesortmodel.cpp moc_mediatypeitem.cpp moc_filedetailsclass.cpp moc_nowplayingclass.cpp moc_screenparamsclass.cpp moc_playlistclass.cpp moc_playlistitemclass.cpp moc_securityvideoclass.cpp moc_epgchannellist.cpp moc_screeninfo.cpp moc_epgitemclass.cpp moc_floorplanmodel.cpp moc_sleepingalarm.cpp moc_avcodegrid.cpp moc_floorplanimageitem.cpp moc_floorplandevice.cpp moc_screenshotattributes.cpp moc_orbiterwindow.cpp moc_screensaverclass.cpp moc_skinloader.cpp moc_genericsetupmodel.cpp moc_genericsetupitem.cpp moc_avdevice.cpp moc_existingorbiter.cpp moc_modelpage.cpp moc_avcommand.cpp moc_filereader.cpp moc_timecodemanager.cpp moc_floorplandeviceprovider.cpp moc_bookmarkitem.cpp moc_promptdata.cpp moc_existingorbitermodel.cpp moc_devicemodel.cpp moc_attributeobject.cpp moc_qorbiterlogger.cpp moc_genericflatlistmodel.cpp moc_genericmodelitem.cpp moc_ActiveMediaStreams.cpp moc_MediaFilter.cpp moc_listitembase.cpp moc_linuxmcedata.cpp moc_mediatypehelper.cpp moc_RemoteCommands.cpp moc_datagrids.cpp moc_settinginterface.cpp moc_entertainareatimecode.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_qOrbiter.cpp moc_qorbitermanager.cpp moc_listModel.cpp moc_gridItem.cpp moc_gridimageprovider.cpp moc_locationmodel.cpp moc_locationitem.cpp moc_usermodel.cpp moc_useritem.cpp moc_lightingscenariomodel.cpp moc_lightingscenarioitem.cpp moc_mediascenariomodel.cpp moc_mediascenarioitem.cpp moc_telecomscenariomodel.cpp moc_climatescenariomodel.cpp moc_securityscenariomodel.cpp moc_climatescenarioitem.cpp moc_securityscenarioitem.cpp moc_telecomscenarioitem.cpp moc_screensavermodule.cpp moc_skindatamodel.cpp moc_skindataitem.cpp moc_filtermodelitem.cpp moc_genreitem.cpp moc_attributesortitem.cpp moc_attributesortmodel.cpp moc_mediatypeitem.cpp moc_filedetailsclass.cpp moc_nowplayingclass.cpp moc_screenparamsclass.cpp moc_playlistclass.cpp moc_playlistitemclass.cpp moc_securityvideoclass.cpp moc_epgchannellist.cpp moc_screeninfo.cpp moc_epgitemclass.cpp moc_floorplanmodel.cpp moc_sleepingalarm.cpp moc_avcodegrid.cpp moc_floorplanimageitem.cpp moc_floorplandevice.cpp moc_screenshotattributes.cpp moc_orbiterwindow.cpp moc_screensaverclass.cpp moc_skinloader.cpp moc_genericsetupmodel.cpp moc_genericsetupitem.cpp moc_avdevice.cpp moc_existingorbiter.cpp moc_modelpage.cpp moc_avcommand.cpp moc_filereader.cpp moc_timecodemanager.cpp moc_floorplandeviceprovider.cpp moc_bookmarkitem.cpp moc_promptdata.cpp moc_existingorbitermodel.cpp moc_devicemodel.cpp moc_attributeobject.cpp moc_qorbiterlogger.cpp moc_genericflatlistmodel.cpp moc_genericmodelitem.cpp moc_ActiveMediaStreams.cpp moc_MediaFilter.cpp moc_listitembase.cpp moc_linuxmcedata.cpp moc_mediatypehelper.cpp moc_RemoteCommands.cpp moc_datagrids.cpp moc_settinginterface.cpp
+	-$(DEL_FILE) moc_qOrbiter.cpp moc_qorbitermanager.cpp moc_listModel.cpp moc_gridItem.cpp moc_gridimageprovider.cpp moc_locationmodel.cpp moc_locationitem.cpp moc_usermodel.cpp moc_useritem.cpp moc_lightingscenariomodel.cpp moc_lightingscenarioitem.cpp moc_mediascenariomodel.cpp moc_mediascenarioitem.cpp moc_telecomscenariomodel.cpp moc_climatescenariomodel.cpp moc_securityscenariomodel.cpp moc_climatescenarioitem.cpp moc_securityscenarioitem.cpp moc_telecomscenarioitem.cpp moc_screensavermodule.cpp moc_skindatamodel.cpp moc_skindataitem.cpp moc_filtermodelitem.cpp moc_genreitem.cpp moc_attributesortitem.cpp moc_attributesortmodel.cpp moc_mediatypeitem.cpp moc_filedetailsclass.cpp moc_nowplayingclass.cpp moc_screenparamsclass.cpp moc_playlistclass.cpp moc_playlistitemclass.cpp moc_securityvideoclass.cpp moc_epgchannellist.cpp moc_screeninfo.cpp moc_epgitemclass.cpp moc_floorplanmodel.cpp moc_sleepingalarm.cpp moc_avcodegrid.cpp moc_floorplanimageitem.cpp moc_floorplandevice.cpp moc_screenshotattributes.cpp moc_orbiterwindow.cpp moc_screensaverclass.cpp moc_skinloader.cpp moc_genericsetupmodel.cpp moc_genericsetupitem.cpp moc_avdevice.cpp moc_existingorbiter.cpp moc_modelpage.cpp moc_avcommand.cpp moc_filereader.cpp moc_timecodemanager.cpp moc_floorplandeviceprovider.cpp moc_bookmarkitem.cpp moc_promptdata.cpp moc_existingorbitermodel.cpp moc_devicemodel.cpp moc_attributeobject.cpp moc_qorbiterlogger.cpp moc_genericflatlistmodel.cpp moc_genericmodelitem.cpp moc_ActiveMediaStreams.cpp moc_MediaFilter.cpp moc_listitembase.cpp moc_linuxmcedata.cpp moc_mediatypehelper.cpp moc_RemoteCommands.cpp moc_datagrids.cpp moc_settinginterface.cpp moc_entertainareatimecode.cpp
 moc_qOrbiter.cpp: ../../../Gen_Devices/qOrbiterBase.h \
 		../../../DCE/DeviceData_Impl.h \
 		../../../DCE/Command_Impl.h \
@@ -427,6 +435,7 @@ moc_qOrbiter.cpp: ../../../Gen_Devices/qOrbiterBase.h \
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/listModel.h \
@@ -541,6 +550,7 @@ moc_qorbitermanager.cpp: ../../../../Qt/5.5/ios/include/QtCore/QtGlobal \
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/listModel.h \
@@ -662,6 +672,7 @@ moc_listModel.cpp: ../../../../Qt/5.5/ios/include/QtCore/QAbstractListModel \
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/listModel.h \
@@ -794,6 +805,7 @@ moc_gridimageprovider.cpp: ../../../../Qt/5.5/ios/include/QtCore/QObject \
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/mediascenariomodel.h \
@@ -856,6 +868,8 @@ moc_locationmodel.cpp: ../../../../Qt/5.5/ios/include/QtCore/QAbstractListModel 
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
 		../../../../Qt/5.5/ios/include/QtCore/QDebug \
 		../../../../Qt/5.5/ios/include/QtCore/QList \
+		../contextobjects/entertainareatimecode.h \
+		../../../../Qt/5.5/ios/include/QtCore/QObject \
 		../datamodels/locationmodel.h
 	/Users/Langstonius/Qt/5.5/ios/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -I/Users/Langstonius/Qt/5.5/ios/mkspecs/macx-ios-clang -I/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS -I/Users/Langstonius/Qt/5.5/ios/mkspecs/macx-ios-clang/ios -I/Users/Langstonius/linuxmce -I/Users/Langstonius/DCE -I/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src -I/Users/Langstonius/Qt/5.5/ios/include -I/Users/Langstonius/Qt/5.5/ios/include/QtQuick -I/Users/Langstonius/Qt/5.5/ios/include/QtWidgets -I/Users/Langstonius/Qt/5.5/ios/include/QtMultimedia -I/Users/Langstonius/Qt/5.5/ios/include/QtGui -I/Users/Langstonius/Qt/5.5/ios/include/QtQml -I/Users/Langstonius/Qt/5.5/ios/include/QtNetwork -I/Users/Langstonius/Qt/5.5/ios/include/QtScript -I/Users/Langstonius/Qt/5.5/ios/include/QtXml -I/Users/Langstonius/Qt/5.5/ios/include/QtCore ../datamodels/locationmodel.h -o moc_locationmodel.cpp
 
@@ -943,6 +957,7 @@ moc_lightingscenariomodel.cpp: ../../../../Qt/5.5/ios/include/QtCore/QAbstractLi
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/mediascenariomodel.h \
 		../datamodels/mediascenarioitem.h \
@@ -1061,6 +1076,7 @@ moc_lightingscenarioitem.cpp: ../datamodels/listModel.h \
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/mediascenariomodel.h \
@@ -1211,6 +1227,7 @@ moc_securityscenariomodel.cpp: ../../../../Qt/5.5/ios/include/QtCore/QAbstractLi
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/mediascenariomodel.h \
@@ -1335,6 +1352,7 @@ moc_securityscenarioitem.cpp: ../datamodels/listModel.h \
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/mediascenariomodel.h \
@@ -1470,6 +1488,7 @@ moc_skindatamodel.cpp: ../datamodels/skinloader.h \
 		../datamodels/useritem.h \
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/listModel.h \
@@ -1682,6 +1701,7 @@ moc_epgchannellist.cpp: ../../../../Qt/5.5/ios/include/QtCore/QAbstractListModel
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/listModel.h \
@@ -1822,6 +1842,7 @@ moc_floorplanmodel.cpp: ../../../../Qt/5.5/ios/include/QtCore/QAbstractListModel
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/listModel.h \
@@ -1923,6 +1944,7 @@ moc_orbiterwindow.cpp: ../../../../Qt/5.5/ios/include/QtCore/QObject \
 		../../../../Qt/5.5/ios/include/QtQml/QQmlEngine \
 		../../../../Qt/5.5/ios/include/QtQuick/QQuickView \
 		../qtquick2applicationviewer/qtquick2applicationviewer.h \
+		../../../../Qt/5.5/ios/include/QtQml/qqmlapplicationengine.h \
 		../../../../Qt/5.5/ios/include/QtDeclarative/QDeclarativeView \
 		../../../../Qt/5.5/ios/include/QtDeclarative/QDeclarativeContext \
 		../../../../Qt/5.5/ios/include/QtOpenGL/QGLWidget \
@@ -2013,6 +2035,7 @@ moc_genericsetupmodel.cpp: ../../../../Qt/5.5/ios/include/QtCore/QObject \
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/listModel.h \
@@ -2111,6 +2134,9 @@ moc_timecodemanager.cpp: ../../../../Qt/5.5/ios/include/QtCore/QtGlobal \
 		../../../../Qt/5.5/ios/include/QtCore/QStringList \
 		../../../../Qt/5.5/ios/include/QtCore/QRegExp \
 		../../../../Qt/5.5/ios/include/QtCore/QTime \
+		../../../../Qt/5.5/ios/include/QtCore/QVector \
+		../contextobjects/entertainareatimecode.h \
+		../../../../Qt/5.5/ios/include/QtCore/QObject \
 		../contextobjects/timecodemanager.h
 	/Users/Langstonius/Qt/5.5/ios/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -I/Users/Langstonius/Qt/5.5/ios/mkspecs/macx-ios-clang -I/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS -I/Users/Langstonius/Qt/5.5/ios/mkspecs/macx-ios-clang/ios -I/Users/Langstonius/linuxmce -I/Users/Langstonius/DCE -I/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src -I/Users/Langstonius/Qt/5.5/ios/include -I/Users/Langstonius/Qt/5.5/ios/include/QtQuick -I/Users/Langstonius/Qt/5.5/ios/include/QtWidgets -I/Users/Langstonius/Qt/5.5/ios/include/QtMultimedia -I/Users/Langstonius/Qt/5.5/ios/include/QtGui -I/Users/Langstonius/Qt/5.5/ios/include/QtQml -I/Users/Langstonius/Qt/5.5/ios/include/QtNetwork -I/Users/Langstonius/Qt/5.5/ios/include/QtScript -I/Users/Langstonius/Qt/5.5/ios/include/QtXml -I/Users/Langstonius/Qt/5.5/ios/include/QtCore ../contextobjects/timecodemanager.h -o moc_timecodemanager.cpp
 
@@ -2180,6 +2206,7 @@ moc_floorplandeviceprovider.cpp: ../../../../Qt/5.5/ios/include/QtCore/QtGlobal 
 		../datamodels/locationmodel.h \
 		../datamodels/locationitem.h \
 		../../../../Qt/5.5/ios/include/QtCore/QUrl \
+		../contextobjects/entertainareatimecode.h \
 		../datamodels/lightingscenariomodel.h \
 		../datamodels/lightingscenarioitem.h \
 		../datamodels/listModel.h \
@@ -2355,6 +2382,10 @@ moc_settinginterface.cpp: ../../../../Qt/5.5/ios/include/QtCore/QObject \
 		../../../../Qt/5.5/ios/include/QtCore/QSettings \
 		../contextobjects/settinginterface.h
 	/Users/Langstonius/Qt/5.5/ios/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -I/Users/Langstonius/Qt/5.5/ios/mkspecs/macx-ios-clang -I/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS -I/Users/Langstonius/Qt/5.5/ios/mkspecs/macx-ios-clang/ios -I/Users/Langstonius/linuxmce -I/Users/Langstonius/DCE -I/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src -I/Users/Langstonius/Qt/5.5/ios/include -I/Users/Langstonius/Qt/5.5/ios/include/QtQuick -I/Users/Langstonius/Qt/5.5/ios/include/QtWidgets -I/Users/Langstonius/Qt/5.5/ios/include/QtMultimedia -I/Users/Langstonius/Qt/5.5/ios/include/QtGui -I/Users/Langstonius/Qt/5.5/ios/include/QtQml -I/Users/Langstonius/Qt/5.5/ios/include/QtNetwork -I/Users/Langstonius/Qt/5.5/ios/include/QtScript -I/Users/Langstonius/Qt/5.5/ios/include/QtXml -I/Users/Langstonius/Qt/5.5/ios/include/QtCore ../contextobjects/settinginterface.h -o moc_settinginterface.cpp
+
+moc_entertainareatimecode.cpp: ../../../../Qt/5.5/ios/include/QtCore/QObject \
+		../contextobjects/entertainareatimecode.h
+	/Users/Langstonius/Qt/5.5/ios/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -I/Users/Langstonius/Qt/5.5/ios/mkspecs/macx-ios-clang -I/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS -I/Users/Langstonius/Qt/5.5/ios/mkspecs/macx-ios-clang/ios -I/Users/Langstonius/linuxmce -I/Users/Langstonius/DCE -I/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src -I/Users/Langstonius/Qt/5.5/ios/include -I/Users/Langstonius/Qt/5.5/ios/include/QtQuick -I/Users/Langstonius/Qt/5.5/ios/include/QtWidgets -I/Users/Langstonius/Qt/5.5/ios/include/QtMultimedia -I/Users/Langstonius/Qt/5.5/ios/include/QtGui -I/Users/Langstonius/Qt/5.5/ios/include/QtQml -I/Users/Langstonius/Qt/5.5/ios/include/QtNetwork -I/Users/Langstonius/Qt/5.5/ios/include/QtScript -I/Users/Langstonius/Qt/5.5/ios/include/QtXml -I/Users/Langstonius/Qt/5.5/ios/include/QtCore ../contextobjects/entertainareatimecode.h -o moc_entertainareatimecode.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:

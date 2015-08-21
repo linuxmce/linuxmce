@@ -261,11 +261,11 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         m_window->setVisibility(QWindow::FullScreen);
 
 #endif
-
+checkOrientation(m_window->size());
     }
     QTimer::singleShot(2000, this, SLOT(beginSetup()));
     ///beginSetup();
-    checkOrientation(m_window->size());
+
 }
 
 qorbiterManager::~qorbiterManager(){
@@ -2331,7 +2331,6 @@ bool qorbiterManager::createThemeStyle()
 
     qDebug() << Q_FUNC_INFO ;
 
-    m_appEngine->load("");
 
     selector->setSelector(m_selector);
     if(m_style ){
@@ -2361,7 +2360,11 @@ bool qorbiterManager::createThemeStyle()
 
     m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
-    m_appEngine->load(skinEntryFile());
+#ifdef Q_OS_IOS
+      m_appEngine->load(QUrl(skinEntryFile()));
+#else
+     m_appEngine->load(skinEntryFile());
+#endif
     return true;
 }
 
