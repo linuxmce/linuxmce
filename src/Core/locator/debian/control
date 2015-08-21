@@ -1,0 +1,12 @@
+Source: lmce-core-locator
+Maintainer: developers <developers@linuxmce.org>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: lmce-core-locator
+Architecture: i386 amd64 armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: metadata for MAME games
+ metadata for hundreds of MAME ROM games
