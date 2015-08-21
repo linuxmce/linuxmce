@@ -2,7 +2,7 @@
 function Get_amount_interfaces() {
 	exec('cat /proc/net/dev | tail -n +3 | cut -d":" -f 1  | sed -e \'s/^[ \t]*//\'',$ifArray);
 	//todo remove multiple interfacs like sit0 and sit1 or ppp0 or ppp1 enz as they are virtual interfaces we don't need .
-	$ifArray = array_diff($ifArray, array("lo","sit~","sit0","br~","ppp~","ipv6tunnel"));
+	$ifArray = array_diff($ifArray, array("lo","sit~","sit0","br~","ppp~","ipv6tunnel","mon.wlan0"));
 	//remove PPP* interfaces from list.
 	//$ppp = preg_grep('PPP', '~');
 	//$out.=$ppp;
@@ -865,13 +865,29 @@ function networkSettings($output,$dbADO) {
 			<td>&nbsp;</td>
 			<td><span id="internalCoreIPv6NMtext" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
 			<td><input type="text" maxlength="2" id="internalCoreIPv6NM" name="internalCoreIPv6NM" size="5" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'" value="'.@$internalCoreIPv6NetMask.'" '.(($internalCoreIPv6Status!='static')?'disabled':'').'></td>
-		</tr>
-		<tr>
-			<td colspan="6"><B>Vlan:</B>&nbsp;&nbsp;<input type="radio" name="intv4" value="vlan" onclick="setStaticIntIP(true,4);"'.(($internalCoreIPv4Status=='vlan')?'checked':'').'>Vlan <!--'.translate('TEXT_INTERFACE_STATIC').'--> number of vlans <input type="number" name="extvlans" size="3"  value="'.$otherInterfaceVlannumber[$i].'" /></td>
 		</tr>';
+		if (strpos(@$internalInterfaceArray[0], 'br') === FALSE) {
+			$out.='<tr>
+				<td colspan="6"><B>Vlan:</B>&nbsp;&nbsp;<input type="radio" name="intv4" value="vlan" onclick="setStaticIntIP(true,4);"'.(($internalCoreIPv4Status=='vlan')?'checked':'').'>Vlan <!--'.translate('TEXT_INTERFACE_STATIC').'--> number of vlans <input type="number" name="extvlans" size="3"  value="'.$otherInterfaceVlannumber[$i].'" /></td>
+			</tr>';
+		} else {
+			$out.='<tr>
+				<td colspan="6">Bridget networkcards:';
+				$i=0;
+				$j=3;
+				while ($i < $countotherInterfaces) {
+					if ( @$otherInterfaceIPv4IP[$i] === @$internalInterfaceArray[0] ) {
+						$out.='&nbsp;'.@$otherInterfaceName[$i];
+					}
+				$i++;
+				}
+				$out.='</td>
+				<tr>';
+		}
 		$i=0;
 		$j=3;
 		while ($i < $countotherInterfaces) {
+			if (strpos(@$otherInterfaceIPv4IP[$i], 'br') === FALSE){
 			if ($otherInterfaceWifi[$i] == 'false') {
 			$out.='
 			<tr><td colspan="6"><hr></td></tr>
@@ -995,6 +1011,7 @@ function networkSettings($output,$dbADO) {
 		while ( $k < $otherInterfaceVlannumber[$i] ) {
 				$out.='<tr><td>test</td></tr>';
 		$k++;
+		}
 		}
 		}
 		$j++;
