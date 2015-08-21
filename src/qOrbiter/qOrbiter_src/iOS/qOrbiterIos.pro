@@ -28,7 +28,7 @@ CONFIG += thread static
 #TARGET=qorbiter
 
 
-)
+
 #!macx-clang-ios{  include(../platforms/Android/QmlVlc/QmlVlc/QmlVlc.pri) }
 
 #Translation files
@@ -36,6 +36,8 @@ TRANSLATIONS += app_de.ts
 
 #Configuration & Flags
                 QT+= qml quick script widgets xml network multimedia core
+
+                LIBS += -L$$[QT_INSTALL_PREFIX]/qml/QtQuick/Controls -lqtquickcontrolsplugin
 
                 folder_01.source = ImportedItems.qml
                 folder_01.path =/
