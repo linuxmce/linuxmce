@@ -23,6 +23,7 @@
 
 TEMPLATE=app
 CONFIG += thread static
+
 # define deployment destination and target executable name
 #TARGET=qorbiter
 
@@ -44,6 +45,9 @@ TRANSLATIONS += app_de.ts
 
                 skins.files=../qml/skins
                 skins.path=/
+
+                loading.files=../qml/Index.qml
+                loading.path=/
 
                 #QMAKE_BUNDLE_DATA+=ICON
 
@@ -192,7 +196,8 @@ SOURCES += ../main.cpp \
         ../defineObjects/linuxmcedata.cpp \
         ../defineObjects/mediatypehelper.cpp \
         ../defineObjects/datagrids.cpp \
-    ../contextobjects/settinginterface.cpp
+    ../contextobjects/settinginterface.cpp \
+    ../contextobjects/entertainareatimecode.cpp
 
 HEADERS += \
         ../../../PlutoUtils/ThreadedClass.h \
@@ -291,7 +296,8 @@ HEADERS += \
         ../RemoteCommands.h \
         ../defineObjects/datagrids.h \
         ../../datamodels/DataGridHandler.h \
-    ../contextobjects/settinginterface.h
+    ../contextobjects/settinginterface.h \
+    ../contextobjects/entertainareatimecode.h
 
 
 

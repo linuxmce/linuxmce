@@ -49,6 +49,7 @@
 Q_IMPORT_PLUGIN(UIKit)
 #endif
 
+
 #include <QtGlobal>
 #ifdef QT5
 #include <QtWidgets/QApplication>
@@ -234,6 +235,8 @@ int main(int argc, char* argv[])
     QApplication  a(argc, argv);
 #endif
 #ifdef Q_OS_IOS
+
+
     //qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_DceScreenSaverPlugin().instance())->registerTypes("DceScreenSaver");
     qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_AudioVisualPlugin().instance())->registerTypes("AudioVisual");
 #endif

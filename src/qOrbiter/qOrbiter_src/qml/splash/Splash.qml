@@ -2,6 +2,7 @@
   Splash.qml This is the general linuxmce splash screen and should be used for all devices on startup.
   */
 import QtQuick 2.2
+import QtQuick.Controls 1.2
 import "."
 
 Item {
@@ -10,7 +11,7 @@ Item {
     width: manager.appWidth
 
     Style{
-        id:theme
+        id:style
     }
 
     Component{
