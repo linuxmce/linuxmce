@@ -16,6 +16,7 @@ TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\
 DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 REPO="main"
 
+DISTRO=$TARGET_RELEASE
 LOCAL_REPO_BASE=/usr/pluto/deb-cache/$DEB_CACHE
 LOCAL_REPO_DIR=./
 
@@ -25,6 +26,8 @@ DT_MEDIA_DIRECTOR=3
 
 mce_wizard_data_shell=/tmp/mce_wizard_data.sh
 
+MESSGFILE=/tmp/messenger
+
 #Setup Pathing
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -33,20 +36,8 @@ export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ### Setup Functions - Error checking and logging
 ###########################################################
 
-Setup_Logfile () {
-	if [ ! -f ${log_file} ]; then
-		touch ${log_file}
-		if [ $? = 1 ]; then
-			echo "`date` - Unable to write to ${log_file} - re-run script as root"
-			exit 1
-		fi
-	else
-		#zero out an existing file
-		echo > ${log_file}
-	fi
-	TeeMyOutput --outfile ${log_file} --stdboth --append -- "$@"
-	VerifyExitCode "Log Setup"
-	echo "`date` - Logging initiatilized to ${log_file}"
+StatsMessage () {
+	printf "`date` - $* \n"
 }
 
 VerifyExitCode () {
@@ -56,10 +47,6 @@ VerifyExitCode () {
 		echo "$1"
 		exit 1
 	fi
-}
-
-StatsMessage () {
-	printf "`date` - $* \n"
 }
 
 TeeMyOutput () {
@@ -146,9 +133,30 @@ TeeMyOutput () {
 	exit 1 # just in case
 }
 
+Setup_Logfile () {
+	if [ ! -f ${log_file} ]; then
+		touch ${log_file}
+		if [ $? = 1 ]; then
+			echo "`date` - Unable to write to ${log_file} - re-run script as root"
+			exit 1
+		fi
+	else
+		#zero out an existing file
+		echo > ${log_file}
+	fi
+	TeeMyOutput --outfile ${log_file} --stdboth --append -- "$@"
+	VerifyExitCode "Log Setup"
+	echo "`date` - Logging initiatilized to ${log_file}"
+}
+
 ###########################################################
 ### Setup Functions - Reference functions
 ###########################################################
+
+AddGpgKeyToKeyring () {
+	local gpg_key="$1"
+	wget -q "$gpg_key" -O- | apt-key add -
+}
 
 Create_Wizard_Data-Double_Nic_Shell () {
 	echo "c_deviceType=2 # 1-Core, 2-Hybrid, 3-DiskedMD
@@ -204,40 +212,6 @@ c_ubuntuLiveCdPath=''
 c_singleNIC=1
 "
 
-}
-
-AddGpgKeyToKeyring () {
-	local gpg_key="$1"
-	wget -q "$gpg_key" -O- | apt-key add -
-}
-
-AddRepoToSources () {
-	local repository="$1"
-	local changed
-
-	if ! grep -q "^[^#]*${repository}" /etc/apt/sources.list; then
-		echo "deb ${repository}" >>/etc/apt/sources.list
-		changed=0
-	else
-		echo "Repository ${repository} seems already active"
-		changed=1
-	fi
-	return $changed
-}
-
-AddRepoToSourcesTop () {
-	local repository="$1"
-	local changed
-
-	if ! grep -q "^[^#]*${repository}" /etc/apt/sources.list; then
-		sed -e "1ideb ${repository}" -i /etc/apt/sources.list
-		changed=0
-	else
-		sed -e "/${repository}/d" -i /etc/apt/sources.list
-		sed -e "1ideb ${repository}" -i /etc/apt/sources.list
-		echo "`date` - Repository ${repository} already active, moved to top"
-		changed=1
-	fi
 }
 
 ###########################################################
@@ -470,9 +444,11 @@ Setup_Pluto_Conf () {
 			;;
 		"precise")
 			PK_DISTRO=20
+			LTS_HES=-lts-trusty
 			;;
 		"trusty")
 			PK_DISTRO=21
+			LTS_HES=-lts-utopic
 			;;
 		"wheezy")
 			PK_DISTRO=19
@@ -508,6 +484,7 @@ Setup_Pluto_Conf () {
 		#ImmediatelyFlushLog = 1
 		AutostartCore=$AutostartCore
 		AutostartMedia=$AutostartMedia
+		LTS_HES=$LTS_HES
 		EOF
 	chmod 777 /etc/pluto.conf &>/dev/null
 }
@@ -703,8 +680,8 @@ CleanInstallSteps () {
 			pluto-telecom-database lmce-asterisk
 		)
 
-		for Pkg in "\${PostInstPkg[@]}"; do
-			/var/lib/dpkg/info/"\$Pkg".postinst configure
+		for Pkg in "${PostInstPkg[@]}"; do
+			/var/lib/dpkg/info/"$Pkg".postinst configure
 		done
 
 		. /usr/pluto/bin/SQL_Ops.sh
@@ -718,7 +695,7 @@ CleanInstallSteps () {
 		# Mark remote assistance as diabled
 		ConfDel remote
 
-		arch=\$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
+		arch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
 
 		Queries=(
 			"UPDATE Device_DeviceData
@@ -727,26 +704,31 @@ CleanInstallSteps () {
 				SELECT PK_Device FROM Device WHERE FK_DeviceTemplate IN (7, 28)
 			)
 			AND FK_DeviceData=7"
-			"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0804_\$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
+			"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0804_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
 			"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0804_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
 			"UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
 			"UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
 		 )
 
-		for Q in "\${Queries[@]}"; do
-			RunSQL "\$Q"
+		for Q in "${Queries[@]}"; do
+			RunSQL "$Q"
 		done
 
 		DT_DiskDrive=11
-		DiskDrives=\$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='\$DT_DiskDrive'")
-		for DiskDrive in \$DiskDrives ;do
-			DiskDrive_DeviceID=\$(Field 1 "\$DiskDrive")
+		DiskDrives=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DT_DiskDrive'")
+		for DiskDrive in $DiskDrives ;do
+			DiskDrive_DeviceID=$(Field 1 "$DiskDrive")
 			for table in 'CommandGroup_Command' 'Device_Command' 'Device_CommandGroup' 'Device_DeviceData' 'Device_DeviceGroup' 'Device_Device_Related' 'Device_EntertainArea' 'Device_HouseMode' 'Device_Orbiter' 'Device_StartupScript' 'Device_Users' ;do
-				RunSQL "DELETE FROM \\\`\$table\\\` WHERE FK_DeviceID = '\$DiskDrive_DeviceID' LIMIT 1"
+				RunSQL "DELETE FROM \\`$table\\` WHERE FK_DeviceID = '$DiskDrive_DeviceID' LIMIT 1"
 			done
-			RunSQL "DELETE FROM Device WHERE PK_Device = '\$DiskDrive_DeviceID' LIMIT 1"
+			RunSQL "DELETE FROM Device WHERE PK_Device = '$DiskDrive_DeviceID' LIMIT 1"
 		done
 	fi
+}
+
+CreateDisklessImage () {
+	local diskless_log=/var/log/pluto/Diskless_Create-`date +"%F"`.log
+	nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
 }
 
 Disable_DisplayManager () {
@@ -783,24 +765,204 @@ Setup_Kernel_PostInst () {
 	chmod +x /etc/kernel/postinst.d/update-symlinks
 }
 
+SetupAptSources () {
+	# Build a new sources.list
+	cat <<-EOF >/etc/apt/sources.list
+		deb file:$LOCAL_REPO_BASE ./
+		deb http://deb.linuxmce.org/ubuntu/ $DISTRO main
+
+		deb http://archive.ubuntu.com/ubuntu/ $DISTRO main restricted universe multiverse
+		deb http://archive.ubuntu.com/ubuntu/ $DISTRO-updates main restricted universe multiverse
+		deb http://archive.ubuntu.com/ubuntu/ $DISTRO-security main restricted universe multiverse
+		EOF
+}
+
+gpgUpdate () {
+	# This does an update, while adding gpg keys for any that are missing.
+	# check if online first? TODO: we have a fn for this
+	if ping -c 1 google.com; then
+		#sed -i 's/#deb/deb/g' /etc/apt/sources.list
+		gpgs=$(apt-get update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
+		if [ -n "$gpgs" ]; then
+			echo "$gpgs" | while read gpgkeys; do
+				gpg --keyserver pgp.mit.edu --recv-keys "$gpgkeys"
+				gpg --export --armor "$gpgkeys" | apt-key add -
+			done
+		fi
+	fi
+}
+
 Notify_Reboot () {
 	/usr/share/update-notifier/notify-reboot-required
+}
+
+###########################################################
+### Live DVD Specific Fn's
+###########################################################
+
+FirstNetwork () {
+	### This is a Live DVD Fn.
+
+	echo "creating dumb DHCP interfaces template" > /var/log/pluto/firstnet.log
+	nic_num=$(lspci | grep -ic "Ethernet")
+	if [[ $nic_num -gt "1" ]]; then
+		cat <<-EOF > /etc/network/interfaces
+			auto lo
+			iface lo inet loopback
+			auto eth0
+			iface eth0 inet dhcp
+			auto eth1
+			iface eth1 inet dhcp
+			EOF
+		ifconfig eth1 del 192.168.80.0 || :
+	else
+		cat <<-EOF > /etc/network/interfaces
+			auto lo
+			iface lo inet loopback
+			auto eth0
+			iface eth0 inet dhcp
+			EOF
+	fi
+	/etc/init.d/networking stop
+	service networking start --no-wait
+}
+
+SetupNetworking () {
+	### This is a Live DVD Fn.
+
+	### This is all done in /etc/init.d/linuxmce
+	rm -f /etc/X11/xorg.conf
+	rm -f /etc/network/interfaces
+	## Reconfigure networking
+	/usr/pluto/bin/Network_Setup.sh
+	/usr/pluto/bin/ConfirmInstallation.sh
+	/usr/pluto/bin/Timezone_Detect.sh
+}
+
+VideoDriverLive () {
+	### This is a Live DVD Fn.
+
+	vga_pci=$(lspci -v | grep ' VGA ')
+	prop_driver="fbdev"
+	chip_man=$(echo "$vga_pci" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086)')
+
+	case "$chip_man" in
+		[10de)
+			prop_driver="nouveau" ;;
+		[1002)
+			prop_driver="radeon" ;;
+		[8086)
+			prop_driver="intel"
+			if echo $vga_pci | grep "i740"; then
+				prop_driver="i740"
+			fi
+			if echo $vga_pci | grep "i128"; then
+				prop_driver="i128"
+			fi
+			if echo $vga_driver | grep "mach"; then
+				prop_driver="mach64"
+			fi ;;
+		[1106)
+			prop_driver="openchrome"
+			if echo $vga_pci | grep -i "Savage"; then
+				prop_driver="savage"
+			fi
+			#if echo $vga_pci | grep -i "s3"; then
+			#	prop_driver="via"
+			#fi
+			if echo $vga_pci | grep -i "virge"; then
+				prop_driver="virge"
+			fi ;;
+		*)
+			prop_driver="fbdev" ;;
+	esac
+
+	### Install driver based on the type of video card used
+	#Install nouveau driver to avoid reboot if nvidia
+	case $prop_driver in
+		nouveau)
+			apt-get -yf install xserver-xorg-nouveau-video$LTS_HES ;;
+		radeon)
+			apt-get -yf install xserver-xorg-video-radeon$LTS_HES ;;
+		r128)
+			apt-get -yf install xserver-xorg-video-r128$LTS_HES ;;
+		mach64)
+			apt-get -yf install xserver-xorg-video-mach64$LTS_HES ;;
+		intel)
+			apt-get -yf install xserver-xorg-video-intel$LTS_HES ;;
+		i128)
+			apt-get -yf install xserver-xorg-video-i128$LTS_HES ;;
+		i740)
+			apt-get -yf install xserver-xorg-video-i740$LTS_HES ;;
+		openchrome)
+			apt-get -yf install xserver-xorg-video-openchrome$LTS_HES ;;
+	esac
+	if [[ "$chip_man" == "Intel" ]]; then
+		if ping -c 1 google.com; then
+			apt-get -yf install libva-driver-i965
+		fi
+	fi
+	VideoDriver="$prop_driver"
+	export Best_Video_Driver="$prop_driver"
+}
+
+InitialBootPrep () {
+	### This is a Live DVD Fn.
+
+	# Remove deprecated options from /etc/default/grub
+	sed -i '/GRUB_HIDDEN_/d' /etc/default/grub
+	/usr/sbin/update-grub
+}
+
+PackageCleanUp () {
+	### This is a Live DVD Fn.
+	### This is i386 ONLY!!!
+
+	# Remove all but the latest package
+	thedir="${LOCAL_REPO_BASE}"
+	X=$(dpkg -l|grep "^ii"|awk '{print $2,$3}')
+	odd="1"
+	for var in $X ; do
+		if [[ "$odd" -eq "1" ]]; then
+			package="$var"
+			odd="0"
+		else
+			version="$var"
+			odd="1"
+			all="$package"
+			all+="_*"
+			latest="${thedir}/${package}"
+			latest+="_$version"
+			latest+="_i386.deb"
+			Alls=$(find "$thedir" -iname "$all")
+			for each in $Alls ; do
+				if [[ "$each" != "$latest" ]]; then
+					rm "$each"
+				fi
+			done
+		fi
+	done > /dev/null
+}
+
+TempEMIFix () {
+	# Placeholder fn.  This is done elsewhere if appropriate
+	:
 }
 
 ###########################################################
 ### Main execution area
 ###########################################################
 dontrun () {
-#Set up logging
+# Set up logging by executing this fn in a script.
 Setup_Logfile
 
-#Execute Functions
+# Installation Functions
 UpdateUpgrade			# firstboot ALL
 TimeUpdate			# firstboot ALL
 CreateBackupSources		# preinst ALL
-Disable_CompCache		# preinst ALL ??
+Disable_CompCache		# preinst ALL ?? (is this necessary?)
 CreateBasePackagesFiles		# preinst ALL
-UpdateDebCache			# firstboot core ??
+UpdateDebCache			# firstboot core (or ALL?)
 ConfigAptConf			# preinst ALL
 ConfigSources			# preinst ALL
 PreSeed_DebConf			# preinst ALL
@@ -817,12 +979,22 @@ Configure_Network_Options	# firstboot core
 UpdateUpgrade			# firstboot
 VideoDriverSetup		# delete
 addAdditionalTTYStart		# preinst ALL
-TempEMIFix			# delete
+TempEMIFix			# placeholder
 CleanInstallSteps		# firstboot ** last
+CreateDisklessImage		# postinst core
 Disable_DisplayManager		# postinst ALL
 Disable_NetworkManager		# postinst ALL
 Setup_Kernel_PostInst		# postinst MDs
+gpgUpdate			# firstboot core
 Notify_Reboot			# postinst ALL
+
+# Live DVD Fns.
+FirstNetwork			# livedvd
+SetupNetworking			# livedvd
+SetupAptSources			# livedvd
+VideoDriverLive			# livedvd
+InitialBootPrep			# livedvd
+PackageCleanUp			# livedvd - i386 ONLY!!!!
 
 #StatsMessage "MCE Install Script completed without a detected error"
 #StatsMessage "The log file for the install process is located at ${log_file}"
