@@ -1,20 +1,30 @@
 #!/bin/bash
 
+if [[ -n "$HEADER_install_common" ]]; then
+	return 0
+fi
+HEADER_install_common=included
+
 ###########################################################
 ### Setup global variables
 ###########################################################
+log_file=/var/log/LinuxMCE_Setup.log
 
-HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
-HOST_RELEASE=$(lsb_release -c -s)
-HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
-DEB_CACHE=$HOST_DISTRO-$HOST_RELEASE-$HOST_ARCH
+TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+TARGET_RELEASE=$(lsb_release -c -s)
+TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
+REPO="main"
 
 LOCAL_REPO_BASE=/usr/pluto/deb-cache/$DEB_CACHE
 LOCAL_REPO_DIR=./
+
 DT_CORE=1
 DT_HYBRID=2
 DT_MEDIA_DIRECTOR=3
+
 mce_wizard_data_shell=/tmp/mce_wizard_data.sh
+
 #Setup Pathing
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -23,17 +33,125 @@ export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ### Setup Functions - Error checking and logging
 ###########################################################
 
+Setup_Logfile () {
+	if [ ! -f ${log_file} ]; then
+		touch ${log_file}
+		if [ $? = 1 ]; then
+			echo "`date` - Unable to write to ${log_file} - re-run script as root"
+			exit 1
+		fi
+	else
+		#zero out an existing file
+		echo > ${log_file}
+	fi
+	TeeMyOutput --outfile ${log_file} --stdboth --append -- "$@"
+	VerifyExitCode "Log Setup"
+	echo "`date` - Logging initiatilized to ${log_file}"
+}
+
+VerifyExitCode () {
+	local EXITCODE=$?
+	if [ "$EXITCODE" != "0" ] ; then
+		echo "An error (Exit code $EXITCODE) occured during the last action"
+		echo "$1"
+		exit 1
+	fi
+}
+
 StatsMessage () {
 	printf "`date` - $* \n"
 }
 
+TeeMyOutput () {
+	# Usage:
+	# source TeeMyOutput.sh --outfile <file> [--infile <file>] [--stdout|--stderr|--stdboth] [--append] [--exclude <egrep pattern>] -- "$@"
+	#   --outfile <file>         the file to tee our output to
+	#   --infile <file>          the file to feed ourselves with on stdin
+	#   --stdout                 redirect stdout (default)
+	#   --stderr                 redirect stderr
+	#   --stdboth                redirect both stdout and stderr
+	#   --append                 run tee in append mode
+	#   --exclude <pattern>      strip matching lines from output; pattern is used with egrep
+	#
+	# Environment:
+	#   SHELLCMD="<shell command>" (ex: bash -x)
+
+	if [[ -n "$TeeMyOutput" ]]; then
+	        return 0
+	fi
+	Me="TeeMyOutput"
+
+	# parse parameters
+	for ((i = 1; i <= "$#"; i++)); do
+	        Parm="${!i}"
+	        case "$Parm" in
+	                --outfile) ((i++)); OutFile="${!i}" ;;
+	                --infile) ((i++)); InFile="${!i}" ;;
+	                --stdout|--stderr|--stdboth) Mode="${!i#--std}" ;;
+	                --append) Append=yes ;;
+	                --exclude) ((i++)); Exclude="${!i}" ;;
+	                --) LastParm="$i"; break ;;
+	                *) echo "$Me: Unknown parameter '$Parm'"; exit 1
+	        esac
+	done
+
+	if [[ -z "$OutFile" ]]; then
+	        echo "$Me: No outfile"
+	        exit 1
+	fi
+
+	if [[ -z "$LastParm" ]]; then
+	        LastParm="$#"
+	fi
+
+	# original parameters
+	for ((i = "$LastParm" + 1; i <= "$#"; i++)); do
+	        OrigParms=("${OrigParms[@]}" "${!i}")
+	done
+
+	# construct command components
+	case "$Mode" in
+	        out) OurRedirect=() ;;
+	        err) OurRedirect=("2>&1" "1>/dev/null") ;;
+	        both) OurRedirect=("2>&1") ;;
+	esac
+
+	if [[ "$Append" == yes ]]; then
+	        TeeParm=(-a)
+	fi
+
+	if [[ -n "$InFile" ]]; then
+	        OurRedirect=("${OurRedirect[@]}" "<$InFile")
+	fi
+
+	# do our stuff
+	export TeeMyOutput=yes
+	ExitCodeFile="/tmp/TeeMyOutputExitCode_$$"
+	trap "rm -rf '$ExitCodeFile'" EXIT
+
+	Run() {
+	        eval exec "${OurRedirect[@]}"
+	        $SHELLCMD "$0" "${OrigParms[@]}"
+	        echo $? >"$ExitCodeFile"
+	}
+
+	if [[ -z "$Exclude" ]]; then
+	        Run | tee "${TeeParm[@]}" "$OutFile"
+	else
+	        Run | grep --line-buffered -v "$Exclude" | tee "${TeeParm[@]}" "$OutFile"
+	fi
+
+	ExitCode=$(<"$ExitCodeFile")
+	exit "$ExitCode"
+	exit 1 # just in case
+}
 
 ###########################################################
 ### Setup Functions - Reference functions
 ###########################################################
 
 Create_Wizard_Data-Double_Nic_Shell () {
-echo "c_deviceType=2 # 1-Core, 2-Hybrid, 3-DiskedMD
+	echo "c_deviceType=2 # 1-Core, 2-Hybrid, 3-DiskedMD
 c_netIfaceNo=1
 c_netExtName='{extif}'
 c_netExtIP=''
@@ -51,7 +169,7 @@ c_installMirror='http://archive.ubuntu.com/ubuntu/'
 c_netExtKeep='true'
 c_installUI=0 # 0 - UI1, 1 - UI2M, 2 - UI2A
 c_linuxmceCdFrom=1 # 1 - CD, 2 -ISO
-c_linuxmceCdIsoPath=''
+c_linuxmceCdIsoPath='' 
 c_ubuntuExtraCdFrom=1
 c_ubuntuExtraCdPath=''
 c_ubuntuLiveCdFrom=1
@@ -78,13 +196,14 @@ c_installMirror='http://archive.ubuntu.com/ubuntu/'
 c_netExtKeep='true'
 c_installUI=0 # 0 - UI1, 1 - UI2M, 2 - UI2A
 c_linuxmceCdFrom=1 # 1 - CD, 2 -ISO
-c_linuxmceCdIsoPath=''
+c_linuxmceCdIsoPath='' 
 c_ubuntuExtraCdFrom=1
 c_ubuntuExtraCdPath=''
 c_ubuntuLiveCdFrom=1
 c_ubuntuLiveCdPath=''
 c_singleNIC=1
 "
+
 }
 
 AddGpgKeyToKeyring () {
@@ -125,6 +244,21 @@ AddRepoToSourcesTop () {
 ### Setup Functions - General functions
 ###########################################################
 
+UpdateUpgrade () {
+	#perform an update and a dist-upgrade
+	StatsMessage "Performing an update and an upgrade to all components"
+	apt-get -qq update
+	VerifyExitCode "apt-get update"
+	apt-get -y -q -f --force-yes dist-upgrade
+	VerifyExitCode "dist-upgrade"
+}
+
+TimeUpdate () {
+	StatsMessage "Synchronizing time with an online server"
+	#Update system time to match ntp server
+	ntpdate ntp.ubuntu.com
+}
+
 CreateBackupSources () {
 	if [ ! -e /etc/apt/sources.list.pbackup ]; then
 		StatsMessage "Backing up sources.list file"
@@ -132,38 +266,35 @@ CreateBackupSources () {
 	fi
 }
 
-AddAptRetries () {
-	local changed
-	if [ -f /etc/apt/apt.conf ]; then
-		if ! grep -q "^[^#]*APT::Acquire { Retries" /etc/apt/apt.conf; then
-			echo 'APT::Acquire { Retries  "20" }'>>/etc/apt/apt.conf
-			changed=0
-		else
-			StatsMessage "APT preference on number of retries already set "
-			changed=1
-		fi
-	else
-		echo 'APT::Acquire { Retries  "20" }'>>/etc/apt/apt.conf
-	fi
-	StatsMessage "APT preference on number of retries set"
-	return $changed
-}
-
-Pre-InstallNeededPackages () {
-	StatsMessage "Installing necessary prep packages"
-
+Disable_CompCache () {
 	# Disable compcache
 	if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
 		rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
 	fi
 }
 
-CreatePackagesFiles () {
-	StatsMessage "Creating deb-cache packages files"
+CreateBasePackagesFile () {
+	StatsMessage "Setting up deb-cache/ packages files"
+	#Make sure there is are Packages files on the MD so apt-get update does not fail
+	mkdir -p /usr/pluto/deb-cache/
+	rm -f /usr/pluto/deb-cache/Packages
+	touch  /usr/pluto/deb-cache/Packages
+	gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
+
+	StatsMessage "Setting up deb-cache/$DEB_CACHE packages files"
+	#Make sure there is are Packages files on the MD so apt-get update does not fail
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	rm -f /usr/pluto/deb-cache/$DEB_CACHE/Packages
+	touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
+	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
+}
+
+UpdateDebCache () {
+	StatsMessage "Updating deb-cache package files"
 	/usr/pluto/bin/UpdateDebCache.sh
 }
 
-SetupAptConf () {
+ConfigAptConf () {
 	# Setup pluto's apt.conf
 	cat <<-EOF >/etc/apt/apt.conf.d/30pluto
 		// Pluto apt conf add-on
@@ -173,51 +304,30 @@ SetupAptConf () {
 		//Acquire::ftp::timeout "10";
 		APT::Get::AllowUnauthenticated "true";
 		//APT::Get::force-yes "yes";
+		APT::Acquire { Retries  "20" };
 		EOF
 }
 
 ConfigSources () {
 	StatsMessage "Configuring sources.list for MCE install"
+	. /usr/pluto/install/AptSources.sh
 
-	# TODO: rework for ubuntu & raspbian or move elsewhere?
-	AddRepoToSourcesTop "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
-	AddRepoToSources "http://deb.linuxmce.org/${HOST_DISTRO}/ ${HOST_RELEASE} main"
+	AptSrc_ParseSourcesList "/etc/apt/sources.list"
+
+	AptSrc_AddSource "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
+	AptSrc_AddSource "http://deb.linuxmce.org/${TARGET_DISTRO}/ ${TARGET_RELEASE} ${REPO}"
+
+	AptSrc_WriteSourcesList
 }
 
-PreSeed_Prefs () {
+PreSeed_DebConf () {
 	StatsMessage "PreSeeding package installation preferences"
 
-	#create preseed file
-	cat <<-EOF >/tmp/preseed.cfg
-		debconf	debconf/frontend	select	Noninteractive
-		# Choices: critical, high, medium, low
-		debconf	debconf/priority	select	critical
-		msttcorefonts	msttcorefonts/http_proxy	string
-		msttcorefonts	msttcorefonts/defoma	note
-		msttcorefonts	msttcorefonts/dlurl	string
-		msttcorefonts	msttcorefonts/savedir	string
-		msttcorefonts	msttcorefonts/baddldir	note
-		msttcorefonts	msttcorefonts/dldir	string
-		msttcorefonts	msttcorefonts/blurb	note
-		msttcorefonts	msttcorefonts/accepted-mscorefonts-eula	boolean	true
-		msttcorefonts	msttcorefonts/present-mscorefonts-eula	boolean	false
-		sun-java6-bin	shared/accepted-sun-dlj-v1-1	boolean	true
-		sun-java6-jre	shared/accepted-sun-dlj-v1-1	boolean	true
-		sun-java6-jre	sun-java6-jre/jcepolicy	note
-		sun-java6-jre	sun-java6-jre/stopthread	boolean	true
-		debconf	debconf/frontend	select	Noninteractive
-		# Choices: critical, high, medium, low
-		debconf	debconf/priority	select	critical
-		EOF
+	debconf-set-selections /usr/pluto/install/preseed.cfg
+	VerifyExitCode "debconf-set-selections - preseed data"
+}
 
-	debconf-set-selections /tmp/preseed.cfg
-
-	#For some odd reason, set-selections adds a space for Noninteractive and Critical that needs to be removed - debconf doesn't handle extra white space well
-	sed -i 's/Value:  /Value: /g' /var/cache/debconf/config.dat
-
-	#remove preseed file, no need to clutter things up
-	rm -f /tmp/preseed.cfg
-
+PreSeed_MythWeb () {
 	#Seeding mythweb preferences to not override the LMCE site on install - for some odd reason, mythweb packages don't accept the set-selections
 	touch /etc/default/mythweb
 	echo "[cfg]" >> /etc/default/mythweb
@@ -225,6 +335,20 @@ PreSeed_Prefs () {
 	echo "only = false" >> /etc/default/mythweb
 	echo "username = " >> /etc/default/mythweb
 	echo "password = " >> /etc/default/mythweb 
+}
+
+Fix_Initrd_Vmlinux () {
+	StatsMessage "Starting initrd and vmlinuz fix"
+	# Fix a problem with the /initrd.img and /vmlinuz links pointing to a different kernel than the
+	# newest (and currently running) one
+	LATEST_KERNEL=`ls /lib/modules --sort time --group-directories-first|head -1`
+	KERNEL_TO_USE=`uname -r`
+
+	if [ -f "/boot/initrd.img-$LATEST_KERNEL" ]; then
+		KERNEL_TO_USE=$LATEST_KERNEL
+	fi
+	ln -s -f /boot/initrd.img-$KERNEL_TO_USE /initrd.img
+	ln -s -f /boot/vmlinuz-$KERNEL_TO_USE /vmlinuz
 }
 
 Nic_Config () {
@@ -297,10 +421,11 @@ Nic_Config () {
 	fi
 
 	if [[ ! -r ${mce_wizard_data_shell} ]]; then
-	echo "`date` - Wizard Information is corrupted or missing."
+	        echo "`date` - Wizard Information is corrupted or missing."
 		exit 1
 	fi
 	. ${mce_wizard_data_shell}
+	VerifyExitCode "MCE Wizard Data"
 
 	Core_PK_Device="0"
 
@@ -332,13 +457,15 @@ Nic_Config () {
 Setup_Pluto_Conf () {
 	StatsMessage "Seting Up MCE Configuration file"
 	AutostartCore=1
-	AutostartMedia=0
+	AutostartMedia=1
 
-	case "$DISTRO" in
+	case "$TARGET_RELEASE" in
 		"intrepid")
+			# select UI1
 			PK_DISTRO=17
 			;;
 		"lucid")
+			# select UI2 without alpha blending
 			PK_DISTRO=18
 			;;
 		"precise")
@@ -353,7 +480,6 @@ Setup_Pluto_Conf () {
 		"jessie")
 			PK_DISTRO=22
 			;;
-
 	esac
 
 
@@ -403,22 +529,31 @@ Setup_NIS () {
 		EOF
 }
 
-Install_DCERouter () {
+Config_MySQL_Client () {
+	StatsMessage "Setting up mysql host"
+	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
+	cat <<-EOF > /root/.my.cnf
+		[client]
+		host = dcerouter
+		EOF
+}
+
+Config_MySQL_Server () {
 	#Run mysql statement
 	echo "UPDATE user SET Create_view_priv = 'Y', Show_view_priv = 'Y', \
 		Create_routine_priv = 'Y', Alter_routine_priv = 'Y', \
 		Create_user_priv = 'Y' WHERE User = 'debian-sys-maint'; \
 		FLUSH PRIVILEGES; \
 		" | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
+}
 
+Setup_MakeDev () {
+	# FIXME: Is this still necessary?
 	#Create logical link for MAKEDEV for the mdadm installation
 	ln -s /sbin/MAKEDEV /dev/MAKEDEV
 }
 
 Create_And_Config_Devices () {
-	StatsMessage "Cycling MySQL server"
-	# Create the initial core device using CreateDevice, and the MD for the core in case we create a Hybrid (the default).
-
 	#Source the SQL_OPS file
 	. /usr/pluto/bin/SQL_Ops.sh
 
@@ -450,10 +585,6 @@ Create_And_Config_Devices () {
 	StatsMessage "Updating Startup Scripts"
 	# "DCERouter postinstall"
 	/usr/pluto/bin/Update_StartupScrips.sh
-
-	# cannot be done in a post-inst script
-#	StatsMessage "Installing & Configuring Packages"
-#	/usr/pluto/bin/Config_Device_Changes.sh
 }
 
 Configure_Network_Options () {
@@ -561,40 +692,141 @@ addAdditionalTTYStart () {
 	fi
 }
 
-InitialBootPrep () {
-	StatsMessage "Preparing initial reboot"
+CleanInstallSteps () {
+	if [[ -f /etc/pluto/install_cleandb ]]; then
+		# on upgrade, the old keys are already in place, so keep them
+		rm -f /etc/ssh/ssh_host_*
+		dpkg-reconfigure -pcritical openssh-server
 
-	# Remove KDM startup
-	echo "/bin/false" >/etc/X11/default-display-manager
-	/usr/share/update-notifier/notify-reboot-required
+		PostInstPkg=(
+			pluto-local-database pluto-media-database pluto-security-database pluto-system-database
+			pluto-telecom-database lmce-asterisk
+		)
+
+		for Pkg in "\${PostInstPkg[@]}"; do
+			/var/lib/dpkg/info/"\$Pkg".postinst configure
+		done
+
+		. /usr/pluto/bin/SQL_Ops.sh
+		. /usr/pluto/bin/Config_Ops.sh
+
+		# Raise max char limit on php.ini
+		if ! grep -q 'max_input_vars' /etc/php5/apache2/php.ini; then 
+			echo "max_input_vars = 15000" >> /etc/php5/apache2/php.ini
+		fi
+
+		# Mark remote assistance as diabled
+		ConfDel remote
+
+		arch=\$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
+
+		Queries=(
+			"UPDATE Device_DeviceData
+				SET IK_DeviceData=15
+			WHERE PK_Device IN (
+				SELECT PK_Device FROM Device WHERE FK_DeviceTemplate IN (7, 28)
+			)
+			AND FK_DeviceData=7"
+			"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0804_\$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
+			"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0804_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
+			"UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
+			"UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
+		 )
+
+		for Q in "\${Queries[@]}"; do
+			RunSQL "\$Q"
+		done
+
+		DT_DiskDrive=11
+		DiskDrives=\$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='\$DT_DiskDrive'")
+		for DiskDrive in \$DiskDrives ;do
+			DiskDrive_DeviceID=\$(Field 1 "\$DiskDrive")
+			for table in 'CommandGroup_Command' 'Device_Command' 'Device_CommandGroup' 'Device_DeviceData' 'Device_DeviceGroup' 'Device_Device_Related' 'Device_EntertainArea' 'Device_HouseMode' 'Device_Orbiter' 'Device_StartupScript' 'Device_Users' ;do
+				RunSQL "DELETE FROM \\\`\$table\\\` WHERE FK_DeviceID = '\$DiskDrive_DeviceID' LIMIT 1"
+			done
+			RunSQL "DELETE FROM Device WHERE PK_Device = '\$DiskDrive_DeviceID' LIMIT 1"
+		done
+	fi
 }
 
+Disable_DisplayManager () {
+	StatsMessage "Disabling display manager"
+	mkdir -p "/etc/X11"
+	echo "/bin/false" >/etc/X11/default-display-manager
+	update-rc.d -f kdm remove 2>/dev/null || :
+	update-rc.d -f lightdm remove 2>/dev/null || :
+}
+
+Disable_NetworkManager () {
+	update-rc.d -f NetworkManager remove || :
+}
+
+Setup_Kernel_PostInst () {
+	#FIXME: this should be in a pkg, not created in a postinst.
+	StatsMessage "Setting up kernel symlink fix"
+	## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
+	cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
+		#!/bin/bash
+		# LinuxMCE post kernel image install.
+		#
+		# We make sure we can read the image and the kernel, and the softlink is correct.
+		chmod g+r /boot/* || :
+		chmod o+r /boot/* || :
+
+		pushd / >/dev/null
+		ln -sf boot/initrd.img-$1 initrd.img || :
+		ln -sf boot/vmlinuz-$1 vmlinuz || :
+		popd > /deb/null
+
+		exit 0
+		EOF
+	chmod +x /etc/kernel/postinst.d/update-symlinks
+}
+
+Notify_Reboot () {
+	/usr/share/update-notifier/notify-reboot-required
+}
 
 ###########################################################
 ### Main execution area
 ###########################################################
+dontrun () {
+#Set up logging
+Setup_Logfile
 
-#UpdateUpgrade ## firstboot
-#TimeUpdate    ## firstboot
-CreateBackupSources  ## preinst
-AddAptRetries  ## preinst
-Pre-InstallNeededPackages  ## depends & preinst
-#CreatePackagesFiles  ## firstboot
-SetupAptConf ## preinst
-ConfigSources  ## preinst
-PreSeed_Prefs  ## preinst
-#Fix_Initrd_Vmlinux  ## firstboot
-Nic_Config      ## preinst
-Setup_Pluto_Conf  ## preinst
-Setup_NIS       ## preinst
-Install_DCERouter  ## preinst & depends
-Create_And_Config_Devices  ## preinst
-Configure_Network_Options  ## preinst
-#UpdateUpgrade  ## firstboot
-addAdditionalTTYStart  ## preinst
-#CreateFirstBoot  ## convert to 'Cleanup' - firstboot
-InitialBootPrep
-StatsMessage "MCE initial install completed without a detected error"
-StatsMessage "Reboot the system to start the final process"
-return 0
+#Execute Functions
+UpdateUpgrade			# firstboot ALL
+TimeUpdate			# firstboot ALL
+CreateBackupSources		# preinst ALL
+Disable_CompCache		# preinst ALL ??
+CreateBasePackagesFiles		# preinst ALL
+UpdateDebCache			# firstboot core ??
+ConfigAptConf			# preinst ALL
+ConfigSources			# preinst ALL
+PreSeed_DebConf			# preinst ALL
+PreSeed_MythWeb			# postinst core
+Fix_Initrd_Vmlinux		# firstboot core
+Nic_Config			# firstboot core
+Setup_Pluto_Conf		# preinst ALL?  firstboot ALL? - make consistent with MD creation
+Setup_NIS			# preinst core
+Config_MySQL_Client		# postinst MDs
+Config_MySQL_Server		# preinst core
+Setup_MakeDev			# preinst ALL
+Create_And_Config_Devices	# preinst core, firstboot MDs?
+Configure_Network_Options	# firstboot core
+UpdateUpgrade			# firstboot
+VideoDriverSetup		# delete
+addAdditionalTTYStart		# preinst ALL
+TempEMIFix			# delete
+CleanInstallSteps		# firstboot ** last
+Disable_DisplayManager		# postinst ALL
+Disable_NetworkManager		# postinst ALL
+Setup_Kernel_PostInst		# postinst MDs
+Notify_Reboot			# postinst ALL
+
+#StatsMessage "MCE Install Script completed without a detected error"
+#StatsMessage "The log file for the install process is located at ${log_file}"
+#StatsMessage "Reboot the system to start the final process"
+}
+
 
