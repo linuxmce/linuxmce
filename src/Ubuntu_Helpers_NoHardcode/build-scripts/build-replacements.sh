@@ -96,6 +96,9 @@ function Build_Replacements_Common_all
 
 function Build_Replacements_Common_ubuntu
 {
+	#Package: lmce-core-locator
+	Build_Replacement_Package core-locator src/Core/locator || :
+
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1 || :
 
 	#Package: libxine2
@@ -253,6 +256,9 @@ function Build_Replacements_ubuntu_trusty
 
 function Build_Replacements_Common_raspbian
 {
+	#Package: lmce-core-locator
+	Build_Replacement_Package core-locator src/Core/locator || :
+
 	#Package: logitechmediaserver-7.8.1
 	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb || :
