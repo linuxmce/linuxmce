@@ -209,7 +209,7 @@ start() {
 
 	# check firstboot completion and launch firstboot from here
 	if [[ "$FirstBoot" != "true" ]] ; then
-		StartService "Starting LinuxMCE Firstboot setup"  "/usr/pluto/bin/Firstboot.sh"
+		StartService "Starting LinuxMCE Firstboot setup"  "/usr/pluto/firstboot/firstboot start"
 		err=$?
 		if [[ "$err" != "0" ]]; then
 			return $err
@@ -223,6 +223,8 @@ start() {
 		err=1
 		return $err
 	fi
+
+	StartService "Starting LinuxMCE Update Service" "/usr/pluto/bin/LMCEUpdate_Apply.sh"
 
 	# Start core services required for DCERouter and networking
 	if [[ "$AutostartCore" -eq "1" ]] ; then
@@ -246,9 +248,6 @@ start() {
 		# un-set any RegenInProgress values for OrbiterGen status
 		RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
 	fi
-
-	# Start the update service
-	StartService "Starting LinuxMCE Update" "/usr/pluto/bin/LMCEUpdate_Apply.sh"
 
 	# Load MD modules in case they are needed for AV Output
 	if [[ "$AutostartMedia" -eq "1" ]] ; then
@@ -287,6 +286,7 @@ start() {
 
 	# X is running, run ConfirmDependencies and start LMCE_Launch_Manager (including DCERouter if this is the core)
 	StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh" "&"
+	StartService "Update deb-cache" "/usr/pluto/bin/UpdateDebCache.sh"
 	StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
 	StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
 
@@ -304,6 +304,7 @@ start() {
 	StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
 	StartService "Starting Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "&"
 	StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
+
 
 	# TODO: move to a boot-addon script for the individual devices (firewire/pvr250).
 	#StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
