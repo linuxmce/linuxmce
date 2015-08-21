@@ -1,9 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -fPIC -ggdb3
 
-whattodo:
-	@echo "type 'make clean', 'make bin' or 'make all'"
-
 all: bin
 
 bin: core-locator
@@ -11,9 +8,10 @@ bin: core-locator
 core-locator: core-locator.c
 	$(CC) -o core-locator core-locator.c $(CFLAGS)
 
-clean: clean-recursive
+clean:
 	rm -f core-locator core-locator.o >/dev/null
 
 install: 
-	mkdir -p /usr/pluto/bin
-	cp core-locator $(DESTPATH)/usr/pluto/bin
+	mkdir -p $(DESTDIR)/usr/pluto/bin/
+	cp -afv core-locator $(DESTDIR)/usr/pluto/bin/
+
