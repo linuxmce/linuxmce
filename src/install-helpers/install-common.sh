@@ -16,13 +16,22 @@ TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\
 DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 REPO="main"
 
-DISTRO=$TARGET_RELEASE
+TARGET_KVER_LTS_HES=""
+[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
+[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
+
+DISTRO="$TARGET_RELEASE"
 LOCAL_REPO_BASE=/usr/pluto/deb-cache/$DEB_CACHE
 LOCAL_REPO_DIR=./
 
 DT_CORE=1
 DT_HYBRID=2
 DT_MEDIA_DIRECTOR=3
+
+DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
+DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
+DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
+DEVICEDATA_DISTRO_Raspbian_Jessie_CONST=22
 
 mce_wizard_data_shell=/tmp/mce_wizard_data.sh
 
@@ -31,6 +40,17 @@ MESSGFILE=/tmp/messenger
 #Setup Pathing
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+# TODO: make compatible with raspbian
+case "$TARGET_ARCH" in
+        i386|amd64)
+                TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
+                SECURITY_REPO="http://security.ubuntu.com/ubuntu/"
+                ;;
+        armhf)
+                TARGET_REPO="http://ports.ubuntu.com/"
+                SECURITY_REPO="http://ports.ubuntu.com/"
+                ;;
+esac
 
 ###########################################################
 ### Setup Functions - Error checking and logging
@@ -482,9 +502,9 @@ Setup_Pluto_Conf () {
 		#<-mkr_b_videowizard_e->
 		LogLevels = 1,5,7,8
 		#ImmediatelyFlushLog = 1
-		AutostartCore=$AutostartCore
-		AutostartMedia=$AutostartMedia
-		LTS_HES=$LTS_HES
+		AutostartCore = $AutostartCore
+		AutostartMedia = $AutostartMedia
+		LTS_HES = $LTS_HES
 		EOF
 	chmod 777 /etc/pluto.conf &>/dev/null
 }
@@ -562,6 +582,11 @@ Create_And_Config_Devices () {
 	StatsMessage "Updating Startup Scripts"
 	# "DCERouter postinstall"
 	/usr/pluto/bin/Update_StartupScrips.sh
+}
+
+Config_Device_Changes () {
+	StatsMessage "Updating Startup Scripts"
+	/usr/pluto/bin/Config_Device_Changes.sh
 }
 
 Configure_Network_Options () {
@@ -793,6 +818,18 @@ gpgUpdate () {
 	fi
 }
 
+Fix_LSB_Data () {
+	case "$TARGET_DISTRO" in
+		raspbian)
+			# raspbian doesn't come with lsb-release by default???
+			cat <<-EOF > /etc/lsb-release
+			DISTRIB_ID=Raspbian
+			DISTRIB_CODENAME=$TARGET_RELEASE
+			EOF
+			;;
+	esac
+}
+
 Notify_Reboot () {
 	/usr/share/update-notifier/notify-reboot-required
 }
@@ -951,6 +988,11 @@ TempEMIFix () {
 }
 
 ###########################################################
+### MD firstboot Fns.
+###########################################################
+
+
+###########################################################
 ### Main execution area
 ###########################################################
 dontrun () {
@@ -976,6 +1018,7 @@ Config_MySQL_Client		# postinst MDs
 Config_MySQL_Server		# preinst core
 Setup_MakeDev			# preinst ALL
 Create_And_Config_Devices	# preinst core, firstboot MDs?
+Config_Device_Changes		# postinst core
 Configure_Network_Options	# firstboot core
 UpdateUpgrade			# firstboot
 VideoDriverSetup		# delete
@@ -987,6 +1030,7 @@ Disable_DisplayManager		# postinst ALL
 Disable_NetworkManager		# postinst ALL
 Setup_Kernel_PostInst		# postinst MDs
 gpgUpdate			# firstboot core
+Fix_LSB_Data			# preinst ALL (raspbian)
 Notify_Reboot			# postinst ALL
 
 # Live DVD Fns.
@@ -996,6 +1040,11 @@ SetupAptSources			# livedvd
 VideoDriverLive			# livedvd
 InitialBootPrep			# livedvd
 PackageCleanUp			# livedvd - i386 ONLY!!!!
+
+
+# MD Firstboot Fns.
+
+
 
 #StatsMessage "MCE Install Script completed without a detected error"
 #StatsMessage "The log file for the install process is located at ${log_file}"
