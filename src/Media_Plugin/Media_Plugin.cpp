@@ -6771,7 +6771,7 @@ void Media_Plugin::CMD_Media_Identified(int iPK_Device,string sValue_To_Assign,s
 		return;  // Nothing more to do
 	}
 
-	if( pMediaStream->m_IdentifiedPriority && pMediaStream->m_IdentifiedPriority>=Priority )
+	if( pMediaStream->m_IdentifiedPriority && (pMediaStream->m_IdentifiedPriority >= Priority) )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media already identified by a higher priority %d (%d)",pMediaStream->m_IdentifiedPriority,Priority);
 		return;
