@@ -31,6 +31,9 @@ eggtimer::eggtimer(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 	: eggtimer_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+	m_pAlarmManager=NULL;
+	m_pAlarmManager = new AlarmManager();
+	m_pAlarmManager->Start(1);
 }
 
 //<-dceag-const2-b->
