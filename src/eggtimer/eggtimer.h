@@ -18,6 +18,7 @@
 //	DCE Implemenation for #2336 Egg Timer
 
 #include "Gen_Devices/eggtimerBase.h"
+#include "AlarmManager.h"
 //<-dceag-d-e->
 
 //<-dceag-decl-b->
@@ -27,10 +28,12 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-
+		class AlarmManager *m_pAlarmManager;
+		
 		// Private methods
 public:
 		// Public member variables
+		void AlarmCallback(int id, void* param);
 
 //<-dceag-const-b->
 public:
