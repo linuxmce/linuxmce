@@ -96,11 +96,11 @@ Item {
     }
 
 
-    //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
+    //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application orbiterWindow.
     function scaleX(x){
         return x/100*manager.appWidth
     }
-    //! Returns the value of the param value passed in scaled to a percentage of the current height value of the application window.
+    //! Returns the value of the param value passed in scaled to a percentage of the current height value of the application orbiterWindow.
     function scaleY(y){
         return y/100*manager.appHeight
     }
@@ -235,23 +235,23 @@ Item {
         z:-5
         onVideoStreamChanged: {
             if(videoStream){
-                console.log("dceplayer::raising window")
+                console.log("dceplayer::raising orbiterWindow")
                 dceplayer.z=1
                 glScreenSaver.setScreenSaverActive(false)
             } else {
-                console.log("dceplayer::lowering window")
+                console.log("dceplayer::lowering orbiterWindow")
                 glScreenSaver.setScreenSaverActive(true)
                 dceplayer.z=-5
             }
         }
 
         Component.onCompleted: {
-            setWindowSize(manager.appHeight, manager.appWidth);
+            setorbiterWindowSize(manager.appHeight, manager.appWidth);
         }
 
         Connections{
             target:manager
-            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+            onOrientationChanged:dceplayer.setorbiterWindowSize(manager.appHeight, manager.appWidth)
             onMediaPlayerIdChanged:{
                 console.log("initializing media player"+manager.mediaPlayerID)
                 dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)

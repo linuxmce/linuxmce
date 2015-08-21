@@ -12,7 +12,7 @@ Item {
     }
 
     onRouterAddressChanged: {
-     window.router=routerAddress
+     orbiterWindow.router=routerAddress
       wait.start()
     }
 

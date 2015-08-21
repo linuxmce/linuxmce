@@ -1,5 +1,5 @@
 import QtQuick 2.2
-import QtQuick.Window 2.2
+import QtQuick.orbiterWindow 2.2
 
 Item {
    anchors.fill: parent

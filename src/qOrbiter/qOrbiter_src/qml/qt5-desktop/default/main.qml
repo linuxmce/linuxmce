@@ -32,7 +32,7 @@ Item {
     property bool screenSaverOn:false
     property int screensaverTimer:manager.screenSaverTimeout*1000
 
-    property string currentWindow:screenInfo.screenName
+    property string currentorbiterWindow:screenInfo.screenName
 
     function resetUiTimeout(){
         hideUiTimer.restart()
@@ -323,7 +323,7 @@ id:skinStyle
         }
 
         Component.onCompleted: {
-            setWindowSize(manager.appHeight, manager.appWidth);
+            setorbiterWindowSize(manager.appHeight, manager.appWidth);
         }
 
     }

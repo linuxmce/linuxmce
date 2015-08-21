@@ -37,22 +37,22 @@ Rectangle {
         Text {
             id: connection_present
             text: qsTr("Connection")
-            color: window.b_connectionPresent ? "transparent" : "red"
-            font.pointSize: window.b_connectionPresent ? 14 : 12
+            color: orbiterWindow.b_connectionPresent ? "transparent" : "red"
+            font.pointSize: orbiterWindow.b_connectionPresent ? 14 : 12
         }
 
         Text {
             id: device
             text: qsTr("Device")
-            color: window.b_devicePresent ? "transparent" : "red"
-            font.pointSize: window.b_devicePresent ? 14 : 12
+            color: orbiterWindow.b_devicePresent ? "transparent" : "red"
+            font.pointSize: orbiterWindow.b_devicePresent ? 14 : 12
         }
 
         Text {
             id: configuration_file
             text: qsTr("Config")
-            color: window.b_localConfigReady ? "red" : "green"
-            font.pointSize: window.b_localConfigReady ? 14 : 12
+            color: orbiterWindow.b_localConfigReady ? "red" : "green"
+            font.pointSize: orbiterWindow.b_localConfigReady ? 14 : 12
         }
 
         Text {
@@ -93,8 +93,8 @@ Rectangle {
         }
 
     Connections{
-        target:window
-        onMessageChanged:loadingStatus.text = window.message
+        target:orbiterWindow
+        onMessageChanged:loadingStatus.text = orbiterWindow.message
         //onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
 
@@ -210,7 +210,7 @@ Rectangle {
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-            onClicked: window.qmlSetupLmce(devicenumber.text, routerip.text)
+            onClicked: orbiterWindow.qmlSetupLmce(devicenumber.text, routerip.text)
             anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -240,7 +240,7 @@ Rectangle {
         id: loadingStatus
         x: 33
         y: 423
-        text: "Status " + window.message
+        text: "Status " + orbiterWindow.message
         font.pixelSize: 14
         font.family: "Droid Sans"
         color: "white"

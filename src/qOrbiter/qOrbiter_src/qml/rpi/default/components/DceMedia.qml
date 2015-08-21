@@ -25,7 +25,7 @@ Item {
 
     Connections{
         target:manager
-        // onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+        // onOrientationChanged:dceplayer.setorbiterWindowSize(manager.appHeight, manager.appWidth)
         onMediaPlayerIdChanged:{
             console.log("initializing media player"+manager.mediaPlayerID)
             dceMediaController.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)

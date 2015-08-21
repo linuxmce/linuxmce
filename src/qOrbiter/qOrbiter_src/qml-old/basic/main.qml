@@ -22,7 +22,7 @@ Item {
 	        anchors.top: parent.top
 	        anchors.left:parent.left
 	        z:-2
-	        Component.onCompleted: {setWindowSize(appH, appW)}
+	        Component.onCompleted: {setorbiterWindowSize(appH, appW)}
 	        MouseArea{
 	            anchors.fill: dceplayer
 	            acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -30,7 +30,7 @@ Item {
 	        }
 	        Connections{
 	            target:manager
-	            onOrientationChanged:dceplayer.setWindowSize(appH, appW)
+	            onOrientationChanged:dceplayer.setorbiterWindowSize(appH, appW)
 	            onMediaPlayerIdChanged:{
 	                 console.log("initializing media player")
 	                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)

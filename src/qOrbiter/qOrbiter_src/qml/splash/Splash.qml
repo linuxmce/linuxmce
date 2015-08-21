@@ -7,8 +7,7 @@ import "."
 
 Item {
     id: splashLogic
-    height: manager.appHeight
-    width: manager.appWidth
+    anchors.fill: parent
 
     Style{
         id:theme
@@ -42,8 +41,8 @@ Item {
     }
 
     Component.onCompleted: {
-        console.log("Splash is loaded")       
-        window.qmlSetupLmce(manager.iPK_Device, manager.m_ipAddress)
+        console.log("Splash is loaded")
+        orbiterWindow.qmlSetupLmce(manager.iPK_Device, manager.m_ipAddress)
         splashLogic.forceActiveFocus()
     }
     focus:true
@@ -101,31 +100,31 @@ Item {
     states: [
         State {
             name: "connecting"
-           when: manager.iPK_Device !=-1 && window.b_connectionPresent
+            when: manager.iPK_Device !=-1 && orbiterWindow.b_connectionPresent
             PropertyChanges {
                 target:splash_content
-               // sourceComponent:splashViewComp
+                // sourceComponent:splashViewComp
             }
         },
         State {
-           when:!window.b_connectionPresent
+            when:!orbiterWindow.b_connectionPresent
             name: "disconnected"
             PropertyChanges {
                 target:splash_content
-              // sourceComponent:splashViewComp
+                // sourceComponent:splashViewComp
             }
         },
         State {
             name: "new-orbiter"
             PropertyChanges {
-               target: splash_content
-               sourceComponent:newOrbiter
+                target: splash_content
+                sourceComponent:newOrbiter
             }
         },
 
         State {
             name: "no-connection"
-            when:!window.b_connectionPresent
+            when:!orbiterWindow.b_connectionPresent
             PropertyChanges {
                 target: splash_content
                 sourceComponent:splashViewComp

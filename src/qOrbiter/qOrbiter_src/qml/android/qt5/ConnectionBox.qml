@@ -52,7 +52,7 @@ Item{
             TextInput {
                 id: routerip
 
-                text: window.router
+                text: orbiterWindow.router
                 font.pixelSize:24
                 font.family:"Roboto"
             }
@@ -74,7 +74,7 @@ Item{
             TextInput {
                 id: devicenumber
                 width: scaleX(10)
-                text: window.deviceno
+                text: orbiterWindow.deviceno
                 font.family: "Roboto"
                 font.pixelSize:24
             }
@@ -108,7 +108,7 @@ Item{
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-                onClicked:window.qmlSetupLmce(devicenumber.text, routerip.text)
+                onClicked:orbiterWindow.qmlSetupLmce(devicenumber.text, routerip.text)
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

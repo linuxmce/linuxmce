@@ -30,7 +30,7 @@ QtObject{
 //-------------function definitions -------------------//
     /*
       These two functions are responsible for always scaling whatever we ask to a particular size.
-      The two variables, appW and appH are always updated with the width and height respectively of the qml window
+      The two variables, appW and appH are always updated with the width and height respectively of the qml orbiterWindow
       Since we know this, we can bind equations to it that will scale thing to %80 of the width or height and so on.
       Its even used for text scaling as shown below.
       */

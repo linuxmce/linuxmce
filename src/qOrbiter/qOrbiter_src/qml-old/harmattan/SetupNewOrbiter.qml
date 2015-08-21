@@ -16,7 +16,7 @@ Rectangle {
     function scaleY(y){
         return y/100*appW
     }
-    Component.onCompleted: window.showSetup()
+    Component.onCompleted: orbiterWindow.showSetup()
 
 
     Timer{

@@ -83,8 +83,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     #endif
     QObject(parent),qorbiterUIwin(view), tskinModel(NULL),
     m_appEngine(engine),
-    appHeight(view->height()),
-    appWidth(view->width()),
+   // appHeight(view->height()),
+  //  appWidth(view->width()),
     settingsInterface(appSettings),
     m_style(0),
     m_fontDir(""),
@@ -2256,8 +2256,7 @@ void qorbiterManager::setupUiSelectors(){
     }
 
     skinMessage("build type set to:: "+buildType);
-    qDebug() << "Local path set to " << m_localQmlPath;
-    qorbiterUIwin->setSource(m_localQmlPath+"splash/Splash.qml");
+    qDebug() << "Local path set to " << m_localQmlPath;   
 }
 
 void qorbiterManager::beginSetup()
@@ -2322,15 +2321,14 @@ bool qorbiterManager::setSizeSelector()
 
 bool qorbiterManager::createThemeStyle()
 {
+    setUiReady(false);
+    qDebug() << Q_FUNC_INFO  << " enter ";
     if(!m_window){
         qWarning() << " Window Not Set cannot create theme ";
         return false ;
     } else {
         qWarning() << " Window Set, loading theme style";
     }
-
-    qDebug() << Q_FUNC_INFO ;
-
 
     selector->setSelector(m_selector);
     if(m_style ){
@@ -2340,10 +2338,7 @@ bool qorbiterManager::createThemeStyle()
 
     setSkinEntryFile(selectPath( "skins/"+currentSkin+"/Main.qml"));
     QString fp ="skins/"+currentSkin+"/Style.qml";
-
     qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
-
-
     qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
     QString filePath =  selectPath(fp);
 
@@ -2360,11 +2355,8 @@ bool qorbiterManager::createThemeStyle()
 
     m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
-#ifdef Q_OS_IOS
-      m_appEngine->load(QUrl(skinEntryFile()));
-#else
-     m_appEngine->load(skinEntryFile());
-#endif
+
+         qDebug() << Q_FUNC_INFO << " exit ";
     return true;
 }
 
@@ -2503,20 +2495,7 @@ void qorbiterManager::checkOrientation(QSize s)
 {
     setDceResponse("checkOrientation(QSize)::start");
     //NOTE: Is this not handled by the window manager and Orientation change signals?
-#ifndef QT5
-    if(qorbiterUIwin->height() < qorbiterUIwin->width()){
-        //setDceResponse("wide");
 
-        appHeight = qorbiterUIwin->window()->rect().height();
-        appWidth = qorbiterUIwin->window()->rect().width() ;
-        setOrientation(false);
-    } else {
-        appHeight = qorbiterUIwin->window()->rect().height();
-        appWidth = qorbiterUIwin->window()->rect().width() ;
-        setOrientation( true);
-    }
-
-#else
     appHeight=s.height();
     appWidth = s.width();
     if(appHeight < appWidth){
@@ -2525,10 +2504,6 @@ void qorbiterManager::checkOrientation(QSize s)
     else{
         setOrientation( true);
     }
-
-#endif
-
-
 }
 
 #ifdef QT5

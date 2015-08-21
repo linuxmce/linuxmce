@@ -62,7 +62,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     b_reloadStatus(false), fullScreenOrbiter(fullScreen),
     m_appEngine(engine)
 {
-    m_appEngine->rootContext()->setContextProperty("window", this);
+    m_appEngine->rootContext()->setContextProperty("orbiterWindow", this);
 #ifdef ANDROID
     m_appEngine->addImportPath("assets:/imports/androidComponents");
     m_appEngine->addPluginPath(QDir::homePath()+"/../lib");
@@ -75,10 +75,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     m_appEngine->addImportPath("lib");
     m_appEngine->addImportPath("qml");
 
-    qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();
-
-
-    mainView.setResizeMode(QQuickView::SizeRootObjectToView);
+    qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();   
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
     m_appEngine->rootContext()->setContextProperty("window", this);
 #ifdef NOQRC
@@ -86,15 +83,12 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #else
     qrcPath="qrc:/qml/Index.qml";
 #endif
-
-
     // mainView.setSource( qrcPath ); /* Sets the initial qml file based on all the above switching */
+    int testH =600;
+    int testW = 800;
 
     if(simScreenSize!=-1){
-
-        int testH;
-        int testW;
-
+        qDebug() << "Using screen size " << simScreenSize;
         switch (simScreenSize) {
         case ScreenData::Device_Small:
             testW=480;
@@ -102,22 +96,22 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
            // mainView.setGeometry(0,0,480*.75, 854*.75);
             break;
         case ScreenData::Device_Medium:
-            mainView.setWidth(1280);
-            mainView.setHeight(720);
+            testW=1280;
+            testH=720;
             // mainView.rootObject()->setScale(.65);
             mainView.setGeometry(0,0,1280*.65, 720*.65);
             break;
         case ScreenData::Device_Large:
-            mainView.setWidth(1600);
-            mainView.setHeight(900);
+            testW=1600;
+            testH=900;
+            break;
         default:
-            mainView.setWidth(800);
-            mainView.setHeight(600);
+            testW=800;
+            testH=600;
             break;
         }
-        //   mainView.showNormal();
-    } else {
 
+    } else {
 #ifdef ANDROID
         // mainView.showFullScreen();
 #elif defined(Q_OS_IOS)
@@ -126,15 +120,16 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         if(fullScreen){
             //  mainView.showFullScreen();
         } else {
-            mainView.setWidth(800);
-            mainView.setHeight(600);
+           testW=800;
+            testH=600;
             //  mainView.showNormal();
         }
 
 #endif
     }
-    mainView.rootContext()->setContextProperty("appW", 800);
-    mainView.rootContext()->setContextProperty("appH", 600);
+    mainView.rootContext()->setContextProperty("appW", testW);
+    mainView.rootContext()->setContextProperty("appH", testH);
+
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
 

@@ -55,7 +55,7 @@ Effect {
 
     // Transform slider values, and bind result to shader uniforms
     property real targetHue: parameters.get(0).value * 360
-    property real windowWidth: parameters.get(1).value * 60
+    property real orbiterWindowWidth: parameters.get(1).value * 60
 
     fragmentShaderFilename: "shaders/isolate.fsh"
 }

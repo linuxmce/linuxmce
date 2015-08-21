@@ -1,7 +1,7 @@
 import QtQuick 1.1
 
 Item {
-    id:pinWindow
+    id:pinorbiterWindow
     height: manager.appHeight
     width: manager.appWidth
     property int requestedUser:-1
@@ -26,7 +26,7 @@ Item {
                 inputPhil.color="red"
             }else{
                 inputPhil.color="green"
-                pinWindow.state="closed"
+                pinorbiterWindow.state="closed"
             }
         }
     }
@@ -35,10 +35,10 @@ Item {
     Rectangle{
         id:phil
         anchors{
-            top:pinWindow.top
-            left:pinWindow.left
-            bottom:pinWindow.bottom
-            right:pinWindow.right
+            top:pinorbiterWindow.top
+            left:pinorbiterWindow.left
+            bottom:pinorbiterWindow.bottom
+            right:pinorbiterWindow.right
         }
         color:"black"
     }
@@ -202,7 +202,7 @@ Item {
         anchors.top: buttonContainer.top
         MouseArea{
             anchors.fill: parent
-            onClicked: pinWindow.state = "closed"
+            onClicked: pinorbiterWindow.state = "closed"
         }
     }
 

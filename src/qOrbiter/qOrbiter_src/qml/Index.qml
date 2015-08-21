@@ -9,14 +9,14 @@ import "skins"
 /*
   Root Item.
   */
-Window {
+ApplicationWindow {
     id:qml_root_item
     height: 640
     width: 480
 
     visible: true
     color:"transparent"
-    property string appEntryQml:  manager.skinEntryFile
+    property string appEntryQml: manager.skinEntryFile
     property int currentStage:deviceSettingsReady+orbiterReady
 
     //startup properties
@@ -33,7 +33,7 @@ Window {
     Connections{
         target:manager
         onUiReadyChanged:{ if(manager.uiReady) {appContent.state="app"} else {appContent.state="regen"}  }
-        onSplashReady:{appContent.state = "splash" }
+        onSplashReady:{appContent.state = "splash"; console.log("SPLASH SCREEN UP!!!!!!!!!!!!") }
     }
 
 
@@ -52,12 +52,11 @@ Window {
     }
 
     Component{
-        id:splashRootCompnent
+        id:splashComponent
         Splash{
 
         }
     }
-
 
     Item{
         id:appContent
@@ -73,7 +72,7 @@ Window {
         state:"preinit"
         //        Component.onCompleted: {
         //            console.log("Index Loaded")
-        //            if(window.orbiterInitialized){
+        //            if(orbiterWindow.orbiterInitialized){
         //                state="init"
         //            } else {
         //                state="preinit"
@@ -122,7 +121,7 @@ Window {
                 name: "splash"
                 PropertyChanges {
                     target: bootStrap
-                    sourceComponent:splashRootCompnent
+                    sourceComponent:splashComponent
                 }
                 PropertyChanges {
                     target: app

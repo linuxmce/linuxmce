@@ -26,7 +26,7 @@ property int sUser:-1
     function scaleY(y){
         return y/100*appW
     }
-    Component.onCompleted: window.showSetup()
+    Component.onCompleted: orbiterWindow.showSetup()
 
 
     Timer{
@@ -229,7 +229,7 @@ property int sUser:-1
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked: window.setupNewOrbiter(String(sUser), String(selectedRoom), 1, 1, appH, appW)
+                onClicked: orbiterWindow.setupNewOrbiter(String(sUser), String(selectedRoom), 1, 1, appH, appW)
             }
 
         }

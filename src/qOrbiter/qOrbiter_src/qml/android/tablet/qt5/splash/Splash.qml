@@ -19,7 +19,7 @@ Item {
         console.log(orbiterSetup) ;
         existing_orbiters.visible = false;
         orbiter_options.visible = true;
-        newOrbiterOptionContainer.visible=true; window.showSetup()
+        newOrbiterOptionContainer.visible=true; orbiterWindow.showSetup()
     }
     onWidthChanged: console.log("detected size change")
 
@@ -35,7 +35,7 @@ Item {
     }
 
 //    Connections{
-//        target: window
+//        target: orbiterWindow
 //        onShowExternal: {
 //            console.log("showing external ip box")
 //            ext_routerip.visible = true

@@ -10,7 +10,7 @@ Rectangle {
     signal splashLoaded()
 
     Connections{
-        target: window
+        target: orbiterWindow
         onShowList:{
             existing_orbiters.visible = true
             if(existing_orbiters.count === 0){
@@ -43,8 +43,8 @@ Rectangle {
             Text {
                 id: connection_label
                 text: qsTr("Connection")
-                color: window.b_connectionPresent ? "green" : "red"
-                font.pixelSize: window.b_connectionPresent ? 14 : 12
+                color: orbiterWindow.b_connectionPresent ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_connectionPresent ? 14 : 12
             }
         }
 
@@ -61,8 +61,8 @@ Rectangle {
             Text {
                 id: device_Label
                 text: qsTr("Device")
-                color: window.b_devicePresent ? "green" : "red"
-                font.pixelSize: window.b_devicePresent ? 14 : 12
+                color: orbiterWindow.b_devicePresent ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_devicePresent ? 14 : 12
             }
         }
 /*
@@ -79,8 +79,8 @@ Rectangle {
             Text {
                 id: config_label
                 text: qsTr("Config")
-                color: window.b_localConfigReady ? "green" : "red"
-                font.pixelSize: window.b_localConfigReady ? 14 : 12
+                color: orbiterWindow.b_localConfigReady ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_localConfigReady ? 14 : 12
             }
         }
 
@@ -97,8 +97,8 @@ Rectangle {
             Text {
                 id: skin_label
                 text: qsTr("Skins")
-                color: window.b_skinIndexReady ? "green" : "red"
-                font.pixelSize: window.b_skinIndexReady ? 14 : 12
+                color: orbiterWindow.b_skinIndexReady ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_skinIndexReady ? 14 : 12
             }
         }
 
@@ -115,8 +115,8 @@ Rectangle {
             Text {
                 id: skin_data_label
                 text: qsTr("Orbiter Ready")
-                color: window.b_orbiterConfigReady ? "green" : "red"
-                font.pixelSize: window.b_orbiterConfigReady ? 14 : 12
+                color: orbiterWindow.b_orbiterConfigReady ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_orbiterConfigReady ? 14 : 12
             }
         }
 */
@@ -128,8 +128,8 @@ Rectangle {
 
 
     Connections{
-        target:window
-        onMessageChanged:loadingStatus.text = window.message
+        target:orbiterWindow
+        onMessageChanged:loadingStatus.text = orbiterWindow.message
         //onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
 
@@ -251,7 +251,7 @@ Rectangle {
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-                onClicked: ext_routerip.visible ? window.qmlSetupLmce(devicenumber.text, ext_routerip.text) : window.qmlSetupLmce(devicenumber.text, routerip.text)
+                onClicked: ext_routerip.visible ? orbiterWindow.qmlSetupLmce(devicenumber.text, ext_routerip.text) : orbiterWindow.qmlSetupLmce(devicenumber.text, routerip.text)
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -327,7 +327,7 @@ Rectangle {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
+                onClicked: orbiterWindow.qmlSetupLmce(i_device_number, routerip.text)
             }
         }
     }

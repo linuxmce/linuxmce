@@ -1,7 +1,6 @@
 // import QtQuick 2.2 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
-import "."
 import org.linuxmce.screeninfo 1.0
 Item {
     anchors.fill: parent
@@ -18,7 +17,7 @@ Item {
     }
 
     Connections{
-        target: window
+        target: orbiterWindow
         onShowList:{
 
             if(existing_orbiters.count === 0){
@@ -128,7 +127,7 @@ Item {
     states: [
         State {
             name: "selection"
-            when:window.b_connectionPresent
+            when:orbiterWindow.b_connectionPresent
             PropertyChanges {
                 target: connectionBox
                 state:"hidden"
@@ -144,7 +143,7 @@ Item {
         },
         State {
             name: "noconnection"
-            when:!window.b_connectionPresent
+            when:!orbiterWindow.b_connectionPresent
             PropertyChanges {
                 target: connectionBox
                 state:"showing"

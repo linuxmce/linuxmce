@@ -4,7 +4,7 @@ Item {
     anchors.fill: parent
 
     Component.onCompleted: {
-        if(window.orbiterInitialized){
+        if(orbiterWindow.orbiterInitialized){
             state="init"
         } else {
             state="preinit"
@@ -47,7 +47,7 @@ Item {
     Loader{
         id:bootStrap
         anchors.fill: parent
-        source:window.orbiterInitialized ? "BaseLoaded.qml" : ""
+        source:orbiterWindow.orbiterInitialized ? "BaseLoaded.qml" : ""
     }
 
     Text {

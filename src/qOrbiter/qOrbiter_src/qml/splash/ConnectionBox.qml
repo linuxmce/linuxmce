@@ -101,7 +101,7 @@ Item{
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-                onClicked: { window.qmlSetupLmce(window.deviceno, routerip.text) }
+                onClicked: { orbiterWindow.qmlSetupLmce(orbiterWindow.deviceno, routerip.text) }
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -142,7 +142,7 @@ Item{
         },
         State {
             name: "hidden"
-            when:orbiterList.count!==0 || window.b_connectionPresent
+            when:orbiterList.count!==0 || orbiterWindow.b_connectionPresent
             PropertyChanges {
                 target: connectionBox
                 opacity:0

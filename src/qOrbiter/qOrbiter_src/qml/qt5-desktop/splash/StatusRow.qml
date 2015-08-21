@@ -31,8 +31,8 @@ Item{
             Text {
                 id: connection_label
                 text: qsTr("Connection")
-                color: window.b_connectionPresent ? "green" : "red"
-                font.pixelSize: window.b_connectionPresent ? 14 : 12
+                color: orbiterWindow.b_connectionPresent ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_connectionPresent ? 14 : 12
                 font.family: myFont.name
             }
         }
@@ -50,8 +50,8 @@ Item{
             Text {
                 id: device_Label
                 text: qsTr("Device")
-                color: window.b_devicePresent ? "green" : "red"
-                font.pixelSize: window.b_devicePresent ? 14 : 12
+                color: orbiterWindow.b_devicePresent ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_devicePresent ? 14 : 12
                 font.family: myFont.name
             }
         }
@@ -69,8 +69,8 @@ Item{
             Text {
                 id: config_label
                 text: qsTr("Config")
-                color: window.b_localConfigReady ? "green" : "red"
-                font.pixelSize: window.b_localConfigReady ? 14 : 12
+                color: orbiterWindow.b_localConfigReady ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_localConfigReady ? 14 : 12
             }
         }
         
@@ -87,8 +87,8 @@ Item{
             Text {
                 id: skin_label
                 text: qsTr("Skins")
-                color: window.b_skinIndexReady ? "green" : "red"
-                font.pixelSize: window.b_skinIndexReady ? 14 : 12
+                color: orbiterWindow.b_skinIndexReady ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_skinIndexReady ? 14 : 12
             }
         }
         
@@ -105,8 +105,8 @@ Item{
             Text {
                 id: skin_data_label
                 text: qsTr("Orbiter Ready")
-                color: window.b_orbiterConfigReady ? "green" : "red"
-                font.pixelSize: window.b_orbiterConfigReady ? 14 : 12
+                color: orbiterWindow.b_orbiterConfigReady ? "green" : "red"
+                font.pixelSize: orbiterWindow.b_orbiterConfigReady ? 14 : 12
             }
         }
 

@@ -119,7 +119,7 @@ GenericPopup{
                 arrow: activeFocus
             }
             LargeStyledButton{
-                buttonText: qsTr("Close", "Close Window")
+                buttonText: qsTr("Close", "Close orbiterWindow")
                 height: parent.height
                 width: parent.width/4
                 arrow: activeFocus

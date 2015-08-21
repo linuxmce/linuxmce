@@ -6,7 +6,7 @@ Item {
     focus:true
 
     Connections{
-        target: window
+        target: orbiterWindow
         onBeginLoading:{
             bootStrap.source="BaseLoaded.qml"
         }
@@ -63,7 +63,7 @@ Item {
     Loader{
         id:bootStrap
         anchors.fill: parent
-        source:window.orbiterInitialized ? "BaseLoaded.qml" : ""
+        source:orbiterWindow.orbiterInitialized ? "BaseLoaded.qml" : ""
     }
 
     Timer{
