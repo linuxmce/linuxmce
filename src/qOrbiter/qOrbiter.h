@@ -1336,6 +1336,7 @@ light, climate, media, security, telecom */
 signals:
 
     void timecodeEvent(QString ea, QMap<long, std::string> mp);
+    void timecodeEvent(int room, QMap<long, std::string> mp);
 
      void creationComplete(bool finished);
 

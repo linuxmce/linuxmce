@@ -3,6 +3,7 @@ import org.linuxmce.enums 1.0
 import org.linuxmce.screens 1.0
 import QtGraphicalEffects 1.0
 import enums.media 1.0
+import QtQuick.Controls 1.2
 import "../."
 Panel{
     id:generic_playback_panel
@@ -53,19 +54,19 @@ Panel{
                     anchors.fill: parent
                     StyledButton{
                         state:"round"
-                         height: Style.scaleY(8)
+                        height: Style.scaleY(8)
                         buttonText: "+"
                         onActivated: manager.adjustLights("+10")
                     }
                     StyledButton{
                         state:"round"
-                         height: Style.scaleY(8)
+                        height: Style.scaleY(8)
                         buttonText: qsTr("Floorplan")
                         onActivated: manager.currentScreen="Screen_2.qml"
                     }
                     StyledButton{
                         state:"round"
-                         height: Style.scaleY(8)
+                        height: Style.scaleY(8)
                         buttonText: "-"
                         onActivated: manager.adjustLights("-10")
 
@@ -125,6 +126,28 @@ Panel{
             id: mediaScrollerTarget
             height: parent.height *.04
             width: parent.width *.75
+            anchors{
+                bottom:transport_buttons.top
+                horizontalCenter: parent.horizontalCenter
+                bottomMargin:10
+            }
+        }
+
+        Slider{
+            id:altTransport
+            height: parent.height *.04
+            width: parent.width *.75
+
+            updateValueWhileDragging: false
+
+            minimumValue: 0
+            maximumValue: roomList.currentEaTimecode.timecodeLength
+            value:roomList.currentEaTimecode.timecodePosition
+            onPressedChanged: {
+                if(!pressed)
+                    roomList.currentEaTimecode.finishDragging(value);
+            }
+
             anchors{
                 bottom:transport_buttons.top
                 horizontalCenter: parent.horizontalCenter

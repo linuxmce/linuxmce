@@ -457,6 +457,10 @@ void MediaManager::processSocketdata()
 void MediaManager::playbackInfoUpdated(QVariant playbackData)
 {
     qDebug() << Q_FUNC_INFO << playbackData;
+    if(!playbackData.isValid()) return;
+
+
+
 }
 
 

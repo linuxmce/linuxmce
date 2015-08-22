@@ -6,7 +6,7 @@ import "../."
 Item{
     id:mediaScrollerTarget
     clip:false
-    property int slidertimer: (dragHandle.x / width) * roomList.currentEaTimecode.totalTimeCode
+    property int slidertimer: (dragHandle.x / width) * roomList.currentEaTimecode.timecodeLength
     Rectangle{
         id:bg
         width: parent.width
@@ -39,7 +39,7 @@ Item{
 
         StyledText {
             id: drag_label
-            text: dceTimecode.dragTime
+            text: roomList.currentEaTimecode.timecodeLength
             anchors.centerIn: parent
             font.pixelSize: Style.scaleY(4)
         }
@@ -54,7 +54,7 @@ Item{
         anchors.verticalCenter: bg.verticalCenter
         width: height
         radius: height
-        x: dg.drag.active ? dg.x : ( dceTimecode.runningTimer / roomList.currentEaTimecode.totalTimeCode) * bg.width
+        x: dg.drag.active ? dg.x : ( roomList.currentEaTimecode.timecodePosition / roomList.currentEaTimecode.timecodeLength) * bg.width
         MouseArea{
             id:dg
             anchors.fill: parent
@@ -64,13 +64,14 @@ Item{
             drag.maximumX:  bg.width
             onPositionChanged: if(drag.active){
                                    drag_indicator.opacity = 1
-                                   dceTimecode.showDragTime(slidertimer)
+                                   roomList.currentEaTimecode.setDragTime(slidertimer)
                                } else{
                                    drag_indicator.opacity = 0
                                }
             onReleased: {
                 drag_indicator.opacity =0
-                dceTimecode.finishDragging()
+                roomList.currentEaTimecode.finishDragging(value);
+                // dceTimecode.finishDragging()
             }
         }
     }

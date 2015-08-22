@@ -550,7 +550,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         if (ea.isEmpty()){
             ea = roomListXml.at(index).attributes().namedItem("Description").nodeValue().append(QString::number(m_iEA));
         } else {
-            m_lRooms->addTimeCodeTrack(ea, m_iEA);
+            m_lRooms->addTimeCodeTrack(ea, m_iEA, m_val);
         }
 
         RroomMapping.insert(m_name, m_val);
@@ -2890,7 +2890,10 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     /*Remote command signal */
     QObject::connect(ptr, SIGNAL(dceGuiCommand(int)), this, SLOT(handleDceGuiCommand(int)), Qt::QueuedConnection);
 
-    QObject::connect(ptr, &qOrbiter::timecodeEvent, m_lRooms, &LocationModel::setEaTimeCode, Qt::QueuedConnection);
+
+    QObject::connect(ptr, SIGNAL(timecodeEvent(QString,QMap<long,std::string>)), m_lRooms, SLOT(setEaTimeCode(QString,QMap<long,std::string>)), Qt::QueuedConnection);
+    QObject::connect(ptr, SIGNAL(timecodeEvent(int,QMap<long,std::string>)), m_lRooms, SLOT(setEaTimeCode(int,QMap<long,std::string>)), Qt::QueuedConnection);
+    QObject::connect(m_lRooms, &LocationModel::seekToTime, ptr, &qOrbiter::JogStream, Qt::QueuedConnection );
 
     return true;
 

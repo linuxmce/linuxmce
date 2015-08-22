@@ -1967,11 +1967,11 @@ void DCE::qOrbiter::deinitialize()
     PurgeInterceptors();
     BindMediaRemote(false);
     DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
-     SendCommand(CMD_OrbiterUnRegistered);
+    SendCommand(CMD_OrbiterUnRegistered);
     emit routerConnectionChanged(false);
     emit closeOrbiter();
     Disconnect();
-   emit closeOrbiter();
+    emit closeOrbiter();
 
 }
 
@@ -2318,15 +2318,20 @@ bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceDat
     string time = pMessage->m_mapParameters[EVENTPARAMETER_Current_Time_CONST];
 
     QString deviceEa;
+    int id;
+
+    QMap <long, string>p(pMessage->m_mapParameters);
 
     if(pDeviceFrom->m_dwPK_DeviceTemplate==DEVICETEMPLATE_qMediaPlayer_CONST){
         deviceEa = QString::fromStdString(pDeviceFrom->GetTopMostDevice()->m_sDescription);
+
+        emit timecodeEvent( deviceEa, p);
     } else {
-        deviceEa = QString::fromStdString(pDeviceFrom->m_sDescription);
+        id=pDeviceFrom->m_dwPK_Room;
+        emit timecodeEvent( id, p);
     }
 
-    QMap <long, string>p(pMessage->m_mapParameters);
-    emit timecodeEvent( deviceEa, p);
+
 
     //  qDebug() <<  Q_FUNC_INFO << "Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str() << "::"<< time.c_str();
     return false;
@@ -4273,12 +4278,12 @@ void qOrbiter::OnReload()
 
 bool qOrbiter::OnReplaceHandler(string msg)
 {
-   // qDebug() << Q_FUNC_INFO;
+    // qDebug() << Q_FUNC_INFO;
     emit commandResponseChanged("Disconnecting due to device with same ID connecting.");
-  //  qDebug() << "Message " << msg.c_str();
+    //  qDebug() << "Message " << msg.c_str();
     registerDevice(i_user,QString(i_ea), i_room);
     emit routerReplace();
-   // deinitialize();
+    // deinitialize();
     return true;
 
 }
@@ -5465,7 +5470,7 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 
 void qOrbiter::reInitialize(){
 
-qDebug() << "Initialize !!!!!!!!!!!!";
+    qDebug() << "Initialize !!!!!!!!!!!!";
     if(this->m_pPrimaryDeviceCommand->m_bQuit_get() == true ){
         emit commandResponseChanged("Device set to quit");
     }
