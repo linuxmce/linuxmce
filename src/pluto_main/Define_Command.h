@@ -1039,8 +1039,8 @@
 #define COMMAND_Bluetooth_Pair_Device_CONST 1143
 #define COMMAND_Bluetooth_Connect_Device_CONST 1144
 #define COMMAND_Bluetooth_Disconnect_Device_CONST 1145
-#define COMMAND_Start_Egg_Timer_CONST 1146
-#define COMMAND_Cancel_Egg_Timer_CONST 1147
+#define COMMAND_Start_Egg_Timer_CONST 1156
+#define COMMAND_Cancel_Egg_Timer_CONST 1157
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
