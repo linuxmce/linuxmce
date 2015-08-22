@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#. /usr/pluto/install/install-common.sh
+#!/bin/bash
+
 if [[ -n "$HEADER_install_common" ]]; then
 	return 0
 fi
@@ -304,4 +307,21 @@ Config_MySQL_Client () {
 		host = dcerouter
 		EOF
 }
+
+
+
+## PKG INSTALL FN's 
+Fix_LSB_Data                    # preinst ALL (raspbian)
+CreateBackupSources             # preinst ALL
+CreateBasePackagesFiles         # preinst ALL
+Disable_CompCache               # preinst ALL ??
+ConfigAptConf                   # preinst ALL
+ConfigSources                   # preinst ALL
+PreSeed_DebConf                 # preinst ALL
+#PreSeed_MythWeb                 # preinst core # TODO: move to lmce-core preinst/postinst
+#Setup_Pluto_Conf                # preinst core # TODO: move to lmce-core preinst/postinst
+#Setup_NIS                       # preinst core	# TODO: move to lmce-core preinst/postinst
+#Config_MySQL_Server             # preinst core	# TODO: move to lmce-core preinst/postinst
+Config_MySQL_Client             # preinst ALL
+Setup_MakeDev                   # preinst ALL
 
