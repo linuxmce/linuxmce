@@ -74,7 +74,7 @@ qMediaPlayer::qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl 
 qMediaPlayer::~qMediaPlayer()
 //<-dceag-dest-e->
 {
-
+    Disconnect();
 }
 
 //<-dceag-getconfig-b->
@@ -2004,21 +2004,13 @@ void qMediaPlayer::confirmMediaEnded(bool witherror)
 void qMediaPlayer::positionChanged(QString total, QString current)
 {
 
-    DCE::Message *tc = new Message(
-                m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
-                EVENT_Media_Position_Changed_CONST,
-                7 /* number of parameter's pairs (id, value) */,
-                EVENTPARAMETER_FK_MediaType_CONST, StringUtils::itos(getMediaType()).c_str(),
-                EVENTPARAMETER_MRL_CONST, getCurrentMediaUrl().toStdString().c_str(),
-                EVENTPARAMETER_ID_CONST, getMediaId().toStdString().c_str(),
-                EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(i_StreamId).c_str(),
-                EVENTPARAMETER_DateTime_CONST, total.toStdString().c_str(),
-                EVENTPARAMETER_Current_Time_CONST, current.toStdString().c_str(),
-                EVENTPARAMETER_Speed_CONST, StringUtils::itos(getCurrentSpeed()).c_str()
+    EVENT_Media_Position_Changed(
+                getMediaType(),
+                getCurrentMediaUrl().toStdString(),
+                getMediaId().toStdString(),
+               i_StreamId,
+                total.toStdString(),
+                current.toStdString(),
+               getCurrentSpeed()
                 );
-
-    this->m_pEvent->SendMessage(tc);
-
-
-
 }
