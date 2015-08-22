@@ -258,6 +258,8 @@ void eggtimer::CommandOn(int PK_Device)
 	cout << "Neet to implement CommandOn" << endl;
 	DCE::CMD_On CMD_On(m_dwPK_Device,PK_Device,0,"");
 	SendCommand(CMD_On);
+	DCE::CMD_Set_Level CMD_Set_Level(m_dwPK_Device,PK_Device,"100");
+	SendCommand(CMD_Set_Level);
 }
 
 void eggtimer::CommandOff(int PK_Device)
