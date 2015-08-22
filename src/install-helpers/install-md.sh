@@ -5,6 +5,7 @@ if [[ -n "$HEADER_install_md" ]]; then
 fi
 HEADER_install_md=included
 
+# include all the common install helpers
 . /usr/pluto/install/install-common.sh
 
 [[ -e /usr/pluto/bin/Config_Ops.sh ]] && . /usr/pluto/bin/Config_Ops.sh
@@ -21,26 +22,25 @@ DEVID_FILE="/etc/Disked_DeviceID"
 #INSTALL_KUBUNTU_DESKTOP="yes"
 INSTALL_KUBUNTU_DESKTOP="no"
 
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
+# Get the Core's IP Address using the locator
+CORE_IP=$(/usr/pluto/install/core-locator)
+
+###########################################################
+### Config setup fns.
+###########################################################
 
 setup_fstab() {
 	# Hmm, let's see if the mounts are here, if not add them
-	check=$(grep 192.168.80.1 "${FSTAB_FILE}" || :)
+	check=$(grep "$CORE_IP" "${FSTAB_FILE}" || :)
 	if [ -z "$check" ] ; then
 		cat <<-EOF >> "${FSTAB_FILE}"
-			192.168.80.1:/usr/pluto/var/		/usr/pluto/var/		nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/orbiter		/usr/pluto/orbiter	nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/keys		/usr/pluto/keys		nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/deb-cache	/usr/pluto/deb-cache    nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/var/spool/asterisk	/var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/home			/home			nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/home/cameras		/home/cameras		nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:/usr/pluto/var/		/usr/pluto/var/		nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:/usr/pluto/orbiter		/usr/pluto/orbiter	nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:/usr/pluto/keys		/usr/pluto/keys		nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:/usr/pluto/deb-cache		/usr/pluto/deb-cache    nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:/var/spool/asterisk		/var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:/home			/home			nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:/home/cameras		/home/cameras		nfs4 retrans=10,timeo=50 1 1
 			EOF
 	fi
 	mkdir -p /usr/pluto/var/
@@ -75,43 +75,16 @@ setup_plutoconf() {
 	esac
 	[ -n "$PK_Distro" ] || [ -n "$distro" ] && ConfSet "PK_Distro" "$distro"
 
-	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "192.168.80.1"
+	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "${CORE_IP}"
 	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
 	[ -n "$MySqlPassword" ] || ConfSet "MySqlPassword" ""
 	[ -n "$MySqlDBName" ] || ConfSet "MySqlDBName" "pluto_main"
-	[ -n "$DCERouter" ] || ConfSet "DCERouter" "192.168.80.1"
+	[ -n "$DCERouter" ] || ConfSet "DCERouter" "${CORE_IP}"
 	[ -n "$MySqlPort" ] || ConfSet "MySqlPort" "3306"
 	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
 	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
 	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
 	[ -n "$AVWizardDone" ] || ConfSet "AVWizardDone" "0"
-}
-
-
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-
-
-###########################################################
-### Setup Functions - Error checking and logging and trapping
-###########################################################
-
-VerifyExitCode () {
-	local EXITCODE=$?
-	if [ "$EXITCODE" != "0" ] ; then
-		echo "An error (Exit code $EXITCODE) occured during the last action"
-		echo "$1"
-		exit 1
-	fi
-}
-
-StatsMessage () {
-	printf "$(date) - $* \n"
 }
 
 ###########################################################
@@ -131,7 +104,7 @@ MD_System_Level_Prep () {
 		cat <<-EOF > /etc/apt/sources.list
 			#deb http://10.10.42.99/$TARGET_RELEASE-$TARGET_ARCH/ ./
 			deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
-			deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
+			deb http://deb.linuxmce.org/$TARGET_DISTRO/ $TARGET_RELEASE $TARGET_REPO_NAME
 			deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
 			deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 			deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
@@ -149,6 +122,7 @@ MD_Seamless_Compatability () {
 }
 
 MD_Preseed () {
+	PreSeed_DebConf	# install-common.sh
 	: # no-op
 }
 
@@ -158,16 +132,16 @@ MD_Update () {
 
 	apt-get -f -y install
 
-	# FIXME: need to fix bootscripts?  need to fix/update install-scripts
-	apt-get -f -y install --no-install-recommends pluto-boot-scripts
-	VerifyExitCode "pluto-boot-scripts failed"
+	## FIXME: need to fix bootscripts?  need to fix/update install-scripts
+	#apt-get -f -y install --no-install-recommends pluto-boot-scripts
+	#VerifyExitCode "pluto-boot-scripts failed"
 }
 
 MD_Install_Kernel () {
 	StatsMessage "Installing kernel headers"
 
 	#TODO get as much of this from database as possible
-	# run any device specific firstboot add-on scripts here
+	# run any device specific firstboot add-on kernel config here
 	ret=""
 	for f in /etc/init.d/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: $f _kernel - Begin"
@@ -177,6 +151,7 @@ MD_Install_Kernel () {
 		StatsMessage "Running device specific script: $f _kernel - End"
 	done
 
+	# Default kernel installation is ubuntu based, if the above is not run
 	if [[ "$ret" != "0" ]] ; then
 		StatsMessage "Setting up HardWare Enablement stack"
 		. /usr/pluto/bin/Config_Ops.sh
@@ -229,6 +204,12 @@ MD_Install_Packages () {
 				libwayland-egl1-mesa"$TARGET_KVER_LTS_HES"
 				VerifyExitCode "Installing X.Org failed"
 			;;
+		*)	# *
+			apt-get -f -y --install-recommends install \
+				xserver-xorg \
+				xserver-xorg-video-all
+				VerifyExitCode "Installing X.Org failed"
+			;;
 	esac
 
 	StatsMessage "Installing primary MD packages"
@@ -240,25 +221,12 @@ MD_Install_Packages () {
 		apt-get -f -y --no-install-recommends install kubuntu-desktop
 		VerifyExitCode "kubuntu-desktop"
 	fi
-
-	StatsMessage "Disabling display manager"
-	#FIXME: dpkg-divert it so it does not get over-written?
-	echo '/bin/false' >/etc/X11/default-display-manager
-
-	# Update startup to remove kdm and network manager
-	update-rc.d -f kdm remove
-
-	StatsMessage "Disabling NetworkManager"
-	update-rc.d -f NetworkManager remove
 }
 
 MD_Populate_Debcache () {
 	StatsMessage "Creating deb-cache dir"
-	# FIXME: is this the correct point here?
-	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
-#	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
-#	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
-	:
+	CreateBasePackagesFiles		# install-common.sh
+	#UpdateDebCache "$DEB_CACHE"	# install-common.sh
 }
 
 MD_Cleanup () {
@@ -310,6 +278,8 @@ dontrun() {
 	setup_plutoconf
 	MD_Install_Kernel
 	MD_Install_Packages
+	Disable_DisplayManager
+	Disable_NetworkManager
 	MD_Populate_Debcache
 	MD_Cleanup
 
