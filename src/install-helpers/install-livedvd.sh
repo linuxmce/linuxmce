@@ -1,11 +1,11 @@
 #!/bin/bash
 
+. /usr/pluto/install/install-core.sh
+
 if [[ -n "$HEADER_install_livedvd" ]]; then
 	return 0
 fi
 HEADER_install_livedvd=included
-
-. /usr/pluto/install/install-core.sh
 
 ###########################################################
 ### Live DVD Specific Fn's
@@ -159,6 +159,10 @@ PackageCleanUp () {
 TempEMIFix () {
 	# Placeholder fn.  This is done elsewhere if appropriate
 	:
+}
+
+SetupAptSources () {
+	ConfigSources	# install-core.sh
 }
 
 ###########################################################
