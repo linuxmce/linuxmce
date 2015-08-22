@@ -234,14 +234,22 @@ void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD
 	cout << "Need to implement command #1147 - Cancel Egg Timer" << endl;
 	cout << "Parm #124 - DeviceToLink=" << iDeviceToLink << endl;
 	cout << "Parm #289 - SendOFF=" << bSendOFF << endl;
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Cancel Egg Timer for Device %n", iDeviceToLink);
+	// This is a manual cancelation. We honor the users wishs whether or not the device in question
+	// shall receive an OFF as well.
+	if (bSendOFF) {
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Cancel Egg Timer with SendOFF");
+		AlarmCallback(iDeviceToLink,pMessage);
+	}
+	
+	m_pAlarmManager->CancelAlarm(iDeviceToLink);	
 	
 }
 
 void eggtimer::AlarmCallback(int id, void* param)
 {
 	cout << "Need to implement AlarmCallback - Egg Timer " <<endl;
-	
-		
+	CommandOff(id);		
 }
 
 void eggtimer::CommandOn(int PK_Device)
