@@ -93,15 +93,16 @@ public:
     int DATA_Get_Port();
     void DATA_Set_Port(int Value,bool bUpdateDatabase=false);
 
-            *****EVENT***** accessors inherited from base class
-    void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
-    void EVENT_Menu_Onscreen(int iStream_ID,bool bOnOff);
-    void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors);
-    void EVENT_Media_Description_Changed(string sText);
-    void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
+			*****EVENT***** accessors inherited from base class
+	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
+	void EVENT_Menu_Onscreen(int iStream_ID,bool bOnOff);
+	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors);
+	void EVENT_Media_Description_Changed(string sText);
+	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
+	void EVENT_Media_Position_Changed(int iFK_MediaType,string sMRL,string sID,int iStream_ID,string sDateTime,string sCurrent_Time,int iSpeed);
 
-            *****COMMANDS***** we need to implement
-    */
+			*****COMMANDS***** we need to implement
+	*/
 
 
     /** @brief COMMAND: #28 - Simulate Keypress */
