@@ -213,8 +213,11 @@ void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,string &sCM
 	cout << "Parm #124 - DeviceToLink=" << iDeviceToLink << endl;
 	cout << "Parm #182 - Timeout=" << sTimeout << endl;
 	int nTimeout;
+	int oldID;
 	nTimeout = atoi(sTimeout.c_str());
 	
+	oldID = m_pAlarmManager->FindAlarmByType(iDeviceToLink);
+	m_pAlarmManager->CancelAlarm(oldID);
 	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,pMessage);
 	CommandOn(iDeviceToLink);
 }
