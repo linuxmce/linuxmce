@@ -17,6 +17,7 @@ fi
 ###########################################################
 
 DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
+DEVICEDATA_DISTRO_Raspbian_Jessie_CONST=22
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
 DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
 
@@ -89,14 +90,13 @@ setup_plutoconf() {
 	DISTRO=$(lsb_release -cs)
 	case "$DISTRO" in
 		precise)
-			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
-	;;
+			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST 	;;
 		trusty)
-			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
-			;;
+			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST 	;;
 		wheezy)
-			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
-			;;
+			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST ;;
+		jessie)
+			distro=$DEVICEDATA_DISTRO_Raspbian_Jessie_CONST ;;
 	esac
 	[ -n "$PK_Distro" ] || [ -n "$distro" ] && ConfSet "PK_Distro" "$distro"
 
