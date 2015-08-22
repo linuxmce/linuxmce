@@ -212,6 +212,11 @@ void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,string &sCM
 	cout << "Need to implement command #1146 - Start Egg Timer" << endl;
 	cout << "Parm #124 - DeviceToLink=" << iDeviceToLink << endl;
 	cout << "Parm #182 - Timeout=" << sTimeout << endl;
+	int nTimeout;
+	nTimeout = atoi(sTimeout.c_str());
+	
+	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,pMessage);
+
 }
 
 //<-dceag-c1147-b->
@@ -231,4 +236,9 @@ void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD
 	cout << "Parm #289 - SendOFF=" << bSendOFF << endl;
 }
 
+void eggtimer::AlarmCallback(int id, void* param)
+{
+	cout << "Need to implement AlarmCallback - Egg Timer " <<endl;
 
+		
+}

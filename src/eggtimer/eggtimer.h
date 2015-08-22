@@ -24,7 +24,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class eggtimer : public eggtimer_Command
+	class eggtimer : public eggtimer_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
