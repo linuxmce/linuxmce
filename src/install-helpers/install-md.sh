@@ -143,7 +143,7 @@ MD_Install_Kernel () {
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on kernel config here
 	ret=""
-	for f in /etc/init.d/firstboot_lmce_* ; do
+	for f in /usr/pluto/firstboot/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: $f _kernel - Begin"
 		. "$f" || :
 		$(basename "$f")_kernel || :
@@ -163,7 +163,7 @@ MD_Install_Kernel () {
 		VerifyExitCode "Install linux headers package failed"
 
 		StatsMessage "Installing kernel"
-		apt-get -f -y install --install-recommends linux-generic"$TARGET_KVER_LTS_HES"
+		apt-get -f -y install --install-recommends linux-generic"$TARGET_KVER_LTS_HES" linux-image-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux kernel package failed"
 	fi
 
@@ -262,7 +262,7 @@ dontrun() {
 
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
-	for f in /etc/init.d/firstboot_lmce_* ; do
+	for f in /usr/pluto/firstboot/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: $f _preinst - Begin"
 		. "$f" || :
 		$(basename "$f")_preinst || :
@@ -284,7 +284,7 @@ dontrun() {
 	MD_Cleanup
 
 	# run any device specific firstboot add-on scripts here
-	for f in /etc/init.d/firstboot_lmce_* ; do
+	for f in /usr/pluto/firstboot/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: $f _postinst - Begin"
 		. "$f" || :
 		$(basename "$f")_postinst || :

@@ -174,6 +174,15 @@ Setup_Logfile () {
 ### Setup Functions - General functions
 ###########################################################
 
+UpdateUpgrade () {
+	#perform an update and a dist-upgrade
+	StatsMessage "Performing an update and an upgrade to all components"
+	apt-get -qq update
+	VerifyExitCode "apt-get update"
+	apt-get -y -q -f --force-yes dist-upgrade
+	VerifyExitCode "dist-upgrade"
+}
+
 TimeUpdate () {
 	StatsMessage "Synchronizing time with an online server"
 	#Update system time to match ntp server
@@ -304,4 +313,3 @@ Config_MySQL_Client () {
 		host = dcerouter
 		EOF
 }
-

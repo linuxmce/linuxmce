@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /usr/pluto/install/install-common.sh
+. /usr/pluto/install/install-common.sh	# lmce-install-scripts
 
 if [[ -n "$HEADER_install_core" ]]; then
 	return 0
@@ -10,11 +10,6 @@ HEADER_install_core=included
 ###########################################################
 ### Setup Functions - Reference functions
 ###########################################################
-
-AddGpgKeyToKeyring () {
-	local gpg_key="$1"
-	wget -q "$gpg_key" -O- | apt-key add -
-}
 
 Create_Wizard_Data-Double_Nic_Shell () {
 	echo "c_deviceType=2 # 1-Core, 2-Hybrid, 3-DiskedMD
@@ -69,67 +64,12 @@ c_ubuntuLiveCdFrom=1
 c_ubuntuLiveCdPath=''
 c_singleNIC=1
 "
-
 }
+
 
 ###########################################################
 ### Setup Functions - General functions
 ###########################################################
-
-UpdateUpgrade () {
-	#perform an update and a dist-upgrade
-	StatsMessage "Performing an update and an upgrade to all components"
-	apt-get -qq update
-	VerifyExitCode "apt-get update"
-	apt-get -y -q -f --force-yes dist-upgrade
-	VerifyExitCode "dist-upgrade"
-}
-
-TimeUpdate () {
-	StatsMessage "Synchronizing time with an online server"
-	#Update system time to match ntp server
-	ntpdate ntp.ubuntu.com
-}
-
-CreateBackupSources () {
-	if [ ! -e /etc/apt/sources.list.pbackup ]; then
-		StatsMessage "Backing up sources.list file"
-		cp -a /etc/apt/sources.list /etc/apt/sources.list.pbackup
-	fi
-}
-
-Disable_CompCache () {
-	# Disable compcache
-	if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
-		rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
-	fi
-}
-
-ConfigAptConf () {
-	# Setup pluto's apt.conf
-	cat <<-EOF >/etc/apt/apt.conf.d/30pluto
-		// Pluto apt conf add-on
-		//Apt::Cache-Limit "12582912";
-		Dpkg::Options { "--force-confold"; };
-		//Acquire::http::timeout "10";
-		//Acquire::ftp::timeout "10";
-		APT::Get::AllowUnauthenticated "true";
-		//APT::Get::force-yes "yes";
-		APT::Acquire { Retries  "20" };
-		EOF
-}
-
-ConfigSources () {
-	StatsMessage "Configuring sources.list for MCE install"
-	. /usr/pluto/install/AptSources.sh
-
-	AptSrc_ParseSourcesList "/etc/apt/sources.list"
-
-	AptSrc_AddSource "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
-	AptSrc_AddSource "http://deb.linuxmce.org/${TARGET_DISTRO}/ ${TARGET_RELEASE} ${REPO}"
-
-	AptSrc_WriteSourcesList
-}
 
 PreSeed_MythWeb () {
 	#Seeding mythweb preferences to not override the LMCE site on install - for some odd reason, mythweb packages don't accept the set-selections
@@ -142,6 +82,7 @@ PreSeed_MythWeb () {
 }
 
 Fix_Initrd_Vmlinux () {
+	##### this occurs if we're installing after a kernel update, but prior to reboot
 	StatsMessage "Starting initrd and vmlinuz fix"
 	# Fix a problem with the /initrd.img and /vmlinuz links pointing to a different kernel than the
 	# newest (and currently running) one
@@ -353,7 +294,7 @@ Setup_MakeDev () {
 
 Create_And_Config_Devices () {
 	#Source the SQL_OPS file
-	. /usr/pluto/bin/SQL_Ops.sh
+	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
 
 	DEVICE_TEMPLATE_Core=7
 	DEVICE_TEMPLATE_MediaDirector=28
@@ -364,7 +305,6 @@ Create_And_Config_Devices () {
 
 	## Create the Core device and set it's description
 	StatsMessage "Setting up your computer to act as a 'Core'"
-	apt-get install lmce-asterisk -y
 	Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
 	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
 	RunSQL "$Q"
@@ -395,7 +335,7 @@ Configure_Network_Options () {
 	# addresses - uses Initial_DHCP_Config.sh from the pluto-install-scripts package.
 	StatsMessage "Configuring your internal network"
 	#Source the SQL Ops file
-	. /usr/pluto/bin/SQL_Ops.sh
+	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
 
 	## Setup /etc/hosts
 	echo > /etc/hosts
@@ -514,8 +454,8 @@ CleanInstallSteps () {
 			/var/lib/dpkg/info/"$Pkg".postinst configure
 		done
 
-		. /usr/pluto/bin/SQL_Ops.sh
-		. /usr/pluto/bin/Config_Ops.sh
+		. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
+		. /usr/pluto/bin/Config_Ops.sh	# pluto-boot-scripts
 
 		# Raise max char limit on php.ini
 		if ! grep -q 'max_input_vars' /etc/php5/apache2/php.ini; then 
@@ -583,6 +523,11 @@ Setup_Kernel_PostInst () {
 	chmod +x /etc/kernel/postinst.d/update-symlinks
 }
 
+Setup_Hostname () {
+	echo "Setting hostname"
+	# set the hostname to dcerouter
+	echo dcerouter > /etc/hostname
+}
 
 ###########################################################
 ### Main execution area
@@ -592,6 +537,7 @@ dontrun () {
 Setup_Logfile
 
 # Installation Functions
+Setup_Hostname			# preinst core
 UpdateUpgrade			# firstboot ALL
 TimeUpdate			# firstboot ALL
 CreateBackupSources		# preinst ALL
