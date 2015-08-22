@@ -216,7 +216,7 @@ void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,string &sCM
 	nTimeout = atoi(sTimeout.c_str());
 	
 	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,pMessage);
-
+	CommandOn(iDeviceToLink);
 }
 
 //<-dceag-c1147-b->
