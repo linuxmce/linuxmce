@@ -254,13 +254,16 @@ void eggtimer::AlarmCallback(int id, void* param)
 
 void eggtimer::CommandOn(int PK_Device)
 {
+	
 	cout << "Neet to implement CommandOn" << endl;
-	CMD_On CMD_On(m_dwPK_Device,PK_Device,0,"");
+	DCE::CMD_On CMD_On(m_dwPK_Device,PK_Device,0,"");
+	SendCommand(CMD_On);
 }
 
 void eggtimer::CommandOff(int PK_Device)
 {
 	cout << "Neet to implement CommandOff" << endl;
-	CMD_Off CMD_Off(m_dwPK_Device,PK_Device,0);
+	DCE::CMD_Off CMD_Off(m_dwPK_Device,PK_Device,0);
+	SendCommand(CMD_Off);
 }
 
