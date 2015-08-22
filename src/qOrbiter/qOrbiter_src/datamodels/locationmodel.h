@@ -63,7 +63,8 @@ public:
 
 public slots:
     void setEaTimeCode(QString ea, QMap<long, std::string> data);
-    bool addTimeCodeTrack(QString ea, int intEa);
+    void setEaTimeCode(int room, QMap<long, std::string> data);
+    bool addTimeCodeTrack(QString ea, int intEa, int room);
     Q_INVOKABLE QList<EntertainAreaTimeCode *> allTimeCode();
 
     void setCurrentItem(int i) {currentItem=i;emit locationChanged();}
@@ -92,6 +93,7 @@ signals:
     void currentEaTimecodeChanged();
 
     void locationChanged();
+    void seekToTime(QString t);
 
 private slots:
     void handleItemChange();

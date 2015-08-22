@@ -1,4 +1,5 @@
 #include "entertainareatimecode.h"
+#include "qstringlist.h"
 
 EntertainAreaTimeCode::EntertainAreaTimeCode():
 i_eaId(-1), m_eaName("undefined"), m_currentTimeCode("00:00:00.000"), m_totalTimeCode("OO:00:00.000")
@@ -10,14 +11,15 @@ EntertainAreaTimeCode::EntertainAreaTimeCode(QString time, QString totalTime):
     m_currentTimeCode(time),
     m_totalTimeCode(totalTime),
     m_eaName("undefined"),
-    i_eaId(-1)
+    i_eaId(-1), i_roomId(-1)
 {
 
 }
 
-EntertainAreaTimeCode::EntertainAreaTimeCode(int ea, QString eaName):
+EntertainAreaTimeCode::EntertainAreaTimeCode(int ea, QString eaName, int room):
     i_eaId(ea),
     m_eaName(eaName),
+    i_roomId(room),
     m_currentTimeCode("00:00:00.000"),
     m_totalTimeCode("OO:00:00.000")
 {
@@ -31,8 +33,23 @@ QString EntertainAreaTimeCode::currentTimeCode() const
 
 void EntertainAreaTimeCode::setCurrentTimeCode(const QString &currentTimeCode)
 {
-    m_currentTimeCode = currentTimeCode;
+    if(m_currentTimeCode==currentTimeCode)return;
+     m_currentTimeCode = currentTimeCode;
+
+     m_currentTimeCode.remove(".\d\d\d");
+
+
+     QStringList current = m_currentTimeCode.split(":");
+     if(current.length() > 2){
+         int hoursToSec = current.at(0).toInt() * 3600 ;
+         int minuteToSec = (current.at(1).toInt() * 60);
+         int seconds = current.at(2).toInt();
+         int currentPosition = hoursToSec + minuteToSec + seconds;
+         setTimecodePosition(currentPosition);
+     }
+
     emit currentTimeCodeChanged();
+
 }
 QString EntertainAreaTimeCode::totalTimeCode() const
 {
@@ -41,11 +58,91 @@ QString EntertainAreaTimeCode::totalTimeCode() const
 
 void EntertainAreaTimeCode::setTotalTimeCode(const QString &totalTimeCode)
 {
+
    if(m_totalTimeCode == totalTimeCode) return;
     m_totalTimeCode = totalTimeCode;
+
+    QStringList times = totalTimeCode.split(":");
+
+    if(times.length() <= 2){
+
+       // qDebug() << Q_FUNC_INFO << "Time code parse error. Avoided galactic destruction" << times;
+        return;
+    }
+
+    int hoursToSec = times.at(0).toInt() * 3600 ;
+    int minuteToSec = (times.at(1).toInt() * 60);
+    int seconds = times.at(2).toInt();
+
+    int totalSeconds = hoursToSec + minuteToSec + seconds;
+
+    setTimecodeLength(totalSeconds);
     emit totalTimeCodeChanged();
 
+
+
+
 }
+int EntertainAreaTimeCode::getI_roomId() const
+{
+    return i_roomId;
+}
+
+void EntertainAreaTimeCode::setI_roomId(int value)
+{
+    i_roomId = value;
+}
+
+int EntertainAreaTimeCode::dragTime() const
+{
+    return m_dragTime;
+}
+
+void EntertainAreaTimeCode::setDragTime(int dragTime)
+{
+    m_dragTime = dragTime;
+}
+
+QString EntertainAreaTimeCode::dragString() const
+{
+    return m_dragString;
+}
+
+void EntertainAreaTimeCode::setDragString(const QString &dragString)
+{
+    m_dragString = dragString;
+}
+
+int EntertainAreaTimeCode::timecodePosition() const
+{
+    return m_timecodePosition;
+}
+
+void EntertainAreaTimeCode::setTimecodePosition(int timecodePosition)
+{
+    if(m_timecodePosition==timecodePosition)return;
+    m_timecodePosition = timecodePosition;
+
+}
+
+void EntertainAreaTimeCode::finishDragging(int i_dragTime)
+{
+     emit seekToTime(QString::number(i_dragTime));
+}
+
+int EntertainAreaTimeCode::timecodeLength() const
+{
+    return m_timecodeLength;
+}
+
+void EntertainAreaTimeCode::setTimecodeLength(int timecodeLength)
+{
+    if(m_timecodeLength==timecodeLength)return;
+    m_timecodeLength = timecodeLength;
+
+}
+
+
 QString EntertainAreaTimeCode::eaName() const
 {
     return m_eaName;

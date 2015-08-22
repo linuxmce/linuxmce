@@ -16,6 +16,7 @@ Loader {
     Connections{
         target:manager
         onScreenChange:{
+            qmlRoot.resetTimeout();
             console.log( "Manager screen::"+ manager.currentScreen)
         }
     }

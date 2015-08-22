@@ -81,13 +81,28 @@ void LocationModel::setEaTimeCode(QString ea, QMap<long, std::string> data)
         if(eaTimecodeItems.at(i)->eaName() ==ea){
              eaTimecodeItems.at(i)->setCurrentTimeCode(QString::fromStdString(data[74]) );
              eaTimecodeItems.at(i)->setTotalTimeCode( QString::fromStdString(data[57]));
+             return;
         }
     }
+    qDebug() << "Could not set ea " << ea;
 }
 
-bool LocationModel::addTimeCodeTrack(QString ea, int intEa)
+void LocationModel::setEaTimeCode(int room, QMap<long, std::string> data)
 {
-    EntertainAreaTimeCode *t  = new EntertainAreaTimeCode(intEa, ea);
+    for (int i = 0; i < eaTimecodeItems.size(); ++i) {
+        if(eaTimecodeItems.at(i)->getI_roomId() ==room){
+             eaTimecodeItems.at(i)->setCurrentTimeCode(QString::fromStdString(data[74]) );
+             eaTimecodeItems.at(i)->setTotalTimeCode( QString::fromStdString(data[57]));
+             return;
+        }
+    }
+    qDebug() << "Could not set ea  for room" << room;
+}
+
+bool LocationModel::addTimeCodeTrack(QString ea, int intEa, int room)
+{
+    EntertainAreaTimeCode *t  = new EntertainAreaTimeCode(intEa, ea, room);
+    connect(t, &EntertainAreaTimeCode::seekToTime, this, &LocationModel::seekToTime);
     eaTimecodeItems.append(t);
     return true;
 }

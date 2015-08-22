@@ -64,13 +64,12 @@ Item{
             if(pluginUrl.length > 4){
                 console.log("URL ok!")
                 prepareMedia(lmceData.pluginUrl)
-
-
             }
             else{
                 qmlPlayer.source=""
                 console.log("Url Malformed!")
                 console.log("Url::"+pluginUrl)
+                lmceData.pluginNotifyEnd(true)
             }
         }
 
@@ -129,6 +128,7 @@ Item{
             }
             onConnectedStateChanged:{
                 if(manager.connectedState ){
+                    qmlPlayer.stop()
                     //lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
                     mediaPlayerRoot.restart()
                 }
@@ -141,11 +141,28 @@ Item{
         autoPlay: true
         autoLoad: true
 
+        onPlaybackStateChanged: {
+            switch (playbackState){
+            case MediaPlayer.PlayingState: lmceData.pluginNotifyStart() ;break
+            case MediaPlayer.PausedState: console.log("Qml Player Has Been Paused"); break;
+            case MediaPlayer.StoppedState: console.log("Preparing next media") ; break;
+            default:console.log("Playback State Changed"); break;
+            }
+        }
 
-        onPlaybackStateChanged: console.log(qmlPlayer.source)
+        onStatusChanged: {
+            switch(status){
+            case MediaPlayer.NoMedia: console.log("qml player got a Bad media link"); lmceData.pluginNotifyEnd(true); break;
+            case MediaPlayer.Loading:console.log("qml player loading media, please wait"); break;
+            case MediaPlayer.Loaded:console.log("Media is loaded and ready to play"); break;
+            case MediaPlayer.Buffering: console.log("Buffering media "); break;
+            case MediaPlayer.EndOfMedia: console.log("Media Ended Normally"); lmceData.pluginNotifyEnd(false); break;
+            case MediaPlayer.InvalidMedia: console.log("Media needs to be transcoded for device"); lmceData.pluginNotifyEnd(true); break;
+            case MediaPlayer.UnknownStatus: console.log("Error is unknown"); break;
+            }
+        }
 
         onErrorStringChanged: {
-
             if(qmlPlayer.error===MediaPlayer.NetworkError){
                 console.log(errorString+"::NetworkError")
             } else if(qmlPlayer.error==MediaPlayer.ResourceError){
@@ -154,19 +171,10 @@ Item{
             }
         }
 
-        onStopped: {
-
-            if(qmlPlayer.errorString!==""){
-                console.log("ended with errors");
-                console.log(qmlPlayer.errorString)
-                lmceData.pluginNotifyEnd(true)
-            } else {
-               // lmceData.pluginNotifyEnd(false)
-            }
-        }
-
         onMediaObjectChanged: {
             console.log(JSON.stringify(metaData, null, "\t"))
+            lmceData.playbackInfoUpdated(metaData);
+
         }
 
         onDurationChanged: {
@@ -183,7 +191,7 @@ Item{
         onErrorChanged: {
             console.log("QML Media player error::"+error)
             if(error===1){
-              //  play()
+                //  play()
             }
         }
 
@@ -193,7 +201,6 @@ Item{
             lmceData.processTimeCode(position);
         }
         onHasVideoChanged: {
-
             if(hasVideo){
                 videoPlane.visible=true
             } else {
