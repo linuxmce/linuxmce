@@ -900,12 +900,6 @@ CreateFirstBoot () {
 		#nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> \${diskless_log} 2>&1 &
 	}
 
-	#VideoDriver () {
-	#	. /usr/pluto/bin/VideoDetectSetup
-	#	CheckVideoDriver
-	#}
-
-
 	###########################################################
 	### Main execution area
 	###########################################################
@@ -926,31 +920,6 @@ CreateFirstBoot () {
 
 InitialBootPrep () {
 	StatsMessage "Preparing initial reboot"
-
-	#Setup Runlevel 3
-	#rm -rf /etc/rc3.d/*
-	#cp -a /etc/rc2.d/* /etc/rc3.d/
-	#ln -sf /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-	#rm -f /etc/rc3.d/S99kdm /etc/rc3.d/S99a0start_avwizard
-
-	#Setup Runlevel 4
-	#rm -rf /etc/rc4.d/*
-	#cp -a /etc/rc2.d/* /etc/rc4.d/
-	#ln -sf /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-
-	#Setup Runlevel 5
-	#rm -rf /etc/rc5.d/*
-	#cp -a /etc/rc2.d/* /etc/rc5.d/
-	#ln -sf /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-
-	#Create inittab config
-	#cat >/etc/inittab <<"EOF"
-	# WARNING: Do NOT set the default runlevel to 0 (shutdown) or 6 (reboot).
-	#id:2:initdefault: # KDE
-	#id:3:initdefault: # Core
-	#id:4:initdefault: # Core + KDE
-	#id:5:initdefault: # Launch Manager
-	#EOF
 
 	mv /tmp/firstboot /etc/init.d/firstboot
 	chmod +x /etc/init.d/firstboot
