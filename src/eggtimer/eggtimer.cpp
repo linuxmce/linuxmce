@@ -234,11 +234,23 @@ void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD
 	cout << "Need to implement command #1147 - Cancel Egg Timer" << endl;
 	cout << "Parm #124 - DeviceToLink=" << iDeviceToLink << endl;
 	cout << "Parm #289 - SendOFF=" << bSendOFF << endl;
+	
 }
 
 void eggtimer::AlarmCallback(int id, void* param)
 {
 	cout << "Need to implement AlarmCallback - Egg Timer " <<endl;
-
+	
 		
 }
+
+void eggtimer::CommandOn(int PK_Device)
+{
+	cout << "Neet to implement CommandOn" << endl;
+}
+
+void eggtimer::CommandOff(int PK_Device)
+{
+	cout << "Neet to implement CommandOff" << endl;
+}
+
