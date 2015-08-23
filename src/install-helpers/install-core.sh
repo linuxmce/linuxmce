@@ -300,12 +300,6 @@ Setup_Pluto_Conf () {
 	chmod 777 /etc/pluto.conf &>/dev/null
 }
 
-UpdateStartupScripts () {
-	StatsMessage "Updating Startup Scripts"
-	# "DCERouter postinstall"
-	${BASE_DIR}/bin/Update_StartupScrips.sh  # << Note the mis-spelling
-}
-
 SetInitialInstallationData () {
 	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
 
@@ -333,9 +327,6 @@ Create_And_Config_Devices () {
 	Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
 	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
 	RunSQL "$Q"
-
-	### CORE
-	UpdateStartupScripts
 }
 
 CleanInstallSteps () {
