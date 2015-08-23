@@ -295,7 +295,7 @@ Setup_Pluto_Conf () {
 		#ImmediatelyFlushLog = 1
 		AutostartCore = $AutostartCore
 		AutostartMedia = $AutostartMedia
-		LTS_HES = $LTS_HES
+		LTS_HES = $TARGET_LTS_HES
 		EOF
 	chmod 777 /etc/pluto.conf &>/dev/null
 }

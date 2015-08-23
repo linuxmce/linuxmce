@@ -5,12 +5,7 @@ if [[ -n "$HEADER_install_md" ]]; then
 fi
 HEADER_install_md=included
 
-# include all the common install helpers
 . /usr/pluto/install/install-common.sh
-
-[[ -e ${BASE_DIR}/bin/Config_Ops.sh ]] && . ${BASE_DIR}/bin/Config_Ops.sh
-[[ -e ${BASE_DIR}/bin/SQL_Ops.sh ]] && . ${BASE_DIR}/bin/SQL_Ops.sh
-[[ -e ${BASE_DIR}/bin/Utils.sh ]] && . ${BASE_DIR}/bin/Utils.sh
 
 ###########################################################
 ### Setup global variables
@@ -55,11 +50,9 @@ MD_Setup_Fstab() {
 MD_Setup_Plutoconf() {
 	. ${BASE_DIR}/bin/Config_Ops.sh
 
-	# get PK_Device from "/etc/Disked_DeviceID", created by interactor
+	# get PK_Device from "$DEVID_FILE", created by interactor
 	DEVICE=$(cat "$DEVID_FILE")
-	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
 
-	[ -n "$PK_Distro" ] || [ -n "$TARGET_DISTRO_ID" ] && ConfSet "PK_Distro" "$TARGET_DISTRO_ID"
 	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "${CORE_IP}"
 	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
 	[ -n "$MySqlPassword" ] || ConfSet "MySqlPassword" ""
@@ -67,9 +60,18 @@ MD_Setup_Plutoconf() {
 	[ -n "$DCERouter" ] || ConfSet "DCERouter" "${CORE_IP}"
 	[ -n "$MySqlPort" ] || ConfSet "MySqlPort" "3306"
 	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
+
+	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
+	[ -n "$PK_Distro" ] || [ -n "$TARGET_DISTRO_ID" ] && ConfSet "PK_Distro" "$TARGET_DISTRO_ID"
+	[ -n "$LogLevels" ] || ConfSet "LogLevels" "1,5,7,8"
 	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
 	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
+	[ -n "$LTS_HES" ] || ConfSet "LTS_HES" "$TARGET_LTS_HES"
+
+	# Set the AVWizard to NOT done
 	[ -n "$AVWizardDone" ] || ConfSet "AVWizardDone" "0"
+	[ -n "$UseVideoWizard" ] || ConfSet "UseVideoWizard" "1"
+
 }
 
 ###########################################################
@@ -88,7 +90,7 @@ MD_System_Level_Prep () {
 }
 
 MD_Seamless_Compatability () {
-	# FIXME: no longer required
+	# FIXME: no longer required - placeholder
 	: # no-op
 }
 
@@ -131,16 +133,9 @@ MD_Populate_Debcache () {
 
 MD_Cleanup () {
 	StatsMessage "Cleaning up from package installations..."
-	#Copy the orbiter activation command to the MD's desktop
-	mkdir -p /root/Desktop
-	cp -r /etc/skel/Desktop/* /root/Desktop
 
 	#Remove the xorg file(s) from installation, need to start with a fresh slate
 	rm -f /etc/X11/xorg.conf*
-
-	#Clean up apt from the installs
-	apt-get -y clean
-	VerifyExitCode "APT Clean"
 
 	#Create a list of installed packages
 	#COLUMNS=1024 dpkg -l | awk '/^ii/ {print $2}' >/tmp/pkglist-diskless.txt # used for deb-cache cleanup in the builder
@@ -173,7 +168,6 @@ dontrun() {
 		return 10
 	fi
 
-	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
 	for f in ${BASE_DIR}/install/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: ${f}_preinst - Begin"

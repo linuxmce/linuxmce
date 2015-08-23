@@ -38,7 +38,6 @@ MESSGFILE=/tmp/messenger
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # get PK_Distro from OS
-LTS_HES=""
 case "$TARGET_RELEASE" in
 	lucid)
 		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Ubuntu_Lucid_CONST
@@ -48,12 +47,12 @@ case "$TARGET_RELEASE" in
 		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
 		TARGET_REPO_DISTRO_SRC=24
 		TARGET_REPO_LMCE_SRC=25
-		LTS_HES="-lts-trusty"	;;
+		TARGET_LTS_HES="-lts-trusty"	;;
 	trusty)
 		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST	;;
 		TARGET_REPO_DISTRO_SRC=24
 		TARGET_REPO_LMCE_SRC=25
-		LTS_HES="-lts-utopic"	;;
+		TARGET_LTS_HES="-lts-utopic"	;;
 	wheezy)
 		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
 		TARGET_REPO_DISTRO_SRC=22
@@ -281,8 +280,8 @@ Install_Kernel () {
 	StatsMessage "Installing kernel & headers"
 
 	StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
-	. ${BASE_DIR}/bin/Config_Ops.sh
-	ConfSet "LTS_HES" "${LTS_HES}"
+
+	LTS_HES="${TARGET_LTS_HES}"
 
 	StatsMessage "Installing Ubuntu kernel"
 	apt-get -f -y install --install-recommends linux-generic${LTS_HES} linux-image-generic${LTS_HES}
@@ -307,6 +306,7 @@ Install_X () {
 	StatsMessage "Installing X.Org"
 	#Install X prior to linuxmce to get lts_hwe pkgs.
 
+	LTS_HES="${TARGET_LTS_HES}"
 	case "$TARGET_RELEASE" in
 		"precise")      # 1204
 			apt-get -f -y --install-recommends install \
