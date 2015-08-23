@@ -178,7 +178,7 @@ Configure_Network_Options () {
 	# addresses - uses Initial_DHCP_Config.sh from the lmce-install-scripts package.
 	StatsMessage "Configuring your internal network"
 	#Source the SQL Ops file
-	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
+	. $BASE_DIR/bin/SQL_Ops.sh	# pluto-boot-scripts
 
 	## Setup /etc/hosts
 	echo > /etc/hosts
@@ -246,7 +246,7 @@ Configure_Network_Options () {
 		NETsetting="$c_netExtName,dhcp|$IntIf,$IntIP,$IntNetmask"
 	fi
 
-	DHCPsetting=$(/usr/pluto/install/Initial_DHCP_Config.sh "$Network" "$Digits_Count")
+	DHCPsetting=$($BASE_DIR/install/Initial_DHCP_Config.sh "$Network" "$Digits_Count")
 
 	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',32,'$NETsetting')"
 	RunSQL "$Q"
@@ -303,11 +303,11 @@ Setup_Pluto_Conf () {
 UpdateStartupScripts () {
 	StatsMessage "Updating Startup Scripts"
 	# "DCERouter postinstall"
-	/usr/pluto/bin/Update_StartupScrips.sh  # << Note the mis-spelling
+	$BASE_DIR/bin/Update_StartupScrips.sh  # << Note the mis-spelling
 }
 
 SetInitialInstallationData () {
-	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
+	. $BASE_DIR/bin/SQL_Ops.sh	# pluto-boot-scripts
 
 	## Update some info in the database
 	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('LinuxMCE', '1111')"
@@ -318,18 +318,18 @@ Create_And_Config_Devices () {
 	SetInitialInstallationData	# install-core.sh
 
 	### CORE
-	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
+	. $BASE_DIR/bin/SQL_Ops.sh	# pluto-boot-scripts
 	## Create the Core device and set it's description
 	StatsMessage "Setting up your computer to act as a 'Core'"
-	Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
+	Core_PK_Device=$($BASE_DIR/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
 	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
 	RunSQL "$Q"
 
 	### HYBRID
-	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
+	. $BASE_DIR/bin/SQL_Ops.sh	# pluto-boot-scripts
 	#Setup media director with core
 	StatsMessage "Setting up your computer to act as a 'Media Director'"
-	/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
+	$BASE_DIR/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
 	Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
 	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
 	RunSQL "$Q"
@@ -357,8 +357,8 @@ CleanInstallSteps () {
 			/var/lib/dpkg/info/"$Pkg".postinst configure
 		done
 
-		. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
-		. /usr/pluto/bin/Config_Ops.sh	# pluto-boot-scripts
+		. $BASE_DIR/bin/SQL_Ops.sh	# pluto-boot-scripts
+		. $BASE_DIR/bin/Config_Ops.sh	# pluto-boot-scripts
 
 		# Raise max char limit on php.ini
 		if ! grep -q 'max_input_vars' /etc/php5/apache2/php.ini; then 
@@ -401,7 +401,7 @@ CleanInstallSteps () {
 
 CreateDisklessImage () {
 	local diskless_log=/var/log/pluto/Diskless_Create-`date +"%F"`.log
-	nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
+	nohup $BASE_DIR/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
 }
 
 
