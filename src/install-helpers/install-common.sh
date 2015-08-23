@@ -280,6 +280,67 @@ DisableSplash () {
 	/usr/sbin/update-grub
 }
 
+Install_Kernel () {
+	StatsMessage "Installing kernel & headers"
+
+	StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
+	. /usr/pluto/bin/Config_Ops.sh
+	ConfSet "LTS_HES" "$LTS_HES"
+
+	StatsMessage "Installing Ubuntu kernel"
+	apt-get -f -y install --install-recommends linux-generic"$LTS_HES" linux-image-generic"$LTS_HES"
+	VerifyExitCode "Install linux kernel package failed"
+
+	StatsMessage "Installing Ubuntu kernel headers"
+	#Install headers and run depmod for the seamless integraton function, ensure no errors exist
+	apt-get -f -y --no-install-recommends install linux-headers-generic"$LTS_HES"
+	VerifyExitCode "Install linux headers package failed"
+
+	#StatsMessage "Installing firmware"
+	#apt-get -f -y install --no-install-recommends linux-firmware || :
+	#VerifyExitCode "Install linux firmware failed" || :
+
+	StatsMessage "Running depmod"
+	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
+	depmod -v "$TARGET_KVER"
+	VerifyExitCode "depmod failed for $TARGET_KVER"
+}
+
+Install_X () {
+	StatsMessage "Installing X.Org"
+	#Install X prior to linuxmce to get lts_hwe pkgs.
+
+	case "$TARGET_RELEASE" in
+		"precise")      # 1204
+			apt-get -f -y --install-recommends install \
+				xserver-xorg"$LTS_HES" \
+				xserver-xorg-video-all"$LTS_HES" \
+				libgl1-mesa-glx"$LTS_HES"
+				VerifyExitCode "Installing X.Org failed"	;;
+		"trusty")       # 1404
+			apt-get -f -y --install-recommends install \
+				xserver-xorg-core-"$LTS_HES" \
+				xserver-xorg"$LTS_HES" \
+				xserver-xorg-video-all"$LTS_HES" \
+				xserver-xorg-input-all"$LTS_HES" \
+				libwayland-egl1-mesa"$LTS_HES"
+				VerifyExitCode "Installing X.Org failed"	;;
+		*)      # *
+			apt-get -f -y --install-recommends install \
+				xserver-xorg \
+				xserver-xorg-video-all
+				VerifyExitCode "Installing X.Org failed"	;;
+	esac
+}
+
+Install_KUbuntu_Desktop () {
+	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
+		StatsMessage "Installing kubuntu desktop packages"
+		apt-get -f -y --no-install-recommends install kubuntu-desktop
+		VerifyExitCode "kubuntu-desktop"
+	fi
+}
+
 addAdditionalTTYStart () {
 	# TODO: this is ubuntu specific, alter to fn properly for debian/raspbian as well
 	if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]] || [[ "$TARGET_RELEASE" == "trusty" ]]; then
@@ -306,4 +367,18 @@ return 0
 ###########################################################
 ###########################################################
 
+dontrun () {
+	# run any device specific firstboot add-on kernel config here
+	ret=""
+	for f in /usr/pluto/install/firstboot_lmce_* ; do
+		StatsMessage "Running device specific script: ${f}_kernel - Begin"
+		. "$f" || :
+		$(basename "$f")_kernel || :
+		ret="0"
+		StatsMessage "Running device specific script: ${f}_kernel - End"
+	done
 
+	# Default kernel installation is ubuntu based, if the above is not run
+	if [[ "$ret" != "0" ]] ; then
+	fi
+}
