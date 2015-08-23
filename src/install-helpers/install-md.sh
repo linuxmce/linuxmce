@@ -8,9 +8,9 @@ HEADER_install_md=included
 # include all the common install helpers
 . /usr/pluto/install/install-common.sh
 
-[[ -e $BASE_DIR/bin/Config_Ops.sh ]] && . $BASE_DIR/bin/Config_Ops.sh
-[[ -e $BASE_DIR/bin/SQL_Ops.sh ]] && . $BASE_DIR/bin/SQL_Ops.sh
-[[ -e $BASE_DIR/bin/Utils.sh ]] && . $BASE_DIR/bin/Utils.sh
+[[ -e ${BASE_DIR}/bin/Config_Ops.sh ]] && . ${BASE_DIR}/bin/Config_Ops.sh
+[[ -e ${BASE_DIR}/bin/SQL_Ops.sh ]] && . ${BASE_DIR}/bin/SQL_Ops.sh
+[[ -e ${BASE_DIR}/bin/Utils.sh ]] && . ${BASE_DIR}/bin/Utils.sh
 
 ###########################################################
 ### Setup global variables
@@ -23,7 +23,7 @@ DEVID_FILE="/etc/Disked_DeviceID"
 INSTALL_KUBUNTU_DESKTOP="no"
 
 # Get the Core's IP Address using the locator
-CORE_IP=$($BASE_DIR/bin/core-locator)
+CORE_IP=$(${BASE_DIR}/bin/core-locator)
 
 ###########################################################
 ### Config setup fns.
@@ -34,26 +34,26 @@ MD_Setup_Fstab() {
 	check=$(grep "${CORE_IP}" "${FSTAB_FILE}" || :)
 	if [ -z "$check" ] ; then
 		cat <<-EOF >> "${FSTAB_FILE}"
-			${CORE_IP}:$BASE_DIR/var/		$BASE_DIR/var/		nfs4 retrans=10,timeo=50 1 1
-			${CORE_IP}:$BASE_DIR/orbiter		$BASE_DIR/orbiter	nfs4 retrans=10,timeo=50 1 1
-			${CORE_IP}:$BASE_DIR/keys		$BASE_DIR/keys		nfs4 retrans=10,timeo=50 1 1
-			${CORE_IP}:$BASE_DIR/deb-cache		$BASE_DIR/deb-cache    nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:${BASE_DIR}/var/		${BASE_DIR}/var/		nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:${BASE_DIR}/orbiter		${BASE_DIR}/orbiter	nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:${BASE_DIR}/keys		${BASE_DIR}/keys		nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:${BASE_DIR}/deb-cache		${BASE_DIR}/deb-cache    nfs4 retrans=10,timeo=50 1 1
 			${CORE_IP}:/var/spool/asterisk		/var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
 			${CORE_IP}:/home			/home			nfs4 retrans=10,timeo=50 1 1
 			${CORE_IP}:/home/cameras		/home/cameras		nfs4 retrans=10,timeo=50 1 1
 			EOF
 	fi
-	mkdir -p $BASE_DIR/var/
-	mkdir -p $BASE_DIR/orbiter
-	mkdir -p $BASE_DIR/keys
-	mkdir -p $BASE_DIR/deb-cache
+	mkdir -p ${BASE_DIR}/var/
+	mkdir -p ${BASE_DIR}/orbiter
+	mkdir -p ${BASE_DIR}/keys
+	mkdir -p ${BASE_DIR}/deb-cache
 	mkdir -p /var/spool/asterisk
 	mkdir -p /home/cameras
 	mount -a || :
 }
 
 MD_Setup_Plutoconf() {
-	. $BASE_DIR/bin/Config_Ops.sh
+	. ${BASE_DIR}/bin/Config_Ops.sh
 
 	# get PK_Device from "/etc/Disked_DeviceID", created by interactor
 	DEVICE=$(cat "$DEVID_FILE")
@@ -79,7 +79,7 @@ MD_Setup_Plutoconf() {
 MD_Copy_SSH_Keys () {
 	## Setup initial ssh access
 	StatsMessage "Setting up SSH"
-	[[ -f $BASE_DIR/keys/id_dsa_pluto.pub ]] && mkdir -p /root/.ssh && cat $BASE_DIR/keys/id_dsa_pluto.pub >> /root/.ssh/authorized_keys
+	[[ -f ${BASE_DIR}/keys/id_dsa_pluto.pub ]] && mkdir -p /root/.ssh && cat ${BASE_DIR}/keys/id_dsa_pluto.pub >> /root/.ssh/authorized_keys
 }
 
 MD_System_Level_Prep () {
@@ -175,7 +175,7 @@ dontrun() {
 
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
-	for f in $BASE_DIR/install/firstboot_lmce_* ; do
+	for f in ${BASE_DIR}/install/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: ${f}_preinst - Begin"
 		. "$f" || :
 		$(basename "$f")_preinst || :
@@ -192,7 +192,7 @@ dontrun() {
 
         # run any device specific firstboot add-on kernel config here
         ret=""
-        for f in $BASE_DIR/install/firstboot_lmce_* ; do
+        for f in ${BASE_DIR}/install/firstboot_lmce_* ; do
                 StatsMessage "Running device specific script: ${f}_kernel - Begin"
                 . "$f" || :
                 $(basename "$f")_kernel || :
@@ -211,7 +211,7 @@ dontrun() {
 	MD_Cleanup
 
 	# run any device specific firstboot add-on scripts here
-	for f in $BASE_DIR/install/firstboot_lmce_* ; do
+	for f in ${BASE_DIR}/install/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: ${f}_postinst - Begin"
 		. "$f" || :
 		$(basename "$f")_postinst || :
