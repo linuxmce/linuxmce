@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -n "$HEADER_install_md" ]]; then
-        return 0
+	return 0
 fi
 HEADER_install_md=included
 
@@ -29,9 +29,9 @@ CORE_IP=$(/usr/pluto/install/core-locator)
 ### Config setup fns.
 ###########################################################
 
-setup_fstab() {
+MD_Setup_Fstab() {
 	# Hmm, let's see if the mounts are here, if not add them
-	check=$(grep "$CORE_IP" "${FSTAB_FILE}" || :)
+	check=$(grep "${CORE_IP}" "${FSTAB_FILE}" || :)
 	if [ -z "$check" ] ; then
 		cat <<-EOF >> "${FSTAB_FILE}"
 			${CORE_IP}:/usr/pluto/var/		/usr/pluto/var/		nfs4 retrans=10,timeo=50 1 1
@@ -52,7 +52,7 @@ setup_fstab() {
 	mount -a || :
 }
 
-setup_plutoconf() {
+MD_Setup_Plutoconf() {
 	. /usr/pluto/bin/Config_Ops.sh
 
 	# get PK_Device from "/etc/Disked_DeviceID", created by interactor
@@ -62,8 +62,7 @@ setup_plutoconf() {
 	# TODO: start_interactor already did this and put it in the DB
 	# TODO: get the data from the DB instead?
 	# get PK_Distro from OS
-	DISTRO=$(lsb_release -cs)
-	case "$DISTRO" in
+	case "$TARGET_RELEASE" in
 		precise)
 			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST 	;;
 		trusty)
@@ -97,20 +96,7 @@ MD_Find_Core () {
 }
 
 MD_System_Level_Prep () {
-	StatsMessage "Setting up /etc/apt/sources.list"
-	APT_CONFIG=$(grep "linuxmce" /etc/apt/sources.list)
-	if [ -z "$APT_CONFIG" ] ; then
-		TARGET_REPO_NAME="main"
-		cat <<-EOF > /etc/apt/sources.list
-			#deb http://10.10.42.99/$TARGET_RELEASE-$TARGET_ARCH/ ./
-			deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
-			deb http://deb.linuxmce.org/$TARGET_DISTRO/ $TARGET_RELEASE $TARGET_REPO_NAME
-			deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
-			deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
-			deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
-			deb $SECURITY_REPO $TARGET_RELEASE-security main restricted universe multiverse
-			EOF
-	fi
+	ConfigSources	# install-common.sh
 
 	## Setup initial ssh access
 	StatsMessage "Setting up SSH"
@@ -123,7 +109,6 @@ MD_Seamless_Compatability () {
 
 MD_Preseed () {
 	PreSeed_DebConf	# install-common.sh
-	: # no-op
 }
 
 MD_Update () {
@@ -132,18 +117,16 @@ MD_Update () {
 
 	apt-get -f -y install
 
-	## FIXME: need to fix bootscripts?  need to fix/update install-scripts
-	#apt-get -f -y install --no-install-recommends pluto-boot-scripts
-	#VerifyExitCode "pluto-boot-scripts failed"
+	AptDistUpgrade	# install-common.sh
 }
 
 MD_Install_Kernel () {
 	StatsMessage "Installing kernel headers"
 
-	#TODO get as much of this from database as possible
+	# TODO: get as much of this from database as possible
 	# run any device specific firstboot add-on kernel config here
 	ret=""
-	for f in /usr/pluto/firstboot/firstboot_lmce_* ; do
+	for f in /usr/pluto/install/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: $f _kernel - Begin"
 		. "$f" || :
 		$(basename "$f")_kernel || :
@@ -153,18 +136,18 @@ MD_Install_Kernel () {
 
 	# Default kernel installation is ubuntu based, if the above is not run
 	if [[ "$ret" != "0" ]] ; then
-		StatsMessage "Setting up HardWare Enablement stack"
+		StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
 		. /usr/pluto/bin/Config_Ops.sh
 		ConfSet "LTS_HES" "$TARGET_KVER_LTS_HES"
 
-		StatsMessage "Installing ubuntu kernel headers"
+		StatsMessage "Installing Ubuntu kernel"
+		apt-get -f -y install --install-recommends linux-generic"$TARGET_KVER_LTS_HES" linux-image-generic"$TARGET_KVER_LTS_HES"
+		VerifyExitCode "Install linux kernel package failed"
+
+		StatsMessage "Installing Ubuntu kernel headers"
 		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 		apt-get -f -y --no-install-recommends install linux-headers-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux headers package failed"
-
-		StatsMessage "Installing kernel"
-		apt-get -f -y install --install-recommends linux-generic"$TARGET_KVER_LTS_HES" linux-image-generic"$TARGET_KVER_LTS_HES"
-		VerifyExitCode "Install linux kernel package failed"
 	fi
 
 	#StatsMessage "Installing firmware"
@@ -262,7 +245,7 @@ dontrun() {
 
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
-	for f in /usr/pluto/firstboot/firstboot_lmce_* ; do
+	for f in /usr/pluto/install/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: $f _preinst - Begin"
 		. "$f" || :
 		$(basename "$f")_preinst || :
@@ -274,8 +257,8 @@ dontrun() {
 	#MD_Seamless_Compatability
 	#MD_Preseed
 	MD_Update
-	setup_fstab
-	setup_plutoconf
+	MD_Setup_Fstab
+	MD_Setup_Plutoconf
 	MD_Install_Kernel
 	MD_Install_Packages
 	Disable_DisplayManager
@@ -284,7 +267,7 @@ dontrun() {
 	MD_Cleanup
 
 	# run any device specific firstboot add-on scripts here
-	for f in /usr/pluto/firstboot/firstboot_lmce_* ; do
+	for f in /usr/pluto/install/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: $f _postinst - Begin"
 		. "$f" || :
 		$(basename "$f")_postinst || :
