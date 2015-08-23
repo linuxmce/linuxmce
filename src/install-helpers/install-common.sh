@@ -10,19 +10,16 @@ HEADER_install_common=included
 ###########################################################
 log_file=/var/log/LinuxMCE_Setup.log
 
+BASE_DIR=/usr/pluto
+
 TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 TARGET_RELEASE=$(lsb_release -c -s)
 TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
 DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 REPO="main"
 
-DISTRO="$TARGET_RELEASE"
-LOCAL_REPO_BASE=/usr/pluto/deb-cache/$DEB_CACHE
+LOCAL_REPO_BASE=$BASE_DIR/deb-cache/$DEB_CACHE
 LOCAL_REPO_DIR=./
-
-DT_CORE=1
-DT_HYBRID=2
-DT_MEDIA_DIRECTOR=3
 
 DEVICE_TEMPLATE_Core=7
 DEVICE_TEMPLATE_MediaDirector=28
@@ -257,7 +254,7 @@ Disable_NetworkManager () {
 ConfigSources () {
 	StatsMessage "Configuring sources.list for MCE install"
 
-	. /usr/pluto/install/AptSources.sh
+	. $BASE_DIR/install/AptSources.sh
 	AptSrc_ParseSourcesList "/etc/apt/sources.list"
 	AptSrc_AddSource "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
 	AptSrc_AddSource "http://deb.linuxmce.org/${TARGET_DISTRO}/ ${TARGET_RELEASE} ${REPO}"
@@ -266,12 +263,12 @@ ConfigSources () {
 
 UpdateDebCache () {
 	StatsMessage "Updating deb-cache package files"
-	/usr/pluto/bin/UpdateDebCache.sh
+	$BASE_DIR/bin/UpdateDebCache.sh
 }
 
 Config_Device_Changes () {
-	StatsMessage "Running /usr/pluto/bin/Config_Device_Changes.sh"
-	/usr/pluto/bin/Config_Device_Changes.sh
+	StatsMessage "Running $BASE_DIR/bin/Config_Device_Changes.sh"
+	$BASE_DIR/bin/Config_Device_Changes.sh
 }
 
 DisableSplash () {
@@ -284,7 +281,7 @@ Install_Kernel () {
 	StatsMessage "Installing kernel & headers"
 
 	StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
-	. /usr/pluto/bin/Config_Ops.sh
+	. $BASE_DIR/bin/Config_Ops.sh
 	ConfSet "LTS_HES" "$LTS_HES"
 
 	StatsMessage "Installing Ubuntu kernel"
@@ -370,7 +367,7 @@ return 0
 dontrun () {
 	# run any device specific firstboot add-on kernel config here
 	ret=""
-	for f in /usr/pluto/install/firstboot_lmce_* ; do
+	for f in $BASE_DIR/install/firstboot_lmce_* ; do
 		StatsMessage "Running device specific script: ${f}_kernel - Begin"
 		. "$f" || :
 		$(basename "$f")_kernel || :
