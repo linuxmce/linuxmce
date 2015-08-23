@@ -66,9 +66,8 @@ c_singleNIC=1
 "
 }
 
-
 ###########################################################
-### Setup Functions - General functions
+### Network Setup Functions
 ###########################################################
 
 Nic_Config () {
@@ -271,32 +270,6 @@ Setup_Pluto_Conf () {
 	AutostartCore=1
 	AutostartMedia=1
 
-	case "$TARGET_RELEASE" in
-		"intrepid")
-			# select UI1
-			PK_DISTRO=17
-			;;
-		"lucid")
-			# select UI2 without alpha blending
-			PK_DISTRO=18
-			;;
-		"precise")
-			PK_DISTRO=20
-			LTS_HES=-lts-trusty
-			;;
-		"trusty")
-			PK_DISTRO=21
-			LTS_HES=-lts-utopic
-			;;
-		"wheezy")
-			PK_DISTRO=19
-			;;
-		"jessie")
-			PK_DISTRO=22
-			;;
-	esac
-
-
 	StatsMessage "Generating Default Config File"
 	cat <<-EOF >/etc/pluto.conf
 		# Pluto config file
@@ -311,7 +284,7 @@ Setup_Pluto_Conf () {
 		Activation_Code = 1111
 		PK_Installation = 1
 		PK_Users = 1
-		PK_Distro = $PK_DISTRO
+		PK_Distro = $TARGET_DISTRO_ID
 		Display = 0
 		SharedDesktop = 1
 		OfflineMode = false
@@ -333,22 +306,27 @@ UpdateStartupScripts () {
 	/usr/pluto/bin/Update_StartupScrips.sh  # << Note the mis-spelling
 }
 
-Create_And_Config_Devices () {
-	#Source the SQL_OPS file
+SetInitialInstallationData () {
 	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
 
 	## Update some info in the database
 	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('LinuxMCE', '1111')"
 	RunSQL "$Q"
+}
 
-## CORE
+Create_And_Config_Devices () {
+	SetInitialInstallationData	# install-core.sh
+
+	### CORE
+	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
 	## Create the Core device and set it's description
 	StatsMessage "Setting up your computer to act as a 'Core'"
 	Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
 	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
 	RunSQL "$Q"
 
-## HYBRID
+	### HYBRID
+	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
 	#Setup media director with core
 	StatsMessage "Setting up your computer to act as a 'Media Director'"
 	/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
@@ -356,6 +334,7 @@ Create_And_Config_Devices () {
 	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
 	RunSQL "$Q"
 
+	### CORE
 	UpdateStartupScripts
 }
 
@@ -386,7 +365,7 @@ CleanInstallSteps () {
 			echo "max_input_vars = 15000" >> /etc/php5/apache2/php.ini
 		fi
 
-		# Mark remote assistance as diabled
+		# Mark remote assistance as disabled
 		ConfDel remote
 
 		arch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
