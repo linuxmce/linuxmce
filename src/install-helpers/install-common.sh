@@ -174,13 +174,21 @@ Setup_Logfile () {
 ### Setup Functions - General functions
 ###########################################################
 
+AptUpdate () {
+	apt-get -qq update
+	VerifyExitCode "apt-get update"
+}
+
+AptDistUpgrade () {
+	apt-get -y -q -f --force-yes dist-upgrade
+	VerifyExitCode "dist-upgrade"
+}
+
 UpdateUpgrade () {
 	#perform an update and a dist-upgrade
 	StatsMessage "Performing an update and an upgrade to all components"
-	apt-get -qq update
-	VerifyExitCode "apt-get update"
-	apt-get -y -q -f --force-yes dist-upgrade
-	VerifyExitCode "dist-upgrade"
+	AptUpdate
+	AptDistUpgrade
 }
 
 TimeUpdate () {
@@ -204,8 +212,9 @@ gpgUpdate () {
 	fi
 }
 
-
 Fix_LSB_Data () {
+	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
+	:
 	case "$TARGET_DISTRO" in
 		raspbian)
 			# raspbian doesn't come with lsb-release by default???
@@ -222,18 +231,23 @@ Notify_Reboot () {
 }
 
 Disable_DisplayManager () {
+	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
+	:
+	# TODO: dpkg-divert this so it doesn't come back
 	StatsMessage "Disabling display manager"
 	mkdir -p "/etc/X11"
 	echo "/bin/false" >/etc/X11/default-display-manager
-	update-rc.d -f kdm remove 2>/dev/null || :
-	update-rc.d -f lightdm remove 2>/dev/null || :
+	update-rc.d -f kdm remove >/dev/null
+	update-rc.d -f lightdm remove >/dev/null
 }
 
 Disable_NetworkManager () {
-	update-rc.d -f NetworkManager remove || :
+	update-rc.d -f NetworkManager remove
 }
 
 CreateBasePackagesFile () {
+	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
+	:
 	StatsMessage "Setting up deb-cache/ packages files"
 	#Make sure there is are Packages files on the MD so apt-get update does not fail
 	if [[ ! -f /usr/pluto/deb-cache/Packages.gz ]] ; then
@@ -259,6 +273,8 @@ UpdateDebCache () {
 }
 
 CreateBackupSources () {
+	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
+	:
 	if [ ! -e /etc/apt/sources.list.pbackup ]; then
 		StatsMessage "Backing up sources.list file"
 		cp -a /etc/apt/sources.list /etc/apt/sources.list.pbackup
@@ -266,6 +282,8 @@ CreateBackupSources () {
 }
 
 Disable_CompCache () {
+	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
+	:
 	# Disable compcache
 	if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
 		rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
@@ -273,9 +291,11 @@ Disable_CompCache () {
 }
 
 ConfigAptConf () {
-	# Setup pluto's apt.conf
+	# FIXME: REMOVE? This is in pluto-boot-scripts postinst
+	:
+	# Setup LinuxMCE's apt.conf
 	cat <<-EOF >/etc/apt/apt.conf.d/30pluto
-		// Pluto apt conf add-on
+		// LinuxMCE apt conf add-on
 		//Apt::Cache-Limit "12582912";
 		Dpkg::Options { "--force-confold"; };
 		//Acquire::http::timeout "10";
@@ -288,24 +308,24 @@ ConfigAptConf () {
 
 ConfigSources () {
 	StatsMessage "Configuring sources.list for MCE install"
+
 	. /usr/pluto/install/AptSources.sh
-
 	AptSrc_ParseSourcesList "/etc/apt/sources.list"
-
 	AptSrc_AddSource "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
 	AptSrc_AddSource "http://deb.linuxmce.org/${TARGET_DISTRO}/ ${TARGET_RELEASE} ${REPO}"
-
 	AptSrc_WriteSourcesList
 }
 
 PreSeed_DebConf () {
+	# FIXME: REMOVE? This is in pluto-boot-scripts preinst
+	:
 	StatsMessage "PreSeeding package installation preferences"
 
 	debconf-set-selections /usr/pluto/install/preseed.cfg
 	VerifyExitCode "debconf-set-selections - preseed data"
 }
 
-Config_MySQL_Client () {
+Config_MySQL_Client () { ## MD Only?
 	StatsMessage "Setting up mysql client - server hostname"
 	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
 	cat <<-EOF > /root/.my.cnf

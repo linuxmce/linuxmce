@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Need pre-depends on lmce-install-scripts
+. /usr/pluto/install/install-common.sh
+
+###########################################################
+### Main Execution Area
+###########################################################
+
+## PKG INSTALL FN's
+Fix_LSB_Data                    # preinst ALL (raspbian)
+CreateBackupSources             # preinst ALL
+CreateBasePackagesFiles         # preinst ALL
+Disable_CompCache               # preinst ALL ??
+ConfigAptConf                   # preinst ALL
+ConfigSources                   # preinst ALL
+PreSeed_DebConf                 # preinst ALL
+Config_MySQL_Client             # preinst ALL
+Setup_MakeDev                   # preinst ALL
+

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+. /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/install/install-core.sh
+
+# run any device specific firstboot add-on scripts here
+for f in /usr/pluto/install/firstboot_lmce_* ; do
+	StatsMessage "Running device specific script: ${f}_preinst - Begin"
+	. "$f" || :
+	$(basename "$f")_preinst || :
+	StatsMessage "Running device specific script: ${f}_preinst - End"
+done
+
+########################################
+
+:
+
+########################################
+
+# run any device specific firstboot add-on scripts here
+for f in /usr/pluto/install/firstboot_lmce_* ; do
+	StatsMessage "Running device specific script: ${f}_postinst - Begin"
+	. "$f" || :
+	$(basename "$f")_postinst || :
+	StatsMessage "Running device specific script: ${f}_postinst - End"
+done
+
+StatsMessage "Setting Firstboot = false"
+ConfSet "FirstBoot" "false"
+sync
+
+StatsMessage "Rebooting in 5 seconds"
+sleep 1
+StatsMessage "Rebooting in 4 seconds"
+sleep 1
+StatsMessage "Rebooting in 3 seconds"
+sleep 1
+StatsMessage "Rebooting in 2 seconds"
+sleep 1
+StatsMessage "Rebooting in 1 seconds"
+sleep 1
+StatsMessage "Rebooting"
+reboot
+return 0
