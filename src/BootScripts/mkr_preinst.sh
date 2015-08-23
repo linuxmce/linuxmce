@@ -27,7 +27,7 @@ if [ install = "$1" -o upgrade = "$1" ]; then
 	debconf-set-selections /tmp/preseed.cfg
 #fi
 #if [ install = "$1" ]; then
-	StatsMessage "Setting up kernel symlink fix"
+	# Setting up kernel symlink fix
 	## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
 	cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
 		#!/bin/bash
