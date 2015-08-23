@@ -67,7 +67,7 @@ c_singleNIC=1
 }
 
 ###########################################################
-### Network Setup Functions
+### Network Setup Functions - FIRSTBOOT
 ###########################################################
 
 Nic_Config () {
@@ -262,7 +262,7 @@ Configure_Network_Options () {
 }
 
 #######################################################
-#######################################################
+### Other Setup Functions
 #######################################################
 
 Setup_Pluto_Conf () {
@@ -391,6 +391,7 @@ CleanInstallSteps () {
 }
 
 CreateDisklessImage () {
+	# This runs in the background '&'
 	local diskless_log=/var/log/pluto/Diskless_Create-`date +"%F"`.log
 	nohup ${BASE_DIR}/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
 }
