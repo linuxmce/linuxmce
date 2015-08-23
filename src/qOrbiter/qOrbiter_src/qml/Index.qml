@@ -11,8 +11,9 @@ import "skins"
   */
 ApplicationWindow {
     id:qml_root_item
-    height: 640
-    width: 480
+    height: manager.appHeight
+    width: manager.appWidth
+
 
     visible: true
     color:"transparent"

@@ -124,9 +124,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
             testH=600;
             //  mainView.showNormal();
         }
-
 #endif
     }
+
+
     mainView.rootContext()->setContextProperty("appW", testW);
     mainView.rootContext()->setContextProperty("appH", testH);
 
@@ -140,8 +141,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     m_appEngine->rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     m_appEngine->rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     m_appEngine->rootContext()->setContextProperty("localPath", localPath);
-
-
 
 #if defined (GLENABLED) || (QT5)
     fileReader = new FileReader();

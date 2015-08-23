@@ -18,14 +18,15 @@ Loader {
         onScreenChange:{
             qmlRoot.resetTimeout();
             console.log( "Manager screen::"+ manager.currentScreen)
+            nextScreen=manager.currentScreen
         }
     }
 
     Timer{
         id:recovery
-        interval: 500
+        interval: 1000
         running:false
-        onTriggered: manager.qmlReload()
+        onTriggered:loadNext()
     }
 
     function toggleContent(toggle){

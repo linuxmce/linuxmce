@@ -262,7 +262,7 @@ public:
     //virtual bool GetConfig();
 
     //<-dceag-const-e->
-    //  virtual bool GetConfig();
+      virtual bool GetConfig();
     virtual bool Register();
     virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
