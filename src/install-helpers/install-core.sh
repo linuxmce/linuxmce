@@ -71,101 +71,6 @@ c_singleNIC=1
 ### Setup Functions - General functions
 ###########################################################
 
-Setup_Pluto_Conf () {
-	StatsMessage "Seting Up MCE Configuration file"
-	AutostartCore=1
-	AutostartMedia=1
-
-	case "$TARGET_RELEASE" in
-		"intrepid")
-			# select UI1
-			PK_DISTRO=17
-			;;
-		"lucid")
-			# select UI2 without alpha blending
-			PK_DISTRO=18
-			;;
-		"precise")
-			PK_DISTRO=20
-			LTS_HES=-lts-trusty
-			;;
-		"trusty")
-			PK_DISTRO=21
-			LTS_HES=-lts-utopic
-			;;
-		"wheezy")
-			PK_DISTRO=19
-			;;
-		"jessie")
-			PK_DISTRO=22
-			;;
-	esac
-
-
-	StatsMessage "Generating Default Config File"
-	cat <<-EOF >/etc/pluto.conf
-		# Pluto config file
-		MySqlHost = localhost
-		MySqlUser = root
-		MySqlPassword =
-		MySqlDBName = pluto_main
-		DCERouter = localhost
-		MySqlPort = 3306
-		DCERouterPort = 3450
-		PK_Device = 1
-		Activation_Code = 1111
-		PK_Installation = 1
-		PK_Users = 1
-		PK_Distro = $PK_DISTRO
-		Display = 0
-		SharedDesktop = 1
-		OfflineMode = false
-		#<-mkr_b_videowizard_b->
-		UseVideoWizard = 1
-		#<-mkr_b_videowizard_e->
-		LogLevels = 1,5,7,8
-		#ImmediatelyFlushLog = 1
-		AutostartCore = $AutostartCore
-		AutostartMedia = $AutostartMedia
-		LTS_HES = $LTS_HES
-		EOF
-	chmod 777 /etc/pluto.conf &>/dev/null
-}
-
-Create_And_Config_Devices () {
-	#Source the SQL_OPS file
-	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
-
-	DEVICE_TEMPLATE_Core=7
-	DEVICE_TEMPLATE_MediaDirector=28
-
-	## Update some info in the database
-	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('LinuxMCE', '1111')"
-	RunSQL "$Q"
-
-	## Create the Core device and set it's description
-	StatsMessage "Setting up your computer to act as a 'Core'"
-	Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
-	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
-	RunSQL "$Q"
-
-	#Setup media director with core
-	StatsMessage "Setting up your computer to act as a 'Media Director'"
-	/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
-	Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
-	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
-	RunSQL "$Q"
-
-	StatsMessage "Updating Startup Scripts"
-	# "DCERouter postinstall"
-	/usr/pluto/bin/Update_StartupScrips.sh
-}
-
-Config_Device_Changes () {
-	StatsMessage "Running /usr/pluto/bin/Config_Device_Changes.sh"
-	/usr/pluto/bin/Config_Device_Changes.sh
-}
-
 Nic_Config () {
 	StatsMessage "Starting NIC Discovery and Configuration"
 	# Find out, what nic configuration we have. This is needed for later on to fill the database
@@ -236,7 +141,7 @@ Nic_Config () {
 	fi
 
 	if [[ ! -r ${mce_wizard_data_shell} ]]; then
-	        echo "`date` - Wizard Information is corrupted or missing."
+		echo "`date` - Wizard Information is corrupted or missing."
 		exit 1
 	fi
 	. ${mce_wizard_data_shell}
@@ -357,25 +262,105 @@ Configure_Network_Options () {
 	RunSQL "$Q"
 }
 
-addAdditionalTTYStart () {
-	# TODO: this is ubuntu specific, alter to fn properly for debian/raspbian as well
-	if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]] || [[ "$TARGET_RELEASE" == "trusty" ]]; then
-		sed -i 's/23/235/' /etc/init/tty2.conf
-		sed -i 's/23/235/' /etc/init/tty3.conf
-		sed -i 's/23/235/' /etc/init/tty4.conf
-		# disable plymouth splash for now. Could be replaced by own LMCE splash later
-		sed -i 's/ splash//' /etc/default/grub
-		#Setup vmalloc for video drivers
-		sed -i 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"vmalloc=256m\"/' /etc/default/grub
-		/usr/sbin/update-grub
-	else
-		echo "start on runlevel 5">>/etc/event.d/tty2
-		echo "start on runlevel 5">>/etc/event.d/tty3
-		echo "start on runlevel 5">>/etc/event.d/tty4
-	fi
+#######################################################
+#######################################################
+#######################################################
+
+Setup_Pluto_Conf () {
+	StatsMessage "Seting Up MCE Configuration file"
+	AutostartCore=1
+	AutostartMedia=1
+
+	case "$TARGET_RELEASE" in
+		"intrepid")
+			# select UI1
+			PK_DISTRO=17
+			;;
+		"lucid")
+			# select UI2 without alpha blending
+			PK_DISTRO=18
+			;;
+		"precise")
+			PK_DISTRO=20
+			LTS_HES=-lts-trusty
+			;;
+		"trusty")
+			PK_DISTRO=21
+			LTS_HES=-lts-utopic
+			;;
+		"wheezy")
+			PK_DISTRO=19
+			;;
+		"jessie")
+			PK_DISTRO=22
+			;;
+	esac
+
+
+	StatsMessage "Generating Default Config File"
+	cat <<-EOF >/etc/pluto.conf
+		# Pluto config file
+		MySqlHost = localhost
+		MySqlUser = root
+		MySqlPassword =
+		MySqlDBName = pluto_main
+		DCERouter = localhost
+		MySqlPort = 3306
+		DCERouterPort = 3450
+		PK_Device = 1
+		Activation_Code = 1111
+		PK_Installation = 1
+		PK_Users = 1
+		PK_Distro = $PK_DISTRO
+		Display = 0
+		SharedDesktop = 1
+		OfflineMode = false
+		#<-mkr_b_videowizard_b->
+		UseVideoWizard = 1
+		#<-mkr_b_videowizard_e->
+		LogLevels = 1,5,7,8
+		#ImmediatelyFlushLog = 1
+		AutostartCore = $AutostartCore
+		AutostartMedia = $AutostartMedia
+		LTS_HES = $LTS_HES
+		EOF
+	chmod 777 /etc/pluto.conf &>/dev/null
+}
+
+UpdateStartupScripts () {
+	StatsMessage "Updating Startup Scripts"
+	# "DCERouter postinstall"
+	/usr/pluto/bin/Update_StartupScrips.sh  # << Note the mis-spelling
+}
+
+Create_And_Config_Devices () {
+	#Source the SQL_OPS file
+	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
+
+	## Update some info in the database
+	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('LinuxMCE', '1111')"
+	RunSQL "$Q"
+
+## CORE
+	## Create the Core device and set it's description
+	StatsMessage "Setting up your computer to act as a 'Core'"
+	Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
+	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
+	RunSQL "$Q"
+
+## HYBRID
+	#Setup media director with core
+	StatsMessage "Setting up your computer to act as a 'Media Director'"
+	/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
+	Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
+	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
+	RunSQL "$Q"
+
+	UpdateStartupScripts
 }
 
 CleanInstallSteps () {
+	# FIXME: This fn has old data and could be dangerous
 	return;
 
 	# This is old and needs work but would allow you to wipe a db and start fresh without re-installing from scratch.
@@ -439,24 +424,6 @@ CreateDisklessImage () {
 	local diskless_log=/var/log/pluto/Diskless_Create-`date +"%F"`.log
 	nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
 }
-
-Fix_Initrd_Vmlinux () {
-	# FIXME: is this still necessary?
-	:
-	##### this occurs if we're installing after a kernel update, but prior to reboot
-	StatsMessage "Starting initrd and vmlinuz fix"
-	# Fix a problem with the /initrd.img and /vmlinuz links pointing to a different kernel than the
-	# newest (and currently running) one
-	LATEST_KERNEL=`ls /lib/modules --sort time --group-directories-first|head -1`
-	KERNEL_TO_USE=`uname -r`
-
-	if [ -f "/boot/initrd.img-$LATEST_KERNEL" ]; then
-		KERNEL_TO_USE=$LATEST_KERNEL
-	fi
-	ln -s -f /boot/initrd.img-$KERNEL_TO_USE /initrd.img
-	ln -s -f /boot/vmlinuz-$KERNEL_TO_USE /vmlinuz
-}
-
 
 
 return 0
