@@ -254,7 +254,7 @@ Disable_NetworkManager () {
 ConfigSources () {
 	StatsMessage "Configuring sources.list for MCE install"
 
-	. $BASE_DIR/install/AptSources.sh
+	. ${BASE_DIR}/install/AptSources.sh
 	AptSrc_ParseSourcesList "/etc/apt/sources.list"
 	AptSrc_AddSource "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
 	AptSrc_AddSource "http://deb.linuxmce.org/${TARGET_DISTRO}/ ${TARGET_RELEASE} ${REPO}"
@@ -263,12 +263,12 @@ ConfigSources () {
 
 UpdateDebCache () {
 	StatsMessage "Updating deb-cache package files"
-	$BASE_DIR/bin/UpdateDebCache.sh
+	${BASE_DIR}/bin/UpdateDebCache.sh
 }
 
 Config_Device_Changes () {
-	StatsMessage "Running $BASE_DIR/bin/Config_Device_Changes.sh"
-	$BASE_DIR/bin/Config_Device_Changes.sh
+	StatsMessage "Running ${BASE_DIR}/bin/Config_Device_Changes.sh"
+	${BASE_DIR}/bin/Config_Device_Changes.sh
 }
 
 DisableSplash () {
@@ -281,7 +281,7 @@ Install_Kernel () {
 	StatsMessage "Installing kernel & headers"
 
 	StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
-	. $BASE_DIR/bin/Config_Ops.sh
+	. ${BASE_DIR}/bin/Config_Ops.sh
 	ConfSet "LTS_HES" "${LTS_HES}"
 
 	StatsMessage "Installing Ubuntu kernel"
