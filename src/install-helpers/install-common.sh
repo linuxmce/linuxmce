@@ -203,18 +203,13 @@ Setup_Logfile () {
 ###########################################################
 
 gpgUpdate () {
-	# TODO: FIXME: remove ping??? why is this here???
 	# This does an update, while adding gpg keys for any that are missing.
-	# check if online first? TODO: we have a fn for this
-	if ping -c 1 google.com; then
-		#sed -i 's/#deb/deb/g' /etc/apt/sources.list
-		gpgs=$(apt-get update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
-		if [ -n "$gpgs" ]; then
-			echo "$gpgs" | while read gpgkeys; do
-				gpg --keyserver pgp.mit.edu --recv-keys "$gpgkeys"
-				gpg --export --armor "$gpgkeys" | apt-key add -
-			done
-		fi
+	gpgs=$(apt-get update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
+	if [ -n "$gpgs" ]; then
+		echo "$gpgs" | while read gpgkeys; do
+			gpg --keyserver pgp.mit.edu --recv-keys "$gpgkeys"
+			gpg --export --armor "$gpgkeys" | apt-key add -
+		done
 	fi
 }
 
@@ -251,7 +246,7 @@ Disable_NetworkManager () {
 }
 
 ConfigSources () {
-	StatsMessage "Configuring sources.list for MCE install"
+	StatsMessage "Configuring sources.list for LinuxMCE"
 
 	. ${BASE_DIR}/install/AptSources.sh
 	AptSrc_ParseSourcesList "/etc/apt/sources.list"
@@ -278,9 +273,6 @@ DisableSplash () {
 
 Install_Kernel () {
 	StatsMessage "Installing kernel & headers"
-
-	StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
-
 	LTS_HES="${TARGET_LTS_HES}"
 
 	StatsMessage "Installing Ubuntu kernel"
@@ -289,11 +281,11 @@ Install_Kernel () {
 
 	StatsMessage "Installing Ubuntu kernel headers"
 	#Install headers and run depmod for the seamless integraton function, ensure no errors exist
-	apt-get -f -y --no-install-recommends install linux-headers-generic${LTS_HES}
+	apt-get -f -y install linux-headers-generic${LTS_HES}
 	VerifyExitCode "Install linux headers package failed"
 
 	#StatsMessage "Installing firmware"
-	#apt-get -f -y install --no-install-recommends linux-firmware || :
+	#apt-get -f -y install linux-firmware || :
 	#VerifyExitCode "Install linux firmware failed" || :
 
 	StatsMessage "Running depmod"
@@ -302,32 +294,30 @@ Install_Kernel () {
 	VerifyExitCode "depmod failed for $TARGET_KVER"
 }
 
+ListXPkgs () {
+	LTS_HES="${TARGET_LTS_HES}"
+	case "$TARGET_RELEASE" in
+		"precise")      # 1204
+			echo "xserver-xorg${LTS_HES} xserver-xorg-video-all${LTS_HES} libgl1-mesa-glx${LTS_HES}"	;;
+		"trusty")       # 1404
+			echo "xserver-xorg-core-${LTS_HES} xserver-xorg${LTS_HES} xserver-xorg-video-all${LTS_HES} xserver-xorg-input-all${LTS_HES} libwayland-egl1-mesa${LTS_HES}"	;;
+		*)      # *
+			echo "xserver-xorg xserver-xorg-video-all"	;;
+	esac
+}
+
 Install_X () {
 	StatsMessage "Installing X.Org"
 	#Install X prior to linuxmce to get lts_hwe pkgs.
 
+	XPKGS=$(ListXPkgs)
+	apt-get -f -y --install-recommends install ${XPKGS}
+}
+
+Install_HWE () {
 	LTS_HES="${TARGET_LTS_HES}"
-	case "$TARGET_RELEASE" in
-		"precise")      # 1204
-			apt-get -f -y --install-recommends install \
-				xserver-xorg${LTS_HES} \
-				xserver-xorg-video-all${LTS_HES} \
-				libgl1-mesa-glx${LTS_HES}
-				VerifyExitCode "Installing X.Org failed"	;;
-		"trusty")       # 1404
-			apt-get -f -y --install-recommends install \
-				xserver-xorg-core-${LTS_HES} \
-				xserver-xorg${LTS_HES} \
-				xserver-xorg-video-all${LTS_HES} \
-				xserver-xorg-input-all${LTS_HES} \
-				libwayland-egl1-mesa${LTS_HES}
-				VerifyExitCode "Installing X.Org failed"	;;
-		*)      # *
-			apt-get -f -y --install-recommends install \
-				xserver-xorg \
-				xserver-xorg-video-all
-				VerifyExitCode "Installing X.Org failed"	;;
-	esac
+	XPKGS=$(ListXPkgs)
+	apt-get -f -y install --install-recommends linux-generic${LTS_HES} linux-image-generic${LTS_HES} ${XPKGS}
 }
 
 Install_KUbuntu_Desktop () {
