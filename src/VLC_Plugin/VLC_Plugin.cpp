@@ -287,15 +287,29 @@ bool VLC_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
 					m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 					pMediaStream->m_iDequeMediaFile_Pos);
-    DCE::CMD_Play_Media cmd(m_dwPK_Device,
-			    pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
-			    pVLCMediaStream->m_iPK_MediaType,
-			    pVLCMediaStream->m_iStreamID_get( ),
-			    pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pVLCMediaStream->m_sStartPosition,
-			    mediaURL);
-    
-    // No handling of errors (it will in some cases deadlock the router.)
-    SendCommand(cmd);
+    if (pVLCMediaStream->StreamingRequired())
+      {
+	DCE::CMD_Start_Streaming scmd(m_dwPK_Device,
+				      pVLCMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+				      pVLCMediaStream->m_iPK_MediaType,
+				      pVLCMediaStream->m_iStreamID_get(),
+				      pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pVLCMediaStream->m_sStartPosition,
+				      mediaURL,
+				      pVLCMediaStream->GetTargets(DEVICETEMPLATE_VLC_Player_CONST));
+	SendCommand(scmd);
+      }
+    else
+      {
+	DCE::CMD_Play_Media cmd(m_dwPK_Device,
+				pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+				pVLCMediaStream->m_iPK_MediaType,
+				pVLCMediaStream->m_iStreamID_get( ),
+				pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pVLCMediaStream->m_sStartPosition,
+				mediaURL);
+	
+	// No handling of errors (it will in some cases deadlock the router.)
+	SendCommand(cmd);
+      }
 
     // if the disk ID not known, trying to see if we have a file with this name
     int iPK_File=0;
