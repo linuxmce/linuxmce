@@ -55,11 +55,24 @@ qOrbiter::qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnec
     //<-dceag-const-e->
 {
     deviceName = name;
-    qDebug() << "Constructing";
+
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
     QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);
     m_bIsOSD=false;
     qRegisterMetaType< QMap<long, std::string> >("QMap<long, std::string>");
+
+}
+
+bool qOrbiter::GetConfig()
+{
+if(!qOrbiter_Command::GetConfig()){
+    return false;
+}
+
+PurgeInterceptors();
+RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
+
+return true;
 
 }
 //<-dceag-const2-b->
@@ -1846,8 +1859,7 @@ bool DCE::qOrbiter::initialize(){
 
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
-        PurgeInterceptors();
-        RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
+
         m_dwMaxRetries = 1;
         m_bRouterReloading = false;
         m_bReload = false;
@@ -1964,7 +1976,7 @@ void DCE::qOrbiter::deinitialize()
     int iSize;
     pData = NULL;
     iSize = 0;
-    PurgeInterceptors();
+
     BindMediaRemote(false);
     DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_OrbiterUnRegistered);
@@ -1980,8 +1992,6 @@ void DCE::qOrbiter::deinitialize()
 
 bool qOrbiter::getConfiguration()
 {
-
-
 
     httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)).append("&label="+deviceName));
     qDebug() << "Ea url::" <<httpSettingsRequest->url();
@@ -2315,6 +2325,9 @@ bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceDat
     Q_UNUSED(pSocket);
     Q_UNUSED(pDeviceTo);
 
+    if(!m_bRunning )
+        return false;
+
     string time = pMessage->m_mapParameters[EVENTPARAMETER_Current_Time_CONST];
 
     QString deviceEa;
@@ -2330,9 +2343,6 @@ bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceDat
         id=pDeviceFrom->m_dwPK_Room;
         emit timecodeEvent( id, p);
     }
-
-
-
     //  qDebug() <<  Q_FUNC_INFO << "Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str() << "::"<< time.c_str();
     return false;
 }
@@ -5481,6 +5491,7 @@ void qOrbiter::reInitialize(){
 
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
+
         m_dwMaxRetries = 1;
         m_bRouterReloading = false;
         m_bReload = false;

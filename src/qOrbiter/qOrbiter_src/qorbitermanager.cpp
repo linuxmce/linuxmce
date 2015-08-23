@@ -252,7 +252,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         connect(m_window, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
         connect(m_window, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
 
-#ifdef Q_OS_LINUX || defined(Q_OS_OSX) || defined(Q_OS_WIN32)
+#if defined(Q_OS_LINUX) || defined(Q_OS_OSX) || defined(Q_OS_WIN32)
 
         if(m_testScreenSize==0){
             m_window->setVisibility(QWindow::FullScreen);

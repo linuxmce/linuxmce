@@ -4,7 +4,7 @@ import "." //used to import the style object as singleton
 
 Item{
     id:qmlRoot
-    anchors.fill: parent
+   anchors.fill: parent
 
 
         property bool screensaverActive:false
@@ -104,7 +104,7 @@ Item{
                     qmlRoot.resetTimeout()
                     console.log("event filter ignored click event")
                 }
-                console.log("Click Event Filter Pressed, screensaver state is "+screensaverActive)
+               // console.log("Click Event Filter Pressed, screensaver state is "+screensaverActive)
             }
         }
     }

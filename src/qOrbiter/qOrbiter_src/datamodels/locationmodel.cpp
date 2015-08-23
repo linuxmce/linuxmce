@@ -187,13 +187,10 @@ void LocationModel::setLocation(int ea, int room)
 
     if(eaTimecodeItems.isEmpty()) return;
 
-      for (int i = 0; i < eaTimecodeItems.size(); ++i) {
-        qDebug() << "wtf" << eaTimecodeItems.length();
-          if(eaTimecodeItems.at(i)->eaId()==ea){
-              qDebug() << "double wtf";
+      for (int i = 0; i < eaTimecodeItems.size(); ++i) {     
+          if(eaTimecodeItems.at(i)->eaId()==ea){          
               m_currentEaTimecode = eaTimecodeItems.at(i);
               emit currentEaTimecodeChanged();
-
         }
       }
 }

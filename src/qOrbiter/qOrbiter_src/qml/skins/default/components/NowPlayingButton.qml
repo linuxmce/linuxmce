@@ -46,7 +46,7 @@ Item{
     StyledText{
         id:time
         font.bold: true
-        text:dceTimecode.qsCurrentTime
+        text: dcenowplaying.b_mediaPlaying ?   roomList.currentEaTimecode.currentTimeCode : "00:00:00.000"
         anchors{
             right: parent.right
             verticalCenter: parent.verticalCenter
@@ -57,7 +57,6 @@ Item{
         anchors.fill: parent
         onClicked: {
             manager.setCurrentScreen(dcenowplaying.qs_screen)
-
         }
     }
 }
