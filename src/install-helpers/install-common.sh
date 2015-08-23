@@ -16,10 +16,6 @@ TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\
 DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 REPO="main"
 
-TARGET_KVER_LTS_HES=""
-[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
-[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
-
 DISTRO="$TARGET_RELEASE"
 LOCAL_REPO_BASE=/usr/pluto/deb-cache/$DEB_CACHE
 LOCAL_REPO_DIR=./
@@ -31,6 +27,7 @@ DT_MEDIA_DIRECTOR=3
 DEVICE_TEMPLATE_Core=7
 DEVICE_TEMPLATE_MediaDirector=28
 
+DEVICEDATA_DISTRO_Ubuntu_Lucid_CONST=18
 DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
 DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
@@ -43,15 +40,47 @@ MESSGFILE=/tmp/messenger
 #Setup Pathing
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# TODO: make compatible with raspbian
-case "$TARGET_ARCH" in
-	i386|amd64)
-		TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
-		SECURITY_REPO="http://security.ubuntu.com/ubuntu/"
-		;;
-	armhf)
-		TARGET_REPO="http://ports.ubuntu.com/"
-		SECURITY_REPO="http://ports.ubuntu.com/"
+# get PK_Distro from OS
+LTS_HES=""
+case "$TARGET_RELEASE" in
+	lucid)
+		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Ubuntu_Lucid_CONST
+		TARGET_REPO_DISTRO_SRC=20
+		TARGET_REPO_LMCE_SRC=21	;;
+	precise)
+		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
+		TARGET_REPO_DISTRO_SRC=24
+		TARGET_REPO_LMCE_SRC=25
+		LTS_HES="-lts-trusty"	;;
+	trusty)
+		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST	;;
+		TARGET_REPO_DISTRO_SRC=24
+		TARGET_REPO_LMCE_SRC=25
+		LTS_HES="-lts-utopic"	;;
+	wheezy)
+		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
+		TARGET_REPO_DISTRO_SRC=22
+		TARGET_REPO_LMCE_SRC=23	;;
+	jessie)
+		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Raspbian_Jessie_CONST
+		TARGET_REPO_DISTRO_SRC=22
+		TARGET_REPO_LMCE_SRC=23	;;
+esac
+
+case "$TARGET_DISTRO" in
+	ubuntu)
+		case "$TARGET_ARCH" in
+			i386|amd64)
+				TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
+				SECURITY_REPO="http://security.ubuntu.com/ubuntu/"
+				;;
+			armhf)
+				TARGET_REPO="http://ports.ubuntu.com/"
+				SECURITY_REPO="http://ports.ubuntu.com/"
+				;;
+		esac	;;
+	raspbian)
+		TARGET_REPO="http://archive.raspbian.org/raspbian/"
 		;;
 esac
 

@@ -59,21 +59,7 @@ MD_Setup_Plutoconf() {
 	DEVICE=$(cat "$DEVID_FILE")
 	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
 
-	# TODO: start_interactor already did this and put it in the DB
-	# TODO: get the data from the DB instead?
-	# get PK_Distro from OS
-	case "$TARGET_RELEASE" in
-		precise)
-			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST 	;;
-		trusty)
-			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST 	;;
-		wheezy)
-			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST ;;
-		jessie)
-			distro=$DEVICEDATA_DISTRO_Raspbian_Jessie_CONST ;;
-	esac
-	[ -n "$PK_Distro" ] || [ -n "$distro" ] && ConfSet "PK_Distro" "$distro"
-
+	[ -n "$PK_Distro" ] || [ -n "$TARGET_DISTRO_ID" ] && ConfSet "PK_Distro" "$TARGET_DISTRO_ID"
 	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "${CORE_IP}"
 	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
 	[ -n "$MySqlPassword" ] || ConfSet "MySqlPassword" ""
@@ -137,15 +123,15 @@ MD_Install_Kernel () {
 	if [[ "$ret" != "0" ]] ; then
 		StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
 		. /usr/pluto/bin/Config_Ops.sh
-		ConfSet "LTS_HES" "$TARGET_KVER_LTS_HES"
+		ConfSet "LTS_HES" "$LTS_HES"
 
 		StatsMessage "Installing Ubuntu kernel"
-		apt-get -f -y install --install-recommends linux-generic"$TARGET_KVER_LTS_HES" linux-image-generic"$TARGET_KVER_LTS_HES"
+		apt-get -f -y install --install-recommends linux-generic"$LTS_HES" linux-image-generic"$LTS_HES"
 		VerifyExitCode "Install linux kernel package failed"
 
 		StatsMessage "Installing Ubuntu kernel headers"
 		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
-		apt-get -f -y --no-install-recommends install linux-headers-generic"$TARGET_KVER_LTS_HES"
+		apt-get -f -y --no-install-recommends install linux-headers-generic"$LTS_HES"
 		VerifyExitCode "Install linux headers package failed"
 	fi
 
@@ -172,18 +158,18 @@ MD_Install_Packages () {
 	case "$TARGET_RELEASE" in
 		"precise")	# 1204
 			apt-get -f -y --install-recommends install \
-				xserver-xorg"$TARGET_KVER_LTS_HES" \
-				xserver-xorg-video-all"$TARGET_KVER_LTS_HES" \
-				libgl1-mesa-glx"$TARGET_KVER_LTS_HES"
+				xserver-xorg"$LTS_HES" \
+				xserver-xorg-video-all"$LTS_HES" \
+				libgl1-mesa-glx"$LTS_HES"
 				VerifyExitCode "Installing X.Org failed"
 			;;
 		"trusty")	# 1404
 			apt-get -f -y --install-recommends install \
-				xserver-xorg-core-"$TARGET_KVER_LTS_HES" \
-				xserver-xorg"$TARGET_KVER_LTS_HES" \
-				xserver-xorg-video-all"$TARGET_KVER_LTS_HES" \
-				xserver-xorg-input-all"$TARGET_KVER_LTS_HES" \
-				libwayland-egl1-mesa"$TARGET_KVER_LTS_HES"
+				xserver-xorg-core-"$LTS_HES" \
+				xserver-xorg"$LTS_HES" \
+				xserver-xorg-video-all"$LTS_HES" \
+				xserver-xorg-input-all"$LTS_HES" \
+				libwayland-egl1-mesa"$LTS_HES"
 				VerifyExitCode "Installing X.Org failed"
 			;;
 		*)	# *
