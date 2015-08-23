@@ -206,6 +206,15 @@ MD_Install_Packages () {
 	fi
 }
 
+MD_Config_MySQL_Client () {
+	StatsMessage "Setting up mysql client - server hostname"
+	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
+	cat <<-EOF > /root/.my.cnf
+		[client]
+		host = dcerouter
+		EOF
+}
+
 MD_Populate_Debcache () {
 	StatsMessage "Creating deb-cache dir"
 	CreateBasePackagesFiles		# install-common.sh
@@ -229,6 +238,17 @@ MD_Cleanup () {
 	#COLUMNS=1024 dpkg -l | awk '/^ii/ {print $2}' >/tmp/pkglist-diskless.txt # used for deb-cache cleanup in the builder
 }
 
+
+return 0
+
+###########################################################
+###########################################################
+### Deprecated Functions
+###########################################################
+###########################################################
+
+
+
 ##########################################################################################################
 ##########################################################################################################
 ##########################################################################################################
@@ -238,6 +258,7 @@ MD_Cleanup () {
 
 
 dontrun() {
+#### this is the generic MD firstrun file
 	if [ ! -f "$DEVID_FILE" ]; then
 		echo "ERR: interactor has not yet created '$DEVID_FILE'."
 		return 10
@@ -253,6 +274,7 @@ dontrun() {
 	done
 
 	MD_Find_Core
+MD_Config_MySQL_Client
 	MD_System_Level_Prep
 	#MD_Seamless_Compatability
 	#MD_Preseed

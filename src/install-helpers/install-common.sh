@@ -212,37 +212,45 @@ gpgUpdate () {
 	fi
 }
 
-Fix_LSB_Data () {
-	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
-	:
-	case "$TARGET_DISTRO" in
-		raspbian)
-			# raspbian doesn't come with lsb-release by default???
-			cat <<-EOF > /etc/lsb-release
-				DISTRIB_ID=Raspbian
-				DISTRIB_CODENAME=$TARGET_RELEASE
-				EOF
-			;;
-	esac
+Disable_NetworkManager () {
+	update-rc.d -f NetworkManager remove
+}
+
+ConfigSources () {
+	StatsMessage "Configuring sources.list for MCE install"
+
+	. /usr/pluto/install/AptSources.sh
+	AptSrc_ParseSourcesList "/etc/apt/sources.list"
+	AptSrc_AddSource "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
+	AptSrc_AddSource "http://deb.linuxmce.org/${TARGET_DISTRO}/ ${TARGET_RELEASE} ${REPO}"
+	AptSrc_WriteSourcesList
+}
+
+UpdateDebCache () {
+	StatsMessage "Updating deb-cache package files"
+	/usr/pluto/bin/UpdateDebCache.sh
 }
 
 Notify_Reboot () {
 	/usr/share/update-notifier/notify-reboot-required
 }
 
-Disable_DisplayManager () {
+
+return 0
+
+###########################################################
+###########################################################
+### Deprecated Functions
+###########################################################
+###########################################################
+
+CreateBackupSources () {
 	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
 	:
-	# TODO: dpkg-divert this so it doesn't come back
-	StatsMessage "Disabling display manager"
-	mkdir -p "/etc/X11"
-	echo "/bin/false" >/etc/X11/default-display-manager
-	update-rc.d -f kdm remove >/dev/null
-	update-rc.d -f lightdm remove >/dev/null
-}
-
-Disable_NetworkManager () {
-	update-rc.d -f NetworkManager remove
+	if [ ! -e /etc/apt/sources.list.pbackup ]; then
+		StatsMessage "Backing up sources.list file"
+		cp -a /etc/apt/sources.list /etc/apt/sources.list.pbackup
+	fi
 }
 
 CreateBasePackagesFile () {
@@ -264,20 +272,6 @@ CreateBasePackagesFile () {
 		rm -f /usr/pluto/deb-cache/$DEB_CACHE/Packages
 		touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
 		gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
-	fi
-}
-
-UpdateDebCache () {
-	StatsMessage "Updating deb-cache package files"
-	/usr/pluto/bin/UpdateDebCache.sh
-}
-
-CreateBackupSources () {
-	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
-	:
-	if [ ! -e /etc/apt/sources.list.pbackup ]; then
-		StatsMessage "Backing up sources.list file"
-		cp -a /etc/apt/sources.list /etc/apt/sources.list.pbackup
 	fi
 }
 
@@ -306,16 +300,6 @@ ConfigAptConf () {
 		EOF
 }
 
-ConfigSources () {
-	StatsMessage "Configuring sources.list for MCE install"
-
-	. /usr/pluto/install/AptSources.sh
-	AptSrc_ParseSourcesList "/etc/apt/sources.list"
-	AptSrc_AddSource "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
-	AptSrc_AddSource "http://deb.linuxmce.org/${TARGET_DISTRO}/ ${TARGET_RELEASE} ${REPO}"
-	AptSrc_WriteSourcesList
-}
-
 PreSeed_DebConf () {
 	# FIXME: REMOVE? This is in pluto-boot-scripts preinst
 	:
@@ -325,11 +309,28 @@ PreSeed_DebConf () {
 	VerifyExitCode "debconf-set-selections - preseed data"
 }
 
-Config_MySQL_Client () { ## MD Only?
-	StatsMessage "Setting up mysql client - server hostname"
-	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
-	cat <<-EOF > /root/.my.cnf
-		[client]
-		host = dcerouter
-		EOF
+Fix_LSB_Data () {
+	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
+	:
+	case "$TARGET_DISTRO" in
+		raspbian)
+			# raspbian doesn't come with lsb-release by default???
+			cat <<-EOF > /etc/lsb-release
+				DISTRIB_ID=Raspbian
+				DISTRIB_CODENAME=$TARGET_RELEASE
+				EOF
+			;;
+	esac
 }
+
+Disable_DisplayManager () {
+	# FIXME: REMOVE? This has moved to pluto-boot-scripts postinst
+	:
+	# TODO: dpkg-divert this so it doesn't come back
+	StatsMessage "Disabling display manager"
+	mkdir -p "/etc/X11"
+	echo "/bin/false" >/etc/X11/default-display-manager
+	update-rc.d -f kdm remove >/dev/null
+	update-rc.d -f lightdm remove >/dev/null
+}
+
