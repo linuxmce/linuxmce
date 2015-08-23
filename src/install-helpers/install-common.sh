@@ -174,30 +174,8 @@ Setup_Logfile () {
 ### Setup Functions - General functions
 ###########################################################
 
-AptUpdate () {
-	apt-get -qq update
-	VerifyExitCode "apt-get update"
-}
-
-AptDistUpgrade () {
-	apt-get -y -q -f --force-yes dist-upgrade
-	VerifyExitCode "dist-upgrade"
-}
-
-UpdateUpgrade () {
-	#perform an update and a dist-upgrade
-	StatsMessage "Performing an update and an upgrade to all components"
-	AptUpdate
-	AptDistUpgrade
-}
-
-TimeUpdate () {
-	StatsMessage "Synchronizing time with an online server"
-	#Update system time to match ntp server
-	ntpdate ntp.ubuntu.com
-}
-
 gpgUpdate () {
+	# TODO: FIXME: remove ping??? why is this here???
 	# This does an update, while adding gpg keys for any that are missing.
 	# check if online first? TODO: we have a fn for this
 	if ping -c 1 google.com; then
@@ -210,6 +188,34 @@ gpgUpdate () {
 			done
 		fi
 	fi
+}
+
+AptUpdate () {
+	apt-get -qq update
+	VerifyExitCode "apt-get update"
+}
+
+AptUpgrade () {
+	apt-get -y -q -f --force-yes upgrade
+	VerifyExitCode "apt-get upgrade"
+}
+
+AptDistUpgrade () {
+	apt-get -y -q -f --force-yes dist-upgrade
+	VerifyExitCode "apt-get dist-upgrade"
+}
+
+UpdateUpgrade () {
+	#perform an update and a dist-upgrade
+	StatsMessage "Performing an update and an upgrade to all components"
+	gpgUpdate # AptUpdate
+	AptDistUpgrade
+}
+
+TimeUpdate () {
+	StatsMessage "Synchronizing time with an online server"
+	#Update system time to match ntp server
+	ntpdate ntp.ubuntu.com
 }
 
 Disable_NetworkManager () {
@@ -290,10 +296,10 @@ ConfigAptConf () {
 	# Setup LinuxMCE's apt.conf
 	cat <<-EOF >/etc/apt/apt.conf.d/30pluto
 		// LinuxMCE apt conf add-on
-		//Apt::Cache-Limit "12582912";
+		Apt::Cache-Limit "12582912";
 		Dpkg::Options { "--force-confold"; };
-		//Acquire::http::timeout "10";
-		//Acquire::ftp::timeout "10";
+		Acquire::http::timeout "10";
+		Acquire::ftp::timeout "10";
 		APT::Get::AllowUnauthenticated "true";
 		//APT::Get::force-yes "yes";
 		APT::Acquire { Retries  "20" };
