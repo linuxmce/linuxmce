@@ -93,102 +93,25 @@ MD_Seamless_Compatability () {
 }
 
 MD_Preseed () {
-	PreSeed_DebConf	# install-common.sh
+	PreSeed_DebConf		# install-common.sh
 }
 
 MD_Update () {
 	StatsMessage "Setting up apt gpg keys"
-	gpgUpdate	# install-common.sh
+	gpgUpdate		# install-common.sh
 
 	apt-get -f -y install
 
-	AptDistUpgrade	# install-common.sh
+	AptDistUpgrade		# install-common.sh
 }
 
 MD_Install_Kernel () {
-	StatsMessage "Installing kernel headers"
-
-	# TODO: get as much of this from database as possible
-	# run any device specific firstboot add-on kernel config here
-	ret=""
-	for f in /usr/pluto/install/firstboot_lmce_* ; do
-		StatsMessage "Running device specific script: $f _kernel - Begin"
-		. "$f" || :
-		$(basename "$f")_kernel || :
-		ret="0"
-		StatsMessage "Running device specific script: $f _kernel - End"
-	done
-
-	# Default kernel installation is ubuntu based, if the above is not run
-	if [[ "$ret" != "0" ]] ; then
-		StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
-		. /usr/pluto/bin/Config_Ops.sh
-		ConfSet "LTS_HES" "$LTS_HES"
-
-		StatsMessage "Installing Ubuntu kernel"
-		apt-get -f -y install --install-recommends linux-generic"$LTS_HES" linux-image-generic"$LTS_HES"
-		VerifyExitCode "Install linux kernel package failed"
-
-		StatsMessage "Installing Ubuntu kernel headers"
-		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
-		apt-get -f -y --no-install-recommends install linux-headers-generic"$LTS_HES"
-		VerifyExitCode "Install linux headers package failed"
-	fi
-
-	#StatsMessage "Installing firmware"
-	#apt-get -f -y install --no-install-recommends linux-firmware || :
-	#VerifyExitCode "Install linux firmware failed" || :
-
-	StatsMessage "Running depmod"
-	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
-	depmod -v "$TARGET_KVER"
-	VerifyExitCode "depmod failed for $TARGET_KVER"
+	Install_Kernel		# install-common.sh
 }
 
 MD_Install_Packages () {
-	StatsMessage "Installing packages to MD"
-
-	StatsMessage "Setting locales"
-	# FIXME: locales are already generated, trigger regen?
-	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
-
-	StatsMessage "Installing X.Org"
-	#Install X prior to linuxmce to get lts_hwe pkgs.
-
-	case "$TARGET_RELEASE" in
-		"precise")	# 1204
-			apt-get -f -y --install-recommends install \
-				xserver-xorg"$LTS_HES" \
-				xserver-xorg-video-all"$LTS_HES" \
-				libgl1-mesa-glx"$LTS_HES"
-				VerifyExitCode "Installing X.Org failed"
-			;;
-		"trusty")	# 1404
-			apt-get -f -y --install-recommends install \
-				xserver-xorg-core-"$LTS_HES" \
-				xserver-xorg"$LTS_HES" \
-				xserver-xorg-video-all"$LTS_HES" \
-				xserver-xorg-input-all"$LTS_HES" \
-				libwayland-egl1-mesa"$LTS_HES"
-				VerifyExitCode "Installing X.Org failed"
-			;;
-		*)	# *
-			apt-get -f -y --install-recommends install \
-				xserver-xorg \
-				xserver-xorg-video-all
-				VerifyExitCode "Installing X.Org failed"
-			;;
-	esac
-
-	StatsMessage "Installing primary MD packages"
-	apt-get -f -y --no-install-recommends install lmce-md-meta nfs-common openssh-server pastebinit locales
-	VerifyExitCode "Installing lmce-md-meta failed"
-
-	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
-		StatsMessage "Installing kubuntu desktop packages"
-		apt-get -f -y --no-install-recommends install kubuntu-desktop
-		VerifyExitCode "kubuntu-desktop"
-	fi
+	Install_X		# install-common.sh
+	Install_KUbuntu_Desktop	# install-common.sh
 }
 
 MD_Config_MySQL_Client () {
@@ -243,7 +166,8 @@ return 0
 
 
 dontrun() {
-#### this is the generic MD firstrun file
+	#### This is a generic MD firstboot file
+
 	if [ ! -f "$DEVID_FILE" ]; then
 		echo "ERR: interactor has not yet created '$DEVID_FILE'."
 		return 10
@@ -252,21 +176,35 @@ dontrun() {
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
 	for f in /usr/pluto/install/firstboot_lmce_* ; do
-		StatsMessage "Running device specific script: $f _preinst - Begin"
+		StatsMessage "Running device specific script: ${f}_preinst - Begin"
 		. "$f" || :
 		$(basename "$f")_preinst || :
-		StatsMessage "Running device specific script: $f _preinst - End"
+		StatsMessage "Running device specific script: ${f}_preinst - End"
 	done
 
-MD_Config_MySQL_Client
+	MD_Config_MySQL_Client
 	MD_System_Level_Prep
 	#MD_Seamless_Compatability
 	#MD_Preseed
 	MD_Update
 	MD_Setup_Fstab
 	MD_Setup_Plutoconf
-	MD_Install_Kernel
-	MD_Install_Packages
+
+        # run any device specific firstboot add-on kernel config here
+        ret=""
+        for f in /usr/pluto/install/firstboot_lmce_* ; do
+                StatsMessage "Running device specific script: ${f}_kernel - Begin"
+                . "$f" || :
+                $(basename "$f")_kernel || :
+                ret="0"
+                StatsMessage "Running device specific script: ${f}_kernel - End"
+        done
+        # Default kernel install, if the above is not run
+        if [[ "$ret" != "0" ]] ; then
+		MD_Install_Kernel
+        fi
+
+	MD_Install_Packages	# X and kubuntu-desktop
 	Disable_DisplayManager
 	Disable_NetworkManager
 	MD_Populate_Debcache
@@ -274,10 +212,10 @@ MD_Config_MySQL_Client
 
 	# run any device specific firstboot add-on scripts here
 	for f in /usr/pluto/install/firstboot_lmce_* ; do
-		StatsMessage "Running device specific script: $f _postinst - Begin"
+		StatsMessage "Running device specific script: ${f}_postinst - Begin"
 		. "$f" || :
 		$(basename "$f")_postinst || :
-		StatsMessage "Running device specific script: $f _postinst - End"
+		StatsMessage "Running device specific script: ${f}_postinst - End"
 	done
 
 	StatsMessage "Setting firstboot = false"
