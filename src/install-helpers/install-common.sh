@@ -15,10 +15,10 @@ BASE_DIR=/usr/pluto
 TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 TARGET_RELEASE=$(lsb_release -c -s)
 TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
-DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
+DEB_CACHE="${TARGET_DISTRO}-${TARGET_RELEASE}-${TARGET_ARCH}"
 REPO="main"
 
-LOCAL_REPO_BASE=$BASE_DIR/deb-cache/$DEB_CACHE
+LOCAL_REPO_BASE=${BASE_DIR}/deb-cache/${DEB_CACHE}
 LOCAL_REPO_DIR=./
 
 DEVICE_TEMPLATE_Core=7
@@ -282,15 +282,15 @@ Install_Kernel () {
 
 	StatsMessage "Setting up Ubuntu HardWare Enablement Stack"
 	. $BASE_DIR/bin/Config_Ops.sh
-	ConfSet "LTS_HES" "$LTS_HES"
+	ConfSet "LTS_HES" "${LTS_HES}"
 
 	StatsMessage "Installing Ubuntu kernel"
-	apt-get -f -y install --install-recommends linux-generic"$LTS_HES" linux-image-generic"$LTS_HES"
+	apt-get -f -y install --install-recommends linux-generic${LTS_HES} linux-image-generic${LTS_HES}
 	VerifyExitCode "Install linux kernel package failed"
 
 	StatsMessage "Installing Ubuntu kernel headers"
 	#Install headers and run depmod for the seamless integraton function, ensure no errors exist
-	apt-get -f -y --no-install-recommends install linux-headers-generic"$LTS_HES"
+	apt-get -f -y --no-install-recommends install linux-headers-generic${LTS_HES}
 	VerifyExitCode "Install linux headers package failed"
 
 	#StatsMessage "Installing firmware"
@@ -310,17 +310,17 @@ Install_X () {
 	case "$TARGET_RELEASE" in
 		"precise")      # 1204
 			apt-get -f -y --install-recommends install \
-				xserver-xorg"$LTS_HES" \
-				xserver-xorg-video-all"$LTS_HES" \
-				libgl1-mesa-glx"$LTS_HES"
+				xserver-xorg${LTS_HES} \
+				xserver-xorg-video-all${LTS_HES} \
+				libgl1-mesa-glx${LTS_HES}
 				VerifyExitCode "Installing X.Org failed"	;;
 		"trusty")       # 1404
 			apt-get -f -y --install-recommends install \
-				xserver-xorg-core-"$LTS_HES" \
-				xserver-xorg"$LTS_HES" \
-				xserver-xorg-video-all"$LTS_HES" \
-				xserver-xorg-input-all"$LTS_HES" \
-				libwayland-egl1-mesa"$LTS_HES"
+				xserver-xorg-core-${LTS_HES} \
+				xserver-xorg${LTS_HES} \
+				xserver-xorg-video-all${LTS_HES} \
+				xserver-xorg-input-all${LTS_HES} \
+				libwayland-egl1-mesa${LTS_HES}
 				VerifyExitCode "Installing X.Org failed"	;;
 		*)      # *
 			apt-get -f -y --install-recommends install \
@@ -364,18 +364,3 @@ return 0
 ###########################################################
 ###########################################################
 
-dontrun () {
-	# run any device specific firstboot add-on kernel config here
-	ret=""
-	for f in $BASE_DIR/install/firstboot_lmce_* ; do
-		StatsMessage "Running device specific script: ${f}_kernel - Begin"
-		. "$f" || :
-		$(basename "$f")_kernel || :
-		ret="0"
-		StatsMessage "Running device specific script: ${f}_kernel - End"
-	done
-
-	# Default kernel installation is ubuntu based, if the above is not run
-	if [[ "$ret" != "0" ]] ; then
-	fi
-}

@@ -47,9 +47,9 @@ SetupNetworking () {
 	rm -f /etc/X11/xorg.conf
 	rm -f /etc/network/interfaces
 	## Reconfigure networking
-	$BASE_DIR/bin/Network_Setup.sh
-	$BASE_DIR/bin/ConfirmInstallation.sh
-	$BASE_DIR/bin/Timezone_Detect.sh
+	${BASE_DIR}/bin/Network_Setup.sh
+	${BASE_DIR}/bin/ConfirmInstallation.sh
+	${BASE_DIR}/bin/Timezone_Detect.sh
 }
 
 VideoDriverLive () {
