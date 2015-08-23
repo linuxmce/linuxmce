@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. /usr/pluto/bin/Utils.sh
+
 ###. /usr/pluto/install/install-core.sh ; Config_MySQL_Server
 # grant debian-sys-main privs in mysql
 #Run mysql statement
