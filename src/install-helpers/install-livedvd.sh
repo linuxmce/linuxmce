@@ -165,64 +165,11 @@ SetupAptSources () {
 	ConfigSources	# install-core.sh
 }
 
+
+return 0
+
 ###########################################################
-### Main execution area
 ###########################################################
-dontrun () {
-# Set up logging by executing this fn in a script.
-Setup_Logfile
-
-# Installation Functions
-UpdateUpgrade			# firstboot ALL
-TimeUpdate			# firstboot ALL
-CreateBackupSources		# preinst ALL
-Disable_CompCache		# preinst ALL ?? (is this necessary?)
-CreateBasePackagesFiles		# preinst ALL
-UpdateDebCache			# firstboot core (or ALL?)
-ConfigAptConf			# preinst ALL
-ConfigSources			# preinst ALL
-PreSeed_DebConf			# preinst ALL
-PreSeed_MythWeb			# postinst core
-Fix_Initrd_Vmlinux		# firstboot core
-Nic_Config			# firstboot core
-Setup_Pluto_Conf		# preinst ALL?  firstboot ALL? - make consistent with MD creation
-Setup_NIS			# preinst core
-Config_MySQL_Client		# postinst MDs
-Config_MySQL_Server		# preinst core
-Setup_MakeDev			# preinst ALL
-Create_And_Config_Devices	# preinst core, firstboot MDs?
-Config_Device_Changes		# postinst core
-Configure_Network_Options	# firstboot core
-UpdateUpgrade			# firstboot
-VideoDriverSetup		# delete
-addAdditionalTTYStart		# preinst ALL
-TempEMIFix			# placeholder
-CleanInstallSteps		# firstboot ** last
-CreateDisklessImage		# postinst core
-Disable_DisplayManager		# postinst ALL
-Disable_NetworkManager		# postinst ALL
-Setup_Kernel_PostInst		# postinst MDs
-gpgUpdate			# firstboot core
-Fix_LSB_Data			# preinst ALL (raspbian)
-Notify_Reboot			# postinst ALL
-
-# Live DVD Fns.
-FirstNetwork			# livedvd
-SetupNetworking			# livedvd
-SetupAptSources			# livedvd
-VideoDriverLive			# livedvd
-InitialBootPrep			# livedvd
-PackageCleanUp			# livedvd - i386 ONLY!!!!
-
-
-# MD Firstboot Fns.
-
-
-
-#StatsMessage "MCE Install Script completed without a detected error"
-#StatsMessage "The log file for the install process is located at ${log_file}"
-#StatsMessage "Reboot the system to start the final process"
-}
-
-
-
+### Deprecated Functions
+###########################################################
+###########################################################

@@ -71,29 +71,99 @@ c_singleNIC=1
 ### Setup Functions - General functions
 ###########################################################
 
-PreSeed_MythWeb () {
-	#Seeding mythweb preferences to not override the LMCE site on install - for some odd reason, mythweb packages don't accept the set-selections
-	touch /etc/default/mythweb
-	echo "[cfg]" >> /etc/default/mythweb
-	echo "enable = false" >> /etc/default/mythweb
-	echo "only = false" >> /etc/default/mythweb
-	echo "username = " >> /etc/default/mythweb
-	echo "password = " >> /etc/default/mythweb 
+Setup_Pluto_Conf () {
+	StatsMessage "Seting Up MCE Configuration file"
+	AutostartCore=1
+	AutostartMedia=1
+
+	case "$TARGET_RELEASE" in
+		"intrepid")
+			# select UI1
+			PK_DISTRO=17
+			;;
+		"lucid")
+			# select UI2 without alpha blending
+			PK_DISTRO=18
+			;;
+		"precise")
+			PK_DISTRO=20
+			LTS_HES=-lts-trusty
+			;;
+		"trusty")
+			PK_DISTRO=21
+			LTS_HES=-lts-utopic
+			;;
+		"wheezy")
+			PK_DISTRO=19
+			;;
+		"jessie")
+			PK_DISTRO=22
+			;;
+	esac
+
+
+	StatsMessage "Generating Default Config File"
+	cat <<-EOF >/etc/pluto.conf
+		# Pluto config file
+		MySqlHost = localhost
+		MySqlUser = root
+		MySqlPassword =
+		MySqlDBName = pluto_main
+		DCERouter = localhost
+		MySqlPort = 3306
+		DCERouterPort = 3450
+		PK_Device = 1
+		Activation_Code = 1111
+		PK_Installation = 1
+		PK_Users = 1
+		PK_Distro = $PK_DISTRO
+		Display = 0
+		SharedDesktop = 1
+		OfflineMode = false
+		#<-mkr_b_videowizard_b->
+		UseVideoWizard = 1
+		#<-mkr_b_videowizard_e->
+		LogLevels = 1,5,7,8
+		#ImmediatelyFlushLog = 1
+		AutostartCore = $AutostartCore
+		AutostartMedia = $AutostartMedia
+		LTS_HES = $LTS_HES
+		EOF
+	chmod 777 /etc/pluto.conf &>/dev/null
 }
 
-Fix_Initrd_Vmlinux () {
-	##### this occurs if we're installing after a kernel update, but prior to reboot
-	StatsMessage "Starting initrd and vmlinuz fix"
-	# Fix a problem with the /initrd.img and /vmlinuz links pointing to a different kernel than the
-	# newest (and currently running) one
-	LATEST_KERNEL=`ls /lib/modules --sort time --group-directories-first|head -1`
-	KERNEL_TO_USE=`uname -r`
+Create_And_Config_Devices () {
+	#Source the SQL_OPS file
+	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
 
-	if [ -f "/boot/initrd.img-$LATEST_KERNEL" ]; then
-		KERNEL_TO_USE=$LATEST_KERNEL
-	fi
-	ln -s -f /boot/initrd.img-$KERNEL_TO_USE /initrd.img
-	ln -s -f /boot/vmlinuz-$KERNEL_TO_USE /vmlinuz
+	DEVICE_TEMPLATE_Core=7
+	DEVICE_TEMPLATE_MediaDirector=28
+
+	## Update some info in the database
+	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('LinuxMCE', '1111')"
+	RunSQL "$Q"
+
+	## Create the Core device and set it's description
+	StatsMessage "Setting up your computer to act as a 'Core'"
+	Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
+	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
+	RunSQL "$Q"
+
+	#Setup media director with core
+	StatsMessage "Setting up your computer to act as a 'Media Director'"
+	/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
+	Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
+	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
+	RunSQL "$Q"
+
+	StatsMessage "Updating Startup Scripts"
+	# "DCERouter postinstall"
+	/usr/pluto/bin/Update_StartupScrips.sh
+}
+
+Config_Device_Changes () {
+	StatsMessage "Running /usr/pluto/bin/Config_Device_Changes.sh"
+	/usr/pluto/bin/Config_Device_Changes.sh
 }
 
 Nic_Config () {
@@ -199,140 +269,9 @@ Nic_Config () {
 	echo "    netmask 255.255.255.0" >> /etc/network/interfaces
 }
 
-Setup_Pluto_Conf () {
-	StatsMessage "Seting Up MCE Configuration file"
-	AutostartCore=1
-	AutostartMedia=1
-
-	case "$TARGET_RELEASE" in
-		"intrepid")
-			# select UI1
-			PK_DISTRO=17
-			;;
-		"lucid")
-			# select UI2 without alpha blending
-			PK_DISTRO=18
-			;;
-		"precise")
-			PK_DISTRO=20
-			LTS_HES=-lts-trusty
-			;;
-		"trusty")
-			PK_DISTRO=21
-			LTS_HES=-lts-utopic
-			;;
-		"wheezy")
-			PK_DISTRO=19
-			;;
-		"jessie")
-			PK_DISTRO=22
-			;;
-	esac
-
-
-	StatsMessage "Generating Default Config File"
-	cat <<-EOF >/etc/pluto.conf
-		# Pluto config file
-		MySqlHost = localhost
-		MySqlUser = root
-		MySqlPassword =
-		MySqlDBName = pluto_main
-		DCERouter = localhost
-		MySqlPort = 3306
-		DCERouterPort = 3450
-		PK_Device = 1
-		Activation_Code = 1111
-		PK_Installation = 1
-		PK_Users = 1
-		PK_Distro = $PK_DISTRO
-		Display = 0
-		SharedDesktop = 1
-		OfflineMode = false
-		#<-mkr_b_videowizard_b->
-		UseVideoWizard = 1
-		#<-mkr_b_videowizard_e->
-		LogLevels = 1,5,7,8
-		#ImmediatelyFlushLog = 1
-		AutostartCore = $AutostartCore
-		AutostartMedia = $AutostartMedia
-		LTS_HES = $LTS_HES
-		EOF
-	chmod 777 /etc/pluto.conf &>/dev/null
-}
-
-Setup_NIS () {
-	# Put a temporary nis config file that will prevent ypbind to start
-	# Temporary NIS setup, disabling NIS server and client.
-	StatsMessage "Temporarily modifying the NIS configuration file disabling the NIS server and client"
-	cat <<-EOF >/etc/default/nis
-		NISSERVER=false
-		NISCLIENT=false
-		YPPWDDIR=/etc
-		YPCHANGEOK=chsh
-		NISMASTER=
-		YPSERVARGS=
-		YPBINDARGS=
-		YPPASSWDDARGS=
-		YPXFRDARGS=
-		EOF
-}
-
-Config_MySQL_Server () {
-	#Run mysql statement
-	echo "UPDATE user SET Create_view_priv = 'Y', Show_view_priv = 'Y', \
-		Create_routine_priv = 'Y', Alter_routine_priv = 'Y', \
-		Create_user_priv = 'Y' WHERE User = 'debian-sys-maint'; \
-		FLUSH PRIVILEGES; \
-		" | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
-}
-
-Setup_MakeDev () {
-	# FIXME: Is this still necessary?
-	#Create logical link for MAKEDEV for the mdadm installation
-	ln -s /sbin/MAKEDEV /dev/MAKEDEV
-}
-
-Create_And_Config_Devices () {
-	#Source the SQL_OPS file
-	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
-
-	DEVICE_TEMPLATE_Core=7
-	DEVICE_TEMPLATE_MediaDirector=28
-
-	## Update some info in the database
-	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('Pluto', '1111')"
-	RunSQL "$Q"
-
-	## Create the Core device and set it's description
-	StatsMessage "Setting up your computer to act as a 'Core'"
-	Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
-	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
-	RunSQL "$Q"
-
-	#Setup media director with core
-	StatsMessage "Setting up your computer to act as a 'Media Director'"
-	/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
-	Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
-	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
-	RunSQL "$Q"
-
-	## Set UI interface
-	Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$Hybrid_DT' AND FK_DeviceTemplate=62"
-	OrbiterDevice=$(RunSQL "$Q")
-
-	StatsMessage "Updating Startup Scripts"
-	# "DCERouter postinstall"
-	/usr/pluto/bin/Update_StartupScrips.sh
-}
-
-Config_Device_Changes () {
-	StatsMessage "Updating Startup Scripts"
-	/usr/pluto/bin/Config_Device_Changes.sh
-}
-
 Configure_Network_Options () {
 	# Updating hosts file and the Device_Data for the core with the internal and external network
-	# addresses - uses Initial_DHCP_Config.sh from the pluto-install-scripts package.
+	# addresses - uses Initial_DHCP_Config.sh from the lmce-install-scripts package.
 	StatsMessage "Configuring your internal network"
 	#Source the SQL Ops file
 	. /usr/pluto/bin/SQL_Ops.sh	# pluto-boot-scripts
@@ -501,8 +440,36 @@ CreateDisklessImage () {
 	nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
 }
 
+Fix_Initrd_Vmlinux () {
+	# FIXME: is this still necessary?
+	:
+	##### this occurs if we're installing after a kernel update, but prior to reboot
+	StatsMessage "Starting initrd and vmlinuz fix"
+	# Fix a problem with the /initrd.img and /vmlinuz links pointing to a different kernel than the
+	# newest (and currently running) one
+	LATEST_KERNEL=`ls /lib/modules --sort time --group-directories-first|head -1`
+	KERNEL_TO_USE=`uname -r`
+
+	if [ -f "/boot/initrd.img-$LATEST_KERNEL" ]; then
+		KERNEL_TO_USE=$LATEST_KERNEL
+	fi
+	ln -s -f /boot/initrd.img-$KERNEL_TO_USE /initrd.img
+	ln -s -f /boot/vmlinuz-$KERNEL_TO_USE /vmlinuz
+}
+
+
+
+return 0
+
+###########################################################
+###########################################################
+### Deprecated Functions
+###########################################################
+###########################################################
+
 Setup_Kernel_PostInst () {
-	#FIXME: this should be in a pkg, not created in a postinst.
+	#FIXME: this has moved to pluto-boot-scripts - preinst
+	:
 	StatsMessage "Setting up kernel symlink fix"
 	## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
 	cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
@@ -523,68 +490,61 @@ Setup_Kernel_PostInst () {
 	chmod +x /etc/kernel/postinst.d/update-symlinks
 }
 
+PreSeed_MythWeb () {
+	# FIXME: moved to pluto-mythtv-plugin preinst
+	:
+	#Seeding mythweb preferences to not override the LMCE site on install - for some odd reason, mythweb packages don't accept the set-selections
+	touch /etc/default/mythweb
+	cat <<-EOF >/etc/default/mythweb
+		[cfg]
+		enable = false
+		only = false
+		username =
+		password =
+		EOF
+}
+
+Setup_NIS () {
+	# FIXME: this has moved to lmce-core preinst
+	:
+	# Put a temporary nis config file that will prevent ypbind to start
+	# Temporary NIS setup, disabling NIS server and client.
+	StatsMessage "Temporarily modifying the NIS configuration file disabling the NIS server and client"
+	cat <<-EOF >/etc/default/nis
+		NISSERVER=false
+		NISCLIENT=false
+		YPPWDDIR=/etc
+		YPCHANGEOK=chsh
+		NISMASTER=
+		YPSERVARGS=
+		YPBINDARGS=
+		YPPASSWDDARGS=
+		YPXFRDARGS=
+		EOF
+}
+
+Config_MySQL_Server () {
+	# FIXME: moved to lmce-core postinst
+	:
+	#Run mysql statement
+	echo "UPDATE user SET Create_view_priv = 'Y', Show_view_priv = 'Y', \
+		Create_routine_priv = 'Y', Alter_routine_priv = 'Y', \
+		Create_user_priv = 'Y' WHERE User = 'debian-sys-maint'; \
+		FLUSH PRIVILEGES; \
+		" | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
+}
+
+Setup_MakeDev () {
+	# FIXME: Is this still necessary?
+	:
+	#Create logical link for MAKEDEV for the mdadm installation
+	ln -s /sbin/MAKEDEV /dev/MAKEDEV
+}
+
 Setup_Hostname () {
+	# FIXME: this has moved to lmce-core postinst
+	:
 	echo "Setting hostname"
 	# set the hostname to dcerouter
 	echo dcerouter > /etc/hostname
-}
-
-###########################################################
-### Main execution area
-###########################################################
-dontrun () {
-# Set up logging by executing this fn in a script.
-Setup_Logfile
-
-# Installation Functions
-Setup_Hostname			# preinst core
-UpdateUpgrade			# firstboot ALL
-TimeUpdate			# firstboot ALL
-CreateBackupSources		# preinst ALL
-Disable_CompCache		# preinst ALL ?? (is this necessary?)
-CreateBasePackagesFiles		# preinst ALL
-UpdateDebCache			# firstboot core (or ALL?)
-ConfigAptConf			# preinst ALL
-ConfigSources			# preinst ALL
-PreSeed_DebConf			# preinst ALL
-PreSeed_MythWeb			# postinst core
-Fix_Initrd_Vmlinux		# firstboot core
-Nic_Config			# firstboot core
-Setup_Pluto_Conf		# preinst ALL?  firstboot ALL? - make consistent with MD creation
-Setup_NIS			# preinst core
-Config_MySQL_Client		# postinst MDs
-Config_MySQL_Server		# preinst core
-Setup_MakeDev			# preinst ALL
-Create_And_Config_Devices	# preinst core, firstboot MDs?
-Config_Device_Changes		# postinst core
-Configure_Network_Options	# firstboot core
-UpdateUpgrade			# firstboot
-VideoDriverSetup		# delete
-addAdditionalTTYStart		# preinst ALL
-TempEMIFix			# placeholder
-CleanInstallSteps		# firstboot ** last ## this allows us to wipe the db (and other stuff) clean and start fresh
-CreateDisklessImage		# postinst core
-Disable_DisplayManager		# postinst ALL
-Disable_NetworkManager		# postinst ALL
-Setup_Kernel_PostInst		# postinst MDs
-gpgUpdate			# firstboot core
-Fix_LSB_Data			# preinst ALL (raspbian)
-Notify_Reboot			# postinst ALL
-
-# Live DVD Fns.
-FirstNetwork			# livedvd
-SetupNetworking			# livedvd
-SetupAptSources			# livedvd
-VideoDriverLive			# livedvd
-InitialBootPrep			# livedvd
-PackageCleanUp			# livedvd - i386 ONLY!!!!
-
-
-# MD Firstboot Fns.
-
-
-
-#StatsMessage "MCE Install Script completed without a detected error"
-#StatsMessage "The log file for the install process is located at ${log_file}"
-#StatsMessage "Reboot the system to start the final process"
 }
