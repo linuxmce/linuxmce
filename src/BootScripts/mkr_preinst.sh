@@ -45,4 +45,6 @@ if [ install = "$1" -o upgrade = "$1" ]; then
 		exit 0
 		EOF
 	chmod +x /etc/kernel/postinst.d/update-symlinks
+
+	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
 fi
