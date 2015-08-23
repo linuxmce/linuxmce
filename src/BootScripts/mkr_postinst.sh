@@ -6,9 +6,17 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
+. /usr/pluto/install/install-common.sh
+
 ## Update the PlutoVersion variable from pluto.conf
 Version=$(dpkg -s pluto-boot-scripts | grep '^Version:' | sed  's/Version: //')
 ConfSet "PlutoVersion" "$Version"
+
+if [ ! -e /etc/apt/sources.list.pbackup ]; then
+	if [ -e /etc/apt/sources.list ] ; then
+		cp /etc/apt/sources.list /etc/apt/sources.list.pbackup
+	fi
+fi
 
 if [ ! -e /etc/apt/30pluto.pbackup ] ;then
 	if [ -e /etc/apt/apt.conf.d/30pluto ] ; then
@@ -35,6 +43,7 @@ if [ ! -e /etc/updatedb.conf.pbackup ] ;then
 	fi
 fi
 
+###. /user/pluto/install/install-common.sh ; ConfigAptConf
 ## Generate the /etc/apt/apt.conf.d/30pluto file
 if ! BlacklistConfFiles '/etc/apt/apt.conf.d/30pluto' ;then
 	rm -rf /var/cache/polipo/*
@@ -48,7 +57,7 @@ if ! BlacklistConfFiles '/etc/apt/apt.conf.d/30pluto' ;then
 		EOF
 fi
 
-## Ouch
+## FIXME: Ouch
 chmod 777 /usr/pluto/locks
 
 
@@ -58,19 +67,13 @@ if ! BlacklistConfFiles '/etc/logrotate.d/pluto' ;then
 	cp /usr/pluto/templates/logrotate.pluto.tmpl /etc/logrotate.d/linuxmce
 fi
 
-## Copy our asound.conf to the system
-# This causes alsa to break on first install with bad values. Let's stop doing that. L3mce
-#if ! BlacklistConfFiles '/etc/asound.conf' ;then
-#	cp /usr/pluto/templates/asound.conf /etc/asound.conf
-#fi
-
 ## Advertise SSH and file sharing via AVAHI
 test -d "/etc/avahi/services" || mkdir -p "/etc/avahi/services"
 if ! BlacklistConfFiles '/etc/avahi/services/ssh.service' ;then
-        cp /usr/pluto/templates/ssh.service.tmpl /etc/avahi/services/ssh.service
+	cp /usr/pluto/templates/ssh.service.tmpl /etc/avahi/services/ssh.service
 fi
 if ! BlacklistConfFiles '/etc/avahi/services/samba.service.tmpl' ;then
-        cp /usr/pluto/templates/samba.service.tmpl /etc/avahi/services/samba.service
+	cp /usr/pluto/templates/samba.service.tmpl /etc/avahi/services/samba.service
 fi
 ## Restart to enable modifications
 ## Note: If restart is not successful, still continue the upgrade.
@@ -103,24 +106,70 @@ if [[ -f /bin/sh.distrib ]] ;then
 	dpkg-divert --remove /bin/sh || :
 fi
 
+# FIXME: wtf are we adding to /etc/skel here for?
 ## Add shortcut to the desktop to get back to LinuxMCE orbiter
-mkdir -p /etc/skel/Desktop
-cat <<-EOF >/etc/skel/Desktop/LinuxMCE
-	[Desktop Entry]
-	Encoding=UTF-8
-	Version=8.10
-	Type=Application
-	Exec=/usr/pluto/bin/ActivateOrbiterFromKDE.sh
-	Path=/usr/pluto/bin
-	Name=Back To LinuxMCE Orbiter
-	Icon=gnome-panel-launcher
-	EOF
-
-if [[ -f /root/Desktop ]] ; then
-	rm -f /root/Desktop
+if [[ ! -f /etc/skel/Desktop/LinuxMCE ]] ; then
+	mkdir -p /etc/skel/Desktop
+	cat <<-EOF >/etc/skel/Desktop/LinuxMCE
+		[Desktop Entry]
+		Encoding=UTF-8
+		Version=8.10
+		Type=Application
+		Exec=/usr/pluto/bin/ActivateOrbiterFromKDE.sh
+		Path=/usr/pluto/bin
+		Name=Back To LinuxMCE Orbiter
+		Icon=gnome-panel-launcher
+		EOF
 fi
-mkdir -p /root/Desktop
-cp -r /etc/skel/Desktop/* /root/Desktop
+
+# wtf?  why are we wiping out the desktop continually? doesn't seem very friendly.
+#if [[ -f /root/Desktop ]] ; then
+#	rm -f /root/Desktop
+#fi
+if [[ ! -f /root/Desktop/LinuxMCE ]] ; then
+	mkdir -p /root/Desktop
+	cp -r /etc/skel/Desktop/* /root/Desktop
+fi
+
+###. /usr/pluto/install/install-common.sh ; Disable_CompCache
+# Disable compcache
+if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
+	rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
+fi
+
+###. /usr/pluto/install/install-common.sh ; CreateBasePackagesFile
+#Make sure there is are Packages files on the MD so apt-get update does not fail
+if [[ ! -f /usr/pluto/deb-cache/Packages.gz ]] ; then
+	mkdir -p /usr/pluto/deb-cache/
+	rm -f /usr/pluto/deb-cache/Packages
+	touch  /usr/pluto/deb-cache/Packages
+	gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
+fi
+#Make sure there is are Packages files on the MD so apt-get update does not fail
+if [[ ! -f /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz ]] ; then
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	rm -f /usr/pluto/deb-cache/$DEB_CACHE/Packages
+	touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
+	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
+fi
+
+###. /usr/pluto/install/install-common.sh ; Fix_LSB_Data
+case "$TARGET_DISTRO" in
+	 raspbian)
+		cat <<-EOF > /etc/lsb-release
+			DISTRIB_ID=Raspbian
+			DISTRIB_CODENAME=$TARGET_RELEASE
+			EOF
+		;;
+esac
+
+###. /usr/pluto/install/install-common.sh ; Disable_DisplayManager
+# TODO: dpkg-divert this so it doesn't come back
+# Disabling display manager
+mkdir -p "/etc/X11"
+echo "/bin/false" >/etc/X11/default-display-manager
+update-rc.d -f kdm remove >/dev/null
+update-rc.d -f lightdm remove >/dev/null
 
 # Make sure the old startup scripts no longer exists
 #rm -f /etc/rc{2,3,4,5}.d/{S30Start_X.sh,S93startup-script.sh,S99lmce_launch_manager.sh,S93linuxmce,S99core,S99launch-manager}
