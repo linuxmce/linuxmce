@@ -13,6 +13,7 @@ HEADER_install_livedvd=included
 
 FirstNetwork () {
 	### This is a Live DVD Fn.
+	:
 
 	echo "creating dumb DHCP interfaces template" > /var/log/pluto/firstnet.log
 	nic_num=$(lspci | grep -ic "Ethernet")
@@ -40,6 +41,7 @@ FirstNetwork () {
 
 SetupNetworking () {
 	### This is a Live DVD Fn.
+	:
 
 	### This is all done in /etc/init.d/linuxmce
 	rm -f /etc/X11/xorg.conf
@@ -52,6 +54,7 @@ SetupNetworking () {
 
 VideoDriverLive () {
 	### This is a Live DVD Fn.
+	:
 
 	vga_pci=$(lspci -v | grep ' VGA ')
 	prop_driver="fbdev"
@@ -129,6 +132,7 @@ InitialBootPrep () {
 PackageCleanUp () {
 	### This is a Live DVD Fn.
 	### This is i386 ONLY!!!
+	:
 
 	# Remove all but the latest package
 	thedir="${LOCAL_REPO_BASE}"
@@ -162,7 +166,7 @@ TempEMIFix () {
 }
 
 SetupAptSources () {
-	ConfigSources	# install-core.sh
+	ConfigSources	# install-common.sh
 }
 
 

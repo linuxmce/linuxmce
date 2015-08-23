@@ -28,6 +28,9 @@ DT_CORE=1
 DT_HYBRID=2
 DT_MEDIA_DIRECTOR=3
 
+DEVICE_TEMPLATE_Core=7
+DEVICE_TEMPLATE_MediaDirector=28
+
 DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
 DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
@@ -235,6 +238,30 @@ ConfigSources () {
 UpdateDebCache () {
 	StatsMessage "Updating deb-cache package files"
 	/usr/pluto/bin/UpdateDebCache.sh
+}
+
+Config_Device_Changes () {
+	StatsMessage "Running /usr/pluto/bin/Config_Device_Changes.sh"
+	/usr/pluto/bin/Config_Device_Changes.sh
+}
+
+DisableSplash () {
+	# disable plymouth splash for now. Could be replaced by own LMCE splash later
+	sed -i 's/ splash//' /etc/default/grub
+	/usr/sbin/update-grub
+}
+
+addAdditionalTTYStart () {
+	# TODO: this is ubuntu specific, alter to fn properly for debian/raspbian as well
+	if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]] || [[ "$TARGET_RELEASE" == "trusty" ]]; then
+		sed -i 's/23/235/' /etc/init/tty2.conf
+		sed -i 's/23/235/' /etc/init/tty3.conf
+		sed -i 's/23/235/' /etc/init/tty4.conf
+	else
+		echo "start on runlevel 5">>/etc/event.d/tty2
+		echo "start on runlevel 5">>/etc/event.d/tty3
+		echo "start on runlevel 5">>/etc/event.d/tty4
+	fi
 }
 
 Notify_Reboot () {

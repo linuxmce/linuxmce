@@ -23,7 +23,7 @@ DEVID_FILE="/etc/Disked_DeviceID"
 INSTALL_KUBUNTU_DESKTOP="no"
 
 # Get the Core's IP Address using the locator
-CORE_IP=$(/usr/pluto/install/core-locator)
+CORE_IP=$(/usr/pluto/bin/core-locator)
 
 ###########################################################
 ### Config setup fns.
@@ -90,20 +90,19 @@ MD_Setup_Plutoconf() {
 ### Setup Functions - General functions
 ###########################################################
 
-MD_Find_Core () {
-	# TODO: Use service discovery to find the Core's IP address
-	:
-}
-
-MD_System_Level_Prep () {
-	ConfigSources	# install-common.sh
-
+MD_Copy_SSH_Keys () {
 	## Setup initial ssh access
 	StatsMessage "Setting up SSH"
 	[[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && mkdir -p /root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> /root/.ssh/authorized_keys
 }
 
+MD_System_Level_Prep () {
+	ConfigSources		# install-common.sh
+	MD_Copy_SSH_Keys	# install-md.sh
+}
+
 MD_Seamless_Compatability () {
+	# FIXME: no longer required
 	: # no-op
 }
 
@@ -273,7 +272,6 @@ dontrun() {
 		StatsMessage "Running device specific script: $f _preinst - End"
 	done
 
-	MD_Find_Core
 MD_Config_MySQL_Client
 	MD_System_Level_Prep
 	#MD_Seamless_Compatability
