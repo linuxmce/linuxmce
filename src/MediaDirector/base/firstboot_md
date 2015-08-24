@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#set -e
+
+[[ -e /usr/pluto/bin/Config_Ops.sh ]] && . /usr/pluto/bin/Config_Ops.sh
+[[ -e /usr/pluto/bin/SQL_Ops.sh ]] && . /usr/pluto/bin/SQL_Ops.sh
+[[ -e /usr/pluto/bin/Utils.sh ]] && . /usr/pluto/bin/Utils.sh
+
+. /usr/pluto/install/install-md.sh
+
+if [ ! -f "$DEVID_FILE" ]; then
+	echo "ERR: interactor has not yet created '$DEVID_FILE'."
+	return 10
+fi
+
+##########################################################################################################
+##########################################################################################################
+# run any device specific firstboot add-on scripts
+for f in /usr/pluto/install/firstboot_md_* ; do
+	StatsMessage "Running script: ${f}_preinst - Begin"
+	. "$f" || :
+	$(basename "$f")_preinst || :
+	StatsMessage "Running script: ${f}_preinst - End"
+done
+##########################################################################################################
+##########################################################################################################
+MD_Setup_Fstab
+MD_Setup_Plutoconf
+MD_Copy_SSH_Keys
+MD_Config_MySQL_Client
+ConfigSources
+gpgUpdate
+Install_HWE # install kernel and X for all targets
+AptDistUpgrade
+MD_Populate_Debcache
+MD_Cleanup
+##########################################################################################################
+##########################################################################################################
+# run any device specific firstboot add-on scripts
+for f in /usr/pluto/install/firstboot_md_* ; do
+	StatsMessage "Running script: ${f}_postinst - Begin"
+	. "$f" || :
+	$(basename "$f")_postinst || :
+	StatsMessage "Running script: ${f}_postinst - End"
+done
+##########################################################################################################
+##########################################################################################################
+
+return 0
