@@ -62,7 +62,7 @@ if [ "$R" -lt "1" ] ; then
 fi
 
 # If this is initial install or firstboot then do network detection/setup
-if [ "$Firstboot" != "false" ] ; then
+if [ "$FirstBoot" != "false" ] ; then
 	Nic_Config			# install-core.sh
 	Configure_Network_Options	# install-core.sh
 fi
