@@ -13,8 +13,6 @@ ApplicationWindow {
     id:qml_root_item
     height: manager.appHeight
     width: manager.appWidth
-
-
     visible: true
     color:"transparent"
     property string appEntryQml: manager.skinEntryFile
@@ -80,7 +78,7 @@ ApplicationWindow {
         //            }
         //        }
 
-        onWidthChanged: console.log("qml_index width::"+width)
+        onWidthChanged: console.log("window size"+manager.appWidth+ " x "+manager.appHeight)
 
         //        Timer{
         //            id:pusher

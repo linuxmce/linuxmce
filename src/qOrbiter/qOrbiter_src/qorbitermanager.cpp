@@ -83,8 +83,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     #endif
     QObject(parent),qorbiterUIwin(view), tskinModel(NULL),
     m_appEngine(engine),
-   // appHeight(view->height()),
-  //  appWidth(view->width()),
+    // appHeight(view->height()),
+    //  appWidth(view->width()),
     settingsInterface(appSettings),
     m_style(0),
     m_fontDir(""),
@@ -143,10 +143,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 #ifdef __ANDROID__
     int testSize=-1;
 #endif
-
-
     if(settingsInterface->ready){
-
         if(restoreSettings()){  }
     }
 
@@ -186,9 +183,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_appEngine->addImportPath("qml");
 
     connect(m_screenInfo, SIGNAL(screenSizeChanged()), this, SLOT(resetScreenSize()));
-    connect(qorbiterUIwin, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
-
-
     // connect(qorbiterUIwin->engine(), SIGNAL(warnings(QList<QQmlError>)), this, SLOT(handleViewError(QList<QQmlError>)));
     m_appEngine->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 
@@ -247,24 +241,34 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
     if(m_appEngine->rootObjects().length()!=0){
         m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
+        connect(m_window, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
+        connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+        connect(m_window->screen(), SIGNAL(primaryOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+        connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         qDebug() << "Set QQuickWindow Ptr";
 
-        connect(m_window, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
-        connect(m_window, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
-
-#if defined(Q_OS_LINUX) || defined(Q_OS_OSX) || defined(Q_OS_WIN32)
+#if !defined(QANDROID) && !defined(Q_OS_IOS)
 
         if(m_testScreenSize==0){
             m_window->setVisibility(QWindow::FullScreen);
+        } else{
+            setAppH(480);
+            setAppW(640);
+            m_window->setGeometry(150,150, appWidth, appHeight);
+            m_window->update();
         }
+        connect(m_window, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
+        connect(m_window, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
+          checkOrientation(m_window->size());
 #else
         m_window->setVisibility(QWindow::FullScreen);
-
+        appHeight = m_window->height();
+        appWidth= m_window->width();
+        checkOrientation(Qt::PrimaryOrientation);
 #endif
-checkOrientation(m_window->size());
+
     }
-    QTimer::singleShot(2000, this, SLOT(beginSetup()));
-    ///beginSetup();
+
 
 }
 
@@ -349,10 +353,7 @@ void qorbiterManager::addScreenToHistory(QString s)
  *This function is responsible for setting the various paths associated with the QML skins, intiating the loading of those skins
  *and reporting sucess or failure in loading those skins.
  */
-bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
-{
-
-
+bool qorbiterManager::initializeManager(string sRouterIP, int device_id){
     setDeviceNumber(device_id);
     setDceResponse("Starting Manager with connection to :"+QString::fromStdString(sRouterIP));
 
@@ -387,11 +388,6 @@ void qorbiterManager::refreshUI(QUrl url){
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
-
-    qorbiterUIwin->engine()->clearComponentCache();
-    qorbiterUIwin->rootContext()->setBaseUrl(url);
-    qorbiterUIwin->setSource(url);
-
     emit currentSkinChanged();
 }
 
@@ -824,7 +820,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     setDceResponse("Setting location");
     setActiveRoom(iFK_Room, iea_area);
     setCurrentUser(QString::number(iPK_User));
-    swapSkins("default");
+    beginSetup();
 }
 
 void qorbiterManager::getConfiguration()
@@ -854,87 +850,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 
     if(currentSkin==incSkin) return;
     currentSkin= incSkin;
-
-    //    if(!mb_useNetworkSkins){
-
-    //        if(m_style  ){
-    //            qDebug() << Q_FUNC_INFO << "Deleting style";
-    //            m_style->deleteLater();
-    //        }
-
-    //        QStringList extra;
-    //        extra.append("skins");
-    //        extra.append(currentSkin);
-    //        extra.append("medium");
-    //        m_selector->setExtraSelectors(extra);
-    //        incSkin="default";
-    //        currentSkin=incSkin;
-    //       // QQmlFileSelector localSelector(m_appEngine);
-    //       // localSelector.setExtraSelectors(m_selector->allSelectors());
-
-    //        QString filePath = m_selector->select("/home/langston/lmce/src/qOrbiter/qOrbiter_src/qml/Style.qml");
-    //        qDebug() << Q_FUNC_INFO << m_selector->allSelectors();
-    //        qDebug() << Q_FUNC_INFO << filePath;
-    //        qDebug() << Q_FUNC_INFO << m_appEngine->baseUrl();
-
-    //        QQmlComponent styleData(m_appEngine, QUrl(filePath), QQmlComponent::PreferSynchronous);
-    //        m_style=styleData.create();
-
-    //        if(!m_style){
-    //            qDebug() << "Couldnt create style! " << filePath;
-    //        } else {
-    //            qDebug() << "Style Created!"  << filePath;;
-    //            qDebug() << m_selector->allSelectors().join("\n");
-    //            //  m_appEngine->rootContext()->setContextProperty("Style", m_style);
-    //        }
-
-
-    //        m_appEngine->clearComponentCache();
-    //        m_appEngine->rootContext()->setContextProperty("Style", m_style);
-
-    //       // qDebug() << m_localQmlPath+"skins/"+incSkin+"/Style.qml";
-    //        refreshUI(QUrl(m_localQmlPath+"skins/"+incSkin+"/Main.qml"));
-    //        setUiReady(true);
-    //        return;
-    //    }
-
-#ifdef WIN32
-    incSkin = "default";
-#endif
-#ifdef debug
-    qDebug() << tskinModel->rowCount();
-#endif
-    checkOrientation(qorbiterUIwin->size());
-    if (tskinModel->rowCount() > 0){
-        emit skinMessage("Setting Skin to:" +incSkin);
-        emit skinMessage("Got it from the model : " + tskinModel->m_baseUrl.toString());
-        setImagePath(tskinModel->m_baseUrl.toString()+"/"+incSkin+"/img/");
-        //load the actual skin entry point
-        currentSkin = incSkin;
-        m_style=tskinModel->currentItem;
-        m_appEngine->rootContext()->setContextProperty("Style", m_style);
-
-#if (QT5)
-        QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QQuickView::Status)),
-                         this, SLOT(skinLoaded(QQuickView::Status)));
-#else
-        QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
-                         this, SLOT(skinLoaded(QDeclarativeView::Status)));
-#endif
-
-#ifdef QT4
-        //qorbiterUIwin->engine()->clearComponentCache();
-#elif QT5
-
-#endif
-        QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, tskinModel->m_entryUrl));
-    }
-    else
-    {
-        emit skinMessage("Major skin Error!!");
-
-        exit(0);
-    }
+    emit currentSkinChanged();
 }
 
 #if (QT5)
@@ -2201,13 +2117,13 @@ void qorbiterManager::setupEarlyContexts()
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
 
 #else
-    QObject::connect(qorbiterUIwin, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+    QObject::connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
 
 #endif
 
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
     // QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
-    QObject::connect(qorbiterUIwin->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
+    QObject::connect(m_appEngine, SIGNAL(quit()), this, SLOT(closeOrbiter()));
 }
 
 void qorbiterManager::setupUiSelectors(){
@@ -2256,7 +2172,7 @@ void qorbiterManager::setupUiSelectors(){
     }
 
     skinMessage("build type set to:: "+buildType);
-    qDebug() << "Local path set to " << m_localQmlPath;   
+    qDebug() << "Local path set to " << m_localQmlPath;
 }
 
 void qorbiterManager::beginSetup()
@@ -2356,7 +2272,7 @@ bool qorbiterManager::createThemeStyle()
     m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
-         qDebug() << Q_FUNC_INFO << " exit ";
+    qDebug() << Q_FUNC_INFO << " exit ";
     return true;
 }
 
@@ -2493,6 +2409,7 @@ int qorbiterManager::loadSplash()
  */
 void qorbiterManager::checkOrientation(QSize s)
 {
+    if(s.height()==0 || s.width() == 0) return;
     setDceResponse("checkOrientation(QSize)::start");
     //NOTE: Is this not handled by the window manager and Orientation change signals?
 
@@ -2509,6 +2426,7 @@ void qorbiterManager::checkOrientation(QSize s)
 #ifdef QT5
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
+    qDebug() << Q_FUNC_INFO;
     Q_UNUSED(o);
 
     appHeight=m_window->size().height();
@@ -2687,6 +2605,9 @@ void qorbiterManager::resetScreenSize(){
         qDebug () << Q_FUNC_INFO << "Using device information ";
         t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
+
+        m_window->setHeight(appHeight);
+        m_window->setWidth(appWidth);
 
     } else {
 
