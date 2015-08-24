@@ -238,7 +238,7 @@ Configure_Network_Options () {
 		echo "We are in single NIC mode -> internal firewalls disabled"
 		. ${BASE_DIR}/bin/Config_Ops.sh
 		ConfSet "DisableFirewall" "1"
-		ConfSet ""DisableIPv6Firewall" "1"
+		ConfSet "DisableIPv6Firewall" "1"
 	fi
 
 	if [[ "$c_netExtUseDhcp" == "0" ]] ;then
