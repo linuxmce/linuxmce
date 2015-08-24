@@ -19,8 +19,8 @@ Depends: pluto-local-database,
 	asterisk-core-sounds-fr-gsm,
 	asterisk-prompt-es,
 	asterisk-prompt-de
-Provides:
-Conflicts: asterisk-pluto
-Replaces:
+Provides: asterisk-config-custom
+Conflicts: asterisk-config
+Replaces: asterisk-config
 Description: lmce-asterisk
  LinuxMCE Asterisk integration
