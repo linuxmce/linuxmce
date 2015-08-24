@@ -2004,13 +2004,17 @@ void qMediaPlayer::confirmMediaEnded(bool witherror)
 void qMediaPlayer::positionChanged(QString total, QString current)
 {
 
+    string mediaurl = getCurrentMediaUrl().toStdString();
+    string media_id = getMediaId().toStdString();
+    string tt = total.toStdString();
+    string ct = current.toStdString();
     EVENT_Media_Position_Changed(
                 getMediaType(),
-                getCurrentMediaUrl().toStdString(),
-                getMediaId().toStdString(),
-               i_StreamId,
-                total.toStdString(),
-                current.toStdString(),
-               getCurrentSpeed()
+                mediaurl,
+                media_id,
+                i_StreamId,
+                tt,
+                ct,
+               1
                 );
 }
