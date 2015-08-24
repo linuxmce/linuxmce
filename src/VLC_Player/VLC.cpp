@@ -598,7 +598,7 @@ namespace DCE
     if (!m_pMp)
       return;
 
-    libvlc_media_player_set_time(m_pMp, (m_fPosition * 1000) + (iMult * 30 * 1000));    
+    libvlc_media_player_set_time(m_pMp, libvlc_media_player_get_time(m_pMp) + (m_fPosition * 1000) + (iMult * 30 * 1000));    
   }
   
   void VLC::JumpBack(int iMult)
@@ -608,7 +608,7 @@ namespace DCE
     if (!m_pMp)
       return;
     
-    libvlc_media_player_set_time(m_pMp, (m_fPosition * 1000) - (iMult * 30 * 1000));
+    libvlc_media_player_set_time(m_pMp, libvlc_media_player_get_time(m_pMp) - (m_fPosition * 1000) - (iMult * 30 * 1000));
   }
 
   void VLC::MoveUp()
@@ -700,6 +700,15 @@ namespace DCE
 
     return libvlc_media_player_get_chapter_count(m_pMp)>0;
   }
+
+  int VLC::numChapters()
+  {
+    if (!m_pMp)
+      return false;
+    
+    return libvlc_media_player_get_chapter_count(m_pMp);
+  }
+
 
   int VLC::GetCurrentChapter()
   {

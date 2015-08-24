@@ -117,6 +117,7 @@ namespace DCE
     bool GetScreenShot(int iWidth, int iHeight, string& sCMD_Result);
     void GotoMediaMenu(int iMenu);
     bool hasChapters();
+    int numChapters();
     int GetCurrentChapter();
     int GetCurrentTitle();
     int GetCurrentAngle() { return 0; } 

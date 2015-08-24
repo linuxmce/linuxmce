@@ -762,47 +762,67 @@ void VLC_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-  int iChaptersToSkip=0;
-  
   if (sValue_To_Assign.size()==0)
     return; // do nothing.
-
+  
   if (!m_pVLC)
     return; // do nothing.
-
+  
   // Resume playback at normal speed, if needed.
   if (m_iMediaPlaybackSpeed!=1000)
     {
       m_iMediaPlaybackSpeed=1000; // Play at normal speed.
       DoTransportControls();
     }
-
-
-  // Since we can only do single step chapter skips, we have to calculate a relative
-  // number of chapters to skip.
-  if (sValue_To_Assign[0]=='-' || sValue_To_Assign[0]=='+')
-    iChaptersToSkip=atoi(sValue_To_Assign.c_str());
-  else if (m_pVLC->GetCurrentChapter()==-1)
-    iChaptersToSkip=1;
-  else
-    iChaptersToSkip=atoi(sValue_To_Assign.c_str())-m_pVLC->GetCurrentChapter();
-
+  
   if (m_pVLC->hasChapters())
     {
-      if (iChaptersToSkip<0)
-	for (int i=0; i>iChaptersToSkip;i--)
-	  m_pVLC->PreviousChapter();
+      // Skip forward/backward chapters.
+
+      int iCurrentChapter = m_pVLC->GetCurrentChapter();
+      int iNewChapter=0;
+
+      if (sValue_To_Assign[0]=='+')
+	{
+	  // Skip forward X chapters
+	  iNewChapter = iCurrentChapter + atoi(sValue_To_Assign.substr(1).c_str());
+	}
+      else if (sValue_To_Assign[0]=='-')
+	{
+	  // Skip backward X chapters
+	  iNewChapter = iCurrentChapter - atoi(sValue_To_Assign.substr(1).c_str());
+	}
+      else 
+	{
+	  iNewChapter = atoi(sValue_To_Assign.c_str());
+	}
+
+      if (iNewChapter!=0 && iNewChapter < m_pVLC->numChapters())
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::CMD_Jump_Position_in_Playlist(%d) - setting new chapter.",iNewChapter);
+	  m_pVLC->SetChapter(iNewChapter);
+	}
       else
-	for (int i=0; i<iChaptersToSkip;i++)
-	  m_pVLC->NextChapter();
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC_Player::CMD_Jump_Position_in_Playlist(%d) - invalid chapter number or offset, ignoring.",iNewChapter);
+	}
+
     }
   else
     {
-      // No chapters, skip ahead instead.
-      if (iChaptersToSkip<0)
-	m_pVLC->JumpBack(iChaptersToSkip);
+      // Non-chapter behavior. Jump forward/backward in increments of 30sec.
+      if (sValue_To_Assign[0] == '-')
+	{
+	  m_pVLC->JumpBack(atoi(sValue_To_Assign.substr(1).c_str()));
+	}
+      else if (sValue_To_Assign[0] == '+')
+	{
+	  m_pVLC->JumpFwd(atoi(sValue_To_Assign.substr(1).c_str()));
+	}
       else
-	m_pVLC->JumpFwd(iChaptersToSkip);
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC_Player::CMD_Jump_Position_in_Playlist(%d) - trying to jump chapters in media with no chapters. Ignoring.");
+	}
     }
 
 }
