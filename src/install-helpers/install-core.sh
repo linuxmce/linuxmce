@@ -236,8 +236,9 @@ Configure_Network_Options () {
 	if [[ "$c_singleNIC" == "1" ]] ;then
 		#Disable firewalls on single NIC operation, refs #396
 		echo "We are in single NIC mode -> internal firewalls disabled"
-		echo "DisableFirewall=1" >>/etc/pluto.conf
-		echo "DisableIPv6Firewall=1" >>/etc/pluto.conf
+		. ${BASE_DIR}/bin/Config_Ops.sh
+		ConfSet "DisableFirewall" "1"
+		ConfSet ""DisableIPv6Firewall" "1"
 	fi
 
 	if [[ "$c_netExtUseDhcp" == "0" ]] ;then
@@ -266,38 +267,28 @@ Configure_Network_Options () {
 #######################################################
 
 Setup_Pluto_Conf () {
-	StatsMessage "Seting Up MCE Configuration file"
-	AutostartCore=1
-	AutostartMedia=1
-
-	StatsMessage "Generating Default Config File"
-	cat <<-EOF >/etc/pluto.conf
-		# Pluto config file
-		MySqlHost = localhost
-		MySqlUser = root
-		MySqlPassword =
-		MySqlDBName = pluto_main
-		DCERouter = localhost
-		MySqlPort = 3306
-		DCERouterPort = 3450
-		PK_Device = 1
-		Activation_Code = 1111
-		PK_Installation = 1
-		PK_Users = 1
-		PK_Distro = $TARGET_DISTRO_ID
-		Display = 0
-		SharedDesktop = 1
-		OfflineMode = false
-		#<-mkr_b_videowizard_b->
-		UseVideoWizard = 1
-		#<-mkr_b_videowizard_e->
-		LogLevels = 1,5,7,8
-		#ImmediatelyFlushLog = 1
-		AutostartCore = $AutostartCore
-		AutostartMedia = $AutostartMedia
-		LTS_HES = $TARGET_LTS_HES
-		EOF
+	StatsMessage "Generating default /etc/pluto.conf file"
+	touch /etc/pluto.conf &>/dev/null
 	chmod 777 /etc/pluto.conf &>/dev/null
+	. ${BASE_DIR}/bin/Config_Ops.sh
+
+	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "localhost"
+	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
+	[ -n "$MySqlPassword" ] || ConfSet "MySqlPassword" ""
+	[ -n "$MySqlDBName" ] || ConfSet "MySqlDBName" "pluto_main"
+	[ -n "$DCERouter" ] || ConfSet "DCERouter" "localhost"
+	[ -n "$MySqlPort" ] || ConfSet "MySqlPort" "3306"
+	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
+	[ -n "$PK_Device" ] || ConfSet "PK_Device" "1"
+	[ -n "$Activation_Code" ] || ConfSet "Activation_Code" "1111"
+	[ -n "$PK_Installation" ] || ConfSet "PK_Installation" "1"
+	[ -n "$PK_Users" ] || ConfSet "PK_Users" "1"
+	[ -n "$PK_Distro" ] || ConfSet "PK_Distro" "$TARGET_DISTRO_ID"
+	[ -n "$UseVideoWizard" ] || ConfSet "UseVideoWizard" "1"
+	[ -n "$LogLevels" ] || ConfSet "LogLevels" "1,5,7,8"
+	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
+	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
+	[ -n "$LTS_HES" ] || ConfSet "LTS_HES" "$TARGET_LTS_HES"
 }
 
 SetInitialInstallationData () {
