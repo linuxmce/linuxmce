@@ -54,7 +54,7 @@ fi
 
 # Do we have an installation ID already?
 Q="SELECT COUNT(*) FROM Installation"
-R=RunSQL "$Q"
+R=$(RunSQL "$Q")
 if [ "$R" -lt "1" ] ; then
 	## Update some info in the database
 	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('LinuxMCE', '1111')"
