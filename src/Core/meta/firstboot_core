@@ -11,80 +11,50 @@ fi
 
 . /usr/pluto/install/install-core.sh
 
-###########################################################
-### Service Fns
-###########################################################
-start() {
-	# run any device specific firstboot add-on scripts here
-	for f in /usr/pluto/install/firstboot_core_* ; do
-		StatsMessage "Running device specific script: ${f}_preinst - Begin"
-		. "$f" || :
-		$(basename "$f")_preinst || :
-		StatsMessage "Running device specific script: ${f}_preinst - End"
-	done
+StatsMessage "Running firstboot_core - Begin"
+
+# run any device specific firstboot add-on scripts here
+for f in /usr/pluto/install/firstboot_core_* ; do
+	StatsMessage "Running script: ${f}_preinst - Begin"
+	. "$f" || :
+	$(basename "$f")_preinst || :
+	StatsMessage "Running script: ${f}_preinst - End"
+done
 ###########################################################
 ###########################################################
 ###########################################################
 
 Nic_Config
 Configure_Network_Options
-:
+Create_And_Configure_Core
 
 ###########################################################
 ###########################################################
 ###########################################################
-	# run any device specific firstboot add-on scripts here
-	for f in /usr/pluto/install/firstboot_core_* ; do
-		StatsMessage "Running device specific script: ${f}_postinst - Begin"
-		. "$f" || :
-		$(basename "$f")_postinst || :
-		StatsMessage "Running device specific script: ${f}_postinst - End"
-	done
+# run any device specific firstboot add-on scripts here
+for f in /usr/pluto/install/firstboot_core_* ; do
+	StatsMessage "Running script: ${f}_postinst - Begin"
+	. "$f" || :
+	$(basename "$f")_postinst || :
+	StatsMessage "Running script: ${f}_postinst - End"
+done
 
-	StatsMessage "Setting firstboot = false"
-	ConfSet "FirstBoot" "false"
-	sync
+StatsMessage "Running firstboot_core - End"
 
-	StatsMessage "Rebooting in 5 seconds"
-	sleep 1
-	StatsMessage "Rebooting in 4 seconds"
-	sleep 1
-	StatsMessage "Rebooting in 3 seconds"
-	sleep 1
-	StatsMessage "Rebooting in 2 seconds"
-	sleep 1
-	StatsMessage "Rebooting in 1 seconds"
-	sleep 1
-	StatsMessage "Rebooting"
-	reboot
-	return 0
-}
+StatsMessage "Setting firstboot = false"
+ConfSet "FirstBoot" "false"
+sync
 
-status() {
-	status_of_proc firstboot firstboot
-	return $?
-}
-
-case "$1" in
-	start|"")
-		start
-		retval=$?
-		;;
-	restart|reload|force-reload)
-		echo "Error: argument '$1' not supported" >&2
-		retval=3
-		;;
-	stop)
-		: # No-op
-		retval=$?
-		;;
-	status)
-		$1
-		retval=$?
-		;;
-	*)
-		echo "Usage: $0 [start|stop|status]" >&2
-		retval=3
-esac
-exit $retval
-
+StatsMessage "Rebooting in 5 seconds"
+sleep 1
+StatsMessage "Rebooting in 4 seconds"
+sleep 1
+StatsMessage "Rebooting in 3 seconds"
+sleep 1
+StatsMessage "Rebooting in 2 seconds"
+sleep 1
+StatsMessage "Rebooting in 1 seconds"
+sleep 1
+StatsMessage "Rebooting"
+reboot
+return 0
