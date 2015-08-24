@@ -66,6 +66,7 @@ namespace DCE
 	libvlc_event_detach(m_pMediaEventManager,libvlc_MediaStateChanged,Media_Callbacks,this);
 	libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
 	libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
+	m_bEventsAttached=false;
       }
 
     if (m_pMp)
@@ -441,6 +442,7 @@ namespace DCE
 	libvlc_event_detach(m_pMediaEventManager,libvlc_MediaStateChanged,Media_Callbacks,this);
 	libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
 	libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
+	m_bEventsAttached=false;
       }
     
     libvlc_media_player_release(m_pMp);
@@ -817,10 +819,21 @@ namespace DCE
 
   void VLC::SetZoomFactor(string sZoomFactor)
   {
-    // float fZoomFactor=0.0;
+    unsigned px;
+    unsigned py;
+
     if (!m_pMp)
       return;
-    if (sZoomFactor[0] == '+')
+
+    if (libvlc_video_get_size(m_pMp,0,&px,&py) != 0)
+      return;
+
+    if (sZoomFactor=="100")
+      {
+	// 0 indicates fill the drawable, aka 100%
+	libvlc_video_set_scale(m_pMp,0);
+      }
+    else if (sZoomFactor[0] == '+')
       {
 	sZoomFactor=sZoomFactor.substr(1);
 	libvlc_video_set_scale(m_pMp,libvlc_video_get_scale(m_pMp)+(atof(sZoomFactor.c_str())) / 100.00);
