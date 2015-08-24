@@ -4238,6 +4238,7 @@ void DCE::qOrbiter::ShowBookMarks()
 
 
 void qOrbiter::OnDisconnect(){
+    PurgeInterceptors();
     emit routerConnectionChanged(false);
     m_bOrbiterConnected = false;
     setNowPlaying(false);
@@ -4248,6 +4249,7 @@ void qOrbiter::OnDisconnect(){
 
 void qOrbiter::OnUnexpectedDisconnect()
 {
+    PurgeInterceptors();
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"QOrbiter::onUnexpectedDisconnect %d", m_dwPK_Device);
     emit routerConnectionChanged(false);
     pthread_cond_broadcast( &m_listMessageQueueCond );
@@ -4256,6 +4258,7 @@ void qOrbiter::OnUnexpectedDisconnect()
 
 void qOrbiter::OnReload()
 {
+    PurgeInterceptors();
     qDebug() << "On Reload Triggered@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"Command_Impl::OnReload %d", m_dwPK_Device);
     m_bOrbiterConnected = false;
@@ -4288,6 +4291,7 @@ void qOrbiter::OnReload()
 
 bool qOrbiter::OnReplaceHandler(string msg)
 {
+    PurgeInterceptors();
     // qDebug() << Q_FUNC_INFO;
     emit commandResponseChanged("Disconnecting due to device with same ID connecting.");
     //  qDebug() << "Message " << msg.c_str();
