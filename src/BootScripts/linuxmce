@@ -209,7 +209,7 @@ start() {
 
 	# check firstboot completion and launch firstboot from here
 	if [[ "$FirstBoot" != "true" ]] ; then
-		StartService "Starting LinuxMCE Firstboot setup"  "/usr/pluto/firstboot/firstboot start"
+		StartService "Starting LinuxMCE Firstboot setup"  "/usr/pluto/install/firstboot start"
 		err=$?
 		if [[ "$err" != "0" ]]; then
 			return $err
