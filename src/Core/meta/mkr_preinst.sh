@@ -1,6 +1,14 @@
 #!/bin/bash
 
 if [ install = "$1" ]; then
+	if [ ! grep -q "PK_Device" /etc/pluto.conf ] ; then
+		StatsMessage "Setting initial PK_Device"
+		cat <<-EOF >/etc/pluto.conf
+			PK_Device = 1
+			EOF
+		chmod 777 /etc/pluto.conf &>/dev/null
+	fi
+
 	if [ $(/bin/hostname) != "dcerouter" ] ; then
 		## Setup /etc/hosts
 		cat <<-EOF >/etc/hosts
