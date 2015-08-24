@@ -249,17 +249,22 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
 
+
+        connect(m_window, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
+        connect(m_window, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
+
         if(m_testScreenSize==0){
             m_window->setVisibility(QWindow::FullScreen);
         } else{
-            setAppH(480);
+            m_window->setVisibility(QWindow::Windowed);
             setAppW(640);
-            m_window->setGeometry(150,150, appWidth, appHeight);
-            m_window->update();
+            setAppH(480);
+            m_window->resize(appWidth, appHeight);
+            m_window->hide();
+            m_window->show();
         }
-        connect(m_window, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
-        connect(m_window, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
-          checkOrientation(m_window->size());
+
+        checkOrientation(m_window->size());
 #else
         m_window->setVisibility(QWindow::FullScreen);
         appHeight = m_window->height();
@@ -2211,7 +2216,13 @@ bool qorbiterManager::setSizeSelector()
         qDebug () << Q_FUNC_INFO << "Using device information ";
         t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
+#if !defined(QANDROID) && !defined(Q_OS_IOS)
+        m_window->setPosition(250, 250);
+        setAppH(400);
 
+#else
+        m_window->showFullScreen();
+#endif
     } else {
 
         qDebug() << Q_FUNC_INFO << "Using test screen size";
@@ -2426,21 +2437,26 @@ void qorbiterManager::checkOrientation(QSize s)
 #ifdef QT5
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
-    qDebug() << Q_FUNC_INFO;
-    Q_UNUSED(o);
+    qDebug() << Q_FUNC_INFO << m_window->size();
+
 
     appHeight=m_window->size().height();
     appWidth=m_window->size().width();
 
+setOrientation(appHeight > appWidth);
+return;
 
-    if(appHeight < appWidth){
+    switch (0) {
+    case Qt::LandscapeOrientation:setOrientation(false);  qDebug() << "Landscape";break;
+    case Qt::PrimaryOrientation:   ; qDebug() << "Primary ";break;
+    case Qt::PortraitOrientation:setOrientation(true);qDebug() << "Portrait"; break;
+    case Qt::InvertedLandscapeOrientation:setOrientation(false); qDebug() << "Inverted Landscape"; break;
+    case Qt::InvertedPortraitOrientation:setOrientation(true);qDebug() << "Inverted portait"; break;
+    default:
+        break;
+    }
 
-        setOrientation(false);
-    }
-    else{
-        setOrientation( true);
-    }
-}
+ }
 #endif
 
 void qorbiterManager::getGrid(int i)
@@ -2605,9 +2621,13 @@ void qorbiterManager::resetScreenSize(){
         qDebug () << Q_FUNC_INFO << "Using device information ";
         t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
-
-        m_window->setHeight(appHeight);
-        m_window->setWidth(appWidth);
+#if !defined(QANDROID) && !defined(Q_OS_IOS)
+        m_window->resize(appWidth, appHeight);
+        m_window->hide();
+        m_window->showNormal();
+#else
+        m_window->showFullScreen();
+#endif
 
     } else {
 
