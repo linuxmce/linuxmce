@@ -67,4 +67,8 @@ if [ "$FirstBoot" != "false" ] ; then
 	Configure_Network_Options	# install-core.sh
 fi
 
+if [ "$FirstBoot" != "false" ] ; then
+	Create_And_Config_Devices	# install-core.sh
+fi
+
 exit 0
