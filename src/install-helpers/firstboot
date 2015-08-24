@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#set -e
+
+. /usr/pluto/bin/Config_Ops.sh
+
+if [ "$FirstBoot" = "false" ] ; then
+	echo "Skipping firstboot, already completed."
+	exit 0
+fi
+
+. /usr/pluto/install/install-common.sh
+
+###########################################################
+### Service Fns
+###########################################################
+start() {
+
+	if [[ -f /usr/pluto/install/firstboot_core ]] ; then
+		/usr/pluto/install/firstboot_core
+	fi
+	if [[ -f /usr/pluto/install/firstboot_md ]] ; then
+		/usr/pluto/install/firstboot_md
+	fi
+
+	StatsMessage "Setting firstboot = false"
+	ConfSet "FirstBoot" "false"
+	sync
+
+	StatsMessage "Rebooting in 5 seconds"
+	sleep 1
+	StatsMessage "Rebooting in 4 seconds"
+	sleep 1
+	StatsMessage "Rebooting in 3 seconds"
+	sleep 1
+	StatsMessage "Rebooting in 2 seconds"
+	sleep 1
+	StatsMessage "Rebooting in 1 seconds"
+	sleep 1
+	StatsMessage "Rebooting"
+	reboot
+	return 0
+}
+
+status() {
+	status_of_proc firstboot firstboot
+	return $?
+}
+
+case "$1" in
+	start|"")
+		start
+		retval=$?
+		;;
+	restart|reload|force-reload)
+		echo "Error: argument '$1' not supported" >&2
+		retval=3
+		;;
+	stop)
+		: # No-op
+		retval=$?
+		;;
+	status)
+		$1
+		retval=$?
+		;;
+	*)
+		echo "Usage: $0 [start|stop|status]" >&2
+		retval=3
+esac
+exit $retval
+
