@@ -21,6 +21,6 @@ Depends: pluto-local-database,
 	asterisk-prompt-de
 Provides: asterisk-config-custom
 Conflicts: asterisk-config
-Replaces: asterisk-config
+Replaces: asterisk-config, asterisk-custom-config
 Description: lmce-asterisk
  LinuxMCE Asterisk integration
