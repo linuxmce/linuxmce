@@ -266,41 +266,8 @@ Configure_Network_Options () {
 ### Other Setup Functions
 #######################################################
 
-Setup_Pluto_Conf () {
-	StatsMessage "Generating default /etc/pluto.conf file"
-	touch /etc/pluto.conf &>/dev/null
-	chmod 777 /etc/pluto.conf &>/dev/null
-	. ${BASE_DIR}/bin/Config_Ops.sh
-
-	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "localhost"
-	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
-	[ -n "$MySqlPassword" ] || ConfSet "MySqlPassword" ""
-	[ -n "$MySqlDBName" ] || ConfSet "MySqlDBName" "pluto_main"
-	[ -n "$DCERouter" ] || ConfSet "DCERouter" "localhost"
-	[ -n "$MySqlPort" ] || ConfSet "MySqlPort" "3306"
-	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
-	[ -n "$PK_Device" ] || ConfSet "PK_Device" "1"
-	[ -n "$Activation_Code" ] || ConfSet "Activation_Code" "1111"
-	[ -n "$PK_Installation" ] || ConfSet "PK_Installation" "1"
-	[ -n "$PK_Users" ] || ConfSet "PK_Users" "1"
-	[ -n "$PK_Distro" ] || ConfSet "PK_Distro" "$TARGET_DISTRO_ID"
-	[ -n "$UseVideoWizard" ] || ConfSet "UseVideoWizard" "1"
-	[ -n "$LogLevels" ] || ConfSet "LogLevels" "1,5,7,8"
-	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
-	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
-	[ -n "$LTS_HES" ] || ConfSet "LTS_HES" "$TARGET_LTS_HES"
-}
-
-SetInitialInstallationData () {
-	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
-
-	## Update some info in the database
-	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('LinuxMCE', '1111')"
-	RunSQL "$Q"
-}
-
 Create_And_Config_Devices () {
-	SetInitialInstallationData	# install-core.sh
+	# TODO: FIXME: Check and do only if not done!
 
 	### CORE
 	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
@@ -318,67 +285,6 @@ Create_And_Config_Devices () {
 	Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
 	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
 	RunSQL "$Q"
-}
-
-CleanInstallSteps () {
-	# FIXME: This fn has old data and could be dangerous
-	return;
-
-	# This is old and needs work but would allow you to wipe a db and start fresh without re-installing from scratch.
-	if [[ -f /etc/pluto/install_cleandb ]]; then
-		# on upgrade, the old keys are already in place, so keep them
-		rm -f /etc/ssh/ssh_host_*
-		dpkg-reconfigure -pcritical openssh-server
-
-		PostInstPkg=(
-			pluto-local-database pluto-media-database pluto-security-database pluto-system-database
-			pluto-telecom-database lmce-asterisk
-		)
-
-		for Pkg in "${PostInstPkg[@]}"; do
-			/var/lib/dpkg/info/"$Pkg".postinst configure
-		done
-
-		. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
-		. ${BASE_DIR}/bin/Config_Ops.sh	# pluto-boot-scripts
-
-		# Raise max char limit on php.ini
-		if ! grep -q 'max_input_vars' /etc/php5/apache2/php.ini; then 
-			echo "max_input_vars = 15000" >> /etc/php5/apache2/php.ini
-		fi
-
-		# Mark remote assistance as disabled
-		ConfDel remote
-
-		arch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
-
-		Queries=(
-			"UPDATE Device_DeviceData
-				SET IK_DeviceData=15
-			WHERE PK_Device IN (
-				SELECT PK_Device FROM Device WHERE FK_DeviceTemplate IN (7, 28)
-			)
-			AND FK_DeviceData=7"
-			"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0804_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
-			"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0804_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
-			"UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
-			"UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
-		 )
-
-		for Q in "${Queries[@]}"; do
-			RunSQL "$Q"
-		done
-
-		DT_DiskDrive=11
-		DiskDrives=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DT_DiskDrive'")
-		for DiskDrive in $DiskDrives ;do
-			DiskDrive_DeviceID=$(Field 1 "$DiskDrive")
-			for table in 'CommandGroup_Command' 'Device_Command' 'Device_CommandGroup' 'Device_DeviceData' 'Device_DeviceGroup' 'Device_Device_Related' 'Device_EntertainArea' 'Device_HouseMode' 'Device_Orbiter' 'Device_StartupScript' 'Device_Users' ;do
-				RunSQL "DELETE FROM \\`$table\\` WHERE FK_DeviceID = '$DiskDrive_DeviceID' LIMIT 1"
-			done
-			RunSQL "DELETE FROM Device WHERE PK_Device = '$DiskDrive_DeviceID' LIMIT 1"
-		done
-	fi
 }
 
 CreateDisklessImage () {
