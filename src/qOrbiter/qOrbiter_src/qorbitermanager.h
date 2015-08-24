@@ -957,10 +957,10 @@ public slots:
     void setLocation(const int& , const int& ) ;
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
-    void setAppH(int h) {appHeight = h;checkOrientation(m_window->size());}
+    void setAppH(int h) { if(appHeight==h)return;  appHeight = h;checkOrientation(QSize(appWidth, appHeight));}
     int getAppH() {return appHeight;}
 
-    void setAppW(int w) {appWidth = w; checkOrientation(m_window->size());}
+    void setAppW(int w) {if(appWidth==w)return;  appWidth = w; checkOrientation(QSize(appWidth, appHeight));}
     int getAppW(){return appWidth; }
 
     /*Network State property functions*/
@@ -1806,33 +1806,27 @@ public slots:
     }
 
     Q_INVOKABLE void setDesiredOrientation(Qt::ScreenOrientation o){
-        int tH = m_window->height();
-        int tW = m_window->width() ;
+        int tH = appHeight;
+        int tW = appWidth;
 
         switch (o) {
         qDebug() <<Q_FUNC_INFO << "Portrait Setting";
         case Qt::PortraitOrientation:
-            if(appHeight < appWidth ){
-                m_window->setHeight(tW);
-                m_window->setWidth(tH);
+            if(tH < tW ){
+                appHeight=tW;
+                appWidth=tH;
             }
-          //  m_window->->rootObject()->setRotation(0.0);
-            setOrientation(true);
             break;
         case Qt::LandscapeOrientation:
             qDebug() <<Q_FUNC_INFO << "Landscape Setting";
-            if(appWidth < appHeight){
-                m_window->setHeight(tW);
-                m_window->setWidth(tH);
+            if(tW < tH){
+                appHeight=tW;
+                appWidth=tH;
             }
-           // qorbiterUIwin->rootObject()->setRotation(0.0);
-            setOrientation(false);
         default:
             break;
         }
-        appHeight = m_window->height();
-        appWidth= m_window->width();
-        emit orientationChanged();
+        checkOrientation(QSize(appWidth, appHeight));
        m_appEngine->clearComponentCache();
         // updateProfileSelector();
     }
