@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.3-9) precise; urgency=low
+
+  * add conflicts/replaces/provides on asterisk-config
+
+ -- phenigma <phenigma@linuxmce.org>  Tue, 24 Aug 2015 03:00:00 -0500
+
 lmce-asterisk (0+0.3.3-8) precise; urgency=low
 
   * alter conflics on asterisk-config-custom
