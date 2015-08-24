@@ -24,7 +24,7 @@ find_linux_root_device() {
 	echo "$ROOTDEVICE"
 }
 
-firstboot_lmce_rpi2_preinst() {
+firstboot_md_rpi2_preinst() {
 	# Resize the SD Card to full size prior to doing anything else
 	ret=2;
 	if [ ! -f /etc/part_resized ] ; then
@@ -86,7 +86,7 @@ EOF
 }
 
 
-firstboot_lmce_rpi2_kernel() {
+firstboot_md_rpi2_kernel() {
 	StatsMessage "Installing RPi2 kernel and headers"
 	apt-get -f -y --no-install-recommends install linux-headers-rpi2 linux-image-rpi2 || :
 	VerifyExitCode "Install linux image & headers for rpi2 failed"
@@ -94,7 +94,7 @@ firstboot_lmce_rpi2_kernel() {
 	return 0
 }
 
-firstboot_lmce_rpi2_postinst() {
+firstboot_md_rpi2_postinst() {
 	StatsMessage "Installing admin utilities"
 	apt-get -f -y install sudo-ldap
 
