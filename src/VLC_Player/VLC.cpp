@@ -55,15 +55,18 @@ namespace DCE
     m_sVideoInfo="";
     m_iStreamID=0;
     m_iPreviousAudioTrack=1;
+    m_bEventsAttached=false;
   }
 
   VLC::~VLC()
   {
-
-    libvlc_event_detach(m_pMediaEventManager,libvlc_MediaParsedChanged,Media_Callbacks,this);
-    libvlc_event_detach(m_pMediaEventManager,libvlc_MediaStateChanged,Media_Callbacks,this);
-    libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
-    libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
+    if (m_bEventsAttached)
+      {
+	libvlc_event_detach(m_pMediaEventManager,libvlc_MediaParsedChanged,Media_Callbacks,this);
+	libvlc_event_detach(m_pMediaEventManager,libvlc_MediaStateChanged,Media_Callbacks,this);
+	libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
+	libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
+      }
 
     if (m_pMp)
       {
@@ -378,7 +381,7 @@ namespace DCE
     libvlc_event_attach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
     libvlc_event_attach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
     // libvlc_event_attach(m_pMediaPlayerEventManager,libvlc_MediaPlayerStopped,Media_Callbacks,this);
-
+    m_bEventsAttached=true;
 
     libvlc_media_release(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
@@ -431,7 +434,20 @@ namespace DCE
     SetPlaying(false);
     SetMediaURL("");
     libvlc_media_player_stop(m_pMp);
-    // libvlc_media_player_release(m_pMp);
+    
+    if (m_bEventsAttached)
+      {
+	libvlc_event_detach(m_pMediaEventManager,libvlc_MediaParsedChanged,Media_Callbacks,this);
+	libvlc_event_detach(m_pMediaEventManager,libvlc_MediaStateChanged,Media_Callbacks,this);
+	libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
+	libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
+      }
+    
+    libvlc_media_player_release(m_pMp);
+    m_pMp=NULL;
+    m_pMediaEventManager=NULL;
+    m_pMediaPlayerEventManager=NULL;
+
   }
 
   void VLC::SetDuration(libvlc_time_t newDuration)
