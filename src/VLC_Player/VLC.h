@@ -54,6 +54,15 @@ namespace DCE
       string m_sAudioSettings;
       string m_sHardwareAcceleration;
       string m_sDeinterlacingMode;
+      string m_sVideoSettings;
+      unsigned m_iWidth;
+      unsigned m_iHeight;
+
+      Config();
+      ~Config();
+
+      bool parseVideoSettings();
+
     };
 
     Config *m_pConfig;
@@ -65,6 +74,7 @@ namespace DCE
     string m_sMediaType;
     string m_sMediaURL;
     int m_iMediaID;
+    int m_iZoomPercent;
 
     VLC(Config* pConfig, DCE::VLC_Player* pVLC_Player);
     ~VLC();
@@ -118,7 +128,7 @@ namespace DCE
     string GetAllAudioTracks();
     string GetAllAngles();
     void SetAspectRatio(string sAspectRatio);
-    void SetZoomFactor(string sZoomFactor);
+    void SetZoomFactor(string sZoomPercent);
     void SetMediaType(string sMediaType, int iMediaID);
     string GetMediaType();
     int GetMediaID();

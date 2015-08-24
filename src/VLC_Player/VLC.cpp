@@ -41,6 +41,39 @@ char *convert(const std::string & s)
 
 namespace DCE
 {
+
+  VLC::Config::Config()
+  {
+    m_sSoundCard="";
+    m_sAudioSettings="";
+    m_sHardwareAcceleration="";
+    m_sDeinterlacingMode="";
+    m_sVideoSettings="";
+    m_iWidth=0;
+    m_iHeight=0;
+  }
+
+  VLC::Config::~Config()
+  {
+    
+  }
+  
+  bool VLC::Config::parseVideoSettings()
+  {
+    if (m_sVideoSettings.empty())
+      return false;
+
+    string::size_type pos=0;
+    int m_iWidth=atoi(StringUtils::Tokenize(m_sVideoSettings," ",pos).c_str());
+    int m_iHeight=atoi(StringUtils::Tokenize(m_sVideoSettings,"/",pos).c_str());
+
+    if (m_iWidth==0 || m_iHeight==0)
+      return false;
+
+    return true;
+    
+  }
+
   VLC::VLC(Config* pConfig, VLC_Player* pVLC_Player)
   {
     m_pVLC_Player = pVLC_Player;
@@ -56,6 +89,7 @@ namespace DCE
     m_iStreamID=0;
     m_iPreviousAudioTrack=1;
     m_bEventsAttached=false;
+    m_iZoomPercent=100;
   }
 
   VLC::~VLC()
@@ -150,6 +184,12 @@ namespace DCE
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "VLC::init() could not minimize VLC window.");
 	// return false;
+      }
+
+    if (!m_pConfig->parseVideoSettings())
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::init() could not parse media director video settings.");
+	return false;
       }
     
     return true;
@@ -817,10 +857,16 @@ namespace DCE
       libvlc_video_set_aspect_ratio(m_pMp,sAspectRatio.c_str());
   }
 
-  void VLC::SetZoomFactor(string sZoomFactor)
+  void VLC::SetZoomFactor(string sZoomPercent)
   {
-    unsigned px;
-    unsigned py;
+    unsigned px=0;
+    unsigned py=0;
+    int windowWidth=0;
+    float fZoomFactor=0.0; 
+    float fZoomScale=0.0;
+    int iZoomPercent=0;
+    int iDelta=0;
+    XWindowAttributes windowattr;
 
     if (!m_pMp)
       return;
@@ -828,27 +874,48 @@ namespace DCE
     if (libvlc_video_get_size(m_pMp,0,&px,&py) != 0)
       return;
 
-    if (sZoomFactor=="100")
+    XLockDisplay(m_pDisplay);
+    XGetWindowAttributes(m_pDisplay,m_Window,&windowattr);
+
+    // Get the 100% zoom factor, which will be scaled.
+    fZoomFactor = (float)windowattr.width / (float)px;
+    
+    if (sZoomPercent == "100")
       {
-	// 0 indicates fill the drawable, aka 100%
+	// Special case for 100%, use 0 to fill drawable.
+	XUnlockDisplay(m_pDisplay);
 	libvlc_video_set_scale(m_pMp,0);
+	m_iZoomPercent=100;
+	return;
       }
-    else if (sZoomFactor[0] == '+')
+    else if (sZoomPercent[0] == '+')
       {
-	sZoomFactor=sZoomFactor.substr(1);
-	libvlc_video_set_scale(m_pMp,libvlc_video_get_scale(m_pMp)+(atof(sZoomFactor.c_str())) / 100.00);
+	// Zoom in X percent
+	iDelta=atoi(sZoomPercent.substr(1).c_str());
+	iZoomPercent=m_iZoomPercent+iDelta;
       }
-    else if (sZoomFactor[0]=='-')
+    else if (sZoomPercent[0] == '-')
       {
-	sZoomFactor=sZoomFactor.substr(1);
-	libvlc_video_set_scale(m_pMp,libvlc_video_get_scale(m_pMp)-(atof(sZoomFactor.c_str())) / 100.00);
+	// Zoom out X percent
+	iDelta=atoi(sZoomPercent.substr(1).c_str());
+	iZoomPercent=m_iZoomPercent-iDelta;
       }
     else
       {
-	libvlc_video_set_scale(m_pMp,atof(sZoomFactor.c_str()) / 100.00);
+	// Absolute percentage.
+	iZoomPercent = atoi(sZoomPercent.c_str());
       }
-    cout << "New scale factor is: " << libvlc_video_get_scale(m_pMp) << endl;
+    
+    XSync(m_pDisplay,false);
+    XUnlockDisplay(m_pDisplay);
 
+    // Calculate scale, and apply it.
+    fZoomScale = fZoomFactor * ((float)iZoomPercent / (float)100.0);
+    libvlc_video_set_scale(m_pMp,fZoomScale);
+
+    m_iZoomPercent=iZoomPercent;
+    
+    return;
   }
 
   void VLC::SetMediaType(string sMediaType, int iMediaID)

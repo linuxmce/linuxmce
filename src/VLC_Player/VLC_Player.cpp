@@ -116,6 +116,11 @@ string VLC_Player::Audiosettings_get()
   return MD_DeviceData_get(DEVICEDATA_Audio_settings_CONST);
 }
 
+string VLC_Player::Videosettings_get()
+{
+  return MD_DeviceData_get(DEVICEDATA_Video_settings_CONST);
+}
+
 //<-dceag-getconfig-b->
 bool VLC_Player::GetConfig()
 {
@@ -134,6 +139,8 @@ bool VLC_Player::GetConfig()
       m_config->m_sAudioSettings=Audiosettings_get();
       m_config->m_sHardwareAcceleration=DATA_Get_Hardware_acceleration();
       m_config->m_sDeinterlacingMode=DATA_Get_Deinterlacing_Mode();
+      m_config->m_sVideoSettings=Videosettings_get();
+
     }
   
   m_pVLC=new VLC(m_config,this);

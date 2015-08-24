@@ -72,7 +72,8 @@ namespace DCE
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();
     string Audiosettings_get();
-
+    string Videosettings_get();
+    
     void DoTransportControls();
     class AlarmManager* m_pAlarmManager;
     void AlarmCallback(int id, void* param);
