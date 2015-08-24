@@ -31,6 +31,7 @@ namespace DCE
     libvlc_media_player_t* m_pMp;
     libvlc_event_manager_t* m_pMediaEventManager;
     libvlc_event_manager_t* m_pMediaPlayerEventManager;
+    bool m_bEventsAttached;
     Display* m_pDisplay;
     Window m_Window;
     Cursor m_Cursor;
