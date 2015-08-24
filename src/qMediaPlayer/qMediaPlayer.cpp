@@ -1849,7 +1849,9 @@ void qMediaPlayer::mediaEnded(bool status)
     qDebug("Stream Ended");
     // DCE::CMD_Stop finished(this->m_dwPK_Device, this->m_dwPK_Device, i_StreamId, false );
 
-    EVENT_Playback_Completed(currentMediaUrl.toStdString(), i_StreamId, false);
+    string mrl = getInternalMediaUrl().toStdString();
+
+    EVENT_Playback_Completed(mrl, i_StreamId, status);
     // EVENT_Playback_Started(currentMediaUrl.toStdString(), i_StreamId, "Media", "none", "none");
 }
 //<-dceag-c616-b->
@@ -1928,9 +1930,6 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
 
 
     pluginVolumeDown();
-
-
-    sCMD_Result = "OK";
     qWarning("Set audio level down.");
     sCMD_Result="OK";
 
@@ -1985,20 +1984,29 @@ void qMediaPlayer::updateMetadata(QString mediaTitle, QString mediaSubtitle, QSt
     DeviceData_Base *p = this->m_pData->m_pDevice_Core->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
     QString whatisthis(",4962,47,244,224,230");
     whatisthis.prepend(QString::number(screen));
+
     CMD_Set_Now_Playing setNowPlaying(this->m_dwPK_Device,p->m_dwPK_Device, whatisthis.toStdString() ,mediaTitle.toStdString(),mediaSubtitle.toStdString(),this->i_pkMediaType,this->i_StreamId,0,name.toStdString(),QString::number(this->m_dwPK_Device).toStdString().c_str(), false);
     SendCommand(setNowPlaying);
 
-    EVENT_Playback_Info_Changed(mediaTitle.toStdString(), mediaSubtitle.toStdString(), name.toStdString());
+    string mt = mediaTitle.toStdString();
+    string mst = mediaSubtitle.toStdString();
+    string nm = name.toStdString();
+
+    EVENT_Playback_Info_Changed(mt, mst, nm);
 }
 
 void qMediaPlayer::confirmMediaStarted(QString description)
 {
-    EVENT_Playback_Started(getInternalMediaUrl().toStdString(), i_StreamId, description.toStdString(), "true", "true");
+    string mrl = getInternalMediaUrl().toStdString();
+    string desc = description.toStdString();
+
+    EVENT_Playback_Started(mrl, i_StreamId, desc, "true", "true");
 }
 
 void qMediaPlayer::confirmMediaEnded(bool witherror)
 {
-    EVENT_Playback_Completed(getInternalMediaUrl().toStdString(), i_StreamId, witherror);
+    string mrl = getInternalMediaUrl().toStdString();
+    EVENT_Playback_Completed(mrl, i_StreamId, witherror);
 }
 
 void qMediaPlayer::positionChanged(QString total, QString current)
@@ -2015,6 +2023,6 @@ void qMediaPlayer::positionChanged(QString total, QString current)
                 i_StreamId,
                 tt,
                 ct,
-               1
+                1
                 );
 }
