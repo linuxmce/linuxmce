@@ -262,7 +262,10 @@ elif [[ "$diskType" == 0 || "$diskType" == 1 || "$diskType" == 6 || "$diskType" 
 		Track=${File%%,*}
 		FileName=${File#*,}
 		FileName=${FileName//\//-}
-		TrackNumber=$Track		
+		TrackNumber=$Track
+
+echo "FILENAME=$filename"
+		TrackName=$(eval echo "\"\$TTITLE$Track\"")
 
 		echo "Track: $Track; Filename: $FileName"
 		if /usr/pluto/bin/IsDataTrack "$sourceDevice" "$Track"; then
