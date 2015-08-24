@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . /usr/pluto/bin/Utils.sh
+. /usr/pluto/install/install-core.sh
 
 ###. /usr/pluto/install/install-core.sh ; Config_MySQL_Server
 # grant debian-sys-main privs in mysql
@@ -23,4 +24,7 @@ if ! BlacklistConfFiles '/etc/hostname' ;then
 		echo dcerouter > /etc/hostname
 	fi
 fi
+
+Setup_Pluto_Conf	# lmce-install-scripts - install-core.sh
+
 exit 0
