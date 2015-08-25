@@ -46,8 +46,4 @@ if [ install = "$1" ]; then
 	chmod +x /etc/kernel/postinst.d/update-symlinks
 
 	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
-
-	if [ ! -f /usr/sbin/named ] ; then
-		echo "chmod -x /usr/sbin/named" > /etc/default/bind9
-	fi
 fi
