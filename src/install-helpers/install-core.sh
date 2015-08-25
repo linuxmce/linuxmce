@@ -15,15 +15,15 @@ Create_Wizard_Data-Double_Nic_Shell () {
 	echo "c_deviceType=2 # 1-Core, 2-Hybrid, 3-DiskedMD
 c_netIfaceNo=1
 c_netExtName='{extif}'
-c_netExtIP=''
-c_netExtMask=''
-c_netExtGateway=''
-c_netExtDNS1=''
+c_netExtIP='{extip}'
+c_netExtMask='{extMask}'
+c_netExtGateway='{extGW}'
+c_netExtDNS1='{extDNS}'
 c_netExtDNS2=''
 c_netExtUseDhcp=1 # 1 - Yes / 0 - No
 c_runDhcpServer=1 # 1 - Yes / 0 - No
 c_netIntName='{intif}'
-c_netIntIPN='192.168.80.1'
+c_netIntIPN='192.168.80'
 c_startupType=1 #0 - Start Kde / 1 - Start LMCE
 c_installType=1
 c_installMirror='http://archive.ubuntu.com/ubuntu/'
@@ -50,7 +50,7 @@ c_netExtDNS2=''
 c_netExtUseDhcp={extUseDhcp} # 1 - Yes / 0 - No
 c_runDhcpServer={runDhcp} # 1 - Yes / 0 - No
 c_netIntName='{extif}:1'
-c_netIntIPN='192.168.80.1'
+c_netIntIPN='192.168.80'
 c_startupType=1 #0 - Start Kde / 1 - Start LMCE
 c_installType=1
 c_installMirror='http://archive.ubuntu.com/ubuntu/'
@@ -150,6 +150,7 @@ Configure_Network_Options () {
 	# addresses - uses Initial_DHCP_Config.sh from the lmce-install-scripts package.
 	StatsMessage "Configuring your internal network"
 	#Source the SQL Ops file
+	. ${BASE_DIR}/bin/Config_Ops.sh	# pluto-boot-scripts
 	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
 
 	. ${mce_wizard_data_shell}
@@ -208,7 +209,6 @@ Configure_Network_Options () {
 	if [[ "$c_singleNIC" == "1" ]] ;then
 		#Disable firewalls on single NIC operation, refs #396
 		echo "We are in single NIC mode -> internal firewalls disabled"
-		. ${BASE_DIR}/bin/Config_Ops.sh
 		ConfSet "DisableFirewall" "1"
 		ConfSet "DisableIPv6Firewall" "1"
 	fi
