@@ -480,34 +480,6 @@ Nic_Config () {
 	        echo "`date` - Wizard Information is corrupted or missing."
 		exit 1
 	fi
-	. ${mce_wizard_data_shell}
-	VerifyExitCode "MCE Wizard Data"
-
-	Core_PK_Device="0"
-
-	#Setup the network interfaces
-	echo > /etc/network/interfaces
-	echo "auto lo" >> /etc/network/interfaces
-	echo "iface lo inet loopback" >> /etc/network/interfaces
-	echo >> /etc/network/interfaces
-	echo "auto $c_netExtName" >> /etc/network/interfaces
-	if [[ $c_netExtUseDhcp  == "1" ]] ;then
-		echo "    iface $c_netExtName inet dhcp" >> /etc/network/interfaces
-	else
-		if [[ "$c_netExtIP" != "" ]] && [[ "$c_netExtName" != "" ]] &&
-		   [[ "$c_netExtMask" != "" ]] && [[ "$c_netExtGateway" != "" ]] ;then
-			echo "" >> /etc/network/interfaces
-			echo "    iface $c_netExtName inet static" >> /etc/network/interfaces
-			echo "    address $c_netExtIP" >> /etc/network/interfaces
-			echo "    netmask $c_netExtMask" >> /etc/network/interfaces
-			echo "    gateway $c_netExtGateway" >> /etc/network/interfaces
-		fi
-	fi
-	echo "" >> /etc/network/interfaces
-	echo "auto $c_netIntName" >> /etc/network/interfaces
-	echo "    iface $c_netIntName inet static" >> /etc/network/interfaces
-	echo "    address $c_netIntIPN" >> /etc/network/interfaces
-	echo "    netmask 255.255.255.0" >> /etc/network/interfaces
 }
 
 Setup_Pluto_Conf () {
@@ -657,10 +629,10 @@ Configure_Network_Options () {
 	#Source the SQL Ops file
 	. /usr/pluto/bin/SQL_Ops.sh
 
-	## Setup /etc/hosts
-	echo > /etc/hosts
-	echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
-	echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
+	. ${mce_wizard_data_shell}
+	VerifyExitCode "MCE Wizard Data"
+
+	Core_PK_Device="0"
 
 	error=false
 	Network=""
@@ -736,6 +708,38 @@ Configure_Network_Options () {
 	# create empty IPv6 tunnel settings field
 	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',292,'')"
 	RunSQL "$Q"
+
+
+	# TODO : move to a new fn?
+	#Setup the network interfaces
+	echo > /etc/network/interfaces
+	echo "auto lo" >> /etc/network/interfaces
+	echo "iface lo inet loopback" >> /etc/network/interfaces
+	echo >> /etc/network/interfaces
+	echo "auto $c_netExtName" >> /etc/network/interfaces
+	if [[ $c_netExtUseDhcp  == "1" ]] ;then
+		echo "    iface $c_netExtName inet dhcp" >> /etc/network/interfaces
+	else
+		if [[ "$c_netExtIP" != "" ]] && [[ "$c_netExtName" != "" ]] &&
+		   [[ "$c_netExtMask" != "" ]] && [[ "$c_netExtGateway" != "" ]] ;then
+			echo "" >> /etc/network/interfaces
+			echo "    iface $c_netExtName inet static" >> /etc/network/interfaces
+			echo "    address $c_netExtIP" >> /etc/network/interfaces
+			echo "    netmask $c_netExtMask" >> /etc/network/interfaces
+			echo "    gateway $c_netExtGateway" >> /etc/network/interfaces
+		fi
+	fi
+	echo "" >> /etc/network/interfaces
+	echo "auto $c_netIntName" >> /etc/network/interfaces
+	echo "    iface $c_netIntName inet static" >> /etc/network/interfaces
+	echo "    address $IntIP" >> /etc/network/interfaces
+	echo "    netmask 255.255.255.0" >> /etc/network/interfaces
+
+	## Setup /etc/hosts
+	echo > /etc/hosts
+	echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
+	echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
+
 }
 
 VideoDriverSetup () {
