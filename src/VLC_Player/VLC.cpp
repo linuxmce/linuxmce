@@ -739,9 +739,27 @@ namespace DCE
 
   int VLC::GetAudioTrack()
   {
+    map<int, int>::iterator it;
+    
     if (!m_pMp)
       return -1;
-    return libvlc_audio_get_track(m_pMp);
+    
+    if (m_mapDgIndexToAudioTrackId.size()>0)
+      {
+	for (it=m_mapDgIndexToAudioTrackId.begin();it!=m_mapDgIndexToAudioTrackId.end();++it)
+	  {
+	    if (it->second == libvlc_audio_get_track(m_pMp))
+	      {
+		return it->first;
+	      }
+	  }
+	return -1;
+      }
+    else
+      {
+	return -1;
+      }
+    
   }
 
   void VLC::SetSubtitle(int iSubtitle)
@@ -758,9 +776,27 @@ namespace DCE
 
   int VLC::GetSubtitle()
   {
+    map<int, int>::iterator it;
+
     if (!m_pMp)
       return -1;
-    return libvlc_video_get_spu(m_pMp);
+
+    if (m_mapDgIndexToSubtitleId.size()>0)
+      {
+	for (it=m_mapDgIndexToSubtitleId.begin();it!=m_mapDgIndexToSubtitleId.end();++it)
+	  {
+	    if (it->second == libvlc_video_get_spu(m_pMp))
+	      {
+		return it->first;
+	      }
+	  }
+	return -1;
+      }
+    else
+      {
+	return -1;
+      }
+
   }
   
   string VLC::GetAllSubtitles()
@@ -768,12 +804,12 @@ namespace DCE
     string sRet = "";
     int i=0;
     
-    m_mapDgIndexToSubtitleId.clear();
-
     if (!m_pMp)
       return sRet;
 
     sRet += StringUtils::itos(GetSubtitle()) + "\n";
+
+    m_mapDgIndexToSubtitleId.clear();
 
     libvlc_track_description_t* first = libvlc_video_get_spu_description(m_pMp);
     libvlc_track_description_t* track = first;
@@ -788,7 +824,6 @@ namespace DCE
 	  {
 	    m_mapDgIndexToSubtitleId[-1]=track->i_id;
 	    track = track->p_next;
-	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Adding DISABLED subtitle.");
 	    // Do not add this to the datagrid, because Off is already added. Stupid, I know...backward compatibility. 
 	  }
 	else
@@ -816,9 +851,9 @@ namespace DCE
     if (!m_pMp)
       return sRet;
 
-    m_mapDgIndexToAudioTrackId.clear();
-
     sRet += StringUtils::itos(GetAudioTrack()) + "\n";
+
+    m_mapDgIndexToAudioTrackId.clear();
 
     libvlc_track_description_t* track = libvlc_audio_get_track_description(m_pMp);
     libvlc_track_description_t* first = track;
@@ -834,8 +869,6 @@ namespace DCE
 	  {
 	    sTrackName = "Off";
 	  }
-
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Adding audio track: %s, id %d",track->psz_name,track->i_id);
 
 	m_mapDgIndexToAudioTrackId[i]=track->i_id;
 	sRet += sTrackName;
