@@ -320,6 +320,11 @@ Install_HWE () {
 	LTS_HES="${TARGET_LTS_HES}"
 	XPKGS=$(ListXPkgs)
 	apt-get -f -y install --install-recommends linux-generic${LTS_HES} linux-image-generic${LTS_HES} ${XPKGS}
+
+	StatsMessage "Running depmod"
+	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
+	depmod -v "$TARGET_KVER"
+	VerifyExitCode "depmod failed for $TARGET_KVER"
 }
 
 Install_KUbuntu_Desktop () {
