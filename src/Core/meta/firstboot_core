@@ -3,12 +3,6 @@
 #set -e
 
 . /usr/pluto/bin/Config_Ops.sh
-
-if [ "$FirstBoot" = "false" ] ; then
-	echo "Skipping firstboot, already completed."
-	exit 0
-fi
-
 . /usr/pluto/install/install-core.sh
 
 StatsMessage "Running firstboot_core - Begin"
