@@ -10,6 +10,7 @@ Loader {
     focus: true
     // source:"screens/Screen_1.qml"
     // visible:qml_root.uiOn
+    property alias contentItem:pageLoader.item
     property string nextScreen:manager.currentScreen
     property string currentScreen:""
     //  Component.onCompleted: manager.currentScreen="Screen_1.qml"
@@ -19,6 +20,7 @@ Loader {
             qmlRoot.resetTimeout();
             console.log( "Manager screen::"+ manager.currentScreen)
             nextScreen=manager.currentScreen
+            qmlRoot.clearDialogs();
         }
     }
 
@@ -105,7 +107,7 @@ Loader {
         }
     }
     
-    Keys.onBackPressed: console.log("back")
+
     
     onLoaded: {
         console.log("Screen Changed:" + pageLoader.source)

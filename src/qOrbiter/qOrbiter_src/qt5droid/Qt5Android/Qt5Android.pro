@@ -67,6 +67,8 @@ TRANSLATIONS += app_de.ts
         base.source = ../../qml/Index.qml
         base.target = /
 
+        manifestFiles.source = ../../iOS/ImportedItems.qml
+        manifestFiles.target = /
 
         #The Configuration file read on startup and used subsequently.
         #Scheduled for replacement using sqlite.
@@ -80,7 +82,7 @@ TRANSLATIONS += app_de.ts
         #The defines that the variables listed will be deployed with the application assets. Since
         #Qt 5.1.0 on Android uses a similar deployment scheme to Necessitas, the same qmake tricks
         #apply. Mostly
-        DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
+        DEPLOYMENTFOLDERS = qmlcomponents base manifestFiles #folder_01
         QML_IMPORT_PATH = "androidComponents"
 
        # INSTALLS+= qmlplugins

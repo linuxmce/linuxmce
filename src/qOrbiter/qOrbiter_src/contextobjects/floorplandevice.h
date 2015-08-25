@@ -66,7 +66,8 @@ class FloorplanDevice : public QObject
         ColorRole = Qt::UserRole+11,
         TextRole = Qt::UserRole+12,
         ParamRole= Qt::EditRole+11,
-        SelectedRole= Qt::EditRole+12
+        SelectedRole= Qt::EditRole+12,
+        RoomRole = Qt::EditRole+13
     };
 
 public:
@@ -75,6 +76,7 @@ public:
                              int floorplan_device_type,
                              int i_flooplanType,
                              QString position,
+                             int room,
                              QObject *parent = 0);
     FloorplanDevice(QObject*parent=0) {}
     QVariant data(int role) ;
@@ -170,7 +172,11 @@ public:
     inline bool selected() const {return m_selected;}
 
 
+    QString getRoom() const;
+    void setRoom(const QString &room);
+
 signals:
+    void roomChanged();
     void statusChanged();
     void dataChanged();
     void floorplanXChanged();
@@ -240,7 +246,8 @@ private:
     int mi_deviceLevel;
     QString m_deviceState;
     QString m_alertStatus;
-     bool m_selected;
+    bool m_selected;
+    QString m_room;
 
 };
 Q_DECLARE_METATYPE(FloorplanDevice*)

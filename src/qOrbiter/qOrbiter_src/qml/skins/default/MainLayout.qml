@@ -8,7 +8,7 @@ import "components"
 Item {
     id:layout
     anchors.fill: qmlRoot
-
+    property alias loader:pageLoader
     Rectangle{
         anchors.fill: parent
         color:"black"

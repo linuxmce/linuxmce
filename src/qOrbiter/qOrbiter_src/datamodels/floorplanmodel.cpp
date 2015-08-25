@@ -198,8 +198,7 @@ void FloorPlanModel::handleItemChange()
 
 void FloorPlanModel::handleStatusChange(int device)
 {
-    selectedDevices.remove(QString::number(device));
-    qDebug() << selectedDevices;
+    selectedDevices.remove(QString::number(device));  
     //    myMap::iterator dev = selectedDevices.begin();
     //    while (dev != selectedDevices.end()) {
     //        if (dev.key() == device)
