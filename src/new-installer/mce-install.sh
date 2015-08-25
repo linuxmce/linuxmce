@@ -148,10 +148,10 @@ Create_Wizard_Data-Double_Nic_Shell () {
 	echo "c_deviceType=2 # 1-Core, 2-Hybrid, 3-DiskedMD
 c_netIfaceNo=1
 c_netExtName='{extif}'
-c_netExtIP=''
-c_netExtMask=''
-c_netExtGateway=''
-c_netExtDNS1=''
+c_netExtIP='{extip}'
+c_netExtMask='{extMask}'
+c_netExtGateway='{extGW}'
+c_netExtDNS1='{extDNS}'
 c_netExtDNS2=''
 c_netExtUseDhcp=1 # 1 - Yes / 0 - No
 c_runDhcpServer=1 # 1 - Yes / 0 - No
