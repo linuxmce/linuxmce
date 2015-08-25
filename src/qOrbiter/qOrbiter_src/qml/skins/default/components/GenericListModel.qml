@@ -19,8 +19,10 @@ Item{
     property string dataGridOptions:""
     property bool extended:true
     property string sectionProperty:""
+    property Component sectionDelegate
 
     onEnabledChanged: if(!enabled)state="retracted"
+
 
     function toggleView(){
         extended=!extended
@@ -113,16 +115,7 @@ Item{
         id:view
         clip:true
         section.criteria: ViewSection.FullString
-        section.delegate: Rectangle{
-            height: Style.listViewItemHeight-10
-            width: parent.width
-            StyledText{
-                text:section
-                color:"black"
-                anchors.centerIn: parent
-            }
-        }
-
+        section.delegate: sectionDelegate
         section.property: sectionProperty
         visible: genericListContainer.visible
         opacity: genericListContainer.opacity

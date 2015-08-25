@@ -14,13 +14,13 @@ Item {
 
     }
 
-    Timer{
-        id:refresh
-        interval:2500
-        onTriggered: floorplan_devices.updateDeviceData()
-        running:true
-        repeat:true
-    }
+//    Timer{
+//        id:refresh
+//        interval:2500
+//        onTriggered: floorplan_devices.updateDeviceData()
+//        running:true
+//        repeat:true
+//    }
 
     property int scaleFactor:floorplanimage.scale
     property alias bg:phil

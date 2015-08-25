@@ -13,6 +13,15 @@ StyledScreen{
         anchors.fill: parent
         id:outerContainer
 
+        Timer{
+            id:refresh
+            interval:2500
+            onTriggered: floorplan_devices.updateDeviceData()
+            running:true
+            repeat:true
+        }
+
+
         Component.onCompleted: {
             floorplan_devices.setCurrentFloorPlanType(2)
             state="visual"
@@ -52,39 +61,85 @@ StyledScreen{
                 label: qsTr("Device List. %1 Devices").arg(modelCount)
                 anchors.fill: parent
                 sectionProperty:"room"
+                sectionDelegate: Rectangle{
+                    height: Style.scaleX(10)
+                    width: parent.width
+                    color:Style.appcolor_background_list
+                    StyledText{
+                        text:roomList.getRoomName(Number(section))
+                        color:"White"
+                        anchors.centerIn: parent
+                        font.pointSize: 22
+                    }
+                }
                 delegate:
-                    Row{
+                    Rectangle{
+                    color:Style.appcolor_background_list
                     property variant dynData;
+                    Connections{
+                        target: floorplan_devices
+
+                        onDeviceChanged:{
+                          //  console.log("Item "+deviceNum+" handling deviceChanged( )"+device)
+                            if(device==Number(deviceno)){
+                              dynData = floorplan_devices.getDeviceData(deviceno);
+                            }
+                        }
+                    }
+
                     Component.onCompleted: {
                         dynData = floorplan_devices.getDeviceData(deviceno);
-
                     }
                     width:parent.width
                     height: Style.listViewItemHeight
-                    Image {
-                        id: fpDevice_image
-                        source:type==="52" ? "" : "../images/floorplan/"+type+".png"
-                        sourceSize:Qt.size(Style.scaleY(6), Style.scaleY(6))
-                        anchors.verticalCenter: parent.verticalCenter
-                        height: 50
-                        width: height
-                        cache: false
-                        opacity: selected ? 1 : .24
-                    }
-                    StyledButton{
-                        width: parent.width/2
-                        height: parent.height
-                        buttonText: qsTr("%1 is %2").arg( name).arg(dynData.deviceState)+deviceno
-                        fontSize: 18
-                    }
-                    CheckBox{
-                        id:chk
-                        anchors.verticalCenter: parent.verticalCenter
-                        checked:dynData.selected
-                        onCheckedChanged: if(!checked) { cmds.clear() }
-                        onClicked: { floorplan_devices.setDeviceSelection(deviceno) ;/* manager.getFloorplanDeviceCommands(deviceno)*/}
+                    Row{
+                        anchors.fill: parent
+
+                        Image {
+                            id: fpDevice_image
+                            source:type==="52" ? "" : "../images/floorplan/"+type+".png"
+                            sourceSize:Qt.size(Style.scaleY(6), Style.scaleY(6))
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: 50
+                            width: height
+                            cache: false
+                            opacity: selected ? 1 : .24
+
+                            StyledText{
+                                anchors.centerIn: parent
+                                text:dynData.deviceLevel
+                                color:"black"
+                                font.pointSize: 18
+                            }
+                        }
+                        StyledText{
+                            width: parent.width *.55
+                            height: parent.height
+                            text: qsTr("%1 is <b>%2</b><br> Device State:<i>%3</i>").arg(name).arg(dynData.deviceState).arg(dynData.deviceStatus)
+                            fontSize: 18
+                        }
+
+                        CheckBox{
+                            id:chk
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked:dynData.selected
+                            onCheckedChanged: if(!checked) { cmds.clear() }
+                            onClicked: { floorplan_devices.setDeviceSelection(deviceno) ;/* manager.getFloorplanDeviceCommands(deviceno)*/}
+                        }
+                        ComboBox{
+                            currentIndex: 2
+                            model:cmds
+                            anchors.verticalCenter: parent.verticalCenter
+                            enabled: model.count!==0
+                            textRole: "command_name"
+                            onCurrentIndexChanged: {
+                                if(count==0)return
+                                console.log(cmds.get(currentIndex).command_number)
+                            }
+                        }
 
                     }
+
                     ListModel{
                         id:cmds
                     }
@@ -102,17 +157,7 @@ StyledScreen{
                         }
                     }
 
-                    ComboBox{
-                        currentIndex: 2
-                        model:cmds
-                        anchors.verticalCenter: parent.verticalCenter
-                        enabled: model.count!==0
-                        textRole: "command_name"
-                        onCurrentIndexChanged: {
-                            if(count==0)return
-                            console.log(cmds.get(currentIndex).command_number)
-                        }
-                    }
+
                 }
             }
 
