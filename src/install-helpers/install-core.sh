@@ -266,7 +266,9 @@ Configure_Network_Options () {
 ### Other Setup Functions
 #######################################################
 
-Create_And_Config_Devices () {
+
+
+Create_And_Config_Core () {
 	# TODO: FIXME: Check and do only if not done!
 
 	### CORE
@@ -276,6 +278,10 @@ Create_And_Config_Devices () {
 	Core_PK_Device=$(${BASE_DIR}/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
 	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
 	RunSQL "$Q"
+}
+
+Create_And_Config_Hybrid_MD () {
+	# TODO: FIXME: Check and do only if not done!
 
 	### HYBRID
 	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
@@ -285,6 +291,11 @@ Create_And_Config_Devices () {
 	Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
 	Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
 	RunSQL "$Q"
+}
+
+Create_And_Config_Devices () {
+	Create_And_Config_Core
+	Create_And_Config_Hybrid_MD
 }
 
 CreateDisklessImage () {
