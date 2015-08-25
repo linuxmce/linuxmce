@@ -195,6 +195,15 @@ void LocationModel::setLocation(int ea, int room)
       }
 }
 
+QString LocationModel::getRoomName(int r)
+{
+
+    foreach(LocationItem* item, m_list) {
+      if(item->roomVal() == r) return item->data(item->NameRole).toString();
+    }
+    return false;
+}
+
 bool LocationModel::removeRow(int row, const QModelIndex &parent)
 {
   Q_UNUSED(parent);

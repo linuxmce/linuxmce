@@ -84,6 +84,7 @@ public slots:
     QString getStringUser () {return currentUser;}
     int getIntUser() {return i_currentUser;}
 
+    Q_INVOKABLE QString getRoomName(int r);
 
 signals:
     void eaChanged();
