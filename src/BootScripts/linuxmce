@@ -181,6 +181,12 @@ start() {
 	log_daemon_msg "Starting up LinuxMCE" "linuxmce"
 	err=0
 
+	# Disable display manager
+	mkdir -p "/etc/X11"
+	echo "/bin/false" >/etc/X11/default-display-manager
+	update-rc.d -f kdm remove >/dev/null
+	update-rc.d -f lightdm remove >/dev/null
+
 	setterm -blank >/dev/console             # disable console blanking
 	mkdir -p /var/log/pluto                  # setup log dir
 	chmod 777 /var/log/pluto 2>/dev/null     # setup log dir
