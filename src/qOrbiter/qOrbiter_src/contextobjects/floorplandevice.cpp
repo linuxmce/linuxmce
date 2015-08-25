@@ -5,12 +5,13 @@
 #include <QDebug>
 #endif
 
-FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_device_type, int i_flooplanType, QString position, QObject *parent) :
+FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_device_type, int i_flooplanType, QString position, int room, QObject *parent) :
     mQS_name(name),
     mI_deviceNo(deviceNo),
     mI_floorplan_device_type(floorplan_device_type),
     mI_floorplanType(i_flooplanType),
-    mQS_position(position)
+    mQS_position(position),
+  m_room(QString::number(room))
 {
     QObject::connect(this, &FloorplanDevice::selectedChanged, this, &FloorplanDevice::dataChanged);
     QObject::connect(this, SIGNAL(deviceStateChanged()), this, SIGNAL(dataChanged()));
@@ -45,6 +46,7 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
     names[TextRole]="text";
     names[ParamRole]="paramlist";
     names[SelectedRole]="selected";
+    names[RoomRole]="room";
     return names;
 }
 
@@ -60,6 +62,7 @@ QVariantMap FloorplanDevice::objectData()
     ret.insert("selected", selected());
     ret.insert("xPos", xPosition());
     ret.insert("yPos", yPosition());
+    ret.insert("commands", getDeviceCommands());
 qDebug() << ret;
     return ret;
 
@@ -95,6 +98,8 @@ QVariant FloorplanDevice::data(int role)
         return getColor();
     case TextRole:
         return getText();
+    case RoomRole:
+        return getRoom();
     default:
         return QVariant();
     }
@@ -132,6 +137,18 @@ void FloorplanDevice::getCommandParameters()
     //  QString address = "http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?c=";
 
 }
+QString FloorplanDevice::getRoom() const
+{
+    return m_room;
+}
+
+void FloorplanDevice::setRoom(const QString &room)
+{
+    if(m_room==room)return;
+    m_room = room;
+    emit roomChanged();
+}
+
 /*!
  * \brief FloorplanDevice::getPagePosition
  * \param page

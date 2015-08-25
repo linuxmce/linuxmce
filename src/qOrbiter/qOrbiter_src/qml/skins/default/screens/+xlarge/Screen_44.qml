@@ -99,7 +99,7 @@ StyledScreen {
             buttonText: qsTr("Reset Device Id")
             onActivated:{
                 manager.setDeviceNumber(-1)
-                manager.writeConfig()              
+                manager.writeConfig()
             }
         }
         LargeStyledButton{

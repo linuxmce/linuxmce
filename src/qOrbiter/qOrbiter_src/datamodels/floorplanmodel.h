@@ -68,8 +68,6 @@ public:
     QModelIndex indexFromItem( const FloorplanDevice* item) const;
     FloorplanDevice* currentRow();
 
-
-
     void sortModel(int column, Qt::SortOrder order);
     QString m_installation;
     QString currentPage;

@@ -18,6 +18,7 @@ Item{
     property string dataGridLabel:""
     property string dataGridOptions:""
     property bool extended:true
+    property string sectionProperty:""
 
     onEnabledChanged: if(!enabled)state="retracted"
 
@@ -48,7 +49,7 @@ Item{
         console.log("getting model "+dataGrid)
         view.model=manager.getDataGridModel(dataGridLabel, dataGrid, dataGridOptions)
     }
-   // onVisibleChanged: if(!visible) manager.clearDataGrid(dataGrid)
+    // onVisibleChanged: if(!visible) manager.clearDataGrid(dataGrid)
 
     Rectangle{
         id:hdr
@@ -77,7 +78,7 @@ Item{
 
     }
     StyledText{
-        id:itemlabel       
+        id:itemlabel
         anchors{
             top:hdr.top
             left:hdr.left
@@ -111,7 +112,18 @@ Item{
     ListView{
         id:view
         clip:true
+        section.criteria: ViewSection.FullString
+        section.delegate: Rectangle{
+            height: Style.listViewItemHeight-10
+            width: parent.width
+            StyledText{
+                text:section
+                color:"black"
+                anchors.centerIn: parent
+            }
+        }
 
+        section.property: sectionProperty
         visible: genericListContainer.visible
         opacity: genericListContainer.opacity
         spacing: modelSpacing

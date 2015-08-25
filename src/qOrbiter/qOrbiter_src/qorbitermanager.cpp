@@ -495,6 +495,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
         int fp_deviceType = floorplan_device_list.at(index).attributes().namedItem("Type").nodeValue().toInt();
         int fpType = floorplan_device_list.at(index).attributes().namedItem("fpType").nodeValue().toInt();
+        int room = floorplan_device_list.at(index).attributes().namedItem("Room").nodeValue().toInt();
         /*        if (fpType == 7)
             fpType = 6;
         else */
@@ -506,6 +507,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
                                                    fp_deviceType,
                                                    fpType,
                                                    position,
+                                                   room,
                                                    floorplans)
                               );
     }
@@ -1813,7 +1815,7 @@ void qorbiterManager::showfloorplan(int fptype)
 void qorbiterManager::setFloorPlanCommand(QVariantMap t)
 {
     // qDebug() << t;
-    qDebug() << "Device " << t["device"].toInt();
+
     FloorplanDevice *p = floorplans->find(t["device"].toInt());
     if(p){
 

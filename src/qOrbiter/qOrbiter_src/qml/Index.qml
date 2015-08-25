@@ -3,6 +3,8 @@ import QtGraphicalEffects 1.0
 import QtMultimedia 5.0
 import QtQuick.Window 2.0
 import QtQuick.Controls 1.2
+import QtQuick.Dialogs 1.2
+import QtQuick.Layouts 1.1
 
 import "splash"
 import "skins"
@@ -21,7 +23,6 @@ ApplicationWindow {
     //startup properties
     property int deviceSettingsReady: settings.ready ? 1 : 0
     property int orbiterReady:manager.uiReady ? 1 : 0
-
 
     Text {
         id: deviceSettings
