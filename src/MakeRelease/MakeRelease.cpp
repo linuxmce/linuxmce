@@ -1700,6 +1700,10 @@ string Makefile = "none:\n"
 		g_DebianPackages[sPkgName] = true;
 	}
 	g_DebianPackages[Package_Name] = true;
+
+	if (sPreDepends != "")
+		sDepends += ", " + sPreDepends;
+	sPreDepends = "";
 	cout << "Depends list: " << sDepends << endl;
 	cout << "PreDepends list: " << sPreDepends << endl;
 	cout << "Replaces: " << pRow_Package_Source->Replaces_get() << endl;  // This is a comma-delimited list
@@ -2097,6 +2101,10 @@ string Makefile = "none:\n"
 		g_DebianPackages[sPkgName] = true;
 	}
 	g_DebianPackages[Package_Name] = true;
+
+	if (sPreDepends != "")
+		sDepends += ", " + sPreDepends;
+	sPreDepends = "";
 	cout << "Depends list: " << sDepends << endl;
 	cout << "PreDepends list: " << sPreDepends << endl;
 	cout << "Replaces: " << pRow_Package_Source->Replaces_get() << endl;  // This is a comma-delimited list
