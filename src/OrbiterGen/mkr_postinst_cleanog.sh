@@ -2,8 +2,7 @@
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 
 
-echo 'DELETE FROM CachedScreens;' | mysql pluto_main 2>/dev/null
-err=$?
+echo 'DELETE FROM CachedScreens;' | mysql pluto_main 2>/dev/null || err=$?; :
 
 if [[ "$err" = "0" ]] ; then 
 	echo 'DELETE FROM CachedScreens;' | mysql pluto_main || /bin/true
