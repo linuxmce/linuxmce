@@ -4,6 +4,15 @@ import "../."
 Panel{
     id:fp_panel
     headerTitle:qsTr("Floorplan")
+    buttonContent:[
+        StyledButton{
+            buttonText: qsTr("Show List")
+            height: Style.appNavigation_panelHeight
+            onActivated:{
+                outerContainer.state="list"
+            }
+        }
+    ]
 
     content: Item{
         id:phoneFloorplanLayout
@@ -102,6 +111,7 @@ Panel{
         }
 
         GenericListModel{
+            id:pageView
             model: floorplan_pages
             label: qsTr("Floorplan(s) : %1").arg(modelCount)
             Component.onCompleted: parent = fp_panel.headerRow
@@ -135,6 +145,9 @@ Panel{
             height: Style.scaleY(65)
             Component.onCompleted: parent=fp_panel.headerRow
         }
+
+
+
 
         ScrollRow{
             id:row_button_scroll

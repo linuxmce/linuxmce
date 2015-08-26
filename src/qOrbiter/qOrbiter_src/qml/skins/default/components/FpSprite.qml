@@ -113,15 +113,15 @@ Item {
         color: getColor(deviceNum)
     }
 */
-    StyledText {
-        id: deviceNumLabel
-        anchors.horizontalCenter: fpDevice_image.horizontalCenter
-        text:deviceName  +"\n"+deviceState + "::"+deviceLevel
-        anchors.top: fpDevice_image.bottom
-        font.pixelSize: Style.fontSize_small
-        visible: true
-        color:"black"
-    }
+//    StyledText {
+//        id: deviceNumLabel
+//        anchors.horizontalCenter: fpDevice_image.horizontalCenter
+//        text:deviceName  +"\n"+deviceState + "::"+deviceLevel
+//        anchors.top: fpDevice_image.bottom
+//        font.pixelSize: Style.fontSize_small
+//        visible: true
+//        color:"black"
+//    }
 
     Rectangle{
         id:sprite
@@ -134,6 +134,17 @@ Item {
         Component.onCompleted: PropertyAnimation {target:sprite ; property:"opacity"; to: 1; duration:1500 }
         scale: iconScale
     }
+        StyledText {
+            id: deviceNumLabel
+            anchors.horizontalCenter: fpDevice_image.horizontalCenter
+            text:deviceLevel
+            visible: deviceLevel!==0
+            anchors.top: fpDevice_image.bottom
+            font.pixelSize: Style.fontSize_small
+            anchors.centerIn: sprite
+
+            color:"black"
+        }
 
 
     MouseArea{

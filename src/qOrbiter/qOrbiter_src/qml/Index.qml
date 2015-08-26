@@ -79,7 +79,7 @@ ApplicationWindow {
         //            }
         //        }
 
-        onWidthChanged: console.log("window size"+manager.appWidth+ " x "+manager.appHeight)
+        onWidthChanged: console.log("window size"+manager.appWidth+ "w x "+manager.appHeight+"h")
 
         //        Timer{
         //            id:pusher

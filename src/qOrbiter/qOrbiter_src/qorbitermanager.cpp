@@ -2442,23 +2442,22 @@ void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
     qDebug() << Q_FUNC_INFO << m_window->size();
 
 
-    appHeight=m_window->size().height();
-    appWidth=m_window->size().width();
+    //setOrientation(appHeight > appWidth);
+    //return;
 
-setOrientation(appHeight > appWidth);
-return;
-
-    switch (0) {
-    case Qt::LandscapeOrientation:setOrientation(false);  qDebug() << "Landscape";break;
-    case Qt::PrimaryOrientation:   ; qDebug() << "Primary ";break;
-    case Qt::PortraitOrientation:setOrientation(true);qDebug() << "Portrait"; break;
-    case Qt::InvertedLandscapeOrientation:setOrientation(false); qDebug() << "Inverted Landscape"; break;
-    case Qt::InvertedPortraitOrientation:setOrientation(true);qDebug() << "Inverted portait"; break;
+    switch (o) {
+    case Qt::InvertedLandscapeOrientation: qDebug() << "Inverted Landscape";
+    case Qt::LandscapeOrientation: appHeight=m_window->width(); appWidth=m_window->height(); setOrientation(false);  qDebug() << "Landscape";
+        break;
+    case Qt::PrimaryOrientation: qDebug() << "Primary ";
+    case Qt::InvertedPortraitOrientation:qDebug() << "Inverted portait";
+    case Qt::PortraitOrientation: appHeight=m_window->height(); appWidth=m_window->width(); setOrientation(true);qDebug() << "Portrait";
+        break;
     default:
         break;
     }
 
- }
+}
 #endif
 
 void qorbiterManager::getGrid(int i)
