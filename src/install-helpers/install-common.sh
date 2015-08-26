@@ -88,6 +88,10 @@ StatsMessage () {
 	printf "`date` - $* \n"
 }
 
+StatusMessage () {
+	printf "`date` - $* \n"
+}
+
 VerifyExitCode () {
 	local EXITCODE=$?
 	if [ "$EXITCODE" != "0" ] ; then
