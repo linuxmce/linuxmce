@@ -20,7 +20,8 @@ DEVICEDATA_Channel_Left="311"
 DEVICEDATA_Channel_Right="312"
 DEVICEDATA_Channel="81"
 DEVICEDATA_Sampling_Rate="310"
-DEVICEDATA_Distro_Raspbian="19"
+DEVICEDATA_Distro_Raspbian_Wheezy="19"
+DEVICEDATA_Distro_Raspbian_Jessie="22"
 
 SettingsFile="/etc/pluto/lastaudiovideo.conf"
 mkdir -p $(dirname $SettingsFile)
@@ -41,7 +42,7 @@ ConfGet "AlternateSC"
 
 # FIXME: This needs to move to an rpi version of AVWizard, for now here is fine
 case "$PK_Distro" in
-	"$DEVICEDATA_Distro_Raspbian")
+	"$DEVICEDATA_Distro_Raspbian_Wheezy|$DEVICEDATA_Distro_Raspbian_Jessie")
 		# Detect and use the current boot resolution 
 		FBWIDTH=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbwidth" | cut -d '=' -f 2; done)
 		FBHEIGHT=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbheight" | cut -d '=' -f 2; done)
@@ -53,7 +54,7 @@ case "$PK_Distro" in
 			# trigger an orbitergen
 			Q="UPDATE Orbiter set Regen=1 where PK_Orbiter=$OrbiterDev"
 			RunSQL "$Q"
- 
+
 			# FIXME: Grab these values from environment
 			SetDeviceData "$PK_Device" "$DEVICEDATA_Connector" "HDMI-0"
 			SetDeviceData "$PK_Device" "$DEVICEDATA_TV_Standard" "1080P"
@@ -214,7 +215,7 @@ Setup_AsoundConf()
 		return		
 	fi
 	# Do not mess with raspbian based systems
-	if [[ "$PK_Distro" == "$DEVICEDATA_Distro_Raspbian" ]]; then
+	if [[ "$PK_Distro" == "$DEVICEDATA_Distro_Raspbian_Wheezy" ]] || [[  "$PK_Distro" == "$DEVICEDATA_Distro_Raspbian_Jessie" ]] ; then
 		return
 	fi
 	if grep 'no soundcards found' <<< "$Yalpa"; then
@@ -432,7 +433,7 @@ VideoSettings_Check()
 
 	if [[ "$Update_XorgConf" == "XorgConf" ]]; then
 		# Raspbian does not use Xconfigure
-		if [[ "$PK_Distro" != "19" ]]; then
+		if [[ "$PK_Distro" != "$DEVICEDATA_Distro_Raspbian_Wheezy" ]] && [[ "$PK_Distro" != "DEVICEDATA_Distro_Raspbian_Jessie" ]] ; then
 			/usr/pluto/bin/Xconfigure.sh
 		fi
 
