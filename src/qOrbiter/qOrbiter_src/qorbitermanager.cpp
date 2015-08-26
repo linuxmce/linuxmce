@@ -242,10 +242,10 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
     if(m_appEngine->rootObjects().length()!=0){
         m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
-        connect(m_window, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
-        connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+       connect(m_window, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
+      //  connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         connect(m_window->screen(), SIGNAL(primaryOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
-        connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+       // connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         qDebug() << "Set QQuickWindow Ptr";
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
@@ -275,7 +275,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
     }
 
-
+emit splashReady();
 }
 
 qorbiterManager::~qorbiterManager(){
@@ -318,10 +318,7 @@ void qorbiterManager::gotoQScreen(QString s){
 }
 
 //! Send the user back to the previous screen in the list
-void qorbiterManager::goBacktoQScreen()
-{
-
-
+void qorbiterManager::goBacktoQScreen(){
     if(!gotoScreenList->isEmpty()){
         gotoScreenList->removeLast();
         setDceResponse("Starting backwards screen switch");
@@ -2445,14 +2442,16 @@ void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 
     //setOrientation(appHeight > appWidth);
     //return;
+    appHeight=m_window->size().height();
+    appWidth=m_window->size().width();
 
     switch (o) {
     case Qt::InvertedLandscapeOrientation: qDebug() << "Inverted Landscape";
-    case Qt::LandscapeOrientation: appHeight=m_window->width(); appWidth=m_window->height(); setOrientation(false);  qDebug() << "Landscape";
+    case Qt::LandscapeOrientation: setOrientation(false);  qDebug() << "Landscape";
         break;
     case Qt::PrimaryOrientation: qDebug() << "Primary ";
     case Qt::InvertedPortraitOrientation:qDebug() << "Inverted portait";
-    case Qt::PortraitOrientation: appHeight=m_window->height(); appWidth=m_window->width(); setOrientation(true);qDebug() << "Portrait";
+    case Qt::PortraitOrientation: setOrientation(true);qDebug() << "Portrait";
         break;
     default:
         break;
@@ -2479,6 +2478,10 @@ void qorbiterManager::setCurrentScreen(QString s)
     if(!s.contains(".qml")){
         setCurrentScreen(s.toInt());
         return;
+    }
+
+    if(s=="Screen_1.qml"){
+        clearAllDataGrid();
     }
 
     if(s!=currentScreen){

@@ -122,7 +122,7 @@ StyledScreen {
 
                     buttonText: qsTr("Exit Application")
                     onActivated:{
-                        manager.exitApp()
+                        manager.closeOrbiter()
                     }
                 }
             }
