@@ -77,7 +77,7 @@ if ! BlacklistConfFiles '/etc/avahi/services/samba.service.tmpl' ;then
 fi
 ## Restart to enable modifications
 ## Note: If restart is not successful, still continue the upgrade.
-which avahi-daemon > /dev/null && service avahi-daemon restart || :
+which avahi-daemon >/dev/null && service avahi-daemon restart >/dev/null || :
 
 ## Prevent updatedb from running from cron
 if ! BlacklistConfFiles '/etc/updatedb.conf' ;then
@@ -168,7 +168,7 @@ case "$TARGET_DISTRO" in
 esac
 
 ###. /usr/pluto/install/install-common.sh ; Disable_DisplayManager
-# TODO: dpkg-divert this so it doesn't come back
+# TODO: dpkg-divert this so it doesn't come back?
 # Disabling display manager
 mkdir -p "/etc/X11"
 echo "/bin/false" >/etc/X11/default-display-manager
@@ -188,8 +188,8 @@ update-rc.d -f launch-manager remove >/dev/null
 # Add a single new startup script.
 #ln -sfv /etc/init.d/linuxmce /etc/rc2.d/S99linuxmce
 #ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-update-rc.d -f linuxmce remove
-update-rc.d -f linuxmce defaults 99 1
+update-rc.d -f linuxmce remove >/dev/null
+update-rc.d -f linuxmce defaults 99 1 >/dev/null
 
 
 

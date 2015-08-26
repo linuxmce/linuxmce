@@ -1,2 +1,18 @@
 #!/bin/bash
-exit 0
+
+return 0
+
+        StatsMessage "Rebooting in 5 seconds"
+        sleep 1
+        StatsMessage "Rebooting in 4 seconds"
+        sleep 1
+        StatsMessage "Rebooting in 3 seconds"
+        sleep 1
+        StatsMessage "Rebooting in 2 seconds"
+        sleep 1
+        StatsMessage "Rebooting in 1 seconds"
+        sleep 1
+        StatsMessage "Rebooting"
+        reboot
+        return 0
+
