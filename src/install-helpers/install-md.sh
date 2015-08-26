@@ -89,11 +89,6 @@ MD_System_Level_Prep () {
 	MD_Copy_SSH_Keys	# install-md.sh
 }
 
-MD_Seamless_Compatability () {
-	# FIXME: no longer required - placeholder
-	: # no-op
-}
-
 MD_Preseed () {
 	PreSeed_DebConf		# install-common.sh
 }
