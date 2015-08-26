@@ -21,11 +21,14 @@ Item{
     property string sectionProperty:""
     property Component sectionDelegate
 
+    signal viewToggled(bool open)
+
     onEnabledChanged: if(!enabled)state="retracted"
 
 
     function toggleView(){
         extended=!extended
+        viewToggled(extended)
     }
 
     function refresh(){

@@ -27,8 +27,9 @@ StyledScreen {
             left:parent.left
             top:now_playing_button.bottom
             right:parent.right
+            bottom:parent.bottom
         }
-        height: Style.appButtonHeight *6
+
 
         model:qmlRoot.scenarios
         delegate:  Item {

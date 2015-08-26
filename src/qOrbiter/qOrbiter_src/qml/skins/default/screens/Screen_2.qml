@@ -60,6 +60,7 @@ StyledScreen{
                 model:floorplan_devices
                 label: qsTr("Device List. %1 Devices").arg(modelCount)
                 anchors.fill: parent
+                onViewToggled: if(!extended) outerContainer.state="visual"
                 sectionProperty:"room"
                 sectionDelegate: Rectangle{
                     height: Style.scaleX(10)
@@ -73,8 +74,14 @@ StyledScreen{
                     }
                 }
                 delegate:
+                    Item{
                     Rectangle{
-                    color:Style.appcolor_background_list
+                        anchors.fill: parent
+                        color:Style.appcolor_navigationBackgroundColor
+                        opacity: .45
+                    }
+
+
                     property variant dynData;
                     Connections{
                         target: floorplan_devices
