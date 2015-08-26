@@ -19,8 +19,8 @@ done
 ###########################################################
 
 Nic_Config
-Create_And_Configure_Core
 Configure_Network_Options
+Create_And_Config_Core
 TimeUpdate
 
 ###########################################################

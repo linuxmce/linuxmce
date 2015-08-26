@@ -17,13 +17,13 @@ fi
 start() {
 
 	if [[ -f /usr/pluto/install/firstboot_core ]] ; then
-		/usr/pluto/install/firstboot_core
+		. /usr/pluto/install/firstboot_core
 	fi
 	if [[ -f /usr/pluto/install/firstboot_md ]] ; then
-		/usr/pluto/install/firstboot_md
+		. /usr/pluto/install/firstboot_md
 	fi
 
-	StatsMessage "Setting firstboot = false"
+	StatsMessage "Setting FirstBoot = false"
 	ConfSet "FirstBoot" "false"
 	sync
 
