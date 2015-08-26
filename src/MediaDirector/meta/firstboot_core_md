@@ -4,6 +4,12 @@
 
 . /usr/pluto/install/install-core.sh
 
-Create_And_Config_Hybrid_MD
+firstboot_core_md_preinst () {
+	:
+}
 
-return 0
+firstboot_core_md_postinst () {
+	Create_And_Config_Hybrid_MD
+}
+
+exit 0
