@@ -2,9 +2,9 @@
 
 #set -e
 
-[[ -e /usr/pluto/bin/Config_Ops.sh ]] && . /usr/pluto/bin/Config_Ops.sh
-[[ -e /usr/pluto/bin/SQL_Ops.sh ]] && . /usr/pluto/bin/SQL_Ops.sh
-[[ -e /usr/pluto/bin/Utils.sh ]] && . /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/bin/SQL_Ops.sh
+. /usr/pluto/bin/Utils.sh
 
 . /usr/pluto/install/install-md.sh
 
