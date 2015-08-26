@@ -28,7 +28,7 @@ fi
 
 ###. /usr/pluto/install/install-core.sh ; Setup_Pluto_Conf	# lmce-install-scripts - install-core.sh
 if ! BlacklistConfFiles '/etc/pluto.conf' ;then
-	StatsMessage "Generating default /etc/pluto.conf file"
+	StatsMessage "Updating /etc/pluto.conf (if required)"
 	touch /etc/pluto.conf &>/dev/null
 	chmod 777 /etc/pluto.conf &>/dev/null
 	. /usr/pluto/bin/Config_Ops.sh
