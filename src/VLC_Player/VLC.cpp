@@ -817,7 +817,7 @@ namespace DCE
     if (track == NULL)
       return sRet;
 
-    while (track->p_next != NULL)
+    while (track)
       {
 	string sTrackName = string(track->psz_name);
 	if (sTrackName == "Disable")
@@ -861,10 +861,9 @@ namespace DCE
     if (track == NULL)
       return sRet;
 
-    while (track->p_next != NULL)
+    while (track)
       {
 	string sTrackName = string(track->psz_name);
-
 	if (sTrackName == "Disable")
 	  {
 	    sTrackName = "Off";
