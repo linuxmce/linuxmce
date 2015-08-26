@@ -276,19 +276,23 @@ Create_And_Config_Core () {
 	# TODO: FIXME: Check and do only if not done!
 
 	### CORE
+	. ${BASE_DIR}/bin/Config_Ops.sh	# pluto-boot-scripts
 	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
 	## Create the Core device and set it's description
 	StatsMessage "Setting up your computer to act as a 'Core'"
 	Core_PK_Device=$(${BASE_DIR}/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
 	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
 	RunSQL "$Q"
+	ConfSet "PK_Device" "$Core_PK_Device"
 }
 
 Create_And_Config_Hybrid_MD () {
 	# TODO: FIXME: Check and do only if not done!
 
 	### HYBRID
+	. ${BASE_DIR}/bin/Config_Ops.sh	# pluto-boot-scripts
 	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
+	Core_PK_Device="$PK_Device"
 	#Setup media director with core
 	StatsMessage "Setting up your computer to act as a 'Media Director'"
 	${BASE_DIR}/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
