@@ -19,8 +19,8 @@ done
 ###########################################################
 
 Nic_Config
-Configure_Network_Options
 Create_And_Config_Core
+Configure_Network_Options # must come after core device creation!
 TimeUpdate
 
 ###########################################################
