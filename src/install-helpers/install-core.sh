@@ -149,14 +149,10 @@ Configure_Network_Options () {
 	# Updating hosts file and the Device_Data for the core with the internal and external network
 	# addresses - uses Initial_DHCP_Config.sh from the lmce-install-scripts package.
 	StatsMessage "Configuring your internal network"
-	#Source the SQL Ops file
-	. ${BASE_DIR}/bin/Config_Ops.sh	# pluto-boot-scripts
 	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
 
 	. ${mce_wizard_data_shell}
-	VerifyExitCode "MCE Wizard Data"
-
-	Core_PK_Device="0"
+	VerifyExitCode "MCE Wizard Data - Configure_Network_Options"
 
 	error=false
 	Network=""
@@ -206,35 +202,23 @@ Configure_Network_Options () {
 		IntIf="$c_netIntName"
 	fi
 
+	echo "IntIP='${IntIP}'" >> ${mce_wizard_data_shell}
+	echo "IntNetmask='${IntNetmask}'" >> ${mce_wizard_data_shell}
+	echo "IntIf='${IntIf}'" >> ${mce_wizard_data_shell}
+
 	if [[ "$c_singleNIC" == "1" ]] ;then
 		#Disable firewalls on single NIC operation, refs #396
 		echo "We are in single NIC mode -> internal firewalls disabled"
 		ConfSet "DisableFirewall" "1"
 		ConfSet "DisableIPv6Firewall" "1"
 	fi
+}
 
-	if [[ "$c_netExtUseDhcp" == "0" ]] ;then
-		NETsetting="$c_netExtName,$c_netExtIP,$c_netExtMask,$c_netExtGateway,$c_netExtDNS1|$IntIf,$IntIP,$IntNetmask"
-	else
-		NETsetting="$c_netExtName,dhcp|$IntIf,$IntIP,$IntNetmask"
-	fi
+Configure_Network_Files () {
+	. ${mce_wizard_data_shell}
+	VerifyExitCode "MCE Wizard Data - Configure_Network_Files"
 
-	DHCPsetting=$(${BASE_DIR}/install/Initial_DHCP_Config.sh "$Network" "$Digits_Count")
-
-	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',32,'$NETsetting')"
-	RunSQL "$Q"
-	if [[ "$c_runDhcpServer" == "1" ]]; then
-		Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-			VALUES($Core_PK_Device, 28, '$DHCPsetting')"
-		RunSQL "$Q"
-	fi
-
-	# create empty IPv6 tunnel settings field
-	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',292,'')"
-	RunSQL "$Q"
-
-	# TODO: move to new fn?
-	#Setup the network interfaces
+	# Setup /etc/network/interfaces
 	echo > /etc/network/interfaces
 	echo "auto lo" >> /etc/network/interfaces
 	echo "iface lo inet loopback" >> /etc/network/interfaces
@@ -263,7 +247,38 @@ Configure_Network_Options () {
 	echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
 	#echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
 	echo "127.0.1.1 dcerouter $(/bin/hostname)"    >> /etc/hosts
+}
 
+Configure_Network_Database () {
+	### !!!!! This must run after Create_And_Config_Core to properly update the database
+
+	. ${BASE_DIR}/bin/Config_Ops.sh	# pluto-boot-scripts
+	. ${BASE_DIR}/bin/SQL_Ops.sh	# pluto-boot-scripts
+
+	. ${mce_wizard_data_shell}
+	VerifyExitCode "MCE Wizard Data - Configure_Network_Database"
+
+	Core_PK_Device="$PK_Device"
+
+	if [[ "$c_netExtUseDhcp" == "0" ]] ;then
+		NETsetting="$c_netExtName,$c_netExtIP,$c_netExtMask,$c_netExtGateway,$c_netExtDNS1|$IntIf,$IntIP,$IntNetmask"
+	else
+		NETsetting="$c_netExtName,dhcp|$IntIf,$IntIP,$IntNetmask"
+	fi
+
+	DHCPsetting=$(${BASE_DIR}/install/Initial_DHCP_Config.sh "$Network" "$Digits_Count")
+
+	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',32,'$NETsetting')"
+	RunSQL "$Q"
+	if [[ "$c_runDhcpServer" == "1" ]]; then
+		Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
+			VALUES($Core_PK_Device, 28, '$DHCPsetting')"
+		RunSQL "$Q"
+	fi
+
+	# create empty IPv6 tunnel settings field
+	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',292,'')"
+	RunSQL "$Q"
 }
 
 #######################################################
