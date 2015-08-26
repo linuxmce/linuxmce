@@ -8,6 +8,7 @@ Standards-Version: 3.6.1
 Package: lmce-asterisk
 Architecture: any
 Depends: pluto-local-database,
+	pluto-system-database,
 	pluto-boot-scripts,
 	chan-sccp-b,
 	asterisk-mysql,

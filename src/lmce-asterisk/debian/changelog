@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.3-10) precise; urgency=low
+
+  * add depends on pluto-system-database
+
+ -- phenigma <phenigma@linuxmce.org>  Tue, 25 Aug 2015 21:39:00 -0500
+
 lmce-asterisk (0+0.3.3-9) precise; urgency=low
 
   * add conflicts/replaces/provides on asterisk-config
