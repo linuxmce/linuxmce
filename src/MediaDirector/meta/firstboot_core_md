@@ -12,4 +12,3 @@ firstboot_core_md_postinst () {
 	Create_And_Config_Hybrid_MD
 }
 
-exit 0
