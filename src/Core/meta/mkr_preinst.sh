@@ -2,7 +2,7 @@
 
 if [ install = "$1" ]; then
 	if [[ ! $(grep "PK_Device" /etc/pluto.conf) ]] ; then
-		StatsMessage "Setting initial PK_Device"
+		#StatsMessage "Setting initial PK_Device"
 		cat <<-EOF >/etc/pluto.conf
 			PK_Device = 1
 			EOF
