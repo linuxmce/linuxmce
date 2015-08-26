@@ -101,7 +101,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     myOrbiters(new ExistingOrbiterModel(new ExistingOrbiter(), this)),
     attribFilter( new AttributeSortModel(new AttributeSortItem,6, this)),
     currentScreen("Screen_1.qml"),
-    m_skinOverridePath(overridePath)
+    m_skinOverridePath(overridePath),
+    m_window(NULL)
 {
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
