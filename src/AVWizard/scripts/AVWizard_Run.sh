@@ -475,25 +475,23 @@ NewAbase=$(cat -s "$Abase")
 echo "$NewAbase" > "$Abase"
 echo "" >> "$Abase"
 
-CardNumbers=$(cat /proc/asound/modules | awk '{print $1}')
-AudioRules="/etc/udev/rules.d/85-linuxmce-audio.rules"
-cat <<EOL> "$AudioRules"
-SUBSYSTEM!="sound", GOTO="linuxmce_audio_end"
-ACTION!="add", GOTO="linuxmce_audio_end"
+}
 
-EOL
-
-
-echo "$CardNumbers" | while read each; do 
-	DevPath=$(udevadm info -a -p /sys/class/sound/card${each} | grep -wo "/devices.*card${each}")
-	CardType=$(cat /sys/class/sound/card${each}/id)
-	echo "DEVPATH==\"${DevPath}\", ATTR{id}=\"Card${each}_${CardType}\"" >> "$AudioRules"
-done
-
-cat <<EOL>> "$AudioRules"
-
-LABEL="linuxmce_audio_end"
-EOL
+Rename_Audio_Cards () {
+	CardNumbers=$(cat /proc/asound/modules | awk '{print $1}')
+	AudioRules="/etc/udev/rules.d/85-linuxmce-audio.rules"
+	cat <<-EOL> "$AudioRules"
+		SUBSYSTEM!="sound", GOTO="linuxmce_audio_end"
+		ACTION!="add", GOTO="linuxmce_audio_end"
+		EOL
+	echo "$CardNumbers" | while read each; do
+		DevPath=$(udevadm info -a -p /sys/class/sound/card${each} | grep -wo "/devices.*card${each}")
+		CardType=$(cat /sys/class/sound/card${each}/id)
+		echo "DEVPATH==\"${DevPath}\", ATTR{id}=\"Card${each}_${CardType}\"" >> "$AudioRules"
+	done
+	cat <<-EOL>> "$AudioRules"
+		LABEL="linuxmce_audio_end"
+		EOL
 }
 
 
@@ -520,7 +518,6 @@ fi
 
 Start_AVWizard () {
 	#Modify /etc/pluto.conf for the AVWizardOverride value
-	ConfSet AVWizardOverride 0
 	rm -f /tmp/AVWizard_Started
 
 	#Setup Main AVWizard loop
@@ -545,7 +542,6 @@ Start_AVWizard () {
 	StatsMessage "AVWizard Main loop done"
 
 	# Finalize wizard: save settings
-	ConfSet "AVWizardDone" "1"
 	mv "$XF86Config" "$ConfFile"
 	mv "$XineConf" /etc/pluto/xine.conf
 	StatsMessage "AVWizard reset conf file"
@@ -559,7 +555,8 @@ Start_AVWizard () {
 	StatsMessage "AVWizard Calling SetupAudioVideo"
 	bash -x /usr/pluto/bin/SetupAudioVideo.sh | tee-pluto /var/log/pluto/avwizard_setup_av.log
 
-	ConfSet AVWizardOverride 0
+	ConfSet "AVWizardDone" "1"
+	ConfSet "AVWizardOverride" "0"
 }
 
 
