@@ -214,8 +214,8 @@ start() {
 	StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
 
 	# check firstboot completion and launch firstboot from here
-	if [[ "$FirstBoot" != "true" ]] ; then
-		StartService "Starting LinuxMCE Firstboot setup"  "/usr/pluto/install/firstboot start"
+	if [[ "$FirstBoot" != "false" ]] ; then
+		/usr/pluto/install/firstboot
 		err=$?
 		if [[ "$err" != "0" ]]; then
 			return $err
