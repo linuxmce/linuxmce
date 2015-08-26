@@ -24,26 +24,27 @@ if [ install = "$1" ]; then
 		sun-java6-jre sun-java6-jre/stopthread boolean true
 		EOF
 	debconf-set-selections /tmp/preseed.cfg
-#fi
-#if [ install = "$1" ]; then
+
 	# Setting up kernel symlink fix
 	## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
-	cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
-		#!/bin/bash
-		# LinuxMCE post kernel image install.
-		#
-		# We make sure we can read the image and the kernel, and the softlink is correct.
-		chmod g+r /boot/* || :
-		chmod o+r /boot/* || :
+	if [[ ! -f /etc/kernel/postinst.d/update-symlinks ]] ; then
+		cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
+			#!/bin/bash
+			# LinuxMCE post kernel image install.
+			#
+			# We make sure we can read the image and the kernel, and the softlink is correct.
+			chmod g+r /boot/* || :
+			chmod o+r /boot/* || :
 
-		pushd / >/dev/null
-		ln -sf boot/initrd.img-$1 initrd.img || :
-		ln -sf boot/vmlinuz-$1 vmlinuz || :
-		popd > /deb/null
+			pushd / >/dev/null
+			ln -sf boot/initrd.img-$1 initrd.img || :
+			ln -sf boot/vmlinuz-$1 vmlinuz || :
+			popd > /deb/null
 
-		exit 0
-		EOF
-	chmod +x /etc/kernel/postinst.d/update-symlinks
+			exit 0
+			EOF
+		chmod +x /etc/kernel/postinst.d/update-symlinks
+	fi
 
 	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
 fi

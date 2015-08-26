@@ -17,10 +17,18 @@ fi
 start() {
 
 	if [[ -f /usr/pluto/install/firstboot_core ]] ; then
-		. /usr/pluto/install/firstboot_core
+		/usr/pluto/install/firstboot_core
+		err=$?
+		if [[ "$err" != "0" ]] ; then
+			exit 0
+		fi
 	fi
 	if [[ -f /usr/pluto/install/firstboot_md ]] ; then
-		. /usr/pluto/install/firstboot_md
+		/usr/pluto/install/firstboot_md
+		err=$?
+		if [[ "$err" != "0" ]] ; then
+			exit 0
+		fi
 	fi
 
 	StatsMessage "Setting FirstBoot = false"

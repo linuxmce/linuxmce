@@ -172,6 +172,7 @@ esac
 # Disabling display manager
 mkdir -p "/etc/X11"
 echo "/bin/false" >/etc/X11/default-display-manager
+chmod -x /etc/init.d/kdm >/dev/null
 update-rc.d -f kdm remove >/dev/null
 update-rc.d -f lightdm remove >/dev/null
 
