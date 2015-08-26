@@ -2,8 +2,8 @@
 
 . /usr/pluto/bin/SQL_Ops.sh
 
-echo "$(date -R) Starting Core Services - config device changes" >> /var/log/pluto/StartCoreServices.log 2>&1
-bash -x /usr/pluto/bin/Config_Device_Changes.sh >> /var/log/pluto/StartCoreServices.log 2>&1
+#echo "$(date -R) Starting Core Services - config device changes" >> /var/log/pluto/StartCoreServices.log 2>&1
+#bash -x /usr/pluto/bin/Config_Device_Changes.sh >> /var/log/pluto/StartCoreServices.log 2>&1
 
 # Start DCERouter before doing the orbitergen, otherwise LMCE Launch Manager will try starting devices which
 # end up being disabled due to DCERouter not yet running.
