@@ -247,6 +247,8 @@ Configure_Network_Files () {
 	echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
 	#echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
 	echo "127.0.1.1 dcerouter $(/bin/hostname)"    >> /etc/hosts
+
+	service networking start >/dev/null
 }
 
 Configure_Network_Database () {
