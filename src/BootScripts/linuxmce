@@ -377,6 +377,7 @@ stop() {
 	if [[ "$AutostartCore" -eq "1" ]] ; then
 		StartService "Halt MDs" "/usr/pluto/bin/HaltMDs.sh"
 	fi
+	/usr/pluto/bin/Report_MachineOff.sh
 
 	:
 	return $?
