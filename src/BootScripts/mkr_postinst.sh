@@ -6,7 +6,7 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
-###. /usr/pluto/install/install-common.sh
+. /usr/pluto/install/install-common.sh
 
 ## Update the PlutoVersion variable from pluto.conf
 Version=$(dpkg -s pluto-boot-scripts | grep '^Version:' | sed  's/Version: //')
@@ -137,25 +137,7 @@ if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
 	rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
 fi
 
-###. /usr/pluto/install/install-common.sh ; CreateBasePackagesFile
-#Make sure there is are Packages files on the MD so apt-get update does not fail
-if [[ ! -f /usr/pluto/deb-cache/Packages.gz ]] ; then
-	mkdir -p /usr/pluto/deb-cache/
-	rm -f /usr/pluto/deb-cache/Packages
-	touch  /usr/pluto/deb-cache/Packages
-	gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
-fi
-#Make sure there is are Packages files on the MD so apt-get update does not fail
-TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
-TARGET_RELEASE=$(lsb_release -c -s)
-TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
-DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
-if [[ ! -f /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz ]] ; then
-	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
-	rm -f /usr/pluto/deb-cache/$DEB_CACHE/Packages
-	touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
-	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
-fi
+#/usr/pluto/bin/UpdateDebCache.sh
 
 ###. /usr/pluto/install/install-common.sh ; Fix_LSB_Data
 case "$TARGET_DISTRO" in
