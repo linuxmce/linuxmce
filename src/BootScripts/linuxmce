@@ -181,11 +181,14 @@ start() {
 	log_daemon_msg "Starting up LinuxMCE" "linuxmce"
 	err=0
 
-	# Disable display manager
-	mkdir -p "/etc/X11"
-	echo "/bin/false" >/etc/X11/default-display-manager
-	update-rc.d -f kdm remove >/dev/null
-	update-rc.d -f lightdm remove >/dev/null
+	if [[ "$AutostartCore" -eq "1" ]] ; then
+		# Disable display manager
+		mkdir -p "/etc/X11"
+		echo "/bin/false" >/etc/X11/default-display-manager
+		update-rc.d -f kdm remove >/dev/null
+		update-rc.d -f lightdm remove >/dev/null
+		service kdm stop || :
+	fi
 
 	setterm -blank >/dev/console             # disable console blanking
 	mkdir -p /var/log/pluto                  # setup log dir
