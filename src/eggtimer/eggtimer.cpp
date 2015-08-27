@@ -213,19 +213,22 @@ void eggtimer::SomeFunction()
 void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerifyStateDeviceID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1156-e->
 {
-	cout << "Need to implement command #1156 - Start Egg Timer" << endl;
-	cout << "Parm #124 - DeviceToLink=" << iDeviceToLink << endl;
-	cout << "Parm #182 - Timeout=" << sTimeout << endl;
-	cout << "Parm #290 - VerifyStateDeviceID=" << iVerifyStateDeviceID << endl;
 	int nTimeout;
 	int oldID;
 	nTimeout = atoi(sTimeout.c_str());
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Start_Egg_Timer(): Starting timer");
 	
 	oldID = m_pAlarmManager->FindAlarmByType(iDeviceToLink);
 	m_pAlarmManager->CancelAlarm(oldID);
 	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,pMessage);
 	CommandOn(iDeviceToLink);
+
+        int nVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Start_Egg_Timer(): current VerifyStateDeviceID is %d", nVerifyStateDeviceID);
+        
 }
+
 
 //<-dceag-c1147-b->
 
@@ -251,7 +254,7 @@ void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD
 	}
 	
 	m_pAlarmManager->CancelAlarm(iDeviceToLink);	
-	
+        	
 
         	
 }
@@ -259,6 +262,7 @@ void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD
 void eggtimer::AlarmCallback(int id, void* param)
 {
 	int iVerifyStateDeviceID=0;
+	string sVerifyStateDeviceID="";
 	bool bTurnOff = true;
 	string sTmp = "";
 
@@ -271,9 +275,10 @@ void eggtimer::AlarmCallback(int id, void* param)
 	cout << "Need to implement AlarmCallback - Egg Timer " <<endl;
 
 	Message* pMessage = (Message*)param;
-	iVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
+	sVerifyStateDeviceID = pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str();
+	iVerifyStateDeviceID = atoi(sVerifyStateDeviceID.c_str());
 	nTimeout = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Timeout_CONST].c_str());
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AlarmCallback(): current VerifyStateDeviceID is %d", iVerifyStateDeviceID);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AlarmCallback(): current VerifyStateDeviceID is %d and %s", iVerifyStateDeviceID, sVerifyStateDeviceID.c_str());
 
         iVerifyStateDeviceID = 32;			
 	if (iVerifyStateDeviceID > 0) 
