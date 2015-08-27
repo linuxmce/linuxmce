@@ -55,6 +55,8 @@ fi
 
 echo "Processing :: Updating all deb-cache locations"
 
+mkdir -p /usr/pluto/deb-cache/${DEB_CACHE}
+
 # update sources.list for any old/existing entries
 if [[ ! $(grep ${DEB_CACHE} /etc/apt/sources.list) ]] ; then
 	# fix sources.list, replace "/deb-cache " with "/deb-cache/${DEB_CACHE} "
@@ -65,8 +67,6 @@ fi
 rm -f /usr/pluto/deb-cache/Packages*
 touch /usr/pluto/deb-cache/Packages
 gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
-
-mkdir -p /usr/pluto/deb-cache/${DEB_CACHE}
 
 # move files to new deb_cache
 if [[ -n "$(find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
