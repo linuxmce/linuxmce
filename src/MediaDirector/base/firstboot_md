@@ -30,7 +30,21 @@ MD_Copy_SSH_Keys
 MD_Config_MySQL_Client
 ConfigSources
 gpgUpdate
-Install_HWE # install kernel and X for all targets
+
+# FIXME: This assumes kernel is done if any script fn is called.
+kernel_done=""
+# run any device specific firstboot kernel scripts
+for f in /usr/pluto/install/firstboot_md_* ; do
+	StatsMessage "Running script: ${f}_kernel - Begin"
+	. "$f" || :
+	$(basename "$f")_preinst || :
+	StatsMessage "Running script: ${f}_kernel - End"
+	kernel_done="0"
+done
+if [[ "$kernel_done" != "0" ]] ; then
+	Install_HWE # install kernel and X for all targets
+fi
+
 AptDistUpgrade
 MD_Populate_Debcache
 MD_Cleanup
