@@ -242,9 +242,6 @@ void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerify
 void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1147-e->
 {
-	cout << "Need to implement command #1147 - Cancel Egg Timer" << endl;
-	cout << "Parm #124 - DeviceToLink=" << iDeviceToLink << endl;
-	cout << "Parm #289 - SendOFF=" << bSendOFF << endl;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Cancel Egg Timer for Device %n", iDeviceToLink);
 	// This is a manual cancelation. We honor the users wishs whether or not the device in question
 	// shall receive an OFF as well.
@@ -270,9 +267,6 @@ void eggtimer::AlarmCallback(int id, void* param)
 	int oldID;
 	
 	oldID = m_pAlarmManager->FindAlarmByType(id);
-
-	
-	cout << "Need to implement AlarmCallback - Egg Timer " <<endl;
 
 	Message* pMessage = (Message*)param;
 	sVerifyStateDeviceID = pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str();
@@ -311,16 +305,12 @@ void eggtimer::AlarmCallback(int id, void* param)
 void eggtimer::CommandOn(int PK_Device)
 {
 	
-	cout << "Neet to implement CommandOn" << endl;
 	DCE::CMD_On CMD_On(m_dwPK_Device,PK_Device,0,"");
 	SendCommand(CMD_On);
-//	DCE::CMD_Set_Level CMD_Set_Level(m_dwPK_Device,PK_Device,"100");
-//	SendCommand(CMD_Set_Level);
 }
 
 void eggtimer::CommandOff(int PK_Device)
 {
-	cout << "Neet to implement CommandOff" << endl;
 	DCE::CMD_Off CMD_Off(m_dwPK_Device,PK_Device,0);
 	SendCommand(CMD_Off);
 }
