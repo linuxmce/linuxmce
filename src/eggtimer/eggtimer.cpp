@@ -277,12 +277,11 @@ void eggtimer::AlarmCallback(int id, void* param)
 	nTimeout = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Timeout_CONST].c_str());
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AlarmCallback(): current VerifyStateDeviceID is %d and %s", iVerifyStateDeviceID, sVerifyStateDeviceID.c_str());
 
-        iVerifyStateDeviceID = 32;			
 	if (iVerifyStateDeviceID > 0) 
 	{
 
                 string status="UNKNOWN";
-                // 27 is General Info Plugin
+                // 4 is General Info Plugin
                 CMD_Get_Device_Status getDeviceStatus(m_dwPK_Device, 4, iVerifyStateDeviceID, &status);
                 string cResponse="";
                 SendCommand(getDeviceStatus, &cResponse);
