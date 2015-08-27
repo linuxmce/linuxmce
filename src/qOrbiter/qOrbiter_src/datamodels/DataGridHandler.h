@@ -195,7 +195,11 @@ public:
                         sourceId,
                         sourceName
                         );
-        }else {
+        } else if (PK_DataGrid == DATAGRID_Active_Users_On_Channel_CONST) {
+            DataGridCell *pCell2 = pTable->GetData(1, row);
+            pItem->setData(ValueRole, pCell2->GetValue());
+            pItem->setData(DescriptionRole, QString::fromUtf8(pCell2->GetText()));
+        } else {
 
             // Default, get one cell use text and value
             pItem->setData(ValueRole, pCell->GetValue());
