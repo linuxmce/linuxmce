@@ -18,10 +18,6 @@ StatsMessage () {
 ### Main execution area
 ###########################################################
 
-StatsMessage "Setting up firstboot"
-# setup the firstboot script
-update-rc.d -f firstboot start 91 2 3 4 5 . >/dev/null
-
 StatsMessage "Setting up mysql host"
 # Make sure, the root user is connecting to DCEROUTER for any MySQL connection
 cat <<-EOF > /root/.my.cnf
