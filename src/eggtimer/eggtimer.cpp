@@ -227,7 +227,7 @@ void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerify
 	CommandOn(iDeviceToLink);
 
         int nVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Start_Egg_Timer(): current VerifyStateDeviceID is %d", nVerifyStateDeviceID);
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Start_Egg_Timer(): current VerifyStateDeviceID is %d", nVerifyStateDeviceID);
         
 }
 
@@ -275,7 +275,7 @@ void eggtimer::AlarmCallback(int id, void* param)
 	sVerifyStateDeviceID = pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str();
 	iVerifyStateDeviceID = atoi(sVerifyStateDeviceID.c_str());
 	nTimeout = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Timeout_CONST].c_str());
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AlarmCallback(): current VerifyStateDeviceID is %d and %s", iVerifyStateDeviceID, sVerifyStateDeviceID.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"AlarmCallback(): current VerifyStateDeviceID is %d and %s", iVerifyStateDeviceID, sVerifyStateDeviceID.c_str());
 
 	if (iVerifyStateDeviceID > 0) 
 	{
