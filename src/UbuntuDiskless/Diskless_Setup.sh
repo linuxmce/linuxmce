@@ -233,7 +233,7 @@ function setup_hosts_file
 function update_config_files
 {
 	local ScriptDir="/usr/pluto/bin/files.d"
-	local ScriptsList="cron.d-synctime fstab-diskless interfaces mythtv-mysql.txt nis-client pluto.conf resolv.conf syslog.conf timezone net-fix.conf mountnfs.sh event.d apt.conf hostname mythtv-fix firstrun"
+	local ScriptsList="cron.d-synctime fstab-diskless interfaces mythtv-mysql.txt nis-client pluto.conf resolv.conf syslog.conf timezone net-fix.conf mountnfs.sh hostname mythtv-fix firstrun"
 	local -a Names
 	local NameKernel Name Kernel
 	if [[ -n "$Moon_DisklessImages" ]]; then
