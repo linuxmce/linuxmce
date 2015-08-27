@@ -100,7 +100,7 @@ if ! grep -qF 'LogLevels = 1,5,7,8' /etc/pluto.conf ;then
 	echo "LogLevels = 1,5,7,8" >> /etc/pluto.conf
 fi
 
-## Remove dash diversion of /bin/sh
+## Remove dash diversion of /bin/sh -- FIXME: this is erroring, why?
 if [[ -f /bin/sh.distrib ]] ;then
 	mv /bin/sh.distrib /bin/sh || :
 	dpkg-divert --remove /bin/sh || :
@@ -149,27 +149,7 @@ case "$TARGET_DISTRO" in
 		;;
 esac
 
-###. /usr/pluto/install/install-common.sh ; Disable_DisplayManager
-# TODO: dpkg-divert this so it doesn't come back?
-# Disabling display manager
-mkdir -p "/etc/X11"
-echo "/bin/false" >/etc/X11/default-display-manager
-[ -x /etc/init.d/kdm ] && chmod -x /etc/init.d/kdm >/dev/null
-update-rc.d -f kdm remove >/dev/null
-update-rc.d -f lightdm remove >/dev/null
-
-# Make sure the old startup scripts no longer exists
-#rm -f /etc/rc{2,3,4,5}.d/{S30Start_X.sh,S93startup-script.sh,S99lmce_launch_manager.sh,S93linuxmce,S99core,S99launch-manager}
-#rm -f /etc/rc2.d/S99kdm
-update-rc.d -f Start_X.sh remove >/dev/null
-update-rc.d -f startup-script.sh remove >/dev/null
-update-rc.d -f lmce_launch_manager.sh remove >/dev/null
-update-rc.d -f core remove >/dev/null
-update-rc.d -f launch-manager remove >/dev/null
-
 # Add a single new startup script.
-#ln -sfv /etc/init.d/linuxmce /etc/rc2.d/S99linuxmce
-#ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
 update-rc.d -f linuxmce remove >/dev/null
 update-rc.d -f linuxmce defaults 99 1 >/dev/null
 
