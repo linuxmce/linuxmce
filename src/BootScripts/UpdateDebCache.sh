@@ -1,39 +1,41 @@
 #!/bin/bash
 export LC_ALL="C"
 
+UPDATE_CACHE=""
 HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 HOST_RELEASE=$(lsb_release -c -s)
 HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+DEB_CACHE="${HOST-DISTRO}-${HOST_RELEASE}-${HOST_ARCH}"
 
 remove_duplicate_debs() {
-        local Dir="$1"
-        local pkg ver arch dup_ver dup_arch
+	local Dir="$1"
+	local pkg ver arch dup_ver dup_arch
 
-        pushd "$Dir" >/dev/null
-        for deb in *.deb ;do
-                pkg=$(echo $deb | cut -d'_' -f1)
-                ver=$(echo $deb | cut -d'_' -f2)
-                arch=$(echo $deb | cut -d '_' -f3 | cut -d'.' -f1)
+	pushd "$Dir" >/dev/null
+	for deb in *.deb ;do
+		pkg=$(echo $deb | cut -d'_' -f1)
+		ver=$(echo $deb | cut -d'_' -f2)
+		arch=$(echo $deb | cut -d '_' -f3 | cut -d'.' -f1)
 
-                for dup_deb in ${pkg}_*.deb ;do
-                        dup_ver=$(echo $dup_deb | cut -d'_' -f2)
-                        dup_arch=$(echo $dup_deb | cut -d '_' -f3 | cut -d'.' -f1)
+		for dup_deb in ${pkg}_*.deb ;do
+			dup_ver=$(echo $dup_deb | cut -d'_' -f2)
+			dup_arch=$(echo $dup_deb | cut -d '_' -f3 | cut -d'.' -f1)
 
-                        if [[ "$dup_arch" == "$arch" ]] ;then
-                                if dpkg --compare-versions "$dup_ver" lt "$ver" 2>/dev/null ;then
-                                        echo "Remove duplicate package $pkg $dup_ver $dup_arch"
-                                        rm -f "${pkg}_${dup_ver}_"*.deb
-                                fi
+			if [[ "$dup_arch" == "$arch" ]] ;then
+				if dpkg --compare-versions "$dup_ver" lt "$ver" 2>/dev/null ;then
+					echo "Remove duplicate package $pkg $dup_ver $dup_arch"
+					rm -f "${pkg}_${dup_ver}_"*.deb
+				fi
 
-                                if dpkg --compare-versions "$dup_ver" gt "$ver" 2>/dev/null ;then
-                                        echo "Remove duplicate package $pkg $ver $arch"
-                                        rm -f "${pkg}_${ver}_"*.deb
-                                        ver=$dup_ver
-                                fi
-                        fi
-                done
-        done
-        popd >/dev/null
+				if dpkg --compare-versions "$dup_ver" gt "$ver" 2>/dev/null ;then
+					echo "Remove duplicate package $pkg $ver $arch"
+					rm -f "${pkg}_${ver}_"*.deb
+					ver=$dup_ver
+				fi
+			fi
+		done
+	done
+	popd >/dev/null
 }
 
 update_debcache() {
@@ -51,40 +53,84 @@ if [[ -n "$1" ]]; then
 	exit 0
 fi
 
-echo "Processing :: Updating deb-cache locations"
+echo "Processing :: Updating all deb-cache locations"
 
-rm -f /tmp/target_updates
-touch /tmp/target_updates
+# update sources.list for any old/existing entries
+if [[ ! $(grep ${DEB_CACHE} /etc/apt/sources.list) ]] ; then
+	# fix sources.list, replace "/deb-cache " with "/deb-cache/${DEB_CACHE} "
+	sed -i "s:/deb-cache :/deb-cache/${DEB_CACHE} :" /etc/apt/sources.list
+fi
 
-for disklessMD in /usr/pluto/diskless/* ; do
-	if [[ -d "$disklessMD" ]] ; then
-		#echo Processing :: $disklessMD
+# clear the original packages lists to avoid problems.
+rm -f /usr/pluto/deb-cache/Packages*
+touch /usr/pluto/deb-cache/Packages
+gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
 
-		chroot "$disklessMD" lsb_release -is > /tmp/target_distro
-		TARGET_DISTRO=$(cat /tmp/target_distro)
-		#echo $TARGET_DISTRO
+# move files to new deb_cache
+if [[ -n "$(find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
+	echo "Moving the Core's apt cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+	find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+	UPDATE_CACHE="${DEB_CACHE}"
+fi
+if [[ -n "$(find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
+	echo "Moving the Core's deb-cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+	find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+	UPDATE_CACHE="${DEB_CACHE}"
+fi
 
-		chroot "$disklessMD" lsb_release -cs > /tmp/target_release
-		TARGET_RELEASE=$(cat /tmp/target_release)
-		#echo $TARGET_RELEASE
+export LC_ALL="C"
+for Moon_RootLocation in $(find /usr/pluto/diskless/* -maxdepth 0 -type d); do
+if [[ -n "$Moon_RootLocation" && -e "$Moon_RootLocation/etc/pluto.conf" ]]; then
+	TARGET_DISTRO=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+	TARGET_RELEASE=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -c -s)
+	TARGET_ARCH=$(LC_ALL="C" chroot ${Moon_RootLocation} apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+	DEB_CACHE="${TARGET_DISTRO}-${TARGET_RELEASE}-${TARGET_ARCH}"
 
-		#TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
-		chroot "$disklessMD" apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1 > /tmp/target_arch
-		TARGET_ARCH=$(cat /tmp/target_arch)
-		#echo $TARGET_ARCH
+	mkdir -p ${Moon_RootLocation}/usr/pluto/deb-cache/${DEB_CACHE}
 
-		DEB_CACHE=${TARGET_DISTRO,,}-${TARGET_RELEASE}-${TARGET_ARCH}
-
-		if [[ -n "$(find $disklessMD/var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
-			echo "Processing :: Moving $disklessMD's apt cache to /usr/pluto/deb-cache/$DEB_CACHE"
-			find "$disklessMD"/var/cache/apt/archives/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
-			echo "$DEB_CACHE" >> /tmp/target_updates
+	if [[ -n "$(find ${Moon_RootLocation}/var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
+		echo "Moving this MDs apt cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+		find ${Moon_RootLocation}/var/cache/apt/archives/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+		if [[ "$UPDATE_CACHE" != "*${DEB_CACHE}*" ]]; then
+			UPDATE_CACHE="$UPDATE_CACHE ${DEB_CACHE}"
 		fi
 	fi
+	if [[ -n "$(find ${Moon_RootLocation}/usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
+		echo "Moving the MD's deb-cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+		find ${Moon_RootLocation}/usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+		if [[ "$UPDATE_CACHE" != "*${DEB_CACHE}*" ]]; then
+			UPDATE_CACHE="$UPDATE_CACHE ${DEB_CACHE}"
+		fi
+	fi
+	if [[ -n "$(find ${Moon_RootLocation}/usr/pluto/deb-cache/${DEB_CACHE} -maxdepth 1 -iname '*.deb')" ]]; then
+		echo "Moving the MD's deb-cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+		find ${Moon_RootLocation}/usr/pluto/deb-cache/${DEB_CACHE} -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+		if [[ "$UPDATE_CACHE" != "*${DEB_CACHE}*" ]]; then
+			UPDATE_CACHE="$UPDATE_CACHE ${DEB_CACHE}"
+		fi
+	fi
+
+	# fix sources.list, replace "/deb-cache " with "/deb-cache/${DEB_CACHE} "
+	sed -i "s:/deb-cache :/deb-cache/${DEB_CACHE} :" ${Moon_RootLocation}/etc/apt/sources.list
+
+	# clear the original packages lists to avoid problems.
+	rm -f ${Moon_RootLocation}/usr/pluto/deb-cache/Packages*
+	touch ${Moon_RootLocation}/usr/pluto/deb-cache/Packages
+	gzip -9c < ${Moon_RootLocation}/usr/pluto/deb-cache/Packages > ${Moon_RootLocation}/usr/pluto/deb-cache/Packages.gz
+
+	# create a blank packages list on the MD so apt-get update does not fail
+	rm -f ${Moon_RootLocation}/usr/pluto/deb-cache/${DEB_CACHE}/Packages*
+	touch ${Moon_RootLocation}/usr/pluto/deb-cache/${DEB_CACHE}/Packages
+	gzip -9c < ${Moon_RootLocation}/usr/pluto/deb-cache/${DEB_CACHE}/Packages > ${Moon_RootLocation}/usr/pluto/deb-cache/${DEB_CACHE}/Packages.gz
+fi
 done
-for debcache in $( cat /tmp/target_updates | sort -u ) ; do
-	echo "Processing :: Building Packages files in /usr/pluto/deb-cache/$debcache"
-	update_debcache /usr/pluto/deb-cache/$debcache
+
+# update package files
+for cache_name in "$UPDATE_CACHE"; do
+if [[ -n "$cache_name" ]]; then
+        echo "Updating packages list in /usr/pluto/deb-cache/$cache_name"
+        update_debcache /usr/pluto/deb-cache/$cache_name || :
+fi
 done
 
 echo "Processing :: deb-cache updates complete."
