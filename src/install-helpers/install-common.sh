@@ -306,7 +306,7 @@ ListXPkgs () {
 		"precise")      # 1204
 			echo "xserver-xorg${LTS_HES} xserver-xorg-video-all${LTS_HES} libgl1-mesa-glx${LTS_HES}"	;;
 		"trusty")       # 1404
-			echo "xserver-xorg-core-${LTS_HES} xserver-xorg${LTS_HES} xserver-xorg-video-all${LTS_HES} xserver-xorg-input-all${LTS_HES} libwayland-egl1-mesa${LTS_HES}"	;;
+			echo "xserver-xorg-core${LTS_HES} xserver-xorg${LTS_HES} xserver-xorg-video-all${LTS_HES} xserver-xorg-input-all${LTS_HES} libwayland-egl1-mesa${LTS_HES}"	;;
 		*)      # *
 			echo "xserver-xorg xserver-xorg-video-all"	;;
 	esac
