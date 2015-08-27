@@ -57,7 +57,7 @@ GenericListModel{
         MouseArea{
             id:ms
             anchors.fill: parent
-            onClicked: {manager.gridChangeChannel(channelNumber, channelid)}
+            onClicked: {manager.gridChangeChannel(channel, channelid)}
         }
     }
     width: Style.scaleX(35)
