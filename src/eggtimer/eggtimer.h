@@ -70,15 +70,18 @@ public:
 	*/
 
 
-	/** @brief COMMAND: #1146 - Start Egg Timer */
-	/** Start egg timer and send On command to designated device. */
+	/** @brief COMMAND: #1156 - Start Egg Timer */
+	/** Start egg timer and send ON to device in question.  */
 		/** @param #124 DeviceToLink */
-			/** Device to keep on for the amount of time the egg timer runs. */
+			/** Device to send the ON command and to setup the egg timer. */
 		/** @param #182 Timeout */
-			/** Seconds before the associated device receives an off command. */
+			/** Time before the OFF command is set to the device in question. */
+		/** @param #290 VerifyStateDeviceID */
+			/** Device ID to verify for state tripped upon end of timer. If tripped, the timer be extended. */
 
-	virtual void CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout) { string sCMD_Result; CMD_Start_Egg_Timer(iDeviceToLink,sTimeout.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerifyStateDeviceID) { string sCMD_Result; CMD_Start_Egg_Timer(iDeviceToLink,sTimeout.c_str(),iVerifyStateDeviceID,sCMD_Result,NULL);};
+	virtual void CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerifyStateDeviceID,string &sCMD_Result,Message *pMessage);
+
 
 
 	/** @brief COMMAND: #1147 - Cancel Egg Timer */
