@@ -281,14 +281,12 @@ void eggtimer::AlarmCallback(int id, void* param)
 
                 string status="UNKNOWN";
                 // 27 is General Info Plugin
-                CMD_Get_Device_Status getDeviceStatus(m_dwPK_Device, 27, iVerifyStateDeviceID, &status);
+                CMD_Get_Device_Status getDeviceStatus(m_dwPK_Device, 4, iVerifyStateDeviceID, &status);
                 string cResponse="";
                 SendCommand(getDeviceStatus, &cResponse);
-                cout << "response: " << cResponse << endl;
-                cout << "status: " << status << endl;
                 if (cResponse=="OK")
                 {
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): current State for device is %c", status.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): current State for device is %s", status.c_str());
                         if (status == "TRIPPED") 
                         {
                                 m_pAlarmManager->CancelAlarm(oldID);
