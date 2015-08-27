@@ -66,6 +66,8 @@ rm -f /usr/pluto/deb-cache/Packages*
 touch /usr/pluto/deb-cache/Packages
 gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
 
+mkdir -p /usr/pluto/deb-cache/${DEB_CACHE}
+
 # move files to new deb_cache
 if [[ -n "$(find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
 	echo "Moving the Core's apt cache to /usr/pluto/deb-cache/${DEB_CACHE}"
