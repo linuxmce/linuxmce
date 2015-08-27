@@ -17,6 +17,8 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include "DeviceData_Router.h"
+#include "pluto_main/Define_ParameterType.h"
 
 #include <iostream>
 using namespace std;
@@ -250,17 +252,39 @@ void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD
 	
 	m_pAlarmManager->CancelAlarm(iDeviceToLink);	
 	
+
+        	
 }
 
 void eggtimer::AlarmCallback(int id, void* param)
 {
 	int iVerifyStateDeviceID=0;
+	bool bTurnOff = true;
+	string sTmp = "";
+	
 	cout << "Need to implement AlarmCallback - Egg Timer " <<endl;
+
 	Message* pMessage = (Message*)param;
-	iVerifyStateDeviceID= atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
+	iVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
+
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AlarmCallback(): current VerifyStateDeviceID is %n", iVerifyStateDeviceID);
-                                                
-	CommandOff(id);		
+			
+	if (iVerifyStateDeviceID > 0) 
+	{
+		DeviceData_Router* pDevice = pRouter->m_mapDeviceData_Router_Find(iVerifyStateDeviceID);
+		if (pDevice)
+		{
+			sTmp = pDevice->m_sState_get();
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): current VerifyStateDeviceID is %n", iVerifyStateDeviceID);
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): current State for device is %c", sTmp.c_str());
+		}
+	}
+         
+         
+ 	if (bTurnOff) 
+ 	{
+		CommandOff(id);		
+	}
 }
 
 void eggtimer::CommandOn(int PK_Device)
