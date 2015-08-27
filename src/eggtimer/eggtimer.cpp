@@ -261,22 +261,40 @@ void eggtimer::AlarmCallback(int id, void* param)
 	int iVerifyStateDeviceID=0;
 	bool bTurnOff = true;
 	string sTmp = "";
+
+	int nTimeout;
+	int oldID;
+	
+	oldID = m_pAlarmManager->FindAlarmByType(id);
+
 	
 	cout << "Need to implement AlarmCallback - Egg Timer " <<endl;
 
 	Message* pMessage = (Message*)param;
 	iVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
+	nTimeout = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Timeout_CONST].c_str());
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AlarmCallback(): current VerifyStateDeviceID is %d", iVerifyStateDeviceID);
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AlarmCallback(): current VerifyStateDeviceID is %n", iVerifyStateDeviceID);
-			
+        iVerifyStateDeviceID = 32;			
 	if (iVerifyStateDeviceID > 0) 
 	{
-		DeviceData_Router* pDevice = pRouter->m_mapDeviceData_Router_Find(iVerifyStateDeviceID);
-		if (pDevice)
-		{
-			sTmp = pDevice->m_sState_get();
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): current VerifyStateDeviceID is %n", iVerifyStateDeviceID);
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): current State for device is %c", sTmp.c_str());
+
+                string status="UNKNOWN";
+                // 27 is General Info Plugin
+                CMD_Get_Device_Status getDeviceStatus(m_dwPK_Device, 27, iVerifyStateDeviceID, &status);
+                string cResponse="";
+                SendCommand(getDeviceStatus, &cResponse);
+                cout << "response: " << cResponse << endl;
+                cout << "status: " << status << endl;
+                if (cResponse=="OK")
+                {
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): current State for device is %c", status.c_str());
+                        if (status == "TRIPPED") 
+                        {
+                                m_pAlarmManager->CancelAlarm(oldID);
+                                m_pAlarmManager->AddRelativeAlarm(nTimeout,this,id,pMessage);              
+                                
+                        }
 		}
 	}
          
@@ -293,8 +311,8 @@ void eggtimer::CommandOn(int PK_Device)
 	cout << "Neet to implement CommandOn" << endl;
 	DCE::CMD_On CMD_On(m_dwPK_Device,PK_Device,0,"");
 	SendCommand(CMD_On);
-	DCE::CMD_Set_Level CMD_Set_Level(m_dwPK_Device,PK_Device,"100");
-	SendCommand(CMD_Set_Level);
+//	DCE::CMD_Set_Level CMD_Set_Level(m_dwPK_Device,PK_Device,"100");
+//	SendCommand(CMD_Set_Level);
 }
 
 void eggtimer::CommandOff(int PK_Device)
