@@ -5,7 +5,7 @@ UPDATE_CACHE=""
 HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 HOST_RELEASE=$(lsb_release -c -s)
 HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
-DEB_CACHE="${HOST-DISTRO}-${HOST_RELEASE}-${HOST_ARCH}"
+DEB_CACHE="${HOST_DISTRO}-${HOST_RELEASE}-${HOST_ARCH}"
 
 remove_duplicate_debs() {
 	local Dir="$1"
