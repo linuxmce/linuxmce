@@ -221,7 +221,7 @@ void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerify
 	
 	oldID = m_pAlarmManager->FindAlarmByType(iDeviceToLink);
 	m_pAlarmManager->CancelAlarm(oldID);
-	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,pMessage);
+	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,(void*)pMessage);
 	CommandOn(iDeviceToLink);
 
         int nVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
@@ -247,7 +247,7 @@ void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD
 	// shall receive an OFF as well.
 	if (bSendOFF) {
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Cancel Egg Timer with SendOFF");
-		AlarmCallback(iDeviceToLink,pMessage);
+		AlarmCallback(iDeviceToLink,(void*)pMessage);
 	}
 	
 	m_pAlarmManager->CancelAlarm(iDeviceToLink);	
@@ -289,7 +289,7 @@ void eggtimer::AlarmCallback(int id, void* param)
                         if (status == "TRIPPED") 
                         {
                                 m_pAlarmManager->CancelAlarm(oldID);
-                                m_pAlarmManager->AddRelativeAlarm(nTimeout,this,id,pMessage);              
+                                m_pAlarmManager->AddRelativeAlarm(nTimeout,this,id,(void*)pMessage);              
                                 
                         }
 		}
