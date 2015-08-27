@@ -186,7 +186,7 @@ public:
 	//Data accessors
 	//Event accessors
 	//Commands - Override these to handle commands from the server
-	virtual void CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerifyStateDeviceID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
@@ -225,7 +225,8 @@ public:
 						string sCMD_Result="OK";
 						int iDeviceToLink=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_DeviceToLink_CONST].c_str());
 						string sTimeout=pMessage->m_mapParameters[COMMANDPARAMETER_Timeout_CONST];
-						CMD_Start_Egg_Timer(iDeviceToLink,sTimeout.c_str(),sCMD_Result,pMessage);
+						int iVerifyStateDeviceID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
+						CMD_Start_Egg_Timer(iDeviceToLink,sTimeout.c_str(),iVerifyStateDeviceID,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -242,7 +243,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Start_Egg_Timer(iDeviceToLink,sTimeout.c_str(),sCMD_Result,pMessage);
+								CMD_Start_Egg_Timer(iDeviceToLink,sTimeout.c_str(),iVerifyStateDeviceID,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
