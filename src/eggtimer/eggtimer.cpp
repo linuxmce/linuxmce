@@ -221,7 +221,9 @@ void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerify
 	
 	oldID = m_pAlarmManager->FindAlarmByType(iDeviceToLink);
 	m_pAlarmManager->CancelAlarm(oldID);
-	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,(void*)pMessage);
+	Message* pDuplicatedMessage = new Message(pMessage);
+	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,(void*)pDuplicatedMessage);
+	
 	CommandOn(iDeviceToLink);
 
         int nVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
@@ -248,10 +250,11 @@ void eggtimer::CMD_Cancel_Egg_Timer(int iDeviceToLink,bool bSendOFF,string &sCMD
 	if (bSendOFF) {
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Cancel Egg Timer with SendOFF");
 		AlarmCallback(iDeviceToLink,(void*)pMessage);
-	}
+	} else {
+	        delete pMessage;
+        }
 	
 	m_pAlarmManager->CancelAlarm(iDeviceToLink);	
-        	
 
         	
 }
@@ -298,6 +301,7 @@ void eggtimer::AlarmCallback(int id, void* param)
          
  	if (bTurnOff) 
  	{
+                delete pMessage;
 		CommandOff(id);		
 	}
 }
