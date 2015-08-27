@@ -205,13 +205,16 @@ void eggtimer::SomeFunction()
 			/** Device to keep on for the amount of time the egg timer runs. */
 		/** @param #182 Timeout */
 			/** Seconds before the associated device receives an off command. */
+		/** @param #290 VerifyStateDeviceID */
+			/** Device ID to verify for state tripped upon end of timer. If tripped, the timer be extended. */
 
-void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,string &sCMD_Result,Message *pMessage)
-//<-dceag-c1146-e->
+void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerifyStateDeviceID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1156-e->
 {
-	cout << "Need to implement command #1146 - Start Egg Timer" << endl;
+	cout << "Need to implement command #1156 - Start Egg Timer" << endl;
 	cout << "Parm #124 - DeviceToLink=" << iDeviceToLink << endl;
 	cout << "Parm #182 - Timeout=" << sTimeout << endl;
+	cout << "Parm #290 - VerifyStateDeviceID=" << iVerifyStateDeviceID << endl;
 	int nTimeout;
 	int oldID;
 	nTimeout = atoi(sTimeout.c_str());
