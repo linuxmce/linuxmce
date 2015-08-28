@@ -218,16 +218,23 @@ void eggtimer::CMD_Start_Egg_Timer(int iDeviceToLink,string sTimeout,int iVerify
 	nTimeout = atoi(sTimeout.c_str());
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Start_Egg_Timer(): Starting timer");
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Start_Egg_Timer(): DeviceToLink %d - Timeout %d - Verify State %d", iDeviceToLink,nTimeout,iVerifyStateDeviceID);
+	
 	
 	oldID = m_pAlarmManager->FindAlarmByType(iDeviceToLink);
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Start_Egg_Timer(): oldID: %d", oldID);
 	m_pAlarmManager->CancelAlarm(oldID);
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Start_Egg_Timer(): Done canceling old alarm");
+
 	Message* pDuplicatedMessage = new Message(pMessage);
+
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Start_Egg_Timer(): message duplicated", oldID);
 	m_pAlarmManager->AddRelativeAlarm(nTimeout,this,iDeviceToLink,(void*)pDuplicatedMessage);
 	
 	CommandOn(iDeviceToLink);
 
-        int nVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
-	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Start_Egg_Timer(): current VerifyStateDeviceID is %d", nVerifyStateDeviceID);
+//        int nVerifyStateDeviceID = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_VerifyStateDeviceID_CONST].c_str());
+//	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Start_Egg_Timer(): current VerifyStateDeviceID is %d", nVerifyStateDeviceID);
         
 }
 
@@ -292,7 +299,7 @@ void eggtimer::AlarmCallback(int id, void* param)
                         {
                                 m_pAlarmManager->CancelAlarm(oldID);
                                 m_pAlarmManager->AddRelativeAlarm(nTimeout,this,id,(void*)pMessage);              
-                                
+                                bTurnOff = false;                                
                         }
 		}
 	}
@@ -300,7 +307,12 @@ void eggtimer::AlarmCallback(int id, void* param)
          
  	if (bTurnOff) 
  	{
-                delete pMessage;
+ 	        if ( NULL != pMessage) 
+ 	        {
+        		LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): cleaning pMessage");
+                        delete pMessage;
+                }
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG,"AlarmCallback(): sending commandoff");
 		CommandOff(id);		
 	}
 }
