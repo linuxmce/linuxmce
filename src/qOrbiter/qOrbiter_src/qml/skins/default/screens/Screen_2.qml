@@ -122,7 +122,7 @@ StyledScreen{
                         StyledText{
                             width: parent.width *.55
                             height: parent.height
-                            text: qsTr("%1 is <b>%2</b><br> Device State:<i>%3</i>").arg(name).arg(dynData.deviceState).arg(dynData.deviceStatus)
+                            text: qsTr("%1 is <b>%2</b><br> Device State:<i>%3</i>\nStatus:").arg(name).arg(dynData.deviceState).arg(dynData.deviceStatus)
                             fontSize: 18
                         }
 

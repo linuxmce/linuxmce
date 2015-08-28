@@ -707,6 +707,7 @@ signals:
     void firstRunChanged();
 
     /*Settings Signals*/
+    void configurationChanged();
     void debugModeChanged();
     void userChanged(int user);
     void locationChanged(int cRoom, int cEA);
@@ -1637,8 +1638,8 @@ public slots:
     //@}
 
     //initialization related
-    void regenOrbiter(int deviceNo);
-    void regenComplete(int i);
+    Q_INVOKABLE void regenOrbiter();
+    void regenComplete(QNetworkReply *r);
 
     QString adjustPath(const QString&);
     void checkConnection();
