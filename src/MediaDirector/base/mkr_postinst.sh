@@ -39,5 +39,14 @@ case "$TARGET_DISTRO" in
 		;;
 esac
 
+# TOCO: FIXME: setup eth0, need to look at wlan0 setup perhaps?
+if [[ ! $(grep eth0 /etc/network/interfaces) ]] ; then
+	echo "" >> /etc/network/interfaces
+	echo "auto eth0" >> /etc/network/interfaces
+	echo "iface eth0 inet dhcp" >> /etc/network/interfaces
+	echo "" >> /etc/network/interfaces
+fi
+
+
 #Exit successfully
 exit 0
