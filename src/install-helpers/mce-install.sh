@@ -14,6 +14,5 @@ apt-get -q --allow-unauthenticated install lmce-install-scripts
 UpdateDebCache
 ConfigSources
 gpgUpdate
-TimeUpdate
 
 apt-get -q --allow-unauthenticated install lmce-hybrid
