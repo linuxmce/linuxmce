@@ -99,14 +99,14 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     mp_securityVideo( new SecurityVideoClass (qOrbiter_ptr, this)),
     userList(new UserModel( new UserItem, this)),
     myOrbiters(new ExistingOrbiterModel(new ExistingOrbiter(), this)),
-    attribFilter( new AttributeSortModel(new AttributeSortItem,6, this)),
+    attribFilter( new AttributeSortModel(new AttributeSortItem,6, false, this)),
     currentScreen("Screen_1.qml"),
     m_skinOverridePath(overridePath),
     m_window(NULL)
 {
-    uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
-    mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
-    genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
+    uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
+    mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
+    genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
 
     m_appEngine->rootContext()->setContextProperty("manager", this);
     m_appEngine->rootContext()->setContextProperty("settings", settingsInterface);
@@ -242,10 +242,10 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
     if(m_appEngine->rootObjects().length()!=0){
         m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
-       connect(m_window, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
-      //  connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+        connect(m_window, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
+        //  connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         connect(m_window->screen(), SIGNAL(primaryOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
-       // connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+        // connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         qDebug() << "Set QQuickWindow Ptr";
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
@@ -270,12 +270,12 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         m_window->setVisibility(QWindow::FullScreen);
         appHeight = m_window->height();
         appWidth= m_window->width();
-        checkOrientation(Qt::PrimaryOrientation);
+        checkOrientation(m_window->screen()->orientation());
 #endif
 
     }
 
-emit splashReady();
+    emit splashReady();
 }
 
 qorbiterManager::~qorbiterManager(){
@@ -1322,8 +1322,6 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     roomTelecom = roomTelecomScenarios.value(room);
     roomSecurity = roomSecurityScenarios.value(room);
 
-
-
     m_appEngine->rootContext()->setContextProperty("currentRoomLights", roomLights);
     m_appEngine->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
     m_appEngine->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
@@ -1361,22 +1359,333 @@ int qorbiterManager::getlocation() const
     return iFK_Room;
 }
 
-void qorbiterManager::regenOrbiter(int deviceNo)
+void qorbiterManager::regenOrbiter()
 {
     setCurrentScreen("Screen_Reload.qml");
 
+    QNetworkRequest updateDevice;
+    QNetworkAccessManager *ud= new QNetworkAccessManager();
+    updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
+    QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(regenComplete(QNetworkReply*)));
+    ud->get(updateDevice);
+
 }
 
-void qorbiterManager::regenComplete(int i)
+void qorbiterManager::regenComplete(QNetworkReply*r)
 {
-    if (i == 0)
-    {
-        //processConfig(iPK_Device);
+
+    if(!alreadyConfigured){
+        iPK_Device_DatagridPlugIn =  long(6);
+        iPK_Device_OrbiterPlugin = long(9);
+        iPK_Device_GeneralInfoPlugin = long(4);
+        iPK_Device_SecurityPlugin = long(13);
+        iPK_Device_LightingPlugin = long(8);
+        iPK_Device_TelecomPlugin = long(11);
+        m_dwIDataGridRequestCounter = 0;
+        iOrbiterPluginID = 9;
+        iMediaPluginID = 10;
+        iPK_Device_eventPlugin = 12;
+        iSize = 0;
+        m_pOrbiterCat = 5;
+        s_onOFF = "1";
     }
-    else
+
+
+    QDomDocument configData;//(config->readAll());
+    QByteArray tConf= r->readAll().replace("\n", "");
+    configData.setContent(tConf,false);
+    if(configData.isDocument() == false)
     {
-        setCurrentScreen("LoadError.qml");
+        return;
     }
+
+    setDceResponse("Attempting to write config");
+
+
+    QDomElement root = configData.documentElement();        //represent configuration in memeory
+
+
+    //------------DEFAULTS-FOR-ORBITER------------------------------------------------------------
+    QDomElement defaults = root.firstChildElement("Default");
+    QString sPK_User = defaults.attribute("sPK_User");
+    if(!alreadyConfigured){
+        iFK_Room = defaults.attribute("DefaultRoom").toInt();
+        iea_area = defaults.attribute("DefaultEA").toInt();
+        iPK_User = defaults.attribute("PK_User").toInt();
+        if(iPK_User == 0)
+            iPK_User =1;
+        setDceResponse("Defaults Set");
+    }
+    //-floorplans-----------------------------------------------------------------------------------------------------
+    QDomElement floorplanXml = root.firstChildElement("Floorplans");
+    QDomNodeList floorplanList = floorplanXml.childNodes();
+    pages.clear();
+    for(int index = 0; index < floorplanList.count(); index++)
+    {
+        floorplans->totalPages = index;
+        QString m_installation= floorplanList.at(index).attributes().namedItem("Installation").nodeValue();
+        floorplans->m_installation = m_installation;
+        QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
+        int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
+        floorplans->imageBasePath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/";
+        QString m_imgPath = "/usr/pluto/orbiter/floorplans/inst"+m_installation+"/"+QString::number(m_page)+".png";
+        pages.append(new FloorPlanItem(m_installation,m_description, m_page, m_imgPath, floorplans));
+    }
+    emit loadingMessage("floorplans complete");
+    QApplication::processEvents(QEventLoop::AllEvents);
+
+    //floorplan devices
+    QDomElement floorplan_devices = root.firstChildElement("FloorplanDevices");
+    QDomNodeList floorplan_device_list = floorplan_devices.childNodes();
+    floorplans->clear();
+    for(int index = 0; index < floorplan_device_list.count(); index++)
+    {
+        QString name = floorplan_device_list.at(index).attributes().namedItem("Name").nodeValue();
+        int fp_deviceno = floorplan_device_list.at(index).attributes().namedItem("Device").nodeValue().toInt();
+        QString position = floorplan_device_list.at(index).attributes().namedItem("Position").nodeValue();
+        if(position.isNull())
+        {
+            position = "-1,-1" ;
+        }
+
+        int fp_deviceType = floorplan_device_list.at(index).attributes().namedItem("Type").nodeValue().toInt();
+        int fpType = floorplan_device_list.at(index).attributes().namedItem("fpType").nodeValue().toInt();
+        int room = floorplan_device_list.at(index).attributes().namedItem("Room").nodeValue().toInt();
+        /*        if (fpType == 7)
+            fpType = 6;
+        else */
+
+        if (fpType == 4)  fpType = 1;// Move cameras to the security floorplan
+
+        floorplans->appendRow(new FloorplanDevice( name,
+                                                   fp_deviceno,
+                                                   fp_deviceType,
+                                                   fpType,
+                                                   position,
+                                                   room,
+                                                   floorplans)
+                              );
+    }
+    emit loadingMessage("Floorplan Devices complete");
+    QApplication::processEvents(QEventLoop::AllEvents);
+    //-USERS-----------------------------------------------------------------------------------------------------
+    QDomElement userXml = root.firstChildElement("Users");
+    QDomNodeList userXmlList = userXml.childNodes();
+    userList->clear();
+    for(int index = 0; index < userXmlList.count(); index++)
+    {
+        QString m_userName = userXmlList.at(index).nodeName();      //username
+        QString m_firstName= userXmlList.at(index).attributes().namedItem("FirstName").nodeValue();
+        QString m_lastName= userXmlList.at(index).attributes().namedItem("LastName").nodeValue();
+        QString m_nickName= userXmlList.at(index).attributes().namedItem("NickName").nodeValue();
+        int m_pk_user= userXmlList.at(index).attributes().namedItem("PK_User").nodeValue().toInt();
+        int m_userMode= userXmlList.at(index).attributes().namedItem("UserMode").nodeValue().toInt();
+        int m_requirePin= userXmlList.at(index).attributes().namedItem("RequirePin").nodeValue().toInt();
+        int m_phoneExtension= userXmlList.at(index).attributes().namedItem("PhoneExtension").nodeValue().toInt();
+        int m_defaultUser= userXmlList.at(index).attributes().namedItem("isDefault").nodeValue().toInt();
+        QImage m_image;
+        userList->appendRow(new UserItem(m_userName,m_firstName, m_lastName, m_nickName, m_pk_user, m_userMode, m_requirePin, m_phoneExtension, m_image, m_defaultUser , userList));
+    }
+
+    //-----ROOMS-AND-ENTERTAIN-AREAS-------------------------------------------------------------------
+    QDomElement roomXml = root.firstChildElement("Rooms");  //rooms
+    QMap <QString, int> RroomMapping;                       //map for later reference
+    QDomNodeList roomListXml = roomXml.childNodes();
+    m_lRooms->clear();
+    for(int index = 0; index < roomListXml.count(); index++)
+    {
+        QString m_name = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+        QString ea= roomListXml.at(index).attributes().namedItem("EA").nodeValue();
+        int m_val = roomListXml.at(index).attributes().namedItem("PK_Room").nodeValue().toInt();
+        int m_iEA = roomListXml.at(index).attributes().namedItem("PK_EntertainArea").nodeValue().toInt();
+        int m_iType = roomListXml.at(index).attributes().namedItem("FK_RoomType").nodeValue().toInt();
+        bool m_isHidden = roomListXml.at(index).attributes().namedItem("HideFromOrbiter").nodeValue().toInt();
+
+        if (ea.isEmpty()){
+            ea = roomListXml.at(index).attributes().namedItem("Description").nodeValue().append(QString::number(m_iEA));
+        } else {
+            m_lRooms->addTimeCodeTrack(ea, m_iEA, m_val);
+        }
+
+        RroomMapping.insert(m_name, m_val);
+        QUrl imgFile;
+        if(m_lRooms->check(m_val)){
+            LocationItem *t= m_lRooms->find(m_name);
+            t->addEa(ea, m_iEA);
+
+        }
+        else{
+            m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imgFile, m_isHidden, m_lRooms));
+            LocationItem *t= m_lRooms->find(m_name);
+            t->addEa(ea, m_iEA);
+
+
+        }
+    }
+    m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
+    m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
+    setDceResponse("Room Done");
+
+    //--LIGHTING SCENARIOS----------------------------------------------------------------------------------
+
+    QDomElement lScenarios = root.firstChildElement("LightingScenarios");
+    QDomNodeList lScenarioList = lScenarios.childNodes();
+
+    for (int index = 0; index < lScenarioList.count(); index++)
+    {
+        QDomNodeList lScenarioRoom = lScenarioList.at(index).childNodes();
+        LightingScenarioModel *lightModelHolder = new LightingScenarioModel(new LightingScenarioItem, this);
+
+        int LroomMapNo = lScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < lScenarioRoom.count(); innerIndex++)
+        {
+            QString m_name = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = lScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("qrc:/icons/"+imgName);
+
+            lightModelHolder->appendRow(new LightingScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, lightModelHolder));
+        }
+        roomLightingScenarios.insert(LroomMapNo, lightModelHolder);
+        roomLights = roomLightingScenarios.value(m_lRooms->idefault_Ea);
+    }
+    setDceResponse("Lighting Done");
+
+    //---MEDIA--------------SCENARIOS----------------------------------------------------------------------------
+    QDomElement mScenarios = root.firstChildElement("MediaScenarios");
+    QDomNodeList mScenarioList = mScenarios.childNodes();
+
+    for (int index = 0; index < mScenarioList.count(); index++)
+    {
+        QDomNodeList mScenarioRoom = mScenarioList.at(index).childNodes();
+        MediaScenarioModel *mediaModelHolder = new MediaScenarioModel(new MediaScenarioItem, this);
+        QString eaTitle = mScenarioList.at(index).attributes().namedItem("EAstring").nodeValue();
+
+        int MroomMapNo = mScenarioList.at(index).attributes().namedItem("EntertainArea").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < mScenarioRoom.count(); innerIndex++)
+        {
+            QString m_name = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = mScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("qrc:/icons/"+imgName);
+            mediaModelHolder->appendRow(new MediaScenarioItem(eaTitle,m_label, m_param, m_command, m_goto, m_image, mediaModelHolder));
+        }
+
+        roomMediaScenarios.insert(MroomMapNo, mediaModelHolder);
+        roomMedia = roomMediaScenarios.value(m_lRooms->idefault_Ea);
+    }
+    setDceResponse("Media Done");
+
+    //CLIMATE-----------SCENARIOS---------------------------------------------------------------------------------
+
+    QDomElement cScenarios = root.firstChildElement("ClimateScenarios");
+    QDomNodeList cScenarioList = cScenarios.childNodes();
+
+    for (int index = 0; index < cScenarioList.count(); index++)
+    {
+        QDomNodeList cScenarioRoom = cScenarioList.at(index).childNodes();
+        ClimateScenarioModel *climateModelHolder = new ClimateScenarioModel(new ClimateScenarioItem, this);
+
+        int roomMapNo = cScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < cScenarioRoom.count(); innerIndex++)
+        {
+            QString m_name = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =cScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = cScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = cScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("Qrc:/icons/"+imgName);
+
+            climateModelHolder->appendRow(new ClimateScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, climateModelHolder));
+        }
+        roomClimateScenarios.insert(roomMapNo, climateModelHolder);
+        roomClimate = roomClimateScenarios.value(m_lRooms->idefault_Ea);
+    }
+    setDceResponse("Climate Done");
+
+
+    //TELECOM------SCENARIOS-------------------------------------------------------------------------------------
+    QDomElement tScenarios = root.firstChildElement("TelecomScenarios");
+    QDomNodeList tScenarioList = tScenarios.childNodes();
+
+    for (int index = 0; index < tScenarioList.count(); index++)
+    {
+        QDomNodeList tScenarioRoom = tScenarioList.at(index).childNodes();
+        TelecomScenarioModel *telecomModelHolder = new TelecomScenarioModel(new TelecomScenarioItem, this);
+
+        int troomMapNo = tScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < tScenarioRoom.count(); innerIndex++)
+        {
+            QString m_name = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = tScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("Qrc:/icons/"+imgName);
+            telecomModelHolder->appendRow(new TelecomScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, telecomModelHolder));
+        }
+        roomTelecomScenarios.insert(troomMapNo, telecomModelHolder);
+        roomTelecom = roomTelecomScenarios.value(m_lRooms->idefault_Ea);
+    }
+    setDceResponse("Telecom Done");
+    //SECURIY---SCENARIOS-----------------------------------------------------------------------------------------
+    QDomElement secScenarios = root.firstChildElement("SecurityScenarios");
+    QDomNodeList secScenarioList = secScenarios.childNodes();
+
+    for (int index = 0; index < secScenarioList.count(); index++)
+    {
+        QDomNodeList secScenarioRoom = secScenarioList.at(index).childNodes();
+        SecurityScenarioModel *securityModelHolder = new SecurityScenarioModel(new SecurityScenarioItem, this);
+
+        int secroomMapNo = secScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < secScenarioRoom.count(); innerIndex++)
+        {
+            QString m_name = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label =  secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = secScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("Qrc:/icons/"+imgName);
+
+            securityModelHolder->appendRow(new SecurityScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, securityModelHolder));
+        }
+        roomSecurityScenarios.insert(secroomMapNo, securityModelHolder);
+        roomSecurity = roomSecurityScenarios.value(m_lRooms->idefault_Ea);
+    }
+    setDceResponse("Security Done");
+    QApplication::processEvents(QEventLoop::AllEvents);
+
+
+
+    binaryConfig.clear();
+    tConf.clear();
+    configData.clear();
+    //---update object image
+    getMediaDevices();
+    setDceResponse(" Remote Config Complete");
+    emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
+    if(!alreadyConfigured && mb_useNetworkSkins){
+        setOrbiterStatus(true);
+    }
+
+    alreadyConfigured=true;
+
+    emit configurationChanged();
+    int returnRoom = iFK_Room;
+    int returnEa = iea_area;
+
+    setActiveRoom(-1, -1);
+    setActiveRoom(returnRoom, returnEa);
+    delayedReloadQml();
 }
 
 QString qorbiterManager::adjustPath(const QString &path)
@@ -1691,7 +2000,7 @@ bool qorbiterManager::writeConfig()
 void qorbiterManager::setStringParam(int paramType, QString param)
 {
     mediaFilter.setStringParam(paramType, param);
-
+    qDebug() << "Param = " << param;
     switch (paramType)
     {
     case 0:
@@ -2438,8 +2747,6 @@ void qorbiterManager::checkOrientation(QSize s)
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
     qDebug() << Q_FUNC_INFO << m_window->size();
-
-
     //setOrientation(appHeight > appWidth);
     //return;
     appHeight=m_window->size().height();
@@ -2453,7 +2760,7 @@ void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
     case Qt::InvertedPortraitOrientation:qDebug() << "Inverted portait";
     case Qt::PortraitOrientation: setOrientation(true);qDebug() << "Portrait";
         break;
-    default:
+    default: qDebug() << "unknown orientation";
         break;
     }
 

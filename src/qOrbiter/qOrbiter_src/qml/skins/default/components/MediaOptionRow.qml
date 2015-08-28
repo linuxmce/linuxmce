@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.enums 1.0
+import QtQuick.Controls 1.2
 import QtGraphicalEffects 1.0
 import "../components"
 import "../."
@@ -50,7 +51,9 @@ Item{
                 GenericListModel{
                     id:selectionView
                     label: qsTr("Selections")
-
+                    ExclusiveGroup{
+                        id:mdloptions
+                    }
 
                     anchors{
                         right:parent.right
@@ -61,9 +64,9 @@ Item{
                     delegate:  StyledButton {
                         height: Style.appButtonHeight /2
                         width: parent.width
-                        buttonRadius: 0
+                        buttonRadius: status ? 5 : 0
                         buttonText: filterdlg.selectingUser? username: name
-
+                       txtObj.font.bold: status
                         onActivated: {
                             if(filterdlg.selectingUser){
                                 filterdlg.authUser=pkUser
@@ -71,10 +74,11 @@ Item{
                                 return;
                             }
 
-                            selectionView.model.setSelectionStatus(name); arrow=!arrow
+                            selectionView.model.setSelectionStatus(name);
+
                         }
                         // arrow:filterdlg.selectingUser ? "false" : selectionView.model.getSelectionStatus(name)
-                    }
+                       }
                 }
 
                 Column{

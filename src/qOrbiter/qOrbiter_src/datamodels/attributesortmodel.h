@@ -34,9 +34,10 @@ class AttributeSortItem;
 class AttributeSortModel: public QAbstractListModel
 {
   Q_OBJECT
+    Q_PROPERTY(bool allowMulti READ allowMulti NOTIFY allowMultiChanged)
 
 public:
-  explicit AttributeSortModel(AttributeSortItem* prototype, int filterNumber, QObject* parent = 0);
+  explicit AttributeSortModel(AttributeSortItem* prototype, int filterNumber, bool exclusive ,QObject* parent = 0);
   ~AttributeSortModel();
 #ifdef QT5
    QHash<int, QByteArray> roleNames() const;
@@ -58,12 +59,16 @@ public:
 
   Q_INVOKABLE bool clearSelections();
 
+  bool allowMulti() const;
+  void setAllowMulti(bool allowMulti);
+
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
    void SetTypeSort(int pos, QString type);
    void modelAboutToBeReset();
    void modelReset();
+   void allowMultiChanged();
 
 public slots:
    void resetStates();

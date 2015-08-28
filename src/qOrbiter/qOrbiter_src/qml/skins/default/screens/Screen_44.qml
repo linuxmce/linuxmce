@@ -25,7 +25,7 @@ StyledScreen {
                     id:regenorbiter
 
                     buttonText: "Regen\nOrbiter"
-                    onActivated:  regenOrbiter(manager.iPK_Device)
+                    onActivated:  manager.currentScreen="Screen_Reload.qml"
                 }
 
                 StyledButton{

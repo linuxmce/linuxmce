@@ -3,8 +3,8 @@
 #include <QDebug>
 
 
-AttributeSortModel::AttributeSortModel(AttributeSortItem* prototype, int filterNumber, QObject *parent) :
-    QAbstractListModel(parent), m_prototype(prototype), filterLevel(filterNumber)
+AttributeSortModel::AttributeSortModel(AttributeSortItem* prototype, int filterNumber, bool exclusive, QObject *parent) :
+    QAbstractListModel(parent), m_prototype(prototype), filterLevel(filterNumber), m_allowMulti(exclusive)
 {
 #ifndef QT5
     setRoleNames(m_prototype->roleNames());
@@ -82,9 +82,6 @@ void AttributeSortModel::reset()
     if(resetInternalData()){
         endResetModel();
     }
-
-
-
 }
 
 bool AttributeSortModel::resetInternalData()
@@ -95,6 +92,16 @@ bool AttributeSortModel::resetInternalData()
     qDebug("Attribute Sort Model Cleared.");
     return true;
 }
+bool AttributeSortModel::allowMulti() const
+{
+    return m_allowMulti;
+}
+
+void AttributeSortModel::setAllowMulti(bool allowMulti)
+{
+    m_allowMulti = allowMulti;
+}
+
 
 AttributeSortItem * AttributeSortModel::find(const QString &id) const
 {
@@ -161,19 +168,21 @@ AttributeSortItem * AttributeSortModel::currentRow()
 
 void AttributeSortModel::sortModel(int column, Qt::SortOrder order)
 {
+
 }
 
 void AttributeSortModel::setSelectionStatus(QString format)
 {
     AttributeSortItem* item = find(format);
     item->updateSelection(!item->selectedStatus());
-    if(filterLevel==6){
+    if(!m_allowMulti){
         qDebug() << "exclusive sort, unchecking other items!";
         foreach(AttributeSortItem* uitem, m_list) {
             if(uitem->id()!= item->id()) uitem->m_isSelected = false;
         }
     }
     qDebug() << "Set State for:" << format << "to " << item->selectedStatus();
+
     //return state;
     ReturnSelectedItems();
 
