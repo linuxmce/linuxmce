@@ -308,9 +308,7 @@ void qorbiterManager::gotoQScreen(QString s){
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
-        if(!currentScreen.contains("187")){
-            gotoScreenList->append(currentScreen);
-        }
+
 
     } else {
         setDceResponse("screenchange() FAILED, sending request screen");
@@ -2806,6 +2804,10 @@ void qorbiterManager::setCurrentScreen(int s)
     if(i!=currentScreen){
         currentScreen = i;
         emit screenChange(i);
+
+        if(!currentScreen.contains("187")){
+            gotoScreenList->append(currentScreen);
+        }
     }
 }
 

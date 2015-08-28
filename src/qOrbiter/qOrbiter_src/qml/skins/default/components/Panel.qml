@@ -10,10 +10,12 @@ Item {
     property string headerTitle:"Lorem Ipsum"
     property bool useHeader:true
     property alias headerRow:control_row
+    property alias contentItem:panelContent.item
     property alias fillColor:bgfill.color
     property string headerFillColor:Style.appcolor_background_list
     property Component content
     property alias buttonContent:control_row.children
+
     clip:true
     anchors.centerIn: parent
 

@@ -1,6 +1,7 @@
 import QtQuick 2.4
 import QtGraphicalEffects 1.0
 import org.linuxmce.screens 1.0
+import QtQuick.Controls 1.2
 import "."
 import "components"
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
@@ -19,8 +20,9 @@ Item {
         onResetTimeout:{
             pageLoader.toggleContent(true)
         }
-
     }
+
+
 
     Rectangle{
         anchors.fill: parent
