@@ -65,14 +65,14 @@ qOrbiter::qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnec
 
 bool qOrbiter::GetConfig()
 {
-if(!qOrbiter_Command::GetConfig()){
-    return false;
-}
+    if(!qOrbiter_Command::GetConfig()){
+        return false;
+    }
 
-PurgeInterceptors();
-RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
+    PurgeInterceptors();
+    RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
 
-return true;
+    return true;
 
 }
 //<-dceag-const2-b->
@@ -3998,6 +3998,7 @@ void DCE::qOrbiter::showAdvancedButtons()
             QString cellTitle;
             QString fk_file;
             QString filePath;
+            bool isActive = false;
             int index;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
@@ -4008,13 +4009,26 @@ void DCE::qOrbiter::showAdvancedButtons()
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
                 index = pDataGridTable->CovertColRowType(it->first).first;
+
                 //cell title is device and heriarchy
                 // fk_file seems to be device name and heirachy
                 //
                 QStringList splitter;
                 splitter = cellTitle.split("/");
 
-                emit addDevice(new AvDevice(fk_file.toInt(), splitter.at(0), splitter.at(splitter.length()-2), NULL, -1, false ));
+                if(fk_file.toInt()== m_dwPK_Device_NowPlaying ||
+                        fk_file.toInt()== m_dwPK_Device_NowPlaying_Audio||
+                        fk_file.toInt()== m_dwPK_Device_NowPlaying_Video||
+                        fk_file.toInt()==m_dwPK_Device_CaptureCard){
+                    isActive=true;
+                } else {
+                    isActive=false;
+                }
+
+                if(isActive){
+                    emit addDevice(new AvDevice(fk_file.toInt(), splitter.at(0), splitter.at(splitter.length()-2), NULL, -1, isActive ));
+                }
+
             }
         }
     }
@@ -4825,11 +4839,7 @@ void qOrbiter::adjustRoomLights(QString level)
     CMD_Set_Level al(m_dwPK_Device, iPK_Device_LightingPlugin,param);
     SendCommand(al);
     emit commandResponseChanged("Set lighting level to" +level);
-
 }
-
-
-
 
 void DCE::qOrbiter::prepareFileList(QString filterString)
 {
@@ -5029,8 +5039,8 @@ void qOrbiter::getFloorplanDeviceStatus(int device)
     string cResponse="";
     if(SendCommand(getDeviceStatus, &cResponse) && cResponse=="OK"){    }
     cResponse="";
-    string state="UNKNOWN";
 
+    string state="UNKNOWN";
     CMD_Get_Device_State getDeviceState(m_dwPK_Device, iPK_Device_GeneralInfoPlugin, device, &state);
     if(SendCommand(getDeviceState, &cResponse) && cResponse=="OK"){ }
 

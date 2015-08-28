@@ -20,6 +20,8 @@ Item {
         state="opening"
         screenOpening()
     }
+
+
     onActiveFocusChanged:{
         if(activeFocus){
             console.log("screen_root has focus")

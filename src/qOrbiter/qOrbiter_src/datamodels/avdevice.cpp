@@ -13,7 +13,7 @@ QHash<int, QByteArray> AvDevice::roleNames() const
   names[NameRole] = "name";
   names[ControllerRole] = "controller";
   names[DeviceNumberRole] = "devicenumber";
-  names[ActiveRole] = "state";
+  names[ActiveRole] = "status";
   names[TypeRole] = "type";
   names[LocationRole]= "location";
   return names;
