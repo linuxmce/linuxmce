@@ -599,6 +599,21 @@ function TestSelectOneRadio(objValue,strError)
 return one_selected;
 }
 
+function TestNumeric(objValue,strError,strDefaultError)
+{
+   var ret = true;
+
+    if(objValue.value.length > 0 &&  isNaN(Number(objValue.value))) { 
+     if(!strError || strError.length ==0) 
+      { 
+        strError = strDefaultError;
+      }//if 
+      alert(strError);
+      ret = false; 
+    }//if     
+ 	return ret;
+}
+
 //*  Checks each field in a form 
 function validateInput(strValidateStr,objValue,strError) 
 { 
@@ -653,7 +668,7 @@ function validateInput(strValidateStr,objValue,strError)
         case "num": 
         case "numeric": 
            { 
-                ret = TestInputType(objValue,"[^0-9]",strError, 
+                ret = TestNumeric(objValue,strError, 
 						objValue.name+": Only digits allowed ");
                 break;               
            }        
