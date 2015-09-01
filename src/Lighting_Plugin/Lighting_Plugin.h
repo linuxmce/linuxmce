@@ -71,6 +71,9 @@ public:
 	// in this map with a pair that is the time to restore the light to it's prior value, and a string that represents
 	// the prior value in the same format as the 'state' (ie ON/50)
 	map<int, pair<time_t,string> > m_mapLightsToRestore;
+	// this map is a flag to avoid processing the first event received for a light that is turned on because of a camera
+	// so we don't loose the restore value
+	map<int, bool > m_mapLightsToRestoreEvents;
 
 	bool DeviceState( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 	bool LightingFollowMe( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );

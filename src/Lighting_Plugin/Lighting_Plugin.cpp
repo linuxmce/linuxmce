@@ -204,6 +204,17 @@ bool Lighting_Plugin::DeviceState( class Socket *pSocket, class Message *pMessag
     class DeviceData_Router *pDevice_RouterFrom = (class DeviceData_Router *) pDeviceFrom;
 	string sLevel = "";    
 
+	// If this device is currently turned on because of a related camera, we ignore one event from it
+	PLUTO_SAFETY_LOCK(lm,m_LightingMutex);
+	map<int, bool>::iterator it=m_mapLightsToRestoreEvents.find(pMessage->m_dwPK_Device_From);
+	if( it!=m_mapLightsToRestoreEvents.end() )
+	{
+		// first event received, remove from map and return to ignore it
+		m_mapLightsToRestoreEvents.erase(it);
+		return false;
+	}
+	lm.Release();
+
 	//LoggerWrapper::GetInstance()->Write(LV_WARNING, "DEBUG...pMessage->m_mapParameters = %d",pMessage->m_mapParameters[EVENTPARAMETER_OnOff_CONST]);
 	if( pMessage->m_dwID == EVENT_Device_OnOff_CONST )
 	{
@@ -294,8 +305,10 @@ bool Lighting_Plugin::GetVideoFrame( class Socket *pSocket, class Message *pMess
 		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Lighting_Plugin::GetVideoFrame We've got a light with state %s for %d",sState.c_str(),pDevice_Light->m_dwPK_Device);
 	
 		if( sState.empty()==false )
+		{
 			m_mapLightsToRestore[ pDevice_Light->m_dwPK_Device ] = make_pair<time_t,string> ( time(NULL)+m_iCameraTimeout, sState );
-
+			m_mapLightsToRestoreEvents[ pDevice_Light->m_dwPK_Device ] = true;
+		}
 		DCE::CMD_On CMD_On(m_dwPK_Device,pDevice_Light->m_dwPK_Device,0,"");
 		DCE::CMD_Set_Level CMD_Set_Level(m_dwPK_Device,pDevice_Light->m_dwPK_Device,"100");
 		CMD_On.m_pMessage->m_mapParameters[COMMANDPARAMETER_Advanced_options_CONST]="1";  // Means don't process it in the interceptor
@@ -472,6 +485,11 @@ void Lighting_Plugin::SetLightState(int PK_Device,bool bIsOn,int Level, bool bRe
 			lm.Release();
 			SetLightingAlarm();
 		}
+		map<int, bool >::iterator it2=m_mapLightsToRestoreEvents.find(PK_Device);
+		if( it2!=m_mapLightsToRestoreEvents.end() )
+		{
+			m_mapLightsToRestoreEvents.erase(it2);
+		}
 	}
 }
 
@@ -536,6 +554,11 @@ void Lighting_Plugin::AlarmCallback(int id, void* param)
 					// set the light state
 					SetLightState(it->first, true, 100, false);
 				}
+			}
+			map<int, bool>::iterator it2=m_mapLightsToRestoreEvents.find(it->first);
+			if( it2!=m_mapLightsToRestoreEvents.end() )
+			{
+				m_mapLightsToRestoreEvents.erase(it2);
 			}
 			m_mapLightsToRestore.erase(it++);
 		}
