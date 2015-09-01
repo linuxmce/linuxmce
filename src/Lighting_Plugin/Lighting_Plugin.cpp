@@ -230,7 +230,7 @@ bool Lighting_Plugin::DeviceState( class Socket *pSocket, class Message *pMessag
 		// Replace the current brightness
 		string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
 		int iLevel = atoi(sLevel.c_str());
-		SetLightState( pMessage->m_dwPK_Device_From, true, iLevel );
+		SetLightState( pMessage->m_dwPK_Device_From, true, iLevel, false );
 	}
 	
 	return false;
