@@ -138,10 +138,12 @@ if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
 fi
 
 ###. /usr/pluto/install/install-common.sh ; Disable_DisplayManager
-# TODO: dpkg-divert this so it doesn't come back ?
-StatsMessage "Disabling display manager"
+# TODO: dpkg-divert this so it doesn't come back ? - overrides work for upstart atm
+# TODO: figure out what systemd will need, perhaps diversion is the answer
 mkdir -p "/etc/X11"
 echo "/bin/false" >/etc/X11/default-display-manager
+echo "manual" >> /etc/init/kdm.override
+echo "manual" >> /etc/init/lightdm.override
 update-rc.d -f kdm remove >/dev/null || :
 update-rc.d -f lightdm remove >/dev/null || :
 
