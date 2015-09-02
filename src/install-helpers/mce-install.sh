@@ -15,4 +15,4 @@ UpdateDebCache
 ConfigSources
 gpgUpdate
 
-apt-get -q --allow-unauthenticated install lmce-hybrid
+apt-get -y -q --allow-unauthenticated install lmce-hybrid
