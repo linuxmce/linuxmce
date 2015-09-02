@@ -1,10 +1,11 @@
 #!/bin/bash
 
-DISTRO="$(lsb_release -cs)"
-COMPOS="main"
+TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+TARGET_RELEASE=$(lsb_release -c -s)
+REPO="main"
 
 echo >>/etc/apt/sources.list
-echo "deb http://deb.linuxmce.org/ubuntu/ ${DISTRO} ${COMPOS}" >>/etc/apt/sources.list
+echo "deb http://deb.linuxmce.org/${TARGET_DISTRO}/ ${TARGET_RELEASE} ${REPO}" >>/etc/apt/sources.list
 
 apt-get -q update
 apt-get -y -q --allow-unauthenticated install lmce-install-scripts

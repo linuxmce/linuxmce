@@ -6,7 +6,7 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
-. /usr/pluto/install/install-common.sh
+#. /usr/pluto/install/install-common.sh
 
 ## Update the PlutoVersion variable from pluto.conf
 Version=$(dpkg -s pluto-boot-scripts | grep '^Version:' | sed  's/Version: //')
@@ -96,7 +96,7 @@ fi
 
 ## If pluto.conf has no LogLevels entry, add: LogLevels = 1,5,7,8
 [ -e /etc/pluto.conf ] || touch /etc/pluto.conf
-if ! grep -qF 'LogLevels = 1,5,7,8' /etc/pluto.conf ;then
+if ! grep -qF 'LogLevels' /etc/pluto.conf ;then
 	echo "LogLevels = 1,5,7,8" >> /etc/pluto.conf
 fi
 
@@ -137,7 +137,13 @@ if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
 	rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
 fi
 
-#/usr/pluto/bin/UpdateDebCache.sh
+###. /usr/pluto/install/install-common.sh ; Disable_DisplayManager
+# TODO: dpkg-divert this so it doesn't come back ?
+StatsMessage "Disabling display manager"
+mkdir -p "/etc/X11"
+echo "/bin/false" >/etc/X11/default-display-manager
+update-rc.d -f kdm remove >/dev/null || :
+update-rc.d -f lightdm remove >/dev/null || :
 
 ###. /usr/pluto/install/install-common.sh ; Fix_LSB_Data
 case "$TARGET_DISTRO" in
@@ -150,7 +156,7 @@ case "$TARGET_DISTRO" in
 esac
 
 # Add a single new startup script.
-update-rc.d -f linuxmce remove >/dev/null
+#update-rc.d -f linuxmce remove >/dev/null || :
 update-rc.d -f linuxmce defaults 99 1 >/dev/null
 
 
