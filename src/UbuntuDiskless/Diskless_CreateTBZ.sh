@@ -627,6 +627,8 @@ MD_Install_Packages () {
 				#LC_ALL=C chroot $TEMP_DIR apt-get -y install kde-minimal
 			fi
 			echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
+			echo 'manual' > "$TEMP_DIR/etc/init/kdm.override
+			echo 'manual' > "$TEMP_DIR/etc/init/lightdm.override
 
 			# Update startup to remove kdm and network manager
 			LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove
