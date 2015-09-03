@@ -25,12 +25,14 @@
 #include "Gen_Devices/VDRPluginBase.h"
 //<-dceag-d-e->
 
-#include "DCE/PlainClientSocket.h"
+#include <time.h>
+// #include "DCE/PlainClientSocket.h"
 
 #include "../Media_Plugin/Media_Plugin.h"
 #include "../Media_Plugin/MediaStream.h"
 #include "../Media_Plugin/MediaHandlerBase.h"
 #include "VDRMediaStream.h"
+#include "../VDR/VDRConnection.h"
 class Row_Bookmark;
 
 	struct VDRRecording
@@ -154,6 +156,7 @@ namespace DCE
 		string m_sID;
 		VDRSource *m_pVDRSource;
 		VDRProgramInstance *m_pVDRProgramInstance_First;
+		time_t m_timeEPGUpdated;     // time of last EPG update or 
 		string m_sShortName,m_sLongName;
 		char *m_pPic;
 		size_t m_Pic_size;
@@ -171,6 +174,7 @@ namespace DCE
 			m_Pic_size=Pic_size;
 			m_pCell=NULL;
 			m_pVDRProgramInstance_First=NULL;
+			m_timeEPGUpdated=0;
 		}
 
 		~VDRChannel()
@@ -178,6 +182,11 @@ namespace DCE
 			delete m_pPic;
 			m_pPic=NULL;
 			m_Pic_size=0;
+		}
+		
+		bool NeedsEPGUpdate(double updateInterval)
+		{
+			return difftime(time(NULL), m_timeEPGUpdated) > updateInterval;
 		}
 
 		class VDRProgramInstance *GetCurrentProgramInstance(time_t tTime)
@@ -208,6 +217,10 @@ namespace DCE
 		VDRSeries *m_mapVDRSeries_Find(string sSeriesID) { map<string,VDRSeries *>::iterator it = m_mapVDRSeries.find(sSeriesID); return it==m_mapVDRSeries.end() ? NULL : (*it).second; }
 
 		string m_sVDRIp;
+		time_t m_timeUpdateInterval;
+		VDRConnection m_VDRConnection;
+		pluto_pthread_mutex_t m_ConMutex; // VDRConnection mutex
+		pthread_cond_t m_ConCond;
 
 		class Orbiter_Plugin *m_pOrbiter_Plugin;
 		class Datagrid_Plugin *m_pDatagrid_Plugin;
@@ -236,6 +249,7 @@ public:
 
 		void PurgeChannelList();
 		void BuildChannelList();
+		void UpdateEPGFromVDR(string channelId, string restrictParm);
 		void RefreshBookmarks();
 		VDRSource *GetNewSource(string sSource);
 		VDRSeries *GetNewSeries(string sSeriesID);
@@ -246,6 +260,7 @@ public:
 		// Datagrids
 		class DataGridTable *CurrentShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
 		class DataGridTable *AllShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
+		class DataGridTable *EPGGrid(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
 		class DataGridTable *FavoriteChannels(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
 		class DataGridTable *FavoriteShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
 		class DataGridTable *OtherShowtimes(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);

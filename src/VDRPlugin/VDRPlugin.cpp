@@ -35,19 +35,22 @@ using namespace DCE;
 #include "../Datagrid_Plugin/Datagrid_Plugin.h"
 #include "../pluto_main/Define_DataGrid.h"
 #include "../pluto_media/Table_Bookmark.h"
-#include "../VDR/VDRCommon.h"
 #include "../DCE/DataGrid.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 VDRPlugin::VDRPlugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: VDRPlugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+	: VDRPlugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter), m_ConMutex( "VDR Connection" )
 //<-dceag-const-e->
 , m_VDRMutex("vdr")
 {
 	pthread_cond_init( &m_VDRCond, NULL );
 	m_VDRMutex.Init(NULL,&m_VDRCond);
+	pthread_cond_init( &m_ConCond, NULL );
+	m_ConMutex.Init(NULL,&m_ConCond);
 	m_sVDRIp="127.0.0.1";
+	m_timeUpdateInterval = 86000; // intervals between updating EPG from VDR in seconds (1 day)
+	m_VDRConnection.SetAddress(m_sVDRIp, "2001");
 }
 //<-dceag-getconfig-b->
 bool VDRPlugin::GetConfig()
@@ -65,6 +68,7 @@ bool VDRPlugin::GetConfig()
 VDRPlugin::~VDRPlugin()
 //<-dceag-dest-e->
 {
+	m_VDRConnection.Close();
 }
 
 void VDRPlugin::PrepareToDelete()
@@ -101,6 +105,8 @@ bool VDRPlugin::Register()
 	m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&VDRPlugin::AllShows))
 		,DATAGRID_EPG_All_Shows_CONST,DEVICETEMPLATE_VDR_CONST);
 
+	m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&VDRPlugin::EPGGrid))
+		,DATAGRID_EPG_Grid_CONST,DEVICETEMPLATE_VDR_CONST);
 	m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&VDRPlugin::FavoriteChannels))
 		,DATAGRID_Favorite_Channels_CONST,DEVICETEMPLATE_VDR_CONST);
 
@@ -124,6 +130,9 @@ bool VDRPlugin::Register()
 		}
 	}
 
+	if (!m_VDRConnection.Connect()) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to connect to VDR (SVDRP)");
+	}
 	BuildChannelList();
 	m_bBookmarksNeedRefreshing=false;
 	RefreshBookmarks();
@@ -403,6 +412,9 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::CMD_Schedule_Recording invalid channel %s",sProgramID.c_str());
 		return;
 	}
+	if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
+		UpdateEPGFromVDR(sChannelID, "");
+
 	VDRProgramInstance *pVDRProgramInstance = pVDRChannel->m_pVDRProgramInstance_First;
 	while(pVDRProgramInstance && pVDRProgramInstance->m_tStartTime!=tStartTime)
 		pVDRProgramInstance = pVDRProgramInstance->m_pVDRProgramInstance_Next;
@@ -421,7 +433,8 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 		sprintf(sDate,"%d-%02d-%02d", tmStart.tm_year+1900, tmStart.tm_mon+1, tmStart.tm_mday);
 
 		string sVDRResponse;
-				bool bResult = SendVDRCommand(m_sVDRIp,"NEWT 1:" + StringUtils::itos(pVDRChannel->m_dwChanNum) + 
+		PLUTO_SAFETY_LOCK(vc, m_ConMutex);
+		bool bResult = m_VDRConnection.SendVDRCommand("NEWT 1:" + StringUtils::itos(pVDRChannel->m_dwChanNum) + 
 			":"  + 
 			sDate + ":" + 
 			(tmStart.tm_hour<10 ? "0" : "")+StringUtils::itos(tmStart.tm_hour) + (tmStart.tm_min<10 ? "0" : "") + StringUtils::itos(tmStart.tm_min) + ":" + 
@@ -445,7 +458,8 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 			// Ues the description
 			sCommand = "NEWS 9:3:12:29=0:" + pVDRProgramInstance->GetTitle();
 		string sVDRResponse;
-		bool bResult = SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+		PLUTO_SAFETY_LOCK(vc, m_ConMutex);
+		bool bResult = m_VDRConnection.SendVDRCommand(sCommand,sVDRResponse);
 
 		int iTimer = atoi(sVDRResponse.c_str());
 		if( !bResult || iTimer<1 )
@@ -456,6 +470,7 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 	}
 }
 
+// Shows on current channel
 class DataGridTable *VDRPlugin::CurrentShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage)
 {
 	if( m_bBookmarksNeedRefreshing )
@@ -485,9 +500,13 @@ class DataGridTable *VDRPlugin::CurrentShows(string GridID, string Parms, void *
 	int iRow=0;
 
 	PLUTO_SAFETY_LOCK(mm, m_pMedia_Plugin->m_MediaMutex);
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDR_PlugIn::CurrentShows A datagrid for all the shows was requested %s params %s", GridID.c_str(), Parms.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDR_PlugIn::CurrentShows A datagrid for all the shows on channel %s was requested %s params %s", sChanId.c_str(), GridID.c_str(), Parms.c_str());
   
-  VDRRecording vdrRecording;
+	// Refresh channel EPG if last time was more than X ago
+	if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
+		UpdateEPGFromVDR(sChanId, "");
+
+	VDRRecording vdrRecording;
 	vdrRecording.data.time.channel_id = atoi(sChanId.c_str());
 
 	VDRProgramInstance *pVDRProgramInstance = pVDRChannel->GetCurrentProgramInstance(tNow);
@@ -566,6 +585,7 @@ class DataGridTable *VDRPlugin::CurrentShows(string GridID, string Parms, void *
 	return pDataGridTable;
 }
 
+// Shows on at this time on all channels
 class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage)
 {
 	if( m_bBookmarksNeedRefreshing )
@@ -583,7 +603,7 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 	EntertainArea *pEntertainArea = m_pMedia_Plugin->m_mapEntertainAreas_Find( iPK_EntertainArea );
 	if( !pEntertainArea || !pEntertainArea->m_pMediaStream || !pEntertainArea->m_pMediaStream->m_pMediaDevice_Source )
 	{
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRPlugin::AllShows cannot find a stream %p",pEntertainArea);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRPlugin::AllShows cannot find a stream %p",pEntertainArea);
 		return pDataGridTable;
 	}
 
@@ -634,6 +654,10 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 
 //		if( bAllSource==false && mapVideoSourcesToUse[ pVDRChannel->m_pVDRSource->m_dwID ]==false )  // Not a source for this list
 //			continue;
+
+		// Refresh channel EPG if last time was more than X ago
+		if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
+			UpdateEPGFromVDR(pVDRChannel->m_sID, "");
 
 		VDRProgramInstance *pVDRProgramInstance = pVDRChannel->GetCurrentProgramInstance(tNow);
 
@@ -697,6 +721,94 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 
 //	LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRTV_PlugIn::AllShows cells: %d source %d plist %p map %d",
 //		(int) pDataGridTable->m_MemoryDataTable.size(), PK_Device_Source, p_list_int, (int) m_mapDevicesToSources.size() );
+
+	return pDataGridTable;
+}
+
+class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage)
+{
+	DataGridTable *pDataGridTable = new DataGridTable();
+
+	string::size_type pos=0;
+	int iPK_Users = atoi(StringUtils::Tokenize(Parms,",",pos).c_str());
+	int iPK_EntertainArea = atoi(StringUtils::Tokenize(Parms,",",pos).c_str());
+	time_t startTime = time(NULL); // TODO: get from parameter
+	time_t endTime = time(NULL) + 3600;
+
+	PLUTO_SAFETY_LOCK(mm, m_pMedia_Plugin->m_MediaMutex);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRTV_PlugIn::EPGrid An EPG datagrid was requested %s params %s", GridID.c_str(), Parms.c_str());
+    
+/*	EntertainArea *pEntertainArea = m_pMedia_Plugin->m_mapEntertainAreas_Find( iPK_EntertainArea );
+	if( !pEntertainArea || !pEntertainArea->m_pMediaStream || !pEntertainArea->m_pMediaStream->m_pMediaDevice_Source )
+	{
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRPlugin::EPGGrid cannot find a stream %p",pEntertainArea);
+		return pDataGridTable;
+	}
+*/
+	int colNo = 0, rowNo = 0;
+	for(ListVDRChannel::iterator it=m_ListVDRChannel.begin();it!=m_ListVDRChannel.end();++it)
+	{
+		VDRChannel *pVDRChannel = *it;
+		if( !pVDRChannel )
+			continue; // Shouldn't happen that pVDRChannel is NULL, we're not including it
+
+		// Refresh channel EPG if last time was more than X ago
+		if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
+			UpdateEPGFromVDR(pVDRChannel->m_sID, "");
+
+		VDRProgramInstance *pVDRProgramInstance = pVDRChannel->GetCurrentProgramInstance(startTime);
+
+		while ( pVDRProgramInstance && pVDRProgramInstance->m_tStartTime < endTime)
+		{
+			string sStartTime = StringUtils::HourMinute(pVDRProgramInstance->m_tStartTime);
+			string sEndTime = StringUtils::HourMinute(pVDRProgramInstance->m_tStopTime);
+			string sNumber = StringUtils::itos(pVDRChannel->m_dwChanNum);
+			string sInfo = pVDRProgramInstance->GetSynopsis();
+			string id = pVDRProgramInstance->GetTitle();
+			DataGridCell* pCell = new DataGridCell(pVDRProgramInstance->GetProgramId(), id);
+			pCell->m_mapAttributes["Series"] = pVDRProgramInstance->GetSeriesId();
+			pCell->m_mapAttributes["Program"] = pVDRProgramInstance->GetProgramId();
+			pCell->m_mapAttributes["Info"] = pVDRProgramInstance->GetTitle();
+			pCell->m_mapAttributes["Number"] = sNumber;
+			pCell->m_mapAttributes["StartTime"] = sStartTime;
+			pCell->m_mapAttributes["EndTime"] = sEndTime;
+
+			pDataGridTable->SetData(colNo, rowNo, pCell);
+			pVDRProgramInstance = pVDRProgramInstance->m_pVDRProgramInstance_Next;
+			rowNo++;
+		}
+
+/*		MapBookmark *pMapBookmark_Series_Or_Program;
+		MapBookmark::iterator itB;
+		if( (itB=pVDRChannel->m_mapBookmark.find(0))!=pVDRChannel->m_mapBookmark.end() ||
+			(itB=pVDRChannel->m_mapBookmark.find(iPK_Users))!=pVDRChannel->m_mapBookmark.end() )
+		{
+			// It's a user's favorited channel
+			pVDRChannel->m_pCell->m_mapAttributes["PK_Bookmark"] = itB->second;
+			pDataGridTable->SetData(0,iRow++,new DataGridCell(pVDRChannel->m_pCell)); // A copy since we'll add this one later too
+		}
+		else if( pVDRProgramInstance &&
+			(pMapBookmark_Series_Or_Program=m_mapSeriesBookmarks_Find(pVDRProgramInstance->GetSeriesId())) &&
+			(
+				(itB=pMapBookmark_Series_Or_Program->find(0))!=pMapBookmark_Series_Or_Program->end() ||
+				(itB=pMapBookmark_Series_Or_Program->find(iPK_Users))!=pMapBookmark_Series_Or_Program->end()
+			))
+		{
+			// It's a user's favorited series
+			pDataGridTable->SetData(0,iRow++,new DataGridCell(pVDRChannel->m_pCell)); // A copy since we'll add this one later too
+		}
+		else if( pVDRProgramInstance &&
+			(pMapBookmark_Series_Or_Program=m_mapProgramBookmarks_Find(pVDRProgramInstance->GetProgramId())) &&
+			(
+				(itB=pMapBookmark_Series_Or_Program->find(0))!=pMapBookmark_Series_Or_Program->end() ||
+				(itB=pMapBookmark_Series_Or_Program->find(iPK_Users))!=pMapBookmark_Series_Or_Program->end()
+			))
+		{
+			// It's a user's favorited series.
+			pDataGridTable->SetData(0,iRow++,new DataGridCell(pVDRChannel->m_pCell)); // A copy since we'll add this one later too
+			}*/
+		colNo++;
+	}
 
 	return pDataGridTable;
 }
@@ -1059,16 +1171,19 @@ void VDRPlugin::BuildChannelList()
 	PurgeChannelList();
 
 	string sVDRResponse;
-	if( !SendVDRCommand(m_sVDRIp,"LSTC",sVDRResponse) )
-
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot get channel list");
-		return;
-	} 
+		PLUTO_SAFETY_LOCK(vc, m_ConMutex);
+		if( !m_VDRConnection.SendVDRCommand("LSTC",sVDRResponse) )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot get channel list");
+			return;
+		}
+	}
 	LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA,"VDRPlugin::BuildChannelList received channel list");
 	        
 	string::size_type pos_line=0;
 	string sLine;
+	int i = 0;
 	while( true )
 	{
 		sLine = StringUtils::Tokenize(sVDRResponse,"\n",pos_line);
@@ -1107,27 +1222,45 @@ void VDRPlugin::BuildChannelList()
 		VDRSource *pVDRSource = GetNewSource(sSource);
 		int iChannel = atoi(sChannel.c_str());
 		string sChannelID = sSource + "-" + sNID + "-" + sTID + "-" + sSID;
+		if (StringUtils::TrimSpaces(sC12) != "0")
+			sChannelID += "-" + sC12;
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"VDRPlugin::BuildChannelList, adding channel = %s", sChannelID.c_str());
 		VDRChannel *pVDRChannel = new VDRChannel(sChannelID,iChannel,pVDRSource,sChannelNameShort,sChannelNameLong,NULL,0);
 		m_mapVDRChannel[sChannelID]=pVDRChannel;
 		m_ListVDRChannel.push_back(pVDRChannel);
+		i++;
 	}
+}
 
-	sVDRResponse="";
-	if( !SendVDRCommand(m_sVDRIp,"LSTE NOW",sVDRResponse) )
+/**
+ * If non-empty the parameters will be used in the fetching of data
+ */
+void VDRPlugin::UpdateEPGFromVDR(string channelId, string restrictParm)
+{
+	string sVDRResponse="";
+	string cmd = "LSTE ";
+	if (!channelId.empty())
+		cmd += channelId + " ";
+	if (!restrictParm.empty())
+		cmd += restrictParm;
+
+	PLUTO_SAFETY_LOCK(vc, m_ConMutex);
+	if( !m_VDRConnection.SendVDRCommand(cmd,sVDRResponse) )
 
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot get epg");
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::UpdateEPGFromVDR cannot get epg, cmd = %s", cmd.c_str());
 		return;
 	}
-	LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA,"VDRPlugin::BuildChannelList received epg");
+	LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA,"VDRPlugin::UpdateEPGFromVDR received epg");
 
+	clock_t startClock = clock();
 	VDRChannel *pVDRChannel = NULL;
 	VDRProgramInstance *pVDRProgramInstance = NULL, *pVDRProgramInstance_Last = NULL;
 	string sSeriesDescription="",sSeriesID="",sEpisodeDescription="",sEpisodeID="",sDescription="";
 	string::size_type pos=0;
 	while( true )
 	{
-		sLine = StringUtils::Tokenize(sVDRResponse,"\n",pos);
+		string sLine = StringUtils::Tokenize(sVDRResponse,"\n",pos);
 		if( sLine.empty()==true )
 			break;
 
@@ -1141,11 +1274,12 @@ void VDRPlugin::BuildChannelList()
 				pVDRChannel = m_mapVDRChannel_Find(sChannelID);
 				if( !pVDRChannel )
 				{	
-				        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot find channel %s",sLine.c_str());
+				        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::UpdateEPGFromVDR cannot find channel %s (%s)",sChannelID.c_str(), sLine.c_str());
 				}
                                 else
                                 {
-                                        LoggerWrapper::GetInstance()->Write(LV_DEBUG,"VDRPlugin::BuildChannelList found channel %s",sLine.c_str());
+                                        LoggerWrapper::GetInstance()->Write(LV_DEBUG,"VDRPlugin::UpdateEPGFromVDR found channel %s",sLine.c_str());
+					pVDRChannel->m_timeEPGUpdated = time(NULL);
                                 }
 
 			}
@@ -1294,6 +1428,8 @@ int k=2;
 		}
 	}
 */
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateEPGFromVDR end, time taken = %f (excluding ReceiveData time)", ((float)(clock() - startClock))/CLOCKS_PER_SEC);
+
 }
 
 bool VDRPlugin::TuneToChannel( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
@@ -1447,7 +1583,8 @@ void VDRPlugin::UpdateTimers()
 {
 	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
 	string sVDRResponse;
-	if( SendVDRCommand(m_sVDRIp,"LSTT",sVDRResponse) )
+	PLUTO_SAFETY_LOCK(vc, m_ConMutex);
+	if( m_VDRConnection.SendVDRCommand("LSTT",sVDRResponse) )
 	{
 		string::size_type pos=0;
 		while(true)
