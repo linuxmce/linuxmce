@@ -295,7 +295,6 @@ start() {
 
 	# X is running, run ConfirmDependencies and start LMCE_Launch_Manager (including DCERouter if this is the core)
 	StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh" "&"
-	StartService "Update deb-cache" "/usr/pluto/bin/UpdateDebCache.sh"
 	StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
 	StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
 
@@ -307,6 +306,7 @@ start() {
 		#StartService "Waking sleeping MDs" "/usr/pluto/bin/WakeMDs.sh" "&"
 		StartService "Starting Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
 		StartService "Starting NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
+		StartService "Update deb-cache" "/usr/pluto/bin/UpdateDebCache.sh"
 	fi
 
 	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh" "&"
