@@ -13,6 +13,8 @@
 #                    and executes LMCE_Launch_Manager to take care of the rest.
 ### END INIT INFO #
 
+grep -q ubiquity /proc/cmdline && exit 0
+
 DD_DISTRO_Raspbian_Wheezy_CONST=19
 DD_DISTRO_Raspbian_Jessie_CONST=22
 DD_DEVICETEMPLATE_Core=7
