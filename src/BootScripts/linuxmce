@@ -13,8 +13,6 @@
 #                    and executes LMCE_Launch_Manager to take care of the rest.
 ### END INIT INFO #
 
-grep -q ubiquity /proc/cmdline && exit 0
-
 DD_DISTRO_Raspbian_Wheezy_CONST=19
 DD_DISTRO_Raspbian_Jessie_CONST=22
 DD_DEVICETEMPLATE_Core=7
@@ -183,13 +181,14 @@ start() {
 	log_daemon_msg "Starting up LinuxMCE" "linuxmce"
 	err=0
 
+	service kdm stop || :
+
 	if [[ "$AutostartCore" -eq "1" ]] ; then
 		# Disable display manager
 		mkdir -p "/etc/X11"
 		echo "/bin/false" >/etc/X11/default-display-manager
-		update-rc.d -f kdm remove >/dev/null
-		update-rc.d -f lightdm remove >/dev/null
-		service kdm stop || :
+		#update-rc.d -f kdm remove >/dev/null
+		#update-rc.d -f lightdm remove >/dev/null
 	fi
 
 	setterm -blank >/dev/console             # disable console blanking
@@ -233,6 +232,12 @@ start() {
 		Message "FIRSTBOOT NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
 		err=1
 		return $err
+	fi
+
+	# start ubiquity *after* network config has been done
+	if grep -q ubiquity /proc/cmdline ; then
+		service ubiquity start
+		exit 0
 	fi
 
 	StartService "Starting LinuxMCE Update Service" "/usr/pluto/bin/LMCEUpdate_Apply.sh"
