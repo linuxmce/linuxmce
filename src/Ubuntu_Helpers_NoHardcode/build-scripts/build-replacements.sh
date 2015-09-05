@@ -96,6 +96,9 @@ function Build_Replacements_Common_all
 
 function Build_Replacements_Common_ubuntu
 {
+	#Package: motion
+	Build_Replacement_Package motion ubuntu/motion-3.2.12+git20150610 || :
+
 	#Package: lmce-core-locator
 	Build_Replacement_Package core-locator src/Core/locator || :
 
@@ -256,6 +259,9 @@ function Build_Replacements_ubuntu_trusty
 
 function Build_Replacements_Common_raspbian
 {
+	#Package: motion
+	Build_Replacement_Package motion ubuntu/motion-3.2.12+git20150610 || :
+
 	#Package: lmce-core-locator
 	Build_Replacement_Package core-locator src/Core/locator || :
 
