@@ -108,7 +108,7 @@ public:
 		int retry = 0;
 		while (!error.empty() && retry < 3)
 		{
-			if (error == "221")
+			if (error == "221" || error == "---")
 			{
 				Connect();
 				error = SendVDRCommandInternal(sCommand, sVDRResponse);
