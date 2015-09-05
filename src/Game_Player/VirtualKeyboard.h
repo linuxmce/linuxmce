@@ -19,14 +19,18 @@ namespace DCE
   {
   public:
     static VirtualKeyboard* GetInstance();
-    bool Open();
+    bool ClickKey(int iKey);
 
   private:
     struct uinput_user_dev m_uidev;         // uinput device struct describing device on bus.
     int m_iInputfd;                         // uinput file descriptor
     bool m_bOpened;                         // did Open() complete successfully?
 
+    bool Open();                            // Open the Virtual Keyboard.
+    void Close();                           // Close the Virtual Keyboard.
+
     VirtualKeyboard();
+    ~VirtualKeyboard();
     VirtualKeyboard(VirtualKeyboard const&){};
     static VirtualKeyboard* m_pInstance;
 

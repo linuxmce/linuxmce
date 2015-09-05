@@ -54,6 +54,14 @@ namespace DCE
     m_uidev.id.version=1;
   }
 
+  /**
+   * dtor
+   */
+  VirtualKeyboard::~VirtualKeyboard()
+  {
+    Close();
+  }
+
   bool VirtualKeyboard::Open()
   {
     int i=0;
@@ -110,6 +118,93 @@ namespace DCE
     m_bOpened=true;
 
     return true;
+  }
+
+  void VirtualKeyboard::Close()
+  {
+    if (m_bOpened && m_iInputfd > 0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VirtualKeyboard::Close() - Virtual Keyboard is open. Calling uinput UI_DEV_DESTROY ioctl.");
+	if (ioctl(m_iInputfd,UI_DEV_DESTROY) < 0)
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::Close() - Virtual Keyboard could not be destroyed.");
+	  }
+	close(m_iInputfd);
+      }
+    else
+      {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"VirtualKeyboard::Close() - Close called when not opened.");
+	if (m_iInputfd > 0)
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"VirtualKeyboard::Close() - uinput fd was open. Closing it.");
+	    close(m_iInputfd);
+	  }
+      }
+    
+    m_bOpened=false;
+
+  }
+
+  bool VirtualKeyboard::ClickKey(int iKey)
+  {
+
+    struct input_event ev;
+
+    if (!m_bOpened)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VirtualKeyboard::ClickKey(%d) - Virtual Keyboard not open. Opening it.");
+	if (!Open())
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::ClickKey(%d) - Could not open virtual keyboard.");
+	    return false;
+	  }
+      }
+
+    ev.type = EV_KEY;
+    ev.code = iKey;
+    ev.value = 1; // Key down.
+
+    if (write(m_iInputfd,&ev,sizeof(ev)) < 0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::ClickKey(%d) - Could not write key down. Bailing!");
+	return false;
+      }
+
+    ev.type = EV_SYN;
+    ev.code = 0;
+    ev.value = 0;
+
+    if (write(m_iInputfd,&ev,sizeof(ev)) < 0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::ClickKey(%d) - Could not write SYN for key down. Bailing!");
+	return false;
+      }    
+
+    usleep(1000);
+    
+    ev.type = EV_KEY;
+    ev.code = iKey;
+    // ev.value is already 0
+
+    if (write(m_iInputfd,&ev,sizeof(ev)) < 0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::ClickKey(%d) - Could not write key up. Bailing!");
+	return false;
+      }
+
+    ev.type = EV_SYN;
+    ev.code = 0;
+    ev.value = 0;
+
+    if (write(m_iInputfd,&ev,sizeof(ev)) < 0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::ClickKey(%d) - Could not write SYN for key up. Bailing!");
+	return false;
+      }    
+
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"VirtualKeyboard::ClickKey(%d) - Wrote key press/depress successfully.");
+    return true;
+
   }
 
 }
