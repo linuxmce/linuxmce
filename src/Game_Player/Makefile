@@ -19,6 +19,7 @@ Gen_Dev_Files = $(GENDEV)/Game_PlayerBase.cpp
 sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 	../utilities/linux/window_manager/WMController/WMController.cpp \
 	../utilities/linux/window_manager/wmctrl/wmctrl.cpp \
+	VirtualKeyboard.cpp \
         ConfigurationWriter.cpp \
 	VideoFrameGeometry.cpp \
 	EmulatorFactory.cpp \
