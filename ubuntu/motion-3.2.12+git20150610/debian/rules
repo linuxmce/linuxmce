@@ -29,7 +29,7 @@ config.status:
 		--datadir=\$${prefix}/share \
 		--mandir=\$${datadir}/man \
 		--infodir=\$${datadir}/info \
-		--sysconfdir=/etc/motion \
+		--sysconfdir=/etc \
 		--with-ffmpeg \
 		--with-mysql \
 		--with-mysql-lib=/usr/lib/$(DEB_HOST_MULTIARCH) \
