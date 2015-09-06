@@ -9,6 +9,8 @@ firstboot_core_md_preinst () {
 }
 
 firstboot_core_md_postinst () {
-	Create_And_Config_Hybrid_MD
+	if ! grep ubiquity /proc/cmdline ; then
+		Create_And_Config_Hybrid_MD
+	fi
 }
 
