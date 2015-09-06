@@ -1,3 +1,9 @@
+motion (3.2.12+git20150610-lmce1) unstable; urgency=medium
+
+  * Rebuild for LMCE with rtsp.
+
+ -- phenigma <developers@linuxmce.org>  Sun, 06 Sep 2015 17:00:00 -0400
+
 motion (3.2.12+git20150610) unstable; urgency=medium
 
   * Rebuild for LMCE with rtsp.
