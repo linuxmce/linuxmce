@@ -29,10 +29,10 @@ config.status:
 		--datadir=\$${prefix}/share \
 		--mandir=\$${datadir}/man \
 		--infodir=\$${datadir}/info \
+		--sysconfdir=/etc \
 		--with-ffmpeg \
 		--with-mysql \
 		--with-mysql-lib=/usr/lib/$(DEB_HOST_MULTIARCH) \
-		--with-ffmpeg-headers=/usr/include/$(DEB_HOST_MULTIARCH) \
 		--with-pgsql \
 		--without-optimizecpu \
 		--without-jpeg-mmx
