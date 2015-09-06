@@ -161,5 +161,13 @@ esac
 #update-rc.d -f linuxmce remove >/dev/null || :
 update-rc.d -f linuxmce defaults 99 1 >/dev/null
 
-
-
+if [[ "$1" == "install" ]] ; then
+	cat <<-EOF >/etc/network/interfaces
+		auto lo
+			iface lo inet loopback
+		allow-hotplug eth0
+			iface eth0 inet dhcp
+		allow-hotplug eth1
+			iface eth1 inet dhcp
+		EOF
+fi
