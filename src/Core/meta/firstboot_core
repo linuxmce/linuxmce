@@ -27,6 +27,7 @@ TimeUpdate
 if ! grep ubiquity /proc/cmdline ; then
 	Create_And_Config_Core # create the core device in the database
 	Configure_Network_Database # write the network settings to the database
+	/usr/pluto/bin/Network_Setup.sh # setup all networking related services
 fi
 
 ###########################################################
