@@ -23,8 +23,11 @@ Configure_Network_Options # determine ip & int/ext if
 Configure_Network_Files # write /etc/network/interfaces /etc/hosts
 ifup -a || :
 TimeUpdate
-Create_And_Config_Core # create the core device in the database
-Configure_Network_Database # write the network settings to the database
+# Do not create and config under ubiquity.
+if ! grep ubiquity /proc/cmdline ; then
+	Create_And_Config_Core # create the core device in the database
+	Configure_Network_Database # write the network settings to the database
+fi
 
 ###########################################################
 ###########################################################
