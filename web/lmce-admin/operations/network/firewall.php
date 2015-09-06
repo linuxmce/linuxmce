@@ -399,7 +399,7 @@ function firewall($output,$dbADO) {
                                 <option value="ipv4" '.((@$fwVersion!="ipv4")?'':'selected').'>IPv4 Firewall</option>
                                 <option value="ipv6" '.((@$fwVersion!="ipv6")?'':'selected').'>IPv6 Firewall</option>
                         </select>
-			<td colspan="30%" align="right"><input type="button" class="button" name="IDIOT" value="Yes, I was an IDIOT. Please reset my '.@$fwVersion.' firewall to defaults" onclick="confirmResetFirewall()"></td>
+			<td colspan="30%" align="right"><input type="button" class="button" name="IDIOT" value="Reset '.@$fwVersion.' firewall to defaults" onclick="confirmResetFirewall()"></td>
 		</tr>
 		<tr><td colspan="100%"><hr></td></tr>';
 		$i=0;
