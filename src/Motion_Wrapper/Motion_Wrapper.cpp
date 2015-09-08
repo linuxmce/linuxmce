@@ -33,7 +33,7 @@ using namespace DCE;
 #include "pluto_main/Define_Command.h"
 #include "pluto_main/Define_CommandParameter.h"
 
-#define MOTION_CONF_PATH	"/etc/motion"
+#define MOTION_CONF_PATH	"/etc/motion/"
 #define MOTION_CONF_FILE	"motion.conf"
 #define ALARM_PURGE_ARCHIVE	1
 #define SNAPSHOT_SLEEP_TIME	100
