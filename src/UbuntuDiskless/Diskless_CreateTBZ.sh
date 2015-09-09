@@ -293,6 +293,8 @@ MD_System_Level_Prep () {
 	[[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
 	[[ -f /etc/apt/apt.conf ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf
 
+	echo "force-unsafe-io" > ${TEMP_DIR}/etc/dpkg/dpkg.cfg.d/02apt-speedup
+
 	## Setup initial ssh access
 	StatsMessage "Setting up SSH"
 	[[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && mkdir -p "$TEMP_DIR"/root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> "$TEMP_DIR"/root/.ssh/authorized_keys
@@ -693,6 +695,8 @@ MD_Cleanup () {
 	mv -f "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,} || :
 	#mv -f "$TEMP_DIR"/sbin/initctl{.pluto-install,}
 	#rm -f "$TEMP_DIR"/usr/sbin/policy-rc.d
+
+	rm -f ${TEMP_DIR}/etc/dpkg/dpkg.cfg.d/02apt-speedup
 
 	#Copy the orbiter activation command to the MD's desktop
 	mkdir -p "$TEMP_DIR"/root/Desktop
