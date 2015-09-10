@@ -84,7 +84,8 @@ public:
             return new ActiveMediaStreamItem(parent);
         } else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
             return new SleepingAlarm(parent);
-        } else if (PK_DataGrid  == DATAGRID_EPG_All_Shows_CONST){
+        } else if (PK_DataGrid  == DATAGRID_EPG_All_Shows_CONST ||
+                   PK_DataGrid  == DATAGRID_EPG_Grid_CONST){
          return new EPGItemClass(parent);
         } else {
             // uses generic model item
@@ -95,19 +96,19 @@ public:
         }
     }
 
-    static GenericModelItem* GetModelItemForCell(int PK_DataGrid, DataGridTable* pTable, int row, QObject * parent = 0)
+    static GenericModelItem* GetModelItemForCell(int PK_DataGrid, DataGridTable* pTable, int row, int col, QObject * parent = 0)
     {
         GenericModelItem* pItem = GetModelItemType(PK_DataGrid, parent);
-        LoadDataFromTable(PK_DataGrid, pItem, pTable, row);
+        LoadDataFromTable(PK_DataGrid, pItem, pTable, row, col);
         return pItem;
     }
 
-    static void LoadDataFromTable(int PK_DataGrid, GenericModelItem* pItem, DataGridTable* pTable, int row)
+    static void LoadDataFromTable(int PK_DataGrid, GenericModelItem* pItem, DataGridTable* pTable, int row, int col)
     {
 
-        int col = 0;
         DataGridCell *pCell = pTable->GetData(col, row);
-        if(!pCell){
+        if(!pCell) {
+            LoggerWrapper::GetInstance()->Write(LV_WARNING, "LoadDataFromTable() pCell == NULL ! row = %d, col = %d", row, col);
             return;
         }
         for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
@@ -153,12 +154,14 @@ public:
                 }
             }
             (static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
-        } else if(PK_DataGrid == DATAGRID_EPG_All_Shows_CONST) {
+        } else if(PK_DataGrid == DATAGRID_EPG_Grid_CONST || PK_DataGrid == DATAGRID_EPG_All_Shows_CONST) {
 
 
 
             QString channelIndex = QString::fromStdString(pCell->m_mapAttributes_Find("Number"));
             QString timeSlot = QString::fromStdString(pCell->m_mapAttributes_Find("Time"));
+            QString startTime = QString::fromStdString(pCell->m_mapAttributes_Find("StartTime"));
+            QString endTime = QString::fromStdString(pCell->m_mapAttributes_Find("EndTime"));
             QString progId = QString::fromStdString(pCell->m_mapAttributes_Find("Program"));
             QString sId = QString::fromStdString(pCell->m_mapAttributes_Find("Series"));
             QString src = QString::fromStdString(pCell->m_mapAttributes_Find("Source"));
@@ -179,8 +182,8 @@ public:
                  channelNumber = tmp.left(tmp.indexOf(" ")).toInt();
                  channelName = tmp.right(tmp.length()-tmp.indexOf(" "));
             }
-            qDebug() << pCell->GetText();
-            qDebug() << pCell->GetValue();
+//            qDebug() << pCell->GetText();
+//            qDebug() << pCell->GetValue();
             channelIndex = pCell->GetValue();
             program = QString::fromStdString(pCell->m_mapAttributes_Find("Info"));
 
@@ -189,7 +192,7 @@ public:
                         program,
                         QString::number(channelNumber),
                         channelIndex,
-                        timeSlot,
+                        timeSlot, startTime.toInt(), endTime.toInt(),
                         progId,
                         sId,
                         sourceId,
