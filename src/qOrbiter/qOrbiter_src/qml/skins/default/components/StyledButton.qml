@@ -25,6 +25,7 @@ Item{
     property bool useHandler:false
     property alias label:button_label.text
     property alias buttonRadius:bg_fill.radius
+    property alias buttonColor: bg_fill.color
 
     signal confirm()
     signal activated()
