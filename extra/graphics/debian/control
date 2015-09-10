@@ -37,11 +37,12 @@ Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: UIta Orbiter skin
  UIta Orbiter Skin
 
-Package: pluto-avwizard-skin-basic
+Package: lmce-avwizard-skin-basic
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: pluto-avwizard-skin-basic
 Replaces: pluto-avwizard-skin-basic
+Provides: pluto-avwizard-skin-basic
 Description: Basic AV Wizard skin
  Basic AV Wizard Skin
 
