@@ -1,4 +1,4 @@
-lmce-skins-all (2.0.0.47.9~lmce4) precise; urgency=medium
+lmce-skins-all (2.0.0.47.9~lmce4~trusty1) precise; urgency=medium
 
   * Fix conflicts/replaces for lmce-skins-basic/pluto-skins-basic
 
