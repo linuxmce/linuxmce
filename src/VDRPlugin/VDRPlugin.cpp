@@ -24,6 +24,7 @@
 #include "PlutoUtils/Other.h"
 
 #include <iostream>
+#include <sstream>
 using namespace std;
 using namespace DCE;
 
@@ -639,10 +640,7 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 				continue;
 			}
 		}
-		string sChannelName = StringUtils::itos(pVDRChannel->m_dwChanNum) + " " + pVDRChannel->m_sShortName;
-		pVDRChannel->m_pCell = new DataGridCell(sChannelName,"i" + pVDRChannel->m_sID);
-		pVDRChannel->m_pCell->m_mapAttributes["Name"] = sChannelName;
-		pVDRChannel->m_pCell->m_mapAttributes["Source"] = pVDRChannel->m_pVDRSource->m_sDescription;
+		pVDRChannel->m_pCell = GetChannelCell(pVDRChannel);
 	}
 
 	int iRow=0;
@@ -725,6 +723,15 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 	return pDataGridTable;
 }
 
+DataGridCell *VDRPlugin::GetChannelCell(VDRChannel *pVDRChannel)
+{
+	string sChannelName = StringUtils::itos(pVDRChannel->m_dwChanNum) + " " + pVDRChannel->m_sShortName;
+	DataGridCell *pCell = new DataGridCell(sChannelName,"i" + pVDRChannel->m_sID);
+	pCell->m_mapAttributes["Name"] = sChannelName;
+	pCell->m_mapAttributes["Source"] = pVDRChannel->m_pVDRSource->m_sDescription;
+	return pCell;
+}
+
 class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage)
 {
 	DataGridTable *pDataGridTable = new DataGridTable();
@@ -732,8 +739,21 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
 	string::size_type pos=0;
 	int iPK_Users = atoi(StringUtils::Tokenize(Parms,",",pos).c_str());
 	int iPK_EntertainArea = atoi(StringUtils::Tokenize(Parms,",",pos).c_str());
-	time_t startTime = time(NULL); // TODO: get from parameter
-	time_t endTime = time(NULL) + 3600;
+	string st = StringUtils::Tokenize(Parms,",",pos);
+	time_t startTime = time(NULL);
+	if (!st.empty()) 
+	{
+		istringstream ss(st);
+		ss >> startTime;
+	}
+	string et = StringUtils::Tokenize(Parms,",",pos);
+	time_t endTime = time(NULL);
+	if (!et.empty()) 
+	{
+		istringstream ss(et);
+		ss >> endTime;
+	}
+	bool bIncludeChannels = atoi(StringUtils::Tokenize(Parms,",",pos).c_str());
 
 	PLUTO_SAFETY_LOCK(mm, m_pMedia_Plugin->m_MediaMutex);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRTV_PlugIn::EPGrid An EPG datagrid was requested %s params %s", GridID.c_str(), Parms.c_str());
@@ -748,9 +768,16 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
 	int colNo = 0, rowNo = 0;
 	for(ListVDRChannel::iterator it=m_ListVDRChannel.begin();it!=m_ListVDRChannel.end();++it)
 	{
+		rowNo = 0;
 		VDRChannel *pVDRChannel = *it;
 		if( !pVDRChannel )
 			continue; // Shouldn't happen that pVDRChannel is NULL, we're not including it
+
+		if (bIncludeChannels)
+		{
+			pDataGridTable->SetData(colNo, rowNo, GetChannelCell(pVDRChannel));
+			rowNo++;
+		}
 
 		// Refresh channel EPG if last time was more than X ago
 		if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
@@ -760,8 +787,8 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
 
 		while ( pVDRProgramInstance && pVDRProgramInstance->m_tStartTime < endTime)
 		{
-			string sStartTime = StringUtils::HourMinute(pVDRProgramInstance->m_tStartTime);
-			string sEndTime = StringUtils::HourMinute(pVDRProgramInstance->m_tStopTime);
+			string sStartTime = StringUtils::itos(pVDRProgramInstance->m_tStartTime);
+			string sEndTime = StringUtils::itos(pVDRProgramInstance->m_tStopTime);
 			string sNumber = StringUtils::itos(pVDRChannel->m_dwChanNum);
 			string sInfo = pVDRProgramInstance->GetSynopsis();
 			string id = pVDRProgramInstance->GetTitle();
