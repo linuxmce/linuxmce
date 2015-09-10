@@ -258,6 +258,7 @@ public:
 
 		virtual void PrepareToDelete();
 		// Datagrids
+		DataGridCell *GetChannelCell(VDRChannel *pVDRChannel);
 		class DataGridTable *CurrentShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
 		class DataGridTable *AllShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
 		class DataGridTable *EPGGrid(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
