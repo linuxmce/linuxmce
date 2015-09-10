@@ -966,9 +966,13 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
             int count = 0;
             for (int row = start; count < numRows; row = row + direction)
             {
-                GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
-                // TODO: stop if datagrid model is reset or request stopped
-                m_mapDataGridModels[dataGridId]->insertRow(row, pItem);
+                QVector<GenericModelItem*> items(m_mapDataGridModels[dataGridId]->getTotalColumns());
+                for (int col = 0; col < m_mapDataGridModels[dataGridId]->getTotalColumns(); col++)
+                {
+                    items[col] = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row, col);
+                    // TODO: stop if datagrid model is reset or request stopped
+                }
+                m_mapDataGridModels[dataGridId]->insertRow(row, items);
                 count++;
             }
         }

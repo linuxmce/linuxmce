@@ -46,7 +46,7 @@ public:
     void appendRows(const QList<GenericModelItem*> &items);
     void appendRow(GenericModelItem* item);
     void insertRows(int row, int count, GenericModelItem *item);
-    void insertRow(int row, GenericModelItem* item);
+    void insertRow(int row, QVector<GenericModelItem*> item);
     void sortModel(int column, Qt::SortOrder order);
 
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
@@ -114,6 +114,7 @@ signals:
 
     void lastIndexChanged();
     void optionChanged(QString dgId);
+    void loadComplete();
 
 public slots:
 
@@ -121,11 +122,13 @@ public slots:
     int getLastIndex(){return lastIndex;}
 
      QVariant get(int index, const QString &name) const;
+     QVariant get(int index, int col, const QString &name) const;
 
      void setWindowSize(int windowSize) { m_windowSize = windowSize; }
      void setTotalRows(int rows);
      void setTotalCols(int cols) { m_totalCols = cols; }
      int getTotalRows();
+     int getTotalColumns();
      void setDgName(QString dgName) { m_dgName = dgName; }
      QString getDGName() { return m_dgName; }
      void setRequestedRows(int start, int end) { m_requestEnd = end; m_requestStart = start; }
@@ -138,6 +141,7 @@ public slots:
      double getProgress();
     Q_INVOKABLE void refreshData();
     void requestMoreData(int row, int direction);
+    Q_INVOKABLE void loadData();
 
     void removeComplete();
 
@@ -149,7 +153,7 @@ private slots:
 private:
     bool resetInternalData();
     GenericModelItem* m_prototype;
-    QList<GenericModelItem*>m_list;
+    QList<QVector<GenericModelItem*> > m_list;
     
 };
 
