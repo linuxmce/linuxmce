@@ -23,16 +23,20 @@ public:
         ProgramIdRole           =Qt::DisplayRole+7,
         SeriesIdRole            =Qt::DisplayRole+8,
         TimeSlotRole=Qt::DisplayRole+9,
-        BroadcastSourceRole     =Qt::DisplayRole+10,
-        BroadcastSourceNameRole =Qt::DisplayRole+11,
-        ChanImageRole = Qt::DisplayRole+12,
-        ProgImageRole = Qt::DisplayRole+13,
+        StartTimeRole=Qt::DisplayRole+10,
+        EndTimeRole=Qt::DisplayRole+11,
+        BroadcastSourceRole     =Qt::DisplayRole+12,
+        BroadcastSourceNameRole =Qt::DisplayRole+13,
+        ChanImageRole = Qt::DisplayRole+14,
+        ProgImageRole = Qt::DisplayRole+15,
 
     };
 
 public:
     EPGItemClass() {}
-    void setEpgItemData(QString channelName, QString programName, QString channelNumber, QString channelId, QString timeSlot, QString programId, QString seriesId, QString sourceId, QString sourceName);
+    void setEpgItemData(QString channelName, QString programName, QString channelNumber, QString channelId,
+                        QString timeSlot, int startTime, int endTime,
+                        QString programId, QString seriesId, QString sourceId, QString sourceName);
     bool setData(int role, const QVariant &value);
     // explicit EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString timeSlot, QString seriesId, QString programId, QString broadcastSource, int broadcastSourceIndex, QString chanImage, QString progImag, QObject *parent = 0);
     explicit EPGItemClass(QObject *parent = NULL);
