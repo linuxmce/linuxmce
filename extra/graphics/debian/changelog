@@ -1,22 +1,28 @@
 lmce-skins-all (2.0.0.47.9~lmce4~trusty1) precise; urgency=medium
 
+  * Fix pkg name
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Thu, 10 Sep 2015 17:43:32 -0400
+
+lmce-skins-all (2.0.0.47.9~lmce4) unstable; urgency=medium
+
   * Fix conflicts/replaces for lmce-skins-basic/pluto-skins-basic
 
  -- developers@linuxmce.org <developers@linuxmce.org>  Sat, 27 Jun 2015 17:52:11 -0500
 
-lmce-skins-all (2.0.0.47.9~lmce3) precise; urgency=medium
+lmce-skins-all (2.0.0.47.9~lmce3) unstable; urgency=medium
 
   * New weather icons, including night status icons
 
  -- developers@linuxmce.org <developers@linuxmce.org>  Sun, 26 Apr 2015 06:52:11 +0000
 
-lmce-skins-all (2.0.0.47.9~lmce2) precise; urgency=medium
+lmce-skins-all (2.0.0.47.9~lmce2) unstable; urgency=medium
 
   * Add some missing telecom icons
 
  -- developers@linuxmce.org <developers@linuxmce.org>  Sun, 26 Apr 2015 06:52:11 +0000
 
-lmce-skins-all (2.0.0.47.9~lmce1) precise; urgency=medium
+lmce-skins-all (2.0.0.47.9~lmce1) unstable; urgency=medium
 
   * Initial release.
   * LinuxMCE Orbiter Skins
