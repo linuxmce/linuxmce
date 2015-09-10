@@ -253,8 +253,6 @@ MD_System_Level_Prep () {
 	mount none -t sysfs $TEMP_DIR/sys
 	mount none -t proc $TEMP_DIR/proc
 
-	/usr/pluto/bin/update-debcache.sh $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
-
 	## Setup apt in pluto style
 	case "$TARGET_DISTRO" in
 	#	"$HOST_DISTRO")
@@ -673,8 +671,7 @@ MD_Install_Packages () {
 }
 
 MD_Populate_Debcache () {
-	find $TEMPDIR/var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
-	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+	/usr/pluto/bin/UpdateDebCache.sh
 }
 
 MD_Cleanup () {
@@ -687,7 +684,10 @@ MD_Cleanup () {
 
 	#Make sure there is are Packages files on the MD so apt-get update does not fail
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
-	/usr/pluto/bin/update-debcache.sh $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
+	echo "" > $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages
+	gzip -9c < $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages > $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
+	echo "" > $TEMP_DIR/usr/pluto/deb-cache/Packages
+	gzip -9c < $TEMP_DIR/usr/pluto/deb-cache/Packages > $TEMP_DIR/usr/pluto/deb-cache/Packages.gz
 
 	mv -f $TEMP_DIR/sbin/invoke-rc.d{.orig,} || :
 	mv -f $TEMP_DIR/sbin/start{.orig,} || :
@@ -823,12 +823,13 @@ for TARGET in "$TARGET_TYPES" ; do
 	TEMP_DIR=$(mktemp -d /opt/Diskless_CreateTBZ.XXXXXXXXX)
 
 	#Function execution
+	#MD_Populate_Debcache
 	MD_Create_And_Populate_Temp_Dir
 	MD_System_Level_Prep
 	MD_Seamless_Compatability
 	MD_Preseed
 	MD_Install_Packages
-	MD_Populate_Debcache
+	#MD_Populate_Debcache
 	MD_Cleanup
 	Create_Diskless_Tar
 	Create_PXE_Initramfs_Vmlinuz
