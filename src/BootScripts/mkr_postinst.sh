@@ -142,10 +142,8 @@ fi
 # TODO: figure out what systemd will need, perhaps diversion is the answer
 mkdir -p "/etc/X11"
 echo "/bin/false" >/etc/X11/default-display-manager
-echo "manual" >> /etc/init/kdm.override
-echo "manual" >> /etc/init/lightdm.override
-update-rc.d -f kdm remove >/dev/null || :
-update-rc.d -f lightdm remove >/dev/null || :
+update-rc.d kdm disable >/dev/null || :
+update-rc.d lightdm disable >/dev/null || :
 
 ###. /usr/pluto/install/install-common.sh ; Fix_LSB_Data
 case "$TARGET_DISTRO" in
