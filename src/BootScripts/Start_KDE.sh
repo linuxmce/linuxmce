@@ -106,7 +106,8 @@ emoticonsTheme[$d]
 [General]
 count=4" > "$homedir/.kde/share/config/kwinrulesrc"
 
-
+chown -R "${TheChosenOne}:${TheChosenOne}" "${homedir}/.kde"
+chown -R "${TheChosenOne}:${TheChosenOne}" "${homedir}/Desktop"
 
 DISTRO="$(lsb_release -c -s)"
 if [[ $DISTRO = "intrepid" ]] ; then
