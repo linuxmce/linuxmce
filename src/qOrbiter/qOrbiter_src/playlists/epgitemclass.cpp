@@ -16,13 +16,16 @@ EPGItemClass::EPGItemClass( QObject *parent ) : GenericModelItem(parent)
     names[BroadcastSourceRole] = "sourceid";  /** The current source being used */
     names[BroadcastSourceNameRole] = "source";/** The Source name */
     names[IdRole] = "id";
+    names[SynopsisRole] = "synopsis";/** The Source name */
+    names[IsRecordingRole] = "recording";/** The Source name */
      setRoleNames(names);
 }
 
 
 void EPGItemClass::setEpgItemData(QString channelName, QString programName, QString channelNumber,
                                   QString channelId, QString timeSlot, int startTime, int endTime,
-                                  QString programId, QString seriesId, QString sourceId, QString sourceName)
+                                  QString programId, QString seriesId, QString sourceId, QString sourceName,
+                                  QString synopsis, bool recording)
 {
 
     m_data.insert(NameRole, channelName);
@@ -37,6 +40,8 @@ void EPGItemClass::setEpgItemData(QString channelName, QString programName, QStr
     m_data.insert(BroadcastSourceNameRole, sourceName);
     m_data.insert(BroadcastSourceRole, sourceId);
     m_data.insert(IdRole,channelNumber);
+    m_data.insert(SynopsisRole,synopsis);
+    m_data.insert(IsRecordingRole,recording);
 }
 
 bool EPGItemClass::setData(int role, const QVariant &value)

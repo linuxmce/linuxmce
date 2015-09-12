@@ -165,6 +165,8 @@ public:
             QString progId = QString::fromStdString(pCell->m_mapAttributes_Find("Program"));
             QString sId = QString::fromStdString(pCell->m_mapAttributes_Find("Series"));
             QString src = QString::fromStdString(pCell->m_mapAttributes_Find("Source"));
+            QString synopsis = QString::fromStdString(pCell->m_mapAttributes_Find("Synopsis"));
+            bool isRecorded = atoi(pCell->m_mapAttributes_Find("isRecorded").c_str()) > 0;
             QStringList srcInfo = src.split(" ");
             QString sourceId, sourceName;
 
@@ -196,7 +198,8 @@ public:
                         progId,
                         sId,
                         sourceId,
-                        sourceName
+                        sourceName,
+                        synopsis, isRecorded
                         );
         } else if (PK_DataGrid == DATAGRID_Active_Users_On_Channel_CONST) {
             DataGridCell *pCell2 = pTable->GetData(1, row);

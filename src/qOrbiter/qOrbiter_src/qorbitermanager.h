@@ -1344,6 +1344,7 @@ public slots:
     void greenButtonPress(){  CMD_Green cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void yellowButtonPress(){ CMD_Yellow cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void startRecordingPress(){CMD_Record cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
+    void scheduleRecording(QString sType, QString sProgramID) { CMD_Schedule_Recording cmd(iPK_Device, iMediaPluginID, sType.toStdString(), "", sProgramID.toStdString()); emit sendDceCommand(cmd); }
     void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, iMediaPluginID); sendDceCommand( cmd);}
     void mute(){DCE::CMD_Mute cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void doMoveMedia(QString eas, int streamID) {CMD_MH_Move_Media cmd(iPK_Device, iMediaPluginID, streamID, eas.toStdString()); sendDceCommand( cmd);}

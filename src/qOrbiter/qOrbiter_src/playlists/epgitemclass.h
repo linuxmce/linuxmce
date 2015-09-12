@@ -29,6 +29,8 @@ public:
         BroadcastSourceNameRole =Qt::DisplayRole+13,
         ChanImageRole = Qt::DisplayRole+14,
         ProgImageRole = Qt::DisplayRole+15,
+        SynopsisRole = Qt::DisplayRole+16,
+        IsRecordingRole = Qt::DisplayRole+17,
 
     };
 
@@ -36,7 +38,8 @@ public:
     EPGItemClass() {}
     void setEpgItemData(QString channelName, QString programName, QString channelNumber, QString channelId,
                         QString timeSlot, int startTime, int endTime,
-                        QString programId, QString seriesId, QString sourceId, QString sourceName);
+                        QString programId, QString seriesId, QString sourceId, QString sourceName,
+                        QString info, bool recording);
     bool setData(int role, const QVariant &value);
     // explicit EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString timeSlot, QString seriesId, QString programId, QString broadcastSource, int broadcastSourceIndex, QString chanImage, QString progImag, QObject *parent = 0);
     explicit EPGItemClass(QObject *parent = NULL);
