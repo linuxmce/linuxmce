@@ -13,7 +13,7 @@ Item {
     property int scaleFactor : 10  // factor to divide time unit with to get actual pixels
     property int markerInterval : 1800 // time interval (in seconds) for time markes in top row
     property int cellHeight : 50 // cell (row) height in pixels
-    property string broadcastSource : "" // the broadcast source, empty means all
+    property string broadcastSource : "" // the broadcast source to show channels from, empty means all
 
     Component.onCompleted: {
         console.log("onComplete")
@@ -30,13 +30,13 @@ Item {
             property real endtime
             property string info
             x: getXPos(starttime)
-            y: ((column+1) * cellHeight)
+            y: (column * cellHeight)
             width: (endtime - starttime) / scaleFactor
             height: cellHeight
             buttonColor: "lightblue"
             label: program
             onActivated: {
-                showInfo(program, info)
+                showInfo(program, epgData.get(index, column, "synopsis"), starttime, endtime, info)
             }
         }
     }
@@ -100,7 +100,7 @@ Item {
                                      "starttime": epgData.get(i, c, "starttime"),
                                      "endtime": epgData.get(i, c, "endtime"),
                                      "program": epgData.get(i, c, "program"),
-                                     "seriesid": epgData.get(i, c, "seriesid")
+                                     "info": epgData.get(i, c, "programid")
                                      });
     }
 
@@ -112,31 +112,76 @@ Item {
             }
         }
         for (var j = fromTime; j < toTime; j = j + markerInterval) {
-            timeDelegate.createObject(programFlick.contentItem, { "time": j })
+            timeDelegate.createObject(timeFlick.contentItem, { "time": j })
         }
-
     }
 
-    function showInfo(title, info) {
-        infoPopup.info = info
-        infoPopup.title = title
-        infoPopup.visible = true
+    function showInfo(title, synopsis, starttime, endtime, info) {
+        infoPopup.createObject(layout, {"title": title, "starttime": starttime,
+                               "endtime":endtime, "info":info, "synopsis": synopsis})
     }
 
-    GenericPopup {
+    Component {
         id: infoPopup
-        visible: false
-        z: 200
-        property string info
-        anchors.fill: parent
-        anchors.margins: 30
-        content: StyledText {
+        GenericPopup {
+            z: 200
+            property string synopsis
+            property real starttime
+            property real endtime
+            anchors.fill: parent
+            anchors.margins: 30
+            content: Item {
                 anchors.fill: parent
-                text: info
+                anchors.margins: 20
+                StyledText {
+                    id: timeText
+                    anchors {
+                        right: parent.right
+                        left: parent.left
+                        top:parent.top
+                    }
+                    height : 50
+                    text: getTimeString(starttime) + " - " + getTimeString(endtime)
+                }
+                StyledText {
+                    id: synopsisText
+                    anchors {
+                        top: timeText.bottom
+                        right: parent.right
+                        left: parent.left
+                        bottom: buttonRect.top
+                    }
+
+                    text: synopsis
+                }
+                Rectangle {
+                    id: buttonRect
+                    anchors {
+                        right: parent.right
+                        left: parent.left
+                        bottom: parent.bottom
+                    }
+                    height : Style.appButtonHeight*1.5
+                    border.color: white
+                    border.width: 2
+                    opacity: .5
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.margins: 20
+                        StyledButton {
+                            id: recordBt
+                            label: qsTr("Record")
+                            onActivated: { }
+                        }
+                    }
+                }
             }
+        }
     }
 
-    // Dummy: we need this to trigger loading of the actual data until I figure out how to trigger it
+    // Dummy: we need this to trigger loading of the actual data until I figure out how to trigger it automatically
     GenericListModel {
         anchors.left: parent.right
         model: epgData
@@ -154,26 +199,43 @@ Item {
         }
     }
 
-    ListView {
+    Flickable {
         id: channelCol
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.topMargin: cellHeight
+        width: 150
         z: 100
+        contentY: programFlick.contentY
+        contentHeight: 1200
+        clip: true
 
     }
 
     Flickable {
-        id: programFlick
+        id: timeFlick
         anchors.top: parent.top
+        anchors.left: channelCol.right
+        anchors.right: parent.right
+        height: cellHeight
+        contentWidth: 1200
+        contentHeight: cellHeight
+        contentX: programFlick.contentX
+        clip: true
+        flickableDirection: Flickable.HorizontalFlick
+    }
+
+    Flickable {
+        id: programFlick
+        anchors.top: timeFlick.bottom
         anchors.left: channelCol.right
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         contentWidth: 1200
         contentHeight: contentItem.childrenRect.height
         clip: true
-        flickableDirection: Flickable.HorizontalFlick
+        flickableDirection: Flickable.HorizontalAndVerticalFlick
     }
 
 }
