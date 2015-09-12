@@ -27,7 +27,12 @@ StyledScreen {
             qmlRoot.createPopup(filedetailscomp)
         }
     }
-
+    Keys.onPressed: {
+        console.log('keyPressed: ' + event.text)
+        if (event.text != ''){
+            multi_view_list.seek(event.text)
+        }
+    }
     Item{
         id:innerContent
         anchors.fill: parent
