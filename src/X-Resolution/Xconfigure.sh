@@ -1,17 +1,13 @@
 #!/bin/bash
+
 function XorgConfLogging() {
 	local message="$1"
-	local xorgLog="/var/log/pluto/xorg.conf.log"
-	local xorgLines=$(cat /etc/X11/xorg.conf | wc -l)
+	local xorgLog="${ConfigFile}.log"
+	local xorgLines=$(cat ${ConfigFile} | wc -l)
 	local myPid=$$
 
 	echo "$myPid $(date -R) $message [$xorgLines]"	>> $xorgLog
 }
-
-XorgConfLogging "Starting $0 $*"
-
-#nVidia modeline, driver bug workaround
-Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/Utils.sh
@@ -28,6 +24,9 @@ DEVICECATEGORY_Video_Cards=125
 DEVICEDATA_Setup_Script=189
 DEVICEDATA_Connector=68
 DEVICEDATA_TV_Standard=229
+
+#nVidia modeline, driver bug workaround
+Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 
 GetResolutionFromDB()
 {
@@ -314,18 +313,19 @@ rm -f /etc/pluto/X-PostStart.sh
 ScriptCustomization
 CheckComponents
 ParseParameters "$@"
+
+XorgConfLogging "Starting $0 $*"
+
 if [[ -z "$SkipLock" ]]; then
 	trap 'Unlock "Xconfigure" "Xconfigure" nolog; XorgConfLogging "Ending"' EXIT
 	WaitLock "Xconfigure" "Xconfigure" nolog # don't run two copies of Xconfigure simultaneously
 fi
 EnsureResolutionVariables
+
 DisplayDriver=$(GetVideoDriver)
 if [[ -n "$ForceVESA" ]]; then
 	DisplayDriver="fbdev"
 fi
-#if [[ "$DisplayDriver" == viaprop ]]; then
-#	DisplayDriver=via
-#fi
 if [[ "$DisplayDriver" == "intel" ]]; then
 	. /usr/pluto/bin/X-IntelSpecificFunctions.sh
 elif [[ "$DisplayDriver" == "nvidia" ]]; then
