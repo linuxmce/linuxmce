@@ -80,6 +80,7 @@ getPreferredNvidiaDriver() {
 		return 1
 	esac
 
+	echo "nvidia-current"
 	return 0
 }
 
