@@ -425,6 +425,10 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 		return;
 	}
 
+    // types:
+    // O - record once
+    // C - record all on channel
+    //
 	if( sType=="O" )
 	{
 		char sDate[20];
@@ -796,9 +800,13 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
 			pCell->m_mapAttributes["Series"] = pVDRProgramInstance->GetSeriesId();
 			pCell->m_mapAttributes["Program"] = pVDRProgramInstance->GetProgramId();
 			pCell->m_mapAttributes["Info"] = pVDRProgramInstance->GetTitle();
-			pCell->m_mapAttributes["Number"] = sNumber;
+            pCell->m_mapAttributes["Synopsis"] = sInfo;
+            pCell->m_mapAttributes["Number"] = sNumber;
 			pCell->m_mapAttributes["StartTime"] = sStartTime;
 			pCell->m_mapAttributes["EndTime"] = sEndTime;
+
+            pCell->m_mapAttributes["recording"] = "";  // type of recording
+            pCell->m_mapAttributes["recordid"] = "";  // recording id
 
 			pDataGridTable->SetData(colNo, rowNo, pCell);
 			pVDRProgramInstance = pVDRProgramInstance->m_pVDRProgramInstance_Next;
