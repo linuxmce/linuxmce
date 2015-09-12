@@ -95,9 +95,9 @@ SetupX () {
 }
 
 DualBus () {
-	if [[ $(lspci | grep -w 'VGA' | sort -u | wc -l) -gt "1" ]]; then
+	vga_pci=$(lspci -nn | grep -w 'VGA')
+	if [[ $(echo "$vga_pci" | sort -u | wc -l) -gt "1" ]]; then
 		CheckVideoDriver # BestGPU
-		vga_pci="$1"
 		if [[ -e "$XF86Config" ]]; then
 			XorgConfig="$XF86Config"
 		else
