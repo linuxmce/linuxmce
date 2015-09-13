@@ -1,0 +1,35 @@
+Mbrola package
+--------------
+
+The mbrola package provides the code part of the mbrola speech synthesizer.
+To make it work, you need to install voice packages according to the desired
+languages and quality, these are called mbrola-xyn where xyn is the mbrola voice
+identifier, the same as in the upstream database:
+http://tcts.fpms.ac.be/synthesis/
+
+Voice packages also provide the virtual package mbrola-voice-<lang>
+where <lang> is the iso code of the language), and sometimes also
+mbrola-voice-<lang>-<territory> where the additional <territory> is the
+territory of the language.
+
+Since mbrola only synthesizes wave speech from phonemes, you also need a text
+to phoneme converter, such as espeak or cicero, and a player such as sox. For
+instance, to use the us1 voice from the mbrola-us1 package, you can run
+
+echo 'Hello, world!' | espeak -v mb-us1 --stdin | mbrola -e /usr/share/mbrola/us1/us1 - -.au | play -t .au -
+
+To make use of mbrola along espeak in speech-dispatcher, enable the
+espeak-mbrola-generic module by uncommenting the corresponding line in
+/etc/speech-dispatcher/speechd.conf
+
+Not all mbrola voices are packaged, because they take a lot of space and require
+text to phoneme support.  If you need to package a particular mbrola voice, you
+can probably just use the debian/mbrola-voice-package-generate script from
+the /usr/share/doc/mbrola/examples.
+
+Note: the amd64 package ships a 32bit binary, because the said-to-be-64
+bit version on the mbrola site actually is 32bit and does not work at
+all.  Users who compile their own kernel should thus make sure to enable
+CONFIG_IA32_EMULATION.
+
+ -- Samuel Thibault <sthibault@debian.org>  Mon, 01 Jun 2009 18:42:38 +0200
