@@ -29,14 +29,17 @@ Item {
             property real starttime
             property real endtime
             property string info
+            property string recording
             x: getXPos(starttime)
             y: (column * cellHeight)
             width: (endtime - starttime) / scaleFactor
             height: cellHeight
-            buttonColor: "lightblue"
+            buttonColor: recording == 'O' ? "lightgreen" : "lightblue"
             label: program
             onActivated: {
-                showInfo(program, epgData.get(index, column, "synopsis"), starttime, endtime, info)
+                showInfo(epgData.get(0, column, "channelid"), program,
+                         epgData.get(index, column, "synopsis"), starttime, endtime, info,
+                         recording, epgData.get(index, column, "recordid"))
             }
         }
     }
@@ -100,7 +103,8 @@ Item {
                                      "starttime": epgData.get(i, c, "starttime"),
                                      "endtime": epgData.get(i, c, "endtime"),
                                      "program": epgData.get(i, c, "program"),
-                                     "info": epgData.get(i, c, "programid")
+                                     "info": epgData.get(i, c, "programid"),
+                                     "recording": epgData.get(i, c, "recording")
                                      });
     }
 
@@ -116,18 +120,22 @@ Item {
         }
     }
 
-    function showInfo(title, synopsis, starttime, endtime, info) {
-        infoPopup.createObject(layout, {"title": title, "starttime": starttime,
-                               "endtime":endtime, "info":info, "synopsis": synopsis})
+    function showInfo(channelID, title, synopsis, starttime, endtime, info, recording, recordid) {
+        infoPopup.createObject(layout, {"channelID": channelID, "title": title, "starttime": starttime,
+                               "endtime":endtime, "info":info, "synopsis": synopsis, "recording": recording,
+                               "recordid": recordid})
     }
 
     Component {
         id: infoPopup
         GenericPopup {
             z: 200
+            property string channelID
             property string synopsis
             property real starttime
             property real endtime
+            property string recording
+            property string recordid
             anchors.fill: parent
             anchors.margins: 30
             content: Item {
@@ -162,7 +170,7 @@ Item {
                         bottom: parent.bottom
                     }
                     height : Style.appButtonHeight*1.5
-                    border.color: white
+                    border.color: "white"
                     border.width: 2
                     opacity: .5
 
@@ -172,8 +180,13 @@ Item {
                         anchors.margins: 20
                         StyledButton {
                             id: recordBt
-                            label: qsTr("Record")
-                            onActivated: { }
+                            label: recording == '' ? qsTr("Record") : qsTr("Cancel record")
+                            onActivated: {
+                                if (recording == 'O')
+                                    manager.cancelRecording(recordid, '')
+                                else
+                                    manager.scheduleRecording('O', channelID+","+starttime+","+endtime)
+                            }
                         }
                     }
                 }
