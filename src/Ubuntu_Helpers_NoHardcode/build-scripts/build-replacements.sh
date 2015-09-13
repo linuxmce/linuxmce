@@ -96,6 +96,9 @@ function Build_Replacements_Common_all
 
 function Build_Replacements_Common_ubuntu
 {
+	#Package: mbrola
+	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1 || :
+
 	#Package: motion
 	Build_Replacement_Package motion ubuntu/motion-3.2.12+git20150610 || :
 
@@ -259,6 +262,9 @@ function Build_Replacements_ubuntu_trusty
 
 function Build_Replacements_Common_raspbian
 {
+	#Package: mbrola
+	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1 || :
+
 	#Package: motion
 	Build_Replacement_Package motion ubuntu/motion-3.2.12+git20150610 || :
 
