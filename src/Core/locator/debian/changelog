@@ -1,4 +1,10 @@
-lmce-core-locator (2.0.0.47.0~lmce1~precise1) precise; urgency=medium
+lmce-core-locator (2.0.0.47.0~lmce2) precise; urgency=medium
+
+  * update
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Sun, 13 Sep 2015 00:51:22 -0400
+
+lmce-core-locator (2.0.0.47.0~lmce1) precise; urgency=medium
 
   * Initial release.
 
