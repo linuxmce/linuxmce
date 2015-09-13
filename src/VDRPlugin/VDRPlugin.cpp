@@ -137,7 +137,7 @@ bool VDRPlugin::Register()
 	BuildChannelList();
 	m_bBookmarksNeedRefreshing=false;
 	RefreshBookmarks();
-	UpdateTimers();
+    UpdateTimers();
 
 	return Connect(PK_DeviceTemplate_get()); 
 }
@@ -407,6 +407,9 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 	localtime_r(&tStartTime,&tmStart);
 	localtime_r(&tStopTime,&tmStop);
 
+    if( sChannelID.size() && sChannelID[0]=='i' )
+        sChannelID = sChannelID.substr(1);
+
 	VDRChannel *pVDRChannel = m_mapVDRChannel_Find(sChannelID);
 	if( !pVDRChannel )
 	{
@@ -452,7 +455,10 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::CMD_Schedule_Recording bad response %s %d %s",sProgramID.c_str(),tStartTime,sVDRResponse.c_str());
 			return;
 		}
-	}
+        pVDRProgramInstance->m_bRecording = true;
+        pVDRProgramInstance->m_iRecordingID = iTimer;
+        m_mapVDRRecording[iTimer] = pVDRProgramInstance;
+    }
 	else if( sType=="C" )
 	{
 		string sCommand;
@@ -496,7 +502,7 @@ class DataGridTable *VDRPlugin::CurrentShows(string GridID, string Parms, void *
 		return pDataGridTable;
 
 	time_t tNow = time(NULL);
-	struct tm t;
+    struct tm t;
 	localtime_r(&tNow,&t);
 	int Month = t.tm_mon;
 	int Day = t.tm_mday;
@@ -758,6 +764,7 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
 		ss >> endTime;
 	}
 	bool bIncludeChannels = atoi(StringUtils::Tokenize(Parms,",",pos).c_str());
+    string source = StringUtils::Tokenize(Parms,",",pos); // Source if there is no active stream
 
 	PLUTO_SAFETY_LOCK(mm, m_pMedia_Plugin->m_MediaMutex);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRTV_PlugIn::EPGrid An EPG datagrid was requested %s params %s", GridID.c_str(), Parms.c_str());
@@ -777,41 +784,43 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
 		if( !pVDRChannel )
 			continue; // Shouldn't happen that pVDRChannel is NULL, we're not including it
 
-		if (bIncludeChannels)
-		{
-			pDataGridTable->SetData(colNo, rowNo, GetChannelCell(pVDRChannel));
-			rowNo++;
-		}
+        if (source.empty() || (pVDRChannel->m_pVDRSource != NULL &&
+                               pVDRChannel->m_pVDRSource->m_sDescription == source)) {
+            if (bIncludeChannels)
+            {
+                pDataGridTable->SetData(colNo, rowNo, GetChannelCell(pVDRChannel));
+                rowNo++;
+            }
 
-		// Refresh channel EPG if last time was more than X ago
-		if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
-			UpdateEPGFromVDR(pVDRChannel->m_sID, "");
+            // Refresh channel EPG if last time was more than X ago
+            if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
+                UpdateEPGFromVDR(pVDRChannel->m_sID, "");
 
-		VDRProgramInstance *pVDRProgramInstance = pVDRChannel->GetCurrentProgramInstance(startTime);
+            VDRProgramInstance *pVDRProgramInstance = pVDRChannel->GetCurrentProgramInstance(startTime);
 
-		while ( pVDRProgramInstance && pVDRProgramInstance->m_tStartTime < endTime)
-		{
-			string sStartTime = StringUtils::itos(pVDRProgramInstance->m_tStartTime);
-			string sEndTime = StringUtils::itos(pVDRProgramInstance->m_tStopTime);
-			string sNumber = StringUtils::itos(pVDRChannel->m_dwChanNum);
-			string sInfo = pVDRProgramInstance->GetSynopsis();
-			string id = pVDRProgramInstance->GetTitle();
-			DataGridCell* pCell = new DataGridCell(pVDRProgramInstance->GetProgramId(), id);
-			pCell->m_mapAttributes["Series"] = pVDRProgramInstance->GetSeriesId();
-			pCell->m_mapAttributes["Program"] = pVDRProgramInstance->GetProgramId();
-			pCell->m_mapAttributes["Info"] = pVDRProgramInstance->GetTitle();
-            pCell->m_mapAttributes["Synopsis"] = sInfo;
-            pCell->m_mapAttributes["Number"] = sNumber;
-			pCell->m_mapAttributes["StartTime"] = sStartTime;
-			pCell->m_mapAttributes["EndTime"] = sEndTime;
+            while ( pVDRProgramInstance && pVDRProgramInstance->m_tStartTime < endTime)
+            {
+                string sStartTime = StringUtils::itos(pVDRProgramInstance->m_tStartTime);
+                string sEndTime = StringUtils::itos(pVDRProgramInstance->m_tStopTime);
+                string sNumber = StringUtils::itos(pVDRChannel->m_dwChanNum);
+                string sInfo = pVDRProgramInstance->GetSynopsis();
+                string id = pVDRProgramInstance->GetTitle();
+                DataGridCell* pCell = new DataGridCell(pVDRProgramInstance->GetProgramId(), id);
+                pCell->m_mapAttributes["Series"] = pVDRProgramInstance->GetSeriesId();
+                pCell->m_mapAttributes["Program"] = pVDRProgramInstance->GetProgramId();
+                pCell->m_mapAttributes["Info"] = pVDRProgramInstance->GetTitle();
+                pCell->m_mapAttributes["Synopsis"] = sInfo;
+                pCell->m_mapAttributes["Number"] = sNumber;
+                pCell->m_mapAttributes["StartTime"] = sStartTime;
+                pCell->m_mapAttributes["EndTime"] = sEndTime;
 
-            pCell->m_mapAttributes["recording"] = "";  // type of recording
-            pCell->m_mapAttributes["recordid"] = "";  // recording id
+                pCell->m_mapAttributes["recording"] = pVDRProgramInstance->m_bRecording ? "O" : "";  // type of recording
+                pCell->m_mapAttributes["recordid"] = StringUtils::itos(pVDRProgramInstance->m_iRecordingID);  // recording id
 
-			pDataGridTable->SetData(colNo, rowNo, pCell);
-			pVDRProgramInstance = pVDRProgramInstance->m_pVDRProgramInstance_Next;
-			rowNo++;
-		}
+                pDataGridTable->SetData(colNo, rowNo, pCell);
+                pVDRProgramInstance = pVDRProgramInstance->m_pVDRProgramInstance_Next;
+                rowNo++;
+            }
 
 /*		MapBookmark *pMapBookmark_Series_Or_Program;
 		MapBookmark::iterator itB;
@@ -842,7 +851,8 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
 			// It's a user's favorited series.
 			pDataGridTable->SetData(0,iRow++,new DataGridCell(pVDRChannel->m_pCell)); // A copy since we'll add this one later too
 			}*/
-		colNo++;
+            colNo++;
+        }
 	}
 
 	return pDataGridTable;
@@ -1263,6 +1273,9 @@ void VDRPlugin::BuildChannelList()
 		VDRChannel *pVDRChannel = new VDRChannel(sChannelID,iChannel,pVDRSource,sChannelNameShort,sChannelNameLong,NULL,0);
 		m_mapVDRChannel[sChannelID]=pVDRChannel;
 		m_ListVDRChannel.push_back(pVDRChannel);
+
+        UpdateEPGFromVDR(sChannelID, "");
+
 		i++;
 	}
 }
@@ -1612,6 +1625,22 @@ void VDRPlugin::CMD_Reporting_EPG_Status(string sText,bool bIsSuccessful,string 
 void VDRPlugin::CMD_Remove_Scheduled_Recording(string sID,string sProgramID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c911-e->
 {
+    string sVDRResponse;
+    PLUTO_SAFETY_LOCK(vc, m_ConMutex);
+    if( !m_VDRConnection.SendVDRCommand("DELT " + sID,sVDRResponse) )
+    {
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "VDRTV_PlugIn::CMD_Remove_Scheduled_Recording(): Failed to remove recording with id %s, message from VDR: %s", sID.c_str(), sVDRResponse.c_str());
+    } else {
+        // remove recording marker on program instance
+        int iTimerID = atoi(sID.c_str());
+        VDRProgramInstance* pInstance = m_mapVDRRecording_Find(iTimerID);
+        if (pInstance)
+        {
+            pInstance->m_bRecording = false;
+            pInstance->m_iRecordingID = 0;
+            m_mapVDRRecording.erase(iTimerID);
+        }
+    }
 }
 
 void VDRPlugin::UpdateTimers()
@@ -1628,10 +1657,55 @@ void VDRPlugin::UpdateTimers()
 			if( sLine.empty() )
 				break;
 			string::size_type pos_colon=0;
-			string s1 = StringUtils::Tokenize(sLine,":",pos_colon);
-			string s2 = StringUtils::Tokenize(sLine,":",pos_colon);
-				
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRTV_PlugIn::TIMERS %s params %s", s1.c_str(), s2.c_str());
+            //  1 9:2:2015-09-13:1939:2009:50:99:Landeplage: Lys og varme:
+            int id = atoi(StringUtils::Tokenize(sLine," ",pos_colon).c_str());
+            string s1 = StringUtils::Tokenize(sLine,":",pos_colon);
+            int channelNum = atoi(StringUtils::Tokenize(sLine,":",pos_colon).c_str());
+            string date = StringUtils::Tokenize(sLine,":",pos_colon);
+            string stime = StringUtils::Tokenize(sLine,":",pos_colon);
+            string etime = StringUtils::Tokenize(sLine,":",pos_colon);
+            string s3 = StringUtils::Tokenize(sLine,":",pos_colon);
+            string s4 = StringUtils::Tokenize(sLine,":",pos_colon);
+            string title = StringUtils::Tokenize(sLine,"",pos_colon);
+
+            // Find actual program that is being recorded and mark it
+            // TODO: support timed recording? (no program, just start and stop time?)
+            size_t c = 0;
+            VDRChannel *pVDRChannel = NULL;
+            ListVDRChannel::iterator it=m_ListVDRChannel.begin();
+            while (pVDRChannel == NULL && it!=m_ListVDRChannel.end())
+            {
+                if ((*it)->m_dwChanNum == channelNum)
+                    pVDRChannel = *it;
+                it++;
+            }
+            if (pVDRChannel)
+            {
+                string::size_type pos_t = 0;
+                int y = atoi(StringUtils::Tokenize(date,"-",pos_t).c_str());
+                int m = atoi(StringUtils::Tokenize(date,"-",pos_t).c_str());
+                int d = atoi(StringUtils::Tokenize(date,"-",pos_t).c_str());
+                int h = atoi(stime.substr(0, 2).c_str());
+                int min = atoi(stime.substr(2).c_str());
+                time_t tStartTime = StringUtils::MakeTime(y, m, d, h, min);
+
+                VDRProgramInstance *pVDRProgramInstance = pVDRChannel->m_pVDRProgramInstance_First;
+                while(pVDRProgramInstance && pVDRProgramInstance->m_tStartTime!=tStartTime)
+                    pVDRProgramInstance = pVDRProgramInstance->m_pVDRProgramInstance_Next;
+                if( !pVDRProgramInstance )
+                {
+                    LoggerWrapper::GetInstance()->Write(LV_WARNING,"VDRPlugin::UpdateTimers() invalid program - unable to map timer to program");
+                    break;
+                } else {
+                    pVDRProgramInstance->m_bRecording = true;
+                    pVDRProgramInstance->m_iRecordingID = id;
+                }
+
+            } else {
+                LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRTV_PlugIn::UpdateTimers() no such channel - unable to map timer to channel+program");
+                break;
+            }
+
 		}
 	}
 }
