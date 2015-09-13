@@ -926,7 +926,7 @@ InstallVideoDriver() {
 		# VirtualBox
 		vboxvideo)
 			if ! PackageIsInstalled virtualbox-guest-x11 ; then
-				apt-get -yf install virtualbox-guest-x11
+				apt-get -yf install virtualbox-guest-dkms
 				VerifyExitCode "Install virtualbox Driver"
 			fi ;;
 	esac
