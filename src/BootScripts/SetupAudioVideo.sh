@@ -23,6 +23,8 @@ DEVICEDATA_Sampling_Rate="310"
 DEVICEDATA_Distro_Raspbian_Wheezy="19"
 DEVICEDATA_Distro_Raspbian_Jessie="22"
 
+ARCH=$(arch)
+
 SettingsFile="/etc/pluto/lastaudiovideo.conf"
 mkdir -p $(dirname $SettingsFile)
 
