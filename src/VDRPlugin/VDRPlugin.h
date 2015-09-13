@@ -111,8 +111,11 @@ namespace DCE
 		class VDREpisode *m_pVDREpisode;
 		VDRProgramInstance *m_pVDRProgramInstance_Next;
 		int m_iID;
+        bool m_bRecording;
+        int m_iRecordingID;
 
-		VDRProgramInstance() : m_pVDRProgramInstance_Next(NULL), m_pVDREpisode(NULL), m_iID(0) {}
+        VDRProgramInstance() : m_pVDRProgramInstance_Next(NULL), m_pVDREpisode(NULL), m_iID(0),
+            m_bRecording(false), m_iRecordingID(0) {}
 
 		string GetSynopsis()
 		{
@@ -215,6 +218,9 @@ namespace DCE
 
 		map<string,VDRSeries *> m_mapVDRSeries;
 		VDRSeries *m_mapVDRSeries_Find(string sSeriesID) { map<string,VDRSeries *>::iterator it = m_mapVDRSeries.find(sSeriesID); return it==m_mapVDRSeries.end() ? NULL : (*it).second; }
+
+        map<int,VDRProgramInstance *> m_mapVDRRecording;
+        VDRProgramInstance *m_mapVDRRecording_Find(int timerID) { map<int,VDRProgramInstance*>::iterator it = m_mapVDRRecording.find(timerID); return it==m_mapVDRRecording.end() ? NULL : (*it).second; }
 
 		string m_sVDRIp;
 		time_t m_timeUpdateInterval;
