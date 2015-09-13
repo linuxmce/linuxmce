@@ -1,0 +1,91 @@
+#!/usr/bin/make -f
+
+DEB_HOST_ARCH?=$(shell dpkg-architecture -qDEB_HOST_ARCH)
+README_ZIPBALL=mbr301h_i386-ppc-alpha-ultra.zip
+
+ZIPBALL=
+RARBALL=
+
+ifeq ($(DEB_HOST_ARCH),i386)
+ZIPBALL=mbr301h_i386-ppc-alpha-ultra.zip
+FILENAME=unpacked/mbrola-linux-i386
+endif
+
+ifeq ($(DEB_HOST_ARCH),amd64)
+ZIPBALL=mbr301h_i386-ppc-alpha-ultra.zip
+FILENAME=unpacked/mbrola-linux-i386
+endif
+
+ifeq ($(DEB_HOST_ARCH),alpha)
+ZIPBALL=mbr301h_i386-ppc-alpha-ultra.zip
+FILENAME=unpacked/mbrola-linux-alpha
+endif
+
+ifeq ($(DEB_HOST_ARCH),powerpc)
+ZIPBALL=mbr301h_i386-ppc-alpha-ultra.zip
+FILENAME=unpacked/mbrola302b-linux-ppc
+endif
+
+ifeq ($(DEB_HOST_ARCH),sparc)
+ZIPBALL=mbr301h_i386-ppc-alpha-ultra.zip
+FILENAME=unpacked/mbrola-SuSElinux-ultra1.dat
+endif
+
+ifeq ($(DEB_HOST_ARCH),armhf)
+ZIPBALL=mbrola-armhf.zip
+FILENAME=unpacked/mbrola-linux-armhf
+endif
+
+ifeq ($(DEB_HOST_ARCH),armel)
+ifeq (0,1)
+# This static one does not work on maemo
+ZIPBALL=mbr301h_arm.zip
+FILENAME=unpacked/mbrola-linux-strongarm2-static
+else
+FILENAME=zipballs/mbrola-armel
+endif
+endif
+
+
+unpack:
+ifneq ($(ZIPBALL),)
+	unzip -u -d unpacked zipballs/$(ZIPBALL)
+else
+	unzip -u -d unpacked zipballs/$(README_ZIPBALL)
+endif
+
+mbrola: unpack
+	cp -f $(FILENAME) mbrola
+	chmod u+w,+x mbrola
+	strip mbrola
+
+build-arch: mbrola
+build-indep:
+
+build: build-arch
+
+binary-arch: build-arch
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_install mbrola usr/bin
+	dh_installdocs
+	dh_installman
+	dh_installchangelogs
+	dh_installexamples
+	dh_shlibdeps
+	dh_compress
+	dh_fixperms
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary-indep:
+
+binary: binary-arch
+
+clean:
+	dh_testdir
+	dh_clean
+	rm -f mbrola
+	rm -fr unpacked

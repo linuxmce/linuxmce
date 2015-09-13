@@ -1,0 +1,28 @@
+Source: mbrola
+Section: non-free/sound
+Priority: optional
+Maintainer: Samuel Thibault <sthibault@debian.org>
+Build-Depends: debhelper (>= 7), unzip, libc6-i386 [amd64] | libc6:i386 [amd64]
+Standards-Version: 3.9.5
+Homepage: http://tcts.fpms.ac.be/synthesis/
+XS-Autobuild: yes
+
+Package: mbrola
+Architecture: i386 amd64 alpha powerpc sparc armel armhf
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends} [!amd64], libc6:i386 [amd64] | libc6-i386 [amd64]
+Suggests: mbrola-voice, espeak, cicero
+Description: Multilingual software speech synthesizer
+ Mbrola is Thierry Dutoit's phonemizer for multilingual speech synthesis. The
+ various diphone databases are distributed on separate packages, but they
+ must be used with and only with Mbrola because of license matters. Read the
+ copyright for details.
+ .
+ Mbrola itself doesn't provide full TTS. It is a speech synthesizer based on
+ the concatenation of diphones. It takes a list of phonemes as input,
+ together with prosodic information (duration of phonemes and a piecewise linear
+ description of pitch), and produces speech samples on 16 bits (linear),
+ at the sampling frequency of the diphone database.
+ .
+ Use Mbrola along with Freephone, cicero or espeak to have a complete
+ text-to-speech in English.

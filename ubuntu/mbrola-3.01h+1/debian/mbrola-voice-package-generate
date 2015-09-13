@@ -1,0 +1,290 @@
+#!/bin/bash
+
+shopt -s nocaseglob nullglob
+
+me="Samuel Thibault <sthibault@debian.org>"
+
+debug() {
+	:
+	echo "$@"
+}
+
+if [ "$#" -lt 4 ]
+then
+	echo "Usage: $0 code version language locale"
+	echo "for instance, $0 ca1 0.1 \"Canadian French\" fr_CA"
+	exit 1
+fi
+
+code="$1"
+version="$2"
+language="$3"
+language="$(echo $language | sed -e 's/^\(.\)/\u\1/')"
+locale="$4"
+locale_lang="${locale/%_*/}"
+locale_territory=
+[ -z "${locale/*_*}" ] && locale_territory="${locale/#*_/}"
+territory="$(echo $locale_territory | tr 'A-Z' 'a-z')"
+a_language="a $language"
+case $language in
+	A*|E*|I*|O*)
+		a_language="an $language"
+esac
+
+debug "code=\"$code\""
+debug "version=\"$version\""
+debug "language=\"$language\""
+debug "locale=\"$locale\""
+debug "lang=\"$locale_lang\""
+debug "territory=\"$territory\""
+debug "a language=\"$a_language\""
+
+#
+#
+debug \# Check the cwd
+#
+#
+
+license=
+[ -r license.txt ] && license=license.txt
+[ -r licence.txt ] && license=licence.txt
+if [ -z "$license" ]
+then
+	echo "missing license file, are you within the unzipped archive?"
+	exit 1
+fi
+
+#
+#
+debug \# check voice file
+#
+#
+
+voice=
+[ -r "$code" ] && voice="$code"
+if [ -z "$voice" ];
+then
+	echo "Could not find voice"
+	exit 1
+fi
+
+#
+#
+debug \# check help file
+#
+#
+
+help=
+[ -r "$code.txt" ] && help="$code.txt"
+[ -r "$code.info" ] && help="$code.info"
+try=$(echo $code | tr 'a-z' 'A-Z')
+[ -r "$try.txt" ] && help="$try.txt"
+[ -r "$try.info" ] && help="$try.info"
+try=$(echo $code | sed -e 's/^\(.\)/\u\1/')
+[ -r "$try.txt" ] && help="$try.txt"
+[ -r "$try.info" ] && help="$try.info"
+if [ -z "$help" ];
+then
+	echo "Could not find help file"
+	exit 1
+fi
+debug "help=\"$help\""
+
+#
+#
+debug \# detect gender
+#
+#
+gender=male
+grep -q -i female $help && gender=female
+debug "gender=\"$gender\""
+
+#
+#
+debug \# Look for a test
+#
+#
+
+testdir=
+[ -d "TEST" ] && testdir="TEST"
+[ -d "TEST1" ] && testdir="TEST1"
+[ -d "test" ] && testdir="test"
+[ -d "Test" ] && testdir="Test"
+if [ -z "$testdir" ];
+then
+	echo "Could not find testdir"
+	exit 1
+fi
+debug "testdir=\"$testdir\""
+cd "$testdir"
+testpho=$(ls -S *.pho *.Pho *.PHO | head -n 1)
+cd - > /dev/null
+if [ -z "$testpho" ];
+then
+	echo "Could not find phoneme test file"
+	exit 1
+fi
+debug "testpho=\"$testpho\""
+
+#
+#
+debug \# Try it
+mbrola -e $voice $testdir/$testpho -.au | play -t .au - &
+#
+#
+
+#
+#
+debug \# Ok, go !
+#
+#
+
+tar czf ../mbrola-${code}_$version.orig.tar.gz --exclude=debian --transform "s/^\./mbrola-$code-$version/" .
+
+mkdir -p debian
+cat > debian/changelog << EOF
+mbrola-$code ($version-1) UNRELEASED; urgency=low
+
+  * Initial release (Closes: #XXX).
+
+ -- $me  $(date -R)
+EOF
+
+cat > debian/compat << EOF
+7
+EOF
+
+provides="mbrola-voice-$locale_lang, mbrola-voice"
+[ -n "$territory" ] && provides="mbrola-voice-$locale_lang-$territory, $provides"
+
+cat > debian/control << EOF
+Source: mbrola-$code
+Section: non-free/sound
+Priority: optional
+Maintainer: $me
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.3
+Homepage: http://tcts.fpms.ac.be/synthesis/
+
+Package: mbrola-$code
+Architecture: all
+Depends: \${misc:Depends}, mbrola
+Provides: $provides
+Description: $language $gender voice for Mbrola
+ This package contains $a_language diphone database provided in the context
+ of the MBROLA project see: http://tcts.fpms.ac.be/synthesis/
+ .
+ It provides $a_language $gender voice to be used with the MBROLA program.
+EOF
+
+cat > debian/copyright << EOF
+This package was debianized by $me
+on $(date -R), based on the packageing from the Oralux
+distribution (Igor B. Poretsky <master@goga.energo.ru> and Gilles Casse
+<gcasse@oralux.org>)
+
+It was downloaded from http://tcts.fpms.ac.be/synthesis/
+
+Upstream Author: Faculte Polytechnique de  Mons  -  mbrola team <mbrola@tcts.fpm
+s.ac.be>
+
+Copyright:
+Copyright (C) 1996-2008  Faculte Polytechnique de  Mons  -  mbrola team <mbrola@tcts.fpms.ac.be>
+
+$(tr -d '' < $license | iconv -f latin1 -t utf-8)
+EOF
+
+cat > debian/docs << EOF
+$help
+EOF
+
+[ -r sampa.txt ] && echo sampa.txt >> debian/docs
+[ -r label.txt ] && echo label.txt >> debian/docs
+
+cat > debian/examples << EOF
+$testdir/*
+EOF
+
+cat > debian/README.Debian << EOF
+mbrola-$code for Debian
+---------------------
+
+This package installs the diphone database into /usr/share/mbrola/$code/$code .
+All examples go to /usr/share/doc/mbrola-$code/examples .
+
+You can test your installation by running:
+
+mbrola /usr/share/mbrola/$code/$code /usr/share/doc/mbrola-$code/examples/$testpho ${testpho/.pho}.wav
+
+which will create ${testpho/.pho}.wav in the current directory.
+
+If you have Sox installed, you can run:
+
+mbrola /usr/share/mbrola/$code/$code /usr/share/doc/mbrola-$code/examples/$testpho -.au | play -t .au -
+
+to play it on the fly.
+
+ -- $me  $(date -R)
+EOF
+
+cat > debian/rules << EOF
+#!/usr/bin/make -f
+
+build:
+build-indep:
+build-arch:
+
+binary-arch:
+
+binary-indep:
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_install $code usr/share/mbrola/$code
+	dh_installdocs
+	dh_installchangelogs
+	dh_installexamples
+	dh_compress -X.pho
+	dh_fixperms
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep
+
+clean:
+	dh_testdir
+	dh_clean
+EOF
+chmod +x debian/rules
+
+cat > ../ITP-mbrola-$code << EOF
+From: $me
+To: Debian Bug Tracking System <submit@bugs.debian.org>
+Subject: ITP: mbrola-$code -- $language $gender voice for Mbrola
+X-Debbugs-Cc: debian-devel@lists.debian.org
+X-Debbugs-Cc: debian-accessibility@lists.debian.org
+
+Package: wnpp
+Version: N/A; reported $(date +%Y-%m-%d)
+Severity: wishlist
+Owner: $me
+
+* Package name    : mbrola-$code
+  Version         : $version
+  Upstream Author : Faculte Polytechnique de  Mons  -  mbrola team <mbrola@tcts.fpms.ac.be> 
+* URL             : http://tcts.fpms.ac.be/synthesis
+* License         : see the file readme.txt in the source zip: non-free as in
+                    without source code, and for non-commercial, non-military
+                    purposes, with and only with the mbrola package made
+                    available by the author.
+  Description     : $language $gender voice for Mbrola
+ This package contains $a_language diphone database provided in the context
+ of the MBROLA project see: http://tcts.fpms.ac.be/synthesis/
+ .
+ It provides $a_language $gender voice to be used with the MBROLA
+ program.
+EOF
+
+wait
+echo Warning: check that the gender was really $gender, or check on http://tcts.fpms.ac.be/synthesis/mbrola/mbrcopybin.html as the readme is sometimes bogus
