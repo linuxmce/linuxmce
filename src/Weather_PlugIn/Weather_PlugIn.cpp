@@ -364,8 +364,8 @@ void Weather_PlugIn::UpdateOrbiterWeatherScenarios()
       UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_City_Data_CONST,"location");
       UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_City_Data_CONST,"location");
       UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_City_Data_CONST,"location");
-      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Current_Description_CONST,"cond_current");
-      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Current_Temperature_CONST,"temp_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Current_Description_CONST,"cond_tonight");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Current_Temperature_CONST,"temp_tonight");
       UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Tomorrow_Weather_Forecast_CONST,"forecast_tonight");
       UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Age_of_Data_CONST,"data_age");
       UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Age_of_Data_CONST,"data_age");
