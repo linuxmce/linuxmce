@@ -1344,7 +1344,22 @@ public slots:
     void greenButtonPress(){  CMD_Green cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void yellowButtonPress(){ CMD_Yellow cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void startRecordingPress(){CMD_Record cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
-    void scheduleRecording(QString sType, QString sProgramID) { CMD_Schedule_Recording cmd(iPK_Device, iMediaPluginID, sType.toStdString(), "", sProgramID.toStdString()); emit sendDceCommand(cmd); }
+    void scheduleRecording(QString sType, QString sProgramID) {
+        //TODO: currently the media plugin does not allow us to send a this command through it if there is no
+        // active stream. We need to be able to do this to allow scheduling recordings from the EPG screen without
+        // actively watching TV. So we now do a slight hack and send to both VDT and MythTV plugin DTs
+        // only one of them is installed at once anyway.
+        CMD_Schedule_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString());
+        emit sendDceCommand(cmd);
+        CMD_Schedule_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString());
+        emit sendDceCommand(cmd2);
+    }
+    void cancelRecording(QString sID, QString sProgramID) {
+        CMD_Remove_Scheduled_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
+        emit sendDceCommand(cmd);
+        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
+        emit sendDceCommand(cmd2);
+    }
     void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, iMediaPluginID); sendDceCommand( cmd);}
     void mute(){DCE::CMD_Mute cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void doMoveMedia(QString eas, int streamID) {CMD_MH_Move_Media cmd(iPK_Device, iMediaPluginID, streamID, eas.toStdString()); sendDceCommand( cmd);}
