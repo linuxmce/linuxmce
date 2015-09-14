@@ -275,10 +275,12 @@ start() {
 
 	# Check AV Wizard completion prior to continuing to launch linuxmce.
 	ConfEval;
-	if [[ "$AutostartMedia" == "1" ]] && [[ "$AVWizardDone" != "1" ]] ; then
-		Message "AVWIZARD NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
-		err=1
-		return $err
+	if [[ "$AutostartMedia" == "1" ]] ; then
+		if [[ "$AVWizardDone" != "1" ]] ; then
+			Message "AVWIZARD NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
+			err=1
+			return $err
+		fi
 	fi
 
 	# hack: cleaning lockfile on M/D start to allow local devices to start
