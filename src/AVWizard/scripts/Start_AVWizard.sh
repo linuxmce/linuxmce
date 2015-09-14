@@ -16,19 +16,22 @@
 CheckAVWizard () {
 	log_daemon_msg "Starting AVWizard" "AVWizard_Run.sh"
 
+	. /usr/pluto/bin/Config_Ops.sh
 	. /usr/pluto/bin/Utils.sh
 
-	if [[ "$AVWizardOverride" != "0" || "$AVWizardDone" != "1" ]] && [[ "$AutostartMedia" == "1" ]] ;then
-		## Install driver based on the type of video card used
-		CheckVideoDriver
+	if [[ "$AutostartMedia" == "1" ]] ; then
+		if [[ "$AVWizardOverride" != "0" || "$AVWizardDone" != "1" ]] ; then
+			## Install driver based on the type of video card used
+			CheckVideoDriver
 
-		## Run the AVWizard
-		/usr/pluto/bin/AVWizard_Run.sh 1>/dev/null 2>/dev/null </dev/null
-		if [[ "$?" == "0" ]]; then
-			ConfSet "AVWizardOverride" "0"
+			## Run the AVWizard
+			/usr/pluto/bin/AVWizard_Run.sh 1>/dev/null 2>/dev/null </dev/null
+			if [[ "$?" == "0" ]]; then
+				ConfSet "AVWizardOverride" "0"
+			fi
+		else
+			beep -l 50 -f 1000 -n -l 50 -f 1200 -n -l 50 -f 1400 -n -l 50 -f 1600 -n -l 50 -f 1800 -n -l 50 -f 2000 -n -l 50 -f 2200 &
 		fi
-	else
-		beep -l 50 -f 1000 -n -l 50 -f 1200 -n -l 50 -f 1400 -n -l 50 -f 1600 -n -l 50 -f 1800 -n -l 50 -f 2000 -n -l 50 -f 2200 &
 	fi
 	killall WatchGyroRemote 2>/dev/null
 
