@@ -68,6 +68,8 @@ case "$PK_Distro" in
 			rpioutput='1'
 		fi
 		amixer cset numid=3 $rpioutput
+
+		NoAsoundConf="true"
 		;;
 esac
 
@@ -209,6 +211,8 @@ Enable_Audio_Channels()
 
 Setup_AsoundConf()
 {
+	[[ -n "$NoAsoundConf" ]] && return
+
 	local AudioSetting="$1"
 	SoundOut="plughw:"
 	Yalpa=$(aplay -l 2>&1)
