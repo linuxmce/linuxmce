@@ -200,11 +200,11 @@ sub generate_voice_mbrola()
 	given ($FK_Language) {
 		# french
 		when(2) {
-			system('echo "'.$TEXT.'" | /usr/share/mbrola/lia_phon/script/lia_text2mbrola | mbrola -I /usr/share/mbrola/lia_phon/data/initfile.lia /usr/share/mbrola/voices/fr4 - /tmp/tts.wav');
+			system('echo "'.$TEXT.'" | espeak -v mb-fr4 -w /tmp/tts.wav');
 		}
 		# german
 		when(3) {
-			system('echo "'.$TEXT.'" | /usr/share/mbrola/txt2pho/txt2pho - | mbrola /usr/share/mbrola/voices/de7 - /tmp/tts.wav');
+			system('echo "'.$TEXT.'" | espeak -v mb-de7 -w /tmp/tts.wav');
 		}
 	}
 
