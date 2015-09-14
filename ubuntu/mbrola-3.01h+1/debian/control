@@ -2,7 +2,7 @@ Source: mbrola
 Section: non-free/sound
 Priority: optional
 Maintainer: Samuel Thibault <sthibault@debian.org>
-Build-Depends: debhelper (>= 7), unzip, libc6-i386 [amd64] | libc6:i386 [amd64]
+Build-Depends: debhelper (>= 7), unzip, libc6-i386 [amd64]
 Standards-Version: 3.9.5
 Homepage: http://tcts.fpms.ac.be/synthesis/
 XS-Autobuild: yes
@@ -10,7 +10,7 @@ XS-Autobuild: yes
 Package: mbrola
 Architecture: i386 amd64 alpha powerpc sparc armel armhf
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${shlibs:Depends} [!amd64], libc6:i386 [amd64] | libc6-i386 [amd64]
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: mbrola-voice, espeak, cicero
 Description: Multilingual software speech synthesizer
  Mbrola is Thierry Dutoit's phonemizer for multilingual speech synthesis. The
