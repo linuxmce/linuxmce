@@ -275,18 +275,19 @@ start() {
 
 	# Check AV Wizard completion prior to continuing to launch linuxmce.
 	ConfEval;
-	if [[ "$AVWizardOverride" != "0" || "$AVWizardDone" != "1" ]] && [[ "$AutostartMedia" == "1" ]] ;then
+	if [[ "$AutostartMedia" == "1" ]] && [[ "$AVWizardDone" != "1" ]] ; then
 		Message "AVWIZARD NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
 		err=1
 		return $err
 	fi
 
-	export DISPLAY=":${Display}"
-	/usr/pluto/bin/SetupAudioVideo.sh
 	# hack: cleaning lockfile on M/D start to allow local devices to start
 	# TODO: remove this when correct locking will be implemented
 	rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
 	if [[ "$AutostartMedia" -eq "1" ]] ; then
+		export DISPLAY=":${Display}"
+		/usr/pluto/bin/SetupAudioVideo.sh
+
 		Q="SELECT FK_DeviceTemplate FROM Device WHERE PK_Device=$PK_Device"
 		FK_DeviceTemplate=$(RunSQL "$Q")
 
@@ -320,7 +321,6 @@ start() {
 	StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
 	StartService "Starting Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "&"
 	StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
-
 
 	# TODO: move to a boot-addon script for the individual devices (firewire/pvr250).
 	#StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
