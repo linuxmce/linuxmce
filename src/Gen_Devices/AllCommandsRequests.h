@@ -5508,36 +5508,84 @@ namespace DCE
 			1 /* number of parameters */,
 			COMMANDPARAMETER_Level_CONST, sLevel.c_str()); }
 	};
+	class RESP_Schedule_Recording : public PreformedCommandResponse {
+		string *m_sID;
+	public:
+		RESP_Schedule_Recording(string *sID) { 
+		m_sID=sID; }
+		void ParseResponse(Message *pMessage) {
+			*m_sID=pMessage->m_mapParameters[COMMANDPARAMETER_ID_CONST]; };
+	};
 	class CMD_Schedule_Recording : public PreformedCommand {
 	public:
-		CMD_Schedule_Recording(long DeviceIDFrom, long DeviceIDTo,string sType,string sOptions,string sProgramID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+		CMD_Schedule_Recording(long DeviceIDFrom, long DeviceIDTo,string sType,string sOptions,string sProgramID,string *sID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
 			COMMAND_Schedule_Recording_CONST,
-			3 /* number of parameters */,
+			4 /* number of parameters */,
 			COMMANDPARAMETER_Type_CONST, sType.c_str(),
 			COMMANDPARAMETER_Options_CONST, sOptions.c_str(),
-			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str()); }
+			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str(),
+			COMMANDPARAMETER_ID_CONST, (*sID).c_str());		m_pcResponse = new RESP_Schedule_Recording(sID); }
 	};
 	class CMD_Schedule_Recording_DL : public PreformedCommand {
 	public:
-		CMD_Schedule_Recording_DL(long DeviceIDFrom, string DeviceIDTo,string sType,string sOptions,string sProgramID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+		CMD_Schedule_Recording_DL(long DeviceIDFrom, string DeviceIDTo,string sType,string sOptions,string sProgramID,string *sID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
 			COMMAND_Schedule_Recording_CONST,
-			3 /* number of parameters */,
+			4 /* number of parameters */,
 			COMMANDPARAMETER_Type_CONST, sType.c_str(),
 			COMMANDPARAMETER_Options_CONST, sOptions.c_str(),
-			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str()); }
+			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str(),
+			COMMANDPARAMETER_ID_CONST, (*sID).c_str());		m_pcResponse = new RESP_Schedule_Recording(sID); }
 	};
 	class CMD_Schedule_Recording_DT : public PreformedCommand {
 	public:
-		CMD_Schedule_Recording_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sType,string sOptions,string sProgramID) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+		CMD_Schedule_Recording_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sType,string sOptions,string sProgramID,string *sID) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Schedule_Recording_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_Type_CONST, sType.c_str(),
+			COMMANDPARAMETER_Options_CONST, sOptions.c_str(),
+			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str(),
+			COMMANDPARAMETER_ID_CONST, (*sID).c_str());		m_pcResponse = new RESP_Schedule_Recording(sID); }
+	};
+	class CMD_Schedule_Recording_Cat : public PreformedCommand {
+	public:
+		CMD_Schedule_Recording_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sType,string sOptions,string sProgramID,string *sID) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Schedule_Recording_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_Type_CONST, sType.c_str(),
+			COMMANDPARAMETER_Options_CONST, sOptions.c_str(),
+			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str(),
+			COMMANDPARAMETER_ID_CONST, (*sID).c_str());		m_pcResponse = new RESP_Schedule_Recording(sID); }
+	};
+	class CMD_NOREP_Schedule_Recording : public PreformedCommand {
+	public:
+		CMD_NOREP_Schedule_Recording(long DeviceIDFrom, long DeviceIDTo,string sType,string sOptions,string sProgramID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
 			COMMAND_Schedule_Recording_CONST,
 			3 /* number of parameters */,
 			COMMANDPARAMETER_Type_CONST, sType.c_str(),
 			COMMANDPARAMETER_Options_CONST, sOptions.c_str(),
 			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str()); }
 	};
-	class CMD_Schedule_Recording_Cat : public PreformedCommand {
+	class CMD_NOREP_Schedule_Recording_DL : public PreformedCommand {
 	public:
-		CMD_Schedule_Recording_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sType,string sOptions,string sProgramID) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+		CMD_NOREP_Schedule_Recording_DL(long DeviceIDFrom, string DeviceIDTo,string sType,string sOptions,string sProgramID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Schedule_Recording_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_Type_CONST, sType.c_str(),
+			COMMANDPARAMETER_Options_CONST, sOptions.c_str(),
+			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str()); }
+	};
+	class CMD_NOREP_Schedule_Recording_DT : public PreformedCommand {
+	public:
+		CMD_NOREP_Schedule_Recording_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sType,string sOptions,string sProgramID) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Schedule_Recording_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_Type_CONST, sType.c_str(),
+			COMMANDPARAMETER_Options_CONST, sOptions.c_str(),
+			COMMANDPARAMETER_ProgramID_CONST, sProgramID.c_str()); }
+	};
+	class CMD_NOREP_Schedule_Recording_Cat : public PreformedCommand {
+	public:
+		CMD_NOREP_Schedule_Recording_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sType,string sOptions,string sProgramID) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
 			COMMAND_Schedule_Recording_CONST,
 			3 /* number of parameters */,
 			COMMANDPARAMETER_Type_CONST, sType.c_str(),

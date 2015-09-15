@@ -24,13 +24,13 @@
 #include "PlutoUtils/Other.h"
 
 #include <iostream>
-#include <sstream>
 using namespace std;
 using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include <sstream>
 #include "VDRMediaStream.h"
 #include "Orbiter_Plugin/Orbiter_Plugin.h"
 #include "../Datagrid_Plugin/Datagrid_Plugin.h"
@@ -41,9 +41,9 @@ using namespace DCE;
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 VDRPlugin::VDRPlugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: VDRPlugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter), m_ConMutex( "VDR Connection" )
+	: VDRPlugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
-, m_VDRMutex("vdr")
+	, m_VDRMutex("vdr"), m_ConMutex( "VDR Connection" )
 {
 	pthread_cond_init( &m_VDRCond, NULL );
 	m_VDRMutex.Init(NULL,&m_VDRCond);
@@ -388,6 +388,8 @@ void VDRPlugin::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStrea
 
 	/** @brief COMMAND: #185 - Schedule Recording */
 	/** This will schedule a recording. */
+		/** @param #10 ID */
+			/** The timer id assigned to the new schedule. */
 		/** @param #14 Type */
 			/** The type of recording: O=Once, C=Channel */
 		/** @param #39 Options */
@@ -395,7 +397,7 @@ void VDRPlugin::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStrea
 		/** @param #68 ProgramID */
 			/** The program which will need to be recorded. (The format is defined by the device which created the original datagrid) */
 
-void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProgramID,string &sCMD_Result,Message *pMessage)
+void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProgramID,string *sID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c185-e->
 {
 	string::size_type pos=0;
@@ -455,10 +457,11 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::CMD_Schedule_Recording bad response %s %d %s",sProgramID.c_str(),tStartTime,sVDRResponse.c_str());
 			return;
 		}
-        pVDRProgramInstance->m_bRecording = true;
-        pVDRProgramInstance->m_iRecordingID = iTimer;
-        m_mapVDRRecording[iTimer] = pVDRProgramInstance;
-    }
+		pVDRProgramInstance->m_bRecording = true;
+		pVDRProgramInstance->m_iRecordingID = iTimer;
+		m_mapVDRRecording[iTimer] = pVDRProgramInstance;
+		*sID = StringUtils::itos(iTimer);
+	}
 	else if( sType=="C" )
 	{
 		string sCommand;
@@ -478,6 +481,7 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::CMD_Schedule_Recording bad recurring response %s %d %s",sProgramID.c_str(),tStartTime,sVDRResponse.c_str());
 			return;
 		}
+		*sID = StringUtils::itos(iTimer);
 	}
 }
 
@@ -1736,5 +1740,15 @@ bool VDRPlugin::PlaybackStarted( class Socket *pSocket,class Message *pMessage,c
 	m_pMedia_Plugin->MediaInfoChanged(pVDRMediaStream,true);
 
 	return false;
+
+}
+//<-dceag-c986-b->
+
+	/** @brief COMMAND: #986 - Sync Storage Groups */
+	/** Synchronize Storage Groups. Sent in response to a storage device being added. */
+
+void VDRPlugin::CMD_Sync_Storage_Groups(string &sCMD_Result,Message *pMessage)
+//<-dceag-c986-e->
+{
 
 }
