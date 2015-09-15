@@ -2277,12 +2277,13 @@ bool ScreenHandler::TV_Channels_ObjectSelected(CallBackData *pData)
 				}
 				else
 				{
+					string sID;
 					DCE::CMD_Schedule_Recording CMD_Schedule_Recording(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn,
 						pObjectInfoData->m_PK_DesignObj_SelectedObject==DESIGNOBJ_butUI2_Ch_Prev_Record_Once_CONST ? "O" : "C",
-						"", pCell->m_mapAttributes["chanid"] + "," + pCell->m_mapAttributes["starttime"] + "," + pCell->m_mapAttributes["endtime"]);
+						   "", pCell->m_mapAttributes["chanid"] + "," + pCell->m_mapAttributes["starttime"] + "," + pCell->m_mapAttributes["endtime"], &sID);
 					m_pOrbiter->SendCommand(CMD_Schedule_Recording);
 					pCell->m_mapAttributes["recording"] = pObjectInfoData->m_PK_DesignObj_SelectedObject==DESIGNOBJ_butUI2_Ch_Prev_Record_Once_CONST ? "O" : "C";
-					pCell->m_mapAttributes["recordid"] = "0";  // not good.  this means if the user adds and immediately deletes without refreshing the grid, it won't delete the right id.  But we want speed and requesting the record id would slow this down
+					pCell->m_mapAttributes["recordid"] = sID;
 				}
 			}
 		}
