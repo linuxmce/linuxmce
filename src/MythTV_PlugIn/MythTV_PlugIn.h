@@ -324,6 +324,8 @@ public:
 
 	/** @brief COMMAND: #185 - Schedule Recording */
 	/** This will schedule a recording. */
+		/** @param #10 ID */
+			/** The timer id assigned to the new schedule. */
 		/** @param #14 Type */
 			/** The type of recording: O=Once, C=Channel */
 		/** @param #39 Options */
@@ -331,8 +333,8 @@ public:
 		/** @param #68 ProgramID */
 			/** The program which will need to be recorded. (The format is defined by the device which created the original datagrid) */
 
-	virtual void CMD_Schedule_Recording(string sType,string sOptions,string sProgramID) { string sCMD_Result; CMD_Schedule_Recording(sType.c_str(),sOptions.c_str(),sProgramID.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Schedule_Recording(string sType,string sOptions,string sProgramID,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Schedule_Recording(string sType,string sOptions,string sProgramID,string *sID) { string sCMD_Result; CMD_Schedule_Recording(sType.c_str(),sOptions.c_str(),sProgramID.c_str(),sID,sCMD_Result,NULL);};
+	virtual void CMD_Schedule_Recording(string sType,string sOptions,string sProgramID,string *sID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #698 - Get Extended Media Data */
