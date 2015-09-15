@@ -389,7 +389,7 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	g_config.Clear();
 	g_callbacks.Clear();
 	snprintf(g_config.strDeviceName, 13, "LinuxMCE");
-	g_config.clientVersion = CEC_CLIENT_VERSION_CURRENT;
+	g_config.clientVersion = _LIBCEC_VERSION_CURRENT;
 	g_config.bActivateSource = 0;
 	g_callbacks.CBCecLogMessage = &CecLogMessage;
 	g_callbacks.CBCecKeyPress = &CecKeyPress;
@@ -412,7 +412,7 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	    return false;
 	  }
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"libCEC initialized - Version %s",m_pParser->ToString((cec_server_version)g_config.serverVersion));
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"libCEC initialized - Version %s",m_pParser->ToString((cec_version)g_config.serverVersion));
 
 	m_pParser->InitVideoStandalone();
 
