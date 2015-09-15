@@ -6,24 +6,50 @@
 
 P="$1"
 
+DEVICECATEGORY_Computer=6
+DEVICECATEGORY_MD=8
+DEVICETEMPLATE_Fiire_Station=1893
+DEVICEDATA_Diskless_Boot=9
+DEVICEDATA_PowerOff_Mode=290
+
 if [ "$P" == "D" ]; then
 	# Selecting diskless MDs only
 	Q="SELECT MACaddress
 	FROM Device_DeviceData
 	JOIN Device ON PK_Device=FK_Device
 	JOIN DeviceTemplate ON PK_DeviceTemplate=FK_DeviceTemplate
-	WHERE FK_DeviceTemplate=28 AND FK_DeviceData=9 AND IPaddress IS NOT NULL AND MACaddress IS NOT NULL AND IK_DeviceData='1'
-	UNION
-	SELECT MACaddress FROM Device WHERE FK_DeviceTemplate = 1893 AND IPaddress IS NOT NULL AND MACaddress IS NOT NULL
+	WHERE FK_DeviceTemplate IN (
+		SELECT PK_DeviceTemplate
+		FROM DeviceTemplate
+		WHERE FK_DeviceCategory IN (${DEVICECATEGORY_MD}) )
+	AND IPaddress IS NOT NULL
+	AND MACaddress IS NOT NULL
+	AND (FK_DeviceData=${DEVICEDATA_Diskless_Boot}
+		 AND IK_DeviceData='1')
+	AND (PK_Device IN (
+		SELECT PK_Device
+		FROM Device_DeviceData
+		JOIN Device ON PK_Device=FK_Device
+		AND (FK_DeviceData=${DEVICEDATA_PowerOff_Mode}
+		AND IK_DeviceData <> 'N') ) )
 	"
 else
 	# Selecting all MDs
 	Q="SELECT MACaddress
 	FROM Device
 	JOIN DeviceTemplate ON PK_DeviceTemplate=FK_DeviceTemplate
-	WHERE FK_DeviceTemplate=28 AND IPaddress IS NOT NULL AND MACaddress IS NOT NULL
-	UNION
-	SELECT MACaddress FROM Device WHERE FK_DeviceTemplate = 1893 AND IPaddress IS NOT NULL AND MACaddress IS NOT NULL
+	WHERE FK_DeviceTemplate IN (
+		SELECT PK_DeviceTemplate
+		FROM DeviceTemplate
+		WHERE FK_DeviceCategory IN (${DEVICECATEGORY_MD}) )
+	AND IPaddress IS NOT NULL
+	AND MACaddress IS NOT NULL
+	AND (PK_Device IN (
+		SELECT PK_Device
+		FROM Device_DeviceData
+		JOIN Device ON PK_Device=FK_Device
+		AND (FK_DeviceData=${DEVICEDATA_PowerOff_Mode}
+		AND IK_DeviceData <> 'N') ) )
 	"
 fi
 
