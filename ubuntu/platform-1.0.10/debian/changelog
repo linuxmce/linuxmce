@@ -1,4 +1,4 @@
-platform (1.0.10-1~trusty) trusty; urgency=medium
+platform (1.0.10-1) unstable; urgency=medium
 
   * fixed: posix socket return value for connect
 
