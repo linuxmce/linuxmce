@@ -1,0 +1,10 @@
+prefix=@prefix@
+libdir=@libdir@
+includedir=@includedir@
+DEPENDENCIES=@platform_LIBRARIES@
+
+Name: @name@
+Description: @description@ @major@.@minor@
+Version: @major@.@minor@
+Libs: -L${libdir} -lplatform
+Cflags: -I${includedir}
