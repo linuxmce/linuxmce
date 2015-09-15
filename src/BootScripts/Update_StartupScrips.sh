@@ -6,7 +6,7 @@
 
 Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Updating startup scripts"
 
-Q="INSERT INTO Device_StartupScript(FK_Device,FK_StartupScript,Boot_Order,Background,Enabled,Parameter)
+Q="REPLACE INTO Device_StartupScript(FK_Device,FK_StartupScript,Boot_Order,Background,Enabled,Parameter)
 SELECT FK_Device_ControlledVia, PK_StartupScript,Hybrid_Boot_Order,Hybrid_Background,Hybrid_Enabled,Hybrid_Parameter FROM Device
 JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate 
 JOIN StartupScript ON 1=1
@@ -16,7 +16,7 @@ AND Device_StartupScript.FK_Device IS NULL"
 
 RunSQL "$Q;"
 
-Q="INSERT INTO Device_StartupScript(FK_Device,FK_StartupScript,Boot_Order,Background,Enabled,Parameter)
+Q="REPLACE INTO Device_StartupScript(FK_Device,FK_StartupScript,Boot_Order,Background,Enabled,Parameter)
 SELECT PK_Device, PK_StartupScript,MD_Boot_Order,MD_Background,MD_Enabled,MD_Parameter FROM Device
 JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate 
 JOIN StartupScript ON 1=1
@@ -26,7 +26,7 @@ AND Device_StartupScript.FK_Device IS NULL"
 
 RunSQL "$Q;"
 
-Q="INSERT INTO Device_StartupScript(FK_Device,FK_StartupScript,Boot_Order,Background,Enabled,Parameter)
+Q="REPLACE INTO Device_StartupScript(FK_Device,FK_StartupScript,Boot_Order,Background,Enabled,Parameter)
 SELECT PK_Device, PK_StartupScript,Core_Boot_Order,Core_Background,Core_Enabled,Core_Parameter FROM Device
 JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate 
 JOIN StartupScript ON 1=1
