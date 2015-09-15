@@ -96,6 +96,12 @@ function Build_Replacements_Common_all
 
 function Build_Replacements_Common_ubuntu
 {
+	#Package: platform for libcec
+	Build_Replacement_Package platform ubuntu/platform-1.0.10 || :
+
+	#Package: libcec
+	Build_Replacement_Package cec ubuntu/libcec-3.0.1 || :
+
 	#Package: mbrola
 	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1 || :
 
@@ -237,10 +243,6 @@ function Build_Replacements_ubuntu_precise
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package soxr ubuntu/libsoxr-0.1.1 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb || :
-
-	#Package: libcec
-	Build_Replacement_Package cec ubuntu/libcec-2.1.4 && \
-	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libcec*.deb || :
 }
 
 function Build_Replacements_ubuntu_trusty
@@ -262,6 +264,12 @@ function Build_Replacements_ubuntu_trusty
 
 function Build_Replacements_Common_raspbian
 {
+	#Package: platform for libcec
+	Build_Replacement_Package platform ubuntu/platform-1.0.10 || :
+
+	#Package: libcec
+	Build_Replacement_Package cec ubuntu/libcec-3.0.1 || :
+
 	#Package: mbrola
 	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1 || :
 
@@ -308,12 +316,6 @@ function Build_Replacements_raspbian_wheezy
 function Build_Replacements_raspbian_jessie
 {
 	mkdir -pv "$replacements_dir"
-
-	#Package: libcec
-	Build_Replacement_Package libcec raspbian/libcec-2.2.0 && \
-	dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb && \
-	cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.deb ${replacements_dir} && \
-	cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.changes ${replacements_dir} || :
 }
 
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
