@@ -4,14 +4,7 @@ use strict;
 use diagnostics;
 use DBI;
 
-sub getIP {
-        my $dbh = DBI->connect('dbi:mysql:pluto_main');
-        my $sth = $dbh->prepare("SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7");
-        $sth->execute || die "Sql Error";
-        my $row = $sth->fetchrow_hashref;
-        my $IP = $row->{IPaddress};
-        return $IP;
-}
+require "/usr/pluto/bin/lmce.pl";
 
 #declare vars (it's safer this way)
 my $Device_ID;
@@ -33,9 +26,9 @@ else
     $Device_MAC = $ARGV[5];
 }
 
-$IntIP = getIP();
+$IntIP = getCoreIP();
 if ($IntIP eq "") {
-        $IntIP="192.168.80.1";
+        exit(-1);
 }
 
 

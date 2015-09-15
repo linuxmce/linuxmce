@@ -37,7 +37,7 @@ $Device_SECRET = get_device_devicedata($Device_ID,128);
 chomp($Device_EXT);
 $IntIP = getCoreIP();
 if ($IntIP eq "") {
-        $IntIP="192.168.80.1";
+        exit(-1);
 }
 
 $Device_MAC =~ s/[^0-9A-Fa-f]//g;

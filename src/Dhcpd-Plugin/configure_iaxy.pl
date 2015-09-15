@@ -4,15 +4,7 @@ use strict;
 use diagnostics;
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
-
-sub getIP {
-        my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
-        my $sth = $dbh->prepare("SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7");
-        $sth->execute || die "Sql Error";
-        my $row = $sth->fetchrow_hashref;
-        my $IP = $row->{IPaddress};
-        return $IP;
-}
+require "/usr/pluto/bin/lmce.pl";
 
 #declare vars (it's safer this way)
 my $Device_ID;
@@ -34,9 +26,9 @@ else
     $Device_MAC = $ARGV[5];
 }
 
-$IntIP = getIP();
+$IntIP = getCoreIP();
 if ($IntIP eq "") {
-        $IntIP="192.168.80.1";
+        exit(-1);
 }
 
 #sync with Asterisk DB (practically do nothing but create a new extension number)

@@ -4,6 +4,7 @@ use DBI;
 #use strict;
 use Socket;
 require "/usr/pluto/bin/config_ops.pl";
+require "/usr/pluto/bin/lmce.pl";
 
 
 if($ARGV[0] ne "-d" || $ARGV[2] ne "-i" || $ARGV[4] ne "-m") {
@@ -17,15 +18,10 @@ if($ARGV[0] ne "-d" || $ARGV[2] ne "-i" || $ARGV[4] ne "-m") {
 
 $db_handle = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
 
-$sql = "select IPaddress from Device where Description='CORE'";
-$st = $db_handle->prepare($sql);
-$st->execute();
-if($row = $st->fetchrow_hashref()) {
-  $shost = $row->{'IPaddress'};
-} else {
-  $shost = "192.168.80.1";
+$shost = getCoreIP();
+if ($shost eq "") {
+  exit(-1);
 }
-$st->finish();
   
 $db_handle = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
 $sql = "select FK_Device from Device_DeviceData where FK_Device=$Device_ID and FK_DeviceData=31 and IK_DeviceData<>''";

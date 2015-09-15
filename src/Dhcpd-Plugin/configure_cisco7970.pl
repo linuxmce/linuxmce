@@ -6,15 +6,6 @@ use DBI;
 require "/usr/pluto/bin/config_ops.pl";
 require "/usr/pluto/bin/lmce.pl";
 
-sub getIP {
-        my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
-        my $sth = $dbh->prepare("SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7");
-        $sth->execute || die "Sql Error";
-        my $row = $sth->fetchrow_hashref;
-        my $IP = $row->{IPaddress};
-        return $IP;
-}
-
 sub getTimeZone {
         my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
         my $sth = $dbh->prepare("SELECT ZoneName FROM TimeZone Where PK_Timezone = (select FK_Timezone from City Where PK_City = (Select FK_City From Installation))");
@@ -45,9 +36,9 @@ else
     $Device_MAC = $ARGV[5];
 }
 
-$IntIP = getIP();
+$IntIP = getCoreIP();
 if ($IntIP eq "") {
-        $IntIP="192.168.80.1";
+        exit(-1);
 }
 
 $Device_EXT=$Device_EXT = get_device_devicedata($Device_ID,31);
