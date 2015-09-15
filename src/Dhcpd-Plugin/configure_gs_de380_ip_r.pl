@@ -35,9 +35,9 @@ $Device_EXT = get_device_devicedata($Device_ID,31);
 $Device_SECRET = get_device_devicedata($Device_ID,128);
 
 chomp($Device_EXT);
-$IntIP = getIP();
+$IntIP = getCoreIP();
 if ($IntIP eq "") {
-	$IntIP="192.168.80.1";
+	exit(-1);
 }
 sleep(10);
 system("rm -f /tmp/cookie");

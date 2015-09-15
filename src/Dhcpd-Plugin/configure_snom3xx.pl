@@ -29,7 +29,7 @@ else
 
 $IntIP = getCoreIP();
 if ($IntIP eq "") {
-        $IntIP="192.168.80.1";
+        exit(-1);
 }
 
 #sync with Asterisk DB (practically do nothing but create a new extension number)
