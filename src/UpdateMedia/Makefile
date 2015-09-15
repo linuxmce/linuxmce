@@ -43,7 +43,7 @@ GAMEROM: GAMEROM.o GAMEROMMain.o
 	cp GAMEROM $(ROOT)/bin/
 
 clean:
-	rm -f UpdateMedia $(sources:.cpp=.o) 
+	rm -f UpdateMedia $(sources:.cpp=.o) GAMEROM GAMEROM.o GAMEROMMain.o
 
 install: 
 	mkdir -p /etc/init.d
