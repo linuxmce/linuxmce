@@ -214,13 +214,14 @@ public:
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Schedule_Recording(string sType,string sOptions,string sProgramID,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Schedule_Recording(string sType,string sOptions,string sProgramID,string *sID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Extended_Media_Data(string sPK_DesignObj,string sProgramID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Active_Menu(string sText,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Make_Thumbnail(string sFilename,char *pData,int iData_Size,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Reporting_EPG_Status(string sText,bool bIsSuccessful,string sTask,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Remove_Scheduled_Recording(string sID,string sProgramID,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Sync_Storage_Groups(string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -286,11 +287,13 @@ public:
 						string sType=pMessage->m_mapParameters[COMMANDPARAMETER_Type_CONST];
 						string sOptions=pMessage->m_mapParameters[COMMANDPARAMETER_Options_CONST];
 						string sProgramID=pMessage->m_mapParameters[COMMANDPARAMETER_ProgramID_CONST];
-						CMD_Schedule_Recording(sType.c_str(),sOptions.c_str(),sProgramID.c_str(),sCMD_Result,pMessage);
+						string sID=pMessage->m_mapParameters[COMMANDPARAMETER_ID_CONST];
+						CMD_Schedule_Recording(sType.c_str(),sOptions.c_str(),sProgramID.c_str(),&sID,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
 							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+						pMessageOut->m_mapParameters[COMMANDPARAMETER_ID_CONST]=sID;
 							pMessageOut->m_mapParameters[0]=sCMD_Result;
 							SendMessage(pMessageOut);
 						}
@@ -303,7 +306,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Schedule_Recording(sType.c_str(),sOptions.c_str(),sProgramID.c_str(),sCMD_Result,pMessage);
+								CMD_Schedule_Recording(sType.c_str(),sOptions.c_str(),sProgramID.c_str(),&sID,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -467,6 +470,31 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Remove_Scheduled_Recording(sID.c_str(),sProgramID.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Sync_Storage_Groups_CONST:
+					{
+						string sCMD_Result="OK";
+						CMD_Sync_Storage_Groups(sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Sync_Storage_Groups(sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
