@@ -17,14 +17,6 @@ Description: eibd server
  It can also act as an EIBnet/IP server. 
  Note: Some backends may crash Linux 2.6 kernels before 2.6.11.
 
-Package: eibd-clients
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: eibd-server
-Description: eibd clients
- Simple example programs to perform management tasks on a EIB system.
-
-
 Package: libeibclient-dev
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -39,12 +31,6 @@ Suggests: libeibclient-dev
 Description: Sources of the eibd client programs
  Provides the source of the eibd client programs as examples how to use
  the eibd client library.
-
-Package: bcusdk-build
-Architecture: any
-Depends: ${shlibs:Depends}, m68hc05-gcc, xsltproc, m68hc05-runtime, libxml2-utils
-Description: BCU SDK image building programs
- Contains all files and programs to build BCU images
 
 Package: bcusdk
 Architecture: all
