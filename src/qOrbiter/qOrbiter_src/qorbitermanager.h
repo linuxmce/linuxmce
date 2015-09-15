@@ -1356,10 +1356,9 @@ public slots:
         emit sendDceCommand(cmd2);
     }
     void cancelRecording(QString sID, QString sProgramID) {
-        string sID;
-        CMD_Remove_Scheduled_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString(), &sID);
+        CMD_Remove_Scheduled_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
         emit sendDceCommand(cmd);
-        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString(), &sID);
+        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
         emit sendDceCommand(cmd2);
     }
     void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, iMediaPluginID); sendDceCommand( cmd);}
