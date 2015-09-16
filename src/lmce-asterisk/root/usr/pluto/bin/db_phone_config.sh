@@ -326,8 +326,13 @@ AddTrunk()
 	case "$protocol" in
 		"IAX2")
 			# provider registry
+			# FIXME: determine var_metric through a more logical method
 			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
 				('$(( 100+$id ))', 'iax.conf', 'general', 'register', '$username:$password@$host');"
+			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
+				('$(( 200+$id ))', 'iax.conf', '$username', 'type', 'user');"
+			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
+				('$(( 300+$id ))', 'iax.conf', '$username', 'context', 'from-trunk-$username');"
 			# create IAX peer
   			context="from-trunk"
    			LINESSQL="$LINESSQL INSERT INTO $DB_IAX_Device_Table (name,username,secret,host,port,context,type,callerid,disallow,allow)
@@ -451,7 +456,7 @@ WorkTheLines()
 	UseDB
 	SQL="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DEVICEDATA_EmergencyNumbers AND FK_Device=$DEVICE_TelecomPlugIn;"
 	emergencynumbers=$(RunSQL "$SQL")
-	
+
 	# get default outgoing phoneline for emergency numbers
 	SQL="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DEVICEDATA_EmergencyPhoneLine AND FK_Device=$DEVICE_TelecomPlugIn;"
 	emergencyphonelineID=$(RunSQL "$SQL")
@@ -463,11 +468,13 @@ WorkTheLines()
 	emergencyphonelineProtocol=$(Field 1 "$R")
 	emergencyphonelineNumber=$(Field 2 "$R")
 
-	# remove everything before recreating	
+	# remove everything before recreating
 	LINESSQL="SET AUTOCOMMIT=0; START TRANSACTION;"
 	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='sip.conf' AND category='general' AND var_name='register';"
 	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='iax.conf' AND category='general' AND var_name='register';"
-	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='jabber.conf' AND cat_metric > 0;"	
+	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='iax.conf' AND var_name='type' AND var_val='user';"
+	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='iax.conf' AND var_name='context' AND var_val LIKE 'from-trunk-%';"
+	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='jabber.conf' AND cat_metric > 0;"
 	LINESSQL="$LINESSQL ALTER TABLE $DB_astconfig_Table AUTO_INCREMENT=1;"
 
 	LINESSQL="$LINESSQL DELETE FROM $DB_Extensions_Table WHERE context='ext-did';"
