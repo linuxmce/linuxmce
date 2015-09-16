@@ -110,7 +110,7 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (0, 6, 0, 'voicemail.conf', 'general', 'maxsilence', '10'),
 (0, 7, 0, 'voicemail.conf', 'general', 'silencethreshold', '128'),
 (0, 8, 0, 'voicemail.conf', 'general', 'maxlogins', '3'),
-(0, 9, 0, 'voicemail.conf', 'general', 'externnotify', '/usr/pluto/bin/NotifiyVoiceMail.sh'),
+(0, 9, 0, 'voicemail.conf', 'general', 'externnotify', '/usr/pluto/bin/NotifyVoiceMail.sh'),
 (1, 0, 0, 'voicemail.conf', 'zonemessages', 'eastern', 'America/New_York|''vm-received'' Q ''digits/at'' IMp'),
 (1, 1, 0, 'voicemail.conf', 'zonemessages', 'central', 'America/Chicago|''vm-received'' Q ''digits/at'' IMp'),
 (1, 2, 0, 'voicemail.conf', 'zonemessages', 'central24', 'America/Chicago|''vm-received'' q ''digits/at'' H N ''hours'''),
