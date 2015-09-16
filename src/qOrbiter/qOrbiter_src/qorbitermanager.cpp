@@ -102,7 +102,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     attribFilter( new AttributeSortModel(new AttributeSortItem,6, false, this)),
     currentScreen("Screen_1.qml"),
     m_skinOverridePath(overridePath),
-    m_window(NULL)
+    m_window(NULL),
+    m_dceRequestNo(1)
 {
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
@@ -2146,6 +2147,30 @@ void qorbiterManager::getDeviceState(int PK_Device, string* data)
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::getDeviceState done");
 }
 
+int qorbiterManager::scheduleRecording(QString sType, QString sProgramID)
+{
+       //TODO: currently the media plugin does not allow us to send a this command through it if there is no
+       // active stream. We need to be able to do this to allow scheduling recordings from the EPG screen without
+       // actively watching TV. So we now do a slight hack and send to both VDT and MythTV plugin DTs
+       // only one of them is installed at once anyway.
+
+       DCECommand *pCmd = getDCECommand();
+       CMD_Schedule_Recording_DT *cmd = new CMD_Schedule_Recording_DT(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST,
+                                                                      BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(),
+                                                                      pCmd->getString(COMMANDPARAMETER_ID_CONST));
+       pCmd->setCommand(cmd);
+       emit sendDceCommandResponse(pCmd);
+       return pCmd->getCallback();
+/*
+       CMD_Schedule_Recording_DT *cmd2 = new CMD_Schedule_Recording_DT(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST,
+                                                                       BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(), ps2);
+}
+
+DCECommand* qorbiterManager::getDCECommand()
+{
+    return new DCECommand(m_dceRequestNo.fetchAndAddAcquire(1));
+}
+
 void qorbiterManager::updateImageChanged(QImage img)
 {
 
@@ -3016,7 +3041,7 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     QObject::connect(this, &qorbiterManager::updateDceScreenSaverTimeout, ptr, &qOrbiter::updateScreenSaverTimeout);
     QObject::connect(ptr, &qOrbiter::setMyIp, this, &qorbiterManager::setInternalIp,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::statusMessage, this , &qorbiterManager::setDceResponse,Qt::QueuedConnection);
-    QObject::connect(ptr,&qOrbiter::commandComplete, this, &qorbiterManager::commandCompleted, Qt::QueuedConnection);
+    QObject::connect(ptr, SIGNAL(commandComplete(DCECommand*)), this, SLOT(commandCompleted(DCECommand*)), Qt::QueuedConnection);
     /*CHild Devices*/
     QObject::connect(ptr, &qOrbiter::qMediaPlayerIDChanged, this, &qorbiterManager::setMediaPlayerID, Qt::QueuedConnection);
     //messaging

@@ -532,7 +532,8 @@ HEADERS += \
         defineObjects/datagrids.h \
     contextobjects/screeninfo.h \
     contextobjects/settinginterface.h \
-    contextobjects/entertainareatimecode.h
+    contextobjects/entertainareatimecode.h \
+    DCECommand.h
 
 
 

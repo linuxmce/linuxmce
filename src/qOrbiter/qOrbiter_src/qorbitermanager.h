@@ -129,6 +129,7 @@
 #include <defineObjects/linuxmcedata.h>
 #include "Gen_Devices/AllCommandsRequests.h"
 
+#include <qOrbiter/qOrbiter_src/DCECommand.h>
 #include <qOrbiter/qOrbiter.h>
 class EPGChannelList;
 class basicImageProvider;
@@ -291,6 +292,7 @@ public:
     QString eventResponse;
     QString deviceResponse;
     QString mediaResponse;
+    QAtomicInt m_dceRequestNo;
 
     /*state related*/
     bool discreteAudio;
@@ -568,6 +570,7 @@ Param 10 - pk_attribute
 
     QString getCurrentTheme() const;
     void setCurrentTheme(const QString &currentTheme);
+    DCECommand* getDCECommand();
 
 signals:
     void currentThemeChanged();
@@ -583,8 +586,9 @@ signals:
     void screenPowerTimeoutChanged();
     void updateDceScreenPowerTimeout(int t);
 
-    void sendDceCommand(DCE::PreformedCommand cmd);
-    void sendDceCommandResponse(DCE::PreformedCommand &cmd, string* p_sResponse);
+    void sendDceCommand(DCE::PreformedCommand cmd, int cbno = 0, QList<int> params = QList<int>(), PreformedCommandResponse* pResp = NULL);
+    void sendDceCommandResponse(DCECommand *pCmd);
+    void dceCommandCompleted(int callback, QVariantMap params); //signal connected to qml window
 
     void skinMessage(QString s);
     void qtMessage(QString s);
@@ -780,7 +784,6 @@ signals:
     void setAlarm(QString dataGridId,int row,int role,bool s, int g);
     void getSingleCam(int i_pk_camera_device, int h, int w, bool showScreen=false);
     void dceGridSepChanged(int d);
-    void commandCompleted();
     void setDceVar(int variable, QString valToAssign);
     void changeScreen(QString screen);
     void textChanged(QString sDesignObj, QString sText, int iPK_Text);
@@ -944,6 +947,12 @@ public slots:
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response);
     QString getDceResponse () ;
+    void commandCompleted(DCECommand *pCmd) {
+        if (pCmd) {
+            emit dceCommandCompleted(pCmd->getCallback(), pCmd->getVariantMap());
+            delete pCmd;
+        }
+    }
 
     /*Environment Slots. i.e. user, location, etc*/
     int getCurrentPKUser() {return iPK_User;}
@@ -1344,16 +1353,14 @@ public slots:
     void greenButtonPress(){  CMD_Green cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void yellowButtonPress(){ CMD_Yellow cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void startRecordingPress(){CMD_Record cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
-    void scheduleRecording(QString sType, QString sProgramID) {
-        //TODO: currently the media plugin does not allow us to send a this command through it if there is no
-        // active stream. We need to be able to do this to allow scheduling recordings from the EPG screen without
-        // actively watching TV. So we now do a slight hack and send to both VDT and MythTV plugin DTs
-        // only one of them is installed at once anyway.
-        string sID;
-        CMD_Schedule_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(), &sID);
-        emit sendDceCommand(cmd);
-        CMD_Schedule_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(), &sID);
-        emit sendDceCommand(cmd2);
+    int scheduleRecording(QString sType, QString sProgramID);
+    int cancelRecording(QString sID, QString sProgramID) {
+        int cbno = m_dceRequestNo.fetchAndAddAcquire(1);
+        CMD_Remove_Scheduled_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
+        emit sendDceCommand(cmd, cbno);
+        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
+        emit sendDceCommand(cmd2, cbno);
+        return cbno;
     }
     void cancelRecording(QString sID, QString sProgramID) {
         CMD_Remove_Scheduled_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());

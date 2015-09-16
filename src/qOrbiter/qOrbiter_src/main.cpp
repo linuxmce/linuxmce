@@ -68,6 +68,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include "logger/qorbiterlogger.h"
 #include "datamodels/listModel.h"
 
+#include <DCECommand.h>
 #include "qOrbiter/qOrbiter.h"
 #include <orbiterwindow.h>
 #include <qorbitermanager.h>
@@ -407,8 +408,8 @@ int main(int argc, char* argv[])
         qmlRegisterType<SettingsKeyType>("org.linuxmce.settings", 1,0, "SettingsKey");
         qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
         qRegisterMetaType<DCE::PreformedCommand>("DCE::PreformedCommand");
+        qRegisterMetaType<QHash<int, string*> >("QHash<int, string*>");
         qmlRegisterType<GenericFlatListModel>();
-
 
         QQmlApplicationEngine engine;
 
@@ -489,6 +490,7 @@ int main(int argc, char* argv[])
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
         // Generic DCE command sending signal/slots
         QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(handleDceCommand(DCE::PreformedCommand)), Qt::QueuedConnection); //this somehow still blocks btw. this is why i had a painful but explict bridge. the must be a middle ground. possibly look at posting the event instead of connections.
+        QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCECommand*)), &pqOrbiter, SLOT(handleDceCommandResp(DCECommand*)), Qt::QueuedConnection); //this somehow still blocks btw. this is why i had a painful but explict bridge. the must be a middle ground. possibly look at posting the event instead of connections.
         //  NO! QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, &qOrbiter::routerFound, &orbiterWin, &orbiterWindow::setConnectionState, Qt::QueuedConnection );
