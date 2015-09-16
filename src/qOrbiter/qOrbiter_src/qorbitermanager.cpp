@@ -2164,6 +2164,7 @@ int qorbiterManager::scheduleRecording(QString sType, QString sProgramID)
 /*
        CMD_Schedule_Recording_DT *cmd2 = new CMD_Schedule_Recording_DT(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST,
                                                                        BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(), ps2);
+                                                                       */
 }
 
 DCECommand* qorbiterManager::getDCECommand()
