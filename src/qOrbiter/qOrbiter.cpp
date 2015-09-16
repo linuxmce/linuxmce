@@ -2399,7 +2399,7 @@ void qOrbiter::beginSetup()
 
 void qOrbiter::sendDCECommand(PreformedCommand cmd) {
 
-    SendCommandNoReponse(cmd);
+    SendCommandNoResponse(cmd);
 }
 
 void qOrbiter::sendDCECommandResp(DCECommand *pCmd) {

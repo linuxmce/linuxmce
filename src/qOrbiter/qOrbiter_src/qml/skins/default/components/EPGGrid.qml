@@ -14,10 +14,32 @@ Item {
     property int markerInterval : 1800 // time interval (in seconds) for time markes in top row
     property int cellHeight : 50 // cell (row) height in pixels
     property string broadcastSource : "" // the broadcast source to show channels from, empty means all
+    property var callbacks : ({})
+    property variant infoPopup
 
     Component.onCompleted: {
         console.log("onComplete")
         epgData.loadData()
+    }
+
+    Connections {
+        target: manager
+        onDceCommandCompleted: {
+            console.log("dceCommandCompleted cbno = " + callback + ", responseParams = " + params[10]);
+            var cb = callbacks[callback];
+            if (cb) {
+                if (cb.type == 'SR') {
+                    cb.progDel.recording = 'O'
+                    infoPopup.recording = 'O'
+                    infoPopup.recordid = params[10]
+                } else if (cb.type == 'CR') {
+                    cb.progDel.recording = ''
+                    infoPopup.recording = ''
+                    infoPopup.recordid = 0
+                }
+                callbacks[callback] = null;
+            }
+        }
     }
 
     Component {
@@ -39,7 +61,7 @@ Item {
             onActivated: {
                 showInfo(epgData.get(0, column, "channelid"), program,
                          epgData.get(index, column, "synopsis"), starttime, endtime, info,
-                         recording, epgData.get(index, column, "recordid"))
+                         recording, epgData.get(index, column, "recordid"), this)
             }
         }
     }
@@ -120,14 +142,14 @@ Item {
         }
     }
 
-    function showInfo(channelID, title, synopsis, starttime, endtime, info, recording, recordid) {
-        infoPopup.createObject(layout, {"channelID": channelID, "title": title, "starttime": starttime,
+    function showInfo(channelID, title, synopsis, starttime, endtime, info, recording, recordid, progDel) {
+        infoPopup = infoPopupComp.createObject(layout, {"id": "myinfopopup", "channelID": channelID, "title": title, "starttime": starttime,
                                "endtime":endtime, "info":info, "synopsis": synopsis, "recording": recording,
-                               "recordid": recordid})
+                               "recordid": recordid, "progDel": progDel})
     }
 
     Component {
-        id: infoPopup
+        id: infoPopupComp
         GenericPopup {
             z: 200
             property string channelID
@@ -136,6 +158,7 @@ Item {
             property real endtime
             property string recording
             property string recordid
+            property variant progDel
             anchors.fill: parent
             anchors.margins: 30
             content: Item {
@@ -182,10 +205,17 @@ Item {
                             id: recordBt
                             label: recording == '' ? qsTr("Record") : qsTr("Cancel record")
                             onActivated: {
-                                if (recording == 'O')
-                                    manager.cancelRecording(recordid, '')
-                                else
-                                    manager.scheduleRecording('O', channelID+","+starttime+","+endtime)
+                                var obj = { 'progDel': progDel};
+                                var currentCB;
+                                if (recording == 'O') {
+                                    currentCB = manager.cancelRecording(recordid, '')
+                                    obj.type = 'CR'
+                                } else {
+                                    currentCB = manager.scheduleRecording('O', channelID+","+starttime+","+endtime)
+                                    obj.type = 'SR'
+                                }
+                                console.log("sent DCE command, got cbno = " + currentCB)
+                                callbacks[currentCB] = obj;
                             }
                         }
                     }

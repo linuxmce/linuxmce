@@ -1355,18 +1355,14 @@ public slots:
     void startRecordingPress(){CMD_Record cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
     int scheduleRecording(QString sType, QString sProgramID);
     int cancelRecording(QString sID, QString sProgramID) {
-        int cbno = m_dceRequestNo.fetchAndAddAcquire(1);
-        CMD_Remove_Scheduled_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
-        emit sendDceCommand(cmd, cbno);
-        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
+        DCECommand *pCmd = getDCECommand();
+        CMD_Remove_Scheduled_Recording_DT *cmd = new CMD_Remove_Scheduled_Recording_DT(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
+        pCmd->setCommand(cmd);
+        emit sendDceCommandResponse(pCmd);
+/*        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
         emit sendDceCommand(cmd2, cbno);
-        return cbno;
-    }
-    void cancelRecording(QString sID, QString sProgramID) {
-        CMD_Remove_Scheduled_Recording_DT cmd(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
-        emit sendDceCommand(cmd);
-        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
-        emit sendDceCommand(cmd2);
+        return cbno;*/
+        return pCmd->getCallback();
     }
     void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, iMediaPluginID); sendDceCommand( cmd);}
     void mute(){DCE::CMD_Mute cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
