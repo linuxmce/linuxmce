@@ -58,6 +58,7 @@ qOrbiter::qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnec
 
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
     QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);
+    QObject::connect(this, SIGNAL(transmitDceCommandResp(DCECommand*)), this, SLOT(sendDCECommandResp(DCECommand*)), Qt::DirectConnection);
     m_bIsOSD=false;
     qRegisterMetaType< QMap<long, std::string> >("QMap<long, std::string>");
 
@@ -2398,12 +2399,24 @@ void qOrbiter::beginSetup()
 
 void qOrbiter::sendDCECommand(PreformedCommand cmd) {
 
-    SendCommandNoResponse(cmd);
-    return;
+    SendCommandNoReponse(cmd);
 }
 
-void qOrbiter::sendDCECommandResponse(PreformedCommand& cmd, string* p_sResponse) {
-    SendCommand(cmd, p_sResponse);
+void qOrbiter::sendDCECommandResp(DCECommand *pCmd) {
+    if (pCmd->getCallback() > 0) {
+        string sResponse;
+
+        bool result = SendCommand(*pCmd->getCommand(), &sResponse);
+        if (result) {
+            emit commandComplete(pCmd);
+        } else {
+            emit commandFailed(pCmd->getCallback());
+            delete pCmd;
+        }
+
+    } else {
+        SendCommandNoResponse(*pCmd->getCommand());
+    }
 }
 
 void qOrbiter::updateScreenSaverTimeout(int t)
@@ -2417,8 +2430,11 @@ void qOrbiter::updateScreenSaverTimeout(int t)
 
 void qOrbiter::handleDceCommand(DCE::PreformedCommand cmd)
 {
-
     emit transmitDceCommand(cmd);
+}
+void qOrbiter::handleDceCommandResp(DCECommand *pCmd)
+{
+    emit transmitDceCommandResp(pCmd);
 }
 
 void qOrbiter::setRecievingStatus(bool b)

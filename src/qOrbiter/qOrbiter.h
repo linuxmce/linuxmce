@@ -45,7 +45,7 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QVariant>
-
+#include "DCECommand.h"
 
 
 #if !defined(QT5) && !defined(Q_OS_ANDROID)
@@ -1341,6 +1341,7 @@ signals:
      void creationComplete(bool finished);
 
     void transmitDceCommand(PreformedCommand cmd);
+    void transmitDceCommandResp(DCECommand *pCmd);
 
     void deviceTemplateChanged(int dt);
 
@@ -1733,8 +1734,8 @@ signals:
     void commandResponseChanged(QString r);
     void eventResponseChanged(QString e);
     void deviceResponseChanged(QString d);
-    void commandComplete();
-    void commandFailed();
+    void commandComplete(DCECommand *pCmd = NULL);
+    void commandFailed(int id = 0);
     void setText(QString designObj, QString text, int iPK_Text);
     ///@}
 
@@ -1836,9 +1837,10 @@ public slots:
     int getqCommunicatorID(){return qCommunicatorID;}
 
     void handleDceCommand(DCE::PreformedCommand cmd);
+    void handleDceCommandResp(DCECommand *pCmd);
 
     void sendDCECommand(PreformedCommand cmd);
-    void sendDCECommandResponse(DCE::PreformedCommand &cmd, string* p_sResponse);
+    void sendDCECommandResp(DCECommand *pCmd);
 
     void getAttributeImage(QString param);
 
