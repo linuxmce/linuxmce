@@ -22,6 +22,7 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
+// include the main LMCE version file
 #include "version.h"
 
 using namespace DCE;
@@ -177,8 +178,8 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
-	bool bAppError = false;
-	bool bReload = false;
+	bool bAppError=false;
+	bool bReload=false;
 	try
 	{
 		Slim_Server_Streamer *pSlim_Server_Streamer = new Slim_Server_Streamer(PK_Device, sRouter_IP,true,bLocalMode);
@@ -192,7 +193,10 @@ int main(int argc, char* argv[])
 			if( bLocalMode )
 				pSlim_Server_Streamer->RunLocalMode();
 			else
-				pthread_join(pSlim_Server_Streamer->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+			{
+				if(pSlim_Server_Streamer->m_RequestHandlerThread)
+					pthread_join(pSlim_Server_Streamer->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+			}
 			g_pDeadlockHandler=NULL;
 			g_pSocketCrashHandler=NULL;
 		} 

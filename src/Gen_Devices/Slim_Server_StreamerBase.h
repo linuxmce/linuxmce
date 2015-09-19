@@ -69,6 +69,20 @@ public:
 			EVENTPARAMETER_With_Errors_CONST, (bWith_Errors ? "1" : "0")));
 	}
 
+    virtual void Media_Position_Changed(int iFK_MediaType,string sMRL,string sID,int iStream_ID,string sDateTime,string sCurrent_Time,int iSpeed)
+    {
+        SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+                EVENT_Media_Position_Changed_CONST,
+                7 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_FK_MediaType_CONST, StringUtils::itos(iFK_MediaType).c_str(),
+                EVENTPARAMETER_MRL_CONST, sMRL.c_str(),
+                EVENTPARAMETER_ID_CONST, sID.c_str(),
+                EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(iStream_ID).c_str(),
+                EVENTPARAMETER_DateTime_CONST, sDateTime.c_str(),
+                EVENTPARAMETER_Current_Time_CONST, sCurrent_Time.c_str(),
+                EVENTPARAMETER_Speed_CONST, StringUtils::itos(iSpeed).c_str()));
+    }
+
 };
 
 
@@ -211,7 +225,8 @@ public:
 	//Data accessors
 	//Event accessors
 	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors) { GetEvents()->Playback_Completed(sMRL.c_str(),iStream_ID,bWith_Errors); }
-	//Commands - Override these to handle commands from the server
+    void EVENT_Media_Position_Changed(int iFK_MediaType,string sMRL,string sID,int iStream_ID,string sDateTime,string sCurrent_Time,int iSpeed) { GetEvents()->Media_Position_Changed(iFK_MediaType,sMRL.c_str(),sID.c_str(),iStream_ID,sDateTime.c_str(),sCurrent_Time.c_str(),iSpeed); }
+    //Commands - Override these to handle commands from the server
 	virtual void CMD_Simulate_Keypress(string sPK_Button,string sName,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,class Message *pMessage) {};
