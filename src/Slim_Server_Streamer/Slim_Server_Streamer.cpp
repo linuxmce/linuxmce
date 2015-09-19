@@ -794,7 +794,11 @@ void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streame
 										   strTotalTimecode,
 										   itStreamsToPlayers->first, 
 										   itStreamsToPlayers->second.first);
-			      }
+                pStreamer->EVENT_Media_Position_Changed(atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName,
+                                             StringUtils::itos(mediaInfo.m_iMediaID),
+                                             itStreamsToPlayers->first, mediaInfo.FormatTotalTime(),
+                                             mediaInfo.FormatCurrentTime(), mediaInfo.m_iSpeed);
+                }
 			  }
             itStreamsToPlayers++;
         }
@@ -1348,8 +1352,10 @@ void Slim_Server_Streamer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assig
 	/** Jump to a specific position in the playlist, or a track, or a chapter.  Smart media players should also understand the skip fwd/skip back (which non-DCE media players use) to be the same thing as a jump +1 or -1 */
 		/** @param #5 Value To Assign */
 			/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void Slim_Server_Streamer::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+void Slim_Server_Streamer::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c65-e->
 {
 }
@@ -1393,10 +1399,12 @@ void Slim_Server_Streamer::StartSlimServer()
 	/** Send a key to the device's OSD, or simulate keypresses on the device's panel */
 		/** @param #26 PK_Button */
 			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 		/** @param #50 Name */
 			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
-void Slim_Server_Streamer::CMD_Simulate_Keypress(string sPK_Button,string sName,string &sCMD_Result,Message *pMessage)
+void Slim_Server_Streamer::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
 	//TODO: implement me!
@@ -1408,8 +1416,75 @@ void Slim_Server_Streamer::CMD_Simulate_Keypress(string sPK_Button,string sName,
 	/** Show a menu associated with this media */
 		/** @param #9 Text */
 			/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void Slim_Server_Streamer::CMD_Menu(string sText,string &sCMD_Result,Message *pMessage)
+void Slim_Server_Streamer::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
+{
+}
+//<-dceag-c32-b->
+
+	/** @brief COMMAND: #32 - Update Object Image */
+	/** Display an image on the media player */
+		/** @param #3 PK_DesignObj */
+			/** The object in which to put the bitmap */
+		/** @param #14 Type */
+			/** 1=bmp, 2=jpg, 3=png */
+		/** @param #19 Data */
+			/** The contents of the bitmap, like reading from the file into a memory buffer */
+		/** @param #23 Disable Aspect Lock */
+			/** If 1, the image will be stretched to fit the object */
+
+void Slim_Server_Streamer::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
+//<-dceag-c32-e->
+{
+}
+//<-dceag-c126-b->
+
+	/** @brief COMMAND: #126 - Guide */
+	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
+
+void Slim_Server_Streamer::CMD_Guide(string &sCMD_Result,Message *pMessage)
+//<-dceag-c126-e->
+{
+}
+//<-dceag-c916-b->
+
+	/** @brief COMMAND: #916 - Set Aspect Ratio */
+	/** Force aspect ratio */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #260 Aspect Ratio */
+			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
+
+void Slim_Server_Streamer::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage)
+//<-dceag-c916-e->
+{
+}
+//<-dceag-c917-b->
+
+	/** @brief COMMAND: #917 - Set Zoom */
+	/** Sets zoom level, relative, absolute or 'auto' */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #261 Zoom Level */
+			/** Zoom level to set */
+
+void Slim_Server_Streamer::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage)
+//<-dceag-c917-e->
+{
+}
+//<-dceag-c920-b->
+
+	/** @brief COMMAND: #920 - Set Media ID */
+	/** Set Media ID - information about media stream */
+		/** @param #10 ID */
+			/** Media ID (special format) */
+		/** @param #41 StreamID */
+			/** ID of stream to set media information for */
+
+void Slim_Server_Streamer::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c920-e->
 {
 }
