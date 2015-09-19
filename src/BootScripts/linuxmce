@@ -273,15 +273,15 @@ start() {
 	# Launch AV Wizard after module loading
 	StartService "Starting LinuxMCE AV Wizard" "/usr/pluto/bin/Start_AVWizard.sh start"
 
-	# Check AV Wizard completion prior to continuing to launch linuxmce.
-	ConfEval;
-	if [[ "$AutostartMedia" == "1" ]] ; then
-		if [[ "$AVWizardDone" != "1" ]] ; then
-			Message "AVWIZARD NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
-			err=1
-			return $err
-		fi
-	fi
+#	# Check AV Wizard completion prior to continuing to launch linuxmce.
+#	ConfEval;
+#	if [[ "$AutostartMedia" == "1" ]] ; then
+#		if [[ "$AVWizardDone" != "1" ]] ; then
+#			Message "AVWIZARD NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
+#			err=1
+#			return $err
+#		fi
+#	fi
 
 	# hack: cleaning lockfile on M/D start to allow local devices to start
 	# TODO: remove this when correct locking will be implemented
