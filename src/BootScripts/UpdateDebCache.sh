@@ -80,6 +80,11 @@ if [[ -n "$(find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
 	UPDATE_CACHE="${DEB_CACHE}"
 fi
 
+# add any empty dirs in deb-cache so they get Packages files as well
+for cache in $(find /usr/pluto/deb-cache/ -depth -type d -empty 2>/dev/null) ; do
+	[[ -n "$UPDATE_CACHE" ]] && UPDATE_CACHE="${UPDATE_CACHE} $(basename ${cache})" || UPDATE_CACHE="$(basename ${cache})"
+done
+
 export LC_ALL="C"
 for Moon_RootLocation in $(find /usr/pluto/diskless/* -maxdepth 0 -type d 2>/dev/null); do
 if [[ -n "$Moon_RootLocation" && -e "$Moon_RootLocation/etc/pluto.conf" ]]; then
