@@ -81,7 +81,7 @@ if [[ -n "$(find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
 fi
 
 export LC_ALL="C"
-for Moon_RootLocation in $(find /usr/pluto/diskless/* -maxdepth 0 -type d); do
+for Moon_RootLocation in $(find /usr/pluto/diskless/* -maxdepth 0 -type d 2>/dev/null); do
 if [[ -n "$Moon_RootLocation" && -e "$Moon_RootLocation/etc/pluto.conf" ]]; then
 	TARGET_DISTRO=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 	TARGET_RELEASE=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -c -s)
