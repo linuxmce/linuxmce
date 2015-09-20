@@ -376,6 +376,7 @@ public:
 
 //<-dceag-h-e->
 
+    void EVENT_Media_Position_Changed(long pkDeviceFrom, int iFK_MediaType,string sMRL,string sID,int iStream_ID,string sDateTime,string sCurrent_Time,int iSpeed);
 	// socket listener for playback info notification
 	
 	class SlimServerStreamerNotification_SocketListener : public SocketListener

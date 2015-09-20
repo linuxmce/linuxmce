@@ -632,6 +632,7 @@ XineMediaInfo Slim_Server_Streamer::parseTimeCode(string strResultTimecode, stri
   iTime = ceil(fTime);
 
   // Parse duration.
+  pos=0;
   sTmp = StringUtils::Tokenize(strTotalTimecode, " ",pos);
   bIsDurCmd = (StringUtils::Tokenize(strTotalTimecode, " ",pos) == "duration" ? true : false);
   fDur = atof(StringUtils::Tokenize(strTotalTimecode, " ",pos).c_str())*1000;
@@ -790,14 +791,21 @@ void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streame
 			    if (pStreamer->isValidTimecode(strResultTimecode))
 			      {
 				string strTotalTimecode = pStreamer->SendReceiveCommand(macAddress + " duration ?");
-				XineMediaInfo mediaInfo = pStreamer->parseTimeCode(strResultTimecode,
+                XineMediaInfo mediaInfo = pStreamer->parseTimeCode(strResultTimecode,
 										   strTotalTimecode,
 										   itStreamsToPlayers->first, 
 										   itStreamsToPlayers->second.first);
-                pStreamer->EVENT_Media_Position_Changed(atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName,
+
+                vector<DeviceData_Base *> *pvectDeviceData_Base = &(itStreamsToPlayers->second.second);
+                for(size_t i = 0; i < pvectDeviceData_Base->size(); i++) {
+                    if (pvectDeviceData_Base->at(i) != NULL) {
+                        pStreamer->EVENT_Media_Position_Changed(pvectDeviceData_Base->at(i)->m_dwPK_Device,
+                                             atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName,
                                              StringUtils::itos(mediaInfo.m_iMediaID),
                                              itStreamsToPlayers->first, mediaInfo.FormatTotalTime(),
                                              mediaInfo.FormatCurrentTime(), mediaInfo.m_iSpeed);
+                    }
+                 }
                 }
 			  }
             itStreamsToPlayers++;
@@ -811,6 +819,20 @@ void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streame
     return NULL;
 }
 
+void Slim_Server_Streamer::EVENT_Media_Position_Changed(long pkDeviceFrom, int iFK_MediaType,string sMRL,string sID,int iStream_ID,
+                                                        string sDateTime,string sCurrent_Time,int iSpeed)
+{
+    GetEvents()->SendMessage(new Message(pkDeviceFrom, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+            EVENT_Media_Position_Changed_CONST,
+            7 /* number of parameter's pairs (id, value) */,
+            EVENTPARAMETER_FK_MediaType_CONST, StringUtils::itos(iFK_MediaType).c_str(),
+            EVENTPARAMETER_MRL_CONST, sMRL.c_str(),
+            EVENTPARAMETER_ID_CONST, sID.c_str(),
+            EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(iStream_ID).c_str(),
+            EVENTPARAMETER_DateTime_CONST, sDateTime.c_str(),
+            EVENTPARAMETER_Current_Time_CONST, sCurrent_Time.c_str(),
+            EVENTPARAMETER_Speed_CONST, StringUtils::itos(iSpeed).c_str()));
+}
 
 string Slim_Server_Streamer::FindControllingMacForStream(int iStreamID)
 {
