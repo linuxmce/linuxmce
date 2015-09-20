@@ -62,13 +62,14 @@ case "$PK_Distro" in
 			SetDeviceData "$PK_Device" "$DEVICEDATA_TV_Standard" "1080P"
 		fi
 
-		# Prevent /etc/asound.conf from being generated on rpi
+		Audio_Settings=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Audio_settings")
 		rpioutput='2' # HDMI is default audio out
-		if [[ "$DEVICEDATA_Audio_settings" == "S" ]]; then
+		if [[ "$Audio_Settings" == "S" ]]; then
 			rpioutput='1'
 		fi
 		amixer cset numid=3 $rpioutput
 
+		# Prevent /etc/asound.conf from being generated on rpi
 		NoAsoundConf="true"
 		;;
 esac
