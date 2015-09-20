@@ -44,7 +44,7 @@ ConfGet "AlternateSC"
 
 # FIXME: This needs to move to an rpi version of AVWizard, for now here is fine
 case "$PK_Distro" in
-	"$DEVICEDATA_Distro_Raspbian_Wheezy|$DEVICEDATA_Distro_Raspbian_Jessie")
+	$DEVICEDATA_Distro_Raspbian_Wheezy|$DEVICEDATA_Distro_Raspbian_Jessie)
 		# Detect and use the current boot resolution 
 		FBWIDTH=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbwidth" | cut -d '=' -f 2; done)
 		FBHEIGHT=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbheight" | cut -d '=' -f 2; done)
