@@ -46,6 +46,7 @@ chown -R www-data: /var/www/mythweb/data || :
 
 # make sure that mythweb hasn't taken over web admin
 a2dissite default-mythbuntu || /bin/true
+a2dissite 000-default-mythbuntu || /bin/true
 
 #Run mythtv-setup.sh to make sure storage groups get added. -tschak
 /usr/pluto/bin/mythtv_setup.pl
