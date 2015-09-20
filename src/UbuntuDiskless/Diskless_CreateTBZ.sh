@@ -3,8 +3,8 @@
 set -e
 #set -x
 
-PROXY=""
-#PROXY=http_proxy=http://10.10.42.99:3142
+#PROXY="http://10.10.42.99:3142"
+#http_proxy="http://10.10.42.99:3142"
 
 ###########################################################
 ### Setup global variables
@@ -194,7 +194,7 @@ function do_debootstrap {
 	qemu_arch=""
 	case "$TARGET_ARCH" in
 		i386)
-			qemu_arch="$arch"
+			qemu_arch="i386"
 		;;
 		amd64)
 			qemu_arch="x86_64"
@@ -204,10 +204,10 @@ function do_debootstrap {
 		;;
 	esac
 
-	[[ -f $(which "qemu-$qemu_arch-static") ]] && qemu_static_bin=$(which "qemu-$qemu_arch-static")
+	[[ -f $(which "qemu-${qemu_arch}-static") ]] && qemu_static_bin=$(which "qemu-${qemu_arch}-static")
 	debootstrap --arch "$TARGET_ARCH" --foreign --no-check-gpg "$release_name" "$temp_dir" "$repository"
-	mkdir -p "$temp_dir/usr/bin"
-	[[ -f "$qemu_static_bin" ]] && cp "$qemu_static_bin" "$temp_dir/usr/bin"
+	mkdir -p "${temp_dir}/usr/bin"
+	[[ -f "$qemu_static_bin" ]] && cp "$qemu_static_bin" "${temp_dir}/usr/bin"
 	chroot "$temp_dir" /debootstrap/debootstrap --second-stage
 }
 
@@ -270,8 +270,6 @@ MD_System_Level_Prep () {
 				deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
 				deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
-				deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
-				deb http://download.videolan.org/pub/debian/stable/ /
 				EOF
 			;;
 		"raspbian")
@@ -772,9 +770,13 @@ trap "Trap_Exit" EXIT
 for TARGET in "$TARGET_TYPES" ; do
 	case "$TARGET" in
 		"ubuntu-i386")
+			if [[ "$HOST_ARCH" == "armhf" ]] ; then
+				echo "Cannot build i386 image on ${HOST_ARCH} core."
+				exit 1
+			fi
 			TARGET_DISTRO="ubuntu"
 			TARGET_RELEASE="$HOST_RELEASE"
-			TARGET_ARCH="$HOST_ARCH"
+			TARGET_ARCH="i386"
 			TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
 			DBST_ARCHIVE="PlutoMD_Debootstraped.tar.bz2"
 			DisklessFS="PlutoMD-${TARGET_ARCH}.tar.xz"
