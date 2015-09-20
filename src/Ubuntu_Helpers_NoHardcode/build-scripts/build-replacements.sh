@@ -268,7 +268,7 @@ function Build_Replacements_Common_raspbian
 	Build_Replacement_Package platform ubuntu/platform-1.0.10 || :
 
 	#Package: libcec
-	Build_Replacement_Package cec ubuntu/libcec-3.0.1 || :
+	Build_Replacement_Package cec raspbian/libcec-3.0.1 || :
 
 	#Package: mbrola
 	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1 || :
