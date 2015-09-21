@@ -181,11 +181,6 @@ function generate_diskless_installer
 	if [[ ! -f $Moon_RootLocation/usr/pluto/install/activation.sh ]]; then
 		/usr/pluto/bin/ConfirmDependencies -o "$Moon_DistroID" -r -D "$MySqlDBName" $PLUTO_DB_CRED -d "$Moon_DeviceID" install > $Moon_RootLocation/usr/pluto/install/activation.sh
 	fi
-	
-	## Modify a install script to run as for diskless
-	sed '/^Type=/ s/^.*$/Type="diskless"/' /usr/pluto/install/Initial_Config.sh >$Moon_RootLocation/usr/pluto/install/Initial_Config.sh
-	chmod +x $Moon_RootLocation/usr/pluto/install/Initial_Config.sh
-	mkdir -p $Moon_RootLocation/usr/pluto/deb-cache
 }
 
 
