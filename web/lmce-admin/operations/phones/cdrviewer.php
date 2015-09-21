@@ -2,7 +2,8 @@
 function cdrviewer($output) {
 	includeLangFile('common.lang.php');
 	includeLangFile('cdrviewer.lang.php');
-
+	$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+	
 	$out='
 	<script language="javascript" type="text/javascript">
 		function iFrameHeight() {
@@ -17,7 +18,7 @@ function cdrviewer($output) {
 		}
 	</script>
 	<iframe 
-		src="http://'.$_SERVER['HTTP_HOST'].'/lmce-admin/cdrviewer/index.php" 
+		src="'.$protocol.$_SERVER['HTTP_HOST'].'/lmce-admin/cdrviewer/index.php" 
 		onload="iFrameHeight()"	
 		id="blockrandom" 
 		width="98%" 
