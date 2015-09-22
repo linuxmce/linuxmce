@@ -61,7 +61,7 @@ contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT5
         CONFIG+= opengl
-        QT+= script widgets
+        QT+= widgets
       include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
      #   include(../platforms/Android/QmlVlc/QmlVlc/QmlVlc.pri)
 }
