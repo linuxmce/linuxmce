@@ -106,6 +106,8 @@ TRANSLATIONS = \
 common-folder.source = qml/skins-common
 common-folder.target = $$DESTDIR/qml
 
+plugins_folder.source = imports
+plugins_folder.target = $$DESTDIR
 
 
 #DEPLOYMENTFOLDERS+=common-folder
@@ -148,8 +150,6 @@ linux-g++{
                 glmsg=scenegraph
         }
 !RPI{
-        plugins_folder.source = imports
-        plugins_folder.target = $$DESTDIR
       # DEPLOYMENTFOLDERS+= plugins_folder
 
        # folder_03.source = config.xml
