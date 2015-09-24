@@ -693,7 +693,7 @@ function getFloorPlanDevices($conn, $doc, $orbiterData) {
 		$i++;
 	}
 
-		echo $i." Devices with floorplan data";
+//		echo $i." Devices with floorplan data";
 	return true;
 }
 
