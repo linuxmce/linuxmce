@@ -117,6 +117,9 @@ function build_main_debs() {
 					Distro_ID="21"
 					RepositorySource=25
 					Main_Version='2.0.0.47.'
+					exclude_list=$exclude_list,452,453 # IRTrans - no armhf .so
+					exclude_list=$exclude_list,879,881 # qOrbiter for Android
+					exclude_list=$exclude_list,682,683 # mame
 					;;
 			esac
 			;;
