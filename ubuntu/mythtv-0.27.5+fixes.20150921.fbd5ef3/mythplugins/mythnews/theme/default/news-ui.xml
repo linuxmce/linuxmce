@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+<mythuitheme>
+
+    <window name="news">
+
+        <buttonlist name="siteslist" from="basebuttonlist">
+            <area>20,20,200,300</area>
+            <wrapstyle>selection</wrapstyle>
+            <showarrow>yes</showarrow>
+        </buttonlist>
+
+        <buttonlist name="articleslist" from="basebuttonlist">
+            <area>250,20,530,300</area>
+            <wrapstyle>selection</wrapstyle>
+            <showarrow>no</showarrow>
+        </buttonlist>
+
+        <textarea name="nosites" from="basetextarea">
+            <area>100,100,600,150</area>
+            <align>allcenter</align>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="title" from="basetextarea">
+            <area>20,350,670,35</area>
+            <font>baselarge</font>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="description" from="basetextarea">
+            <area>20,390,570,150</area>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="updated" from="basetextarea">
+            <area>20,540,300,35</area>
+        </textarea>
+
+        <imagetype name="background">
+            <filename>news-info-bg.png</filename>
+            <position>0,340</position>
+        </imagetype>
+
+        <imagetype name="thumbnail">
+            <area>600,390,160,120</area>
+            <preserveaspect>true</preserveaspect>
+        </imagetype>
+
+        <imagetype name="enclosures">
+            <filename>enclosures.png</filename>
+            <position>705,350</position>
+        </imagetype>
+
+        <imagetype name="download">
+            <filename>need-download.png</filename>
+            <position>740,350</position>
+        </imagetype>
+
+        <imagetype name="ispodcast">
+            <filename>podcast.png</filename>
+            <position>740,350</position>
+        </imagetype>
+
+    </window>
+
+    <window name="editor">
+
+        <textarea name="title" from="basetextarea">
+            <font>baselarge</font>
+            <area>0,50,800,50</area>
+            <align>center,vcenter</align>
+        </textarea>
+
+        <textarea name="namelabel" from="basetextarea">
+            <area>120,150,100,30</area>
+            <align>right,vcenter</align>
+        </textarea>
+
+        <textedit name="name" from="basetextedit">
+            <position>235,140</position>
+        </textedit>
+
+        <textarea name="urllabel" from="basetextarea">
+            <area>120,250,100,30</area>
+            <align>right,vcenter</align>
+        </textarea>
+
+        <textedit name="url" from="basetextedit">
+            <position>235,240</position>
+        </textedit>
+
+        <textarea name="iconlabel" from="basetextarea">
+            <area>120,350,100,30</area>
+            <align>right,vcenter</align>
+        </textarea>
+
+        <textedit name="icon" from="basetextedit">
+            <position>235,340</position>
+        </textedit>
+
+        <textarea name="podcastlabel" from="basetextarea">
+            <area>120,450,100,30</area>
+            <align>right,vcenter</align>
+        </textarea>
+
+        <checkbox name="podcast_check" from="basecheckbox">
+            <position>235,450</position>
+        </checkbox>
+
+        <button name="cancel" from="basebutton">
+            <position>60,510</position>
+            <value>Cancel</value>
+        </button>
+
+        <button name="ok" from="basebutton">
+            <position>590,510</position>
+            <value>OK</value>
+        </button>
+
+    </window>
+
+    <window name="config">
+
+        <buttonlist name="category" from="basebuttonlist">
+            <area>20,40,300,515</area>
+            <showarrow>yes</showarrow>
+        </buttonlist>
+
+        <buttonlist name="sites" from="basebuttonlist">
+            <area>340,40,440,515</area>
+        </buttonlist>
+
+        <textarea name="context_switch" from="basetextarea">
+            <area>20,550,760,50</area>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="help" from="basetextarea">
+            <area>20,500,760,150</area>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <!-- <blackhole name="spinbox_holder">
+            <area>20,170,70,30</area>
+        </blackhole>
+
+        <textarea name="minutes">
+            <area>90,170,100,30</area>
+            <font>active</font>
+            <value>Minutes</value>
+        </textarea> -->
+
+    </window>
+
+</mythuitheme>

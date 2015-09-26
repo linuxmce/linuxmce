@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+    <head>
+        <style type="text/css">
+            body {
+                padding: 0;
+                margin: 0;
+            }
+        </style>
+
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+
+        <script type="text/javascript">
+            /* gup function by R.D. Vaughan */
+            function gup( name )
+            {
+                name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+                var regexS = "[\\?&]"+name+"=([^&#]*)";
+                var regex = new RegExp( regexS );
+                var results = regex.exec( window.location.href );
+                if( results == null )
+                    return "";
+                else
+                    return results[1];
+            }
+
+            var video_id = gup( 'videocode' );
+            var myth_player = null;
+            var paused = false;
+            var volume = 50;
+
+            var embedPage = "http://www.bbc.co.uk/iplayer/episode/";
+            embedPage = embedPage.concat(video_id);
+<!--            embedPage = embedPage.concat("/Top_Gear_Series_13_Episode_1_(new_series)/?t=00m01s");-->
+
+            var pl = "http://www.bbc.co.uk/iplayer/playlist/";
+            pl = pl.concat(video_id);
+
+            var hi = "http://node2.bbcimg.co.uk/iplayer/images/episode/";
+            hi = hi.concat(video_id);
+            hi = hi.concat("_640_360.jpg");
+
+            function play() {
+                if (myth_player) {
+                    if (paused) {
+                        myth_player.play();
+                        paused = false;
+                    }
+                    else if (!paused) {
+                        myth_player.pause();
+                        paused = true;
+                    }
+                }
+            }
+
+            function seek(amount) {
+                if (myth_player) {
+                    myth_player.seekTo(myth_player.getCurrentTime() + amount);
+                }
+            }
+
+            function adjustVolume(amount) {
+                if (myth_player) {
+                    volume += amount;
+                    if (volume > 100)
+                        volume = 100;
+                    if (volume < 0)
+                        volume = 0;
+                    myth_player.setVolume(volume);
+                }
+            }
+
+            var flashvars = {
+                embedReferer: '',
+                embedPageUrl: embedPage,
+                domId: 'bip-play-emp',
+                config: 'http://www.bbc.co.uk/emp/iplayer/config.xml',
+                playlist: pl,
+                holdingImage: hi,
+                config_settings_bitrateFloor: 0,
+                config_settings_bitrateCeiling: 2500,
+                config_settings_transportHeight: 35,
+                config_settings_cueItem: "b00ldy1k:875",
+                config_settings_showPopoutCta: false,
+                config_messages_diagnosticsMessageBody: "Insufficient bandwidth to stream this programme. Try downloading instead, or see our diagnostics page.",
+                config_settings_language: "en",
+                guidance: "unset"
+            };
+
+            var params = {
+                allowscriptaccess: 'always',
+                allowfullscreen: 'true',
+                wmode: 'opaque',
+            };
+
+            var attributes = { id: "mybbcplayer" };
+
+            swfobject.embedSWF("http://www.bbc.co.uk/emp/10player.swf?revision=10344_10570", "myth_player", window.innerWidth, window.innerHeight, "9.0.0", "expressInstall.swf", flashvars, params, attributes);
+
+            function onPlayerReady(playerId) {
+                myth_player = document.getElementById("mybbcplayer");
+                myth_player.setVolume(50);
+                if (videocode != "") {
+                    myth_player.loadVideoById(videocode);
+                    myth_player.playVideo();
+                }
+            }
+
+        </script>
+    </head>
+    <body>
+        <div id="myth_player"/>
+    </body>
+</html>

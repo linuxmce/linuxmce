@@ -1,0 +1,99 @@
+"Action"
+    Akční
+    \b(?:action|adven)
+"Adult"
+    Erotický
+    \b(?:adult|erot)
+"Animals"
+    O zvířatech
+    \b(?:animal|tiere)
+"Art_Music"
+    Hudební
+    \b(?:art|dance|music|cultur)
+"Business"
+    Biznis
+    \b(?:biz|busine)
+"Children"
+    Dětský
+    \b(?:child|infan|animation|deti)
+"Comedy"
+    Komedie
+    \b(?:comed|entertain|sitcom|zabava)
+"Crime_Mystery"
+    Krimi / Mysteriózní
+    \b(?:crim|myster)
+"Documentary"
+    Dokumentární
+    \b(?:doc|dokument)
+"Drama"
+    Drama
+    \b(?:drama)
+"Educational"
+    Vzdělávací
+    \b(?:edu|interests)
+"Food"
+    Vaření
+    \b(?:food|cook|drink)
+"Game"
+    Herní
+    \b(?:game)
+"Health_Medical"
+    Zdraví
+    \b(?:health|medic)
+"History"
+    Historický
+    \b(?:hist)
+"Horror"
+    Horor
+    \b(?:horror)
+"HowTo"
+    Jak na to
+    \b(?:how|home|house|garden)
+"Misc"
+    Různý
+    \b(?:special|variety|info|collect)
+"News"
+    Spravodajství
+    \b(?:news|current|zpravy)
+"Reality"
+    Reality
+    \b(?:reality)
+"Romance"
+    Romantický
+    \b(?:romance)
+"SciFi_Fantasy"
+    SciFi / Fantasy
+    \b(?:fantasy|sci\w*\W*fi)
+"Science_Nature"
+    Vědecký / Přírodopisní
+    \b(?:science|nature|environment)
+"Shopping"
+    Nakupování
+    \b(?:shop)
+"Soaps"
+    Mýdlová opera
+    \b(?:soaps)
+"Spiritual"
+    Duchovní
+    \b(?:spirit|relig)
+"Sports"
+    Sport
+    \b(?:sport)
+"Talk"
+    Talk-show
+    \b(?:talk)
+"Travel"
+    Cestopisní
+    \b(?:travel)
+"Unknown"
+    Neznámý
+    
+"War"
+    Válečný
+    \b(?:war)
+"Western"
+    Western
+    \b(?:west)
+"movie"
+    Film
+    

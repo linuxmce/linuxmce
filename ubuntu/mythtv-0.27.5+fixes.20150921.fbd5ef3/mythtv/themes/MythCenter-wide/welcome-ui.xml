@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+<mythuitheme>
+
+    <window name="welcome_screen">
+
+        <!--
+            First, define all the fonts we need on this screen
+        -->
+        <fontdef name="title" from="baselarge">
+            <color>#ffff00</color>
+            <pixelsize>34</pixelsize>
+            <shadowcolor>#000000</shadowcolor>
+            <shadowoffset>2,2</shadowoffset>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="time" from="basesmall">
+            <color>#9999cc</color>
+            <pixelsize>20</pixelsize>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="label" from="basesmall">
+            <color>#ffff00</color>
+            <pixelsize>26</pixelsize>
+            <shadowcolor>#000000</shadowcolor>
+            <shadowoffset>2,2</shadowoffset>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="info" from="basesmall">
+            <color>#ffffff</color>
+            <pixelsize>22</pixelsize>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="warning" from="basesmall">
+            <color>#ff0000</color>
+            <pixelsize>22</pixelsize>
+            <shadowcolor>#000000</shadowcolor>
+            <shadowoffset>2,2</shadowoffset>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="buttons" from="basesmall">
+            <color>#ffff00</color>
+            <pixelsize>20</pixelsize>
+            <weight>bold</weight>
+        </fontdef>
+
+
+        <textarea name="title" from="basetextarea">
+            <area>80,12,1120,48</area>
+            <font>title</font>
+            <align>allcenter</align>
+            <value>Welcome to MythTV</value>
+        </textarea>
+
+        <!--
+            date & time
+        -->
+        <clock name="date">
+            <area>32,24,304,84</area>
+            <font>time</font>
+            <template>dddd\ndd MMMM yyyy</template>
+            <align>left,top</align>
+            <cutdown>true</cutdown>
+        </clock>
+
+        <clock name="time" from="date">
+            <area>1072,24,176,36</area>
+            <template>%TIME%</template>
+            <align>right</align>
+        </clock>
+
+        <!--
+            current myth status
+        -->
+        <textarea name="status_text" from="basetextarea">
+            <area>32,84,1216,72</area>
+            <multiline>yes</multiline>
+            <font>info</font>
+            <align>hcenter</align>
+            <value>MythTV is idle and will shutdown shortly.</value>
+        </textarea>
+
+        <!--
+            current recordings status
+        -->
+        <textarea name="recording_label" from="basetextarea">
+            <area>32,156,1216,36</area>
+            <font>label</font>
+            <align>hcenter</align>
+            <value>Current Recording(s)</value>
+        </textarea>
+
+        <textarea name="recording_text" from="status_text">
+            <area>32,198,1216,180</area>
+            <value>Retrieving Recording Status...</value>
+        </textarea>
+
+        <!--
+            next scheduled recording status
+        -->
+        <textarea name="scheduled_label" from="recording_label">
+            <area>32,384,1216,36</area>
+            <value>Next Scheduled Recording(s)</value>
+        </textarea>
+
+        <textarea name="scheduled_text" from="recording_text">
+            <area>32,426,1216,144</area>
+            <value>Retrieving Scheduled Recordings...</value>
+        </textarea>
+
+        <!--
+            scheduled recordings conflict warning
+        -->
+        <textarea name="conflicts_text" from="basetextarea">
+            <area>32,588,1216,36</area>
+            <font>warning</font>
+            <align>hcenter</align>
+            <value>WARNING: There are conflicting scheduled recordings!</value>
+        </textarea>
+
+        <!--
+            start frontend button
+        -->
+        <button name="startfrontend_button" from="basewidebutton">
+            <position>486,642</position>
+            <value>Start Frontend</value>
+        </button>
+
+
+    </window>
+
+</mythuitheme>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+<mythuitheme>
+
+        <window name="miniplayer">
+            <area>20,690,800,30</area>
+
+            <statetype name="trackstate">
+                <state name="playing">
+                    <imagetype name="playicon">
+                        <filename>music/miniplayer_playicon.png</filename>
+                    </imagetype>
+                </state>
+                <state name="paused">
+                    <position>0,4</position>
+                    <imagetype name="pauseicon">
+                        <filename>music/miniplayer_pauseicon.png</filename>
+                    </imagetype>
+                </state>
+                <state name="stopped">
+                    <position>0,4</position>
+                    <imagetype name="stopicon">
+                        <filename>music/miniplayer_stopicon.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+
+            <textarea name="label" from="basetextarea">
+                <area>20,0,85,25</area>
+                <font>basesmallbrown</font>
+                <value>Playing:</value>
+                <align>allcenter</align>
+            </textarea>
+
+            <textarea name="artist" from="label">
+                <area>110,0,460,25</area>
+                <value>None</value>
+                <align>left,vcenter</align>
+                <template>%TITLE%  by  %ARTIST%</template>
+            </textarea>
+        </window>
+
+</mythuitheme>

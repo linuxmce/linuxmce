@@ -1,0 +1,43 @@
+#!python
+
+from MythTV import *
+import sys
+
+if __name__ == '__main__':
+    if '--version' in sys.argv:
+        def print_version(name, s=None, j=None):
+            name = '    {0}:'.format(name)
+            if s: ver = str(s)
+            elif j: ver = '.'.join([str(i) for i in j])
+            print '{0:<30}{1}'.format(name, ver)
+
+        import MythTV.ttvdb.tvdb_api
+        import MythTV.tmdb3
+        import lxml.etree
+        print 'MythTV Python Bindings'
+        print '  local versions'
+        print_version('bindings version', j=static.OWN_VERSION)
+        print_version('ttvdb version', MythTV.ttvdb.tvdb_api.__version__)
+        print_version('tmdb version', MythTV.tmdb3.__version__)
+        print '  external versions'
+        print_version('lxml version', lxml.etree.__version__)
+        print_version('{0} version'.format(static.dbmodule[0]), j=static.dbmodule[1:])
+        print '  protocol versions'
+        print_version('backend', static.PROTO_VERSION)
+        print_version('schema', static.SCHEMA_VERSION)
+        print_version('music schema', static.MUSICSCHEMA_VERSION)
+        print_version('netvision schema', static.NVSCHEMA_VERSION)
+        sys.exit(0)
+
+    banner = 'MythTV Python interactive shell.'
+    import code
+    try:
+        import readline, rlcompleter
+    except:
+        pass
+    else:
+        readline.parse_and_bind("tab: complete")
+        banner += ' TAB completion available.'
+    namespace = globals().copy()
+    namespace.update(locals())
+    code.InteractiveConsole(namespace).interact(banner)

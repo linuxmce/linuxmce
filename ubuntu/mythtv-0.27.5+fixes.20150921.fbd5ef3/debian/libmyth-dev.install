@@ -1,0 +1,3 @@
+usr/include/mythtv
+
+debian/mythtv.make usr/share/mythtv

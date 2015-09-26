@@ -1,0 +1,928 @@
+#!/bin/sh
+#
+# Configure script for mythplugins
+#
+
+###
+# functions from ffmpeg's configure
+
+log(){
+    echo "$@" >> $logfile
+}
+
+log_file(){
+    log BEGIN $1
+    pr -n -t $1 >> $logfile
+    log END $1
+}
+
+echolog(){
+    log "$@"
+    echo "$@"
+}
+
+set_all(){
+    value=$1
+    shift
+    for var in $*; do
+        eval $var=$value
+    done
+}
+
+enable(){
+    set_all yes $*
+}
+
+disable(){
+    set_all no $*
+}
+
+enabled(){
+    test "${1#!}" = "$1" && op== || op=!=
+    eval test "x\$${1#!}" $op "xyes"
+}
+
+disabled(){
+    test "${1#!}" = "$1" && op== || op=!=
+    eval test "x\$${1#!}" $op "xno"
+}
+
+enabled_all(){
+    for opt; do
+        enabled $opt || return 1
+    done
+}
+
+disabled_all(){
+    for opt; do
+        disabled $opt || return 1
+    done
+}
+
+enabled_any(){
+    for opt; do
+        enabled $opt && return 0
+    done
+}
+
+disabled_any(){
+    for opt; do
+        disabled $opt && return 0
+    done
+    return 1
+}
+
+is_in(){
+    value=$1
+    shift
+    for var in $*; do
+        [ $var = $value ] && return 0
+    done
+    return 1
+}
+
+check_cmd(){
+    log "$@"
+    "$@" >> $logfile 2>&1
+}
+
+die_unknown(){
+    echo "Unknown option \"$1\"."
+    echo "See $0 --help for available options."
+    exit 1
+}
+
+die(){
+    echolog "$@"
+    cat <<EOF
+
+If you think configure made a mistake, make sure that you are using the latest
+version of MythTV from git.  If the latest version fails, report the problem to the
+mythtv-dev@mythtv.org mailing list or IRC #mythtv on irc.freenode.net
+EOF
+cat <<EOF
+Include the log file "$logfile" produced by configure as this will help
+solving the problem.
+EOF
+    exit 1
+}
+
+append(){
+    var=$1
+    shift
+    eval "$var=\"\$$var $*\""
+}
+
+prepend(){
+    var=$1
+    shift
+    eval "$var=\"$* \$$var\""
+}
+
+check_cmd(){
+    log "$@"
+    "$@" >> $logfile 2>&1
+}
+
+filter_cflags=echo
+filter_cppflags=echo
+filter_cxxflags=echo
+filter_cxxppflags=echo
+
+check_cc(){
+    log check_cc "$@"
+    cat > $TMPC
+    log_file $TMPC
+    check_cmd $CC $CPPFLAGS $CFLAGS "$@" -c -o $TMPO $TMPC
+}
+
+check_cpp(){
+    log check_cpp "$@"
+    cat > $TMPC
+    log_file $TMPC
+    check_cmd $CC $CPPFLAGS $CFLAGS "$@" -E -o $TMPO $TMPC
+}
+
+check_ld(){
+    log check_ld "$@"
+    flags=''
+    libs=''
+    for f; do
+        test "${f}" = "${f#-l}" && flags="$flags $f" || libs="$libs $f"
+    done
+    check_cc $($filter_cflags $flags) || return
+    check_cmd $LD $LDFLAGS $flags -o $TMPE $TMPO $libs $EXTRALIBS
+}
+
+check_header(){
+    log check_header "$@"
+    header=$1
+    shift
+    check_cpp "$@" <<EOF
+#include <$header>
+int x;
+EOF
+}
+
+check_func(){
+    log check_func "$@"
+    func=$1
+    shift
+    check_ld "$@" <<EOF
+extern int $func();
+int main(void){ $func(); }
+EOF
+}
+
+check_func_headers(){
+    log check_func_headers "$@"
+    headers=$1
+    func=$2
+    shift 2
+    incs=""
+    for hdr in $headers; do
+        incs="$incs
+#include <$hdr>"
+    done
+    check_ld "$@" <<EOF
+$incs
+int main(int argc, char **argv){
+    return (long) $func;
+}
+EOF
+}
+
+check_lib(){
+    log check_lib "$@"
+    header="$1"
+    func="$2"
+    shift 2
+    check_header $header && check_func $func "$@"
+}
+
+check_lib2(){
+    log check_lib2 "$@"
+    headers="$1"
+    func="$2"
+    shift 2
+    check_func_headers "$headers" $func "$@"
+}
+
+#CXX related tests
+check_header_cxx(){
+    log check_header_cxx "$@"
+    header=$1
+    shift
+    check_cxx "$@" <<EOF
+#include <$header>
+int x;
+EOF
+}
+
+add_ldflags(){
+    append LDFLAGS "$@"
+}
+
+add_cxxflags(){
+    append ECXXFLAGS "$@"
+}
+
+check_cxx(){
+    log check_cxx "$@"
+    cat > $TMPCXX
+    log_file $TMPCXX
+    check_cmd $CXX $CXXPPFLAGS $ECXXFLAGS "$@" -c -o $TMPO $TMPCXX
+}
+
+check_ld_cxx(){
+    log check_ld_cxx "$@"
+    flags=''
+    libs=''
+    for f; do
+        test "${f}" = "${f#-l}" && flags="$flags $f" || libs="$libs $f"
+    done
+    check_cxx $($filter_cxxflags $flags) || return
+    check_cmd $CXX $LDFLAGS $flags -o $TMPE $TMPO $libs
+}
+
+check_func_cxx(){
+    log check_func_cxx "$@"
+    func=$1
+    header=$2
+    shift 2
+    disable $(echo $func | sed -e 's/:://g')
+    check_ld_cxx "$@" <<EOF
+#include <$header>
+int main(void){ $func(); }
+EOF
+}
+
+check_lib_cxx(){
+    log check_lib_cxx "$@"
+    header="$1"
+    func="$2"
+    shift 2
+    check_header_cxx $header && check_func_cxx $func $header "$@"
+}
+
+#
+#    default parameters for all plugins
+#
+
+PLUGIN_LIST="
+archive
+browser
+flix
+gallery
+game
+music
+netvision
+news
+weather
+zoneminder
+"
+
+CONFIG_LIST="
+opengl
+fftw
+exif
+newexif
+dcraw
+cdio
+"
+
+DEPEND_LIST="
+vorbis
+flac
+mp3lame
+"
+
+enable $PLUGIN_LIST $CONFIG_LIST $DEPEND_LIST
+
+prefix="/usr/local"
+libdir_name="lib"
+sysroot=""
+ln_s="ln -sf"
+
+logfile="config.ep"
+
+cc="gcc"
+qmake="qmake"
+python="python"
+
+targetos=`uname -s`
+
+if test x"$1" = x"-h" -o x"$1" = x"--help" ; then
+cat << EOF
+
+Usage:   configure [options]
+Options: [defaults in brackets after descriptions]
+NB:      all --enable-* options can be reversed with --disable-*
+
+Generic options:
+  --prefix=PREFIX          MythTV install location PREFIX [$prefix]
+  --sysroot=SYSROOT        MythTV sysroot location SYSROOT [$sysroot]
+  --qmake=QMAKE            use specified qmake [$qmake]
+  --python=PATH            Force a specific python executable to use [$python]
+  --libdir-name=LIBNAME    install/look for libs in PREFIX/LIBNAME [$libdir_name]
+  --help                   print this message
+  --enable-all             Enable all options
+  --enable-opengl          enable OpenGL (Music and Gallery) [$opengl]
+  --previous               use previous configure parameters if possible
+
+MythArchive related options:
+  --enable-mytharchive     build the mytharchive plugin [$archive]
+
+MythBrowser related options:
+  --enable-mythbrowser     build the mythbrowser plugin [$browser]
+
+MythGallery related options:
+  --enable-mythgallery     build the mythgallery plugin [$gallery]
+  --enable-exif            enable reading of EXIF headers [$exif]
+  --enable-new-exif        use libexif > version 0.6.9 [$newexif]
+  --enable-dcraw           use dcraw to view raw photos [$dcraw]
+  --icc-profile=PROFILE    ICC profile for dcraw decoding [$icc]
+
+MythGame related options:
+  --enable-mythgame        build the mythgame plugin [$game]
+
+MythMusic related options:
+  --enable-mythmusic       build the mythmusic plugin [$music]
+  --enable-fftw            enable fftw visualizers [$fftw]
+
+MythNetvision related options:
+  --enable-mythnetvision   build the mythnetvision plugin [$netvision]
+
+MythNews related options:
+  --enable-mythnews        build the mythnews plugin [$news]
+
+MythWeather related options:
+  --enable-mythweather     build the mythweather plugin [$weather]
+
+MythZoneMinder related options:
+  --enable-mythzoneminder  build the mythzoneminder plugin [$zoneminder]
+
+EOF
+exit 0
+fi
+if [ -e config.log ] ; then
+    PCONF=`cat config.log | tail -n 1 | grep configure`
+    if test x"$PCONF" != x"" ; then
+        PCONF=`echo $PCONF | sed 's/.\/configure//g'`
+    fi
+    for opt do
+        if test x"$opt" != x"--prev" -a x"$opt" != x"--previous" ; then
+            OTHOPT="$OTHOPT$opt"
+        fi
+        if test x"$opt" = x"--prev" -o x"$opt" = x"--previous" ; then
+            if test x"$PCONF" != "--prev" ; then
+                PREV="yes";
+            fi
+        fi
+    done
+    if test x"$PREV" = x"yes"; then
+        echo "Options: $PCONF $OTHOPT"
+        ./configure $PCONF $OTHOPT
+        exit
+    fi
+fi
+
+
+CMDLINE_SET="
+    logfile
+    qmake
+    python
+    sysroot
+"
+
+CONFIGURATION_OPTS=""
+for opt do
+  CONFIGURATION_OPTS="$CONFIGURATION_OPTS ""$opt"
+done
+
+date >> config.log
+echo "   $0$CONFIGURATION_OPTS" >> config.log
+
+for opt do
+  optval="${opt#*=}"
+  case "$opt" in
+  --targetos=*) targetos=`echo $opt | cut -d '=' -f 2`
+  ;;
+  --prefix=*) prefix=`echo $opt | cut -d '=' -f 2`
+  ;;
+  --libdir-name=*) libdir_name=`echo $opt | cut -d '=' -f 2`;
+  ;;
+  --enable-myth?*|--disable-myth?*)
+  eval $(echo "$opt" | sed 's/--/action=/;s/-myth/ option=/;s/-/_/g')
+  if is_in $option $PLUGIN_LIST; then
+      $action $option
+  else
+      die_unknown $opt
+  fi
+  ;;
+  --enable-new-exif)  enable exif newexif
+  ;;
+  --disable-new-exif) disable newexif
+  ;;
+  --enable-dcraw) dcraw="yes"
+  ;;
+  --disable-dcraw) dcraw="no"
+  ;;
+  --icc-profile=*) icc=`echo $opt | cut -d '=' -f 2`
+  ;;
+  --enable-all)
+      enable $PLUGIN_LIST $CONFIG_LIST
+  ;;
+  --disable-all)
+      disable $PLUGIN_LIST $CONFIG_LIST
+  ;;
+  --enable-?*|--disable-?*)
+  eval $(echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g')
+  if is_in $option $CONFIG_LIST; then
+      $action $option
+  else
+      die_unknown $opt
+  fi
+  ;;
+  *)
+  optname="${opt%%=*}"
+  optname="${optname#--}"
+  optname=$(echo "$optname" | sed 's/-/_/g')
+  if is_in $optname $CMDLINE_SET; then
+      eval $optname='$optval'
+  fi
+  esac
+done
+
+check_py_lib(){
+    log check_py_lib "$@"
+    lib=${1}
+    check_cmd $python <<EOF
+from distutils.sysconfig import get_python_lib
+import sys
+sys.path.append(get_python_lib(prefix='${prefix}'))
+try:
+    import $lib
+except:
+    sys.exit(1)
+sys.exit(0)
+EOF
+}
+
+# set temporary file name
+: ${TMPDIR:=$TEMPDIR}
+: ${TMPDIR:=$TMP}
+: ${TMPDIR:=/tmp}
+
+if ! check_cmd type mktemp; then
+    # simple replacement for missing mktemp
+    # NOT SAFE FOR GENERAL USE
+    mktemp(){
+        echo "${2%XXX*}.${HOSTNAME}.${UID}.$$"
+    }
+fi
+
+tmpfile(){
+    tmp=$(mktemp -u "${TMPDIR}/mythplugins_conf.XXXXXXXX")$2 &&
+    (set -C; exec > $tmp) 2>/dev/null ||
+    die "Unable to create temporary file in $TMPDIR."
+    append TMPFILES $tmp
+    eval $1=$tmp
+}
+
+trap 'rm -f -- $TMPFILES' EXIT
+trap exit HUP INT TERM
+
+tmpfile TMPC  .c
+tmpfile TMPE  $EXESUF
+tmpfile TMPH  .h
+tmpfile TMPO  .o
+tmpfile TMPS  .S
+tmpfile TMPV  .ver
+tmpfile TMPSH .sh
+tmpfile TMPCXX .cpp
+tmpfile TMPASM .asm
+tmpfile TMPMAK .mak
+
+unset -f mktemp
+
+# make sure we can execute files in $TMPDIR
+cat > $TMPSH 2>> $logfile <<EOF
+#! /bin/sh
+EOF
+chmod +x $TMPSH >> $logfile 2>&1
+if ! $TMPSH >> $logfile 2>&1; then
+    cat <<EOF
+Unable to create and execute files in $TMPDIR.  Set the TMPDIR environment
+variable to another directory and make sure that it is not mounted noexec.
+EOF
+    die "Sanity test failed."
+fi
+
+is_qmake5(){
+    $1 --version 2>&1 | egrep -q -e "Qt version 5\.[0-9]\.[0-9]"
+}
+
+is_qmake4(){
+    $1 --version 2>&1 | egrep -q -e "Qt version 4\.[8-9]\.[0-9]"
+}
+
+# bring in mythtv config
+if [ -e $prefix/include/mythtv/mythconfig.mak ] ; then
+    rm mythconfig.mak 2> /dev/null
+    ${ln_s} $prefix/include/mythtv/mythconfig.mak mythconfig.mak
+else
+    echo "ERROR: mythconfig.mak not found at $prefix/include/mythtv/mythconfig.mak"
+    echo "Did you make AND install MythTV first?"
+    echo "Are you using the correct prefix ($prefix)?"
+    echo "Bailing out!!"
+    exit
+fi
+
+#Set build env variables according to mythconfig.mak
+LD=$(cat mythconfig.mak | grep -e "^LD=")
+LD=${LD#LD=}
+CC=$(cat mythconfig.mak | grep -e "^CC=")
+CC=${CC#CC=}
+CFLAGS=$(cat mythconfig.mak | grep -e "^CFLAGS=")
+CFLAGS=${CFLAGS#CFLAGS=}
+CPPFLAGS=$(cat mythconfig.mak | grep -e "^CPPFLAGS=")
+CPPFLAGS=${CPPFLAGS#CPPFLAGS=}
+LDFLAGS=$(cat mythconfig.mak | grep -e "^LDFLAGS=")
+LDFLAGS=${LDFLAGS#LDFLAGS=}
+CXX=$(cat mythconfig.mak | grep -e "^QMAKE_CXX=")
+CXX=${CXX#QMAKE_CXX=}
+ECXXFLAGS=$(cat mythconfig.mak | grep -e "^ECXXFLAGS=")
+ECXXFLAGS=${ECXXFLAGS#ECXXFLAGS=}
+CXXPPFLAGS=$(cat mythconfig.mak | grep -e "^CXXPPFLAGS=")
+CXXPPFLAGS=${CXXPPFLAGS#CXXPPFLAGS=}
+OPENGLV=$(cat mythconfig.mak | grep -e "^CONFIG_OPENGL_VIDEO=yes")
+
+EXTRALIBS=$(cat mythconfig.mak | grep -e "^EXTRALIBS=")
+EXTRALIBS=${EXTRALIBS#EXTRALIBS=}
+
+if is_qmake4 $qmake || is_qmake4 qmake-qt4; then
+    if is_qmake4 qmake-qt4; then
+        qmake=qmake-qt4
+    fi
+elif is_qmake5 $qmake || is_qmake5 qmake-qt5; then
+    if is_qmake5 qmake-qt5; then
+        qmake=qmake-qt5
+    fi
+else
+    die "qmake for Qt4.8 or newer not found.\nPlease specify the correct qmake with --qmake="
+fi
+
+
+# rely on what was discover during MythTV configure
+if enabled opengl && test "$OPENGLV" != "CONFIG_OPENGL_VIDEO=yes"; then
+    disable opengl
+fi
+
+#Test if fftw_lib3 is available
+if enabled fftw &&! check_lib2 fftw3.h fftw_init_threads -lfftw3_threads -lfftw3f -lfftw3 ; then
+    disable fftw
+fi
+
+if ! check_lib libexif/exif-data.h exif_loader_new -lexif ; then
+    disable exif
+fi
+
+if enabled netvision; then
+    disable_netvision(){
+        msg="$1"
+        echo "MythNetvision requires the $msg"
+        disable netvision
+    }
+
+    check_py_lib MythTV  || disable_netvision "MythTV Python bindings (MythTV)"
+    check_py_lib pycurl  || disable_netvision "Python pycurl library (pycurl)"
+    check_py_lib lxml    || disable_netvision "Python lxml library (lxml)"
+    check_py_lib xml     || disable_netvision "Python XML library (xml)"
+    check_py_lib urllib  || disable_netvision "Python URL library (urllib)"
+    check_py_lib urllib2 || disable_netvision "Python URL library 2 (urllib2)"
+    check_py_lib oauth   || disable_netvision "Python OAuth library (oauth)"
+
+    disabled netvision && echo "Disabling MythNetvision due to missing dependencies."
+fi
+
+if enabled weather; then
+    check_pl_lib(){
+        log check_pl_lib "$@"
+        check_cmd perl -e "use ${1};"
+    }
+
+    disable_weather(){
+        echo "MythWeather requires $1"
+        disable weather
+    }
+
+    check_pl_lib "Date::Manip"  || disable_weather "Date::Manip"
+    check_pl_lib "XML::Simple"  || disable_weather "XML::Simple"
+    check_pl_lib "XML::XPath"  || disable_weather "XML::XPath"
+    check_pl_lib "Image::Size"  || disable_weather "Image::Size"
+    check_pl_lib "DateTime::Format::ISO8601" ||
+        disable_weather "DateTime::Format::ISO8601"
+    check_pl_lib "SOAP::Lite"  || disable_weather "SOAP::Lite"
+    check_pl_lib "JSON"  || disable_weather "JSON"
+
+    disabled weather && echo "Disabling MythWeather due to missing dependencies."
+fi
+
+# Test for dcraw utility
+enabled dcraw && command -v dcraw 2>/dev/null > /dev/null || disable dcraw
+
+if test x"$icc" != x ; then
+    # Assume relative paths are for files in the standard icc directory.
+    case "$icc" in
+    /*)
+    ;;
+    *) icc=$sysroot/usr/share/color/icc/$icc
+    ;;
+    esac
+    # Verify the presence of the file.
+    if test ! -f "$icc" ; then
+        icc=""
+    fi
+fi
+
+if enabled music ; then
+    if ! check_lib vorbis/codec.h vorbis_info_init -lvorbis || ! check_lib vorbis/vorbisenc.h vorbis_encode_setup_vbr -lvorbisenc -lvorbis -logg ; then
+        disable vorbis
+        echo "MythMusic requires vorbis."
+    fi
+
+    if ! check_lib FLAC/all.h FLAC__stream_decoder_new -lFLAC ;then
+        disable flac
+        echo "MythMusic requires FLAC."
+    fi
+
+    if ! check_lib cdio/cdio.h cdio_open -lcdio || ! check_lib cdio/cdda.h cdio_cddap_open -lcdio_cdda || ! check_lib cdio/paranoia.h cdio_paranoia_init -lcdio_paranoia ; then
+        disable cdio
+    fi
+
+    if ! check_lib lame/lame.h lame_init -lmp3lame ; then
+        disable mp3lame
+        echo "MythMusic requires the LAME mp3 encoder."
+    fi
+
+    if disabled vorbis || disabled flac || disabled mp3lame ;  then
+        echo "Disabling MythMusic due to missing dependencies."
+        disable music
+    fi
+fi
+
+if enabled zoneminder ; then
+    if ! check_header mysql/mysql.h ; then
+        echo "Disabling MythZoneMinder. Requires mysql/mysql.h header"
+        disable zoneminder
+    fi
+fi
+
+cat > $TMPC << EOF
+#include <stdint.h>
+int main( void ) { return 0; }
+EOF
+
+disable _stdint_h
+if $cc -o $TMPE $TMPC 2> /dev/null ; then
+  enable _stdint_h
+fi
+
+###########################################################
+#                                                         #
+#  Top level mythplugin.pro file creation                 #
+#  (ie. which plugins to build)                           #
+#                                                         #
+###########################################################
+
+echo ""
+echo "Configuration settings: "
+echo " "
+echo "        qmake          $(which $qmake)"
+echo " "
+
+echo "#" > ./config.pro
+echo "#    Automatically generated by mythplugin configure" >> ./config.pro
+echo "#    (manual modifications will be overwritten)" >> ./config.pro
+echo "#" >> ./config.pro
+
+if enabled archive ; then
+  echo "        MythArchive    plugin will be built"
+  echo "SUBDIRS += mytharchive" >> ./config.pro
+else
+  echo "        MythArchive    plugin will not be built"
+fi
+
+if enabled browser ; then
+  echo "        MythBrowser    plugin will be built"
+  echo "SUBDIRS += mythbrowser" >> ./config.pro
+else
+  echo "        MythBrowser    plugin will not be built"
+fi
+
+if enabled gallery ; then
+  echo "        MythGallery    plugin will be built"
+  echo "SUBDIRS += mythgallery" >> ./config.pro
+else
+  echo "        MythGallery    plugin will not be built"
+fi
+
+if enabled game ; then
+  echo "        MythGame       plugin will be built"
+  echo "SUBDIRS += mythgame" >> ./config.pro
+else
+  echo "        MythGame       plugin will not be built"
+fi
+
+if enabled music ; then
+  echo "        MythMusic      plugin will be built"
+  echo "SUBDIRS += mythmusic" >> ./config.pro
+else
+  echo "        MythMusic      plugin will not be built"
+fi
+
+if enabled netvision ; then
+  echo "        MythNetvision  plugin will be built"
+  echo "SUBDIRS += mythnetvision" >> ./config.pro
+else
+  echo "        MythNetvision  plugin will not be built"
+fi
+
+if enabled news ; then
+  echo "        MythNews       plugin will be built"
+  echo "SUBDIRS += mythnews" >> ./config.pro
+else
+  echo "        MythNews       plugin will not be built"
+fi
+
+if enabled weather ; then
+  echo "        MythWeather    plugin will be built"
+  echo "SUBDIRS += mythweather" >> ./config.pro
+else
+  echo "        MythWeather    plugin will not be built"
+fi
+
+if enabled zoneminder ; then
+  echo "        MythZoneMinder plugin will be built"
+  echo "SUBDIRS += mythzoneminder" >> ./config.pro
+else
+  echo "        MythZoneMinder plugin will not be built"
+fi
+
+###########################################################
+#                                                         #
+#   MythGallery related configuration options             #
+#                                                         #
+###########################################################
+
+if enabled gallery ; then
+
+    echo "/*" >  ./mythgallery/mythgallery/config.h
+    echo "    Automatically generated by configure - do not modify" >> ./mythgallery/mythgallery/config.h
+    echo "*/" >> ./mythgallery/mythgallery/config.h
+
+    echo "#" > ./mythgallery/config.pro
+    echo "#    Automatically generated by configure - modify only under penalty of death" >> ./mythgallery/config.pro
+    echo "#" >> ./mythgallery/config.pro
+
+    echo "#" > ./mythgallery/mythgallery/config.pro
+    echo "#    Automatically generated by configure - modify only under penalty of death" >> ./mythgallery/mythgallery/config.pro
+    echo "#" >> ./mythgallery/mythgallery/config.pro
+
+    if enabled opengl ; then
+        echo "        OpenGL         support will be included in MythGallery"
+        echo "#define OPENGL_SUPPORT 1" >> ./mythgallery/mythgallery/config.h
+        echo "CONFIG += opengl" >> ./mythgallery/mythgallery/config.pro
+        echo "HEADERS += glsingleview.h" >> ./mythgallery/mythgallery/config.pro
+        echo "SOURCES += glsingleview.cpp" >> ./mythgallery/mythgallery/config.pro
+    else
+        echo "        OpenGL         support will not be included in MythGallery"
+    fi
+
+    if enabled exif ; then
+        echo "        EXIF           support will be included in MythGallery"
+        echo "#define EXIF_SUPPORT 1" >> ./mythgallery/mythgallery/config.h
+        echo "LIBS += -lexif" >> ./mythgallery/mythgallery/config.pro
+
+        if test x`which pkg-config 2>/dev/null` != x"" ; then
+            if `pkg-config --atleast-version 0.6.9 libexif` ; then
+                echo "#define NEW_LIB_EXIF 1" >> \
+                    ./mythgallery/mythgallery/config.h
+            fi
+        else
+            if test x"$newexif" = x"yes" ; then
+                echo "#define NEW_LIB_EXIF 1" >> \
+                    ./mythgallery/mythgallery/config.h
+            else
+                echo
+                echo "Could not determine libexif version, if it is greater"
+                echo "than or equal to 0.6.9 you need to add"
+                echo "--enable-new-exif to the configure flags"
+                echo
+            fi
+        fi
+    else
+        echo "        EXIF           support will not be included in MythGallery"
+    fi
+
+    if enabled dcraw ; then
+        echo "        Dcraw          support will be included in MythGallery"
+        echo "SUBDIRS += dcrawplugin" >> ./mythgallery/config.pro
+        echo "#define DCRAW_SUPPORT 1" >> ./mythgallery/mythgallery/config.h
+        echo "LIBS += -L../dcrawplugin -ldcrawplugin" >> ./mythgallery/mythgallery/config.pro
+        echo "TARGETDEPS += ../dcrawplugin/libdcrawplugin.a" >> ./mythgallery/mythgallery/config.pro
+
+        echo "/*" >  ./mythgallery/dcrawplugin/config.h
+        echo "    Automatically generated by configure - do not modify" >> ./mythgallery/dcrawplugin/config.h
+        echo "*/" >> ./mythgallery/dcrawplugin/config.h
+
+        if enabled exif ; then
+            echo "#define EXIF_SUPPORT 1" >> ./mythgallery/dcrawplugin/config.h
+
+        fi
+
+        if test x"$icc" != x ; then
+            echo "        ICC profile    $icc"
+            # Quote C escape characters.
+            quoted_icc=`echo "$icc" | sed 's/\\([\\\\"?]\\)/\\\\\\1/g;\$!{s/\$/\\\\/}'`
+            echo "#define ICC_PROFILE \"$quoted_icc\"" >> ./mythgallery/dcrawplugin/config.h
+        fi
+    else
+        echo "        Dcraw          support will not be included in MythGallery"
+    fi
+fi
+
+###########################################################
+#                                                         #
+#  MythMusic related configuration options                #
+#                                                         #
+###########################################################
+
+if enabled music ; then
+
+    echo "/*" >  ./mythmusic/mythmusic/config.h
+    echo "    Automatically generated by configure - do not modify" >> ./mythmusic/mythmusic/config.h
+    echo "*/" >> ./mythmusic/mythmusic/config.h
+
+    echo "#" > ./mythmusic/mythmusic/config.pro
+    echo "#    Automatically generated by configure - modify only under penalty of death" >> ./mythmusic/mythmusic/config.pro
+    echo "#" >> ./mythmusic/mythmusic/config.pro
+
+    if enabled _stdint_h ; then
+      echo "#define HAVE_STDINT_H 1" >> ./mythmusic/mythmusic/config.h
+    else
+      echo "#undef  HAVE_STDINT_H" >> ./mythmusic/mythmusic/config.h
+    fi
+
+    if enabled cdio ; then
+      echo "#define HAVE_CDIO 1" >> ./mythmusic/mythmusic/config.h
+      echo "CONFIG += cdio" >> ./mythmusic/mythmusic/config.pro
+      echo "        libcdio        support will be included in MythMusic"
+    else
+      echo "#undef  HAVE_CDIO" >> ./mythmusic/mythmusic/config.h
+      echo "        libcdio        support will not be included in MythMusic"
+    fi
+
+    if enabled fftw; then
+        echo "        FFTW v.3       support will be included in MythMusic"
+        echo "#define FFTW3_SUPPORT 1" >> ./mythmusic/mythmusic/config.h
+        echo "LIBS += -lfftw3 -lm" >> \
+             ./mythmusic/mythmusic/config.pro
+    else
+        echo "        FFTW           support will not be included in MythMusic"
+    fi
+fi
+
+###########################################################
+#                                                         #
+#   An extra directory and Makefile for cleanup rules     #
+#                                                         #
+###########################################################
+
+mkdir -p cleanup
+cat << END_CLEANUP > cleanup/Makefile
+check:
+all:
+clean:
+distclean:
+install:
+qmake_all:
+	\$(NONE)
+
+# Hack to remove some empty directories that qmake doesn't create rules for
+uninstall:
+	-rmdir \$(INSTALL_ROOT)/$prefix/share/mythtv/*
+	-rmdir \$(INSTALL_ROOT)/$prefix/share/mythtv
+
+END_CLEANUP
+
+echo >> ./config.pro
+echo "# clean up for 'make uninstall'. This must be last" >> ./config.pro
+echo "SUBDIRS += cleanup " >> ./config.pro
+
+###########################################################
+
+echo ""
+
+${qmake} QMAKE=$(which ${qmake}) mythplugins.pro

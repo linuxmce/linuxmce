@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="ADVANCED">
+
+    <button>
+        <type>MENU_MANAGE_RECORDINGS</type>
+        <text>Manage Recordings</text>
+        <description>Pick and prioritize shows to record</description>
+        <action>MENU manage_recordings.xml</action>
+    </button>
+
+    <button>
+        <type>MENU_OPTICAL_DISKS</type>
+        <text>Optical Disks</text>
+        <description>Play or import Blu-ray, DVD, and CDs</description>
+        <action>MENU optical_menu.xml</action>
+    </button>
+
+    <button>
+        <type>TV_STATUS</type>
+        <text>System Status</text>
+        <description>What your system is doing right now</description>
+        <action>TV_STATUS</action>
+    </button>
+
+    <button>
+        <type>MUSIC_PLAYLIST</type>
+        <text>Music Tools</text>
+        <description>Select, import, or play music</description>
+        <action>PLUGIN mythmusic</action>
+        <depends>mythmusic</depends>
+    </button>
+
+    <button>
+        <type>SETUP_KEYS</type>
+        <text>Edit Keys</text>
+        <description>Change MythTV key bindings</description>
+        <action>SETUP_KEYS</action>
+    </button>
+
+    <button>
+        <type>SETUP_MENU</type>
+        <text>Setup</text>
+        <description>Configure MythTV and plugins</description>
+        <action>MENU main_settings.xml</action>
+        <password>SetupPinCode</password>
+    </button>
+
+</mythmenu>

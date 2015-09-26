@@ -1,0 +1,34 @@
+<mythmenu name="ARCHIVE">
+
+   <button>
+      <type>ARCHIVE_CREATE_DVD</type>
+      <text>Create DVD</text>
+      <action>ARCHIVE_CREATE_DVD</action>
+   </button>
+
+   <button>
+      <type>ARCHIVE_CREATE_ARCHIVE</type>
+      <text>Create Archive</text>
+      <action>ARCHIVE_CREATE_ARCHIVE</action>
+  </button>
+
+   <button>
+       <type>ARCHIVE_ENCODE_VIDEO</type>
+       <text>Encode Video File</text>
+       <action>ARCHIVE_ENCODE_VIDEO</action>
+       <depends></depends>
+   </button>
+
+   <button>
+       <type>ARCHIVE_IMPORT_VIDEO</type>
+       <text>Import Archive</text>
+       <action>ARCHIVE_IMPORT_VIDEO</action>
+   </button>
+
+   <button>
+       <type>ARCHIVE_UTILITIES</type>
+       <text>Archive Utilities</text>
+       <action>MENU archiveutils.xml</action>
+   </button>
+
+</mythmenu>

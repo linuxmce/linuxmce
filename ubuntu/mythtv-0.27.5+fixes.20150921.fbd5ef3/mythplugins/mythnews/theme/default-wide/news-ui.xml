@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+<mythuitheme>
+
+    <window name="news">
+
+        <buttonlist name="siteslist" from="basebuttonlist">
+            <area>40,20,430,400</area>
+            <wrapstyle>selection</wrapstyle>
+            <showarrow>yes</showarrow>
+            <searchposition>-1,430</searchposition>
+        </buttonlist>
+
+        <buttonlist name="articleslist" from="basebuttonlist">
+            <area>500,20,740,400</area>
+            <wrapstyle>selection</wrapstyle>
+            <showarrow>no</showarrow>
+            <searchposition>-1,430</searchposition>
+        </buttonlist>
+
+        <textarea name="nosites" from="basetextarea">
+            <area>200,100,880,150</area>
+            <align>allcenter</align>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="title" from="basetextarea">
+            <area>40,450,1020,70</area>
+            <font>baselarge</font>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="description" from="basetextarea">
+            <area>40,515,1020,150</area>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="updated" from="basetextarea">
+            <area>40,660,1080,35</area>
+        </textarea>
+
+        <imagetype name="background">
+            <filename>news-info-bg.png</filename>
+            <area>0,440,1280,280</area>
+        </imagetype>
+
+        <imagetype name="thumbnail">
+            <area>1080,515,160,120</area>
+            <preserveaspect>true</preserveaspect>
+        </imagetype>
+
+        <imagetype name="enclosures">
+            <filename>enclosures.png</filename>
+            <position>1080,450</position>
+        </imagetype>
+
+        <imagetype name="download">
+            <filename>need-download.png</filename>
+            <position>1208,450</position>
+        </imagetype>
+
+        <imagetype name="ispodcast">
+            <filename>podcast.png</filename>
+            <position>1208,450</position>
+        </imagetype>
+
+    </window>
+
+    <window name="editor">
+
+        <textarea name="title" from="basetextarea">
+            <font>baselarge</font>
+            <area>0,50,1280,50</area>
+            <align>center,vcenter</align>
+        </textarea>
+
+        <textarea name="namelabel" from="basetextarea">
+            <area>335,150,100,30</area>
+            <align>right,vcenter</align>
+        </textarea>
+
+        <textedit name="name" from="basetextedit">
+            <position>450,140</position>
+        </textedit>
+
+        <textarea name="urllabel" from="basetextarea">
+            <area>335,250,100,30</area>
+            <align>right,vcenter</align>
+        </textarea>
+
+        <textedit name="url" from="basetextedit">
+            <position>450,240</position>
+        </textedit>
+
+        <textarea name="iconlabel" from="basetextarea">
+            <area>335,350,100,30</area>
+            <align>right,vcenter</align>
+        </textarea>
+
+        <textedit name="icon" from="basetextedit">
+            <position>450,340</position>
+        </textedit>
+
+        <checkbox name="podcast_check" from="basecheckbox">
+            <position>450,445</position>
+        </checkbox>
+
+        <textarea name="podcastlabel" from="basetextarea">
+            <area>285,445,150,30</area>
+            <align>right,vcenter</align>
+        </textarea>
+
+        <button name="cancel" from="basebutton">
+            <position>275,600</position>
+            <value>Cancel</value>
+        </button>
+
+        <button name="ok" from="basebutton">
+            <position>805,600</position>
+            <value>OK</value>
+        </button>
+
+    </window>
+
+    <window name="config">
+
+        <buttonlist name="category" from="basebuttonlist">
+            <area>40,40,500,550</area>
+        </buttonlist>
+
+        <buttonlist name="sites" from="basebuttonlist">
+            <area>560,40,670,550</area>
+            <showarrow>no</showarrow>
+        </buttonlist>
+
+        <textarea name="context_switch" from="basetextarea">
+            <area>20,550,760,50</area>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="help" from="basetextarea">
+            <area>20,500,760,150</area>
+            <multiline>yes</multiline>
+        </textarea>
+
+    </window>
+
+</mythuitheme>

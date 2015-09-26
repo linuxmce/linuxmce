@@ -1,0 +1,32 @@
+<mythmenu name="GAME_SETTINGS">
+
+   <button>
+      <type>GAME_SETTINGS_GENERAL</type>
+      <text>General Settings</text>
+      <action>GAME_SETTINGS</action>
+      <description>Game folders and general options</description>
+   </button>
+
+   <button>
+      <type>GAME_SETTINGS_PLAYERS</type>
+      <text>Game Players</text>
+      <action>GAME_PLAYERS</action>
+      <description>Configure an emulator</description>
+   </button>
+
+   <button>
+      <type>GAME_SCAN</type>
+      <text>Scan for Games</text>
+      <action>SEARCH_FOR_GAMES</action>
+      <description>Add games to your library</description>
+   </button>
+
+   <button>
+       <type>GAME_CLEAR_DATA</type>
+      <text>Clear Game Data</text>
+      <action>CLEAR_GAME_DATA</action>
+      <description>Empty your game library</description>
+   </button>
+
+
+</mythmenu>

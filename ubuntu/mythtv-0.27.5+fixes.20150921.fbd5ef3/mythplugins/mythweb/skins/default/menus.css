@@ -1,0 +1,16 @@
+/* popup and menu classes */
+.popup {
+    font-size:          9pt;
+}
+
+.popup table {
+    font-size:          9pt;
+}
+
+.popup dl {
+    min-width:          40em;
+    color:              #dedede;
+    background-color:   #265990;
+    border:             2px ridge #127;
+    padding:            5px;
+}

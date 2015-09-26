@@ -1,0 +1,38 @@
+<mythmenu name="MUSIC_SETTINGS">
+
+   <button>
+      <type>MUSIC_SETTINGS_GENERAL</type>
+      <text>General Settings</text>
+      <action>SETTINGS_GENERAL</action>
+      <description>Music folders and general options</description>
+   </button>
+
+   <button>
+      <type>MUSIC_SETTINGS_PLAYER</type>
+      <text>Player Settings</text>
+      <action>SETTINGS_PLAYER</action>
+      <description>Music playback options</description>
+   </button>
+
+   <button>
+      <type>MUSIC_SETTINGS_RIP</type>
+      <text>Ripper Settings</text>
+      <action>SETTINGS_IMPORT</action>
+      <description>CD copying options</description>
+   </button>
+
+   <button>
+      <type>MUSIC_SETTINGS_RATING</type>
+      <text>Rating Settings</text>
+      <action>SETTINGS_RATING</action>
+      <description>Music rating options</description>
+   </button>
+
+   <button>
+      <type>MUSIC_SETTINGS_VISUALIZATION</type>
+      <text>Visualization Settings</text>
+      <action>SETTINGS_VISUALIZATION</action>
+      <description>Music visualization options</description>
+   </button>
+
+</mythmenu>

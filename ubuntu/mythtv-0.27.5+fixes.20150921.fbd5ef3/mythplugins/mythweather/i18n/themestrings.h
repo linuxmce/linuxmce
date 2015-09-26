@@ -1,0 +1,66 @@
+// This is an automatically generated file
+// Do not edit
+
+void strings_null() {
+    ThemeUI::tr("Humidity");
+    ThemeUI::tr("Pressure");
+    ThemeUI::tr("Wind(Gust)");
+    ThemeUI::tr("Wind Direction");
+    ThemeUI::tr("Visibility");
+    ThemeUI::tr("Feels Like");
+    ThemeUI::tr("Low");
+    ThemeUI::tr("High");
+    ThemeUI::tr("Weather Alerts");
+    ThemeUI::tr("Temp");
+    ThemeUI::tr("Precip");
+    ThemeUI::tr("Global Settings");
+    ThemeUI::tr("Seconds to display each page:");
+    ThemeUI::tr("Retrieve data in the background:");
+    ThemeUI::tr("Screen Setup");
+    ThemeUI::tr("Source Setup");
+    ThemeUI::tr("Data Retrieval Interval (minutes):");
+    ThemeUI::tr("Source Update Timeout (seconds):");
+    ThemeUI::tr("Location Search");
+    ThemeUI::tr("Enter your current location, nearest large town or city. In some countries postal codes are also supported.");
+    ThemeUI::tr("Enter Location:");
+    ThemeUI::tr("%DATE%, %TIME%");
+    ThemeUI::tr("Last Updated %1");
+    ThemeUI::tr("High Temperature:  %1");
+    ThemeUI::tr("Low Temperature:  %1");
+    ThemeUI::tr("Temperature:  %1");
+    ThemeUI::tr("Chance of Precipitation:  %1");
+    ThemeUI::tr("Weather Screen Settings");
+    ThemeUI::tr("This screen governs the behavior of the weather screens.  You can enable a background weather update which will run regardless of being on the weather screen, and configure how many seconds each screen will display.\n\nWhen you are done configuring the weather plugin, click \"Finish\" to continue.");
+    ThemeUI::tr("Retrieve data in background:");
+    ThemeUI::tr("OK");
+    ThemeUI::tr("Weather Setup");
+    ThemeUI::tr("Available Screens");
+    ThemeUI::tr("Active Screens");
+    ThemeUI::tr("Weather Script Settings");
+    ThemeUI::tr("This settings screen governs the behavior of individual weather scripts.  Select the script whose behavior you with to change and press the right arrow. Adjust the interval at which data is retrieved, and the timeout for accessing the site.\n\nWhen you have completed your changes, click \"Finish\" to continue.");
+    ThemeUI::tr("Finish");
+    ThemeUI::tr("Search");
+    ThemeUI::tr("Enter Current Location");
+    ThemeUI::tr("This screen governs the behavior of the weather screens. You can enable a background weather update which will run regardless of being on the weather screen, and configure how many seconds each screen will display. When you are done configuring the weather plugin, click \"Finish\" to continue.");
+    ThemeUI::tr("Weather settings");
+    ThemeUI::tr("Weather Screen Setup");
+    ThemeUI::tr("Weather Source Setup");
+    ThemeUI::tr("Source");
+    ThemeUI::tr("Weather Location Search");
+    ThemeUI::tr("Humidity:");
+    ThemeUI::tr("Pressure:");
+    ThemeUI::tr("Wind (Gust):");
+    ThemeUI::tr("Wind Direction:");
+    ThemeUI::tr("Visibility:");
+    ThemeUI::tr("Feels Like:");
+    ThemeUI::tr(": %1");
+    ThemeUI::tr("100%");
+    ThemeUI::tr("Global Weather Settings");
+    ThemeUI::tr("Seconds to display each page");
+    ThemeUI::tr("Retrieve data in the background");
+    ThemeUI::tr("General weather options");
+    ThemeUI::tr("Screen Settings");
+    ThemeUI::tr("Choose which weather forecasts to display");
+    ThemeUI::tr("Source Settings");
+    ThemeUI::tr("Configure the behavior of weather scripts");
+}

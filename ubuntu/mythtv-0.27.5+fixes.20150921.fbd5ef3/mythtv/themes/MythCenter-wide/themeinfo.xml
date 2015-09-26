@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<themeinfo>
+    <!-- The Theme Name (Required) -->
+    <name>MythCenter-wide</name>
+
+    <!-- The Theme Types (Required) -->
+    <types>
+        <!-- Type. Legal Values are one or more of: UI, OSD and Menu -->
+        <type>UI</type>
+    </types>
+
+    <!-- Aspect ratio of the theme. (Required)
+         Maybe be: 4:3, 5:4, 16:9 or 16:10 -->
+    <aspect>16:9</aspect>
+
+    <!-- The base resolution of the theme before being scaled to the users
+         resolution (Required)
+         Usually 800x600 (4:3) or 1280x720 (16:9) -->
+    <baseres>1280x720</baseres>
+
+    <!-- Theme Author Details (Optional)-->
+    <author>
+        <!-- Your name -->
+        <name>Jeroen Brosens</name>
+
+        <!-- Your Email Address -->
+        <email>jeroen@fotoniq.nl</email>
+    </author>
+
+    <!-- The Versioning Info (Required) -->
+    <version>
+        <!-- Major version changes mean the theme is no longer
+             compatible with earlier versions of mythtv -->
+        <major>1</major>
+
+        <!-- Minor version changes are backwards compatible -->
+        <minor>7</minor>
+    </version>
+
+    <!-- Theme Details (Required) -->
+    <detail>
+        <!-- At least one thumbnail image named "preview" must be included
+             with the theme.
+             There is no limit to the number of thumbnails.
+             Each thumbnail must be given a different name -->
+        <thumbnail name="preview">preview.png</thumbnail>
+
+        <!-- A description of the theme, including general colours and
+             style. The description should include any details that
+             may help to locate your theme in a search. -->
+        <description>This was adapted from the Jeroen Brosens' MythCenter theme.  The fonts have been changed to freely redistributable ones and layout changes have been made to make this theme look good on 1280x720 and 1920x1080 screens with a 1:1 pixel aspect ratio.</description>
+
+        <!-- Errata. A list of known faults, missing elements or unfinished
+             areas. e.g. "mythgallery not themed" -->
+        <errata>N/A</errata>
+    </detail>
+</themeinfo>

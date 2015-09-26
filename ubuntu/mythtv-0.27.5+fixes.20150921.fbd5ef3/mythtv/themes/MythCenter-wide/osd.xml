@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+
+<mythuitheme>
+
+    <window name="program_info">
+        <fontdef name="small" face="Droid Sans">
+            <pixelsize>22</pixelsize>
+            <color>#EEEEEE</color>
+        </fontdef>
+        <fontdef name="medium" from="small">
+            <pixelsize>28</pixelsize>
+        </fontdef>
+        <fontdef name="large" from="small">
+            <pixelsize>34</pixelsize>
+            <weight>bold</weight>
+        </fontdef>
+        <area>50,0,1180,720</area>
+        <imagetype name="background1">
+            <area>0,0,1180,124</area>
+            <filename>osd/prog_top.png</filename>
+        </imagetype>
+        <imagetype name="background2">
+            <area>0,520,1180,200</area>
+            <filename>osd/prog_bot.png</filename>
+        </imagetype>
+        <textarea name="title">
+            <font>large</font>
+            <area>20,40,860,70</area>
+            <align>left,bottom</align>
+        </textarea>
+        <shape name="divider1">
+            <area>890,20,2,100</area>
+            <fill color="#FFFFFF" alpha="200" />
+        </shape>
+        <textarea name="starttime">
+            <area>880,40,280,70</area>
+            <font>medium</font>
+            <template>%LENMINS%</template>
+            <align>hcenter,bottom</align>
+        </textarea>
+        <shape name="divider2">
+            <area>890,520,2,180</area>
+            <fill color="#FFFFFF" alpha="200" />
+        </shape>
+        <statetype name="tvstate">
+            <state name="WatchingLiveTV">
+                <imagetype name="image">
+                    <area>925,480,80,80</area>
+                    <filename>osd/tv.png</filename>
+                </imagetype>
+            </state>
+            <state name="WatchingPreRecorded">
+                <imagetype name="image">
+                    <area>925,480,80,80</area>
+                    <filename>osd/recording.png</filename>
+                </imagetype>
+            </state>
+            <state name="WatchingVideo">
+                <imagetype name="image">
+                    <area>925,480,80,80</area>
+                    <filename>osd/video.png</filename>
+                </imagetype>
+            </state>
+            <state name="WatchingDVD">
+                <imagetype name="image">
+                    <area>925,480,80,80</area>
+                    <filename>osd/dvd.png</filename>
+                </imagetype>
+            </state>
+            <state name="WatchingBD">
+                <imagetype name="image">
+                    <area>925,480,80,80</area>
+                    <filename>osd/bd.png</filename>
+                </imagetype>
+            </state>
+            <state name="WatchingRecording">
+                <imagetype name="image">
+                    <area>925,480,80,80</area>
+                    <filename>osd/recording.png</filename>
+                </imagetype>
+            </state>
+        </statetype>
+        <statetype name="videodescrip">
+            <state name="SD">
+                <imagetype name="image">
+                    <area>942,580,46,30</area>
+                    <filename>osd/sd.png</filename>
+                </imagetype>
+            </state>
+            <state name="HD_720_P">
+                <imagetype name="image">
+                    <area>942,580,46,30</area>
+                    <filename>hd720.png</filename>
+                </imagetype>
+            </state>
+            <state name="HD_1080_I">
+                <imagetype name="image">
+                    <area>942,580,46,30</area>
+                    <filename>hd1080.png</filename>
+                </imagetype>
+            </state>
+            <state name="HD_1080_P">
+                <imagetype name="image">
+                    <area>942,580,46,30</area>
+                    <filename>hd1080.png</filename>
+                </imagetype>
+            </state>
+        </statetype>
+        <textarea name="description">
+            <font>small</font>
+            <area>20,540,860,150</area>
+            <align>left,top</align>
+            <multiline>yes</multiline>
+            <template>%"|SUBTITLE|" %%LONGREPEAT%%(|STARS|) %%DESCRIPTION%</template>
+        </textarea>
+        <imagetype name="iconpath">
+            <area>1030,500,130,100</area>
+        </imagetype>
+        <imagetype name="coverart">
+            <area>1045,500,100,150</area>
+        </imagetype>
+        <clock name="clock">
+            <area>900,630,280,70</area>
+            <font>medium</font>
+            <template>%TIME%</template>
+            <align>bottom,hcenter</align>
+        </clock>
+    </window>
+
+    <window name="osd_status">
+        <fontdef name="medium" face="Droid Sans">
+            <pixelsize>28</pixelsize>
+            <color>#EEEEEE</color>
+            <weight>bold</weight>
+        </fontdef>
+        <area>50,520,1180,100</area>
+        <imagetype name="background1">
+            <area>0,0,1180,100</area>
+            <filename>osd/info.png</filename>
+        </imagetype>
+        <shape name="divider1">
+            <area>890,0,2,95</area>
+            <fill color="#FFFFFF" alpha="200" />
+        </shape>
+        <textarea name="title">
+            <font>medium</font>
+            <area>10,10,870,40</area>
+            <align>left,vcenter</align>
+        </textarea>
+        <textarea name="description">
+            <font>medium</font>
+            <area>10,10,870,40</area>
+            <align>right,vcenter</align>
+            <template>%DESCRIPTION% %VALUE%%UNITS%</template>
+        </textarea>
+        <clock name="clock">
+            <area>900,0,280,100</area>
+            <font>medium</font>
+            <template>%TIME%</template>
+            <align>vcenter,hcenter</align>
+        </clock>
+        <progressbar name="position">
+            <area>10,50,870,38</area>
+            <layout>horizontal</layout>
+            <style>reveal</style>
+            <imagetype name="background">
+                <area>0,0,100%,100%</area>
+                <filename>osd/progressbar_bg.png</filename>
+            </imagetype>
+            <imagetype name="progressimage">
+                <area>0,0,100%,100%</area>
+                <filename>osd/progressbar_fill.png</filename>
+            </imagetype>
+        </progressbar>
+    </window>
+
+    <window name="browse_info">
+        <fontdef name="small" face="Droid Sans">
+            <pixelsize>22</pixelsize>
+            <color>#EEEEEE</color>
+        </fontdef>
+        <fontdef name="medium" from="small">
+            <pixelsize>28</pixelsize>
+            <weight>bold</weight>
+        </fontdef>
+        <fontdef name="large" from="medium">
+            <pixelsize>34</pixelsize>
+        </fontdef>
+        <area>50,520,1180,100</area>
+        <imagetype name="background1">
+            <area>0,0,1180,100</area>
+            <filename>osd/info.png</filename>
+        </imagetype>
+        <shape name="divider1">
+            <area>890,0,2,95</area>
+            <fill color="#FFFFFF" alpha="200" />
+        </shape>
+        <textarea name="title">
+            <font>medium</font>
+            <area>10,10,870,40</area>
+            <align>left,vcenter</align>
+        </textarea>
+        <textarea name="description">
+            <font>small</font>
+            <area>10,50,870,40</area>
+            <align>left,vcenter</align>
+            <template>%"|SUBTITLE|" %%LONGREPEAT%%(|STARS|) %%DESCRIPTION%</template>
+        </textarea>
+        <textarea name="starttime">
+            <font>medium</font>
+            <area>10,10,870,40</area>
+            <align>right,top</align>
+            <template>%STARTTIME%-%ENDTIME%</template>
+        </textarea>
+        <textarea name="channum">
+            <area>900,10,95,80</area>
+            <font>large</font>
+            <align>hcenter,vcenter</align>
+            <value>%CHANNUM%</value>
+        </textarea>
+        <imagetype name="iconpath">
+            <area>1015,10,125,80</area>
+        </imagetype>
+    </window>
+
+    <window name="osd_input">
+        <fontdef name="medium" face="Droid Sans">
+            <pixelsize>28</pixelsize>
+            <color>#EEEEEE</color>
+            <weight>bold</weight>
+        </fontdef>
+        <area>50,124,200,80</area>
+        <imagetype name="background">
+            <area>0,0,200,80</area>
+            <filename>osd/input.png</filename>
+        </imagetype>
+        <textarea name="osd_number_entry">
+            <font>medium</font>
+            <area>20,20,160,40</area>
+            <align>hcenter,vcenter</align>
+        </textarea>
+    </window>
+
+    <window name="osd_message">
+        <fontdef name="medium" face="Droid Sans">
+            <pixelsize>28</pixelsize>
+            <color>#EEEEEE</color>
+            <weight>bold</weight>
+        </fontdef>
+        <area>680,124,550,80</area>
+        <imagetype name="background">
+            <area>0,0,550,80</area>
+            <filename>osd/message.png</filename>
+        </imagetype>
+        <textarea name="message_text">
+            <font>medium</font>
+            <area>20,20,510,40</area>
+            <align>hcenter,vcenter</align>
+        </textarea>
+    </window>
+
+    <window name="MythPopupBox">
+        <fontdef name="basesmall" face="Droid Sans">
+            <pixelsize>22</pixelsize>
+            <color>#EEEEEE</color>
+            <weight>bold</weight>
+        </fontdef>
+        <fontdef name="basesmall_normal_inactive" from="basesmall">
+            <color>#666666</color>
+        </fontdef>
+        <area>-1,-1,500,500</area>
+        <imagetype name="backimg">
+            <area>0,0,500,500</area>
+            <filename>mythdialogbox-background.png</filename>
+        </imagetype>
+
+        <textarea name="messagearea">
+            <font>basesmall</font>
+            <area>12,14,470,210</area>
+            <multiline>yes</multiline>
+            <align>allcenter</align>
+        </textarea>
+
+        <buttonlist name="list">
+            <area>12,224,470,250</area>
+            <drawfrombottom>yes</drawfrombottom>
+            <showarrow>no</showarrow>
+            <wrapstyle>selection</wrapstyle>
+            <layout>vertical</layout>
+            <spacing>4</spacing>
+            <buttonarea>0,0,100%,97%</buttonarea>
+            <statetype name="buttonitem">
+                <state name="active">
+                    <area>0,0,100%,30</area>
+                    <shape name="background">
+                        <area>0,0,100%,100%</area>
+                        <fill style="gradient">
+                            <gradient start="#505050" end="#000000" alpha="200" />
+                        </fill>
+                    </shape>
+                    <textarea name="buttontext">
+                        <area>0,0,100%,30</area>
+                        <align>allcenter</align>
+                        <font>basesmall</font>
+                        <cutdown>yes</cutdown>
+                    </textarea>
+                    <statetype name="buttoncheck">
+                        <area>91%,4,20,20</area>
+                        <state type="off">
+                            <imagetype name="checkoff">
+                                <area>0,0,20,20</area>
+                                <filename>lb-check-empty.png</filename>
+                            </imagetype>
+                        </state>
+                        <state type="half">
+                            <imagetype name="checkhalf">
+                                <area>0,0,20,20</area>
+                                <filename>lb-check-half.png</filename>
+                            </imagetype>
+                        </state>
+                        <state type="full">
+                            <imagetype name="checkfull">
+                                <area>0,0,20,20</area>
+                                <filename>lb-check-full.png</filename>
+                            </imagetype>
+                        </state>
+                    </statetype>
+                    <imagetype name="buttonarrow">
+                        <area>94%,6,16,16</area>
+                        <filename>lb-arrow.png</filename>
+                    </imagetype>
+                </state>
+                <state name="selectedactive" from="active">
+                    <shape name="background">
+                        <fill style="gradient">
+                            <gradient start="#52CA38" end="#349838" alpha="255" />
+                        </fill>
+                    </shape>
+                </state>
+                <state name="selectedinactive" from="active">
+                    <shape name="background">
+                        <fill style="gradient">
+                            <gradient start="#52CA38" end="#349838" alpha="100" />
+                        </fill>
+                    </shape>
+                    <textarea name="buttontext">
+                        <font>basesmall_normal_inactive</font>
+                    </textarea>
+                </state>
+            </statetype>
+            <statetype name="upscrollarrow">
+                <position>10,96%</position>
+                <state type="off">
+                    <imagetype name="upon">
+                        <area>0,0,27,18</area>
+                        <filename>lb-uparrow-reg.png</filename>
+                    </imagetype>
+                </state>
+                <state type="full">
+                    <imagetype name="upoff">
+                        <area>0,0,27,18</area>
+                        <filename>lb-uparrow-sel.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+            <statetype name="downscrollarrow">
+                <position>40,96%</position>
+                <state type="off">
+                    <imagetype name="dnon">
+                        <area>0,0,27,18</area>
+                        <filename>lb-dnarrow-reg.png</filename>
+                    </imagetype>
+                </state>
+                <state type="full">
+                    <imagetype name="dnoff">
+                        <area>0,0,27,18</area>
+                        <filename>lb-dnarrow-sel.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+        </buttonlist>
+    </window>
+
+    <window name="osd_program_editor">
+        <fontdef name="medium" face="Droid Sans">
+            <pixelsize>28</pixelsize>
+            <color>#EEEEEE</color>
+            <weight>bold</weight>
+        </fontdef>
+        <area>50,520,1180,100</area>
+        <imagetype name="background1">
+            <area>0,0,1180,100</area>
+            <filename>osd/info.png</filename>
+        </imagetype>
+        <shape name="divider1">
+            <area>890,0,2,95</area>
+            <fill color="#FFFFFF" alpha="200" />
+        </shape>
+        <textarea name="title">
+            <font>medium</font>
+            <area>10,10,870,40</area>
+            <align>left,vcenter</align>
+        </textarea>
+        <textarea name="seekamount" from="title">
+            <area>10,10,870,40</area>
+            <align>right,vcenter</align>
+        </textarea>
+        <textarea name="timedisplay" from="title">
+            <area>900,10,280,40</area>
+            <align>vcenter,hcenter</align>
+        </textarea>
+        <textarea name="framedisplay" from="title">
+            <area>900,50,280,40</area>
+            <align>vcenter,hcenter</align>
+        </textarea>
+        <editbar name="editbar">
+            <area>10,50,870,38</area>
+            <imagetype name="keep">
+                <area>0,0,100%,100%</area>
+                <filename>osd/progressbar_fill.png</filename>
+            </imagetype>
+            <imagetype name="cut">
+                <area>0,0,100%,100%</area>
+                <filename>osd/progressbar_cut.png</filename>
+            </imagetype>
+            <shape name="position">
+                <area>0,0,4,100%</area>
+                <fill color="#FFFFFF" alpha="255" />
+                <alphapulse min="180" max="255" change="4" />
+            </shape>
+            <shape name="cuttoright">
+                <area>0,4,3,30</area>
+                <fill color="#FF0000" alpha="255" />
+            </shape>
+            <shape name="cuttoleft">
+                <area>0,4,3,30</area>
+                <fill color="#FF0000" alpha="255" />
+            </shape>
+            <shape name="keeptoright">
+                <area>0,4,3,30</area>
+                <fill color="#00FF00" alpha="255" />
+            </shape>
+            <shape name="keeptoleft">
+                <area>0,4,3,30</area>
+                <fill color="#00FF00" alpha="255" />
+            </shape>
+        </editbar>
+    </window>
+
+    <window name="ChannelEditor">
+        <fontdef name="basesmall" face="Droid Sans">
+            <pixelsize>22</pixelsize>
+            <color>#EEEEEE</color>
+            <weight>bold</weight>
+        </fontdef>
+        <area>100,-1,500,500</area>
+        <imagetype name="backimg">
+            <area>0,0,500,500</area>
+            <filename>mythdialogbox-background.png</filename>
+        </imagetype>
+
+        <textarea name="title">
+            <font>basesmall</font>
+            <area>12,14,470,85</area>
+            <align>allcenter</align>
+            <value>Channel Editor</value>
+        </textarea>
+
+        <textarea name="callsign_label">
+            <area>12,85,200,83</area>
+            <font>basesmall</font>
+            <align>allcenter</align>
+            <value>Callsign</value>
+        </textarea>
+        <textedit name="callsign">
+            <area>224,105,259,42</area>
+            <statetype name="background">
+                <area>0,0,100%,100%</area>
+                <state name="active">
+                    <area>0,0,100%,100%</area>
+                    <shape name="background">
+                        <area>0,0,100%,100%</area>
+                        <fill color="#444444" />
+                        <line color="#555555" width="1" />
+                    </shape>
+                </state>
+                <state name="selected" from="active">
+                    <shape name="background">
+                        <area>0,0,100%,100%</area>
+                        <fill color="#555555" />
+                        <line color="#ffffff" width="1" />
+                    </shape>
+                </state>
+                <state name="inactive" from="active"/>
+            </statetype>
+
+            <imagetype name="cursor">
+                <filename>cursor.png</filename>
+            </imagetype>
+            <textarea name="text">
+                <font>basesmall</font>
+                <align>left,vcenter</align>
+            </textarea>
+        </textedit>
+
+        <textarea name="channum_label" from="callsign_label">
+            <position>12,168</position>
+            <value>Channel Number</value>
+        </textarea>
+        <textedit name="channum" from="callsign">
+            <area>224,188,259,42</area>
+        </textedit>
+
+        <textarea name="name_label" from="callsign_label">
+            <position>12,251</position>
+            <value>Channel Name</value>
+        </textarea>
+        <textedit name="channame" from="callsign">
+            <area>224,271,259,42</area>
+        </textedit>
+
+        <textarea name="xmltv_label" from="callsign_label">
+            <position>12,334</position>
+            <value>XMLTV ID</value>
+        </textarea>
+        <textedit name="XMLTV" from="callsign">
+            <area>224,354,259,42</area>
+        </textedit>
+
+        <button name="probe">
+            <area>100,430,100,50</area>
+            <value>Probe</value>
+            <statetype name="buttonstate">
+                <area>0,0,100%,100%</area>
+                <state name="active">
+                    <area>0,0,100%,100%</area>
+                    <shape name="background">
+                        <area>0,0,100%,100%</area>
+                        <fill color="#555555" />
+                        <line color="#888888" width="1" />
+                    </shape>
+                    <textarea name="text">
+                        <font>basesmall</font>
+                        <area>0,0,100%,100%</area>
+                        <align>allcenter</align>
+                    </textarea>
+                </state>
+                <state name="selected" from="active">
+                    <shape name="background">
+                        <fill color="#555555" />
+                        <line color="#ffffff" width="1" />
+                    </shape>
+                </state>
+                <state name="disabled" from="active" />
+                <state name="pushed" from="active">
+                    <shape name="background">
+                        <fill color="#222222" />
+                        <line color="#555555" width="1" />
+                    </shape>
+                    <textarea name="text">
+                        <font>basesmall</font>
+                        <area>0,0,100%,100%</area>
+                        <align>allcenter</align>
+                    </textarea>
+                </state>
+            </statetype>
+        </button>
+
+        <button name="ok" from="probe">
+            <area>300,430,100,50</area>
+            <value>OK</value>
+        </button>
+    </window>
+
+</mythuitheme>
+
