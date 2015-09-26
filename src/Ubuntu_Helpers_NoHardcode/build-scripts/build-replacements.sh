@@ -6,7 +6,9 @@
 . /usr/local/lmce-build/common/utils.sh
 
 set -e
-set -x
+#set -x
+
+BUILD_ALL_PKGS="no"
 
 make_jobs=""
 # set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
@@ -79,51 +81,51 @@ fi
 
 function Build_Replacements_Common_all
 {
-	Build_Replacement_Package lmce-mame-metadata extra/mamedata || :
+	Build_Replacement_Package lmce-mame-metadata extra/mamedata
 
-	Build_Replacement_Package lmce-mame-snaps extra/snap || :
+	Build_Replacement_Package lmce-mame-snaps extra/snap
 
-	Build_Replacement_Package lmce-sample-media extra/sample_media || :
+	Build_Replacement_Package lmce-sample-media extra/sample_media
 
-	Build_Replacement_Package lmce-avwizard-sounds extra/avwizard-sounds || :
+	Build_Replacement_Package lmce-avwizard-sounds extra/avwizard-sounds
 
-	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos || :
+	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos
 
 	Build_Replacement_Package lmce-skins extra/graphics && \
-	cp -fr ${svn_dir}/${svn_branch_name}/extra/graphics/lmce-avwizard-skins* "${replacements_dir}" || :
+	cp -fr ${svn_dir}/${svn_branch_name}/extra/graphics/lmce-avwizard-skins* "${replacements_dir}"
 
 }
 
 function Build_Replacements_Common_ubuntu
 {
 	#Package: platform for libcec
-	Build_Replacement_Package platform ubuntu/platform-1.0.10 || :
+	Build_Replacement_Package platform ubuntu/platform-1.0.10
 
 	#Package: libcec
-	Build_Replacement_Package cec ubuntu/libcec-3.0.1 || :
+	Build_Replacement_Package cec ubuntu/libcec-3.0.1
 
 	#Package: mbrola
-	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1 || :
+	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1
 
 	#Package: motion
-	Build_Replacement_Package motion ubuntu/motion-3.2.12+git20150610 || :
+	Build_Replacement_Package motion ubuntu/motion-3.2.12+git20150610
 
 	#Package: lmce-core-locator
-	Build_Replacement_Package core-locator src/Core/locator || :
+	Build_Replacement_Package core-locator src/Core/locator
 
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1 || :
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
 
 	#Package: libxine2
 	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb
 
 	#Package: logitechmediaserver-7.8.1
 	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb
 
 	#Package: squeezelite-1.8
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb
 
 	#Package: lirc
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.9.0-0ubuntu1+lmce1
@@ -136,15 +138,15 @@ fi
 		echo "dpkg-buildpackage -rfakeroot -uc -b"
 		dpkg-buildpackage -uc -b && \
 		cp -fr ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.deb ${replacements_dir} && \
-		cp -fr ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.changes ${replacements_dir} || :
+		cp -fr ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.changes ${replacements_dir} && \
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
 
-	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5 || :
+	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
 	# SqueezeSlave
-	Build_Replacement_Package squeezeslave ubuntu/squeezeslave-1.3-393 || :
+	#Build_Replacement_Package squeezeslave ubuntu/squeezeslave-1.3-393
 
 	# ola needs to be configured to the current build environment
 	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
@@ -158,12 +160,12 @@ fi
 		dpkg-buildpackage -uc -b -tc $make_jobs && \
 		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
 		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
-		Update_Changed_Since_Last_Build "$dir_" || :
+		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
 
 	#Package: tee-pluto
-	Build_Replacement_Package tee-pluto misc_utils/tee-pluto || :
+	Build_Replacement_Package tee-pluto misc_utils/tee-pluto
 
 	#Package: pluto-asterisk
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk"
@@ -176,18 +178,18 @@ fi
 		./make_package_ubuntu.sh $KVER && \
 		cp -fr asterisk-pluto_*.deb ${replacements_dir} && \
 		cp -fr asterisk-pluto_*.changes ${replacements_dir} && \
-		Update_Changed_Since_Last_Build "$dir_" || :
+		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
 
 	#Package: lirc-pluto
-	Build_Replacement_Package lirc-pluto ubuntu/lirc-pluto-0.1 || :
+	Build_Replacement_Package lirc-pluto ubuntu/lirc-pluto-0.1
 
 	#Package: mtx-pluto
-	Build_Replacement_Package mtx-pluto ubuntu/mtx-1.3.11 || :
+	Build_Replacement_Package mtx-pluto ubuntu/mtx-1.3.11
 
 	# lmce-asterisk
-	Build_Replacement_Package lmce-asterisk src/lmce-asterisk || :
+	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
 
 	#Package: linux-image-diskless
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
@@ -200,7 +202,7 @@ fi
 		./makepackage.sh && \
 		cp -fr linux-image-diskless_*.deb "${replacements_dir}" && \
 		cp -fr linux-image-diskless_*.changes "${replacements_dir}" && \
-		Update_Changed_Since_Last_Build "$dir_" || :
+		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
 
@@ -208,7 +210,7 @@ fi
 	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}" && \
- 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
+ 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
 
 	# qhttpserver (for LinuxMCE NVR)
 	Build_Replacement_Package libqhttpserver external/qhttpserver && \
@@ -218,7 +220,7 @@ fi
 	#Package: raspi2png
 	if [[ "$arch" == "armhf" ]]; then
 		Build_Replacement_Package raspi2png external/raspi2png && \
-		dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/raspi2png*.deb || :
+		dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/raspi2png*.deb
 	fi
 }
 
@@ -227,14 +229,14 @@ function Build_Replacements_ubuntu_precise
 	mkdir -pv "$replacements_dir"
 
 	# lmce-asterisk
-	Build_Replacement_Package lmce-asterisk src/lmce-asterisk || :
+	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
 
-	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2 || :
+	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	#Package: libbluray1
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package bluray ubuntu/libbluray-0.5.0 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb
 
 	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one for libxine2
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/smbclient.pc /usr/lib/pkgconfig/
@@ -242,7 +244,7 @@ function Build_Replacements_ubuntu_precise
 	#Package: libsoxr-0.1.1 - for squeezelite
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package soxr ubuntu/libsoxr-0.1.1 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb
 }
 
 function Build_Replacements_ubuntu_trusty
@@ -250,52 +252,52 @@ function Build_Replacements_ubuntu_trusty
 	mkdir -pv "$replacements_dir"
 
 	# shairport (AirPlay Audio)
-	Build_Replacement_Package shairport ubuntu/shairport-0.05 || :
+	Build_Replacement_Package shairport ubuntu/shairport-0.05
 
 	#Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	# libhupnp and libhupnp-av need to build under qt4.
 	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
 
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 }
 
 function Build_Replacements_Common_raspbian
 {
 	#Package: platform for libcec
-	Build_Replacement_Package platform ubuntu/platform-1.0.10 || :
+	Build_Replacement_Package platform ubuntu/platform-1.0.10
 
 	#Package: libcec
-	Build_Replacement_Package cec raspbian/libcec-3.0.1 || :
+	Build_Replacement_Package cec raspbian/libcec-3.0.1
 
 	#Package: mbrola
-	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1 || :
+	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1
 
 	#Package: motion
-	Build_Replacement_Package motion ubuntu/motion-3.2.12+git20150610 || :
+	Build_Replacement_Package motion ubuntu/motion-3.2.12+git20150610
 
 	#Package: lmce-core-locator
-	Build_Replacement_Package core-locator src/Core/locator || :
+	Build_Replacement_Package core-locator src/Core/locator
 
 	#Package: logitechmediaserver-7.8.1
 	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb
 
 	#ubuntu/squeezelite-1.8
 	#Package: squeezelite-1.8
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb
 
 	# Open ZWave library
 	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}" && \
- 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
+ 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
 
 	#Package: tee-pluto
-	Build_Replacement_Package tee-pluto misc_utils/tee-pluto || :
+	Build_Replacement_Package tee-pluto misc_utils/tee-pluto
 	# qhttpserver (for LinuxMCE NVR)
 	Build_Replacement_Package libqhttpserver external/qhttpserver && \
 	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}" && \
@@ -304,7 +306,7 @@ function Build_Replacements_Common_raspbian
 	#Package: raspi2png
 	if [[ "$arch" == "armhf" ]]; then
 		Build_Replacement_Package raspi2png external/raspi2png && \
-		dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/raspi2png*.deb || :
+		dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/raspi2png*.deb
 	fi
 }
 
