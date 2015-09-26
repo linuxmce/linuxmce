@@ -1,0 +1,58 @@
+                             MythMusic
+                           Release 0.25
+
+
+BUILD/CONFIGURATION INSTRUCTIONS
+--------------------------------
+
+First, you need MythTV to be installed.  At the very least, you need MythTV's
+database stuff setup properly.  If you don't have that done, don't even bother
+with this, as it won't work.
+
+In addition to MythTV's requirements, you'll need these software packages:
+(note: _all_ of these exist as software packages in Debian).
+
+   Vorbis - I've just used this with version 1.3.2.  You'll need a full install,
+            encoding and decoding support.  http://www.vorbis.com
+
+   FLAC   - lossless encoder/decoder.  Version >= 1.0.4 is needed.
+            http://flac.sourceforge.net
+
+   libcdaudio - Used to play CDs and to hit FreeDB for CD information.
+                I'm using 0.99.12.  http://libcdaudio.sourceforge.net
+
+   cdparanoia - The integrated ripping support uses the libraries from this.
+                I'm using cdparanoia 3.10.2.  http://www.xiph.org/paranoia/
+
+   taglib     - A library for reading and editing audio meta data.
+                I'm using 1.7.  http://developer.kde.org/~wheeler/taglib.html
+
+Optionally:
+
+   fftw   - A very nice library for Fast Fourier Transforms (helps analyze
+            audio data for playback visualizations). Currently using 3.2.2.
+            http://www.fftw.org/
+
+Phew.  Lotta stuff required. If you're having problems, please check both
+the documentation and the mailing list archives at http://www.mythtv.org
+
+The plugins configure script will enable MythMusic by default if you have all
+the pre-requisites installed so just do the usual ./configure; make;  and as
+root make install.
+
+If you get any errors about missing references, etc, you most likely don't have
+one of the required pieces of software installed.
+
+You'll want to go into the Music Settings section of the Setup from mythfrontend
+and set at least the path where your music is stored.
+
+Once it's done searching for your music, the interface will show up.  It should
+be fairly easy to figure out.   Check out the HOWTO for details.
+
+Feel free to subscribe to the development mailing list at:
+http://www.mythtv.org/mailman/listinfo/mythtv-dev
+
+A list that's restricted to the GIT commit messages is available at:
+http://www.mythtv.org/mailman/listinfo/mythtv-commits
+
+or, just email me directly:  Isaac Richards <ijr@po.cwru.edu>

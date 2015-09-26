@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+<mythuitheme>
+
+    <window name="status">
+
+        <imagetype name="backdrop" from="basebackdrop" />
+
+        <imagetype name="topbar" from="basetopbar" />
+
+        <textarea name="sched" from="baseheading">
+            <value>System Status</value>
+        </textarea>
+
+        <buttonlist name="category">
+            <area>39,97,600,588</area>
+            <layout>vertical</layout>
+            <spacing>0</spacing>
+            <buttonarea>25,0,600,588</buttonarea>
+            <statetype name="buttonitem">
+                <area>0,0,595,84</area>
+                <state name="active">
+                    <area>0,0,595,84</area>
+                    <imagetype name="statusimage">
+                        <filename>shared/disabled.png</filename>
+                    </imagetype>
+                    <imagetype name="frame">
+                        <filename>recordings/generallistbackground.png</filename>
+                    </imagetype>
+                    <textarea name="buttontext" from="basetextarea">
+                        <area>35,10,515,42</area>
+                        <font>baselarge</font>
+                        <align>vcenter</align>
+                    </textarea>
+                </state>
+                <state name="selectedactive" from="active">
+                    <imagetype name="frame">
+                        <position>-19,0</position>
+                        <filename>recordings/generallistselectedframe.png</filename>
+                    </imagetype>
+                    <imagetype name="statusimage">
+                        <filename>shared/selected_disabled.png</filename>
+                    </imagetype>
+                    <textarea name="buttontext">
+                        <area>37,10,555,42</area>
+                    </textarea>
+                </state>
+                <state name="selectedinactive" from="active">
+                </state>
+            </statetype>
+            <statetype name="upscrollarrow">
+                <position>0,5</position>
+                <state type="full">
+                    <imagetype name="up">
+                        <filename>shared/list_up_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+            <statetype name="downscrollarrow">
+                <position>0,564</position>
+                <state type="full">
+                    <imagetype name="down">
+                        <filename>shared/list_down_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+        </buttonlist>
+
+        <imagetype name="groupframe">
+            <position>0,57</position>
+            <filename>recordings/groupframe.png</filename>
+        </imagetype>
+
+        <buttonlist name="log" from="basebuttonlist2">
+            <area>670,117,500,528</area>
+            <buttonarea>0,0,500,528</buttonarea>
+        </buttonlist>
+
+        <textarea name="helptext" from="basetextarea">
+            <area>40,530,0,0</area>
+            <value>This screen displays the status of various system components</value>
+            <multiline>yes</multiline>
+        </textarea>
+
+    </window>
+
+</mythuitheme>
+

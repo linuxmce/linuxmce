@@ -1,0 +1,1040 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+
+    <!-- NOTE: XML Schema really sucks. We're forced to use
+               <xs:choice minOccurs="0" maxOccurs="unbounded">
+               to allow elements to appear in any order, but it completely
+               nullifies the maxOccurs and choice validation, we can no longer
+               require that an element appear only once in a widget or require
+               that two elements be mutually exclusive.
+
+               You might even ask why we bother with an XSD at all! -->
+
+    <!-- All widgets -->
+    <xs:group name="widgets">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="fontdef" />
+                <xs:element ref="textarea" />
+                <xs:element ref="imagetype" />
+                <xs:element ref="statetype" />
+                <xs:element ref="button" />
+                <xs:element ref="buttonlist" />
+                <xs:element ref="buttontree" />
+                <xs:element ref="textedit" />
+                <xs:element ref="checkbox" />
+                <xs:element ref="spinbox" />
+                <xs:element ref="progressbar" />
+                <xs:element ref="clock" />
+                <xs:element ref="webbrowser" />
+                <xs:element ref="shape" />
+                <xs:element ref="guidegrid" />
+                <xs:element ref="editbar" />
+                <xs:element ref="group" />
+                <xs:element ref="video" />
+            </xs:choice>
+        </xs:sequence>
+    </xs:group>
+
+
+    <!-- Elements common to all widgets -->
+    <xs:group name="widget_common">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="1">
+                <xs:element name="area" type="area" />
+                <xs:element name="position" type="position" />
+            </xs:choice>
+            <xs:element name="alpha" type="alpha" minOccurs="0" maxOccurs="1" />
+            <xs:element name="alphapulse" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:attribute name="min" type="alpha" default="0" />
+                    <xs:attribute name="max" type="alpha" default="255" />
+                    <xs:attribute name="change" type="xs:integer" default="5" />
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="helptext" type="text" minOccurs="0" maxOccurs="1" />
+            <xs:element name="focusorder" type="xs:integer" minOccurs="0" maxOccurs="1" />
+            <xs:element name="minsize" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="size">
+                            <xs:attribute name="vanish" type="boolean" />
+                            <xs:attribute name="initiator" type="boolean" />
+                            <xs:attribute name="shrink">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:token">
+                                        <xs:enumeration value="short" />
+                                        <xs:enumeration value="narrow" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:attribute>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="loadondemand" type="boolean" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+    </xs:group>
+
+    <!-- Attributes common to all widgets -->
+    <xs:attributeGroup name="common_attributes">
+        <xs:attribute name="name" type="xs:string" use="required" />
+        <xs:attribute name="from" type="xs:string" />
+        <xs:attribute name="depends" type="xs:string" />
+    </xs:attributeGroup>
+
+
+    <!-- Common type declarations -->
+    <xs:simpleType name="boolean">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="true" />
+            <xs:enumeration value="false" />
+            <xs:enumeration value="1" />
+            <xs:enumeration value="0" />
+            <xs:enumeration value="yes" />
+            <xs:enumeration value="no" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="percentage">
+        <xs:restriction base="xs:integer">
+            <xs:minInclusive value="0" />
+            <xs:maxInclusive value="100" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="area">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\s*(-?[0-9]+|\d{0,3}%([+,-]\d+)?)\s*,\s*(-?[0-9]+|\d{0,3}%([+,-]\d+)?)\s*,\s*(-?[0-9]+|\d{0,3}%([+,-]\d+)?)\s*,\s*(-?[0-9]+|\d{0,3}%([+,-]\d+)?)\s*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="position">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(\s*(-?[0-9]+|\d{0,3}%([+,-]\d+)?))\s*,\s*((-?[0-9]+|\d{0,3}%([+,-]\d+)?))\s*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="size">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(\s*([0-9]+|\d{0,3}%))\s*,\s*(([0-9]+|\d{0,3}%)\s*)" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="color">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="#[0-9A-Fa-f]{6}" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="alpha">
+        <xs:restriction base="xs:integer">
+            <xs:minInclusive value="0" />
+            <xs:maxInclusive value="255" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="angle">
+        <xs:restriction base="xs:integer">
+            <xs:minInclusive value="0" />
+            <xs:maxInclusive value="360" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="text">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="lang" type="xs:language" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:simpleType name="align">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(left|right|top|bottom|hcenter|vcenter|center|allcenter|justify)(,(left|right|top|bottom|hcenter|vcenter|center|allcenter|justify))?" />
+        </xs:restriction>
+    </xs:simpleType>
+
+   <!-- Common effect attributes -->
+    <xs:attributeGroup name="common_effect_attributes">
+        <xs:attribute name="easingcurve">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="Linear" />
+                    <xs:enumeration value="InQuad" />
+                    <xs:enumeration value="OutQuad" />
+                    <xs:enumeration value="InOutQuad" />
+                    <xs:enumeration value="OutInQuad" />
+                    <xs:enumeration value="InCubic" />
+                    <xs:enumeration value="OutCubic" />
+                    <xs:enumeration value="InOutCubic" />
+                    <xs:enumeration value="OutInCubic" />
+                    <xs:enumeration value="InQuart" />
+                    <xs:enumeration value="OutQuart" />
+                    <xs:enumeration value="InOutQuart" />
+                    <xs:enumeration value="OutInQuart" />
+                    <xs:enumeration value="InQuint" />
+                    <xs:enumeration value="OutQuint" />
+                    <xs:enumeration value="InOutQuint" />
+                    <xs:enumeration value="OutInQuint" />
+                    <xs:enumeration value="InSine" />
+                    <xs:enumeration value="OutSine" />
+                    <xs:enumeration value="InOutSine" />
+                    <xs:enumeration value="OutInSine" />
+                    <xs:enumeration value="InExpo" />
+                    <xs:enumeration value="OutExpo" />
+                    <xs:enumeration value="InOutExpo" />
+                    <xs:enumeration value="OutInExpo" />
+                    <xs:enumeration value="InCirc" />
+                    <xs:enumeration value="OutCirc" />
+                    <xs:enumeration value="InOutCirc" />
+                    <xs:enumeration value="OutInCirc" />
+                    <xs:enumeration value="InElastic" />
+                    <xs:enumeration value="OutElastic" />
+                    <xs:enumeration value="InOutElastic" />
+                    <xs:enumeration value="OutInElastic" />
+                    <xs:enumeration value="InBack" />
+                    <xs:enumeration value="OutBack" />
+                    <xs:enumeration value="InOutBack" />
+                    <xs:enumeration value="OutInBack" />
+                    <xs:enumeration value="InBounce" />
+                    <xs:enumeration value="OutBounce" />
+                    <xs:enumeration value="InOutBounce" />
+                    <xs:enumeration value="OutInBounce" />
+                    <xs:enumeration value="InCurve" />
+                    <xs:enumeration value="OutCurve" />
+                    <xs:enumeration value="SineCurve" />
+                    <xs:enumeration value="CosineCurve" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="duration" type="xs:integer" />
+    </xs:attributeGroup>
+
+    <!-- Animation definition -->
+    <xs:element name="animation">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="duration" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                <xs:element name="centre" minOccurs="0" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="topleft" />
+                            <xs:enumeration value="top" />
+                            <xs:enumeration value="topright" />
+                            <xs:enumeration value="left" />
+                            <xs:enumeration value="middle" />
+                            <xs:enumeration value="right" />
+                            <xs:enumeration value="bottomleft" />
+                            <xs:enumeration value="bottom" />
+                            <xs:enumeration value="bottomright" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="section">
+                    <xs:complexType>
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:element name="alpha" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:attributeGroup ref="common_effect_attributes" />
+                                    <xs:attribute name="start" type="alpha" use="required" />
+                                    <xs:attribute name="end" type="alpha" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="position" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:attributeGroup ref="common_effect_attributes" />
+                                    <xs:attribute name="start" type="position" use="required" />
+                                    <xs:attribute name="end" type="position" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="angle" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:attributeGroup ref="common_effect_attributes" />
+                                    <xs:attribute name="start" type="angle" use="required" />
+                                    <xs:attribute name="end" type="angle" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="zoom" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:attributeGroup ref="common_effect_attributes" />
+                                    <xs:attribute name="start" type="percentage" use="required" />
+                                    <xs:attribute name="end" type="percentage" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="horizontalzoom" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:attributeGroup ref="common_effect_attributes" />
+                                    <xs:attribute name="start" type="percentage" use="required" />
+                                    <xs:attribute name="end" type="percentage" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="verticalzoom" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:attributeGroup ref="common_effect_attributes" />
+                                    <xs:attribute name="start" type="percentage" use="required" />
+                                    <xs:attribute name="end" type="percentage" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:choice>
+                        <xs:attribute name="duration" type="xs:integer" />
+                        <xs:attribute name="looped" type="boolean" />
+                        <xs:attribute name="reversible" type="boolean" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="trigger" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="AboutToShow" />
+                        <xs:enumeration value="AboutToHide" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- MythUI Theme Root -->
+    <xs:element name="mythuitheme">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widgets" />
+                <xs:element ref="window" minOccurs="0" maxOccurs="unbounded" />
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Font Definition -->
+    <xs:element name="fontdef">
+        <xs:complexType>
+            <!-- XML Schema sucks, no choice but to enforce order here -->
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:choice minOccurs="0" maxOccurs="1">
+                    <xs:element name="pixelsize" type="xs:integer" />
+                    <xs:element name="size" type="xs:integer" />
+                </xs:choice>
+                <xs:element name="color" type="color" minOccurs="0" maxOccurs="1" />
+                <xs:element name="shadowcolor" type="color" minOccurs="0" maxOccurs="1" />
+                <xs:element name="shadowoffset" type="position" minOccurs="0" maxOccurs="1" />
+                <xs:element name="shadowalpha" type="alpha" minOccurs="0" maxOccurs="1" />
+                <xs:element name="outlinecolor" type="color" minOccurs="0" maxOccurs="1" />
+                <xs:element name="outlinesize" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                <xs:element name="outlinealpha" type="alpha" minOccurs="0" maxOccurs="1" />
+                <xs:element name="stretch" minOccurs="0" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="1" />
+                            <xs:enumeration value="ultracondensed" />
+                            <xs:enumeration value="2" />
+                            <xs:enumeration value="extracondensed" />
+                            <xs:enumeration value="3" />
+                            <xs:enumeration value="condensed" />
+                            <xs:enumeration value="4" />
+                            <xs:enumeration value="semicondensed" />
+                            <xs:enumeration value="5" />
+                            <xs:enumeration value="unstretched" />
+                            <xs:enumeration value="6" />
+                            <xs:enumeration value="semiexpanded" />
+                            <xs:enumeration value="7" />
+                            <xs:enumeration value="expanded" />
+                            <xs:enumeration value="8" />
+                            <xs:enumeration value="extraexpanded" />
+                            <xs:enumeration value="9" />
+                            <xs:enumeration value="ultraexpanded" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="weight" minOccurs="0" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="1" />
+                            <xs:enumeration value="ultralight" />
+                            <xs:enumeration value="2" />
+                            <xs:enumeration value="light" />
+                            <xs:enumeration value="3" />
+                            <xs:enumeration value="normal" />
+                            <xs:enumeration value="4" />
+                            <xs:enumeration value="demibold" />
+                            <xs:enumeration value="5" />
+                            <xs:enumeration value="bold" />
+                            <xs:enumeration value="6" />
+                            <xs:enumeration value="black" />
+                            <xs:enumeration value="7" />
+                            <xs:enumeration value="ultrablack" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="letterspacing" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                <xs:element name="wordspacing" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                <xs:element name="decoration" minOccurs="0" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="underline" />
+                            <xs:enumeration value="overline" />
+                            <xs:enumeration value="strikeout" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+            <xs:attribute name="face" type="xs:string" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Window/Screen -->
+    <xs:element name="window">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="animation" />
+                <xs:group ref="widget_common" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+            <xs:attribute name="include" type="xs:string" />
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Group Widget -->
+    <xs:element name="group">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Video Widget -->
+    <xs:element name="video">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Textarea Widget -->
+    <xs:group name="textarea_elements">
+        <!-- XML Schema sucks, no choice but to enforce order here -->
+        <xs:sequence>
+            <xs:element name="case" minOccurs="0" maxOccurs="1">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="normal" />
+                        <xs:enumeration value="upper" />
+                        <xs:enumeration value="lower" />
+                        <xs:enumeration value="capitaliseall" />
+                        <xs:enumeration value="capitalisefirst" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="font" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="state" type="xs:string" />
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="cutdown" minOccurs="0" maxOccurs="1">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="true" />
+                        <xs:enumeration value="false" />
+                        <xs:enumeration value="1" />
+                        <xs:enumeration value="0" />
+                        <xs:enumeration value="yes" />
+                        <xs:enumeration value="no" />
+                        <xs:enumeration value="left" />
+                        <xs:enumeration value="right" />
+                        <xs:enumeration value="center" />
+                        <xs:enumeration value="centre" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="extraleading" type="xs:integer" minOccurs="0" maxOccurs="1" />
+            <xs:element name="multiline" type="boolean" minOccurs="0" maxOccurs="1" />
+            <xs:element name="align" type="align" minOccurs="0" maxOccurs="1" />
+            <xs:element name="colorcycle" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:attribute name="start" type="color" />
+                    <xs:attribute name="end" type="color" />
+                    <xs:attribute name="steps" type="xs:integer" />
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="scroll" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:attribute name="direction" default="left">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="left" />
+                                <xs:enumeration value="up" />
+                                <xs:enumeration value="right" />
+                                <xs:enumeration value="down" />
+                                <xs:enumeration value="horizontal" />
+                                <xs:enumeration value="vertical" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="value" type="text" minOccurs="0" maxOccurs="1" />
+            <xs:element name="template" type="text" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+    </xs:group>
+
+    <xs:element name="textarea">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+
+                <xs:group ref="textarea_elements" />
+
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Imagetype Widget -->
+    <xs:element name="imagetype">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:element name="filename" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="preserveaspect" type="boolean" minOccurs="0" maxOccurs="1" />
+                <xs:element name="crop" type="area" minOccurs="0" maxOccurs="1" />
+                <xs:element name="mask" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="reflection" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:attribute name="axis" type="xs:string" default="horizontal" />
+                        <xs:attribute name="shear" type="percentage" default="0" />
+                        <xs:attribute name="scale" type="percentage" default="100" />
+                        <xs:attribute name="length" type="percentage" default="100" />
+                        <xs:attribute name="spacing" type="xs:integer" default="0" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="grayscale" type="boolean" minOccurs="0" maxOccurs="1" />
+                <xs:element name="greyscale" type="boolean" minOccurs="0" maxOccurs="1" />
+                <xs:element name="filepattern" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                                <xs:attribute name="low" type="xs:integer" default="0" />
+                                <xs:attribute name="high" type="xs:integer" use="required" />
+                                <xs:attribute name="cycle" default="start">
+                                    <xs:simpleType>
+                                        <xs:restriction base="xs:string">
+                                            <xs:enumeration value="start" />
+                                            <xs:enumeration value="reverse" />
+                                        </xs:restriction>
+                                    </xs:simpleType>
+                                </xs:attribute>
+                                <xs:attribute name="delay" type="xs:integer" default="500" />
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="delay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Shape Widget -->
+    <xs:element name="shape">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+
+                <xs:element name="type" minOccurs="0" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="box" />
+                            <xs:enumeration value="roundbox" />
+                            <xs:enumeration value="ellipse" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+
+                <xs:element name="cornerradius" type="xs:integer" minOccurs="0" maxOccurs="1"/>
+
+                <xs:element name="fill" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="gradient" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="stop" minOccurs="0" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:attribute name="position" type="percentage" use="required" />
+                                                <xs:attribute name="color" type="color" use="required" />
+                                                <xs:attribute name="alpha" type="alpha" />
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="start" type="color" />
+                                    <xs:attribute name="end" type="color" />
+                                    <xs:attribute name="alpha" type="alpha" />
+                                    <xs:attribute name="direction" default="vertical">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="horizontal" />
+                                                <xs:enumeration value="vertical" />
+                                                <xs:enumeration value="diagonal" />
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:attribute>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="color" type="color" />
+                        <xs:attribute name="alpha" type="alpha" />
+                        <xs:attribute name="style" default="solid">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="solid" />
+                                    <xs:enumeration value="gradient" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+
+                <xs:element name="line" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:attribute name="color" type="color" default="#000000" />
+                        <xs:attribute name="alpha" type="alpha" default="255" />
+                        <xs:attribute name="width" type="xs:integer" default="1" />
+                        <xs:attribute name="style" default="solid">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="solid" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Statetype Widget -->
+    <xs:element name="statetype">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+
+                <xs:element name="showempty" type="boolean" minOccurs="0" maxOccurs="1" />
+                <xs:element name="state" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:group ref="widget_common" />
+                            <xs:group ref="widgets" />
+                        </xs:sequence>
+                        <xs:attribute name="name" type="xs:string" />
+                        <xs:attribute name="type" type="xs:string" />
+                        <xs:attribute name="from" type="xs:string" />
+                    </xs:complexType>
+                </xs:element>
+
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Clock Widget -->
+    <xs:element name="clock">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:group ref="textarea_elements" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Button Widget -->
+    <xs:element name="button">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:element name="value" type="text" minOccurs="0" maxOccurs="1" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Buttonlist Widget -->
+    <xs:group name="buttonlist_elements">
+        <xs:sequence>
+            <xs:element name="align" type="align" minOccurs="0" maxOccurs="1" />
+            <xs:element name="layout" minOccurs="0" maxOccurs="1">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="horizontal" />
+                        <xs:enumeration value="vertical" />
+                        <xs:enumeration value="grid" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="spacing" type="xs:integer" minOccurs="0" maxOccurs="1" />
+            <xs:element name="arrange" minOccurs="0" maxOccurs="1">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="fixed" />
+                        <xs:enumeration value="stack" />
+                        <xs:enumeration value="fill" />
+                        <xs:enumeration value="spread" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="scrollstyle" minOccurs="0" maxOccurs="1">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="center" />
+                        <xs:enumeration value="groupcenter" />
+                        <xs:enumeration value="free" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="wrapstyle" minOccurs="0" maxOccurs="1">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="none" />
+                        <xs:enumeration value="selection" />
+                        <xs:enumeration value="items" />
+                        <xs:enumeration value="captive" />
+                        <xs:enumeration value="flowing" />
+                        <xs:enumeration value="captive" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="showarrow" type="boolean" minOccurs="0" maxOccurs="1" />
+            <xs:element name="buttonarea" type="area" minOccurs="0" maxOccurs="1" />
+            <xs:element name="drawfrombottom" type="boolean" minOccurs="0" maxOccurs="1" />
+            <xs:element name="searchposition" type="position" minOccurs="0" maxOccurs="1" />
+            <xs:element name="triggerevent" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="action" type="xs:string" />
+                            <xs:attribute name="context" type="xs:string" />
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:element name="buttonlist">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:group ref="buttonlist_elements" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Buttontree Widget -->
+    <xs:element name="buttontree">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+
+                <xs:element name="numlists" type="xs:integer" />
+                <xs:element name="spacing" type="xs:integer" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Textedit Widget -->
+    <xs:complexType name="textedit">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:group ref="widget_common" />
+            <xs:group ref="widgets" />
+        </xs:choice>
+        <xs:attributeGroup ref="common_attributes" />
+    </xs:complexType>
+    <xs:element name="textedit" type="textedit" />
+
+
+    <!-- Checkbox Widget -->
+    <xs:element name="checkbox">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Spinbox Widget -->
+    <xs:element name="spinbox">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:group ref="buttonlist_elements" />
+                <xs:element name="template" minOccurs="0" maxOccurs="3">
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="text">
+                                <xs:attribute name="type">
+                                    <xs:simpleType>
+                                        <xs:restriction base="xs:string">
+                                            <xs:enumeration value="positive" />
+                                            <xs:enumeration value="zero" />
+                                            <xs:enumeration value="negative" />
+                                        </xs:restriction>
+                                    </xs:simpleType>
+                                </xs:attribute>
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Progressbar Widget -->
+    <xs:element name="progressbar">
+       <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:element name="layout" minOccurs="0" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="horizontal" />
+                            <xs:enumeration value="vertical" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="style" minOccurs="0" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="reveal" />
+                            <xs:enumeration value="slide" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Guidegrid Widget -->
+    <xs:complexType name="guidegrid">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:group ref="widget_common" />
+            <xs:element name="channels" type="xs:integer" />
+            <xs:element name="timeslots" type="xs:integer" />
+            <xs:element name="solidcolor" type="color" />
+            <xs:element name="selector">
+                <xs:complexType>
+                    <xs:attribute name="type">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="highlight" />
+                                <xs:enumeration value="box" />
+                                <xs:enumeration value="roundbox" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="linecolor" type="color" />
+                    <xs:attribute name="fillcolor" type="color" />
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="showcategories" type="boolean" />
+            <xs:element name="categoryalpha" type="alpha" />
+            <xs:element name="recordingcolor" type="color" />
+            <xs:element name="conflictingcolor" type="color" />
+            <xs:element name="cutdown" type="boolean" />
+            <xs:element name="multiline" type="boolean" />
+            <xs:element name="textoffset" type="position" />
+            <xs:element name="recordstatus">
+                <xs:complexType>
+                    <xs:attribute name="type" use="required">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:token">
+                                <xs:enumeration value="ChannelRecord" />
+                                <xs:enumeration value="WeekslotRecord" />
+                                <xs:enumeration value="OverrideRecord" />
+                                <xs:enumeration value="TimeslotRecord" />
+                                <xs:enumeration value="SingleRecord" />
+                                <xs:enumeration value="AllRecord" />
+                                <xs:enumeration value="FindOneRecord" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="image" type="xs:string" use="required" />
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="arrow">
+                <xs:complexType>
+                    <xs:attribute name="direction" use="required">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:token">
+                                <xs:enumeration value="left" />
+                                <xs:enumeration value="right" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="image" type="xs:string" use="required" />
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="font" type="xs:string" />
+            <xs:group ref="widgets" />
+        </xs:choice>
+        <xs:attributeGroup ref="common_attributes" />
+    </xs:complexType>
+    <xs:element name="guidegrid">
+
+    </xs:element>
+
+    <!-- Webbrowser Widget -->
+    <xs:element name="webbrowser">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:element name="url" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="zoom" type="xs:decimal" minOccurs="0" maxOccurs="1" />
+                <xs:element name="background" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:attribute name="color" type="color" use="required" />
+                        <xs:attribute name="alpha" type="alpha" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="userstylesheet" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="updateinterval" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+
+    <!-- Editbar Widget -->
+    <xs:element name="editbar">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="widget_common" />
+                <xs:group ref="widgets" />
+            </xs:choice>
+            <xs:attributeGroup ref="common_attributes" />
+        </xs:complexType>
+    </xs:element>
+
+    <!-- ThemeInfo -->
+    <xs:element name="themeinfo">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+
+                <xs:element name="types" minOccurs="1" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="type" minOccurs="1" maxOccurs="3">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="UI" />
+                                        <xs:enumeration value="OSD" />
+                                        <xs:enumeration value="Menu" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+
+                <xs:element name="aspect" minOccurs="1" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="4:3" />
+                            <xs:enumeration value="16:9" />
+                            <xs:enumeration value="16:10" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+
+                <xs:element name="baseres" minOccurs="0" maxOccurs="1">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:pattern value="([0-9]{3,4})x([0-9]{3,4})" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+
+                <xs:element name="author" minOccurs="1" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+                            <xs:element name="email" type="xs:string" minOccurs="1" maxOccurs="1" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+
+                <xs:element name="version" minOccurs="1" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="major" type="xs:integer" minOccurs="1" maxOccurs="1" />
+                            <xs:element name="minor" type="xs:integer" minOccurs="1" maxOccurs="1" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+
+                <xs:element name="detail" minOccurs="1" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="thumbnail" minOccurs="1" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                            <xs:attribute name="name" type="xs:string" use="required" />
+                                        </xs:extension>
+                                    </xs:simpleContent>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="description" type="xs:string" minOccurs="1" maxOccurs="1" />
+                            <xs:element name="errata" type="xs:string" minOccurs="1" maxOccurs="1" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

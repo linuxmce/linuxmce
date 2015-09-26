@@ -1,0 +1,1138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+<mythuitheme>
+
+    <window name="functionpopup">
+        <fontdef name="title" from="basesmall">
+            <color>#ffff00</color>
+            <size>14</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <area>-1,-1,413,426</area>
+
+        <imagetype name="backimg">
+            <area>0,0,413,426</area>
+            <filename>mythdialogbox-background.png</filename>
+        </imagetype>
+
+        <textarea name="title" from="basetextarea">
+            <area>20,20,360,40</area>
+            <font>title</font>
+            <align>hcenter,top</align>
+            <value>Edit Monitor Function</value>
+        </textarea>
+
+        <textarea name="caption_text" from="basetextarea">
+            <area>20,100,360,100</area>
+            <align>hcenter,top</align>
+        </textarea>
+
+        <buttonlist name="function_list" from="baseselector">
+            <position>90,200</position>
+        </buttonlist>
+
+        <checkbox name="enable_check" from="basecheckbox">
+            <position>90,270</position>
+        </checkbox>
+
+        <textarea name="enable_text" from="basetextarea">
+            <area>130,270,200,30</area>
+            <align>left,vcenter</align>
+            <value>Enabled</value>
+        </textarea>
+
+        <button name="ok_button" from="basebutton">
+            <position>125,350</position>
+        </button>
+    </window>
+
+
+    <window name="zmconsole">
+
+        <fontdef name="listlabel" from="basesmall">
+            <color>#ffff00</color>
+            <size>14</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="date" from="basesmall">
+            <color>#9999cc</color>
+            <size>14</size>
+        </fontdef>
+
+        <fontdef name="running" from="basesmall">
+            <color>#00ff00</color>
+            <size>16</size>
+        </fontdef>
+
+        <fontdef name="stopped" from="running">
+            <color>#ff0000</color>
+        </fontdef>
+
+        <fontdef name="footer" from="basesmall">
+            <color>#ffffff</color>
+            <size>16</size>
+        </fontdef>
+
+        <fontdef name="info" from="basesmall">
+            <color>#ffffff</color>
+            <size>14</size>
+        </fontdef>
+
+        <textarea name="pagetitle" from="basetextarea">
+            <area>30,10,570,40</area>
+            <font>baselarge</font>
+            <value>ZoneMinder Console</value>
+        </textarea>
+
+        <shape name="topbackground" from="basebackground">
+            <area>30,75,740,100</area>
+        </shape>
+
+        <textarea name="date_text" from="basetextarea">
+            <area>40,80,200,80</area>
+            <font>date</font>
+            <multiline>yes</multiline>
+            <value></value>
+        </textarea>
+
+        <textarea name="time_text" from="basetextarea">
+            <area>550,80,200,40</area>
+            <font>date</font>
+            <align>right</align>
+        </textarea>
+
+        <textarea name="label" from="basetextarea">
+            <area>250,90,300,40</area>
+            <font>basesmallyellow</font>
+            <value>Status</value>
+        </textarea>
+
+        <textarea name="status_text" from="basetextarea">
+            <area>250,110,300,40</area>
+            <align>allcenter</align>
+            <font>running</font>
+            <font state="running">running</font>
+            <font state="stopped">stopped</font>
+            <multiline>no</multiline>
+            <value></value>
+        </textarea>
+
+        <textarea name="load_text" from="basetextarea">
+            <area>40,145,200,40</area>
+            <font>info</font>
+            <multiline>no</multiline>
+            <value>Load: 0.12</value>
+        </textarea>
+
+        <textarea name="disk_text" from="basetextarea">
+            <area>550,145,200,40</area>
+            <align>right</align>
+            <font>info</font>
+            <multiline>no</multiline>
+            <value>Disk: 100%</value>
+        </textarea>
+
+        <textarea name="label1" from="basetextarea">
+            <area>40,196,130,30</area>
+            <font>basesmallyellow</font>
+            <value>Camera</value>
+        </textarea>
+
+        <textarea name="label2" from="basetextarea">
+            <area>250,196,130,30</area>
+            <font>basesmallyellow</font>
+            <value>Function</value>
+        </textarea>
+
+        <textarea name="label3" from="basetextarea">
+            <area>420,196,130,30</area>
+            <font>basesmallyellow</font>
+            <value>Source</value>
+        </textarea>
+
+        <textarea name="label4" from="basetextarea">
+            <area>690,196,130,30</area>
+            <font>basesmallyellow</font>
+            <value>Events</value>
+        </textarea>
+
+        <shape name="bottombackground" from="basebackground">
+            <area>30,220,740,330</area>
+        </shape>
+
+        <buttonlist name="monitor_list">
+            <area>20,230,760,242</area>
+            <layout>vertical</layout>
+            <spacing>5</spacing>
+            <buttonarea>0,0,760,250</buttonarea>
+            <statetype name="buttonitem">
+                <area>0,0,760,25</area>
+                <state name="active">
+                    <imagetype name="buttonimage">
+                        <area>0,2,25,25</area>
+                        <preserveaspect>yes</preserveaspect>
+                    </imagetype>
+                    <shape name="buttonbackground">
+                        <area>15,0,730,30</area>
+                        <fill style="gradient">
+                            <gradient start="#505050" end="#000000" alpha="200"/>
+                        </fill>
+                    </shape>
+                    <textarea name="buttontext" from="basetextarea">
+                        <area>30,2,250,25</area>
+                        <font>basesmallgrey</font>
+                    </textarea>
+                    <textarea name="name" from="buttontext">
+                        <area>25,2,170,25</area>
+                    </textarea>
+                    <textarea name="zmcstatus" from="buttontext">
+                        <area>230,2,160,25</area>
+                    </textarea>
+                    <textarea name="zmastatus" from="buttontext">
+                        <area>400,2,260,25</area>
+                    </textarea>
+                    <textarea name="eventcount" from="buttontext">
+                        <area>670,2,50,25</area>
+                    </textarea>
+                </state>
+                <state name="selectedactive" from="active">
+                    <shape name="buttonbackground">
+                        <area>15,0,730,30</area>
+                        <fill style="gradient">
+                            <gradient start="#52CA38" end="#349838" alpha="255"/>
+                        </fill>
+                    </shape>
+
+                    <textarea name="buttontext">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="name">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="zmcstatus">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="zmastatus">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="eventcount">
+                        <font>basesmall</font>
+                    </textarea>
+                </state>
+            </statetype>
+            <statetype name="upscrollarrow">
+                <position>240,270</position>
+                <state type="on">
+                    <imagetype name="upon">
+                        <filename>up_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+            <statetype name="downscrollarrow">
+                <position>456,270</position>
+                <state type="on">
+                    <imagetype name="dnon">
+                        <filename>down_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+        </buttonlist>
+
+        <textarea name="label">
+            <area>45,200,130,30</area>
+            <font>basesmallyellow</font>
+            <value>[x]</value>
+        </textarea>
+
+        <textarea name="label">
+            <area>100,550,600,40</area>
+            <align>allcenter</align>
+            <font>footer</font>
+            <multiline>no</multiline>
+            <value>[R] = Running [S] = Stopped</value>
+        </textarea>
+
+    </window>
+
+
+    <window name="zmevents">
+
+        <fontdef name="active" from="basesmall">
+            <color>#ffffff</color>
+            <size>18</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="inactive" from="basesmall">
+            <color>#9999cc</color>
+            <size>18</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="selected" from="basesmall">
+            <color>#00ff00</color>
+            <size>18</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="date" from="basesmall">
+            <color>#9999cc</color>
+            <size>14</size>
+        </fontdef>
+        <fontdef name="description" from="basesmall">
+            <color>#ffffff</color>
+            <size>18</size>
+        </fontdef>
+
+        <fontdef name="label" from="basesmall">
+            <color>#ffff00</color>
+            <size>16</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="listlabel" from="basesmall">
+            <color>#ffff00</color>
+            <size>14</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="buttons" from="basesmall">
+            <color>#ffffff</color>
+            <size>12</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="subtitle_active" from="basesmall">
+            <color>#ffffff</color>
+            <size>14</size>
+        </fontdef>
+
+        <fontdef name="subtitle_inactive" from="basesmall">
+            <color>#9999cc</color>
+            <size>14</size>
+        </fontdef>
+
+        <fontdef name="subtitle_selected" from="basesmall">
+            <color>#ff0000</color>
+            <size>14</size>
+        </fontdef>
+
+        <textarea name="pagetitle" from="basetextarea">
+            <area>30,10,570,40</area>
+            <font>baselarge</font>
+            <value>ZoneMinder Events</value>
+        </textarea>
+
+        <shape name="topbackground" from="basebackground">
+            <area>20,60,740,95</area>
+        </shape>
+
+        <textarea name="label1" from="basetextarea">
+            <area>45,75,200,50</area>
+            <font>listlabel</font>
+            <value>Select Camera</value>
+        </textarea>
+
+        <textarea name="label2" from="basetextarea">
+            <area>345,75,200,50</area>
+            <font>listlabel</font>
+            <value>Select Date</value>
+        </textarea>
+
+        <buttonlist name="camera_selector" from="baseselector">
+            <position>45,100</position>
+        </buttonlist>
+
+        <buttonlist name="date_selector" from="baseselector">
+            <position>345,100</position>
+        </buttonlist>
+
+        <textarea name="eventno_text" from="basetextarea">
+            <area>600,110,140,50</area>
+            <align>right</align>
+            <font>label</font>
+            <value>0/0</value>
+        </textarea>
+
+
+<!--+++++++++++++++++++ layout 1 - list view +++++++++++++++++++++++++-->
+
+        <textarea name="layout1_title1" from="basetextarea">
+            <area>50,165,130,30</area>
+            <font>listlabel</font>
+            <value>Event Name</value>
+        </textarea>
+
+        <textarea name="layout1_title2" from="basetextarea">
+            <area>200,165,130,30</area>
+            <font>listlabel</font>
+            <value>Camera</value>
+        </textarea>
+
+        <textarea name="layout1_title3" from="basetextarea">
+            <area>425,165,130,30</area>
+            <font>listlabel</font>
+            <value>Date/Time</value>
+        </textarea>
+
+        <textarea name="layout1_title4" from="basetextarea">
+            <area>600,165,130,30</area>
+            <align>right</align>
+            <font>listlabel</font>
+            <value>Length</value>
+        </textarea>
+
+        <shape name="layout1_image2" from="basebackground">
+            <area>20,190,740,330</area>
+        </shape>
+
+        <buttonlist name="layout1_eventlist">
+            <area>25,200,700,320</area>
+            <layout>vertical</layout>
+            <spacing>5</spacing>
+            <buttonarea>0,0,740,320</buttonarea>
+            <statetype name="buttonitem">
+                <area>0,0,740,25</area>
+                <state name="active">
+                    <shape name="buttonbackground">
+                        <area>15,0,700,30</area>
+                        <fill style="gradient">
+                            <gradient start="#505050" end="#000000" alpha="200"/>
+                        </fill>
+                    </shape>
+                    <textarea name="buttontext" from="basetextarea">
+                        <area>25,4,150,25</area>
+                        <font>basesmallgrey</font>
+                    </textarea>
+                    <textarea name="camera" from="buttontext">
+                        <area>175,4,160,25</area>
+                    </textarea>
+                    <textarea name="time" from="buttontext">
+                        <area>400,4,230,25</area>
+                    </textarea>
+                    <textarea name="length" from="buttontext">
+                        <area>640,4,60,25</area>
+                        <align>right</align>
+                    </textarea>
+                </state>
+                <state name="selectedactive" from="active">
+                    <shape name="buttonbackground">
+                        <area>15,0,700,30</area>
+                        <fill style="gradient">
+                            <gradient start="#52CA38" end="#349838" alpha="255"/>
+                        </fill>
+                    </shape>
+                    <textarea name="buttontext">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="camera">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="time">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="length">
+                        <font>basesmall</font>
+                    </textarea>
+                </state>
+               <state name="selectedinactive" from="active">
+                    <shape name="buttonbackground"> 
+                        <area>15,0,700,30</area> 
+                        <fill style="gradient"> 
+                            <gradient start="#52CA38" end="#349838" alpha="100"/> 
+                        </fill> 
+                    </shape> 
+
+                    <textarea name="buttontext">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="camera">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="time">
+                        <font>basesmall</font>
+                    </textarea>
+                    <textarea name="length">
+                        <font>basesmall</font>
+                    </textarea>
+                </state>
+            </statetype>
+            <statetype name="upscrollarrow">
+                <position>240,270</position>
+                <state type="on">
+                    <imagetype name="upon">
+                        <filename>up_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+            <statetype name="downscrollarrow">
+                <position>456,270</position>
+                <state type="on">
+                    <imagetype name="dnon">
+                        <filename>down_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+        </buttonlist>
+
+
+<!--+++++++++++++++++++ layout 2 - 1 row +++++++++++++++++++++++++-->
+
+        <shape name="layout2_image2" from="basebackground">
+            <area>20,160,740,350</area>
+        </shape>
+
+        <buttonlist name="layout2_eventlist">
+            <area>50,170,700,340</area>
+            <layout>grid</layout>
+            <spacing>10</spacing>
+            <buttonarea>0,0,700,340</buttonarea>
+            <statetype name="buttonitem">
+                <area>0,0,700,340</area>
+                <state name="active">
+                    <shape name="buttonbackground">
+                        <area>0,0,690,330</area>
+                        <fill style="gradient">
+                            <gradient start="#505050" end="#000000" alpha="200"/>
+                        </fill>
+                    </shape>
+
+                    <imagetype name="buttonimage">
+                        <area>15,15,400,300</area>
+                    </imagetype>
+
+                    <textarea name="namelabel" from="basetextarea">
+                        <area>415,30,285,30</area>
+                        <font>listlabel</font>
+                        <align>hcenter,top</align>
+                        <value>Name</value>
+                    </textarea>
+                    <textarea name="cameralabel" from="namelabel">
+                        <area>415,100,285,30</area>
+                        <value>Camera</value>
+                    </textarea>
+                    <textarea name="datelabel" from="namelabel">
+                        <area>415,170,285,30</area>
+                        <value>Date</value>
+                    </textarea>
+                    <textarea name="durationlabel" from="namelabel">
+                        <area>415,240,285,30</area>
+                        <value>Duration</value>
+                    </textarea>
+
+                    <textarea name="buttontext" from="basetextarea">
+                        <area>415,55,285,30</area>
+                        <align>hcenter,top</align>
+                        <font>basegrey</font>
+                    </textarea>
+                    <textarea name="camera" from="buttontext">
+                        <area>415,125,285,30</area>
+                    </textarea>
+                    <textarea name="time" from="buttontext">
+                        <area>415,195,285,30</area>
+                    </textarea>
+                    <textarea name="length" from="buttontext">
+                        <area>415,265,285,30</area>
+                    </textarea>
+
+                </state>
+                <state name="selectedactive" from="active">
+                    <shape name="buttonbackground">
+                        <area>0,0,690,330</area>
+                        <fill style="gradient">
+                            <gradient start="#52CA38" end="#349838" alpha="255"/>
+                        </fill>
+                    </shape>
+                    <textarea name="buttontext">
+                        <font>basesmall</font>
+                    </textarea>
+                </state>
+               <state name="selectedinactive" from="active">
+                    <shape name="buttonbackground">
+                        <area>0,0,690,330</area>
+                        <fill style="gradient">
+                            <gradient start="#52CA38" end="#349838" alpha="100"/>
+                        </fill>
+                    </shape>
+
+                    <textarea name="buttontext">
+                        <font>basesmall</font>
+                    </textarea>
+                </state>
+            </statetype>
+            <statetype name="upscrollarrow">
+                <position>240,270</position>
+                <state type="on">
+                    <imagetype name="upon">
+                        <filename>up_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+            <statetype name="downscrollarrow">
+                <position>456,270</position>
+                <state type="on">
+                    <imagetype name="dnon">
+                        <filename>down_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+        </buttonlist>
+
+
+        <!--+++++++++++++++++++ layout 3 - grid view 6x2 +++++++++++++++++++++++++-->
+
+        <shape name="layout3_image2" from="basebackground">
+            <area>20,160,740,350</area>
+        </shape>
+
+        <buttonlist name="layout3_eventlist">
+            <area>42,170,700,340</area>
+            <layout>grid</layout>
+            <spacing>10</spacing>
+            <buttonarea>0,0,700,340</buttonarea>
+            <statetype name="buttonitem">
+                <area>0,0,230,150</area>
+                <state name="active">
+                    <shape name="buttonbackground">
+                        <area>0,0,225,160</area>
+                        <fill style="gradient">
+                            <gradient start="#505050" end="#000000" alpha="200"/>
+                        </fill>
+                    </shape>
+                    <imagetype name="buttonimage">
+                        <area>25,10,180,120</area>
+                    </imagetype>
+
+                    <textarea name="buttontext" from="basetextarea">
+                        <area>5,130,220,30</area>
+                        <align>hcenter,bottom</align>
+                        <font>basesmallgrey</font>
+                    </textarea>
+                </state>
+                <state name="selectedactive" from="active">
+                    <shape name="buttonbackground">
+                        <area>0,0,225,160</area>
+                        <fill style="gradient">
+                            <gradient start="#52CA38" end="#349838" alpha="255"/>
+                        </fill>
+                    </shape>
+                    <textarea name="buttontext">
+                        <font>basesmall</font>
+                    </textarea>
+                </state>
+               <state name="selectedinactive" from="active">
+                    <shape name="buttonbackground">
+                        <area>0,0,225,160</area>
+                        <fill style="gradient">
+                            <gradient start="#52CA38" end="#349838" alpha="100"/>
+                        </fill>
+                    </shape>
+                    <textarea name="buttontext">
+                        <font>basesmall</font>
+                    </textarea>
+                </state>
+            </statetype>
+            <statetype name="upscrollarrow">
+                <position>240,270</position>
+                <state type="on">
+                    <imagetype name="upon">
+                        <filename>up_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+            <statetype name="downscrollarrow">
+                <position>456,270</position>
+                <state type="on">
+                    <imagetype name="dnon">
+                        <filename>down_arrow.png</filename>
+                    </imagetype>
+                </state>
+            </statetype>
+        </buttonlist>
+
+<!--+++++++++++++++++++ buttons  +++++++++++++++++++++++++-->
+
+        <button name="delete_button" from="basebutton">
+            <position>35,530</position>
+        </button>
+
+        <button name="play_button" from="basebutton">
+            <position>610,530</position>
+        </button>
+
+    </window>
+
+    <window name="zmplayer">
+
+        <fontdef name="label" from="basesmall">
+            <color>#ffff00</color>
+            <size>16</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="data" from="basesmall">
+            <color>#ffffff</color>
+            <size>14</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <fontdef name="buttons" from="basesmall">
+            <color>#ffffff</color>
+            <size>12</size>
+            <weight>bold</weight>
+        </fontdef>
+
+        <textarea name="pagetitle" from="basetextarea">
+            <area>30,10,570,40</area>
+            <font>baselarge</font>
+            <value>ZoneMinder Event Player</value>
+        </textarea>
+
+        <shape name="topbackground" from="basebackground">
+            <area>30,75,740,70</area>
+        </shape>
+
+        <textarea name="label1">
+            <area>40,75,160,40</area>
+            <align>left,vcenter</align>
+            <font>label</font>
+            <value>Event:</value>
+        </textarea>
+
+        <textarea name="event_text">
+            <area>140,75,270,40</area>
+            <align>left,vcenter</align>
+            <font>data</font>
+            <value>Event Name (1/123)</value>
+        </textarea>
+
+        <textarea name="label2">
+            <area>410,75,400,40</area>
+            <align>left,vcenter</align>
+            <font>label</font>
+            <value>Camera:</value>
+        </textarea>
+
+        <textarea name="camera_text">
+            <area>530,75,160,40</area>
+            <align>left,vcenter</align>
+            <font>data</font>
+            <value>Camera Name</value>
+        </textarea>
+
+        <textarea name="label3">
+            <area>40,105,160,40</area>
+            <font>label</font>
+            <align>left,vcenter</align>
+            <value>Frame:</value>
+        </textarea>
+
+        <textarea name="frame_text">
+            <area>140,105,160,40</area>
+            <align>left,vcenter</align>
+            <font>data</font>
+            <value>1/123</value>
+        </textarea>
+
+        <textarea name="label4">
+            <area>410,105,400,40</area>
+            <align>left,vcenter</align>
+            <font>label</font>
+            <value>Date:</value>
+        </textarea>
+
+        <textarea name="date_text">
+            <area>530,105,250,40</area>
+            <align>left,vcenter</align>
+            <font>data</font>
+            <value>Mon 01 Nov 2006 12:34</value>
+        </textarea>
+
+        <imagetype name="frameimage">
+            <area>150,165,500,350</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="noevents_text">
+            <area>100,65,600,450</area>
+            <font>data</font>
+            <align>allcenter</align>
+            <value>There are no events to show</value>
+        </textarea>
+
+        <!-- fullscreen player -->
+        <imagetype name="framefsimage">
+            <area>0,0,800,600</area>
+        </imagetype>
+
+        <!-- buttons -->
+        <button name="play_button" from="basebutton">
+            <position>35,550</position>
+        </button>
+
+        <button name="delete_button" from="basebutton">
+            <position>205,550</position>
+        </button>
+
+        <button name="prev_button" from="basebutton">
+            <position>440,550</position>
+        </button>
+
+        <button name="next_button" from="basebutton">
+            <position>610,550</position>
+        </button>
+
+    </window>
+
+    <window name="zmliveplayer">
+
+        <fontdef name="monitor" from="basesmall">
+            <color>#ffff00</color>
+            <size>16</size>
+        </fontdef>
+
+        <fontdef name="idle" from="basesmall">
+            <color>#ffff00</color>
+            <size>16</size>
+        </fontdef>
+
+        <fontdef name="alarm" from="basesmall">
+            <color>#ff0000</color>
+            <size>16</size>
+        </fontdef>
+
+        <fontdef name="alert" from="basesmall">
+            <color>#ffa500</color>
+            <size>16</size>
+        </fontdef>
+
+        <textarea name="pagetitle" from="basetextarea">
+            <area>30,10,570,40</area>
+            <font>baselarge</font>
+            <value>ZoneMinder Live Player</value>
+        </textarea>
+
+        <!-- one monitor view -->
+        <textarea name="name1-1" from="basetextarea">
+            <area>100,75,300,70</area>
+            <font>monitor</font>
+            <value>Monitor 1</value>
+        </textarea>
+
+        <textarea name="status1-1" from="basetextarea">
+            <area>400,75,300,70</area>
+            <align>right</align>
+            <font>idle</font>
+            <font state="idle">idle</font>
+            <font state="alarm">alarm</font>
+            <font state="alert">alert</font>
+            <value></value>
+        </textarea>
+
+        <imagetype name="frame1-1">
+            <area>100,105,600,450</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <!-- two monitor view -->
+        <textarea name="name2-1" from="basetextarea">
+            <area>20,70,185,30</area>
+            <font>monitor</font>
+            <value>Monitor 1</value>
+        </textarea>
+
+        <textarea name="status2-1" from="status1-1">
+            <area>205,75,185,70</area>
+        </textarea>
+
+        <imagetype name="frame2-1">
+            <area>20,105,370,280</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name2-2" from="basetextarea">
+            <area>410,75,185,30</area>
+            <font>monitor</font>
+            <value>Monitor 2</value>
+        </textarea>
+
+        <textarea name="status2-2" from="status1-1">
+            <area>595,75,185,70</area>
+        </textarea>
+
+        <imagetype name="frame2-2">
+            <area>410,105,370,280</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <!-- four monitor view -->
+
+        <textarea name="name3-1" from="basetextarea">
+            <area>50,70,162,30</area>
+            <font>monitor</font>
+            <multiline>no</multiline>
+            <value>Monitor 1</value>
+        </textarea>
+
+        <textarea name="status3-1" from="status1-1">
+            <area>212,70,162,30</area>
+        </textarea>
+
+        <imagetype name="frame3-1">
+            <area>50,100,325,215</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name3-2" from="basetextarea">
+            <area>425,70,162,30</area>
+            <font>monitor</font>
+            <value>Monitor 2</value>
+        </textarea>
+
+        <textarea name="status3-2" from="status1-1">
+            <area>587,70,162,30</area>
+        </textarea>
+
+        <imagetype name="frame3-2">
+            <area>425,100,325,215</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name3-3" from="basetextarea">
+            <area>50,320,162,30</area>
+            <font>monitor</font>
+            <value>Monitor 3</value>
+        </textarea>
+
+        <textarea name="status3-3" from="status1-1">
+            <area>212,320,162,30</area>
+        </textarea>
+
+        <imagetype name="frame3-3">
+            <area>50,350,325,215</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name3-4" from="basetextarea">
+            <area>425,320,162,30</area>
+            <font>monitor</font>
+            <value>Monitor 4</value>
+        </textarea>
+
+        <textarea name="status3-4" from="status1-1">
+            <area>587,320,162,30</area>
+        </textarea>
+
+        <imagetype name="frame3-4">
+            <area>425,350,325,215</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+         <!-- six monitor view -->
+        <textarea name="name4-1" from="name1-1">
+            <area>10,50,253,30</area>
+            <align>allcenter</align>
+            <value>Monitor 1</value>
+        </textarea>
+
+        <textarea name="status4-1" from="status1-1">
+            <area>10,270,253,30</area>
+            <align>allcenter</align>
+        </textarea>
+
+        <imagetype name="frame4-1">
+            <area>10,80,253,190</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name4-2" from="name4-1">
+            <area>273,50,253,30</area>
+            <font>monitor</font>
+            <value>Monitor 2</value>
+        </textarea>
+
+        <textarea name="status4-2" from="status4-1">
+            <area>273,270,253,30</area>
+        </textarea>
+
+        <imagetype name="frame4-2">
+            <area>273,80,253,190</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name4-3" from="name4-1">
+            <area>536,50,253,30</area>
+            <value>Monitor 4</value>
+        </textarea>
+
+        <textarea name="status4-3" from="status4-1">
+            <area>536,270,253,30</area>
+        </textarea>
+
+        <imagetype name="frame4-3">
+            <area>536,80,253,190</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name4-4" from="name4-1">
+            <area>10,340,253,30</area>
+            <value>Monitor 4</value>
+        </textarea>
+
+        <textarea name="status4-4" from="status4-1">
+            <area>10,560,253,30</area>
+        </textarea>
+
+        <imagetype name="frame4-4">
+            <area>10,370,253,190</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name4-5" from="name4-1">
+            <area>273,340,253,30</area>
+            <value>Monitor 4</value>
+        </textarea>
+
+        <textarea name="status4-5" from="status4-1">
+            <area>273,560,253,30</area>
+        </textarea>
+
+        <imagetype name="frame4-5">
+            <area>273,370,253,190</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name4-6" from="name4-1">
+            <area>536,340,253,30</area>
+            <value>Monitor 4</value>
+        </textarea>
+
+        <textarea name="status4-6" from="status4-1">
+            <area>536,560,253,30</area>
+        </textarea>
+
+        <imagetype name="frame4-6">
+            <area>536,370,253,190</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <!-- eight monitor view -->
+        <textarea name="name5-1" from="name1-1">
+            <area>10,110,187,30</area>
+            <align>allcenter</align>
+            <value>Monitor 1</value>
+        </textarea>
+
+        <textarea name="status5-1" from="status1-1">
+            <area>10,280,187,30</area>
+            <align>allcenter</align>
+        </textarea>
+
+        <imagetype name="frame5-1">
+            <area>10,140,187,140</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name5-2" from="name5-1">
+            <area>207,110,187,30</area>
+            <value>Monitor 2</value>
+        </textarea>
+
+        <textarea name="status5-2" from="status5-1">
+            <area>207,280,187,30</area>
+        </textarea>
+
+        <imagetype name="frame5-2">
+            <area>207,140,187,140</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name5-3" from="name5-1">
+            <area>404,110,187,30</area>
+            <value>Monitor 3</value>
+        </textarea>
+
+        <textarea name="status5-3" from="status5-1">
+            <area>404,280,187,30</area>
+        </textarea>
+
+        <imagetype name="frame5-3">
+            <area>404,140,187,140</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name5-4" from="name5-1">
+            <area>601,110,187,30</area>
+            <value>Monitor 4</value>
+        </textarea>
+
+        <textarea name="status5-4" from="status5-1">
+            <area>601,280,187,30</area>
+        </textarea>
+
+        <imagetype name="frame5-4">
+            <area>601,140,187,140</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name5-5" from="name5-1">
+            <area>10,395,187,30</area>
+            <value>Monitor 5</value>
+        </textarea>
+
+        <textarea name="status5-5" from="status5-1">
+            <area>10,565,187,30</area>
+        </textarea>
+
+        <imagetype name="frame5-5">
+            <area>10,425,187,140</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name5-6" from="name5-1">
+            <area>207,395,187,30</area>
+            <value>Monitor 6</value>
+        </textarea>
+
+        <textarea name="status5-6" from="status5-1">
+            <area>207,565,187,30</area>
+        </textarea>
+
+        <imagetype name="frame5-6">
+            <area>207,425,187,140</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name5-7" from="name5-1">
+            <area>404,395,187,30</area>
+            <value>Monitor 7</value>
+        </textarea>
+
+        <textarea name="status5-7" from="status5-1">
+            <area>404,565,187,30</area>
+        </textarea>
+
+        <imagetype name="frame5-7">
+            <area>404,425,187,140</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+        <textarea name="name5-8" from="name5-1">
+            <area>601,395,187,30</area>
+            <value>Monitor 8</value>
+        </textarea>
+
+        <textarea name="status5-8" from="status5-1">
+            <area>601,565,187,30</area>
+        </textarea>
+
+        <imagetype name="frame5-8">
+            <area>601,425,187,140</area>
+            <filename>mz_testcard.png</filename>
+        </imagetype>
+
+    </window>
+
+</mythuitheme>

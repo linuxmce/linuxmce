@@ -1,0 +1,99 @@
+"Action"
+    Action
+    \b(?:action|aven)
+"Adult"
+    Adulte
+    \b(?:adult|erot|sex)
+"Animals"
+    Animaux
+    \b(?:animaux)
+"Art_Music"
+    Arts / Musique
+    \b(?:art|danse|spectacle|musique|culture)
+"Business"
+    Économie
+    \b(?:conomie)
+"Children"
+    Jeunesse
+    \b(?:jeunesse|dessin anim)
+"Comedy"
+    Divertissement
+    \b(?:spectacle|sitcom|divertissement)
+"Crime_Mystery"
+    Policier
+    \b(?:crim|policier)
+"Documentary"
+    Documentaire
+    \b(?:mag|doc)
+"Drama"
+    Théâtre
+    \b(?:th.*tre)
+"Educational"
+    Éducatif
+    \b(?:cours|edu)
+"Food"
+    Cuisine
+    \b(?:gastro|cuisine)
+"Game"
+    Jeux
+    \b(?:jeu)
+"Health_Medical"
+    Santé
+    \b(?:medic|sant)
+"History"
+    Histoire
+    \b(?:hist)
+"Horror"
+    Horreur
+    \b(?:horreur)
+"HowTo"
+    Thématique
+    \b(?:th.*matique)
+"Misc"
+    Variété
+    \b(?:vari)
+"News"
+    Information
+    \b(?:news|info|journal)
+"Reality"
+    Téléréalité
+    \b(?:realit.*)
+"Romance"
+    Téléfilm / Romance
+    \b(?:t.*l.*film|romance)
+"SciFi_Fantasy"
+    Fantastique / Science-Fiction
+    \b(?:fantastique|sci\w*\W*fi)
+"Science_Nature"
+    Nature / Sciences
+    \b(?:science|nature|environnement)
+"Shopping"
+    Téléachat
+    \b(?:shop|achat)
+"Soaps"
+    Série
+    \b(?:s.*rie|soap|feuilleton)
+"Spiritual"
+    Spirituel
+    \b(?:spirit|relig)
+"Sports"
+    Sport
+    \b(?:sport|foot)
+"Talk"
+    Débat
+    \b(?:talk|d.*bat)
+"Travel"
+    Voyage
+    \b(?:voyage)
+"Unknown"
+    Inconnu
+    
+"War"
+    Guerre
+    \b(?:guerre)
+"Western"
+    Western
+    \b(?:west)
+"movie"
+    Film
+    

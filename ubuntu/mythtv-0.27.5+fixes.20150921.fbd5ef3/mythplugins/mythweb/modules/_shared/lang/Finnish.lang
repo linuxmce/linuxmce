@@ -1,0 +1,1574 @@
+""
+"# Tracks"
+    # Raidat
+"$1 B"
+    $1 B
+"$1 day"
+    $1 päivä
+"$1 days"
+    $1 päivää
+"$1 episode"
+    $1 jakso
+"$1 episodes"
+    $1 jaksoa
+"$1 GB"
+    $1 GB
+"$1 hr"
+    $1 tunti
+"$1 hrs"
+    $1 tuntia
+"$1 is not responding."
+    $1 ei vastaa.
+"$1 KB"
+    $1 KB
+"$1 MB"
+    $1 MB
+"$1 min"
+    $1 minuutti
+"$1 mins"
+    $1 minuuttia
+"$1 month"
+    $1 kuukausi
+"$1 months"
+    $1 kuukautta
+"$1 programs, using $2 ($3) out of $4 ($5 free)."
+    $1 ohjelmaa, käyttää $2 ($3) $4:stä ($5 vapaana).
+"$1 recording"
+    $1 tallenne
+"$1 recordings"
+    $1 tallennetta
+"$1 requests pending."
+    $1 anomusta odottamassa
+"$1 Search"
+    $1 Haku
+"$1 TB"
+    $1 TB
+"$1 to $2"
+    $1 - $2
+"$1 video"
+"$1 videos"
+"$1 wasted"
+    $1 tuhlattu
+"$1 year"
+    $1 vuosi
+"$1 years"
+    $1 vuotta
+"%s Song (%s)"
+    %s kappale
+"%s Songs"
+    %s kappaletta
+"%s Songs (%s)"
+    %s kappaletta (%s)
+"(height is calculated automatically from the recording aspect ratio)"
+    (korkeus lasketaan automaattisesti tallenteen kuvasuhteella)
+"1 - Lowest"
+    1 - Alin
+"4 - Highest"
+    4 - Korkein
+"Aborted"
+    Keskeytetty
+"Aborting"
+    Keskeytetään
+"Action"
+    Toiminto
+"Activate"
+    Aktivoi
+"Add"
+    Lisää
+"Add Album to Current Playlist"
+    Lisää albumi nykyiseen Soittolistaan
+"Add Mix"
+    Lisää miksaus
+"Add Song to Current Playlist"
+    Lisää kappale nykyiseen Soittolistaan
+"add string"
+    lisää lauseke
+"Add this Playlist as a Subplaylist"
+    Lisää tämä Soittolista alisoittolistaksi
+"Additional Tables"
+    Täydentävät taulukot
+"Additional tables:"
+    Täydentävät taulukot:
+"Admin Key"
+    Ylläpitäjän avain
+"Advanced"
+    Monipuolinen
+"Advanced Options"
+    Edistyneet valinnat
+"Advanced Search"
+    Monipuolinen haku
+"airdate"
+    lähettämissaika
+"Airdate"
+    Lähetysaika
+"Airtime"
+    Lähetysaika
+"Album Listing"
+    Albumilista
+"Album Tracks"
+    Albumiraidat
+"Albums"
+    Albumit
+"Albums with songs by %s"
+    Albumit, joissa on kappaleita tekijältä %s
+"All"
+    Kaikki
+"All Albums"
+    Kaikki albumit
+"All Categories"
+    Kaikki kategoriat
+"All Fields"
+    Kaikki kentät
+"All Genres"
+    Kaikki lajityypit
+"All groups"
+    Kaikki ryhmät
+"All HDTV"
+    Kaikki HDTV
+"All Hosts"
+    Kaikki palvelimet
+"All recordings"
+    Kaikki tallenteet
+"All Songs"
+    Kaikki kappaleet
+"ALLOCINETYPE"
+    ALLOCINETYPE
+"Allows you to match any string of any length (including zero length)"
+    Sallii haun osuvan millaiseen ja minkä mittaiseen lauseeseen vain (ml. tyhjä)
+"Allows you to match on a single character"
+    Sallii haun osuvan yhteen merkkiin
+"Allows you to search through other database tables when using a power search"
+    Sallii haut muihin tietokannan tauluihin kun tehdään tehohaku
+"An error occurred while adding your playlist."
+"and"
+    ja
+"Any"
+    Mikä vain
+"Any Category"
+    Mikä tahansa kategoria
+"Any Channel"
+    Mikä tahansa kanava
+"Any Program Type"
+    Mikä tahansa ohjelmatyyppi
+"API Key"
+"API Server"
+"Append"
+    Kiinnitys
+"Append to Current Playlist"
+    Kiinnitä nykyiseen Soittolistaan
+"Are you sure you want to delete the following show?"
+    Poistetaanko seuraavat ohjelmat?
+"Are you sure you want to DELETE THIS SAVED PLAYLIST?"
+    Oletko varma, että haluat POISTAA TÄMÄN TALLENNETUN SOITTOLISTAN?
+"Artist Listing"
+    Artistiluettelo
+"Artists"
+    Artistit
+"Artists Beginning with %s"
+    Artistit, jotka alkavat %s -kirjaimella
+"ASX Stream"
+    ASX virtaus
+"Audio Bitrate"
+    Äänen bittitaajuus
+"Audio for Hearing Impaired"
+    Ääni kuulovammaisille
+"Audio for Visually Impaired"
+    Ääni näkövammaisille
+"Auto Expire"
+    Automaattinen vanheneminen
+"Auto-expire recordings"
+    Tallenteen aut. vanheneminen
+"Auto-flag commercials"
+    Aut. mainosten merkkaus
+"Auto-transcode"
+    Automaattinen jälkikäsittely
+"AVC/H.264"
+    AVC/H.264
+"Avoid poor signal quality"
+    Vältä huonoa signaalia
+"Back"
+    Takaisin
+"Back Tab"
+    Takaisin välilehti
+"Back to the program listing"
+    Takaisin ohjelmalistaukseen
+"Back to the recorded programs"
+    Takaisin tallennettuihin ohjelmiin
+"Back to the recording schedules"
+    Takaisin tallennuksen ajastukseen
+"Backend Logs"
+    Palvelimen Lokitiedostot
+"Backend Status"
+    Palvelimen tila
+"Backspace"
+    Askelpalautin
+"Begin a New Search"
+    Aloita uusi haku
+"brightness"
+    Kirkkaus
+"Browsable"
+    Selattavissa
+"Browse"
+    Selaa
+"Browse = no"
+    Selaus = ei
+"Browse = yes"
+    Selaus = kyllä
+"Browse all"
+    Selaa kaikkia
+"Browse All Albums"
+    Selaa kaikkia albumeja
+"Browse Music"
+    Selaa musiikkia
+"Browse the Music Database"
+    Selaa musiikkitietokantaa
+"By Artist Beginning With"
+    Selaa artisteja, jotka alkavat"
+"By Genre"
+    Lajityypin mukaan
+"Cache_APC"
+"cache_engine"
+"Cache_Memcache"
+"Cache_Memcached"
+"Cache_Null"
+"Cache_SHM"
+"callsign"
+    Kutsumanimi
+"Cancel"
+    Peruuta
+"Cancel this schedule."
+    Peruuta tallennus
+"Cancelled"
+    Peruutettu
+"Caps Lock"
+    Caps Lock
+"Cast"
+    Esiintyjät
+"category"
+    Kategoria
+"Category"
+    Kategoria
+"Category Legend"
+    Kategorioiden Värit/Merkitys
+"CC"
+    Tekstitys
+"Chan. Callsign"
+    Kanavan kutsumanimi
+"Chan. Name"
+    Kanavan nimi
+"Chan. Number"
+    Kanavan numero
+"Channel"
+    Kanava
+"channel"
+    kanava
+"Channel &quot;Jump to&quot;"
+    Kanavahyppy
+"Channel Detail"
+    Kanavatiedot
+"Channel Info"
+    Kanavatiedot
+"Channels"
+    Kanavat
+"channum"
+    Kanava
+"Check for duplicates in"
+    Tarkista kaksoiskappaleet
+"Children's Movies"
+"Choose Genre.."
+    Valitse lajityyppi..
+"Choose Type"
+    Valitse tyyppi
+"Clear the current default session"
+    Tyhjennä nykyinen oletusistunto
+"Click to disable Auto Expire"
+    Klikkaa estääksesi Automaattinen vanheneminen
+"Click to enable Auto Expire"
+    Klikkaa mahdollistaakseski Automaattinen vanhentuminen
+"Click to View Playlist"
+    Klikkaa katsoaksesi soittolistaa
+"Close Captioned priority"
+    Teksitettyjen prioriteetti
+"Closed Captioning"
+    Tekstitykset
+"color"
+"Commands"
+    Komennot
+"Commands:"
+    Komennot:
+"Commercial free"
+"Commercials Flagged"
+    Merkityt mainokset
+"commfree"
+    Mainosvapaa
+"Conflict"
+    Ristiriitaisuudet
+"Conflicts"
+    Ristiriidat
+"Context"
+    Konteksti
+"contrast"
+    Kontrasti
+"Count"
+    Lukumäärä
+"Cover Image"
+    Kansikuva
+"Create a New Playlist"
+    Luo uusi soittolista
+"Create a Random Mix"
+    Luo uusi Satunnainen miksaus
+"Create Schedule"
+    Ajoita tallennus
+"Current MythWeb Template"
+    Nykyinen MythWeb teema
+"Current Recording"
+    Nykyinen tallennus
+"Current recordings"
+    Nykyiset tallennukset
+"Currently Browsing:  $1"
+    Selataan:  $1
+"Currently Recording:  Edit"
+    Tallennetaan nyt - Muokkaa
+"Custom"
+    Mukautettu
+"Custom Schedule"
+    Mukautettu ajastus
+"Custom Search"
+    Mukautettu haku
+"Customize Screens"
+    Mukauta näyttöjä
+"Data"
+    Tieto
+"Database"
+    Tietokanta
+"Database Health"
+    Tietokannan kunto
+"Date"
+    Aika
+"Date Formats"
+    Päivämäärän muoto
+"Deactivated"
+    Pois päältä
+"Deaf Signed"
+    Kuuromerkitty
+"Default"
+    Oletus
+"Default MythVideo View"
+    MythVideon oletusnäkymä
+"Default MythWeb Template"
+    Oletus MythWeb teema
+"Delete"
+    Poista
+"delete"
+    Poista
+"Delete $1"
+    Poista $1
+"Delete + Rerecord"
+    Poisto ja uudelleentallennus
+"Delete and allow rerecord: $1"
+    Poista ja salli uudelleen tallennus: $1
+"Delete and rerecord $1"
+    Poista ja tallenna uudelleen $1
+"Delete Forever"
+    Poista ikuisesti
+"DELETE this Saved Playlist"
+    POISTA tämä tallennettu Soittolista
+"DeleteKey"
+"Depending on the Search type this is where you enter actual main search commands"
+"description"
+    kuvaus
+"Description"
+    Kuvaus
+"Destination"
+    Kohde
+"Details for: $1"
+    Yksityiskohdat $1 :lle
+"Direct Download"
+    Suora lataus
+"Directed by"
+    Ohjaus
+"Director"
+    Ohjaaja
+"Director:"
+    Ohjaaja:
+"Directory Structure"
+    Hakemistorakenne
+"Display"
+    Tulosta
+"Dolby Surround"
+    Dolby Surround
+"Don't Record"
+    Älä tallenna
+"Don't record this program."
+    Älä tallenna ohjelmaa.
+"Done, Unknown Status"
+    Valmis, tuntematon tilanne
+"Down"
+    Alas
+"Download URL override"
+    Lataa URL -ohitin
+"Dup Method"
+    Metodi
+"Duplicate"
+    Kaksoiskappale
+"Duplicate Check method"
+    Kaksoiskapp. tarkistus
+"Duplicates/Ignored"
+    Kaksoiskappaleet/Ohitetut
+"Earlier"
+    Aiemmat
+"Earlier Showing"
+    aiemmat näytännöt
+"Edit"
+    Muokkaa
+"Edit existing group"
+    Muokkaa ryhmää
+"Edit MythWeb and some MythTV settings."
+    Muokkaa MythWeb:in ja MythTV:n asetuksia.
+"Edit settings for: $1"
+    Muokkaa asetuksia: $1
+"Editing "
+    Muokkaa
+"Embed HTTP basic auth user name/password into stream urls"
+    Sisällä HTTP basic auth käyttäjätunnus/salasana virtojen urleihin
+"Enable"
+"Enable Flash Video player for recordings."
+    Salli Flash videotoisto
+"Enable Video Playback"
+    Salli videon toisto
+"End"
+    Lopeta
+"End Late"
+    Lopeta myöhemmin
+"Enter"
+    Syötä
+"Enter a new name for your playlist"
+    Syötä uusi nimi soittolistallesi
+"Enter your search terms"
+    Syötä hakutermit
+"enter your search terms"
+    syötä hakutermit
+"Episode"
+    Jakso
+"Episode Number"
+    Jakson numero
+"Error"
+    Virhe
+"Error contacting server to retrieve metadata."
+"error: playgroup $1 exists"
+    Virhe: soittoryhmä $1 on jo olemassa
+"Errored"
+    Virhe
+"Erroring"
+    Virhe
+"Escape"
+    Poistu
+"Everything"
+    Kaikki
+"Exec. Producer"
+    Tuottaja
+"Extended Check"
+    Pidennetty tarkistus
+"ffmpeg with MP3 support not detected"
+    Ei löydetty ffmpeg MP3 tukea
+"File Size"
+    Tiedostokoko
+"film"
+    elokuva
+"Filters"
+    Filtterit
+"Find Date & Time Options"
+    Etsi pävämäärä- ja aikavalinnat
+"Find Day"
+    Etsi päivä
+"Find other showings of this program"
+    Etsi muita ohjelman lähetyksiä
+"Find showings of this program"
+    Etsi ohjelman lähetyksiä
+"Find Time"
+    Etsi aika
+"Find Time must be of the format:  HH:MM:SS"
+    Etsi aika, täytyy olla muotoa: TT:MM:SS
+"finetune"
+    Hienosäätö
+"Finished"
+    Valmis
+"First recording"
+    Ensimmäinen tallennus
+"First showing"
+"First showing of each episode"
+    Ensimmäisen jakson ensimmäinen lähetys
+"Flag Commercials"
+    Merkitse mainokset
+"FLV Width"
+    FLV Leveys
+"For daily recordings, 5 weekdays if a weekday, or 7 days per week if a weekend day."
+    Päivittäisille tallennuksille, 5 viikonpäivää jos arkipäivä, tai 7 päivää viikossa jos viikonloppu.
+"For more information on the Power Search please go to:"
+    Saadaksesi lisätietoa tehohausta, mene:
+"Force HTTP for streams"
+    Pakota HTTP virtauksille
+"Force HTTP/HTTPS port for streams"
+    Pakota HTTP/HTTPS portti virtauksille
+"Forced"
+    Pakotettu
+"Forget Old"
+    Unohda vanha
+"format help"
+    apua muotoiluun
+"Found %s results for '%s'"
+    Löyti %s tulosta '%s':lle
+"freqid"
+    freqid
+"Friday"
+    Perjantai
+"Frontends"
+    Käyttöliittymät
+"generic_date"
+    %a %b %e, %Y
+"generic_time"
+    %I:%M %p
+"Genre"
+    Lajityyppi
+"genre_colors"
+"Genres"
+    Lajityypit
+"Go"
+    Mene
+"Google"
+    Google
+"Group timeslots every"
+    Ryhmitä aikapaikat joka
+"Guest Starring"
+    Vierailevat tähdet
+"Guide rating"
+    Arvostelu
+"Guide Settings"
+    Ohjelmalistauksen Asetus
+"Handy Predefined Searches"
+    Esitäytetyt Haut
+"handy: overview"
+    Sisältää valmiita edistyneen haun lauseita.
+"has Bookmark"
+    on Kirjainmerkitty
+"Has Cutlist"
+    Sisältää leikkauslistan
+"HD"
+    HD
+"HDTV"
+    Tarkkapiirto
+"Height"
+    Korkeus
+"Hide"
+    Piilota
+"High definition"
+"Home"
+    Koti
+"Hosted by"
+    Isäntänä
+"Hour"
+    Tunti
+"Hour Format"
+    Ajan muoto
+"hue"
+    Värikylläisyys
+"Identifiable episode"
+"Ignore generic shows"
+    Ohita yleiset ohjelmat
+"Ignore scheduled shows"
+    Ohita ajastetut ohjelmat
+"IMDB"
+    Internet MDB
+"IMDBTYPE"
+    IMBDTYPE
+"Inactive"
+    Ei aktiivinen
+"info: activate recording"
+    Pakota tämän ohjelman tallennus
+"info: default recording"
+    Poista kaikki lisämääreet siten että tämä esitys tallennetaan normaalisti.
+"info: dont record"
+    Älä tallenna
+"info: flvplayer"
+    <p>
+    Flash videon toisto on tällä hetkellä konseptinkokeiluvaiheessa ja tulisi
+    pitää <b>ERITTÄIN-</b> kokeilullisena , jonka takia se on oletuksena pois
+    päältä.
+    </p>
+    <p>
+    Ohjelmisto olettaa tällä hetkellä ffmpeg :in olevan asennettu ja käännetty
+    mp3 -tuen kanssa, ja että web-palvelimen käyttäjätunnuksella on pääsy 
+    tallennetiedostoihin. Tämä luultavasti ei toimi Nupplevideo -tiedostojen kanssa.
+    Loppujan lopuksi, mahdollisesti se ei toimi lainkaan (tai jotain pahempaa).
+    </p>
+    <p>
+    Aseta tämä valinta omalla vastuullasi, äläkä odota kovin paljon
+    virallista apua ennen kuin ohjelmisto kehittyy pois kokeiluasteelta
+    </p>
+"info: hidden advanced schedule"
+    Edistyneet valinnat ovat tällä hetkellä piilotettu
+"info: record this"
+    Pakota tämän esityksen tallennus.
+"info:forget old"
+    Unohda ohjelman vanhemmat tallenteet jotta se voidaan tallentaa uudestaan.
+"info:jumppoints"
+    <ul>
+        <li>Hyppypisteet ovat globaalisti päällä. Jos asetat näppäimen hyppypisteelle joka on jo määritelty Näppäinkomennot -osiossa, hyppypisteen määritys astuu voimaan näppäinkomennon sijaan.</li>
+        <li>Välttääksesi ongelmia on suositeltavaa käyttää funktionäppäimiä yhdistettynä alt tai control näppäimeen (esim. ctrl-F1).</li>
+        <li>Muutokset näppäinkomentoihin/hyppypisteisiin vaatii niihin liittyvän käyttöliittymän uudelleenkäynnistyksen. Tämä rajoite voi poistua tulevissa versioissa.</li>
+       </ul>
+"info:never record"
+    Luo väärennös vanhemmasta tallennuksesta, jotta tätä esitystä ei tallenneta.
+"Insert"
+    Syötä
+"Internet Reference #"
+"Jump"
+    Hyppy
+"Jump Points"
+    Hyppypisteet
+"Jump to"
+    Hyppää
+"Jump To"
+    Hyppää
+"JumpPoints Editor"
+    Hyppäämisasetukset
+"Key Bindings"
+    Näppäinkomennot
+"Key bindings"
+    Näppäinkomennot
+"Key Controls"
+    Näppäinkomennot
+"Keybindings Editor"
+    Näppäinkomentojen muokkaus
+"Keyword"
+    Avainsana
+"Keyword Search"
+    Haku avainsanalla
+"Keyword Search:"
+    Haku avainsanalla:
+"Keywords"
+    Avainsanat
+"Language"
+    Kieli
+"Last Recorded"
+    Viimeksi tallennettu
+"Last recording"
+    Viimeisin tallennus
+"Last showing of each episode"
+    Kunkin jakson viimeisin lähetys
+"Later"
+    Myöhemmin
+"left"
+    jäljellä
+"Left"
+    Vasen
+"leftl"
+    leftl
+"length"
+    pituus
+"Length"
+    Pituus
+"Length (min)"
+    Pituus (min)
+"Length in minutes"
+    Kesto minuuteissa
+"Listing &quot;Jump to&quot;"
+    Listauksen hyppy
+"Listing Time Key"
+    Listauksen aikanäppäin
+"Listings"
+    Kanavaluettelo
+"Load"
+    Lataa
+"Load a Saved Playlist"
+    Lataa tallennettu Soittolista
+"Load Playlist"
+    Lataa Soittolista
+"Load Saved Playlists"
+    Lataa tallennetut Soittolistat
+"Load this Saved Playlist"
+    Lataa tämä tallennettu soittolista
+"LOADING"
+    LATAA
+"Local Server Statistics"
+    Paikallinen serveristatistiikka
+"LOCKDOWN_NOTICE"
+"LOCKDOWN_NOTICE_2"
+"Logs"
+    Lokitiedostot
+"Look up Metadata"
+"Low Space"
+    Alhainen kovalevytila
+"Manual"
+    Manuaalinen
+"Match related callsigns"
+"matches"
+    vastaavuudet
+"Max star rating for movies"
+    Maksimi tähtiluokitus elokuville
+"Metadata Home Page"
+"Metadata Lookup"
+"Metadata Lookup Error"
+"minutes"
+    minuuttia
+"Missing Cover"
+    Puuttuva kansi
+"Modify priority by star rating (0.0 to 1.0 for movies only)"
+    Muokkaa prioriteettiä tähtien määrällä (0.0 - 1.0 vain elokuville)
+"Modify priority for a station on an input"
+    Muokkaa kanavan prioriteettiä per sisääntulo (kortti)
+"Modify priority for all inputs on a card"
+    Muokkaa kortin kaikkien kanavan prioriteettiä
+"Modify priority for an input (Input priority)"
+    Muokkaa kortin prioriteettiä (Sisääntulo prioriteetti)
+"Modify priority for every card on a host"
+    Muokkaa palvelimen kaikkien korttien prioriteettia
+"Modify unidentified episodes"
+    Muokkaa tunnistamattomia jaksoja
+"Monday"
+    Maanantai
+"Mono"
+    Mono
+"More"
+    Lisää
+"more"
+    lisää
+"Move Item Down in Playlist"
+    Siirrä kohde alaspäin soittolistassa
+"Move Item Up in Playlist"
+    Siirrä kohde ylöspäin Soittolistassa
+"movie"
+    elokuva
+"Movies"
+    Elokuvat
+"Movies, 3&frac12; Stars or more"
+    Elokuvat, 3&frac12; Tähteä tai enemmän
+"Movies, Stinkers (2 Stars or less)"
+    Elokuvat, Surkeat (2 tähteaä tai vähemmän)
+"Music"
+    Musiikki
+"Music Specials"
+    Musiikki erikoiset
+"My Session"
+    Oma istunto
+"MythMusic on the web."
+    MythMusic netissä.
+"MythMusic_Prefixes_To_Ignore"
+"MythTV"
+    MythTV
+"MythTV Status"
+    MythTV:n tila
+"MythVideo Artwork Dir"
+    MythVideo taidekansio
+"MythVideo Dir"
+    MythVideo kansio
+"MythVideo on the web."
+    MythVideo netissä.
+"mythvideo.db_folder_view"
+    mythvideo.db_folder_view
+"mythvideo.ImageCacheSize"
+    mythvideo.ImageCacheSize
+"mythvideo.sort_ignores_case"
+    mythvideo.sort_ignores_case
+"MythWeb"
+    MythWeb
+"MythWeb Defaults"
+    MythWeb oletukset
+"MythWeb Global Defaults"
+    MythWeb yleiset oletukset
+"MythWeb Locked"
+    MythWeb lukittu
+"MythWeb Session"
+    MythWeb istunto
+"MythWeb Skin"
+    MythWebin kuoret
+"MythWeb Template"
+    MythWeb teema
+"MythWeb Weather."
+    MythWeb Sääennuste.
+"Name"
+    Nimi
+"name"
+    Nimi
+"Narrow Your Search"
+    Kavenna hakuasi
+"Never Record"
+    Älä tallenna koskaan
+"New"
+    Uusi
+"New episode"
+"New episodes only"
+    Vain uudet jaksot
+"New Group"
+    Uusi ryhmä
+"New Search"
+    Uusi haku
+"New Titles, Premieres"
+    Uudet nimikkeet, ensi-illat
+"No"
+    ei
+"NO DATA"
+    EI DATAA
+"No Frontends allow remote control."
+    Yksikään käyttöliittymä ei salli etäkäyttöä
+"No Genre"
+    Ei lajia
+"No matches found"
+    Ei vastaavuuksia
+"No matching programs found."
+    Ei vastaavia ohjelmia.
+"No metadata results found."
+"No Public Playlists"
+    Ei yleisiä Soittolistoja
+"No recording schedules have been defined."
+    Ajoituksia ei määritelty.
+"No TV configured!"
+"No videos"
+"No. of recordings to keep"
+    Säilytettävien tallenteiden lkm
+"NO_TV_CONFIGURED_NOTICE_1"
+"NO_TV_CONFIGURED_NOTICE_2"
+"Non-Music Specials"
+    Ei-musiikilliset erikoiset
+"Non-Series HDTV"
+    Ei-sarja HDTV
+"None"
+    Ei mikään
+"Not Listed"
+    Ei listattu
+"Notes"
+    Viesti
+"Number of episodes"
+    Jaksojen lukumäärä
+"Number of shows"
+    Ohjelmien lukumäärä
+"Number of Songs"
+    Kappaleiden lukumäärä
+"Number of timeslots"
+    Aikalokeroiden lukumäärä
+"Off"
+    Pois päältä
+"OK"
+"Only a certain channel number"
+    Vain tietty kanavanumero
+"Only channels marked as commercial free"
+    Vain mainosvapaaksi merkityt kanavat
+"Only channels that carry a specific station"
+    Vain tietyn aseman kanavat
+"Only display favorite channels"
+"Only match commercial-free channels"
+    Vain mainoksettomat kanavat
+"Only match HD programs"
+    Vain HD -ohjelmat
+"Only match non-recorded shows"
+    Vain tallentamattomat ohjelmat
+"Only New Episodes"
+    Vain uudet jaksot
+"Only one specific channel ID (Channel priority)"
+    Vain yksi tietty kanava ID (Kanavaprioriteetti)
+"Only show distinct shows"
+    Näytä vain erilliset ohjelmat
+"Only shows marked as HDTV"
+    Näytä vain HDTV ohjelmat
+"Optimize Tables"
+    Optimoi taulukot
+"or"
+    tai
+"Original Airdate"
+    Alkuperäinen julkaisuvuosi
+"Originally aired between"
+    Alunperin esitetty välillä
+"Override"
+    Ohita
+"Page Down"
+    Sivu alas
+"Page recorded programs"
+    Sivuta tallennetut ohjelmat
+"Page Up"
+    Sivu ylös
+"Parental Level"
+    Ikäraja
+"Part $1 of $2"
+    Jakso $1/$2
+"Past Month"
+    Viime kuu
+"Past Week"
+    Viime viikko
+"Past Year"
+    Viime vuosi
+"Paused"
+    Tauotettu
+"Pending"
+    Odottaa
+"People"
+    Ihmiset
+"People Search"
+    Haku nimellä
+"People Search:"
+    Hae ihmisiä:
+"Percent of time spent recording"
+    Tallennukseen käytetty aika prosentteina
+"Play"
+    Toista
+"Play Recording on Frontend"
+    Toista tallenne käyttöliittymässä
+"Play this Album Now"
+    Toista tämä albumi nyt
+"Play This Playlist Now"
+    Toista tämä Soittolista nyt
+"Play this Playlist Now"
+    Toista tämä Noittolista nyt
+"Play this Song Now"
+    Toista tämä kappale nyt
+"Play Time"
+    Toistoaika
+"Playback Group"
+    Toistoryhmät
+"Playback Groups"
+    Toistoryhmät
+"Played %s times"
+    Toistettu %s kertaa
+"Played once"
+    Toistettu kerran
+"Playlist"
+    Soittolista
+"Playlist Info"
+    Soittolistan tiedot
+"Playlist is empty"
+    Soittolista on tyhjä
+"Playlist Items"
+    Soittolistan kohteet
+"Playlist Name"
+    Soittolistan nimi
+"Playlist renamed successfully"
+    Soittolistan nimi vaihdettu onnistuneesti
+"Playlist saved successfully"
+    Soittolista tallennettu onnistuneesti
+"Playlist: %s"
+    Soittolista: %s
+"Playlists"
+    Soittolistat
+"Please enter an IMDB number or a title to do another search"
+"Please rate more shows to get more results"
+"Please wait for the pending AJAX request"
+"Plot"
+    Juoni
+"Plot:"
+    Juoni:
+"Pop-out player"
+    Soitin erilliseen ikkunaan
+"Possible conflicts"
+    Mahdolliset ristiriidat
+"Possible conflicts with this show"
+    Saattaa olla ristiriidassa tämän ohjelman kanssa
+"Post Processing"
+"Power"
+    Virta
+"Power Search"
+    Tehokas Haku
+"Power Search:"
+    Tehokas Haku:
+"Prefer a host for a storage group"
+    Suosi palvelinta tallennusryhmän mukaan
+"Prefer a host for live sports with overtime"
+    Suosi palvelinta live urheilulle joka on jatkoajalla
+"Prefer Channum"
+    Suosi kanavanumeroa
+"Prefer movies when shown at night"
+    Suosi elokuvia jotka lähetetään yöllä
+"prefer_channum"
+    Suosi kanavan numeroa lempinimen sijaan:
+"Preferred Input"
+    Suosittu syöttö
+"Presented by"
+    Esittää
+"Previous Recording"
+    Aiempi tallennus
+"Previous recordings"
+    Aiemmat tallennukset
+"Prime time"
+"Priority for a category"
+    Prioriteetti luokalle
+"Priority for a category type"
+    Prioriteetti kategorialle
+"Priority for all matching titles"
+    Prioriteetti kaikille osuville nimikkeille
+"Priority for any show with End Late time"
+    Prioriteetti kaikille myöhäiseen aikaan loppuville ohjelmille
+"Priority for HD shows under two hours"
+    Prioriteetti alle kaksituntisille HD ohjelmille
+"Priority for movies by the year of release"
+    Prioriteetti elokuville julkaisuvuoden mukaan
+"Priority when shown once"
+    Prioriteetti kun esitetty kerran
+"Produced by"
+    Tuottajana
+"Profile"
+    Profiili
+"profile"
+    profiili
+"Program Categories"
+    Ohjelmakategoriat
+"Program Detail"
+    Ohjelman Lisätietoja
+"Program ID"
+    Ohjelman tunnus
+"Program Listing"
+    Ohjelmalistaus
+"Program Type"
+    Ohjelman tyyppi
+"Protocol"
+    Protokolla
+"Queue a job"
+    Aseta työ jonoon
+"Queued"
+    Jonotettu
+"Queued jobs"
+    Työt jonossa
+"Random"
+    Satunnainen
+"Random Items"
+    Satunnaiset kohteet
+"Random Mix Maker"
+    Satunnainen miksaaja
+"Random Type"
+    Satunnainen tyyppi
+"Rating"
+    Arvostelu
+"Rating:"
+    Arvostelu
+"Recently Added Albums"
+    Äskettäin lisätyt albumit
+"Recently completed jobs"
+    Juuri valmistuneet työt
+"Recently Played Songs"
+    Äskettäin soitetut kappaleet
+"recgroup"
+"Recommend Videos"
+"Recommended"
+"Recommended Programs"
+"Record Date"
+    Tallennuspäivämäärä
+"Record Length"
+    Tallennuksen pituus
+"Record new and expire old"
+    Tallenna uusi ja poista vanha
+"Record This"
+    Tallenna tämä
+"Recorded"
+    Tallennettu
+"Recorded Programs"
+    Tallennetut ohjelmat
+"Recording Details"
+    Tallennuksen yksityiskohdat
+"Recording Group"
+    Tallennusryhmä
+"Recording Options"
+    Tallennusvalinnat
+"Recording Options Help"
+    Tallennusvalintojen ohje
+"Recording Priority"
+    Tallennuksen prioriteetti
+"Recording Profile"
+    Tallennusprofiili
+"Recording Schedules"
+    Tulevat tallennukset
+"Recording Statistics"
+    Tallennuksen statistiikat
+"recpriority"
+    Tallennusprioriteetti
+"recstatus: cancelled"
+    Ajoitettu tallennus oli manuaalisesti peruttu.
+"recstatus: conflict"
+    Toinen korkeamman prioriteetin ohjelma tallennetaan tämän sijasta.
+"recstatus: currentrecording"
+    Jakso on aikaisemmin tallennettu ja katsottavissa.
+"recstatus: deleted"
+    Jaksoa tallennettiin, mutta tallenne poistettiin sen aikana.
+"recstatus: earliershowing"
+    Jakso tullaan tallentamaan aikaisemmin.
+"recstatus: force_record"
+    Ohjelman tallennus ajoitettiin käsin tälle ajankohdalle.
+"recstatus: inactive"
+    Tallennus on poistettu käytöstä tälle ohjelmalle.
+"recstatus: latershowing"
+    Jakso tullaan tallentamaan myöhemmin.
+"recstatus: lowdiskspace"
+    Levytilaa ei ollut tarpeeksi tämän ohjelman tallentamiseen.
+"recstatus: manualoverride"
+    Ohjelman tallennus peruttiin manuaalisesti.
+"recstatus: neverrecord"
+    Ohjelmaa ei tulla koskaan tallentamaan
+"recstatus: notlisted"
+    Ohjelmaa ei löydetty oppaasta
+"recstatus: previousrecording"
+    Jakso on tallennettu aikaisemmin, sen mukaisesti mitä ajastuksen kaksoiskappaleiden asetukset määräävät.
+"recstatus: recorded"
+    Ohjelma on tallennettu.
+"recstatus: recording"
+    Ohjelmaa tallennetaan.
+"recstatus: repeat"
+    Ohjelma on uudelleenesitys, joten sitä ei tallenneta.
+"recstatus: stopped"
+    Ohjelman tallennus lopetettiin ennen sen loppumista.
+"recstatus: toomanyrecordings"
+    Liian monta tallennusta tälle ohjelmalle.
+"recstatus: tunerbusy"
+    Viritinkortti oli käytössä tämän ohjelman aikana.
+"recstatus: unknown"
+    Ohjelman tilaa ei voida määritellä.
+"recstatus: willrecord"
+    Ohjelma tullaan tallentamaan.
+"rectype-long: always"
+    Tallenna mihin aikaan tahansa millä kanavalla tahansa.
+"rectype-long: daily"
+    Tallenna ohjelma tähän aikaan joka päivä.
+"rectype-long: dontrec"
+    Älä tallenna tätä lähetystä.
+"rectype-long: finddaily"
+    Etsi yksi tallennus tästä lähetyksestä joka päivä.
+"rectype-long: findone"
+    Etsi yksi tallennus tästä lähetyksestä.
+"rectype-long: findweekly"
+    Etsi yksi tallennus tästä lähetyksestä joka viikko.
+"rectype-long: once"
+    Tallenna vain tämä lähetys.
+"rectype-long: override"
+    Tallenna tämä tietty lähetys.
+"rectype-long: weekly"
+    Tallenna ohjelma tähän aikaan joka viikko.
+"rectype: always"
+    Aina
+"rectype: daily"
+    Päivittäin
+"rectype: dontrec"
+    Ei tallennusta
+"rectype: findone"
+    Etsi yksi
+"rectype: once"
+    Kerran
+"rectype: override"
+    Syrjäytys (tallenna)
+"rectype: weekly"
+    Viikottain
+"regex: articles"
+    An?|The
+"Remote"
+    Etäkäyttö
+"Remove Item from Playlist"
+    Poista kohde Soittolistalta
+"Repair Tables"
+    Korjaa taulukot
+"Repeat"
+    Tee uudelleen
+"Reset"
+    Alustus
+"Reset template and skin to defaults"
+    Resetoi teema ja skin oletuksiin
+"Retry"
+    Yritä uudelleen
+"Return to Statistics Page"
+    Palaa Statistiikat -sivulle
+"right"
+    oikein
+"Right"
+    oikea
+"Root Directory"
+    Juurihakemisto
+"Rows to show between timeslot info"
+    Näytettävien rivien lkumuäärä aikalokerotietojen välissä
+"Running"
+    Käynnissä
+"Saturday"
+    Lauantai
+"Save"
+    Tallenna?
+"Save or Rename the Current Playlist"
+    Tallenna tai nimea uudelleen nykyinnen Soittolista
+"Save Schedule"
+    Tallenna ajoitus
+"Save/Rename"
+    Tallenna/Nimeä uudelleen
+"Save/Rename Playlist"
+    Tallenna/Nimeä uudelleen soittolista
+"Saved Playlist Successfully Deleted"
+    Tallennettu Soittolista poistettiin onnistuneesti
+"Saved Playlists"
+    Tallennetut Soittolistat
+"Scan Collection"
+    Tutki kokoelma
+"Schedule"
+    Ajoitus
+"Schedule Manually"
+    Ajoita manuaalisesti
+"Schedule normally."
+    Ajoita normaalisti
+"Schedule Options"
+    Ajastusvalinnat
+"Schedule Override"
+    Ajoituksen syrjäytys
+"Schedule via $1."
+    Ajoita $1 kautta
+"Scheduled"
+    Ajoitettu
+"Scheduled Popup"
+    Ajoitusten ikkunointi
+"Science Fiction Movies"
+    Tieteiselokuvat
+"Search"
+    Hae
+"Search $1"
+    Hae $1
+"Search all program keywords for a match against search phrase below"
+"Search all program titles containing the Title text below"
+"Search for all actors contained in a recording for a match against search phrase below"
+"Search for:  $1"
+    Hae:  $1
+"Search Music"
+    Hae musiikkia
+"Search Phrase"
+    Hakulause
+"Search Phrase:"
+"Search Results"
+    Haun tulokset
+"Search the Music Database"
+    Hae musiikkitietokannasta
+"Search Type"
+    Haun tyyppi
+"Search Type Help"
+"Search will perform complex SQL queries against the database as per the search phrase below"
+"Searches"
+    Haut
+"Searches will be performed against the title of all TV shows"
+"Seas/Ep"
+"Season"
+"Select the correct show"
+"Server returned invalid data when attempting to retrieve metadata."
+"Server Statistics"
+    Serverin statistiikkaa
+"Set Host"
+    Aseta palvelin
+"Settings"
+    Asetukset
+"settings"
+    Asetukset
+"Settings Table"
+    Asetustaulukko
+"settings/stream: protocol"
+    Monet mediatoistimet eivät pysty toistamaan tiedostoja, joita<br>
+    virrataan http -palvelimilta. Jos ajat MythWebiä http:n kautta voit<br>
+    MYÖS haluta tehdä ei-SSL -asennuksen ja valita tämän laatikon, mikä<br> 
+    pakotta kaikki virtaukset ladattavaksi http:n kautta.
+"settings: notice"
+    Varoitus: Näiden asetusten muokkaus voi haitata MythTV:n toimintaa.
+"Shift"
+    Shift
+"Show"
+    Näytä
+"Show group"
+    Näytä ryhmä
+"Show pixmaps"
+    Näytä bittikartat
+"Show recordings"
+    Näytä tallennukset
+"show_channel_icons"
+    Näytä kanavan ikonit:
+"show_popup_info"
+    Näytä ohjelmatietoja ponnahdusikkunassa:
+"show_video_covers"
+    Näytä videon kannet videoikkunassa:
+"Showing all programs from the $1 group."
+    Näytetään kaikki ohjelmat ryhmästä $1.
+"Showing all programs."
+    Näytetään kaikki ohjelmat.
+"Showings between"
+    Ohjelmat välillä
+"Shows"
+    Ohjelmat
+"Skip Ahead"
+    Hyppää eteenpäin
+"Skip Back"
+    Hyppää taaksepäin
+"Songs"
+    Kappaleet
+"Songs for Genre"
+    Kappaleet lajityypille
+"Songs Played"
+    Soitetut kappaleet
+"Songs Rated"
+    Arvostellut kappaleet
+"Sorry, but you cannot add this playlist as it would create a circular dependency."
+"sortby_channum"
+    Lajittele kanavaluettelo kanvanumeron mukaan (valittu) tai lempinimen mukaan (ei valittu):
+"sourceid"
+    lähdetunnus
+"Space"
+    Välilyönti
+"Special Searches"
+    Edistynyt haku
+"Star character"
+    Tähtihahmo
+"Start Date"
+    Päivämäärä
+"Start Early"
+    Aloita aiemmin
+"Start Time"
+    Aloitusaika
+"Starting"
+    Aloitukset
+"Statistics"
+    Tilastot
+"Stats"
+    Tila
+"Status"
+    Järjestelmän tila
+"Status Bar"
+    Tilarivi
+"Stereo"
+    Stereo
+"Still Recording: Edit"
+    Tallentaa yhä - Muokkaa
+"Stopping"
+    Pysättää
+"Storage Group"
+    Tallennusjoukko
+"Store the current session as the default"
+"Streaming"
+    Virtaa
+"Sub and Desc (Empty matches)"
+    Kuvaus ja nimike (Ei vastaavuuksia)
+"Submit"
+"Submit Search"
+    Anna haku
+"Subtitle"
+    Jakson nimi
+"Subtitle and Description"
+    Tekstitykset ja kuvaus
+"Subtitle then Description"
+    Ensin tekstitykset, sitten kuvaus
+"Subtitled"
+    Tekstitetty
+"Subtitles Available"
+    Tekstitykset saatavilla
+"Sunday"
+    Sunnuntai
+"Surround Sound"
+    Surround ääni
+"Tab"
+    Välilehti
+"Television"
+"The requested recording schedule has been deleted."
+    Ajoitettu tallennus on poistettu
+"themoviedb"
+"There are no items in this Playlist!"
+    Tässä soittolistassa ei ole kohteita!
+"There was a problem saving your playlist"
+    Soittolistasi tallennuksessa ilmeni ongelma
+"TheTVDB"
+"This channel"
+"This day and time"
+"This episode"
+"This playlist is already loaded!"
+    Tämä Soittolista on jo ladattu!
+"This series"
+"This time"
+"This will overwrite your current, unsaved playlist. Are you sure you want to continue?"
+    Tämä tallentaa nykyisen, tallentamattoman Soittolistasi. Haluatko varmasti jatkaa?
+"Thursday"
+    Torstai
+"Time"
+    Aika
+"Time Span"
+    Aikaväli
+"Time Stretch"
+    Ajan säätö
+"Timeslot size"
+    Aikalokeron koko
+"title"
+    Nimike
+"Title"
+    Nimike
+"Title Match"
+    Nimike vastaavuus
+"Title search"
+    Nimikkeen haku
+"Title Search"
+    Haku Nimikkeellä
+"Title Search:"
+"Title:"
+"Toggle Interactive Mode"
+"Too Many"
+    Liian monta
+"Top $1"
+    Top $1
+"Top Played Songs"
+    Eniten soitetut kappaleet
+"Top Rated Songs"
+    Parhaiten arvostellut kappaleet
+"Total Length"
+    Kokonaispituus
+"Total Recorded"
+    Tallennettu yhteensä
+"Total Running Time"
+    Kokonaissoittoaika
+"Total Time"
+    Kokonaisaika
+"Total Time:  %s"
+    Kokonaisaika:  %s
+"Track #%s from the album '%s'"
+    Kappale #%s albumilta '%s'
+"Transcode"
+    Jälkikäsittely
+"Transcoded"
+"transcoder"
+    jälkikäsittelijä
+"Transcoder"
+    Jälkikäsittely
+"Tuesday"
+    Tiistai
+"Tuner Busy"
+    Viritn on kiireinen
+"TV"
+    Televisio
+"TV functions, including recorded programs."
+    Tallennetut ohjelmat ja muut TV-asetukset.
+"TV.com"
+    TV.com
+"type"
+    tyyppi
+"Type"
+    Tallennustapa
+"Uncategorized"
+"Undelete"
+    Poista poisto
+"Undelete: $1"
+    Poista $1 poisto
+"Unknown"
+    Tuntematon
+"Unknown action"
+"Unknown frontend"
+"Unknown Program."
+    Tuntematon ohjelma.
+"Unknown Recording Schedule."
+    Tuntematon ajoitus.
+"Up"
+    Ylös
+"Upcoming Recordings"
+    Tulevat tallennukset
+"Update"
+    Päivitä
+"Update Recording Settings"
+    Päivitä tallennusasetukset
+"Use callsign"
+    Käytä lempinimeä
+"Use date/time"
+    Käytä päivämäärää/aikaa
+"useonairguide"
+    Käytä Ohjelmavirran opasta
+"User Rating"
+"Value"
+    Arvo
+"Video"
+    Videot
+"Video Bitrate"
+    Videon bittitaajuus
+"Video Playback"
+    Videon toisto
+"Video: Error: IMDB"
+    Virhe: IMBD
+"Video: Error: IMDB: Not Found"
+    Virhe: IMBD ei löydettäy
+"Video: Error: Missing ID"
+    Virhe: Tunnus puuttuu
+"Video: IMDB: No Matches"
+    IMBD: Ei vastaavuuksia
+"Video: IMDB: Window Title"
+    IMBD: Otsikkoikkuna
+"Video: Warning: Artwork"
+    Varoitus: Kuvitusta
+"Video: Warning: Artwork: Download"
+    Varoitus: Lataa kuvitus
+"Video: Warning: fopen"
+    Varoitus: fopen
+"VideoAggressivePC"
+"VideoArtworkDir"
+"VideoBrowserNoDB"
+"VideoDefaultParentalLevel"
+"VideoDefaultPlayer"
+"videofilters"
+    Videosuodattimet
+"VideoGalleryAspectRatio"
+"VideoGalleryColsPerPage"
+"VideoGalleryNoDB"
+"VideoGalleryRowsPerPage"
+"VideoGallerySubtitle"
+"VideoListUnknownFiletypes"
+"VideoNewBrowsable"
+"Videos"
+    Videot
+"VideoStartupDir"
+"VideoTreeLoadMetaData"
+"VideoTreeNoDB"
+"View"
+"View Albums by %s"
+    Katso %s:n albumit
+"View Details of %s"
+    Katso %s yksityiskohdat
+"View Saved Playlist"
+    Katso tallennetut Soittolistat
+"View Server Statistics"
+    Katso palvelimen tilastoja
+"visible"
+    Näkyvä
+"Visit $1"
+    Vieraile $1
+"Watched"
+    Katsottu
+"Weather"
+    Säätila
+"web_video_imdb_path"
+"web_video_imdb_type"
+"web_video_thumbnail_height"
+"web_video_thumbnail_width"
+"Wednesday"
+    Keskiviikko
+"welcome: backend_log"
+    tervetuloa: lokit
+"welcome: music"
+    Selaa musiikkikokoelmaasi.
+"welcome: remote"
+    Käytä MythTV:tä etäkoneelta MythWebin kautta.
+"welcome: settings"
+    Muokkaa MythWebin ja joitakin MythTV:n asetuksia.
+"welcome: stats"
+    MythTV:n tallennusstatistiikat.
+"welcome: status"
+    Näyttää järjestelmän tila -sivun.
+"welcome: tv"
+    Katso mitä televisiosta tulee, ajasta tallennuksia ja hallitse jo tallennettuja
+    esityksiä. Valitse seuraavista:
+"welcome: video"
+    Hallitse videokokoelmaasi.
+"What else is on at this time?"
+    Mitä muuta on tähän aikaan?
+"Widescreen"
+    Laajakuva
+"Width"
+    Leveys
+"Will Record"
+    Tulee tallentamaan
+"Written by"
+    Käsikirjoittaja
+"xmltvid"
+    xmltvid
+"Year"
+    Vuosi
+"Year:"
+"Yes"
+    Kyllä
+"Yesterday"
+    Eilen
+"You are missing a php extension for mysql interaction. Please install php-mysqli or similar"
+    Sinulta puuttuu php lisäke mysql toimintoihin. Ele hyvä ja asenna php-mysql tai vastaava
+"You must be running at least php 5.3 to use this program."
+    Sinulla täytyy olla käytössä vähintään php 5.3 käyttääksesi tätä ohjelmaa.

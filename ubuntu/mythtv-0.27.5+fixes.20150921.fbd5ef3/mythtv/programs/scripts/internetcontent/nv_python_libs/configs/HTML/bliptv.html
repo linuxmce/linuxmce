@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+    <head>
+        <style type="text/css">
+            body {
+                padding: 0;
+                margin: 0;
+                overflow-x: hidden;
+                overflow-y: hidden;
+            }
+        </style>
+
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+        <script type="text/javascript">
+            /* gup function by R.D. Vaughan */
+            function gup( name )
+            {
+                name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+                var regexS = "[\\?&]"+name+"=([^&#]*)";
+                var regex = new RegExp( regexS );
+                var results = regex.exec( window.location.href );
+                if( results == null )
+                    return "";
+                else
+                    return results[1];
+            }
+
+            var myth_player = null;
+            var video_id = gup( 'videocode' );
+            var url = 'http://blip.tv/play/';
+            var final = url.concat(video_id);
+            var curTime = 0;
+            var curVolume = 1;
+            var curState = 2;
+
+            var params = {
+                allowScriptAccess: "always",
+                allowfullscreen: 'true',
+                wmode: 'opaque'
+            };
+
+            var flashvars = {
+                'enablejs': 'true',
+                'javascriptid': 'mybtvplayer',
+                'autostart': 'true'
+                'showsharebutton': 'false',
+                'showinfo': 'false',
+                'showfsbutton': 'false',
+                'showhd': 'false',
+                'brandname': 'MythTV',
+            };
+
+            var atts = { id: "mybtvplayer" };
+
+            swfobject.embedSWF(final,
+                               "myth_player", window.innerWidth, window.innerHeight, "8", null, flashvars, params, atts, onPlayerReady);
+
+            function onPlayerReady() {
+                myth_player = document.getElementById("mybtvplayer");
+            }
+
+            function getUpdate(changeType, param1, param2){
+                switch(changeType) {
+                    case "time":
+                        curTime = param1;
+                        break;
+                    case "volume":
+                        break;
+                    case "state":
+                        curState = param1;
+                        break;
+                }
+            }
+
+            function play() {
+                if (myth_player) {
+                    if (curState == 0) {
+                        myth_player.sendEvent("play");
+                        curState = 2;
+                    }
+                    else if (curState == 2) {
+                        myth_player.sendEvent("pause");
+                        curState = 0;
+                    }
+                }
+            }
+
+            function seek(amount) {
+                if (myth_player) {
+                    curTime += amount;
+                    myth_player.sendEvent("seek", curTime);
+                }
+            }
+
+            function adjustVolume(amount) {
+                if (myth_player) {
+                    curVolume += (amount / 30);
+                    if (curVolume > 1)
+                        curVolume = 1;
+                    if (curVolume < 0)
+                        curVolume = 0;
+                    myth_player.sendEvent("volume", curVolume);
+                }
+            }
+
+            window.onresize = function() {
+                document.body.style.width = window.innerWidth;
+                document.body.style.height = window.innerHeight;
+                if (myth_player) {
+                    //             myth_player.setSize(window.innerWidth, window.innerHeight);
+                    document.getElementById("mybtvplayer").width = window.innerWidth;
+                    document.getElementById("mybtvplayer").height = window.innerHeight;
+                }
+            };
+        </script>
+    </head>
+    <body>
+        <div id="myth_player"/>
+    </body>
+</html>

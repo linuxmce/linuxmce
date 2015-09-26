@@ -1,0 +1,2232 @@
+<?xml version="1.0"?>
+
+<sites>
+
+<category name="Arts"> 
+
+    <item> 
+        <title>BBC News - Entertainment</title> 
+        <url>http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml</url> 
+    </item> 
+
+    <item> 
+        <title>Bureau 42</title> 
+        <url>http://www.bureau42.com/rdf/</url> 
+        <ico>http://www.bureau42.com/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>eFilmCritic</title> 
+        <url>http://efilmcritic.com/fo.rdf</url> 
+        <ico>http://efilmcritic.com/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Reuters Entertainment</title> 
+        <url>http://feeds.reuters.com/reuters/Entertainment/</url> 
+        <ico>http://www.reuters.com/favicon.ico</ico> 
+    </item>
+
+    <item> 
+        <title>Scotsman.com Entertainment News</title> 
+        <url>http://news.scotsman.com/getFeed.aspx?Format=rss&amp;sectionid=7010</url> 
+        <ico>http://www.scotsman.com/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Yahoo News Entertainment</title> 
+        <url>http://rss.news.yahoo.com/rss/entertainment</url> 
+    </item> 
+
+    <item>
+        <title>Die Zeit - Kultur (DE)</title>
+        <url>http://newsfeed.zeit.de/kultur/index</url>
+        <ico>http://www.zeit.de/favicon.ico</ico>
+    </item>
+
+</category> 
+
+<category name="Business"> 
+
+    <item> 
+        <title>BBC News - Business</title> 
+        <url>http://feeds.bbci.co.uk/news/business/rss.xml</url> 
+    </item> 
+
+    <item> 
+        <title>Reuters Business</title> 
+        <url>http://feeds.reuters.com/reuters/businessNews/</url> 
+        <ico>http://www.reuters.com/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Internet.com Business</title> 
+        <url>http://headlines.internet.com/internetnews/bus-news/news.rss</url> 
+    </item> 
+
+    <item> 
+        <title>Topix: Business</title> 
+        <url>http://www.topix.net/rss/business</url> 
+        <ico>http://rss.topix.net/favicon.ico</ico> 
+    </item> 
+
+    <item>
+        <title>Handelsblatt.com (DE)</title>
+        <url>http://www.handelsblatt.com/rss/hb.xml</url>
+        <ico>http://www.handelsblatt.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>FT Deutschland - Unternehmen (DE)</title>
+        <url>http://www.ftd.de/static/container/rss/ftd-rss-300.rdf</url>
+        <ico>http://www.ftd.de/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>FT Deutschland - Finanzen (DE)</title>
+        <url>http://www.ftd.de/static/container/rss/ftd-rss2-500.rdf</url>
+        <ico>http://www.ftd.de/favicon.ico</ico>
+    </item>
+
+</category> 
+
+<category name="Computers"> 
+
+    <item> 
+        <title>2CPU.com</title> 
+        <url>http://www.2cpu.com/news.rdf</url> 
+    </item> 
+
+    <item> 
+        <title>Arstechnica</title> 
+        <url>http://feeds.arstechnica.com/arstechnica/BAaf</url> 
+        <ico>http://arstechnica.com/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>BBC News - Technology</title> 
+        <url>http://feeds.bbci.co.uk/news/technology/rss.xml</url> 
+    </item> 
+
+    <item> 
+        <title>Daemon News</title> 
+        <url>http://www.daemonnews.org/rss.php</url> 
+    </item> 
+
+    <item> 
+        <title>Debian Security Advisories</title> 
+        <url>http://www.debian.org/security/dsa-long.rdf</url> 
+        <ico>http://www.debian.org/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>desktopian.org</title> 
+        <url>http://www.desktopian.org/includes/headlines.xml</url> 
+        <ico>http://www.desktopian.org/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Digg - Technology</title> 
+        <url>http://www.digg.com/rss/containertechnology.xml</url> 
+    </item> 
+
+    <item> 
+        <title>Fedora Weekly News</title> 
+        <url>http://fedora-tchung.blogspot.com/feeds/posts/default</url> 
+    </item> 
+
+    <item> 
+        <title>FreeBSD Project News</title> 
+        <url>http://www.freebsd.org/news/news.rdf</url> 
+        <ico>http://www.freebsd.org/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Freshmeat</title> 
+        <url>http://rss.freshmeat.net/freshmeat/feeds/fm-releases-global</url> 
+        <ico>http://freshmeat.net/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>FreshPorts - the place for ports</title> 
+        <url>http://www.freshports.org/backend/rss2.0.php</url> 
+        <ico>http://www.freshports.org/favicon.ico</ico> 
+    </item> 
+
+    <item>
+        <title>Gizmodo - The Gadget Guide</title>
+        <url>http://feeds.gawker.com/gizmodo/full</url>
+        <ico>http://cache.gizmodo.com/assets/base/img/site/www.gizmodo.com/favicon.ico</ico>
+    </item>
+
+    <item> 
+        <title>GNOME News</title> 
+        <url>http://gnomedesktop.org/node/feed</url> 
+    </item> 
+
+    <item> 
+        <title>Groklaw</title> 
+        <url>http://www.groklaw.net/backend/GrokLaw.rdf</url> 
+        <ico>http://www.groklaw.net/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>heise online news</title> 
+        <url>http://www.heise.de/newsticker/heise.rdf</url> 
+        <ico>http://www.heise.de/favicon.ico</ico> 
+    </item> 
+
+    <item>
+        <title>I, Cringely</title>
+        <url>http://www.pbs.org/cringely/pulpit/rss2.xml</url>
+    </item>
+
+    <item> 
+        <title>KDE Deutschland</title> 
+        <url>http://www.kde.de/nachrichten/nachrichten.rdf</url> 
+        <ico>http://www.kde.de/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>KDE News</title> 
+        <url>http://www.kde.org/dotkdeorg.rdf</url> 
+        <ico>http://www.kde.org/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Kuro5hin</title> 
+        <url>http://www.kuro5hin.org/backend.rdf</url> 
+        <ico>http://www.kuro5hin.org/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Linux Game Tome</title> 
+        <url>http://happypenguin.org/html/news.rdf</url> 
+    </item> 
+
+    <item> 
+        <title>Linux Weekly News</title> 
+        <url>http://lwn.net/headlines/rss</url> 
+        <ico>http://lwn.net/favicon.ico"</ico> 
+    </item> 
+
+    <item> 
+        <title>LinuxSecurity.com</title> 
+        <url>http://www.linuxsecurity.com/static-content/linuxsecurity_articles.rss</url> 
+    </item> 
+
+    <item>
+        <title>Microsoft TechNet Security Bulletin Feed</title>
+        <url>http://www.microsoft.com/technet/security/bulletin/secrss.aspx</url>
+        <ico>http://www.microsoft.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Microsoft Security Advisories</title>
+        <url>http://www.microsoft.com/technet/security/advisory/RssFeed.aspx?securityadvisory</url>
+        <ico>http://www.microsoft.com/favicon.ico</ico>
+    </item>
+
+    <item> 
+        <title>Mozilla</title> 
+        <url>http://www.mozilla.org/news.rdf</url> 
+        <ico>http://www.mozillazine.org/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>MozillaZine</title> 
+        <url>http://www.mozillazine.org/contents.rdf</url> 
+        <ico>http://www.mozillazine.org/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>PC Magazine - New Product Reviews</title> 
+        <url>http://feeds.ziffdavis.com/ziffdavis/pcmag</url> 
+    </item> 
+
+    <item> 
+        <title>Planet Ubuntu</title> 
+        <url>http://planet.ubuntu.com/rss10.xml</url> 
+        <ico>http://www.ubuntu.com/favicon.ico</ico> 
+    </item> 
+
+    <item>
+        <title>Red Hat Magazine</title>
+        <url>http://feeds.feedburner.com/RedHatMagazine</url>
+    </item>
+
+    <item> 
+        <title>Reuters Technology</title> 
+        <url>http://feeds.reuters.com/reuters/technologyNews/</url> 
+        <ico>http://www.reuters.com/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Root prompt</title> 
+        <url>http://www.rootprompt.org/rss/</url> 
+        <ico>http://www.rootprompt.org/favicon.ico</ico> 
+    </item> 
+
+    <item>
+        <title>SANS Internet Storm Center</title>
+        <url>http://isc.sans.org/rssfeed.xml</url>
+    </item>
+
+    <item> 
+        <title>SecurityFocus News</title> 
+        <url>http://www.securityfocus.com/rss/news.xml</url> 
+        <ico>http://www.securityfocus.com/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>SecurityFocus Bugtraq</title> 
+        <url>http://www.securityfocus.com/rss/vulnerabilities.xml</url> 
+        <ico>http://www.securityfocus.com/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>Slashdot</title> 
+        <url>http://rss.slashdot.org/Slashdot/slashdot</url> 
+        <ico>http://slashdot.org/favicon.ico</ico> 
+    </item> 
+
+    <item> 
+        <title>use Perl</title> 
+        <url>http://use.perl.org/useperl.rdf</url> 
+    </item>
+
+    <item>
+        <title>US-CERT Technical Cyber Security Alerts</title>
+        <url>http://www.us-cert.gov/channels/techalerts.rdf</url>
+    </item>
+
+</category> 
+
+<category name="Education">
+
+    <item>
+        <title>BBC News - Education</title>
+        <url>http://feeds.bbci.co.uk/news/education/rss.xml</url>
+    </item>
+    
+</category>
+
+<category name="Electronic Frontier Foundation">
+
+    <item>
+        <title>EFF Action Alerts</title>
+        <url>http://action.eff.org/feed/rss2_0/alerts.rss</url>
+        <ico>http://www.eff.org/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>EFF Breaking News</title>
+        <url>http://www.eff.org/rss/pressrelease</url>
+        <ico>http://www.eff.org/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>EFF DeepLinks</title>
+        <url>http://www.eff.org/rss/blog</url>
+        <ico>http://www.eff.org/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>EFF MiniLinks</title>
+        <url>http://w2.eff.org/minilinks/index.xml</url>
+        <ico>http://www.eff.org/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>EFF Weekly Events Calendar</title>
+        <url>http://w2.eff.org/calendar/rss/rss.php</url>
+        <ico>http://www.eff.org/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Entertainment, Gossip, and Movies">
+
+    <item>
+        <title>E! Gossip - Answer Bitch</title>
+        <url>http://feeds.eonline.com/eonline/answer</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! Gossip - The Hum</title>
+        <url>http://feeds.eonline.com/eonline/hum</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! Movies - Lyons Den</title>
+        <url>http://feeds.eonline.com/eonline/lyonsden</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! Movies - Movie Reviews</title>
+        <url>http://feeds.eonline.com/eonline/movies</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! Gossip - Party Girl</title>
+        <url>http://feeds.eonline.com/eonline/partygirl</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! Gossip - Planet Gossip</title>
+        <url>http://feeds.eonline.com/eonline/planet</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! Movies - Reel Girl</title>
+        <url>http://feeds.eonline.com/eonline/reelgirl</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! Gossip - The Awful Truth</title>
+        <url>http://feeds.eonline.com/eonline/awful</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! Gossip - Watch with Kristin</title>
+        <url>http://feeds.eonline.com/eonline/kristin</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>E! News - Headlines</title>
+        <url>http://feeds.eonline.com/eonline/topstories</url>
+        <ico>http://www.eonline.com/images/feeds_logo.gif</ico>
+    </item>
+
+    <item>
+        <title>IMDb - News</title>
+        <url>http://rss.imdb.com/news/</url>
+        <ico>http://i.imdb.com/logo.gif</ico>
+    </item>
+
+    <item>
+        <title>Roger Ebert - Headlines and Reviews</title>
+        <url>http://rogerebert.suntimes.com/apps/pbcs.dll/section?category=RSS&amp;mime=xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Certified Fresh on DVD/Video</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/complete_certified_fresh_dvds.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Certified Fresh in Theaters</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/in_theaters_certified_fresh.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Certified Fresh Top DVD/Video Pick</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/video_certified_fresh.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Certified Fresh Top Movie Pick</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/movie_certified_fresh.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Complete Listing of DVD/Videos</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/complete_dvds.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Complete Listing of Movies</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/complete_movies.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - In Theaters</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/in_theaters.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - New DVD Releases</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/new_releases.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Opening Movies</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/opening.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Top DVDs</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/top_dvds.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Top Movies</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/top_movies.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Top Movie News</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/top_news.xml</url>
+    </item>
+
+    <item>
+        <title>Rotten Tomatoes - Upcoming Movies</title>
+        <url>http://i.rottentomatoes.com/syndication/rss/upcoming.xml</url>
+    </item>
+
+</category>
+
+<category name="G4TV">
+
+    <item>
+        <title>G4TV Attack of the Show Daily Video Podcast</title>
+        <url>http://g4tv.com/attackoftheshow/podcasts/5/Attack_of_the_Show_Daily_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV Cheat! Video Podcast</title>
+        <url>http://g4tv.com/cheat/podcasts/7/Cheat_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV Cinematech: Nocturnal Emissions Video Podcast</title>
+        <url>http://g4tv.com/cinematechnocturnalemissions/podcasts/9/Cinematech_Nocturnal_Emissions_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+    <item>
+        <title>G4TV Cinematech Video Podcast</title>
+        <url>http://g4tv.com/cinematech/podcasts/8/Cinematech_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV ICONS Video Podcast</title>
+        <url>http://g4tv.com/icons/podcasts/17/ICONS_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV Filter Video Podcast</title>
+        <url>http://g4tv.com/filter/podcasts/10/Filter_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item>
+ 
+    <item>
+        <title>G4TV Formula D Video Podcast</title>
+        <url>http://g4tv.com/formulad/podcasts/18/Formula_D_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV Street Fury Video Podcast</title>
+        <url>http://g4tv.com/streetfury/podcasts/11/Street_Fury_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV The Daily Feed Video Podcast</title>
+        <url>http://g4tv.com/thefeed/podcasts/19/The_Daily_Feed_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV The Daily Nut</title>
+        <url>http://g4tv.com/dailynut/podcasts/15/The_Daily_Nut.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV The Man Show Video Podcast</title>
+        <url>http://g4tv.com/themanshow/podcasts/14/The_Man_Show_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>G4TV X-Play Daily Video Podcast</title>
+        <url>http://g4tv.com/xplay/podcasts/6/XPlay_Daily_Video_Podcast.xml</url>
+        <ico>http://g4tv.com/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="GoogleVideo">
+
+    <item>
+        <title>Google Video Comedy</title>
+        <url>http://video.google.com/videofeed?type=search&amp;q=genre:comedy&amp;so=1</url>
+        <ico>http://video.google.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Google Video Movie Trailers</title>
+        <url>http://video.google.com/videofeed?type=search&amp;q=type:movie_trailer&amp;so=1</url>
+        <ico>http://video.google.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Google Video Music</title>
+        <url>http://video.google.com/videofeed?type=search&amp;q=type:music_video&amp;so=1</url>
+        <ico>http://video.google.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Google Video Top 100 New Videos</title>
+        <url>http://video.google.com/videofeed?type=search&amp;q=type:gpick&amp;output=rss</url>
+        <ico>http://video.google.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Google Video TV Educational</title>
+        <url>http://video.google.com/videofeed?type=search&amp;q=genre:educational&amp;so=1</url>
+        <ico>http://video.google.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Google Video TV Shows</title>
+        <url>http://video.google.com/videofeed?type=search&amp;q=type:tvshow&amp;so=1</url>
+        <ico>http://video.google.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Google Video TV Sports</title>
+        <url>http://video.google.com/videofeed?type=search&amp;q=type:sports%20OR%20genre:sports&amp;so=1</url>
+        <ico>http://video.google.com/favicon.ico</ico>
+    </item> 
+
+
+</category>
+
+<category name="Health">
+
+    <item>
+        <title>BBC News - Health</title>
+        <url>http://feeds.bbci.co.uk/news/health/rss.xml</url>
+    </item>
+    
+    <item>
+        <title>CNN - Health</title>
+        <url>	http://rss.cnn.com/rss/cnn_health.rss</url>
+    </item>
+
+    <item>
+        <title>Reuters Health</title>
+        <url>	http://feeds.reuters.com/reuters/healthNews/</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Humor">
+
+    <item>
+        <title>Dilbert</title>
+        <url>http://feeds.feedburner.com/dilbert.rdf</url>
+    </item>
+
+    <item>
+        <title>Fark</title>
+        <url>http://feeds.feedburner.com/fark</url>
+        <ico>http://www.fark.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>The Onion</title>
+        <url>http://feeds.theonion.com/theonion/weekly</url>
+    </item>
+
+</category>
+
+<category name="International">
+
+    <item>
+        <title>BBC News (World Edition)</title>
+        <url>http://feeds.bbci.co.uk/news/rss.xml</url>
+    </item>
+
+    <item>
+        <title>CNN (Top Stories)</title>
+        <url>http://rss.cnn.com/rss/cnn_topstories.rss</url>
+    </item>
+
+    <item>
+        <title>CNN (World Edition)</title>
+        <url>http://rss.cnn.com/rss/cnn_world.rss</url>
+    </item>
+     
+    <item>
+        <title>Reuters World News</title>
+        <url>http://feeds.reuters.com/reuters/worldNews/</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Scotsman.com International News</title>
+        <url>http://news.scotsman.com/getFeed.aspx?Format=rss&amp;sectionid=7000</url>
+        <ico>http://www.scotsman.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: World News</title>
+        <url>http://www.topix.net/rss/world</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Magazines">
+
+    <item>
+        <title>Linux Format</title>
+        <url>http://www.linuxformat.co.uk/backend.php</url>
+    </item>
+    
+    <item>
+        <title>Linux Journal</title>
+        <url>http://feeds.feedburner.com/linuxjournalcom</url>
+    </item>
+
+    <item>
+        <title>Make</title>
+        <url>http://blog.makezine.com/index.rss</url>
+    </item>
+
+    <item>
+        <title>TIME - Top Stories</title>
+        <url>	http://feeds.feedburner.com/time/topstories</url>
+	<ico>http://www.time.com/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Miscellaneous">
+
+    <item>
+        <title>CNN - Education</title>
+        <url>http://rss.cnn.com/rss/cnn_education.rss</url>
+    </item>
+
+    <item>
+        <title>CNN - Law</title>
+        <url>http://rss.cnn.com/rss/cnn_law.rss</url>
+    </item>
+    
+    <item>
+        <title>CNN - Most Popular</title>
+        <url>http://rss.cnn.com/rss/cnn_mostpopular.rss</url>
+    </item>
+
+    <item>
+        <title>CNN - Most Recent</title>
+        <url>http://rss.cnn.com/rss/cnn_latest.rss</url>
+    </item>
+    
+    <item>
+        <title>CNN - Travel</title>
+        <url>http://rss.cnn.com/rss/cnn_travel.rss</url>
+    </item>
+    
+    <item>
+        <title>The Register</title>
+        <url>http://www.theregister.co.uk/headlines.rss</url>
+        <ico>http://www.theregister.co.uk/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Wired News - Top Stories</title>
+        <url>http://feeds.wired.com/wired/index</url>
+        <ico>http://www.wired.com/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Media News">
+
+    <item>
+        <title>CNN - Entertainment</title>
+        <url>http://rss.cnn.com/rss/cnn_showbiz.rss</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Media Headlines</title>
+        <url>http://www.digitalspy.co.uk/rss/zones/gb/media.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Big Brother</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/bigbrother.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Cult</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/cult.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Movies</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/movies.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Music</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/music.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Reality</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/realitytv.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Showbiz</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/showbiz.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Soaps</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/soaps.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - Television</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/tv.xml</url>
+    </item>
+
+    <item>
+        <title>Digital Spy - US TV</title>
+        <url>http://www.digitalspy.co.uk/rss/categories/gb/ustv.xml</url>
+    </item>
+
+</category>
+
+<category name="MythTV">
+
+    <item>
+        <title>Mythbuntu </title>
+        <url>http://www.mythbuntu.org/rss.xml</url>
+    </item>
+
+    <item>
+        <title>MythDora</title>
+        <url>http://g-ding.tv/?q=node/feed</url>
+    </item>
+
+    <item>
+        <title>MythPVR</title>
+        <url>http://feeds.feedburner.com/mythtv</url>
+    </item>
+
+    <item>
+        <title>MythTV - Commits</title>
+        <url>http://svn.mythtv.org/trac/timeline?changeset=on&amp;milestone=on&amp;max=20&amp;daysback=14&amp;format=rss</url>
+    </item>
+
+    <item>
+        <title>MythTV - Dev</title>
+        <url>http://www.gossamer-threads.com/lists/mythtv/dev.xml</url>
+    </item>
+
+    <item>
+        <title>MythTV - Users</title>
+        <url>http://www.gossamer-threads.com/lists/mythtv/users.xml</url>
+    </item>
+
+    <item>
+        <title>MythTV - Wiki Recent Changes</title>
+        <url>http://www.mythtv.org/wiki?title=Special:RecentChanges&amp;feed=rss</url>
+    </item>
+  
+</category>
+
+<category name="News Video">
+
+    <item>
+        <title>CNET TV</title>
+        <url>http://reviews.cnet.com/html/xml/2001-12839_7-0.xml</url>
+        <ico>http://www.cnet.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>CNN All Access - Backstage Pass Weekly Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/allaccess/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN Daily Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/cnnnewsroom/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN In Case You Missed It Daily Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/incaseyoumissed/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN Now in the News Commuter Edition Daily Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/nitn/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN Late Edition with Wolf Blitzer Weekly Video Podcast</title>
+        <url>http://www.cnn.com/services/podcasting/lateedition/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+    <item>
+        <title>CNN Paging Dr. Gupta Weekly Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/gupta/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN Reliable Sources Weekly Video Podcast</title>
+        <url>http://www.cnn.com/services/podcasting/reliablesources/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN SHOWandTELL Weekly Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/showandtell/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN Special Programming Weekly Video Podcast</title>
+        <url>http://rss.cnn.com/rss/cnn_specialvideo.rss</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+    <item>
+        <title>CNN Student News Daily Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/studentnews/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN The Glenn Beck Show Weekly Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/glennbeck/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN The Gryst Weekly Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/absurd/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>CNN The Scene Weekly Video Podcast</title>
+        <url>http://rss.cnn.com/services/podcasting/thescene/rss.xml</url>
+        <ico>http://rss.cnn.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Reuters Video Archive</title>
+        <url>http://today.reuters.com/tv/rss/default.aspx?channelId=2ec8a55340373e6476cf68c0942c4a804b8abd47</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Reuters Video Business</title>
+        <url>http://today.reuters.com/tv/rss/default.aspx?channelId=6ffc0233e09c26943b265ef3abd575b2d872818b</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Reuters Video Entertainment</title>
+        <url>http://today.reuters.com/tv/rss/default.aspx?channelId=189f8813eb619acad6694531e1004d4fcae3c097</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Reuters Video In Depth</title>
+        <url>http://today.reuters.com/tv/rss/default.aspx?channelId=9784d2e333d72cb34b52f788c6e44bb63d086ef0</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Reuters Video Oddly Enough</title>
+        <url>http://today.reuters.com/tv/rss/default.aspx?channelId=4ccf1d535d893e464710e92b6722e47e8a3524df</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Reuters Video Technology</title>
+        <url>http://today.reuters.com/tv/rss/default.aspx?channelId=d45538fb92ef02a065c15e16d3dd6a297c2ae7d7</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item> 
+
+    <item>
+        <title>Reuters Video Top News</title>
+        <url>http://today.reuters.com/tv/rss/default.aspx?channelId=3fe70fe45a9e09f79818a5848a0a6039e8e2a37b</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item> 
+
+</category>
+
+<category name="Offbeat">
+
+    <item>
+        <title>Boing Boing</title>
+        <url>http://feeds.feedburner.com/boingboing/iBag</url>
+    </item>
+
+    <item>
+        <title>CNN - Offbeat</title>
+        <url>http://rss.cnn.com/rss/cnn_offbeat.rss</url>
+    </item>
+
+    <item>
+        <title>Fark</title>
+        <url>http://feeds.feedburner.com/fark</url>
+        <ico>http://www.fark.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Reuters Oddly Enough</title>
+        <url>http://feeds.reuters.com/reuters/oddlyEnoughNews/</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Offbeat</title>
+        <url>http://www.topix.net/rss/news/weird.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+    
+</category>
+
+<category name="OpEd">
+
+    <item>
+        <title>BBC News - Talking Point</title>
+        <url>http://feeds.bbci.co.uk/news/have_your_say/rss.xml</url>
+    </item>
+
+    <item>
+        <title>New York Times - Opinion</title>
+        <url>http://www.nytimes.com/services/xml/rss/nyt/Opinion.xml</url>
+    </item>
+
+    <item>
+        <title>Scotsman.com Opinion</title>
+        <url>http://news.scotsman.com/getFeed.aspx?Format=rss&amp;sectionid=7074</url>
+        <ico>http://www.scotsman.com/favicon.ico</ico>
+    </item>
+    
+    <item>
+        <title>Sydsvenskan opinion (SE)</title>
+        <url>http://sydsvenskan.se/rss/opinion</url>
+    </item>
+
+</category>
+
+<category name="Politics (non-US)">
+
+    <item>
+        <title>BBC News - Politics</title>
+        <url>http://feeds.bbci.co.uk/news/politics/rss.xml</url>
+    </item>
+
+</category>
+
+<category name="Politics (US)">
+
+    <item>
+        <title>CNN - Politics</title>
+        <url>http://rss.cnn.com/rss/cnn_allpolitics.rss</url>
+    </item>
+
+    <item>
+        <title>Political Wire</title>
+        <url>http://feeds.feedburner.com/PoliticalWire</url>
+        <ico>http://politicalwire.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Reuters Politics</title>
+        <url>http://feeds.reuters.com/reuters/politicsNews/</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item>
+    
+</category>
+
+<category name="Recreation">
+
+    <item>
+        <title>Reuters Lifestyle</title>
+        <url>http://feeds.reuters.com/reuters/Lifestyle</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Die Zeit - Lebensart (DE)</title>
+        <url>http://newsfeed.zeit.de/lebensart/index</url>
+        <ico>http://www.zeit.de/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Regional (non-US)">
+
+    <item>
+        <title>Aftonbladet (SE)</title>
+        <url>http://www.aftonbladet.se/rss/nyheter.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - Africa</title>
+        <url>http://feeds.bbci.co.uk/news/world/africa/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - Asia-Pacific</title>
+        <url>http://feeds.bbci.co.uk/news/world/asia_pacific/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - England</title>
+        <url>http://feeds.bbci.co.uk/news/england/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - Europe</title>
+        <url>http://feeds.bbci.co.uk/news/world/europe/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - Latin America and Caribbean</title>
+        <url>http://feeds.bbci.co.uk/news/world/latin_america/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - Middle East</title>
+        <url>http://feeds.bbci.co.uk/news/world/middle_east/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - Northern Ireland</title>
+        <url>http://feeds.bbci.co.uk/news/northern_ireland/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - Scotland</title>
+        <url>http://feeds.bbci.co.uk/news/scotland/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - South Asia</title>
+        <url>http://feeds.bbci.co.uk/news/world/south_asia/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - UK</title>
+        <url>http://feeds.bbci.co.uk/news/uk/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - US and Canada</title>
+        <url>http://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC News - Wales</title>
+        <url>http://feeds.bbci.co.uk/news/wales/rss.xml</url>
+    </item>
+
+    <item>
+        <title>DN (SE)</title>
+        <url>http://www.dn.se/DNet/jsp/polopoly.jsp?d=1400</url>
+    </item>
+
+    <item>
+        <title>Expressen (SE)</title>
+        <url>http://www.expressen.se/1.573280?standAlone=true</url>
+    </item>
+
+    <item>
+        <title>Helsingin Sanomat (FI)</title>
+        <url>http://www.hs.fi/uutiset/rss/</url>
+        <ico>http://www.hs.fi/static/hs/img/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>YLE (FI)</title>
+        <url>http://www.yle.fi/uutiset/rss/paauutiset.xml</url>
+        <ico>http://www.yle.fi/favicon.ico</ico>
+    </item>
+    
+    <item>
+        <title>Scotsman.com Headlines</title>
+        <url>http://news.scotsman.com/getFeed.aspx?Format=rss&amp;sectionid=4068</url>
+        <ico>http://www.scotsman.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Scotsman.com UK News</title>
+        <url>http://news.scotsman.com/getFeed.aspx?Format=rss&amp;sectionid=7071</url>
+        <ico>http://www.scotsman.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Sydsvenskan (SE)</title>
+        <url>http://sydsvenskan.se/rss/senastenytt</url>
+    </item>
+
+    <item>
+        <title>The Globe and Mail</title>
+        <url>http://www.theglobeandmail.com/generated/headlines/pickup/rdf/ROB.rdf</url>
+        <ico>http://www.globeandmail.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Spiegel Online - Schlagzeilen (DE)</title>
+        <url>http://www.spiegel.de/schlagzeilen/index.rss</url>
+        <ico>http://www.spiegel.de/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>FT Deutschland - Topnews (DE)</title>
+        <url>http://www.ftd.de/static/container/rss2/ftd-topnews.rdf</url>
+        <ico>http://www.ftd.de/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>FT Deutschland - Nachrichten Podcast (DE)</title>
+        <url>http://www.ftd.de/podcast.php</url>
+        <ico>http://www.ftd.de/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Die Zeit - Online Startseite (DE)</title>
+        <url>http://newsfeed.zeit.de/index</url>
+        <ico>http://www.zeit.de/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Afghanistan</title>
+        <url>http://www.topix.net/rss/world/afghanistan.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Africa</title>
+        <url>http://www.topix.net/rss/world/africa.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Albania</title>
+        <url>http://www.topix.net/rss/world/albania.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Algeria</title>
+        <url>http://www.topix.net/rss/world/algeria.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: American Samoa</title>
+        <url>http://www.topix.net/rss/world/american-samoa.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Angola</title>
+        <url>http://www.topix.net/rss/world/angola.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Asia</title>
+        <url>http://www.topix.net/rss/world/asia.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Australia</title>
+        <url>http://www.topix.net/rss/world/australia.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Belgium</title>
+        <url>http://www.topix.net/rss/world/belgium.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Brazil</title>
+        <url>http://www.topix.net/rss/world/brazil.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Canada</title>
+        <url>http://www.topix.net/rss/world/canada.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: China</title>
+        <url>http://www.topix.net/rss/world/china.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Cuba</title>
+        <url>http://www.topix.net/rss/world/cuba.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Egypt</title>
+        <url>http://www.topix.net/rss/world/egypt.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Europe</title>
+        <url>http://www.topix.net/rss/world/europe.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: France</title>
+        <url>http://www.topix.net/rss/world/france.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Hong Kong</title>
+        <url>http://www.topix.net/rss/world/hong-kong.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Iran</title>
+        <url>http://www.topix.net/rss/world/iran.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Iraq</title>
+        <url>http://www.topix.net/rss/world/iraq.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Ireland</title>
+        <url>http://www.topix.net/rss/world/ireland.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Israel</title>
+        <url>http://www.topix.net/rss/world/israel.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Italy</title>
+        <url>http://www.topix.net/rss/world/italy.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Middle-East</title>
+        <url>http://www.topix.net/rss/world/middle-east.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: North America</title>
+        <url>http://www.topix.net/rss/world/north-america.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: North Korea</title>
+        <url>http://www.topix.net/rss/world/north-korea.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Oceania</title>
+        <url>http://www.topix.net/rss/world/oceania.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Poland</title>
+        <url>http://www.topix.net/rss/world/poland.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Russia</title>
+        <url>http://www.topix.net/rss/world/russia.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: South Africa</title>
+        <url>http://www.topix.net/rss/world/south-africa.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: South America</title>
+        <url>http://www.topix.net/rss/world/south-america.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Regional (US)">
+
+    <item>
+        <title>CNN - US Edition</title>
+        <url>http://rss.cnn.com/rss/cnn_us.rss</url>
+    </item>
+
+    <item>
+        <title>Reuters US News</title>
+        <url>http://feeds.reuters.com/reuters/domesticNews/</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>The New York Times</title>
+        <url>http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml</url>
+    </item>
+
+    <item>
+        <title>Topix: US</title>
+        <url>http://WWW.topix.net/rss/us/us.xml</url>
+        <ico>http://WWW.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Alabama</title>
+        <url>http://www.topix.net/rss/state/al.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Alaska</title>
+        <url>http://www.topix.net/rss/state/ak.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Arizona</title>
+        <url>http://www.topix.net/rss/state/az.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Arkansas</title>
+        <url>http://www.topix.net/rss/state/ar.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: California</title>
+        <url>http://www.topix.net/rss/state/ca.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Colorado</title>
+        <url>http://www.topix.net/rss/state/co.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Connecticut</title>
+        <url>http://www.topix.net/rss/state/ct.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Delaware</title>
+        <url>http://www.topix.net/rss/state/de.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Florida</title>
+        <url>http://www.topix.net/rss/state/fl.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Georgia</title>
+        <url>http://www.topix.net/rss/state/ga.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Hawaii</title>
+        <url>http://www.topix.net/rss/state/hi.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Idaho</title>
+        <url>http://www.topix.net/rss/state/id.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Illinois</title>
+        <url>http://www.topix.net/rss/state/il.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Indiana</title>
+        <url>http://www.topix.net/rss/state/in.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Iowa</title>
+        <url>http://www.topix.net/rss/state/ia.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Kansas</title>
+        <url>http://www.topix.net/rss/state/ks.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Kentucky</title>
+        <url>http://www.topix.net/rss/state/ky.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Louisiana</title>
+        <url>http://www.topix.net/rss/state/la.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Main</title>
+        <url>http://www.topix.net/rss/state/me.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Maryland</title>
+        <url>http://www.topix.net/rss/state/md.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Massachusetts</title>
+        <url>http://www.topix.net/rss/state/ma.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Michigan</title>
+        <url>http://www.topix.net/rss/state/mi.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Minnesota</title>
+        <url>http://www.topix.net/rss/state/mn.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Mississippi</title>
+        <url>http://www.topix.net/rss/state/ms.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Missouri</title>
+        <url>http://www.topix.net/rss/state/mo.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Montana</title>
+        <url>http://www.topix.net/rss/state/mt.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Nebraska</title>
+        <url>http://www.topix.net/rss/state/ne.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Nevada</title>
+        <url>http://www.topix.net/rss/state/nv.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: New Hampshire</title>
+        <url>http://www.topix.net/rss/state/nh.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: New Jersey</title>
+        <url>http://www.topix.net/rss/state/nj.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: New Mexico</title>
+        <url>http://www.topix.net/rss/state/nm.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: New York</title>
+        <url>http://www.topix.net/rss/state/ny.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: North Carolina</title>
+        <url>http://www.topix.net/rss/state/nc.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: North Dakota</title>
+        <url>http://www.topix.net/rss/state/nd.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Ohio</title>
+        <url>http://www.topix.net/rss/state/oh.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Oklahoma</title>
+        <url>http://www.topix.net/rss/state/ok.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Oregon</title>
+        <url>http://www.topix.net/rss/state/or.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Pennsylvania</title>
+        <url>http://www.topix.net/rss/state/pa.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Rhode Island</title>
+        <url>http://www.topix.net/rss/state/ri.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: South Carolina</title>
+        <url>http://www.topix.net/rss/state/sc.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: South Dakota</title>
+        <url>http://www.topix.net/rss/state/sd.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Tennesee</title>
+        <url>http://www.topix.net/rss/state/tn.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Texas</title>
+        <url>http://www.topix.net/rss/state/tx.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Utah</title>
+        <url>http://www.topix.net/rss/state/ut.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Vermont</title>
+        <url>http://www.topix.net/rss/state/vt.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Virginia</title>
+        <url>http://www.topix.net/rss/state/va.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Washington DC</title>
+        <url>http://www.topix.net/rss/state/dc.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Washington</title>
+        <url>http://www.topix.net/rss/state/wa.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: West Virginia</title>
+        <url>http://www.topix.net/rss/state/wv.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Wisconsin</title>
+        <url>http://www.topix.net/rss/state/wi.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+        </item>
+
+    <item>
+        <title>Topix: Wyoming</title>
+        <url>http://www.topix.net/rss/state/wi.xml</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Science">
+
+    <item>
+        <title>BBC News - Science</title>
+        <url>http://feeds.bbci.co.uk/news/science_and_environment/rss.xml</url>
+    </item>
+    
+    <item>
+        <title>CNN - Science &amp; Space</title>
+        <url>http://rss.cnn.com/rss/cnn_space.rss</url>
+    </item>
+
+    <item>
+        <title>CNN - Technology</title>
+        <url>http://rss.cnn.com/rss/cnn_tech.rss</url>
+    </item>
+
+    <item>
+        <title>DN vetenskap (SE)</title>
+        <url>http://www.dn.se/DNet/jsp/polopoly.jsp?d=2241</url>
+    </item>
+
+    <item>
+        <title>Reuters Science</title>
+        <url>http://feeds.reuters.com/reuters/scienceNews/</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item>
+    
+</category>
+
+<category name="Society">
+
+    <item>
+        <title>Die Zeit - Gesellschaft (DE)</title>
+        <url>http://newsfeed.zeit.de/gesellschaft/index</url>
+        <ico>http://www.zeit.de/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Sports">
+
+    <item>
+        <title>Baseball Primer</title>
+        <url>http://www.baseballthinkfactory.org/files/newsstand/rss_2.0</url>
+    </item>
+
+    <item>
+        <title>BBC Sport - Cricket</title>
+        <url>http://newsrss.bbc.co.uk/rss/sportonline_uk_edition/cricket/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC Sport - Headlines</title>
+        <url>http://newsrss.bbc.co.uk/rss/sportonline_world_edition/front_page/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC Sport - Football</title>
+        <url>http://newsrss.bbc.co.uk/rss/sportonline_uk_edition/football/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC Sport - Formula One</title>
+        <url>http://newsrss.bbc.co.uk/rss/sportonline_uk_edition/motorsport/formula_one/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC Sport - Olympic Games</title>
+        <url>http://newsrss.bbc.co.uk/rss/sportonline_uk_edition/olympic_games/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC Sport - Rugby Union</title>
+        <url>http://newsrss.bbc.co.uk/rss/sportonline_uk_edition/rugby_union/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC Sport - Rugby League</title>
+        <url>http://newsrss.bbc.co.uk/rss/sportonline_uk_edition/rugby_league/rss.xml</url>
+    </item>
+
+    <item>
+        <title>DN sport (SE)</title>
+        <url>http://www.dn.se/DNet/jsp/polopoly.jsp?d=1402</url>
+    </item>
+
+    <item>
+        <title>ESPN Headlines</title>
+        <url>http://sports.espn.go.com/espn/rss/news</url>
+	<ico>http://espn.go.com/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Expressen sport (SE)</title>
+        <url>http://www.expressen.se/1.573281?standAlone=true</url>
+    </item>
+
+    <item>
+        <title>Reuters Sports</title>
+        <url>http://feeds.reuters.com/reuters/sportsNews/</url>
+        <ico>http://www.reuters.com/favicon.ico</ico>
+    </item>
+    
+    <item>
+        <title>Sportbladet (SE)</title>
+        <url>http://www.aftonbladet.se/rss/sport.xml</url>
+    </item>
+
+    <item>
+        <title>Sydsvenskan sport (SE)</title>
+        <url>http://sydsvenskan.se/rss/sport</url>
+    </item>
+
+    <item>
+        <title>Topix: NFL</title>
+        <url>http://www.topix.net/rss/nfl</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Racing</title>
+        <url>http://www.topix.net/rss/racing</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: Sports</title>
+        <url>http://www.topix.net/rss/sports</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Topix: World Soccer</title>
+        <url>http://www.topix.net/rss/world-soccer</url>
+        <ico>http://www.topix.net/favicon.ico</ico>
+    </item>
+
+</category>
+
+<category name="Weather (non-US)">
+
+    <item>
+        <title>BBC Weather - Weather News</title>
+        <url>http://newsrss.bbc.co.uk/rss/weather/news/rss.xml</url>
+    </item>
+
+    <item>
+        <title>BBC Weather - UK Weather Warnings</title>
+        <url>http://newsrss.bbc.co.uk/rss/weather/uk_warnings/rss.xml</url>
+    </item>
+
+</category>
+
+<category name="Weather (US)">
+
+    <item>
+        <title>NOAA - Hurricane Advisories for the Atlantic</title>
+        <url>http://www.nhc.noaa.gov/index-at.xml</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>NOAA - Hurricane Advisories for the Eastern Pacific</title>
+        <url>http://www.nhc.noaa.gov/index-ep.xml</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>NOAA - Hurricane Advisories for the Central Pacific</title>
+        <url>http://www.prh.noaa.gov/cphc/index-cp.xml</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>NOAA - Tsunami Warning System for West Coast/Alaska</title>
+        <url>http://wcatwc.arh.noaa.gov/rss/tsunamirss.xml</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>NOAA - Current Observed Weather across US Airports</title>
+        <url>http://www.weather.gov/data/current_obs/index.xml</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>ALL STATES - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/us.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Alabama - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/al.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Alaska - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ak.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Arizona - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/az.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Arkansas - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ar.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>California - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ca.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Colorado - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/co.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Connecticut - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ct.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Delaware - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/de.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>District of Columbia - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/dc.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Florida - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/fl.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Georgia - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ga.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Hawaii - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/hi.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Idaho - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/id.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Illinois - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/il.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Indiana - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/in.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Iowa - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ia.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Kansas - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ks.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Kentucky - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ky.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Louisiana - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/la.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Maine - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/me.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Maryland - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/md.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Massachusetts - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ma.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Michigan - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/mi.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Minnesota - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/mn.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Mississippi - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ms.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Missouri - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/mo.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Montana - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/mt.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Nevada - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/nv.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Nebraska - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ne.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>New Hampshire - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/nh.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>New Jersey - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/nj.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>New Mexico - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/nm.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>New York - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ny.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>North Carolina - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/nc.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>North Dakota - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/nd.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Ohio - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/oh.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Oklahoma - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ok.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Oregon - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/or.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Pennsylvania - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/pa.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Rhode Island - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ri.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>South Carolina - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/sc.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>South Dakota - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/sd.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Tennessee - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/tn.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Texas - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/tx.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Utah - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/ut.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Vermont - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/vt.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Virginia - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/va.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Washington - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/wa.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>West Virginia - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/wv.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Wisconsin - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/wi.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+    <item>
+        <title>Wyoming - NOAA Watches, Warnings, and Advisories</title>
+        <url>http://www.weather.gov/alerts/wy.rss</url>
+        <ico>http://www.weather.gov/favicon.ico</ico>
+    </item>
+
+</category>
+
+</sites>

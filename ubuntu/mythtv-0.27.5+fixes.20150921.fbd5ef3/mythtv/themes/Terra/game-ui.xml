@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+<mythuitheme>
+
+  <window name="gameui">
+
+    <imagetype name="fanart" from="basebackdrop" />
+    <imagetype name="topbar" from="basetopbar" />
+
+    <textarea name="heading" from="baseheading">
+        <value>Play Games</value>
+    </textarea>
+
+    <buttontree name="gametreelist">
+        <area>8,52,1264,375</area>
+        <numlists>3</numlists>
+        <spacing>10</spacing>
+        <buttonlist name="listtemplate">
+            <area>0,0,1264,375</area>
+            <layout>vertical</layout>
+            <buttonarea>0,0,100%,97%</buttonarea>
+            <statetype name="buttonitem">
+                <state name="active">
+                    <area>0,0,100%,30</area>
+                    <shape name="background">
+                        <area>0,0,100%,100%</area>
+                        <fill color="#4b4b3e" alpha="255" />
+                    </shape>
+                    <textarea name="buttontext">
+                        <area>5,0,85%,30</area>
+                        <font>basesmall</font>
+                        <cutdown>yes</cutdown>
+                        <align>left,vcenter</align>
+                    </textarea>
+                </state>
+                <state name="selectedactive" from="active">
+                    <shape name="background">
+                        <fill color="#8a916f" />
+                    </shape>
+                    <textarea name="buttontext">
+                        <area>5,0,85%,30</area>
+                        <font>basesmallbrown</font>
+                        <cutdown>yes</cutdown>
+                        <align>left,vcenter</align>
+                    </textarea>
+                </state>
+                <state name="selectedinactive" from="active" />
+            </statetype>
+        </buttonlist>
+    </buttontree>
+
+    <textarea name="title">
+        <area>296,440,752,60</area>
+        <font>baseextralarge</font>
+    </textarea>
+
+    <textarea name="systemlabel">
+        <area>296,510,140,35</area>
+        <font>basemedium</font>
+        <value>System:</value>
+    </textarea>
+
+    <textarea name="system">
+        <area>436,510,580,35</area>
+        <font>basemedium</font>
+    </textarea>
+
+    <textarea name="yearlabel">
+        <area>296,545,140,35</area>
+        <font>basemedium</font>
+        <value>Year:</value>
+    </textarea>
+
+    <textarea name="year">
+        <area>436,545,580,35</area>
+        <font>basemedium</font>
+    </textarea>
+
+    <textarea name="genrelabel">
+        <area>296,580,140,35</area>
+        <font>basemedium</font>
+        <value>Genre:</value>
+    </textarea>
+
+    <textarea name="genre">
+        <area>436,580,580,35</area>
+        <font>basemedium</font>
+    </textarea>
+
+    <textarea name="favoritelabel">
+        <area>296,615,140,35</area>
+        <font>basemedium</font>
+        <value>Favorite:</value>
+    </textarea>
+
+    <statetype name="favorite">
+        <area>436,615,580,35</area>
+        <state name="yes">
+            <textarea name="favorite" from="basetextarea">
+                <area>0,0,580,35</area>
+                <value>Yes</value>
+            </textarea>
+        </state>
+        <state name="no" from="yes">
+            <textarea name="favorite">
+                <value>No</value>
+            </textarea>
+        </state>
+    </statetype>
+
+    <imagetype name="screenshot">
+          <area>880,448,300,196</area>
+    </imagetype>
+
+    <imagetype name="coverart">
+          <area>25,448,300,196</area>
+          <preserveaspect>true</preserveaspect>
+    </imagetype>
+
+  </window>
+
+    <window name="gamedetailspopup">
+        <area>0,42,1280,515</area>
+        <shape name="fade" from="basefadebackground" />
+
+        <imagetype name="backimg">
+            <position>236,58</position>
+            <filename>video/info_background.png</filename>
+        </imagetype>
+
+        <imagetype name="coverart">
+            <area>759,79,260,391</area>
+            <mask>video/info_poster_mask.png</mask>
+            <preserveaspect>true</preserveaspect>
+        </imagetype>
+
+        <textarea name="title" from="basetextarea">
+            <area>270,85,455,35</area>
+            <font>baselarge</font>
+        </textarea>
+
+        <textarea name="description" from="basetextarea">
+            <area>270,165,455,220</area>
+            <multiline>yes</multiline>
+        </textarea>
+
+        <textarea name="syslbl" from="basetextarea">
+            <area>270,135,120,35</area>
+            <value>Emulator:</value>
+            <align>left</align>
+        </textarea>
+
+        <textarea name="allsystems" from="basetextarea">
+            <area>405,135,250,35</area>
+        </textarea>
+
+        <textarea name="year" from="basetextarea">
+            <area>270,445,80,35</area>
+        </textarea>
+
+        <textarea name="genre" from="basetextarea">
+            <area>447,445,278,35</area>
+            <align>right</align>
+        </textarea>
+
+        <button name="done_button" from="basebutton">
+            <position>363,495</position>
+            <value>Done</value>
+        </button>
+
+        <button name="play_button" from="basebutton">
+            <position>693,495</position>
+            <value>Play</value>
+        </button>
+
+    </window>
+
+</mythuitheme>

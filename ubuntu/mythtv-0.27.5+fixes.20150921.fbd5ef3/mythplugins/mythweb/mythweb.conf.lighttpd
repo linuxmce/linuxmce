@@ -1,0 +1,70 @@
+# This is a user supplied example file. Please modify before use
+
+# Apply mythweb configuration if hostname starts with mythtv
+$HTTP["host"] =~ "^mythweb" {
+
+  # You'll want to specify the document root, naturally.  Clone the
+  # git repo there for the easiest and best results.
+
+  server.document-root = "/var/www/localhost/htdocs/mythweb"
+
+  # Configure this section for HTTP Digest Authentication.  Be sure to
+  # set up the mythweb.htdigest file for your users according to the
+  # lighttpd documentation.
+
+  auth.backend = "htdigest"
+  auth.backend.htdigest.userfile = "/etc/lighttpd/mythweb.htdigest"
+  auth.require = (
+    "/" => (
+      "method"  => "digest",
+      "realm"   => "MythTV",
+      "require" => "valid-user"
+    )
+  )
+
+  # Whether or not you're using fastcgi for PHP applications in
+  # general on your lighttpd server, this makes sure you are for
+  # mythweb.
+
+  fastcgi.server = (
+    ".php" => ((
+      "bin-path" => "/usr/bin/php-cgi",
+      "socket"   => "/var/run/lighttpd/mythtv-php-fcgi.socket",
+      "broken-scriptfilename" => "enable",
+      "bin-environment" => (
+        "db_server"   => "localhost",
+        "db_name"     => "mythconverg",
+        "db_login"    => "mythtv",
+        "db_password" => "mythtv"
+      )
+    ))
+  )
+
+  # Credentials to pass along to the CGI scripts.  Be sure to
+  # configure the correct hostname, username, database name, and
+  # password for your MySQL server's MythTV setup.
+
+  setenv.add-environment = (
+    "db_server"   => "localhost",
+    "db_name"     => "mythconverg",
+    "db_login"    => "mythtv",
+    "db_password" => "mythtv"
+  )
+
+  # This makes sure that mythweb's perl files get run by the perl
+  # interpreter.
+
+  cgi.assign = (
+    ".pl"  => "/usr/bin/perl"
+  )
+
+  # The mythweb code relies on some URL rewriting.  This directive is
+  # required.
+
+  url.rewrite-once = (
+    "^/(css|data|images|js|themes|skins|[a-z_]+\.(php|pl)).*" => "$0",
+    "^/(pl(/.*)?)$" => "/mythweb.pl/$1",
+    "^/(.+)$"       => "/mythweb.php/$1",
+    "^/(.*)$"       => "/mythweb.php"
+  )
+}

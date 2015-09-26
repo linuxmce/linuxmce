@@ -1,0 +1,27 @@
+<themeinfo>
+    <name>Mythbuntu</name>
+    <author>
+        <name>Thomas Mashos</name>
+        <email>tgm4883@mythbuntu.org</email>
+    </author>
+
+    <!-- The Theme Types (Required) -->
+    <types>
+        <!-- Type. Legal Values are one or more of: UI, OSD and Menu -->
+        <type>UI</type>
+    </types>
+
+    <aspect>16:9</aspect>
+    <baseres>1920x1080</baseres>
+
+    <version>
+        <major>28</major>
+        <minor>20</minor>
+    </version>
+
+    <detail>
+        <thumbnail name="preview">preview.png</thumbnail>
+        <description>A sleek black theme that is the default theme for the Mythbuntu distribution. The Mythbuntu theme is inspired by ProjectGrayhem.</description> 
+        <errata></errata>
+    </detail>
+</themeinfo>

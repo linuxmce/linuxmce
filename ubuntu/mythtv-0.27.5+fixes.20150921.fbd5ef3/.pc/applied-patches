@@ -1,0 +1,4 @@
+default_directories
+bindings_install_paths.patch
+allow_no_tuners.patch
+configure_mythplugins_without_mythtv_installed.patch

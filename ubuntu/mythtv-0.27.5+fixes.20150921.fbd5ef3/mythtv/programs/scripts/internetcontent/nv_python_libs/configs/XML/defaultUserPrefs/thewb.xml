@@ -1,0 +1,21 @@
+<userTheWB>
+<!--
+    This file contains the user preferences for "The WB.com" MNV Treeview grabber.
+    The "Shows Episodes" elements will be automatically maintained adding and removing shows as they
+    reflecting the www.thewb.com web site. Users must enable new shows (see instructions below).
+    When an update is performed a user''s current settings are retained.
+-->
+    <!--
+        Updates to the "thewb.xml" file is made every X number of days as determined by the value of
+        the "updateDuration" element in this file. The default is every 5 days.
+    -->
+    <updateDuration>5</updateDuration>
+
+    <!--
+        The WB Treeview video TV series Episodes
+        "enabled" If you want to remove a TV series then change the "enabled" attribute to "false".
+                  Do not delete the element as during the next automatic update the show will just
+                  be added back but with a enabled value of "false".
+        Note; Check that the shows you enable actually have Full Episodes available to play in a browser
+    -->
+</userTheWB>

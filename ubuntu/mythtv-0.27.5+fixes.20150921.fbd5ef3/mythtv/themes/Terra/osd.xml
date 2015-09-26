@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mythuitheme SYSTEM "http://www.mythtv.org/schema/mythuitheme.dtd">
+<mythuitheme>
+
+    <window name="program_info">
+        <area>0,480,1280,253</area>
+
+        <imagetype name="background">
+            <area>0,0,1280,238</area>
+            <filename>osd/infobackground.png</filename>
+        </imagetype>
+
+        <textarea name="heading">
+            <area>20,9,650,36</area>
+            <font>baselargebrown</font>
+            <value>Info</value>
+        </textarea>
+
+        <textarea name="title">
+            <area>150,51,810,35</area>
+            <font>baselarge</font>
+        </textarea>
+
+        <statetype name="ratingstate">
+            <area>1196,50,39,38</area>
+            <showempty>yes</showempty>
+            <state name="0">
+            </state>
+            <state name="1">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/black_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="2" from="1" />
+            <state name="3">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/bronze_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="4" from="3" />
+            <state name="5">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/silver_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="6" from="5" />
+            <state name="7">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/gold_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="8" from="7" />
+            <state name="9">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/super_gold_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="10" from="9" />
+        </statetype>
+
+        <textarea name="description">
+            <area>150,96,1095,105</area>
+            <multiline>yes</multiline>
+            <font>basesmall</font>
+            <template>%"|SUBTITLE|" %%DESCRIPTION%</template>
+            <align>vcenter</align>
+        </textarea>
+
+        <textarea name="year">
+            <area>150,213,190,30</area>
+            <font>basesmall</font>
+        </textarea>
+
+        <statetype name="videodescrip">
+            <position>647,216</position>
+            <state name="default">
+            </state>
+            <state name="HD_1080_P">
+                <imagetype name="hdtv">
+                    <area>0,0,86,16</area>
+                    <filename>shared/icons/hd_1080.png</filename>
+                </imagetype>
+            </state>
+            <state name="HD_1080_I" from="HD_1080_P" />
+            <state name="HD_720_P">
+                <imagetype name="hdtv">
+                    <area>4,0,76,16</area>
+                    <filename>shared/icons/hd_720.png</filename>
+                </imagetype>
+            </state>
+        </statetype>
+
+        <textarea name="lentime">
+            <area>1035,213,200,30</area>
+            <align>right</align>
+            <font>basesmall</font>
+        </textarea>
+
+        <textarea name="channum" depends="!iconpath">
+            <area>20,95,110,30</area>
+            <font>baseextralarge</font>
+            <align>hcenter</align>
+            <template>%CHANNUM%</template>
+        </textarea>
+
+        <imagetype name="iconpath" depends="!coverart">
+            <area>15,65,120,90</area>
+        </imagetype>
+
+        <imagetype name="coverart">
+            <area>35,60,80,120</area>
+        </imagetype>
+
+        <fontdef name="timefont" from="baselarge">
+            <pixelsize>26</pixelsize>
+            <weight>bold</weight>
+        </fontdef>
+
+        <clock name="time">
+            <area>15,187,120,35</area>
+            <font>timefont</font>
+            <cutdown>no</cutdown>
+            <align>allcenter</align>
+            <template>hh:mm</template>
+        </clock>
+    </window>
+
+    <window name="browse_info">
+        <area>0,480,1280,253</area>
+
+        <imagetype name="background">
+            <area>0,0,1280,238</area>
+            <filename>osd/infobackground.png</filename>
+        </imagetype>
+
+        <textarea name="heading">
+            <area>20,9,650,36</area>
+            <font>baselargebrown</font>
+            <value>Browse</value>
+        </textarea>
+
+        <textarea name="title">
+            <area>150,51,810,35</area>
+            <font>baselarge</font>
+        </textarea>
+
+        <statetype name="ratingstate">
+            <area>1196,50,39,38</area>
+            <showempty>yes</showempty>
+            <state name="0">
+            </state>
+            <state name="1">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/black_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="2" from="1" />
+            <state name="3">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/bronze_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="4" from="3" />
+            <state name="5">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/silver_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="6" from="5" />
+            <state name="7">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/gold_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="8" from="7" />
+            <state name="9">
+                <imagetype name="stars">
+                    <area>0,0,39,38</area>
+                    <filename>shared/super_gold_star.png</filename>
+                </imagetype>
+            </state>
+            <state name="10" from="9" />
+        </statetype>
+
+        <textarea name="description">
+            <area>150,96,1095,105</area>
+            <multiline>yes</multiline>
+            <font>basesmall</font>
+            <template>%"|SUBTITLE|" %%DESCRIPTION%</template>
+            <align>vcenter</align>
+        </textarea>
+
+        <textarea name="year">
+            <area>150,213,190,30</area>
+            <font>basesmall</font>
+        </textarea>
+
+        <statetype name="videodescrip">
+            <position>647,216</position>
+            <state name="default">
+            </state>
+            <state name="HD_1080_P">
+                <imagetype name="hdtv">
+                    <area>0,0,86,16</area>
+                    <filename>shared/icons/hd_1080.png</filename>
+                </imagetype>
+            </state>
+            <state name="HD_1080_I" from="HD_1080_P" />
+            <state name="HD_720_P">
+                <imagetype name="hdtv">
+                    <area>4,0,76,16</area>
+                    <filename>shared/icons/hd_720.png</filename>
+                </imagetype>
+            </state>
+        </statetype>
+
+        <textarea name="lentime">
+            <area>1035,213,200,30</area>
+            <align>right</align>
+            <font>basesmall</font>
+        </textarea>
+
+        <textarea name="channum" depends="!iconpath">
+            <area>20,95,110,30</area>
+            <font>baseextralarge</font>
+            <align>hcenter</align>
+            <template>%CHANNUM%</template>
+        </textarea>
+
+        <imagetype name="iconpath" depends="!coverart">
+            <area>15,65,120,90</area>
+        </imagetype>
+
+        <imagetype name="coverart">
+            <area>35,60,80,120</area>
+        </imagetype>
+
+        <fontdef name="timefont" from="baselarge">
+            <pixelsize>26</pixelsize>
+            <weight>bold</weight>
+        </fontdef>
+
+        <clock name="time">
+            <area>15,187,120,35</area>
+            <font>timefont</font>
+            <cutdown>no</cutdown>
+            <align>allcenter</align>
+            <template>hh:mm</template>
+        </clock>
+
+    </window>
+
+    <window name="osd_status">
+        <area>-1,580,619,92</area>
+
+        <imagetype name="backimg">
+            <area>0,0,619,92</area>
+            <filename>popups/progress_dialog_background.png</filename>
+        </imagetype>
+
+        <textarea name="title">
+            <area>20,5,280,55</area>
+            <font>baselarge</font>
+            <multiline>true</multiline>
+            <align>vcenter</align>
+        </textarea>
+
+        <textarea name="value">
+            <area>310,5,280,50</area>
+            <multiline>true</multiline>
+            <font>basemedium</font>
+            <align>right,vcenter</align>
+            <template>%VALUE%%UNITS%</template>
+        </textarea>
+
+        <textarea name="playedtime">
+            <area>310,6,280,50</area>
+            <multiline>true</multiline>
+            <font>basesmall</font>
+            <align>allcenter</align>
+            <template>%PLAYEDTIME% of %TOTALTIME%\n%(|REMAININGTIME| remaining)%%(|BEHINDTIME| behind)%</template>
+        </textarea>
+
+        <progressbar name="position">
+            <area>45,62,519,16</area>
+            <layout>horizontal</layout>
+            <style>reveal</style>
+            <imagetype name="background">
+                <area>0,0,100%,100%</area>
+                <filename>popups/progress_bar_background.png</filename>
+            </imagetype>
+            <imagetype name="progressimage">
+                <area>0,0,100%,100%</area>
+                <filename>popups/progress_bar_fill.png</filename>
+            </imagetype>
+            <imagetype name="overlay">
+                <area>0,0,100%,100%</area>
+                <filename>popups/progress_bar_overlay.png</filename>
+            </imagetype>
+        </progressbar>
+
+    </window>
+
+    <window name="osd_message">
+        <area>-1,0,534,58</area>
+        <imagetype name="background">
+            <area>0,0,534,58</area>
+            <filename>osd/messagebackground.png</filename>
+        </imagetype>
+        <textarea name="message_text">
+            <font>baselarge</font>
+            <area>10,6,514,35</area>
+            <align>allcenter</align>
+        </textarea>
+    </window>
+
+    <window name="osd_program_editor">
+        <area>0,625,1280,75</area>
+
+        <imagetype name="background">
+            <area>0,0,1280,75</area>
+            <filename>osd/editorbackground.png</filename>
+        </imagetype>
+<!--
+        <shape name="background">
+            <area>-8,0,1296,100%</area>
+            <fill color="#484537" alpha="210" />
+            <line color="#a7ac93" alpha="255" width="6" />
+        </shape>-->
+
+        <editbar name="editbar">
+            <area>42,11,1196,25</area>
+            <shape name="keep">
+                <area>0,7,100%,11</area>
+                <fill color="#00AA00" />
+                <line color="#009900" width="1" />
+                <type>roundbox</type>
+                <cornerradius>10</cornerradius>
+            </shape>
+            <shape name="cut">
+                <area>0,7,100%,11</area>
+                <fill color="#AA0000" />
+                <line color="#990000" width="1" />
+                <type>roundbox</type>
+                <cornerradius>10</cornerradius>
+            </shape>
+            <shape name="cuttoright">
+                <area>0,0,5,25</area>
+                <fill color="#AA0000" />
+                <type>roundbox</type>
+                <cornerradius>2</cornerradius>
+            </shape>
+            <shape name="cuttoleft" from="cuttoright" />
+            <shape name="keeptoright">
+                <area>0,0,5,25</area>
+                <fill color="#00AA00" />
+                <type>roundbox</type>
+                <cornerradius>2</cornerradius>
+            </shape>
+            <shape name="keeptoleft" from="keeptoright" />
+            <shape name="position">
+                <area>0,0,6,25</area>
+                <fill color="#000000" />
+                <type>roundbox</type>
+                <cornerradius>3</cornerradius>
+            </shape>
+        </editbar>
+
+<!--        <imagetype name="overlay">
+            <area>42,108,1196,16</area>
+            <filename>popups/progress_bar_overlay.png</filename>
+        </imagetype>-->
+
+        <textarea name="heading">
+            <area>50,35,200,30</area>
+            <font>basemedium</font>
+            <value>Video Editor</value>
+        </textarea>
+
+        <textarea name="timedisplay">
+            <area>540,38,200,30</area>
+            <font>basesmall</font>
+            <align>hcenter</align>
+        </textarea>
+
+        <textarea name="seekamount">
+            <area>935,38,300,30</area>
+            <font>basesmall</font>
+            <align>right</align>
+            <template>Move by %1</template>
+        </textarea>
+
+    </window>
+
+    <window name="MythPopupBox">
+        <area>0,42,412,642</area>
+
+        <imagetype name="backimg">
+            <area>0,78,412,515</area>
+            <filename>popups/menu_background.png</filename>
+        </imagetype>
+
+        <textarea name="messagearea">
+            <area>12,93,378,125</area>
+            <multiline>yes</multiline>
+            <align>allcenter</align>
+            <font>basesmall</font>
+        </textarea>
+
+        <buttonlist name="list">
+            <area>15,238,378,350</area>
+            <buttonarea>0,0,378,350</buttonarea>
+            <spacing>3</spacing>
+            <wrapstyle>selection</wrapstyle>
+            <statetype name="buttonitem">
+                <area>0,0,367,53</area>
+                <state name="active">
+                    <area>0,0,367,53</area>
+                    <imagetype name="buttonbackground">
+                        <area>0,0,367,53</area>
+                        <filename>popups/menu_button.png</filename>
+                    </imagetype>
+                    <textarea name="buttontext">
+                        <area>18,0,324,50</area>
+                        <align>allcenter</align>
+                        <font>basemedium</font>
+                    </textarea>
+                    <imagetype name="buttonarrow">
+                        <area>346,16,10,19</area>
+                        <filename>popups/submenu_arrow.png</filename>
+                    </imagetype>
+                </state>
+                <state name="selectedinactive" from="active">
+                </state>
+                <state name="selectedactive" from="active">
+                    <imagetype name="selecteditemarrow">
+                        <area>5,16,10,19</area>
+                        <filename>popups/selected_item_arrow.png</filename>
+                    </imagetype>
+                    <textarea name="buttontext">
+                        <font>basemediumbrown</font>
+                    </textarea>
+                </state>
+            </statetype>
+        </buttonlist>
+    </window>
+
+    <window name="osd_input">
+        <area>40,40,160,60</area>
+        <shape name="background">
+            <area>0,0,100%,100%</area>
+            <type>roundbox</type>
+            <fill color="#484537" alpha="210" />
+            <line color="#a7ac93" alpha="255" width="6" />
+            <cornerradius>12</cornerradius>
+        </shape>
+        <textarea name="osd_number_entry">
+            <font>baselarge</font>
+            <area>10,10,140,40</area>
+            <align>allcenter</align>
+        </textarea>
+    </window>
+
+    <window name="ChannelEditor">
+        <area>-1,-1,814,555</area>
+
+        <imagetype name="backimg">
+            <area>0,0,814,555</area>
+            <filename>popups/edit_background.png</filename>
+        </imagetype>
+
+        <textarea name="title">
+            <area>15,30,774,90</area>
+            <value>Video List Filters</value>
+            <align>allcenter</align>
+            <font>basemedium</font>
+            <value>Channel Editor</value>
+        </textarea>
+
+        <textarea name="channum_label">
+            <area>20,200,270,30</area>
+            <value>Channel Number</value>
+            <font>basemedium</font>
+            <align>right</align>
+        </textarea>
+
+        <textedit name="channum">
+            <area>300,190,437,45</area>
+            <statetype name="background">
+                <area>0,0,100%,100%</area>
+                <state name="active">
+                    <area>0,0,100%,100%</area>
+                    <shape name="background">
+                        <area>0,0,100%,100%</area>
+                        <type>roundbox</type>
+                        <cornerradius>8</cornerradius>
+                        <fill color="#e6e6e6" />
+                        <line color="#a7ac93" width="3" />
+                    </shape>
+                </state>
+                <state name="selected" from="active">
+                <shape name="background">
+                        <fill color="#f9f9f9" />
+                    </shape>
+                </state>
+                <state name="inactive" from="active"/>
+            </statetype>
+            <imagetype name="cursor">
+                <filename>controls/cursor.png</filename>
+            </imagetype>
+            <textarea name="text">
+                <area>8,10,421,35</area>
+                <font>basemediumbrown</font>
+            </textarea>
+        </textedit>
+
+        <textarea name="name_label" from="channum_label">
+            <position>20,260</position>
+            <value>Channel Name</value>
+        </textarea>
+
+        <textedit name="channame" from="channum">
+            <position>300,250</position>
+        </textedit>
+
+        <textarea name="callsign_label" from="channum_label">
+            <position>20,320</position>
+            <value>Callsign</value>
+        </textarea>
+
+        <textedit name="callsign" from="channum">
+            <position>300,310</position>
+        </textedit>
+
+        <textarea name="xmltv_label" from="channum_label">
+            <position>20,380</position>
+            <value>XMLTV ID</value>
+        </textarea>
+
+        <textedit name="XMLTV" from="channum">
+            <position>300,370</position>
+        </textedit>
+
+        <button name="probe">
+            <area>130,475,223,53</area>
+            <value>Probe</value>
+            <statetype name="buttonstate">
+                <state name="active">
+                    <imagetype name="background">
+                        <filename>controls/button.png</filename>
+                    </imagetype>
+                    <textarea name="text">
+                        <area>5,5,213,43</area>
+                        <font>baselarge</font>
+                        <align>allcenter</align>
+                    </textarea>
+                </state>
+                <state name="selected" from="active">
+                    <textarea name="text">
+                        <font>baselargebrown</font>
+                    </textarea>
+                </state>
+                <state name="disabled" from="active" />
+                <state name="pushed" from="selected">
+                    <imagetype name="background">
+                        <filename>controls/button_pushed.png</filename>
+                    </imagetype>
+                    <textarea name="text">
+                        <position>8,8</position>
+                    </textarea>
+                </state>
+            </statetype>
+        </button>
+
+        <button name="ok" from="probe">
+            <position>460,475</position>
+            <value>OK</value>
+        </button>
+    </window>
+
+</mythuitheme>

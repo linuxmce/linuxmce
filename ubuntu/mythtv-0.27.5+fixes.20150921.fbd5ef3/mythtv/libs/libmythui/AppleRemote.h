@@ -1,0 +1,100 @@
+#ifndef APPLEREMOTE
+#define APPLEREMOTE
+
+// C++ headers
+#include <string>
+#include <vector>
+#include <map>
+
+// MythTV headers
+#include "mthread.h"
+
+#include <QTimer>
+
+#include <IOKit/IOKitLib.h>
+#include <IOKit/IOCFPlugIn.h>
+#include <IOKit/hid/IOHIDLib.h>
+#include <IOKit/hid/IOHIDKeys.h>
+#include <CoreFoundation/CoreFoundation.h>
+
+class AppleRemote : public QObject, public MThread
+{
+    Q_OBJECT
+public:
+    enum Event
+    { // label/meaning on White ... and Aluminium remote
+        Up = 0,        // VolumePlus    Up
+        Down,          // VolumeMinus   Down
+        Menu,
+        Select,        // Play          Select
+        Right,
+        Left,
+        RightHold,
+        LeftHold,
+        MenuHold,
+        PlayHold,  // was PlaySleep
+        ControlSwitched,
+        PlayPause,     // Play or Pause
+        Undefined      // Used to handle the Apple TV > v2.3
+    };
+
+    class Listener
+    {
+    public:
+        virtual      ~Listener();
+        virtual void appleRemoteButton(Event button, bool pressedDown) = 0;
+    };
+
+    static AppleRemote * Get();
+    ~AppleRemote();
+
+    bool      isListeningToRemote();
+    void      setListener(Listener* listener);
+    Listener* listener()                      { return _listener; }
+    void      setOpenInExclusiveMode(bool in) { openInExclusiveMode = in; };
+    bool      isOpenInExclusiveMode()         { return openInExclusiveMode; };
+    void      startListening();
+    void      stopListening();
+    void      run();
+
+protected:
+    AppleRemote(); // will be a singleton class
+
+    static AppleRemote*      _instance;
+
+
+private:
+    bool                   openInExclusiveMode;
+    IOHIDDeviceInterface** hidDeviceInterface;
+    IOHIDQueueInterface**  queue;
+    std::vector<int>       cookies;
+    std::map< std::string, Event > cookieToButtonMapping;
+    int                    remoteId;
+    Listener*              _listener;
+
+    bool                   mUsingNewAtv;
+    AppleRemote::Event     mLastEvent;
+    int                    mEventCount;
+    bool                   mKeyIsDown;
+    QTimer*                mCallbackTimer;
+
+    void        _initCookieMap();
+    bool        _initCookies();
+    bool        _createDeviceInterface(io_object_t hidDevice);
+    bool        _openDevice();
+
+    static void QueueCallbackFunction(void* target, IOReturn result,
+                                      void* refcon, void* sender);
+    void        _queueCallbackFunction(IOReturn result,
+                                       void* refcon, void* sender);
+    void        _queueCallbackATV23(IOReturn result);
+    void        _handleEventWithCookieString(std::string cookieString,
+                                             SInt32 sumOfValues);
+    void        _handleEventATV23(std::string cookieString, SInt32 sumOfValues);
+    
+private slots:
+    // Key up event handling on the ATV v2.3 and above
+    void         TimeoutHandler();
+};
+
+#endif // APPLEREMOTE

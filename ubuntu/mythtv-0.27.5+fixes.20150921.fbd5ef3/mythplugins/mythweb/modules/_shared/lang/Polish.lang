@@ -1,0 +1,1048 @@
+""
+"# Tracks"
+"$1 B"
+"$1 day"
+    $1 dzień
+"$1 days"
+    $1 dni
+"$1 episode"
+    $1 epizod
+"$1 episodes"
+    $1 epizodów
+"$1 GB"
+"$1 hr"
+    $1 godzina
+"$1 hrs"
+    $1 godziny
+"$1 is not responding."
+"$1 KB"
+"$1 MB"
+"$1 min"
+    $1 minuty
+"$1 mins"
+    $1 minut
+"$1 month"
+"$1 months"
+"$1 programs, using $2 ($3) out of $4 ($5 free)."
+    $1 programów, użyte $2 ($3) z $4 ($5 wolne).
+"$1 recording"
+    $1 nagranie
+"$1 recordings"
+    $1 nagrania
+"$1 requests pending."
+"$1 Search"
+    $1 Szukaj
+"$1 TB"
+"$1 to $2"
+"$1 video"
+"$1 videos"
+"$1 wasted"
+"$1 year"
+"$1 years"
+"%s Song (%s)"
+"%s Songs"
+"%s Songs (%s)"
+"(height is calculated automatically from the recording aspect ratio)"
+"1 - Lowest"
+"4 - Highest"
+"Aborted"
+"Aborting"
+"Action"
+    Akcja
+"Activate"
+    Uaktywnij
+"Add"
+"Add Album to Current Playlist"
+"Add Mix"
+"Add Song to Current Playlist"
+"add string"
+"Add this Playlist as a Subplaylist"
+"Additional Tables"
+"Additional tables:"
+"Admin Key"
+"Advanced"
+    Zaawansowany
+"Advanced Options"
+    Zaawansowane opcje
+"Advanced Search"
+    Szukanie zaawansowane
+"airdate"
+"Airdate"
+"Airtime"
+"Album Listing"
+"Album Tracks"
+"Albums"
+"Albums with songs by %s"
+"All"
+    Wszystko
+"All Albums"
+"All Categories"
+"All Fields"
+"All Genres"
+"All groups"
+    Wszystkie grupy
+"All HDTV"
+"All Hosts"
+"All recordings"
+    Wszystkie nagrania
+"All Songs"
+"ALLOCINETYPE"
+"Allows you to match any string of any length (including zero length)"
+"Allows you to match on a single character"
+"Allows you to search through other database tables when using a power search"
+"An error occurred while adding your playlist."
+"and"
+"Any"
+    Dowolny
+"Any Category"
+    Dowolna kategoria
+"Any Channel"
+    Dowolny kanał
+"Any Program Type"
+    Dowolny typ programu
+"API Key"
+"API Server"
+"Append"
+"Append to Current Playlist"
+"Are you sure you want to delete the following show?"
+"Are you sure you want to DELETE THIS SAVED PLAYLIST?"
+"Artist Listing"
+"Artists"
+"Artists Beginning with %s"
+"ASX Stream"
+"Audio Bitrate"
+"Audio for Hearing Impaired"
+"Audio for Visually Impaired"
+"Auto Expire"
+"Auto-expire recordings"
+    nadpisz nagrania
+"Auto-flag commercials"
+    Oznaczanie reklam
+"Auto-transcode"
+    Przekodowywanie
+"AVC/H.264"
+"Avoid poor signal quality"
+"Back"
+"Back Tab"
+"Back to the program listing"
+    Wróć do przewodnika programowego
+"Back to the recorded programs"
+"Back to the recording schedules"
+    Wróć do harmonogramu nagrań
+"Backend Logs"
+    Logi serwera
+"Backend Status"
+    Status serwera
+"Backspace"
+"Begin a New Search"
+"brightness"
+    jasność
+"Browsable"
+"Browse"
+"Browse = no"
+"Browse = yes"
+"Browse all"
+"Browse All Albums"
+"Browse Music"
+"Browse the Music Database"
+"By Artist Beginning With"
+"By Genre"
+"Cache_APC"
+"cache_engine"
+"Cache_Memcache"
+"Cache_Memcached"
+"Cache_Null"
+"Cache_SHM"
+"callsign"
+    ??callsign??
+"Cancel"
+"Cancel this schedule."
+    Anuluj to zadanie.
+"Cancelled"
+"Caps Lock"
+"Cast"
+    Obsada
+"category"
+    kategoria
+"Category"
+    Kategoria
+"Category Legend"
+    Legenda kategorie
+"CC"
+"Chan. Callsign"
+"Chan. Name"
+    Nazwa kanału
+"Chan. Number"
+    Numer kanału
+"Channel"
+    Kanał
+"channel"
+    kanał
+"Channel &quot;Jump to&quot;"
+"Channel Detail"
+    Szczegóły Kanału
+"Channel Info"
+"Channels"
+"channum"
+    numer kanału
+"Check for duplicates in"
+    Sprawdzaj duplikaty w
+"Children's Movies"
+"Choose Genre.."
+"Choose Type"
+"Clear the current default session"
+"Click to disable Auto Expire"
+"Click to enable Auto Expire"
+"Click to View Playlist"
+"Close Captioned priority"
+"Closed Captioning"
+"color"
+"Commands"
+    Komendy
+"Commands:"
+"Commercial free"
+"Commercials Flagged"
+"commfree"
+    bez reklam
+"Conflict"
+"Conflicts"
+    konflikty
+"Context"
+    Kontekst
+"contrast"
+    kontrast
+"Count"
+"Cover Image"
+"Create a New Playlist"
+"Create a Random Mix"
+"Create Schedule"
+    Utwórz zadanie
+"Current MythWeb Template"
+"Current Recording"
+"Current recordings"
+    Bieżące Nagrania
+"Currently Browsing:  $1"
+    Obecnie Przeglądany: $1
+"Currently Recording:  Edit"
+"Custom"
+"Custom Schedule"
+"Custom Search"
+"Customize Screens"
+"Data"
+    Dane
+"Database"
+"Database Health"
+"Date"
+    Data
+"Date Formats"
+    Format Daty
+"Deactivated"
+    Zdezaktywowany
+"Deaf Signed"
+"Default"
+    Domyślny
+"Default MythVideo View"
+"Default MythWeb Template"
+"Delete"
+    Usuń
+"delete"
+    usuń
+"Delete $1"
+    Usuń $1
+"Delete + Rerecord"
+    Usuń + Nagraj ponownie
+"Delete and allow rerecord: $1"
+"Delete and rerecord $1"
+    Usuń i nagraj ponownie $1
+"Delete Forever"
+"DELETE this Saved Playlist"
+"DeleteKey"
+"Depending on the Search type this is where you enter actual main search commands"
+"description"
+    opis
+"Description"
+    Opis
+"Destination"
+    Cel
+"Details for: $1"
+"Direct Download"
+"Directed by"
+"Director"
+"Director:"
+"Directory Structure"
+"Display"
+"Dolby Surround"
+"Don't Record"
+    Nie Nagrywaj
+"Don't record this program."
+"Done, Unknown Status"
+"Down"
+"Download URL override"
+"Dup Method"
+"Duplicate"
+"Duplicate Check method"
+    Metoda szukania duplikatu
+"Duplicates/Ignored"
+"Earlier"
+"Earlier Showing"
+"Edit"
+    Edycja
+"Edit existing group"
+"Edit MythWeb and some MythTV settings."
+"Edit settings for: $1"
+"Editing "
+"Embed HTTP basic auth user name/password into stream urls"
+"Enable"
+"Enable Flash Video player for recordings."
+"Enable Video Playback"
+"End"
+    Koniec
+"End Late"
+    Zakończ później
+"Enter"
+"Enter a new name for your playlist"
+"Enter your search terms"
+"enter your search terms"
+"Episode"
+"Episode Number"
+"Error"
+"Error contacting server to retrieve metadata."
+"error: playgroup $1 exists"
+"Errored"
+"Erroring"
+"Escape"
+"Everything"
+"Exec. Producer"
+"Extended Check"
+"ffmpeg with MP3 support not detected"
+"File Size"
+"film"
+"Filters"
+"Find Date & Time Options"
+    Find Date &amp; Time Options
+"Find Day"
+    Znajdź Dzień
+"Find other showings of this program"
+"Find showings of this program"
+"Find Time"
+    Znajdź Czas
+"Find Time must be of the format:  HH:MM:SS"
+    Szukany Czas musi być podany w formacie: HH:MM:SS
+"finetune"
+"Finished"
+"First recording"
+"First showing"
+"First showing of each episode"
+"Flag Commercials"
+"FLV Width"
+"For daily recordings, 5 weekdays if a weekday, or 7 days per week if a weekend day."
+"For more information on the Power Search please go to:"
+"Force HTTP for streams"
+"Force HTTP/HTTPS port for streams"
+"Forced"
+"Forget Old"
+"format help"
+"Found %s results for '%s'"
+"freqid"
+"Friday"
+    Piątek
+"Frontends"
+"generic_date"
+    %a %b %e, %Y
+"generic_time"
+    %H:%M %p
+"Genre"
+"genre_colors"
+    Wyróżniaj gatunki kolorami
+"Genres"
+"Go"
+    Idź
+"Google"
+"Group timeslots every"
+"Guest Starring"
+"Guide rating"
+"Guide Settings"
+"Handy Predefined Searches"
+"handy: overview"
+    This page contains pre-prepared complex searches of the program listings.
+"has Bookmark"
+"Has Cutlist"
+"HD"
+"HDTV"
+"Height"
+"Hide"
+"High definition"
+"Home"
+"Hosted by"
+    Udostępniony przez
+"Hour"
+    Godzina
+"Hour Format"
+    Format godziny
+"hue"
+    kolor
+"Identifiable episode"
+"Ignore generic shows"
+"Ignore scheduled shows"
+"IMDB"
+"IMDBTYPE"
+"Inactive"
+    Bezczynny
+"info: activate recording"
+"info: default recording"
+"info: dont record"
+"info: flvplayer"
+"info: hidden advanced schedule"
+"info: record this"
+"info:forget old"
+"info:jumppoints"
+"info:never record"
+"Insert"
+"Internet Reference #"
+"Jump"
+    Skocz
+"Jump Points"
+"Jump to"
+    Skocz do
+"Jump To"
+    Skocz Do
+"JumpPoints Editor"
+"Key Bindings"
+"Key bindings"
+"Key Controls"
+"Keybindings Editor"
+"Keyword"
+"Keyword Search"
+"Keyword Search:"
+"Keywords"
+"Language"
+    Język
+"Last Recorded"
+    Ostatnio Nagrane
+"Last recording"
+"Last showing of each episode"
+"Later"
+"left"
+"Left"
+"leftl"
+"length"
+    długość
+"Length"
+    Długość
+"Length (min)"
+    Czas trwania (minut):
+"Length in minutes"
+"Listing &quot;Jump to&quot;"
+"Listing Time Key"
+"Listings"
+    Lista programów
+"Load"
+"Load a Saved Playlist"
+"Load Playlist"
+"Load Saved Playlists"
+"Load this Saved Playlist"
+"LOADING"
+"Local Server Statistics"
+"LOCKDOWN_NOTICE"
+"LOCKDOWN_NOTICE_2"
+"Logs"
+    Logi
+"Look up Metadata"
+"Low Space"
+"Manual"
+    Ręczny
+"Match related callsigns"
+"matches"
+"Max star rating for movies"
+"Metadata Home Page"
+"Metadata Lookup"
+"Metadata Lookup Error"
+"minutes"
+    minut
+"Missing Cover"
+"Modify priority by star rating (0.0 to 1.0 for movies only)"
+"Modify priority for a station on an input"
+"Modify priority for all inputs on a card"
+"Modify priority for an input (Input priority)"
+"Modify priority for every card on a host"
+"Modify unidentified episodes"
+"Monday"
+    Poniedziałek
+"Mono"
+"More"
+"more"
+"Move Item Down in Playlist"
+"Move Item Up in Playlist"
+"movie"
+    film
+"Movies"
+    Filmy
+"Movies, 3&frac12; Stars or more"
+    Filmy 3&frac12; gwiazdy lub więcej
+"Movies, Stinkers (2 Stars or less)"
+"Music"
+    Muzyka
+"Music Specials"
+"My Session"
+"MythMusic on the web."
+"MythMusic_Prefixes_To_Ignore"
+"MythTV"
+"MythTV Status"
+"MythVideo Artwork Dir"
+"MythVideo Dir"
+"MythVideo on the web."
+"mythvideo.db_folder_view"
+"mythvideo.ImageCacheSize"
+"mythvideo.sort_ignores_case"
+"MythWeb"
+"MythWeb Defaults"
+"MythWeb Global Defaults"
+"MythWeb Locked"
+"MythWeb Session"
+"MythWeb Skin"
+    Wygląd MythWeb
+"MythWeb Template"
+"MythWeb Weather."
+"Name"
+    Nazwa
+"name"
+    nazwa
+"Narrow Your Search"
+"Never Record"
+    Nigdy Nie Nagrywaj
+"New"
+"New episode"
+"New episodes only"
+"New Group"
+"New Search"
+"New Titles, Premieres"
+    Nowe tytuły, premiery
+"No"
+"NO DATA"
+"No Frontends allow remote control."
+"No Genre"
+"No matches found"
+"No matching programs found."
+"No metadata results found."
+"No Public Playlists"
+"No recording schedules have been defined."
+"No TV configured!"
+"No videos"
+"No. of recordings to keep"
+"NO_TV_CONFIGURED_NOTICE_1"
+"NO_TV_CONFIGURED_NOTICE_2"
+"Non-Music Specials"
+"Non-Series HDTV"
+"None"
+    Brak
+"Not Listed"
+"Notes"
+"Number of episodes"
+"Number of shows"
+"Number of Songs"
+"Number of timeslots"
+"Off"
+"OK"
+"Only a certain channel number"
+"Only channels marked as commercial free"
+"Only channels that carry a specific station"
+"Only display favorite channels"
+"Only match commercial-free channels"
+"Only match HD programs"
+"Only match non-recorded shows"
+"Only New Episodes"
+"Only one specific channel ID (Channel priority)"
+"Only show distinct shows"
+"Only shows marked as HDTV"
+"Optimize Tables"
+"or"
+"Original Airdate"
+"Originally aired between"
+"Override"
+"Page Down"
+"Page recorded programs"
+"Page Up"
+"Parental Level"
+"Part $1 of $2"
+"Past Month"
+"Past Week"
+"Past Year"
+"Paused"
+"Pending"
+"People"
+    Ludzie
+"People Search"
+    Szukaj Ludzi
+"People Search:"
+"Percent of time spent recording"
+"Play"
+"Play Recording on Frontend"
+"Play this Album Now"
+"Play This Playlist Now"
+"Play this Playlist Now"
+"Play this Song Now"
+"Play Time"
+"Playback Group"
+"Playback Groups"
+"Played %s times"
+"Played once"
+"Playlist"
+"Playlist Info"
+"Playlist is empty"
+"Playlist Items"
+"Playlist Name"
+"Playlist renamed successfully"
+"Playlist saved successfully"
+"Playlist: %s"
+"Playlists"
+"Please enter an IMDB number or a title to do another search"
+"Please rate more shows to get more results"
+"Please wait for the pending AJAX request"
+"Plot"
+"Plot:"
+"Pop-out player"
+"Possible conflicts"
+"Possible conflicts with this show"
+"Post Processing"
+"Power"
+"Power Search"
+"Power Search:"
+"Prefer a host for a storage group"
+"Prefer a host for live sports with overtime"
+"Prefer Channum"
+"Prefer movies when shown at night"
+"prefer_channum"
+"Preferred Input"
+"Presented by"
+"Previous Recording"
+"Previous recordings"
+    Poprzednie nagrania
+"Prime time"
+"Priority for a category"
+"Priority for a category type"
+"Priority for all matching titles"
+"Priority for any show with End Late time"
+"Priority for HD shows under two hours"
+"Priority for movies by the year of release"
+"Priority when shown once"
+"Produced by"
+"Profile"
+    Profil
+"profile"
+    profil
+"Program Categories"
+"Program Detail"
+    Szczegóły Programu
+"Program ID"
+"Program Listing"
+"Program Type"
+"Protocol"
+"Queue a job"
+"Queued"
+"Queued jobs"
+"Random"
+"Random Items"
+"Random Mix Maker"
+"Random Type"
+"Rating"
+"Rating:"
+"Recently Added Albums"
+"Recently completed jobs"
+"Recently Played Songs"
+"recgroup"
+"Recommend Videos"
+"Recommended"
+"Recommended Programs"
+"Record Date"
+"Record Length"
+"Record new and expire old"
+    Nagraj nowy i kończy się stary
+"Record This"
+    Nagraj to
+"Recorded"
+"Recorded Programs"
+    Nagrane Programy
+"Recording Details"
+"Recording Group"
+    Grupy Nagrywania
+"Recording Options"
+    Opcje Nagrywania
+"Recording Options Help"
+"Recording Priority"
+    Priorytet Nagrywania
+"Recording Profile"
+    Profil Nagrywania
+"Recording Schedules"
+    Zadania Nagrywania
+"Recording Statistics"
+    Statystyki Nagrywania
+"recpriority"
+    priorytet nagrania
+"recstatus: cancelled"
+    This was scheduled to be recorded but was manually canceled.
+"recstatus: conflict"
+    Another program with a higher recording priority will be recorded.
+"recstatus: currentrecording"
+    This episode was previously recorded and is still available in the list of recordings.
+"recstatus: deleted"
+    This showing was recorded but was deleted before recording was completed.
+"recstatus: earliershowing"
+    This episode will be recorded at an earlier time instead.
+"recstatus: force_record"
+    This show was manually set to record this specific instance.
+"recstatus: inactive"
+    This recording schedule is inactive.
+"recstatus: latershowing"
+    This episode will be recorded at a later time instead.
+"recstatus: lowdiskspace"
+    There wasn't enough disk space available to record this program.
+"recstatus: manualoverride"
+    This showing was manually set to not record
+"recstatus: neverrecord"
+    This show was marked to never be recorded.
+"recstatus: notlisted"
+    This show does not match the current program listings.
+"recstatus: previousrecording"
+    This episode was previously recorded according to the duplicate policy chosen for this title.
+"recstatus: recorded"
+    This showing was recorded.
+"recstatus: recording"
+    This showing is being recorded.
+"recstatus: repeat"
+    This showing is a repeat and will not be recorded.
+"recstatus: stopped"
+    This showing was recorded but was stopped before recording was completed.
+"recstatus: toomanyrecordings"
+    Too many recordings of this program have already been recorded.
+"recstatus: tunerbusy"
+    The tuner card was already being used when this program was scheduled to be recorded.
+"recstatus: unknown"
+    The status of this showing is unknown.
+"recstatus: willrecord"
+    Ta projekcja będzie nagrana.
+"rectype-long: always"
+    Nagraj w dowolnym czasie na dowolnym kanale.
+"rectype-long: daily"
+    Nagraj ten program w tym przedziale czasowym codziennie.
+"rectype-long: dontrec"
+    Nie nagrywaj tej projekcji.
+"rectype-long: finddaily"
+    Znajdź i nagraj jedną projekcję o tym tytule codziennie.
+"rectype-long: findone"
+    Znajdź i nagraj jedną projekcję o tym tytule.
+"rectype-long: findweekly"
+    Znajdź i nagraj jedną projekcję o tym tytule co tydzień.
+"rectype-long: once"
+    Nagraj tylko tą projekcję.
+"rectype-long: override"
+    Nagraj tą projekcję.
+"rectype-long: weekly"
+    Nagraj ten program w tym przedziale czasowym co tydzieñ.
+"rectype: always"
+    Zawsze
+"rectype: daily"
+    Dziennie
+"rectype: dontrec"
+    Nie nagrywaj
+"rectype: findone"
+    Znajdź raz
+"rectype: once"
+    Raz
+"rectype: override"
+    Override (record)
+"rectype: weekly"
+    Co tydzień
+"regex: articles"
+    An?|The
+"Remote"
+"Remove Item from Playlist"
+"Repair Tables"
+"Repeat"
+    Rerun
+"Reset"
+"Reset template and skin to defaults"
+"Retry"
+"Return to Statistics Page"
+"right"
+"Right"
+"Root Directory"
+"Rows to show between timeslot info"
+"Running"
+"Saturday"
+    Sobota
+"Save"
+    Zapisz
+"Save or Rename the Current Playlist"
+"Save Schedule"
+    Zapisz Zadanie
+"Save/Rename"
+"Save/Rename Playlist"
+"Saved Playlist Successfully Deleted"
+"Saved Playlists"
+"Scan Collection"
+"Schedule"
+    Zadanie
+"Schedule Manually"
+"Schedule normally."
+"Schedule Options"
+    Opcje zadania
+"Schedule Override"
+"Schedule via $1."
+"Scheduled"
+"Scheduled Popup"
+"Science Fiction Movies"
+"Search"
+    Szukaj
+"Search $1"
+"Search all program keywords for a match against search phrase below"
+"Search all program titles containing the Title text below"
+"Search for all actors contained in a recording for a match against search phrase below"
+"Search for:  $1"
+    Szukaj: $1
+"Search Music"
+"Search Phrase"
+    Szukaj zwrotu
+"Search Phrase:"
+"Search Results"
+    Szukaj wyniku
+"Search the Music Database"
+"Search Type"
+    Szukaj typu
+"Search Type Help"
+"Search will perform complex SQL queries against the database as per the search phrase below"
+"Searches"
+    Poszukiwania
+"Searches will be performed against the title of all TV shows"
+"Seas/Ep"
+"Season"
+"Select the correct show"
+"Server returned invalid data when attempting to retrieve metadata."
+"Server Statistics"
+"Set Host"
+"Settings"
+    Ustawienia
+"settings"
+    ustawienia
+"Settings Table"
+    Tabela ustawień
+"settings/stream: protocol"
+"settings: notice"
+"Shift"
+"Show"
+    Pokaż
+"Show group"
+    Pokaż grupę
+"Show pixmaps"
+"Show recordings"
+    Pokaż nagrania
+"show_channel_icons"
+"show_popup_info"
+"show_video_covers"
+    Pokazuj okładki filmów
+"Showing all programs from the $1 group."
+"Showing all programs."
+"Showings between"
+"Shows"
+"Skip Ahead"
+"Skip Back"
+"Songs"
+"Songs for Genre"
+"Songs Played"
+"Songs Rated"
+"Sorry, but you cannot add this playlist as it would create a circular dependency."
+"sortby_channum"
+"sourceid"
+"Space"
+"Special Searches"
+"Star character"
+"Start Date"
+    Data rozpoczęcia
+"Start Early"
+    Rozpocznij wcześniej
+"Start Time"
+    Czas rozpoczęcia
+"Starting"
+"Statistics"
+"Stats"
+"Status"
+"Status Bar"
+"Stereo"
+"Still Recording: Edit"
+"Stopping"
+"Storage Group"
+"Store the current session as the default"
+"Streaming"
+"Sub and Desc (Empty matches)"
+"Submit"
+"Submit Search"
+"Subtitle"
+    Tytuł
+"Subtitle and Description"
+    Tytuł i opis
+"Subtitle then Description"
+"Subtitled"
+"Subtitles Available"
+"Sunday"
+    Niedziela
+"Surround Sound"
+"Tab"
+"Television"
+"The requested recording schedule has been deleted."
+"themoviedb"
+"There are no items in this Playlist!"
+"There was a problem saving your playlist"
+"TheTVDB"
+"This channel"
+"This day and time"
+"This episode"
+"This playlist is already loaded!"
+"This series"
+"This time"
+"This will overwrite your current, unsaved playlist. Are you sure you want to continue?"
+"Thursday"
+    Czwartek
+"Time"
+    Czas
+"Time Span"
+"Time Stretch"
+"Timeslot size"
+"title"
+    tytuł
+"Title"
+    Tytuł
+"Title Match"
+"Title search"
+"Title Search"
+    Szukanie Tytułu
+"Title Search:"
+"Title:"
+"Toggle Interactive Mode"
+"Too Many"
+"Top $1"
+    Szczyt $1
+"Top Played Songs"
+"Top Rated Songs"
+"Total Length"
+"Total Recorded"
+"Total Running Time"
+"Total Time"
+    Całkowity Czas
+"Total Time:  %s"
+"Track #%s from the album '%s'"
+"Transcode"
+"Transcoded"
+"transcoder"
+"Transcoder"
+"Tuesday"
+    Wtorek
+"Tuner Busy"
+"TV"
+"TV functions, including recorded programs."
+"TV.com"
+"type"
+    typ
+"Type"
+    Typ
+"Uncategorized"
+"Undelete"
+"Undelete: $1"
+"Unknown"
+    Nieznany
+"Unknown action"
+"Unknown frontend"
+"Unknown Program."
+    Nieznany Program.
+"Unknown Recording Schedule."
+    Nieznane Zadanie Nagrania.
+"Up"
+"Upcoming Recordings"
+    Zaplanowane Nagrania
+"Update"
+    Uaktualnij
+"Update Recording Settings"
+    Uaktualnij Ustawienia Nagrywania
+"Use callsign"
+    Użyj CALLSIGN?
+"Use date/time"
+    Użyj Data/Czas
+"useonairguide"
+"User Rating"
+"Value"
+    Wartość
+"Video"
+    Wideo
+"Video Bitrate"
+"Video Playback"
+"Video: Error: IMDB"
+"Video: Error: IMDB: Not Found"
+"Video: Error: Missing ID"
+"Video: IMDB: No Matches"
+"Video: IMDB: Window Title"
+"Video: Warning: Artwork"
+"Video: Warning: Artwork: Download"
+"Video: Warning: fopen"
+"VideoAggressivePC"
+"VideoArtworkDir"
+"VideoBrowserNoDB"
+"VideoDefaultParentalLevel"
+"VideoDefaultPlayer"
+"videofilters"
+    Filtry wideo
+"VideoGalleryAspectRatio"
+"VideoGalleryColsPerPage"
+"VideoGalleryNoDB"
+"VideoGalleryRowsPerPage"
+"VideoGallerySubtitle"
+"VideoListUnknownFiletypes"
+"VideoNewBrowsable"
+"Videos"
+"VideoStartupDir"
+"VideoTreeLoadMetaData"
+"VideoTreeNoDB"
+"View"
+"View Albums by %s"
+"View Details of %s"
+"View Saved Playlist"
+"View Server Statistics"
+"visible"
+    Widoczny
+"Visit $1"
+"Watched"
+"Weather"
+"web_video_imdb_path"
+"web_video_imdb_type"
+"web_video_thumbnail_height"
+"web_video_thumbnail_width"
+"Wednesday"
+    Środa
+"welcome: backend_log"
+    Pokaż Logi Serwera.
+"welcome: music"
+    Przeglądaj Twoją kolekcję muzyki.
+"welcome: remote"
+"welcome: settings"
+    Configure MythWeb and some of the MythTV settings.
+"welcome: stats"
+    MythTV recording statistics.
+"welcome: status"
+    Show the backend status page.
+"welcome: tv"
+    See what's on tv, schedule recordings and manage shows that you've already
+    recorded.  Please see the following choices:
+"welcome: video"
+    Browse your video collection.
+"What else is on at this time?"
+"Widescreen"
+"Width"
+"Will Record"
+"Written by"
+    Napisany przez
+"xmltvid"
+"Year"
+"Year:"
+"Yes"
+    Tak
+"Yesterday"
+    Wczoraj
+"You are missing a php extension for mysql interaction. Please install php-mysqli or similar"
+"You must be running at least php 5.3 to use this program."

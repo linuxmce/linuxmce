@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="MAIN">
+
+    <button>
+        <type>TV_WATCH_RECORDINGS</type>
+        <text>Watch Recordings</text>
+        <description>Play recordings</description>
+        <action>TV_WATCH_RECORDING</action>
+    </button>
+
+    <button>
+        <type>VIDEO_BROWSER</type>
+        <text>Watch Videos</text>
+        <description>Play videos</description>
+        <action>JUMP Video Default</action>
+    </button>
+
+    <button>
+        <type>DVD_PLAY</type>
+        <text>Watch A Disc</text>
+        <description>Play the video on a Blu-ray or DVD</description>
+        <action>JUMP Play Disc</action>
+    </button>
+
+    <button>
+        <type>TV_WATCH_TV</type>
+        <text>Watch Live TV</text>
+        <description>Watch live television</description>
+        <action>TV_WATCH_LIVE</action>
+    </button>
+
+    <button>
+        <type>TV_PROGRAM_GUIDE</type>
+        <text>Program Guide</text>
+        <description>Choose programs from a grid-style list</description>
+        <action>TV_SCHEDULE</action>
+    </button>
+
+    <button>
+        <type>NET_VIDEO_SEARCH</type>
+        <text>Search Internet Video</text>
+        <description>Search popular video sites</description>
+        <action>JUMP MythNetSearch</action>
+        <depends>mythnetvision</depends>
+    </button>
+
+    <button>
+        <type>NET_VIDEO_TREE</type>
+        <text>Browse Internet Video</text>
+        <description>Browse highlights and entire sites</description>
+        <action>JUMP MythNetTree</action>
+        <depends>mythnetvision</depends>
+    </button>
+
+    <button>
+        <type>STREAM</type>
+        <text>Watch Online Streams</text>
+        <description></description>
+        <action>PLUGIN mythstream</action>
+        <depends>mythstream</depends>
+    </button>
+
+    <button>
+        <type>MUSIC_PLAY</type>
+        <text>Listen to Music</text>
+        <description></description>
+        <action>JUMP Play music</action>
+        <depends>mythmusic</depends>
+    </button>
+
+   <button>
+      <type>MUSIC_PLAY</type>
+      <text>Listen to Radio Stream</text>
+        <description>Play radio streams</description>
+        <action>JUMP Play radio stream</action>
+        <depends>mythmusic</depends>
+   </button>
+
+    <button>
+        <type>MENU_PLUGINS</type>
+        <text>Plugins</text>
+        <description>Other Plugins</description>
+        <action>MENU plugin_menu.xml</action>
+    </button>
+
+    <button>
+        <type>MENU_ADVANCED</type>
+        <text>Advanced</text>
+        <description>Advanced Options</description>
+        <action>MENU advanced.xml</action>
+    </button>
+
+</mythmenu>

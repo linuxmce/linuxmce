@@ -1,0 +1,24 @@
+<mythmenu name="WEATHER_SETTINGS">
+
+   <button>
+      <type>WEATHER_SETTINGS_GENERAL</type>
+      <text>Global Settings</text>
+      <action>SETTINGS_GENERAL</action>
+      <description>General weather options</description>
+   </button>
+
+   <button>
+      <type>WEATHER_SETTINGS_SCREEN</type>
+      <text>Screen Settings</text>
+      <action>SETTINGS_SCREEN</action>
+      <description>Choose which weather forecasts to display</description>
+   </button>
+
+   <button>
+      <type>WEATHER_SETTINGS_SOURCE</type>
+      <text>Source Settings</text>
+      <action>SETTINGS_SOURCE</action>
+      <description>Configure the behavior of weather scripts</description>
+   </button>
+
+</mythmenu>
