@@ -101,6 +101,10 @@ function Build_Replacements_Common_ubuntu
 	#Package: pthsem for bcusdk
 	make_jobs="" Build_Replacement_Package pthsem external/pthsem-2.0.7
 
+	#Package: bcusdk (eib)
+	Build_Replacement_Package bcusdk external/bcusdk-0.0.4 && \
+	cp -fr ${svn_dir}/${svn_branch_name}/external/*eib*.deb ${replacements_dir}
+
 	#Package: platform for libcec
 	Build_Replacement_Package platform ubuntu/platform-1.0.10
 
@@ -264,6 +268,10 @@ function Build_Replacements_Common_raspbian
 {
 	#Package: pthsem for bcusdk
 	make_jobs="" Build_Replacement_Package pthsem external/pthsem-2.0.7
+
+	#Package: bcusdk (eib)
+	Build_Replacement_Package bcusdk external/bcusdk-0.0.4 && \
+	cp -fr ${svn_dir}/${svn_branch_name}/external/*eib*.deb ${replacements_dir}
 
 	#Package: platform for libcec
 	Build_Replacement_Package platform ubuntu/platform-1.0.10
