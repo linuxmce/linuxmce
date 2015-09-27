@@ -116,16 +116,13 @@ function Build_Replacements_Common_ubuntu
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
 
 	#Package: libxine2
-	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb
+	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
 
 	#Package: logitechmediaserver-7.8.1
-	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb
+	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1
 
 	#Package: squeezelite-1.8
-	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb
+	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
 
 	#Package: lirc
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.9.0-0ubuntu1+lmce1
@@ -209,18 +206,15 @@ fi
 	# Open ZWave library
 	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
-        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}" && \
- 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}"
 
 	# qhttpserver (for LinuxMCE NVR)
 	Build_Replacement_Package libqhttpserver external/qhttpserver && \
-	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}" && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb
+	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}"
 
 	#Package: raspi2png
 	if [[ "$arch" == "armhf" ]]; then
-		Build_Replacement_Package raspi2png external/raspi2png && \
-		dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/raspi2png*.deb
+		Build_Replacement_Package raspi2png external/raspi2png
 	fi
 }
 
@@ -235,16 +229,14 @@ function Build_Replacements_ubuntu_precise
 
 	#Package: libbluray1
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package bluray ubuntu/libbluray-0.5.0 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb
+	Build_Replacement_Package bluray ubuntu/libbluray-0.5.0
 
 	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one for libxine2
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/smbclient.pc /usr/lib/pkgconfig/
 
 	#Package: libsoxr-0.1.1 - for squeezelite
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package soxr ubuntu/libsoxr-0.1.1 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb
+	Build_Replacement_Package soxr ubuntu/libsoxr-0.1.1
 }
 
 function Build_Replacements_ubuntu_trusty
@@ -257,11 +249,9 @@ function Build_Replacements_ubuntu_trusty
 	#Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	# libhupnp and libhupnp-av need to build under qt4.
-	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
+	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
 
-	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
+	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 }
 
 function Build_Replacements_Common_raspbian
@@ -282,31 +272,27 @@ function Build_Replacements_Common_raspbian
 	Build_Replacement_Package core-locator src/Core/locator
 
 	#Package: logitechmediaserver-7.8.1
-	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb
+	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1
 
 	#ubuntu/squeezelite-1.8
 	#Package: squeezelite-1.8
-	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb
+	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
 
 	# Open ZWave library
 	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
-        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}" && \
- 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}"
 
 	#Package: tee-pluto
 	Build_Replacement_Package tee-pluto misc_utils/tee-pluto
+
 	# qhttpserver (for LinuxMCE NVR)
 	Build_Replacement_Package libqhttpserver external/qhttpserver && \
-	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}" && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb
+	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}"
 
 	#Package: raspi2png
 	if [[ "$arch" == "armhf" ]]; then
-		Build_Replacement_Package raspi2png external/raspi2png && \
-		dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/raspi2png*.deb
+		Build_Replacement_Package raspi2png external/raspi2png
 	fi
 }
 
