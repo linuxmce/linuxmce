@@ -1,3 +1,9 @@
+bcusdk (0.0.4-lmce0) unstable; urgency=low
+
+  * LinuxMCE release, disable java and m68 emulator, we don't use them
+
+ -- phenigma <phenigma@hotmail.com>  Sun, 27 Sep 2015 13:23:04 -0400
+
 bcusdk (0.0.4) unstable; urgency=low
 
   * Next release
