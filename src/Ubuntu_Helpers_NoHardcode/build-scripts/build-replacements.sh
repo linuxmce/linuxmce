@@ -25,13 +25,13 @@ function Changed_Since_Last_Build
 	local cache_file="${replacements_dir}/${cache_name}"
 	local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
 	local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
-	local revision_old=$(cat "$cache_file" | grep "^${url_id}" | cut -d'|' -f2)
+	local revision_old=$(cat "$cache_file" | grep "^${url_id}" | cut -d'|' -f2) || :
 
 	if [ "$revision_new" = "$revision_old" ] && [ -n "$revision_old" ]; then
-		return $(/bin/false)
+		return 1 #$(/bin/false)
 	fi
 
-	return $(/bin/true)
+	return 0 #$(/bin/true)
 }
 
 function Update_Changed_Since_Last_Build
@@ -73,7 +73,7 @@ fi
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 
-		return $(/bin/true)
+		return 0 #$(/bin/true)
 #	else
 #		return $(/bin/false)
 	fi
@@ -98,6 +98,9 @@ function Build_Replacements_Common_all
 
 function Build_Replacements_Common_ubuntu
 {
+	#Package: pthsem for bcusdk
+	make_jobs="" Build_Replacement_Package pthsem external/pthsem-2.0.7
+
 	#Package: platform for libcec
 	Build_Replacement_Package platform ubuntu/platform-1.0.10
 
@@ -141,9 +144,6 @@ fi
 	fi
 
 	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
-
-	# SqueezeSlave
-	#Build_Replacement_Package squeezeslave ubuntu/squeezeslave-1.3-393
 
 	# ola needs to be configured to the current build environment
 	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
@@ -262,6 +262,9 @@ function Build_Replacements_ubuntu_trusty
 
 function Build_Replacements_Common_raspbian
 {
+	#Package: pthsem for bcusdk
+	make_jobs="" Build_Replacement_Package pthsem external/pthsem-2.0.7
+
 	#Package: platform for libcec
 	Build_Replacement_Package platform ubuntu/platform-1.0.10
 
