@@ -1,0 +1,304 @@
+ola (0.9.7-1build1) wily; urgency=medium
+
+  * No-change rebuild against libprotobuf9v5
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 10 Aug 2015 18:47:07 +0000
+
+ola (0.9.7-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Wouter Verhelst <wouter@debian.org>  Tue, 14 Jul 2015 11:28:09 +0200
+
+ola (0.9.6-3) unstable; urgency=medium
+
+  * cherry-pick 3eab3821 from upstream git HEAD to fix test suite on
+    little-endian architectures.
+
+ -- Wouter Verhelst <wouter@debian.org>  Wed, 08 Jul 2015 23:11:03 +0200
+
+ola (0.9.6-2) unstable; urgency=medium
+
+  * plugins/usbdmx/LibUsbThreadTest.cpp: don't segfault when we can't access
+    USB
+  * Cherry-pick c8ef84a1 and e71a21a5 from upstream git HEAD to fix build on
+    ppc, which does not have termios2
+
+ -- Wouter Verhelst <wouter@debian.org>  Sat, 04 Jul 2015 15:26:18 +0200
+
+ola (0.9.6-1) unstable; urgency=medium
+
+  * New upstream release. Closes: #778038, #769690.
+  * debian/rules: remove override_dh_autoreconf target (no longer relevant due
+    to upstream changes)
+  * debian/libola*.install: remove reference to /usr/lib/*/olad which no longer
+    exists.
+  * debian/rules: add --parallel
+  * Incorporate NMU.
+    - Remove patch for #769690 (integrated upstream).
+  * debian/source/include-binaries: remove, no longer necessary
+  * configure.ac: revert change to add option serial-tests to automake
+    initialization. This was added when a previous version of ola kept
+    failing on the bigendian architectures, but there is an environment
+    variable VERBOSE that we can set to get the same diagnostics
+    instead, so use that (and stop diverting from upstream on this
+    part).
+
+ -- Wouter Verhelst <wouter@debian.org>  Tue, 30 Jun 2015 10:04:28 +0200
+
+ola (0.9.5-1) unstable; urgency=low
+
+  * New upstream release
+  * Update udev rules
+
+ -- RenZO <renzo@imaginux.com>  Sat, 28 Feb 2015 19:22:09 +0100
+
+ola (0.9.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sat, 24 Jan 2015 18:24:52 +0100
+
+ola (0.9.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sun, 16 Nov 2014 00:16:27 +0100
+
+ola (0.9.2-1) unstable; urgency=low
+
+  [ RenZO ]
+  * New upstream release
+  * Add ola_usbpro program
+  * Add usbpro_firmware program
+
+  [ Wouter Verhelst ]
+  * Remove debconf usage from ola-rdm-tests postinst; Closes: #767676.
+
+ -- RenZO <renzo@imaginux.com>  Wed, 20 Aug 2014 14:56:45 +0200
+
+ola (0.9.1-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload
+  * Remove debconf calls from ola-rdm-tests postinst (Closes: #767676)
+  * Ship /etc/ola within ola & ola-rdm-tests packages (Closes: #769331)
+  * Add a patch which fix failing test when running in pbuilder
+    (Closes: #769690)
+  * Fix other important issues:
+    - Remove the check for $RUN_DAEMON from both ini scripts olad and
+      rdm_test_server (Package maintainer disagree about this way of
+      controling service)
+    - Remove ola-rdm-tests postinst since its only purpose was to provide
+      /etc/default/ola-rdm-tests
+    - Add postrm scripts for packages ola & ola-rdm-tests to fully remove
+      configuration files so that piuparts tests can pass
+
+ -- Jean Baptiste Favre <debian@jbfavre.org>  Sun, 16 Nov 2014 17:44:18 +0100
+
+ola (0.9.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Enable "serial-tests" automake option, to avoid issues in the test
+    suite. This will also allow us to more easily figure out what went
+    wrong in the test suite, should the build fail.
+  * Disable DummyPluginTester test, since it wants to link against
+    KiNet, which no longer exists.
+  * Migrate to dh_python2 (from python-support)
+
+ -- Wouter Verhelst <wouter@debian.org>  Sat, 19 Jul 2014 12:56:32 +0200
+
+ola (0.9.0-5) never released; urgency=medium
+
+  * Add missing numbers for FSF copyright licenses (zip code, house numbers)
+
+ -- Wouter Verhelst <wouter@debian.org>  Thu, 05 Jun 2014 08:13:06 +0200
+
+ola (0.9.0-4) unstable; urgency=medium
+
+  * debian/copyright: add missing licenses (Apache-2.0 and LGPL)
+
+ -- Wouter Verhelst <wouter@debian.org>  Wed, 04 Jun 2014 01:23:28 +0200
+
+ola (0.9.0-3) unstable; urgency=medium
+
+  * debian/ola.olad.init: implement force-reload
+  * debian/ola-rdm-server.rdm_test_server.init: same
+  * debian/changelog: fix trailer format of older changelog entry
+  * debian/ola-python.install: remove brace expression
+  * debian/ola.lintian-overrides: add, overriding two javascript-missing-source
+    false positives
+  * tools/rdm/static/rdmtest.html, debian/ola-rdm-tests.link: don't use
+    shipped/minified version of jquery, instead use Debian-packaged
+    versions by using symlinks and Depends: headers
+  * ola-python: fix dependency to ola so it's binNMUable
+  * Add dependency to python-support for python-using packages
+  * debian/control: update Standards-Version to 3.9.5. No relevant changes.
+
+ -- Wouter Verhelst <wouter@debian.org>  Tue, 22 Apr 2014 20:42:31 +0200
+
+ola (0.9.0-2) unstable; urgency=medium
+
+  * Upload to Debian. Closes: #745385.
+  * debian/compat: bump to compat level 9
+  * debian/rules: convert to dh mode
+  * debian/control: add missing build-dependencies
+  * debian/ola-dev.install: don't install .la files
+  * debian/control: make descriptions be policy-compliant, rename ola-dev to
+    libola-dev
+  * debian/ola.templates: don't state the obvious about dpkg-reconfigure
+  * libola1: split off from ola, contains libraries only in multiarch-compliant
+    paths
+  * debian/ola.postinst: add --home parameter to adduser invocation
+  * convert to dpkg-source v3 (quilt) format (let's give that another chance...)
+  * debian/source/include-binaries: add, with doxygen/OLA.png
+
+ -- Wouter Verhelst <wouter@debian.org>  Mon, 21 Apr 2014 22:14:57 +0200
+
+ola (0.9.0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sat, 01 Mar 2014 23:46:42 +0100
+
+ola (0.8.33-2) unstable; urgency=low
+
+  * Remove logic_rdm_sniffer since it causes debuild failures.
+
+ -- Simon Newton <nomis52@gmail.com>  Tue, 17 Dec 2013 18:25:55 -0800
+
+ola (0.8.33-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sat, 19 Oct 2013 22:48:32 +0200
+
+ola (0.8.32-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sun, 29 Sep 2013 17:15:41 +0200
+
+ola (0.8.31-3) unstable; urgency=low
+
+  * New ola-logic-sniffer package
+
+ -- RenZO <renzo@imaginux.com>  Mon, 19 Aug 2013 00:16:57 +0200
+
+ola (0.8.31-2) unstable; urgency=low
+
+  * Add logic_rdm_sniffer
+    (requires libSaleaeDevice.so from Saleae Device SDK)
+
+ -- RenZO <renzo@imaginux.com>  Sat, 17 Aug 2013 15:33:24 +0200
+
+ola (0.8.31-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Mon, 12 Aug 2013 15:13:53 +0200
+
+ola (0.8.30-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sun, 16 Jun 2013 17:31:13 +0200
+
+ola (0.8.29-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Wed, 29 May 2013 00:05:25 +0200
+
+ola (0.8.28-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sat, 20 Apr 2013 23:59:52 +0200
+
+ola (0.8.27-1) unstable; urgency=low
+
+  * New upstream release
+  * Display a message if init scripts are disabled
+
+ -- RenZO <renzo@imaginux.com>  Sat, 02 Mar 2013 02:12:02 +0100
+
+ola (0.8.26-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sun, 11 Nov 2012 03:58:40 +0100
+
+ola (0.8.25-1) unstable; urgency=low
+
+  * New upstream release
+  * Update the init script names
+
+ -- RenZO <renzo@imaginux.com>  Mon, 08 Oct 2012 01:34:31 +0200
+
+ola (0.8.24-1) unstable; urgency=low
+
+  * New upstream release
+  * Use a pidfile in the init script
+  * Add a init script for the RDM Test Server
+
+ -- RenZO <renzo@imaginux.com>  Tue, 02 Oct 2012 16:04:18 +0200
+
+ola (0.8.23-1) unstable; urgency=low
+
+  * New upstream release
+  * New rdm-tests package
+  * Add the init script
+  * Add udev rules
+  * Add docs
+
+ -- RenZO <renzo@imaginux.com>  Sun, 09 Sep 2012 04:03:59 +0200
+
+ola (0.8.22-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Thu, 09 Aug 2012 16:09:30 +0200
+
+ola (0.8.21-2) unstable; urgency=low
+
+  * Move RDM Tests in python package
+  * Support both python 2.6 and 2.7
+
+ -- RenZO <renzo@imaginux.com>  Sat, 28 Jul 2012 00:26:44 +0200
+
+ola (0.8.21-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Wed, 18 Jul 2012 16:14:55 +0200
+
+ola (0.8.18-1) unstable; urgency=low
+
+  * New upstream release
+  * Add missing /usr/share/ola/pids/pids.proto
+
+ -- RenZO <renzo@imaginux.com>  Fri, 02 Mar 2012 00:27:44 +0100
+
+ola (0.8.17-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sat, 04 Feb 2012 11:11:22 +0100
+
+ola (0.8.15-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- RenZO <renzo@imaginux.com>  Sun, 18 Dec 2011 16:05:33 +0100
+
+ola (0.8.14-1) unstable; urgency=low
+
+  * Initial release from RenZO
+
+ -- RenZO <renzo@imaginux.com>  Sat, 05 Nov 2011 13:01:33 +0100
+
+ola (0.7.3-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Simon Newton <nomis52@gmail.com>  Sun, 16 May 2010 04:03:33 +0000
