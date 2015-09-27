@@ -6,7 +6,7 @@
 . /usr/local/lmce-build/common/utils.sh
 
 set -e
-#set -x
+set -x
 
 BUILD_ALL_PKGS="no"
 
@@ -74,8 +74,8 @@ fi
 		popd
 
 		return $(/bin/true)
-	else
-		return $(/bin/false)
+#	else
+#		return $(/bin/false)
 	fi
 }
 
@@ -188,6 +188,21 @@ fi
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
 
+	# Open ZWave library
+	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}"
+
+	# qhttpserver (for LinuxMCE NVR)
+	Build_Replacement_Package libqhttpserver external/qhttpserver && \
+	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}"
+
+	#Package: raspi2png
+	if [[ "$arch" == "armhf" ]]; then
+		Build_Replacement_Package raspi2png external/raspi2png
+	fi
+
+	if [[ "$arch" != "armhf" ]]; then
 	#Package: linux-image-diskless
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
 	if Changed_Since_Last_Build "$dir_" ;then
@@ -202,19 +217,6 @@ fi
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
-
-	# Open ZWave library
-	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
-        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
-        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}"
-
-	# qhttpserver (for LinuxMCE NVR)
-	Build_Replacement_Package libqhttpserver external/qhttpserver && \
-	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}"
-
-	#Package: raspi2png
-	if [[ "$arch" == "armhf" ]]; then
-		Build_Replacement_Package raspi2png external/raspi2png
 	fi
 }
 
@@ -225,7 +227,7 @@ function Build_Replacements_ubuntu_precise
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
 
-	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
+	Build_Replacement_Package coherence ubuntu/Coherence-0.6.6.2
 
 	#Package: libbluray1
 	Build_Replacement_Package bluray ubuntu/libbluray-0.5.0
