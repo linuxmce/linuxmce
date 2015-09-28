@@ -201,10 +201,10 @@ fi
 	Build_Replacement_Package libqhttpserver external/qhttpserver && \
 	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}"
 
-	#Package: raspi2png
-	if [[ "$arch" == "armhf" ]]; then
-		Build_Replacement_Package raspi2png external/raspi2png
-	fi
+	##Package: raspi2png
+	#if [[ "$arch" == "armhf" ]]; then
+	#	Build_Replacement_Package raspi2png external/raspi2png
+	#fi
 
 	if [[ "$arch" != "armhf" ]]; then
 	#Package: linux-image-diskless
