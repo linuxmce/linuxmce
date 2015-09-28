@@ -117,11 +117,16 @@ function build_main_debs() {
 					Distro_ID="21"
 					RepositorySource=25
 					Main_Version='2.0.0.47.'
-					if [[ "$arch" == "armhf" ]] ; then
-						exclude_list=$exclude_list,452,453 # IRTrans - no armhf .so
-						exclude_list=$exclude_list,879,881 # qOrbiter for Android
-						exclude_list=$exclude_list,682,683 # mame
-					fi
+					case "${arch}" in
+						"armhf")
+							exclude_list=$exclude_list,452,453 # IRTrans - no armhf .so
+							exclude_list=$exclude_list,879,881 # qOrbiter for Android
+							exclude_list=$exclude_list,682,683 # mame
+							;;
+						"amd64")
+							exclude_list=$exclude_list,879,881 # qorbiter android
+							;;
+					esac
 					;;
 			esac
 			;;
