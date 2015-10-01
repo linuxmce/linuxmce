@@ -243,7 +243,7 @@ function Build_Replacements_ubuntu_precise
 	Build_Replacement_Package soxr ubuntu/libsoxr-0.1.1
 
 	# mythtv
-	QT_SELECT=4 Build_Replacement_Package mythtv ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
+	QT_SELECT=4 Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
 }
 
 function Build_Replacements_ubuntu_trusty
@@ -261,7 +261,7 @@ function Build_Replacements_ubuntu_trusty
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 
 	# mythtv
-	Build_Replacement_Package mythtv ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
+	Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
 }
 
 function Build_Replacements_Common_raspbian
@@ -318,7 +318,7 @@ function Build_Replacements_raspbian_wheezy
 	mkdir -pv "$replacements_dir"
 
 	# mythtv
-	QT_SELECT=4 Build_Replacement_Package mythtv ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
+	QT_SELECT=4 Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
 }
 
 function Build_Replacements_raspbian_jessie
@@ -326,7 +326,7 @@ function Build_Replacements_raspbian_jessie
 	mkdir -pv "$replacements_dir"
 
 	# mythtv
-	Build_Replacement_Package mythtv ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
+	Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
 }
 
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
