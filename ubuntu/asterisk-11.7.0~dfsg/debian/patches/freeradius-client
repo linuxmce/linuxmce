@@ -1,0 +1,74 @@
+Description: allows either libfreeradius-client or libradiusclient-ng
+Author: Daniel Pocock <daniel@pocock.com.au>
+Author: Jeremy Lainé <jeremy.laine@m4x.org>
+Bug: https://issues.asterisk.org/jira/browse/ASTERISK-22980
+--- a/cdr/cdr_radius.c	2013-12-11 10:08:13.537159711 +0100
++++ b/cdr/cdr_radius.c	2013-12-11 10:08:13.529159762 +0100
+@@ -36,7 +36,11 @@
+ 
+ ASTERISK_FILE_VERSION(__FILE__, "$Revision: 328259 $")
+ 
++#ifdef FREERADIUS_CLIENT
++#include <freeradius-client.h>
++#else
+ #include <radiusclient-ng.h>
++#endif
+ 
+ #include "asterisk/channel.h"
+ #include "asterisk/cdr.h"
+@@ -82,7 +86,11 @@
+ static const char name[] = "radius";
+ static const char cdr_config[] = "cdr.conf";
+ 
++#ifdef FREERADIUS_CLIENT
++static char radiuscfg[PATH_MAX] = "/etc/radiusclient/radiusclient.conf";
++#else
+ static char radiuscfg[PATH_MAX] = "/etc/radiusclient-ng/radiusclient.conf";
++#endif
+ 
+ static struct ast_flags global_flags = { RADIUS_FLAG_USEGMTIME | RADIUS_FLAG_LOGUNIQUEID | RADIUS_FLAG_LOGUSERFIELD };
+ 
+--- a/cel/cel_radius.c	2013-12-11 10:08:13.537159711 +0100
++++ b/cel/cel_radius.c	2013-12-11 10:08:13.529159762 +0100
+@@ -35,7 +35,11 @@
+ 
+ ASTERISK_FILE_VERSION(__FILE__, "$Rev: 328259 $")
+ 
++#ifdef FREERADIUS_CLIENT
++#include <freeradius-client.h>
++#else
+ #include <radiusclient-ng.h>
++#endif
+ 
+ #include "asterisk/channel.h"
+ #include "asterisk/cel.h"
+@@ -79,7 +83,11 @@
+ 
+ static char *cel_config = "cel.conf";
+ 
++#ifdef FREERADIUS_CLIENT
++static char radiuscfg[PATH_MAX] = "/etc/radiusclient/radiusclient.conf";
++#else
+ static char radiuscfg[PATH_MAX] = "/etc/radiusclient-ng/radiusclient.conf";
++#endif
+ 
+ static struct ast_flags global_flags = { RADIUS_FLAG_USEGMTIME | RADIUS_FLAG_LOGUNIQUEID | RADIUS_FLAG_LOGUSERFIELD };
+ 
+--- a/configure.ac	2013-12-11 10:08:13.537159711 +0100
++++ b/configure.ac	2013-12-11 10:11:02.420053317 +0100
+@@ -2103,7 +2103,14 @@
+ # Some distributions (like SuSE) remove the 5.1 suffix.
+ AST_EXT_LIB_CHECK([LUA], [lua], [luaL_register], [lua.h], [-lm])
+ 
+-AST_EXT_LIB_CHECK([RADIUS], [radiusclient-ng], [rc_read_config], [radiusclient-ng.h])
++# Accept either RADIUS client library, their APIs are fully compatible,
++# just different header filenames and different SONAMEs
++AST_EXT_LIB_CHECK([RADIUS], [freeradius-client], [rc_read_config], [freeradius-client.h])
++if test "x${PBX_RADIUS}" = "x1"; then
++	AC_DEFINE(FREERADIUS_CLIENT, [], [Use the FreeRADIUS-client library])
++else
++	AST_EXT_LIB_CHECK([RADIUS], [radiusclient-ng], [rc_read_config], [radiusclient-ng.h])
++fi
+ 
+ AST_EXT_LIB_CHECK([COROSYNC], [cpg], [cpg_join], [corosync/cpg.h], [-lcfg])
+ AST_EXT_LIB_CHECK([COROSYNC_CFG_STATE_TRACK], [cfg], [corosync_cfg_state_track], [corosync/cfg.h], [-lcfg])

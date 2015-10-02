@@ -1,0 +1,26 @@
+Subject: Don't use TTY9 by default
+
+Author: Faidon Liambotis <paravoid@debian.org>
+Bug-Debian: http://bugs.debian.org/381786
+Last-Update: 2010-02-14
+
+--- a/contrib/scripts/safe_asterisk
++++ b/contrib/scripts/safe_asterisk
+@@ -109,7 +109,7 @@ ulimit -c unlimited
+ # Don't fork when running "safely"
+ #
+ ASTARGS=""
+-if test "x$TTY" != "x" ; then
++if test "x$TTY" != "xno" ; then
+ 	if test -c /dev/tty${TTY} ; then
+ 		TTY=tty${TTY}
+ 	elif test -c /dev/vc/${TTY} ; then
+@@ -159,7 +159,7 @@ run_asterisk()
+ {
+ 	while :; do 
+ 
+-		if test "x$TTY" != "x" ; then
++		if test "x$TTY" != "xno" ; then
+ 			cd "${RUNDIR}"
+ 			stty sane < /dev/${TTY}
+ 			nice -n $PRIORITY ${ASTSBINDIR}/asterisk -f ${CLIARGS} ${ASTARGS} > /dev/${TTY} 2>&1 < /dev/${TTY}
