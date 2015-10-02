@@ -228,6 +228,12 @@ function Build_Replacements_ubuntu_precise
 {
 	mkdir -pv "$replacements_dir"
 
+	# libical-1.0 for asterisk 11.7
+	Build_Replacement_Package libical ubuntu/libical-1.0
+
+	# asterisk
+	Build_Replacement_Package asterisk ubuntu/asterisk-11.7.0~dfsg
+
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
 
