@@ -119,7 +119,7 @@ function Build_Replacements_Common_ubuntu
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
 
 	#Package: libxine2
-	make_jobs="" Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
+	build_opts="" Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
 
 	#Package: logitechmediaserver-7.8.1
 	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1
