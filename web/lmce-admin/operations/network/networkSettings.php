@@ -687,44 +687,6 @@ function networkSettings($output,$dbADO) {
 		<tr><td colspan="6">&nbsp;</td></tr>
 		<tr>
 			<td colspan="6" class="tablehead"><B>'.translate('TEXT_DHCP_SERVERS_CONST').':</B></td>
-		</tr>
-		<tr>
-			<!-- IPv4 DHCP range for LinuxMCE devices) -->
-			<td colspan="3">
-				<input type="checkbox" name="enableDHCP" value="1" '.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();">
-				<span id="coreDHCPText" style="color:'.(($enableDHCP!=1)?'#999999':'').'">'.translate('TEXT_IPV4_DHCP_ENABLED_CONST').'</span>
-			</td>
-			<td colspan="3">
-				<input type="text" maxlength="15" id="coreDHCPStart" name="coreDHCPStart" size="16" style="text-align: right" value="'.@$coreDHCPStart.'" '.(($enableDHCP!=1)?'disabled':'').'> - 
-			  	<input type="text" maxlength="3" id="coreDHCPEnd" name="coreDHCPEnd" size="4" value="'.@$coreDHCPEnd.'" '.(($enableDHCP!=1)?'disabled':'').'>
-			</td>
-		</tr>
-		<tr>
-			<!-- IPv4 DHCP range for non-LinuxMCE devices) -->		
-			<td>&nbsp;</td>
-			<td colspan="2">
-				<input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'>
-				<span id="nonPlutoIPText" style="color:'.(($nonPlutoIP!=1)?'#999999':'').'"> '.translate('TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST').'</span>
-			</td>
-			<td colspan="3">
-				<input type="text" maxlength="15" name="nonPlutoIPStart" size="16" style="text-align: right" value="'.@$nonPlutoIPStart.'" '.(($enableDHCP==1)?'':'disabled').'> -
-				<input type="text" maxlength="3" name="nonPlutoIPEnd" size="4" value="'.@$nonPlutoIPEnd.'" '.(($enableDHCP==1)?'':'disabled').'>
-			</td>
-		</tr>
-		<tr><td colspan="6"><hr></td></tr>
-		
-		<tr>
-			<!-- IPv6 RA daemon settings -->
-			<td colspan="3">
-				<input type="checkbox" name="enableRA" '.(($enableRA==1)?'checked':'').' onclick="setIPv6Range();">
-				<span id="IPv6PrefixText" style="color:'.(($enableRA==0)?'#999999':'').'">'.translate('TEXT_IPV6_RA_ENABLED_CONST').':</span>
-			</td>
-			<td colspan="3">
-				<input type="text" maxlength="38" style="color:'.(($enableRA==0)?'#999999':'').'" name="IPv6Prefix" size="39" value="'.@$IPv6Prefix.'" '.(($enableRA==1)?'':'disabled').'> / 
-				<input type="text" maxlength="2" style="color:'.(($enableRA==0)?'#999999':'').'" name="IPv6Netmask" size="2" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
-			</td>
-		</tr>
-		<tr><td colspan="6"><hr></td></tr>
 		<tr>
 			<!-- VPN SETTINGS -->
 			<td colspan="3">
@@ -877,13 +839,52 @@ function networkSettings($output,$dbADO) {
 				$j=3;
 				while ($i < $countotherInterfaces) {
 					if ( @$otherInterfaceIPv4IP[$i] === @$internalInterfaceArray[0] ) {
-						$out.='&nbsp;'.@$otherInterfaceName[$i];
+						$out.='&nbsp;<b>'.@$otherInterfaceName[$i].'</b>';
 					}
 				$i++;
 				}
 				$out.='</td>
 				<tr>';
 		}
+		$out.='<td colspan="6" class="tablehead"><B>'.translate('TEXT_DHCP_SERVERS_CONST').':</B></td>
+		</tr>
+		<tr>
+			<!-- IPv4 DHCP range for LinuxMCE devices) -->
+			<td colspan="3">
+				<input type="checkbox" name="enableDHCP" value="1" '.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();">
+				<span id="coreDHCPText" style="color:'.(($enableDHCP!=1)?'#999999':'').'">'.translate('TEXT_IPV4_DHCP_ENABLED_CONST').'</span>
+			</td>
+			<td colspan="3">
+				<input type="text" maxlength="15" id="coreDHCPStart" name="coreDHCPStart" size="16" style="text-align: right" value="'.@$coreDHCPStart.'" '.(($enableDHCP!=1)?'disabled':'').'> - 
+			  	<input type="text" maxlength="3" id="coreDHCPEnd" name="coreDHCPEnd" size="4" value="'.@$coreDHCPEnd.'" '.(($enableDHCP!=1)?'disabled':'').'>
+			</td>
+		</tr>
+		<tr>
+			<!-- IPv4 DHCP range for non-LinuxMCE devices) -->		
+			<td>&nbsp;</td>
+			<td colspan="2">
+				<input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'>
+				<span id="nonPlutoIPText" style="color:'.(($nonPlutoIP!=1)?'#999999':'').'"> '.translate('TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST').'</span>
+			</td>
+			<td colspan="3">
+				<input type="text" maxlength="15" name="nonPlutoIPStart" size="16" style="text-align: right" value="'.@$nonPlutoIPStart.'" '.(($enableDHCP==1)?'':'disabled').'> -
+				<input type="text" maxlength="3" name="nonPlutoIPEnd" size="4" value="'.@$nonPlutoIPEnd.'" '.(($enableDHCP==1)?'':'disabled').'>
+			</td>
+		</tr>
+		<tr><td colspan="6"><hr></td></tr>
+		
+		<tr>
+			<!-- IPv6 RA daemon settings -->
+			<td colspan="3">
+				<input type="checkbox" name="enableRA" '.(($enableRA==1)?'checked':'').' onclick="setIPv6Range();">
+				<span id="IPv6PrefixText" style="color:'.(($enableRA==0)?'#999999':'').'">'.translate('TEXT_IPV6_RA_ENABLED_CONST').':</span>
+			</td>
+			<td colspan="3">
+				<input type="text" maxlength="38" style="color:'.(($enableRA==0)?'#999999':'').'" name="IPv6Prefix" size="39" value="'.@$IPv6Prefix.'" '.(($enableRA==1)?'':'disabled').'> / 
+				<input type="text" maxlength="2" style="color:'.(($enableRA==0)?'#999999':'').'" name="IPv6Netmask" size="2" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
+			</td>
+		</tr>
+		<tr><td colspan="6"><hr></td></tr>';
 		$i=0;
 		$j=3;
 		while ($i < $countotherInterfaces) {

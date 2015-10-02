@@ -512,6 +512,9 @@ function firewall($output,$dbADO) {
 				if ( $row['Disabled'] == 1 ) {
 						$tr.=' err';
 					}
+				if ( $row['Offline'] == 1 ) {
+						$tr.=' err';
+					}
 				if ($chains[$i] == 'input' || $chains[$i] == 'forward' || $chains[$i] == 'output'){
 					if ( $DPolicy == $row['RPolicy'] ) {
 						$tr.='" style="color: #808080';
@@ -699,6 +702,9 @@ function firewall($output,$dbADO) {
 				$Disabled=$row['Disabled'];
 				$tr='<tr class="'.(($pos%2==0)?'alternate_back':'');
 				if ( $row['Disabled'] == 1 ) {
+						$tr.=' err';
+					}
+				if ( $row['Offline'] == 1 ) {
 						$tr.=' err';
 					}
 				if ($chains[$i] == 'input' || $chains[$i] == 'forward' || $chains[$i] == 'output'){
