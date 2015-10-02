@@ -10,6 +10,7 @@ set -x
 
 BUILD_ALL_PKGS="no"
 
+build_opts="-tc"
 make_jobs=""
 # set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
 [[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j$NUM_CORES"
@@ -28,10 +29,10 @@ function Changed_Since_Last_Build
 	local revision_old=$(cat "$cache_file" | grep "^${url_id}" | cut -d'|' -f2) || :
 
 	if [ "$revision_new" = "$revision_old" ] && [ -n "$revision_old" ]; then
-		return 1 #$(/bin/false)
+		return $(/bin/false)
 	fi
 
-	return 0 #$(/bin/true)
+	return $(/bin/true)
 }
 
 function Update_Changed_Since_Last_Build
@@ -56,7 +57,6 @@ function Build_Replacement_Package
 	local pkg_name="$1"
 	local pkg_dir="$2"
 
-
 	dir_="${svn_dir}/${svn_branch_name}/${pkg_dir}"
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
@@ -66,16 +66,12 @@ if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
 fi
 
 		DisplayMessage "Building ${pkg_name}"
-		echo "dpkg-buildpackage -rfakeroot -us -uc -b -tc"
-		dpkg-buildpackage -rfakeroot -us -uc -b -tc $make_jobs
+		echo "dpkg-buildpackage -rfakeroot -us -uc -b $build_opts $make_jobs"
+		dpkg-buildpackage -rfakeroot -us -uc -b $build_opts $make_jobs
 		cp -fr ../*${pkg_name}*.deb "${replacements_dir}"
 		cp -fr ../*${pkg_name}*.changes "${replacements_dir}"
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
-
-		return 0 #$(/bin/true)
-#	else
-#		return $(/bin/false)
 	fi
 }
 
@@ -123,7 +119,7 @@ function Build_Replacements_Common_ubuntu
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
 
 	#Package: libxine2
-	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
+	make_jobs="" Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
 
 	#Package: logitechmediaserver-7.8.1
 	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1
@@ -132,20 +128,7 @@ function Build_Replacements_Common_ubuntu
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
 
 	#Package: lirc
-	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.9.0-0ubuntu1+lmce1
-	if Changed_Since_Last_Build "$dir_" ;then
-		pushd "$dir_"
-if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/\~${build_name}1)/" debian/changelog
-fi
-		DisplayMessage "Building lirc-0.9.0-0ubuntu1+lmce1"
-		echo "dpkg-buildpackage -rfakeroot -uc -b"
-		dpkg-buildpackage -uc -b && \
-		cp -fr ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.deb ${replacements_dir} && \
-		cp -fr ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.changes ${replacements_dir} && \
-		Update_Changed_Since_Last_Build "$dir_"
-		popd
-	fi
+	build_opts="" Build_Replacement_Package lirc ubuntu/lirc-0.9.0-0ubuntu1+lmce1
 
 	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
@@ -158,7 +141,7 @@ if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
 fi
 		DisplayMessage "Building ola-0.9.0"
 		autoreconf -i && \
-		dpkg-buildpackage -uc -b -tc $make_jobs && \
+		dpkg-buildpackage -uc -b $build_opts $make_jobs && \
 		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
 		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
 		Update_Changed_Since_Last_Build "$dir_"
