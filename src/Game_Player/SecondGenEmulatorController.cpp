@@ -15,12 +15,13 @@
  *
  */
 #include "SecondGenEmulatorController.h"
+#include "pluto_main/Define_Button.h"
 
 namespace DCE
 {
 
   SecondGenEmulatorController::SecondGenEmulatorController(Game_Player *pGame_Player, SecondGenEmulatorModel *pEmulatorModel)
-    : MESSEmulatorController(pGame_Player, pEmulatorModel)
+    : MAMEEmulatorController(pGame_Player, pEmulatorModel)
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
@@ -37,13 +38,19 @@ namespace DCE
     int iPK_Button_Offset = 0;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	iPK_Button_Offset=SECONDGEN_P1;
+	if (iPK_Button == BUTTON_Asterisk_CONST)
+	  doAction("KEYPAD1_*");
+	else if (iPK_Button == BUTTON_Pound_CONST)
+	  doAction("KEYPAD1_#");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	iPK_Button_Offset=SECONDGEN_P2;
+	if (iPK_Button == BUTTON_Asterisk_CONST)
+	  doAction("KEYPAD2_*");
+	else if (iPK_Button == BUTTON_Pound_CONST)
+	  doAction("KEYPAD2_#");
       }
-    return X11EmulatorController::pressButton(iPK_Button+iPK_Button_Offset, pMessage);
+    return true;
   }
 
   bool SecondGenEmulatorController::press0(Message *pMessage)
@@ -51,11 +58,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("0");
+	return doAction("KEYPAD1_0");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_0");
+	return doAction("KEYPAD2_0");
       }
     return true;
   }
@@ -65,11 +72,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("1");
+	return doAction("KEYPAD1_1");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_1");
+	return doAction("KEYPAD2_1");
       }
     return true;
   }
@@ -79,11 +86,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("2");
+	return doAction("KEYPAD1_2");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_2");
+	return doAction("KEYPAD2_2");
       }
     return true;
   }
@@ -93,11 +100,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("3");
+	return doAction("KEYPAD1_3");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_3");
+	return doAction("KEYPAD2_3");
       }
     return true;
   }
@@ -107,11 +114,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("4");
+	return doAction("KEYPAD1_4");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_4");
+	return doAction("KEYPAD2_4");
       }
     return true;
   }
@@ -121,11 +128,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("5");
+	return doAction("KEYPAD1_5");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_5");
+	return doAction("KEYPAD2_5");
       }
     return true;
   }
@@ -135,11 +142,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("6");
+	return doAction("KEYPAD1_6");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_6");
+	return doAction("KEYPAD2_6");
       }
     return true;
   }
@@ -149,11 +156,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("7");
+	return doAction("KEYPAD1_7");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_7");
+	return doAction("KEYPAD2_7");
       }
     return true;
   }
@@ -163,11 +170,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("8");
+	return doAction("KEYPAD1_8");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_8");
+	return doAction("KEYPAD2_8");
       }
     return true;
   }
@@ -177,11 +184,11 @@ namespace DCE
     long dwPK_Device_Orbiter = pMessage->m_dwPK_Device_From;
     if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P1)
       {
-	return doAction("9");
+	return doAction("KEYPAD1_9");
       }
     else if (m_pEmulatorModel->m_mapOrbiterToKeypadPlayer[dwPK_Device_Orbiter]==SECONDGEN_P2)
       {
-	return doAction("P2_9");
+	return doAction("KEYPAD2_9");
       }
     return true;
   }

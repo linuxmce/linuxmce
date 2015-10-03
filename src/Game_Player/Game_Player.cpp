@@ -93,7 +93,10 @@ Game_Player::~Game_Player()
 //<-dceag-dest-e->
 {
   EVENT_Playback_Completed ("", 0, false);	// In case media plugin thought something was playing, let it know that there's not
-
+  if (m_pVirtualKeyboard)
+    {
+      delete m_pVirtualKeyboard;
+    }
 }
 
 void Game_Player::pleaseResend()
@@ -263,6 +266,8 @@ bool Game_Player::GetConfig()
 	  m_sJoystick_Configuration = "";
 	}
     }
+
+  m_pVirtualKeyboard=VirtualKeyboard::GetInstance();
 
   return true;
 }
@@ -785,6 +790,9 @@ void Game_Player::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *p
 {
   cout << "Need to implement command #81 - Navigate Next" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  m_pVirtualKeyboard->ClickKey(BTN_LEFT);
+  
 }
 
 //<-dceag-c82-b->

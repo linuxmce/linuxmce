@@ -22,6 +22,7 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
+// include the main LMCE version file
 #include "version.h"
 
 using namespace DCE;

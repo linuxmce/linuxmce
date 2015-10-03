@@ -16,7 +16,7 @@ namespace DCE
   {
   public:
     Atari800EmulatorModel();
-    ~Atari800EmulatorModel();
+    virtual ~Atari800EmulatorModel();
 
     bool m_bCapsLockPressed;
 

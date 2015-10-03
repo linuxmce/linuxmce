@@ -26,22 +26,23 @@ namespace DCE
 
   void ColecoVisionEmulatorModel::initializeActionstoKeysyms()
   {
-    MESSEmulatorModel::initializeActionstoKeysyms();
+    /* MESSEmulatorModel::initializeActionstoKeysyms();
     m_mapActionsToKeysyms["*"] = make_pair(XK_KP_Add,0);
-    m_mapActionsToKeysyms["#"] = make_pair(XK_KP_Subtract,0);
+    m_mapActionsToKeysyms["#"] = make_pair(XK_KP_Subtract,0); */
   }
 
   void ColecoVisionEmulatorModel::initializeButtontoKeysyms()
   {
-    m_mapButtonToKeysyms[BUTTON_asterisk_CONST] = XK_KP_Add;
-    m_mapButtonToKeysyms[BUTTON_Pound_CONST] = XK_KP_Subtract;
+    /* m_mapButtonToKeysyms[BUTTON_asterisk_CONST] = XK_KP_Add;
+       m_mapButtonToKeysyms[BUTTON_Pound_CONST] = XK_KP_Subtract; */
   }
 
   bool ColecoVisionEmulatorModel::updateConfig()
   {
-    MESSEmulatorModel::updateConfig();
+    MAMEEmulatorModel::updateConfig();
+    /*
     ConfigurationWriter keypadConfig(COLECO_CONFIG_FILE_TEMPLATE, COLECO_CONFIG_FILE, "");
-    return keypadConfig.Write();
+    return keypadConfig.Write(); */
   }
 
 }

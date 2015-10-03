@@ -17,7 +17,7 @@ namespace DCE
   {
   public:
     VIC20EmulatorModel();
-    ~VIC20EmulatorModel();
+    virtual ~VIC20EmulatorModel();
   };
 }
 

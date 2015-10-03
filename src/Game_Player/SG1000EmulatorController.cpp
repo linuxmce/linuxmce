@@ -11,7 +11,7 @@ namespace DCE
 {
 
   SG1000EmulatorController::SG1000EmulatorController(Game_Player *pGame_Player, SG1000EmulatorModel *pEmulatorModel)
-    : MESSEmulatorController(pGame_Player, pEmulatorModel)
+    : MAMEEmulatorController(pGame_Player, pEmulatorModel)
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;

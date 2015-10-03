@@ -34,7 +34,7 @@ namespace DCE
   public:
 
     EmulatorController(Game_Player *pGame_Player, EmulatorModel *pEmulatorModel);
-    ~EmulatorController();
+    virtual ~EmulatorController();
 
     // not so pure virtuals. :P
     virtual bool init();

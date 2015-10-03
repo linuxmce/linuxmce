@@ -10,7 +10,7 @@
 namespace DCE
 {
 
-  VectrexEmulatorModel::VectrexEmulatorModel() : MESSEmulatorModel()
+  VectrexEmulatorModel::VectrexEmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "vectrex";
   }

@@ -21,19 +21,19 @@
 #define SECONDGEN_P1 0
 #define SECONDGEN_P2 1024 // Second generation console button offset when P2 selected.
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 #include <map>
 
 namespace DCE
 {
-  class SecondGenEmulatorModel : public MESSEmulatorModel
+  class SecondGenEmulatorModel : public MAMEEmulatorModel
   {
 
   protected:
 
   public:
     SecondGenEmulatorModel();
-    ~SecondGenEmulatorModel();
+    virtual ~SecondGenEmulatorModel();
 
     map<long, int> m_mapOrbiterToKeypadPlayer;
     int m_mapOrbiterToKeypadPlayer_Find(int iPK_Orbiter)

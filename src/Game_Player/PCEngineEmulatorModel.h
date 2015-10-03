@@ -7,15 +7,15 @@
 #ifndef PCENGINEEMULATORMODEL_H
 #define PCENGINEEMULATORMODEL_H
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 
 namespace DCE
 {
-  class PCEngineEmulatorModel : public MESSEmulatorModel
+  class PCEngineEmulatorModel : public MAMEEmulatorModel
   {
   public:
     PCEngineEmulatorModel();
-    ~PCEngineEmulatorModel();
+    virtual ~PCEngineEmulatorModel();
 
   };
 }

@@ -117,6 +117,11 @@ namespace DCE
 	  }
       }
     // thread exit.
+
+    WMControllerImpl *pWMController = new WMControllerImpl();
+    pWMController->SetMaximized(m_pEmulatorModel->m_sWindowName.c_str(),true);
+    delete pWMController; 
+
     m_bWindowIdThreadIsRunning=false;
   }
 

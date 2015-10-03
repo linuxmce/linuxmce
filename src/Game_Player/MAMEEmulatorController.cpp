@@ -11,13 +11,12 @@
 namespace DCE
 {
   MAMEEmulatorController::MAMEEmulatorController(Game_Player *pGame_Player, MAMEEmulatorModel *pEmulatorModel)
-    : X11EmulatorController(pGame_Player, pEmulatorModel)
+    : INotifyEmulatorController(pGame_Player, pEmulatorModel)
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
     m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/mame";
     m_pEmulatorModel->m_sProcessName="mame";
-    m_pEmulatorModel->m_sWindowName="mame.mame"; // wmclass.wmname of window.
     m_pEmulatorModel->m_bChangeRequiresRestart=true;
     m_pEmulatorModel->m_bRunning=false;
     m_pEmulatorModel->m_bHasArgs=true;
@@ -31,7 +30,7 @@ namespace DCE
 
   bool MAMEEmulatorController::init()
   {
-    return X11EmulatorController::init();
+    return INotifyEmulatorController::init();
   }
 
   string MAMEEmulatorController::getRomFromSlot()
@@ -49,7 +48,7 @@ namespace DCE
       {
 	return "";
       }
-    return FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(sMedia));
+    return (m_pEmulatorModel->m_sSystemName == "arcade" ? FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(sMedia)) : m_pEmulatorModel->m_sSystemName);
   }
 
   string MAMEEmulatorController::getRomPathFromSlot()
@@ -65,6 +64,42 @@ namespace DCE
       }
   }
 
+  string MAMEEmulatorController::getSlotsAndRoms()
+  {
+
+    string sRet = "";
+
+    if (!m_pEmulatorModel)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MAMEEmulatorController::getSlotsAndRoms() - no m_pEmulatorModel, bailing!");
+	return "";
+      }
+
+    for (map<string,string>::iterator it=m_pEmulatorModel->m_mapMedia.begin(); it!=m_pEmulatorModel->m_mapMedia.end(); ++it)
+      {
+	string sSlot = it->first;
+	string sMediaFile = it->second;
+	
+	if (sSlot == "default")
+	  {
+	    // By default, cart is used.
+	    sSlot = "cart";
+	  }
+	else
+	  {
+	    // do not change.
+	  }
+	
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Inserting %s into slot %s",sSlot.c_str(),sMediaFile.c_str());
+	
+	sRet += "-" + sSlot + "\t" +
+	  sMediaFile;
+      }
+
+    return sRet;
+
+  }
+
   bool MAMEEmulatorController::run()
   {
     
@@ -74,7 +109,15 @@ namespace DCE
 	return false;
       }
 
-    m_pEmulatorModel->m_sArgs = getRomFromSlot();
+    if (m_pEmulatorModel->m_sSystemName == "arcade")
+      {
+	m_pEmulatorModel->m_sArgs = getRomFromSlot();
+      }
+    else
+      {
+	m_pEmulatorModel->m_sArgs = getRomFromSlot() + "\t" + getSlotsAndRoms();
+      }
+
     // If a media position was set (i.e. as part of the CMD_Play_Media, then put it in
     // the mame configuration file to load. Otherwise, blank it out.
     if (!m_pEmulatorModel->m_sMediaPosition.empty() && 
@@ -85,7 +128,7 @@ namespace DCE
 
 	string sPath = "/home/mamedata/sta/"+getRomFromSlot();
 	string sSource = sPath + "/" + m_pEmulatorModel->m_sMediaPosition;
-	string sDest = sPath + "/1.sta";
+	string sDest = "/run/Game_Player/state";
 	
 	FileUtils::DelFile(sDest); // some basic house cleaning.
 	
@@ -118,7 +161,6 @@ namespace DCE
     if (m_pEmulatorModel->m_bIsStreaming)
       {
 	m_pEmulatorModel->m_sProcessName="csmame";
-	m_pEmulatorModel->m_sWindowName="csmame.csmame";
 	m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/csmame";
 	m_pEmulatorModel->m_sState="";
 	if (m_pEmulatorModel->m_bIsStreamingSource)
@@ -135,11 +177,10 @@ namespace DCE
       {
 	// Regular non streaming instance.
 	m_pEmulatorModel->m_sProcessName="mame";
-	m_pEmulatorModel->m_sWindowName="mame.mame";
 	m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/mame";
       }
 
-    if (X11EmulatorController::run())
+    if (INotifyEmulatorController::run())
       return true;
 
     return false;
@@ -178,27 +219,31 @@ namespace DCE
 	doAction("UI_ENTER");
       }
     
-    return X11EmulatorController::gotoMenu(iMenu); // and up the chain...
+    return INotifyEmulatorController::gotoMenu(iMenu); // and up the chain...
   }
 
   bool MAMEEmulatorController::saveState(string& sPosition, string& sText, bool bAutoSave, string sAutoSaveName)
   {
-
+    int iRetries=10;
     if (!m_pEmulatorModel->m_bIsStreaming && 
 	m_pEmulatorModel->m_bCanSaveState)
       {
 	doAction("SAVE_STATE");
-	doAction("1");
-	
-	// the save game is now in /home/mamedata/sta/<ROMNAME>/1.sta. We need to 
-	// make a copy of this to reference later.
-	
-	if (!FileUtils::FileExists("/home/mamedata/sta/"+getRomFromSlot()+"/1.sta"))
+
+	while (!FileUtils::FileExists("/run/Game_Player/state/"+getRomFromSlot()+"/state.sta"))
 	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MAMEEmulatorController::saveState() - State file /home/mamedata/sta/%s/1.sta does not exist. Bailing!",getRomFromSlot().c_str());
-	    sPosition="";
-	    sText="";
-	    return false;
+	    if (iRetries>0)
+	      {
+		iRetries--;
+		Sleep(100);
+	      }
+	    else
+	      {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MAMEEmulatorController::saveState() - State file /run/Game_Player/state/%s/state.sta does not exist. Bailing!",getRomFromSlot().c_str());
+		sPosition="";
+		sText="";
+		return false;
+	      }
 	  }
 	
 	// Autosave bookmark is always saved as AutoSave if bAutoSave is true
@@ -207,13 +252,17 @@ namespace DCE
 	string sBookmarkName;
 	if (!bAutoSave)
 	  {
-	    sBookmarkName = FileUtils::FileChecksum("/home/mamedata/sta/"+getRomFromSlot()+"/1.sta");
+	    sBookmarkName = FileUtils::FileChecksum("/run/Game_Player/state/"+getRomFromSlot()+"/state.sta");
 	  }
 	else
 	  {
 	    sBookmarkName = "AutoSave";
 	  }
-	string sCmd = "mv /home/mamedata/sta/"+getRomFromSlot()+"/1.sta /home/mamedata/sta/"+getRomFromSlot()+"/"+sBookmarkName;
+
+	string sCmd00 = "mkdir -p /home/mamedata/sta/"+getRomFromSlot();
+	system(sCmd00.c_str());
+
+	string sCmd = "mv /run/Game_Player/state/"+getRomFromSlot()+"/state.sta /home/mamedata/sta/"+getRomFromSlot()+"/"+sBookmarkName;
 	system(sCmd.c_str());
 	
 	if (!FileUtils::FileExists("/home/mamedata/sta/"+getRomFromSlot()+"/"+sBookmarkName))
@@ -250,8 +299,11 @@ namespace DCE
       {
 	string sPath = "/home/mamedata/sta/"+getRomFromSlot();
 	string sSource = sPath + "/" + sPosition;
-	string sDest = sPath + "/1.sta";
+	string sDest = "/run/Game_Player/state/"+getRomFromSlot();
 	
+	string sCmd0 = "mkdir -p "+sDest;
+	system(sCmd0.c_str());
+
 	FileUtils::DelFile(sDest); // some basic house cleaning.
 	
 	if (sPosition.find("AutoSave") != string::npos)
@@ -267,7 +319,7 @@ namespace DCE
 	  }
 	
 	// move file into place.
-	string sCmd = "cp "+sSource+" "+sDest;
+	string sCmd = "cp "+sSource+" "+sDest+"/state.sta";
 	system(sCmd.c_str());
 	
 	if (!FileUtils::FileExists(sDest))
@@ -277,7 +329,6 @@ namespace DCE
 	
 	// File moved into place, save state.
 	doAction("LOAD_STATE");
-	doAction("1");
 	
 	return true;
       }

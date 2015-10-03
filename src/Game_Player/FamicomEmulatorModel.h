@@ -15,7 +15,7 @@ namespace DCE
   {
   public:
     FamicomEmulatorModel();
-    ~FamicomEmulatorModel();
+    virtual ~FamicomEmulatorModel();
 
   protected:
 

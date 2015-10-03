@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     A5200EmulatorController(Game_Player *pGame_Player, A5200EmulatorModel *pEmulatorModel); // ctor
-    ~A5200EmulatorController(); // dtor
+    virtual ~A5200EmulatorController(); // dtor
 
     A5200EmulatorModel *m_pEmulatorModel;
 

@@ -15,7 +15,7 @@ namespace DCE
   {
   public:
     A7800EmulatorModel();
-    ~A7800EmulatorModel();
+    virtual ~A7800EmulatorModel();
 
   };
 }

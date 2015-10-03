@@ -12,6 +12,7 @@
 #include "PlutoUtils/StringUtils.h"
 #include "DCE/Message.h"
 #include "INotifyCodes.h"
+#include "ImageUtils.h"
 
 #include <cstdlib>
 
@@ -32,8 +33,10 @@ namespace DCE
   // ---------------------------------------------------------------------
 
   INotifyEmulatorController::INotifyEmulatorController(Game_Player *pGame_Player, INotifyEmulatorModel *pEmulatorModel)
-    : EmulatorController(pGame_Player, pEmulatorModel)
+    : EmulatorController(pGame_Player, pEmulatorModel),
+      m_INotifyCommandMutex("inotify")
   {
+    m_INotifyCommandMutex.Init(NULL);
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
   }
@@ -46,6 +49,41 @@ namespace DCE
   // ---------------------------------------------------------------------
   bool INotifyEmulatorController::init()
   {
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"INotifyEmulatorController::init() - Fetching Media Director screen resolution.");
+    if (m_pGame_Player)
+      {
+	if (m_pGame_Player->m_pData)
+	  {
+ 	    string::size_type pos=0;
+	    int PK_MD = m_pGame_Player->m_pData->m_dwPK_Device_MD;
+	    string sVideoSettings = m_pGame_Player->m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Video_settings_CONST); // 1920 1080/60
+	    int iScreenWidth = atoi(StringUtils::Tokenize(sVideoSettings," ",pos).c_str());
+	    int iScreenHeight = atoi(StringUtils::Tokenize(sVideoSettings,"/",pos).c_str());
+	    int iRefreshRate = atoi(StringUtils::Tokenize(sVideoSettings,"/",pos).c_str()); // There shouldn't be a /, but this will get the rest of the string.
+	    if (iScreenWidth!=0 && iScreenHeight!=0 && iRefreshRate!=0)
+	      {
+		m_pEmulatorModel->m_iScreenWidth=iScreenWidth;
+		m_pEmulatorModel->m_iScreenHeight=iScreenHeight;
+		m_pEmulatorModel->m_iRefreshRate=iRefreshRate;
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media Director resolution detected as: %dx%d@%dHz",m_pEmulatorModel->m_iScreenWidth
+						    ,m_pEmulatorModel->m_iScreenHeight
+						    ,m_pEmulatorModel->m_iRefreshRate);
+
+	      }
+	  }
+	else
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"INotifyEmulatorController::init() - Could not get m_pData from Game Player!");
+	    return false;
+	  }
+      }
+    else
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"INotifyEmulatorController::init() - Could not fetch Game Player parent. WTF?!");
+	return false;
+      }
+
     return EmulatorController::init();
   }
 
@@ -54,33 +92,20 @@ namespace DCE
     if (pthread_create(&m_inotifyThread, NULL, StartINotifyThread, (void *) this))
       {
 	// failed
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to create Game Player Receive iNotify thread.");
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"INotifyEmulatorController::run() - Failed to create Game Player Receive iNotify thread.");
 	return false;
       }
     else
       {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Inotify Thread started.");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"INotifyEmulatorController::run() - Inotify Thread started.");
       }
     
-    m_pEmulatorModel->m_sArgs = getRomFromSlot();
-
-    // If a media position is specified, load it. 
-    if (!m_pEmulatorModel->m_sMediaPosition.empty())
-      {
-	FileUtils::DelFile("/run/Game_Player/state");
-	
-	if (!loadState(m_pEmulatorModel->m_sMediaPosition))
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Could not load save state %s. Continuing",m_pEmulatorModel->m_sMediaPosition.c_str());
-	  }
-	
-      }
-
     return EmulatorController::run();
   }
 
   bool INotifyEmulatorController::stop()
   {
+    doAction("STOP"); // Tell Emulator to stop.
     m_pEmulatorModel->m_bRunning=false;
     pthread_join(m_inotifyThread,NULL);
     return EmulatorController::stop();
@@ -90,16 +115,18 @@ namespace DCE
   bool INotifyEmulatorController::doAction(string sAction)
   {
     if (!m_pEmulatorModel->m_mapActionstoCommandBytes_Exists(sAction))
-      return false;
+      {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"INotifyEmulatorController::doAction() - action %s does not exist.",sAction.c_str());
+	return false;
+      }
 
     pair<char, bool> command = m_pEmulatorModel->m_mapActionsToCommandBytes_Find(sAction);
 
     SendCommand(command.first);
 
-    Sleep(200);
-
     if (command.second)
       {
+	Sleep(m_pEmulatorModel->m_iDoneDelay);
 	if (!SendCommand(LMCE_INOTIFY_DONE))
 	  return false;
       }
@@ -115,7 +142,15 @@ namespace DCE
 
   bool INotifyEmulatorController::pressButton(int iPK_Button, Message *pMessage)
   {
-    return false;
+    if (!m_pEmulatorModel->m_mapButtonsToActions_Exists(iPK_Button))
+      {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Could not find action mapping for requested PK_Button %d",iPK_Button);
+	return false;
+      }
+
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"INotifyEmulatorController::pressButton(%d) - matched action: %s",iPK_Button,m_pEmulatorModel->m_mapButtonsToActions_Find(iPK_Button).c_str());
+
+    return doAction(m_pEmulatorModel->m_mapButtonsToActions_Find(iPK_Button));
   }
 
   // ---------------------------------------------------------------------
@@ -131,7 +166,7 @@ namespace DCE
   {
     int iRetries=5;
     size_t size=0;
-    SendCommand(0x0C);
+    doAction("GET_SNAPSHOT");
 
     while (iRetries>0)
       {
@@ -146,6 +181,10 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"INotifyEmulatorController::getSnap() - could not find /run/Game_Player/snap.png. Bailing!");
 	return false;
       }
+
+    ImageUtils::ResizeImage("/run/Game_Player/snap.png",iWidth,iHeight);
+
+    Sleep(100);
 
     *pData = FileUtils::ReadFileIntoBuffer("/run/Game_Player/snap.png",size);
     iData_Size = size;
@@ -164,7 +203,7 @@ namespace DCE
   {
     int iRetries=5;
     string sBookmarkName;
-    SendCommand(0x20);
+    doAction("SAVE_STATE");
 
     while (iRetries>0)
       {
@@ -192,7 +231,7 @@ namespace DCE
 	sBookmarkName = FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(getRomFromSlot()))+"-"+"AutoSave";
       }
 
-    string sCmd = "mv /run/Game_Player/state \"/home/mamedata/stella.sta/"+sBookmarkName + "\"";
+    string sCmd = "mv /run/Game_Player/state \""+m_pEmulatorModel->m_sStateDir+"/"+sBookmarkName + "\"";
 
     system(sCmd.c_str());
 
@@ -213,13 +252,12 @@ namespace DCE
   // ---------------------------------------------------------------------
 
   bool INotifyEmulatorController::loadState(string sPosition)
-  {
-    string sSource = "/home/mamedata/stella.sta/"+sPosition;
+ {    string sSource = m_pEmulatorModel->m_sStateDir+"/"+sPosition;
     FileUtils::DelFile("/run/Game_Player/state");
     
     if (sPosition.find("AutoSave") != string::npos)
       {
-	sSource = "/home/mamedata/stella.sta/"+FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(getRomFromSlot()))+"-"+"AutoSave";
+	sSource = m_pEmulatorModel->m_sStateDir+"/"+FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(getRomFromSlot()))+"-"+"AutoSave";
       }
 
     if (!FileUtils::FileExists(sSource))
@@ -237,30 +275,37 @@ namespace DCE
 	return false;
       }
 
-    SendCommand(0x21); // load state
+    doAction("LOAD_STATE"); // load state
 
     return true;
   }
-
-
 
   // ---------------------------------------------------------------------
 
   void INotifyEmulatorController::INotifyRunloop()
   {
     inotify notify;
+    int iRetries=20;
 
     int fd_notify = notify.watch("/run/Game_Player",IN_ALL_EVENTS);
 
     if (fd_notify < 0)
       return;
 
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Starting INotify Runloop.");
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"INotifyEmulatorController::INotifyRunloop() - Starting INotify Runloop.");
 
-    while (!m_pEmulatorModel->m_bRunning)
+    while (!m_pEmulatorModel->m_bRunning && iRetries > 0)
       {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Emulator not running yet...waiting...");
+	iRetries--;
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"INotifyEmulatorController::INotifyRunloop() - Emulator not running yet...waiting...");
 	Sleep(100);
+      }
+
+    if (!m_pEmulatorModel->m_bRunning)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"INotifyEmulatorController::INotifyRunloop() - Could not contact emulator, gonna go byebye...");
+	notify.unwatch(fd_notify);
+	return;
       }
 
     while (m_pEmulatorModel->m_bRunning)
@@ -274,7 +319,7 @@ namespace DCE
 
     notify.unwatch(fd_notify);
 
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Byebye.");
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"INotifyEmulatorController::INotifyRunloop() - Exiting runloop.");
     return;
   }
 
@@ -297,8 +342,19 @@ namespace DCE
     switch (cBuf[0])
       {
       case 0x00: // Heartbeat
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Emulator is up.");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"INotifyEmulatorController::ProcessInotifyEvent() - Emulator is up.");
 	m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
+	if (!m_pEmulatorModel->m_sMediaPosition.empty())
+	  {
+	    if (!loadState(m_pEmulatorModel->m_sMediaPosition))
+	      {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"INotifyEmulatorController::ProcessInotifyEvent() - Emulator up, position %s was specified, but was unable to load. Emulation will attempt to continue.",m_pEmulatorModel->m_sMediaPosition.c_str());
+	      }
+	    else
+	      {
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"INotifyEmulatorController::ProcessInotifyEvent() - Emulator up, position %s was specified, and loaded successfully.",m_pEmulatorModel->m_sMediaPosition.c_str());
+	      }
+	  }
 	break;
       }
 
@@ -310,11 +366,12 @@ namespace DCE
 
   // ---------------------------------------------------------------------
 
-  bool INotifyEmulatorController::SendCommand(char command)
+  bool INotifyEmulatorController::SendCommand(unsigned char command)
   {
-    char cBuf[2];
+    PLUTO_SAFETY_LOCK(im,m_INotifyCommandMutex);
+    unsigned char cBuf[2];
     FILE *fp;
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"INotifyEmulatorController::SendCommand() - Sending command 0x%0x",command);
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"INotifyEmulatorController::SendCommand() - Sending command 0x%0x",command);
     fp = fopen("/run/Game_Player/send","wb");
     cBuf[0]=command;
     fwrite(&cBuf,1,1,fp);
@@ -353,6 +410,6 @@ namespace DCE
       {
 	return sMedia;
       }
-  }\
+  }
 
 }

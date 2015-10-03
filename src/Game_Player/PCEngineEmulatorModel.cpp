@@ -10,7 +10,7 @@
 namespace DCE
 {
 
-  PCEngineEmulatorModel::PCEngineEmulatorModel() : MESSEmulatorModel()
+  PCEngineEmulatorModel::PCEngineEmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "pce";
   }

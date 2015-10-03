@@ -8,18 +8,18 @@
 #ifndef MAMEEMULATORCONTROLLER_H
 #define MAMEEMULATORCONTROLLER_H
 
-#include "X11EmulatorController.h"
+#include "INotifyEmulatorController.h"
 #include "MAMEEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class MAMEEmulatorController : public X11EmulatorController
+  class MAMEEmulatorController : public INotifyEmulatorController
   {
   public:
     MAMEEmulatorController(Game_Player *pGame_Player, MAMEEmulatorModel *pEmulatorModel); // ctor
-    ~MAMEEmulatorController(); // dtor
+    virtual ~MAMEEmulatorController(); // dtor
 
     MAMEEmulatorModel *m_pEmulatorModel;
     virtual bool init();
@@ -37,6 +37,7 @@ namespace DCE
   private:
     string getRomFromSlot();
     string getRomPathFromSlot();
+    string getSlotsAndRoms();
   };
 }
 

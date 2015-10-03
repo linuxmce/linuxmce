@@ -15,7 +15,7 @@ namespace DCE
   {
   public:
     TG16EmulatorModel();
-    ~TG16EmulatorModel();
+    virtual ~TG16EmulatorModel();
 
   };
 }

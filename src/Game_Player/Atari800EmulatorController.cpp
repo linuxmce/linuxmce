@@ -44,11 +44,11 @@ namespace DCE
     else if ((sMediaUpper.find(".CAR") != string::npos) ||
 	     (sMediaUpper.find(".ROM") != string::npos))
       {
-	sSlot="/cart";
+	sSlot="-cart";
       }
     else if ((sMediaUpper.find(".XEX") != string::npos))
       {
-	sSlot="/run";
+	sSlot="-run";
       }
 
     EmulatorController::insertMediaNamed(sMediaFile, sSlot);
@@ -71,6 +71,34 @@ namespace DCE
 		
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Inserting %s into slot %s",sSlot.c_str(),sMediaFile.c_str());
 	
+	if (sMediaFile.find("(OSB)") != string::npos)
+	  {
+	    sRet += "-atari\t";
+	  }
+	else
+	  {
+	    sRet += "-320xe\t";
+	  }
+	
+	if (sMediaFile.find("(SIO)") != string::npos)
+	  {
+	    sRet += "-nopatchall\t";
+	  }
+
+	if (sMediaFile.find("(BASIC)") != string::npos)
+	  {
+	    sRet += "-basic\t";
+	  }
+
+	if (sMediaFile.find("(PAL)") != string::npos)
+	  {
+	    sRet += "-pal\t";
+	  }
+	else 
+	  {
+	    sRet += "-ntsc\t";
+	  }
+
 	sRet += "-" + sSlot + "\t" +
 	  sMediaFile;
       }

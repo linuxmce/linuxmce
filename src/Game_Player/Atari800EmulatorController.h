@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     Atari800EmulatorController(Game_Player *pGame_Player, Atari800EmulatorModel *pEmulatorModel); // ctor
-    ~Atari800EmulatorController(); // dtor
+    virtual ~Atari800EmulatorController(); // dtor
 
     Atari800EmulatorModel *m_pEmulatorModel;
     virtual bool init();

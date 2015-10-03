@@ -14,7 +14,7 @@ namespace DCE
   {
   public:
     A5200EmulatorModel();
-    ~A5200EmulatorModel();
+    virtual ~A5200EmulatorModel();
 
     virtual void initializeActionstoKeysyms();
     virtual void initializeButtontoKeysyms();

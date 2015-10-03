@@ -8,18 +8,18 @@
 #ifndef PCENGINEEMULATORCONTROLLER_H
 #define PCENGINEEMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "PCEngineEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class PCEngineEmulatorController : public MESSEmulatorController
+  class PCEngineEmulatorController : public MAMEEmulatorController
   {
   public:
     PCEngineEmulatorController(Game_Player *pGame_Player, PCEngineEmulatorModel *pEmulatorModel); // ctor
-    ~PCEngineEmulatorController(); // dtor
+    virtual ~PCEngineEmulatorController(); // dtor
 
     PCEngineEmulatorModel *m_pEmulatorModel;
 

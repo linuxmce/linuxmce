@@ -15,7 +15,7 @@ namespace DCE
   {
   public:
     SGXEmulatorModel();
-    ~SGXEmulatorModel();
+    virtual ~SGXEmulatorModel();
 
   };
 }

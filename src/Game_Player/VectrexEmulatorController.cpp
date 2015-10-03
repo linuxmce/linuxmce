@@ -11,7 +11,7 @@ namespace DCE
 {
 
   VectrexEmulatorController::VectrexEmulatorController(Game_Player *pGame_Player, VectrexEmulatorModel *pEmulatorModel)
-    : MESSEmulatorController(pGame_Player, pEmulatorModel)
+    : MAMEEmulatorController(pGame_Player, pEmulatorModel)
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;

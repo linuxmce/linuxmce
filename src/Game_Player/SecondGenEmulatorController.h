@@ -18,18 +18,18 @@
 #ifndef SECONDGENEMULATORCONTROLLER_H
 #define SECONDGENEMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "SecondGenEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class SecondGenEmulatorController : public MESSEmulatorController
+  class SecondGenEmulatorController : public MAMEEmulatorController
   {
   public:
     SecondGenEmulatorController(Game_Player *pGame_Player, SecondGenEmulatorModel *pEmulatorModel); // ctor
-    ~SecondGenEmulatorController(); // dtor
+    virtual ~SecondGenEmulatorController(); // dtor
 
     SecondGenEmulatorModel *m_pEmulatorModel;
 

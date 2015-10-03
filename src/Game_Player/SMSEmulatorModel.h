@@ -7,15 +7,15 @@
 #ifndef SMSEMULATORMODEL_H
 #define SMSEMULATORMODEL_H
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 
 namespace DCE
 {
-  class SMSEmulatorModel : public MESSEmulatorModel
+  class SMSEmulatorModel : public MAMEEmulatorModel
   {
   public:
     SMSEmulatorModel();
-    ~SMSEmulatorModel();
+    virtual ~SMSEmulatorModel();
 
   };
 }

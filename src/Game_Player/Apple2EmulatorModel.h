@@ -15,7 +15,7 @@ namespace DCE
   {
   public:
     Apple2EmulatorModel();
-    ~Apple2EmulatorModel();
+    virtual ~Apple2EmulatorModel();
 
   };
 }

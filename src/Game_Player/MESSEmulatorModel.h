@@ -22,7 +22,7 @@ namespace DCE
   private:
   public:
     MESSEmulatorModel();
-    ~MESSEmulatorModel();
+    virtual ~MESSEmulatorModel();
 
     string m_sSystemName;   // Emulator System name
     string m_sState;

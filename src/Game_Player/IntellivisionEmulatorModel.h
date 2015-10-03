@@ -17,7 +17,7 @@ namespace DCE
   {
   public:
     IntellivisionEmulatorModel();
-    ~IntellivisionEmulatorModel();
+    virtual ~IntellivisionEmulatorModel();
 
     virtual bool updateConfig(); 
   };

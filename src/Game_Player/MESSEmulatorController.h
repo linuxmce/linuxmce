@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     MESSEmulatorController(Game_Player *pGame_Player, MESSEmulatorModel *pEmulatorModel); // ctor
-    ~MESSEmulatorController(); // dtor
+    virtual ~MESSEmulatorController(); // dtor
 
     MESSEmulatorModel *m_pEmulatorModel;
     virtual bool init();

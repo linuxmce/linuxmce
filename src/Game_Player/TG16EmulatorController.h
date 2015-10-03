@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     TG16EmulatorController(Game_Player *pGame_Player, TG16EmulatorModel *pEmulatorModel); // ctor
-    ~TG16EmulatorController(); // dtor
+    virtual ~TG16EmulatorController(); // dtor
 
     TG16EmulatorModel *m_pEmulatorModel;
 

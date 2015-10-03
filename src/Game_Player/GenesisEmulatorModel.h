@@ -7,15 +7,15 @@
 #ifndef GENESISEMULATORMODEL_H
 #define GENESISEMULATORMODEL_H
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 
 namespace DCE
 {
-  class GenesisEmulatorModel : public MESSEmulatorModel
+  class GenesisEmulatorModel : public MAMEEmulatorModel
   {
   public:
     GenesisEmulatorModel();
-    ~GenesisEmulatorModel();
+    virtual ~GenesisEmulatorModel();
 
   };
 }
