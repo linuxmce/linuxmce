@@ -474,6 +474,8 @@ void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Resul
 		::ExitWindowsEx(EWX_REBOOT | EWX_FORCE, 0);
 #endif
 		break;
+	case 'I': // ignore
+		break;
 	default:
 		if( m_bHardDrive )
 			SetStatus("PC_OFF",m_dwPK_Device_MD);
