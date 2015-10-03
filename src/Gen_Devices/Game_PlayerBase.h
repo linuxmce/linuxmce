@@ -145,6 +145,18 @@ public:
 			return m_mapParameters[DEVICEDATA_Hardware_acceleration_CONST];
 	}
 
+	string Get_Disks()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Disks_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Disks_CONST];
+	}
+
+	void Set_Disks(string Value)
+	{
+		SetParm(DEVICEDATA_Disks_CONST,Value.c_str());
+	}
 };
 
 
@@ -252,6 +264,8 @@ public:
 	string DATA_Get_Name() { return GetData()->Get_Name(); }
 	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
 	string DATA_Get_Hardware_acceleration() { return GetData()->Get_Hardware_acceleration(); }
+	string DATA_Get_Disks() { return GetData()->Get_Disks(); }
+	void DATA_Set_Disks(string Value,bool bUpdateDatabase=false) { GetData()->Set_Disks(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,323,Value); }
 	//Event accessors
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription) { GetEvents()->Playback_Info_Changed(sMediaDescription.c_str(),sSectionDescription.c_str(),sSynposisDescription.c_str()); }
 	void EVENT_Menu_Onscreen(int iStream_ID,bool bOnOff) { GetEvents()->Menu_Onscreen(iStream_ID,bOnOff); }
