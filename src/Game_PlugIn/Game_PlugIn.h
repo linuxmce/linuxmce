@@ -53,12 +53,15 @@ namespace DCE
 		// Private methods
 protected:
 		class Orbiter_Plugin *m_pOrbiter_Plugin;
-
+		class Datagrid_Plugin *m_pDatagrid_Plugin;
 
 		// Private methods
 public:
 		// Public member variables
 		int m_iPriority;
+
+		class DataGridTable *SwapDisksGrid( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage );
+
 
 //<-dceag-const-b->
 public:

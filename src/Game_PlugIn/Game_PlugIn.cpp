@@ -120,6 +120,8 @@ bool Game_PlugIn::Register()
  
 	m_pMedia_Plugin=( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
 	m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
+	m_pDatagrid_Plugin=( Datagrid_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Datagrid_Plugin_CONST);
+
 	if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to game plugin");
@@ -138,6 +140,10 @@ bool Game_PlugIn::Register()
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &Game_PlugIn::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
 	RegisterMsgInterceptor(( MessageInterceptorFn )( &Game_PlugIn::PlaybackCompleted ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Completed_CONST );
 
+	/* Register swap disks datagrid */
+	m_pDatagrid_Plugin->RegisterDatagridGenerator(new DataGridGeneratorCallBack( this, ( DCEDataGridGeneratorFn )( &Game_PlugIn::SwapDisksGrid ))
+						      , DATAGRID_Swap_Disks_CONST,PK_DeviceTemplate_get() );
+	
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -181,6 +187,33 @@ void Game_PlugIn::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 }
 
 //<-dceag-sample-b->!
+
+/**
+ * Swap Disks Datagrid
+ */
+
+class DataGridTable *Game_PlugIn::SwapDisksGrid( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
+{
+  DataGridTable *pDataGrid = new DataGridTable();
+  
+  vector<EntertainArea *> vectEntertainArea;
+  m_pMedia_Plugin->DetermineEntArea( pMessage->m_dwPK_Device_From, 0, "", vectEntertainArea );
+  if( vectEntertainArea.size()==0 || vectEntertainArea[0]->m_pMediaStream==NULL )
+    return pDataGrid;
+  MediaStream *pMediaStream = vectEntertainArea[0]->m_pMediaStream;
+  string Data = GetCurrentDeviceData( pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device, DEVICEDATA_Disks_CONST );
+  string::size_type pos=0;
+  int iCurrent = atoi(StringUtils::Tokenize(Data,"\n",pos).c_str());
+  for(int i=0;pos!=string::npos && pos<Data.size();++i)
+    {
+      DataGridCell *pCell = new DataGridCell( StringUtils::Tokenize(Data,"\n",pos), StringUtils::itos(i) );
+      pDataGrid->SetData(0,i,pCell);
+    }
+  *iPK_Variable=VARIABLE_Misc_Data_2_CONST;
+  *sValue_To_Assign=StringUtils::itos(iCurrent);
+  return pDataGrid;
+  
+}
 
 /*
 
@@ -321,63 +354,63 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 
 	if (mediaURL.find("/a2600") != string::npos || StringUtils::ToLower(mediaURL).find(".a26") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "stella.stella";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a2600_CONST;
 	}
 
 	if (mediaURL.find("/a5200") != string::npos || StringUtils::ToLower(mediaURL).find(".a52") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a5200_CONST;
 		pGameMediaStream->m_sKeypadOverlayPath = "/home/snap/a5200/keypads/";
 	}
 
 	if (mediaURL.find("/a7800") != string::npos || StringUtils::ToLower(mediaURL).find(".a78") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a7800_CONST;
 	}
 
 	if (mediaURL.find("/coleco") != string::npos || StringUtils::ToLower(mediaURL).find(".col") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_coleco_CONST;
 	}
 
 	if (mediaURL.find("/intv") != string::npos || StringUtils::ToLower(mediaURL).find(".int") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_intv_CONST;
 		pGameMediaStream->m_sKeypadOverlayPath = "/home/snap/intv/keypads/";
 	}
 
 	if (mediaURL.find("/sg1000") != string::npos || StringUtils::ToLower(mediaURL).find(".sg") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sg1000_CONST;
 	}
 
 	if (mediaURL.find("/sms") != string::npos || StringUtils::ToLower(mediaURL).find(".sms") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sms_CONST;
 	}
 
 	if (mediaURL.find("/nes") != string::npos || StringUtils::ToLower(mediaURL).find(".nes") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_nes_CONST;
 	}
 
 	if (mediaURL.find("/famicom") != string::npos || StringUtils::ToLower(mediaURL).find(".fam") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_famicom_CONST;
 	}
 
 	if (mediaURL.find("/snespal") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_snespal_CONST;
 	}
         if (mediaURL.find("/snes") != string::npos || StringUtils::ToLower(mediaURL).find(".smc") != string::npos
@@ -385,7 +418,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		|| StringUtils::ToLower(mediaURL).find(".fig") != string::npos
 		|| StringUtils::ToLower(mediaURL).find(".swc") != string::npos)
         {
-                pGameMediaStream->m_sAppName = "mess.mess";
+                pGameMediaStream->m_sAppName = "mame.mame";
                 pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_snes_CONST; 
         }
 
@@ -394,28 +427,28 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		StringUtils::ToLower(mediaURL).find(".md") != string::npos ||
 		StringUtils::ToLower(mediaURL).find(".gen") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_genesis_CONST; 
 	}
 
 	if (mediaURL.find("/tg16") != string::npos 
 		&& StringUtils::ToLower(mediaURL).find(".pce") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_tg16_CONST;
 	}
 
         if (mediaURL.find("/pce") != string::npos
                 && StringUtils::ToLower(mediaURL).find(".pce") != string::npos)
         {
-                pGameMediaStream->m_sAppName = "mess.mess";
+                pGameMediaStream->m_sAppName = "mame.mame";
                 pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_pce_CONST;
         }
 
         if (mediaURL.find("/sgx") != string::npos
                 && StringUtils::ToLower(mediaURL).find(".pce") != string::npos)
         {
-                pGameMediaStream->m_sAppName = "mess.mess";
+                pGameMediaStream->m_sAppName = "mame.mame";
                 pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sgx_CONST;
         }
 
@@ -423,7 +456,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		|| StringUtils::ToLower(mediaURL).find(".vec") != string::npos 
 		|| StringUtils::ToLower(mediaURL).find(".gam") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_vectrex_CONST;
 	}
 
@@ -433,7 +466,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		|| StringUtils::ToLower(mediaURL).find(".po") != string::npos
 		|| StringUtils::ToLower(mediaURL).find(".do") != string::npos)
         {
-                pGameMediaStream->m_sAppName = "mess.mess";
+                pGameMediaStream->m_sAppName = "mame.mame";
                 pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_apple2_CONST;
         }
 
@@ -464,7 +497,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	if (mediaURL.find("/ti994a") != string::npos
 	    || StringUtils::ToLower(mediaURL).find(".rpk") != string::npos)
 	{
-	  pGameMediaStream->m_sAppName = "mess.mess";
+	  pGameMediaStream->m_sAppName = "mame.mame";
 	  pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_TI99_CONST;
 	}
 
@@ -481,7 +514,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 
 	if (mediaURL.find(".j64") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "mame.mame";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_jaguar_CONST;
 	}
 
@@ -513,7 +546,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	      {
 		pGameMediaStream->m_sAppName = "csmame.csmame";
 	      }
-	    else if (pGameMediaStream->m_sAppName == "mess.mess")
+	    else if (pGameMediaStream->m_sAppName == "mame.mame")
 	      {
 		pGameMediaStream->m_sAppName = "csmess.csmess";
 	      }
