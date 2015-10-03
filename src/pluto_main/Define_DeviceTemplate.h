@@ -2159,6 +2159,10 @@
 #define DEVICETEMPLATE_Smart_Apps_Network_Media_CONST 2334
 #define DEVICETEMPLATE_Linuxmce_NVR_Camera_CONST 2335
 #define DEVICETEMPLATE_Egg_Timer_CONST 2336
+#define DEVICETEMPLATE_Raspberry_Pi_as_doorphone_CONST 2337
+#define DEVICETEMPLATE_doorphone_CONST 2338
+#define DEVICETEMPLATE_UPnP_Client_CONST 2339
+#define DEVICETEMPLATE_windows_shared_printer_CONST 2340
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"
