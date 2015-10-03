@@ -88,7 +88,7 @@ function Build_Replacements_Common_all
 	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos
 
 	Build_Replacement_Package lmce-skins extra/graphics
-	cp -fr ${svn_dir}/${svn_branch_name}/extra/graphics/lmce-avwizard-skin* "${replacements_dir}"
+	cp -fr ${svn_dir}/${svn_branch_name}/extra/lmce-avwizard-skin* "${replacements_dir}"
 
 }
 
