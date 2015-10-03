@@ -15,11 +15,41 @@ using namespace std;
 
 #include <string>
 #include <map>
+#include <deque>
 #include "ConfigurationWriter.h"
 #include "DCE/Logger.h"
 
 namespace DCE
 {
+
+  /** 
+   * A container for Disks and their on-filesystem representations for emulators to use for disk swaps.
+   */
+  class Disk
+  {
+  private:
+    string m_sFilename; // The filesystem name for disk
+    string m_sSlot; // The slot to place in.
+
+  public:
+    Disk(string sFilename, string sSlot)
+      {
+	m_sFilename=sFilename;
+	m_sSlot=sSlot;
+      }
+
+    Disk()
+      {
+	m_sFilename="";
+	m_sSlot="";
+      }
+
+    void   SetFilename(string sFilename) {m_sFilename=sFilename;}
+    string GetFilename() {return m_sFilename;}
+    void   SetSlot(string sSlot) {m_sSlot=sSlot;}
+    string GetSlot() {return m_sSlot;}
+
+  };
 
   class EmulatorModel
   {
@@ -88,6 +118,9 @@ namespace DCE
     virtual ~EmulatorModel();
 
     void coldReset(); // Wipe everything before a run();
+
+    deque<Disk> m_dequeDisks;
+    int m_iCurrentDisk;
 
   };
 

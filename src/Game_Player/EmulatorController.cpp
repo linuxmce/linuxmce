@@ -44,6 +44,29 @@ namespace DCE
   }
 
   /**
+   * Update the Disks device data, with any other matching media
+   */
+  void EmulatorController::updateDisks(string sMediaFile)
+  {
+    m_pEmulatorModel->m_dequeDisks.clear();
+    m_pEmulatorModel->m_dequeDisks.push_back(Disk(sMediaFile,"default"));
+    int i=0;
+    string sDiskDDItems=StringUtils::itos(m_pEmulatorModel->m_iCurrentDisk) + "\n" + FileUtils::FilenameWithoutPath(sMediaFile) +"\n";
+
+    for (i=1;i<=256;i++)
+      {
+	string sAdditionalDiskPath = sMediaFile + ".disk" + StringUtils::itos(i);
+	if (FileUtils::FileExists(sAdditionalDiskPath))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding additional disk: %s",sAdditionalDiskPath.c_str());
+	    m_pEmulatorModel->m_dequeDisks.push_back(Disk(sAdditionalDiskPath,""));
+	    sDiskDDItems += FileUtils::FilenameWithoutPath(sAdditionalDiskPath) + "\n";
+	  }
+      }
+    m_pGame_Player->DATA_Set_Disks(sDiskDDItems);
+  }
+
+  /**
    * Insert media into the emulator into a given slot.
    * If not specified, the 'default' slot is used.
    */
@@ -51,6 +74,7 @@ namespace DCE
   {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"Inserting media %s into slot %s",sMediaFile.c_str(),sSlot.c_str());
     m_pEmulatorModel->m_mapMedia[sSlot] = sMediaFile;
+    updateDisks(sMediaFile);
   }
 
   /**
