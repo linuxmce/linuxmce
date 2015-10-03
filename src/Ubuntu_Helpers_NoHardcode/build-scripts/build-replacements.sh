@@ -87,7 +87,7 @@ function Build_Replacements_Common_all
 
 	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos
 
-	Build_Replacement_Package lmce-skins extra/graphics && \
+	Build_Replacement_Package lmce-skins extra/graphics
 	cp -fr ${svn_dir}/${svn_branch_name}/extra/graphics/lmce-avwizard-skin* "${replacements_dir}"
 
 }
@@ -98,7 +98,7 @@ function Build_Replacements_Common_ubuntu
 	make_jobs="" Build_Replacement_Package pthsem external/pthsem-2.0.8
 
 	#Package: bcusdk (eib)
-	Build_Replacement_Package bcusdk external/bcusdk-0.0.5 && \
+	Build_Replacement_Package bcusdk external/bcusdk-0.0.5
 	cp -fr ${svn_dir}/${svn_branch_name}/external/*eib*.deb ${replacements_dir}
 
 	#Package: platform for libcec
@@ -176,12 +176,12 @@ fi
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
 
 	# Open ZWave library
-	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
-        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
+	Build_Replacement_Package zwave external/openzwave-1.3.1025
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}"
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}"
 
 	# qhttpserver (for LinuxMCE NVR)
-	Build_Replacement_Package libqhttpserver external/qhttpserver && \
+	Build_Replacement_Package libqhttpserver external/qhttpserver
 	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}"
 
 	##Package: raspi2png
@@ -259,7 +259,7 @@ function Build_Replacements_Common_raspbian
 	make_jobs="" Build_Replacement_Package pthsem external/pthsem-2.0.8
 
 	#Package: bcusdk (eib)
-	Build_Replacement_Package bcusdk external/bcusdk-0.0.5 && \
+	Build_Replacement_Package bcusdk external/bcusdk-0.0.5
 	cp -fr ${svn_dir}/${svn_branch_name}/external/*eib*.deb ${replacements_dir}
 
 	#Package: platform for libcec
@@ -285,15 +285,15 @@ function Build_Replacements_Common_raspbian
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
 
 	# Open ZWave library
-	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
-        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
+	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}"
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}"
 
 	#Package: tee-pluto
 	Build_Replacement_Package tee-pluto misc_utils/tee-pluto
 
 	# qhttpserver (for LinuxMCE NVR)
-	Build_Replacement_Package libqhttpserver external/qhttpserver && \
+	Build_Replacement_Package libqhttpserver external/qhttpserver
 	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}"
 
 	#Package: raspi2png
