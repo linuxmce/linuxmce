@@ -270,6 +270,10 @@
 #define DEVICEDATA_Debug_CONST 317
 #define DEVICEDATA_Token_CONST 318
 #define DEVICEDATA_WIFIConfig_CONST 319
+#define DEVICEDATA_DHCP6_data_CONST 320
+#define DEVICEDATA_SSLProxyPort_CONST 321
+#define DEVICEDATA_Use_as_mountpoint_on_Userspace_CONST 322
+#define DEVICEDATA_Disks_CONST 323
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"

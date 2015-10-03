@@ -134,6 +134,8 @@
 #define DEVICECATEGORY_Weather_Stations_CONST 187
 #define DEVICECATEGORY_Energy_Meter_CONST 188
 #define DEVICECATEGORY_CEC_Remote_Controls_CONST 189
+#define DEVICECATEGORY_printers_CONST 190
+#define DEVICECATEGORY_Network_shared_CONST 191
 
 #define DEVICECATEGORY_TABLE "DeviceCategory"
 #define DEVICECATEGORY_PK_DEVICECATEGORY_FIELD "PK_DeviceCategory"
