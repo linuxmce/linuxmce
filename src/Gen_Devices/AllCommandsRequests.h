@@ -31328,5 +31328,37 @@ namespace DCE
 			COMMANDPARAMETER_DeviceToLink_CONST, StringUtils::itos(iDeviceToLink).c_str(),
 			COMMANDPARAMETER_SendOFF_CONST, (bSendOFF ? "1" : "0")); }
 	};
+	class CMD_Swap_Media : public PreformedCommand {
+	public:
+		CMD_Swap_Media(long DeviceIDFrom, long DeviceIDTo,string sFilename,string sSlot) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_Swap_Media_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
+			COMMANDPARAMETER_Slot_CONST, sSlot.c_str()); }
+	};
+	class CMD_Swap_Media_DL : public PreformedCommand {
+	public:
+		CMD_Swap_Media_DL(long DeviceIDFrom, string DeviceIDTo,string sFilename,string sSlot) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Swap_Media_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
+			COMMANDPARAMETER_Slot_CONST, sSlot.c_str()); }
+	};
+	class CMD_Swap_Media_DT : public PreformedCommand {
+	public:
+		CMD_Swap_Media_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sFilename,string sSlot) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Swap_Media_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
+			COMMANDPARAMETER_Slot_CONST, sSlot.c_str()); }
+	};
+	class CMD_Swap_Media_Cat : public PreformedCommand {
+	public:
+		CMD_Swap_Media_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sFilename,string sSlot) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Swap_Media_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
+			COMMANDPARAMETER_Slot_CONST, sSlot.c_str()); }
+	};
 }
 #endif
