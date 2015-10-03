@@ -8,10 +8,12 @@
 #include "VICEEmulatorController.h"
 #include "PlutoUtils/FileUtils.h"
 
+#include "utilities/linux/window_manager/WMController/WMController.h"
+
 namespace DCE
 {
   VICEEmulatorController::VICEEmulatorController(Game_Player *pGame_Player, VICEEmulatorModel *pEmulatorModel)
-    : X11EmulatorController(pGame_Player, pEmulatorModel)
+    : INotifyEmulatorController(pGame_Player, pEmulatorModel)
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
@@ -24,7 +26,7 @@ namespace DCE
 
   bool VICEEmulatorController::init()
   {
-    return X11EmulatorController::init();
+    return INotifyEmulatorController::init();
   }
 
   void VICEEmulatorController::insertMediaNamed(string sMediaFile, string sSlot)
@@ -50,7 +52,7 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Inserting %s into slot %s",sSlot.c_str(),sMediaFile.c_str());
 	
 	sRet += "-" + sSlot + "\t" +
-	  sMediaFile;
+	  sMediaFile + "\t";
       }
 
     return sRet;
@@ -88,21 +90,15 @@ namespace DCE
 	// Regular Non-streaming instance
       }
 
-    if (X11EmulatorController::run())
-      {
-        usleep(2000);
-        m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
-        usleep(2000);
-      	return true;
-      }
+    bool bRet = INotifyEmulatorController::run();
+
+    return true;
     
-    return false;
-
   }
-
+  
   bool VICEEmulatorController::stop()
   {
-      X11EmulatorController::stop();
+      INotifyEmulatorController::stop();
 
       // TODO: remember why the hell I removed this from the base class!
       m_pEmulatorModel->m_mapMedia.clear();
@@ -143,28 +139,7 @@ namespace DCE
 	doAction("UI_ENTER");
       }
     
-    return X11EmulatorController::gotoMenu(iMenu); // and up the chain...
-  }
-
-  bool VICEEmulatorController::saveState(string& sPosition, string& sText, bool bAutoSave, string sAutoSaveName)
-  {
-    return false;
-  }
-
-  void VICEEmulatorController::setMediaPosition(string sMediaPosition)
-  {
-    EmulatorController::setMediaPosition(sMediaPosition);
-    return;
-  }
-
-  bool VICEEmulatorController::loadState(string sPosition)
-  {
-    if (!m_pEmulatorModel->m_bIsStreaming)
-      {
-	// Implement State loading.
-	return false;
-      }
-    return false;
+    return INotifyEmulatorController::gotoMenu(iMenu); // and up the chain...
   }
 
   bool VICEEmulatorController::record()

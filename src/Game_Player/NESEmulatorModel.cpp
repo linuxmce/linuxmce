@@ -10,7 +10,7 @@
 namespace DCE
 {
 
-  NESEmulatorModel::NESEmulatorModel() : MESSEmulatorModel()
+  NESEmulatorModel::NESEmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "nes";
   }

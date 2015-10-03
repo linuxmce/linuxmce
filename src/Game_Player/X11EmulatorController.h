@@ -26,8 +26,10 @@ namespace DCE
   {
   public:
 
+    bool m_bWindowIdThreadIsRunning;
+
     X11EmulatorController(Game_Player *pGame_Player, X11EmulatorModel *pEmulatorModel);  // ctor
-    ~X11EmulatorController(); // dtor
+    virtual ~X11EmulatorController(); // dtor
 
     virtual bool run();
     virtual bool stop();
@@ -58,7 +60,6 @@ namespace DCE
     pthread_t m_windowIdThread;
     string m_sLastAction;
     bool m_bResend; // Resend keystroke if needed. Set by default window handler.
-    bool m_bWindowIdThreadIsRunning;
     bool m_bResendFired;
     bool getWindowCalled(string sWindowName, Window& windowId);
   };

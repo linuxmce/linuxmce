@@ -10,7 +10,7 @@
 namespace DCE
 {
 
-  SG1000EmulatorModel::SG1000EmulatorModel() : MESSEmulatorModel()
+  SG1000EmulatorModel::SG1000EmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "sg1000";
   }

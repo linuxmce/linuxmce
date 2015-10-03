@@ -86,11 +86,31 @@ namespace DCE
 	return false;
       }
 
-    if (ioctl(m_iInputfd,UI_SET_EVBIT,EV_REP)<0)
+    if (ioctl(m_iInputfd,UI_SET_EVBIT,EV_REL)<0)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::Open() - Could not set EV_REP EVBIT. Bailing!");
 	return false;
       }
+
+    if (ioctl(m_iInputfd,UI_SET_RELBIT,REL_X)<0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::Open() - Could not set Relative X bit. Bailing!");
+	return false;
+      }
+
+    if (ioctl(m_iInputfd,UI_SET_RELBIT,REL_Y)<0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::Open() - Could not set Relative Y bit. Bailing!");
+	return false;
+      }
+
+
+    if (ioctl(m_iInputfd,UI_SET_KEYBIT,BTN_MOUSE)<0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VirtualKeyboard::Open() - Could not set KEYBIT MICE Bailing!");
+	return false;
+      }
+
 
     // Set the KEY bits.
     for (i=KEY_ESC;i<=KEY_MICMUTE;i++)

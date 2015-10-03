@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     FamicomEmulatorController(Game_Player *pGame_Player, FamicomEmulatorModel *pEmulatorModel); // ctor
-    ~FamicomEmulatorController(); // dtor
+    virtual ~FamicomEmulatorController(); // dtor
 
     virtual void insertMediaNamed(string sMediaFile, string sSlot);
 

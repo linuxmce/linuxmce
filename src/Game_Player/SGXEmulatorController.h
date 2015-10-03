@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     SGXEmulatorController(Game_Player *pGame_Player, SGXEmulatorModel *pEmulatorModel); // ctor
-    ~SGXEmulatorController(); // dtor
+    virtual ~SGXEmulatorController(); // dtor
 
     SGXEmulatorModel *m_pEmulatorModel;
 

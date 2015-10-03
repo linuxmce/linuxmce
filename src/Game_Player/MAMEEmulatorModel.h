@@ -9,7 +9,7 @@
 #ifndef MAMEEMULATORMODEL_H
 #define MAMEEMULATORMODEL_H
 
-#include "X11EmulatorModel.h"
+#include "INotifyEmulatorModel.h"
 #include "EmulatorModel.h"
 
 #define MAME_CONFIG_FILE_TEMPLATE "/usr/pluto/templates/mame.ini.template"
@@ -17,14 +17,15 @@
 
 namespace DCE
 {
-  class MAMEEmulatorModel : public X11EmulatorModel
+  class MAMEEmulatorModel : public INotifyEmulatorModel
   {
   private:
   public:
     MAMEEmulatorModel();
-    ~MAMEEmulatorModel();
+    virtual ~MAMEEmulatorModel();
 
     string m_sState; 
+    string m_sSystemName; // MAME and MESS are now one.
 
   protected:
 

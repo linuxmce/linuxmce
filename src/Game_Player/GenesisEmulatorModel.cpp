@@ -10,7 +10,7 @@
 namespace DCE
 {
 
-  GenesisEmulatorModel::GenesisEmulatorModel() : MESSEmulatorModel()
+  GenesisEmulatorModel::GenesisEmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "genesis";
   }

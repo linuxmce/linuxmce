@@ -22,7 +22,7 @@ namespace DCE
   private:
   public:
     StellaEmulatorModel();
-    ~StellaEmulatorModel();
+    virtual ~StellaEmulatorModel();
 
     string m_sSystemName;   // Emulator System name
     string m_sState;

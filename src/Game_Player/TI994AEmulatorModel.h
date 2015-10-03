@@ -15,7 +15,7 @@ namespace DCE
   {
   public:
     TI994AEmulatorModel();
-    ~TI994AEmulatorModel();
+    virtual ~TI994AEmulatorModel();
 
   };
 }

@@ -85,7 +85,7 @@ namespace DCE
     }    
 
     EmulatorModel();
-    ~EmulatorModel();
+    virtual ~EmulatorModel();
 
     void coldReset(); // Wipe everything before a run();
 

@@ -15,7 +15,7 @@ namespace DCE
   {
   public:
     MegadriveEmulatorModel();
-    ~MegadriveEmulatorModel();
+    virtual ~MegadriveEmulatorModel();
 
   };
 }

@@ -11,7 +11,7 @@ namespace DCE
 {
 
   GenesisEmulatorController::GenesisEmulatorController(Game_Player *pGame_Player, GenesisEmulatorModel *pEmulatorModel)
-    : MESSEmulatorController(pGame_Player, pEmulatorModel)
+    : MAMEEmulatorController(pGame_Player, pEmulatorModel)
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;

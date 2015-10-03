@@ -20,7 +20,7 @@ namespace DCE
   {
   public:
     VIC20EmulatorController(Game_Player *pGame_Player, VIC20EmulatorModel *pEmulatorModel); // ctor
-    ~VIC20EmulatorController(); // dtor
+    virtual ~VIC20EmulatorController(); // dtor
 
     VIC20EmulatorModel *m_pEmulatorModel;
 

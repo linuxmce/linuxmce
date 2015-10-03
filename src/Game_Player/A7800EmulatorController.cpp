@@ -11,7 +11,7 @@ namespace DCE
 {
 
   A7800EmulatorController::A7800EmulatorController(Game_Player *pGame_Player, A7800EmulatorModel *pEmulatorModel)
-    : MESSEmulatorController(pGame_Player, pEmulatorModel)
+    : MAMEEmulatorController(pGame_Player, pEmulatorModel)
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;

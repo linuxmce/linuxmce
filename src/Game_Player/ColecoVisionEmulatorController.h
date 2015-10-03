@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     ColecoVisionEmulatorController(Game_Player *pGame_Player, ColecoVisionEmulatorModel *pEmulatorModel); // ctor
-    ~ColecoVisionEmulatorController(); // dtor
+    virtual ~ColecoVisionEmulatorController(); // dtor
 
     ColecoVisionEmulatorModel *m_pEmulatorModel;
 

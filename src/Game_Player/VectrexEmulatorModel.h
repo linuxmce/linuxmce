@@ -7,15 +7,15 @@
 #ifndef VECTREXEMULATORMODEL_H
 #define VECTREXEMULATORMODEL_H
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 
 namespace DCE
 {
-  class VectrexEmulatorModel : public MESSEmulatorModel
+  class VectrexEmulatorModel : public MAMEEmulatorModel
   {
   public:
     VectrexEmulatorModel();
-    ~VectrexEmulatorModel();
+    virtual ~VectrexEmulatorModel();
 
   };
 }

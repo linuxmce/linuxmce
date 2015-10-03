@@ -2,8 +2,8 @@
 Package = DCE_Destination_Package
 Dir = 
 desc = DCE Implemenation for #1965 Game Player
-Maintainer = ThomasName
-Email = 
+Maintainer = DCE_MaintainerName
+Email = DCE_MaintainerEmail
 Depend = DCE_Dependencies
 <-dceag-p-e->
 

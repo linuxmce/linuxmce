@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     StellaEmulatorController(Game_Player *pGame_Player, StellaEmulatorModel *pEmulatorModel); // ctor
-    ~StellaEmulatorController(); // dtor
+    virtual ~StellaEmulatorController(); // dtor
 
     StellaEmulatorModel *m_pEmulatorModel;
     virtual bool init();
@@ -44,6 +44,7 @@ namespace DCE
   protected:
   private:
     string getSaveStateFromSlot();
+    virtual string getRomFromSlot();
     bool doKeypadAction(string sKey, Message *pMessage);
   };
 }

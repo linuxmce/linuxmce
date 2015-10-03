@@ -28,6 +28,24 @@ namespace DCE
    
   }
 
+  string StellaEmulatorController::getRomFromSlot()
+  {
+    string sMedia;
+    if (getMediaInSlot(sMedia))
+      {
+	if (!FileUtils::FileExists(sMedia))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MAMEEmulatorController::run() - could not find media in default slot: %s",sMedia.c_str());
+	    return "";
+	  }
+      }
+    else
+      {
+	return "";
+      }
+    return sMedia;
+  }
+
   bool StellaEmulatorController::init()
   {
     return INotifyEmulatorController::init();
@@ -35,6 +53,7 @@ namespace DCE
 
   bool StellaEmulatorController::run()
   {
+    m_pEmulatorModel->m_sArgs = getRomFromSlot();
     return INotifyEmulatorController::run();
   }
 

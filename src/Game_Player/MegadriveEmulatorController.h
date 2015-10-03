@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     MegadriveEmulatorController(Game_Player *pGame_Player, MegadriveEmulatorModel *pEmulatorModel); // ctor
-    ~MegadriveEmulatorController(); // dtor
+    virtual ~MegadriveEmulatorController(); // dtor
 
     MegadriveEmulatorModel *m_pEmulatorModel;
 

@@ -7,15 +7,15 @@
 #ifndef NESEMULATORMODEL_H
 #define NESEMULATORMODEL_H
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 
 namespace DCE
 {
-  class NESEmulatorModel : public MESSEmulatorModel
+  class NESEmulatorModel : public MAMEEmulatorModel
   {
   public:
     NESEmulatorModel();
-    ~NESEmulatorModel();
+    virtual ~NESEmulatorModel();
 
   };
 }

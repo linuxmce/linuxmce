@@ -21,7 +21,7 @@ namespace DCE
   {
   public:
     INotifyEmulatorController(Game_Player *pGame_Player, INotifyEmulatorModel *pEmulatorModel);
-    ~INotifyEmulatorController();
+    virtual ~INotifyEmulatorController();
 
     void inotifyThread();
     void INotifyRunloop();
@@ -44,14 +44,15 @@ namespace DCE
 
   protected:
     INotifyEmulatorModel *m_pEmulatorModel;
-    bool SendCommand(char command);
+    bool SendCommand(unsigned char command);
     virtual string getRomFromSlot();
     virtual string getRomPathFromSlot();
 
   private:
     pthread_t m_inotifyThread;
+    pluto_pthread_mutex_t m_INotifyCommandMutex;
     void ProcessINotifyEvent(cpp_inotify_event event);
-    void doCommand(char command);
+    void doCommand(unsigned char command);
   };
 }
 

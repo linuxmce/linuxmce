@@ -17,7 +17,7 @@ namespace DCE
   {
   public:
     ColecoVisionEmulatorModel();
-    ~ColecoVisionEmulatorModel();
+    virtual ~ColecoVisionEmulatorModel();
 
     virtual void initializeActionstoKeysyms();
     virtual void initializeButtontoKeysyms();

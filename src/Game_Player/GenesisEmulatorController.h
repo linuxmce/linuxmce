@@ -8,18 +8,18 @@
 #ifndef GENESISEMULATORCONTROLLER_H
 #define GENESISEMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "GenesisEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class GenesisEmulatorController : public MESSEmulatorController
+  class GenesisEmulatorController : public MAMEEmulatorController
   {
   public:
     GenesisEmulatorController(Game_Player *pGame_Player, GenesisEmulatorModel *pEmulatorModel); // ctor
-    ~GenesisEmulatorController(); // dtor
+    virtual ~GenesisEmulatorController(); // dtor
 
     GenesisEmulatorModel *m_pEmulatorModel;
 

@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     TI994AEmulatorController(Game_Player *pGame_Player, TI994AEmulatorModel *pEmulatorModel); // ctor
-    ~TI994AEmulatorController(); // dtor
+    virtual ~TI994AEmulatorController(); // dtor
 
     TI994AEmulatorModel *m_pEmulatorModel;
     string getAdditionalOptions();

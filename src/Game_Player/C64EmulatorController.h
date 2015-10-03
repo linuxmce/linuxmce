@@ -20,7 +20,7 @@ namespace DCE
   {
   public:
     C64EmulatorController(Game_Player *pGame_Player, C64EmulatorModel *pEmulatorModel); // ctor
-    ~C64EmulatorController(); // dtor
+    virtual ~C64EmulatorController(); // dtor
 
     C64EmulatorModel *m_pEmulatorModel;
 

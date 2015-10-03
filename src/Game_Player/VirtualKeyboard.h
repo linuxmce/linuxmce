@@ -18,6 +18,7 @@ namespace DCE
   class VirtualKeyboard
   {
   public:
+    ~VirtualKeyboard();
     static VirtualKeyboard* GetInstance();
     bool ClickKey(int iKey);
 
@@ -30,7 +31,6 @@ namespace DCE
     void Close();                           // Close the Virtual Keyboard.
 
     VirtualKeyboard();
-    ~VirtualKeyboard();
     VirtualKeyboard(VirtualKeyboard const&){};
     static VirtualKeyboard* m_pInstance;
 

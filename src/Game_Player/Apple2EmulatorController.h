@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     Apple2EmulatorController(Game_Player *pGame_Player, Apple2EmulatorModel *pEmulatorModel); // ctor
-    ~Apple2EmulatorController(); // dtor
+    virtual ~Apple2EmulatorController(); // dtor
 
     Apple2EmulatorModel *m_pEmulatorModel;
 

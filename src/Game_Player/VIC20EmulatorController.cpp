@@ -24,32 +24,21 @@ namespace DCE
 
   void VIC20EmulatorController::insertMediaNamed(string sMediaFile, string sSlot)
   {
-    if (sMediaFile.find(".20") != string::npos)
+    string sFilepath = FileUtils::BasePath(sMediaFile);
+    string sFilename = FileUtils::FilenameWithoutPath(sMediaFile);
+    string sBaseName = FileUtils::FileWithoutExtension(sFilename);
+
+    EmulatorController::insertMediaNamed(sMediaFile,"cartA");
+
+    if (FileUtils::FileExists(sFilepath+"/"+sBaseName+".20"))
       {
-	sSlot = "cart2";
+	EmulatorController::insertMediaNamed(sFilepath+"/"+sBaseName+".20","cart2");
       }
 
-    if (sMediaFile.find(".40") != string::npos)
+    if (FileUtils::FileExists(sFilepath+"/"+sBaseName+".60"))
       {
-	sSlot = "cart4";
+	EmulatorController::insertMediaNamed(sFilepath+"/"+sBaseName+".60","cart6");
       }
-    
-    if (sMediaFile.find(".60") != string::npos)
-      {
-	sSlot = "cart6";
-      }
-    
-    if (StringUtils::ToLower(sMediaFile).find(".a0") != string::npos)
-      {
-	sSlot = "cartA";
-      }
-
-    if (StringUtils::ToLower(sMediaFile).find(".b0") != string::npos)
-      {
-	sSlot = "cartB";
-      }
-
-    EmulatorController::insertMediaNamed(sMediaFile,sSlot);
 
   }
 

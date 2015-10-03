@@ -8,18 +8,18 @@
 #ifndef SMSEMULATORCONTROLLER_H
 #define SMSEMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "SMSEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class SMSEmulatorController : public MESSEmulatorController
+  class SMSEmulatorController : public MAMEEmulatorController
   {
   public:
     SMSEmulatorController(Game_Player *pGame_Player, SMSEmulatorModel *pEmulatorModel); // ctor
-    ~SMSEmulatorController(); // dtor
+    virtual ~SMSEmulatorController(); // dtor
 
     SMSEmulatorModel *m_pEmulatorModel;
 

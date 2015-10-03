@@ -8,18 +8,18 @@
 #ifndef A2600EMULATORCONTROLLER_H
 #define A2600EMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "A2600EmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class A2600EmulatorController : public MESSEmulatorController
+  class A2600EmulatorController : public MAMEEmulatorController
   {
   public:
     A2600EmulatorController(Game_Player *pGame_Player, A2600EmulatorModel *pEmulatorModel); // ctor
-    ~A2600EmulatorController(); // dtor
+    virtual ~A2600EmulatorController(); // dtor
 
     A2600EmulatorModel *m_pEmulatorModel;
 

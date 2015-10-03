@@ -8,18 +8,18 @@
 #ifndef NESEMULATORCONTROLLER_H
 #define NESEMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "NESEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class NESEmulatorController : public MESSEmulatorController
+  class NESEmulatorController : public MAMEEmulatorController
   {
   public:
     NESEmulatorController(Game_Player *pGame_Player, NESEmulatorModel *pEmulatorModel); // ctor
-    ~NESEmulatorController(); // dtor
+    virtual ~NESEmulatorController(); // dtor
 
     NESEmulatorModel *m_pEmulatorModel;
 

@@ -10,7 +10,7 @@
 namespace DCE
 {
 
-  SMSEmulatorModel::SMSEmulatorModel() : MESSEmulatorModel()
+  SMSEmulatorModel::SMSEmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "sms";
   }

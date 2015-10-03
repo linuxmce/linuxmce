@@ -7,15 +7,15 @@
 #ifndef SG1000EMULATORMODEL_H
 #define SG1000EMULATORMODEL_H
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 
 namespace DCE
 {
-  class SG1000EmulatorModel : public MESSEmulatorModel
+  class SG1000EmulatorModel : public MAMEEmulatorModel
   {
   public:
     SG1000EmulatorModel();
-    ~SG1000EmulatorModel();
+    virtual ~SG1000EmulatorModel();
 
   };
 }

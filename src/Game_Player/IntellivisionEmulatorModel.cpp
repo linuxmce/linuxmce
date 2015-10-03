@@ -24,9 +24,9 @@ namespace DCE
 
   bool IntellivisionEmulatorModel::updateConfig()
   {
-    MESSEmulatorModel::updateConfig();
-    ConfigurationWriter keypadConfig(INTV_CONFIG_FILE_TEMPLATE, INTV_CONFIG_FILE, "");
-    return keypadConfig.Write();
+    MAMEEmulatorModel::updateConfig();
+    // ConfigurationWriter keypadConfig(INTV_CONFIG_FILE_TEMPLATE, INTV_CONFIG_FILE, "");
+    // return keypadConfig.Write();
   }
 
 }

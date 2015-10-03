@@ -17,7 +17,7 @@ namespace DCE
   {
   public:
     C64EmulatorModel();
-    ~C64EmulatorModel();
+    virtual ~C64EmulatorModel();
 
     virtual bool updateConfig();
 

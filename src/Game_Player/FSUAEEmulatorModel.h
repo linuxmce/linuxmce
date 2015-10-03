@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     FSUAEEmulatorModel();
-    ~FSUAEEmulatorModel();
+    virtual ~FSUAEEmulatorModel();
 
   protected:
     virtual void initializeActionstoKeysyms(); // set key mappings for VICE.

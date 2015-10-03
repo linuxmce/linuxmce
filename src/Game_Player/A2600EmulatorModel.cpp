@@ -10,7 +10,7 @@
 namespace DCE
 {
 
-  A2600EmulatorModel::A2600EmulatorModel() : MESSEmulatorModel()
+  A2600EmulatorModel::A2600EmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "a2600";
   }

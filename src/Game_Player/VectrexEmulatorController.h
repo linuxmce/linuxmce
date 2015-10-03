@@ -8,18 +8,18 @@
 #ifndef VECTREXEMULATORCONTROLLER_H
 #define VECTREXEMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "VectrexEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class VectrexEmulatorController : public MESSEmulatorController
+  class VectrexEmulatorController : public MAMEEmulatorController
   {
   public:
     VectrexEmulatorController(Game_Player *pGame_Player, VectrexEmulatorModel *pEmulatorModel); // ctor
-    ~VectrexEmulatorController(); // dtor
+    virtual ~VectrexEmulatorController(); // dtor
 
     VectrexEmulatorModel *m_pEmulatorModel;
 

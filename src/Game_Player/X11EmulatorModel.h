@@ -28,7 +28,7 @@ namespace DCE
   {
   public:
     X11EmulatorModel();
-    ~X11EmulatorModel();
+    virtual ~X11EmulatorModel();
     Display *m_pDisplay;
     Window m_iWindowId;
     Window m_iPreviousWindowId;

@@ -12,7 +12,6 @@ namespace DCE
 {
   C64EmulatorModel::C64EmulatorModel() : VICEEmulatorModel()
   {
-    m_sWindowName = "x64.x64";
     m_sEmulatorBinary += "x64";
     m_sProcessName = "x64";
   }

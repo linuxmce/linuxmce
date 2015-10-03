@@ -19,7 +19,7 @@ namespace DCE
   {
   public:
     IntellivisionEmulatorController(Game_Player *pGame_Player, IntellivisionEmulatorModel *pEmulatorModel); // ctor
-    ~IntellivisionEmulatorController(); // dtor
+    virtual ~IntellivisionEmulatorController(); // dtor
 
     IntellivisionEmulatorModel *m_pEmulatorModel;
 

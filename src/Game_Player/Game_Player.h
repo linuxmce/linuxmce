@@ -50,6 +50,8 @@
 #include "EmulatorFactory.h"
 #include "EmulatorController.h"
 
+#include "VirtualKeyboard.h"
+
 #define GAME_PLAYER_STATE_DIR "/run/Game_Player"
 
 //<-dceag-decl-b->
@@ -57,7 +59,6 @@ namespace DCE
 {
 	class EmulatorFactory;
 	class EmulatorController;
-
 	class Game_Player : public Game_Player_Command
 	{
 //<-dceag-decl-e->
@@ -70,6 +71,7 @@ namespace DCE
     // Public member variables
 
   private:
+    VirtualKeyboard* m_pVirtualKeyboard;
     bool m_bIsRecording;
     bool m_bStateDirExists;
     string m_sIPofMD;
@@ -136,6 +138,8 @@ public:
 	string DATA_Get_Name();
 	bool DATA_Get_Only_One_Per_PC();
 	string DATA_Get_Hardware_acceleration();
+	string DATA_Get_Disks();
+	void DATA_Set_Disks(string Value,bool bUpdateDatabase=false);
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);

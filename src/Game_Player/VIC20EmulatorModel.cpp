@@ -12,7 +12,6 @@ namespace DCE
 {
   VIC20EmulatorModel::VIC20EmulatorModel() : VICEEmulatorModel()
   {
-    m_sWindowName = "xvic.xvic";
     m_sEmulatorBinary += "xvic";
     m_sProcessName = "xvic";
   }

@@ -8,18 +8,18 @@
 #ifndef VICEEMULATORCONTROLLER_H
 #define VICEEMULATORCONTROLLER_H
 
-#include "X11EmulatorController.h"
+#include "INotifyEmulatorController.h"
 #include "VICEEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class VICEEmulatorController : public X11EmulatorController
+  class VICEEmulatorController : public INotifyEmulatorController
   {
   public:
     VICEEmulatorController(Game_Player *pGame_Player, VICEEmulatorModel *pEmulatorModel);  // ctor
-    ~VICEEmulatorController(); // dtor
+    virtual ~VICEEmulatorController(); // dtor
 
     VICEEmulatorModel *m_pEmulatorModel;
     virtual bool init();
@@ -27,9 +27,6 @@ namespace DCE
     virtual bool stop();
     virtual bool setSpeed(int iSpeed);
     virtual bool gotoMenu(int iMenu);
-    virtual void setMediaPosition(string sMediaPosition);
-    virtual bool saveState(string& sPosition, string& sText, bool bAutoSave=false, string sAutoSaveName="");
-    virtual bool loadState(string sPosition);
     virtual void insertMediaNamed(string sMediaFile, string sSlot);
     
     bool getRecordingFilename(string sPath, string &sFilename);

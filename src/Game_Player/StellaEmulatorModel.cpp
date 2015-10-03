@@ -47,6 +47,7 @@ namespace DCE
     m_mapActionsToCommandBytes["KEYPAD2_*"] = make_pair(0x35,true);
     m_mapActionsToCommandBytes["KEYPAD2_#"] = make_pair(0x36,true);
 
+    m_sStateDir="/home/mamedata/stella.sta";
     m_bCanSaveState=true;
   }
 
