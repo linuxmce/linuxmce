@@ -1041,6 +1041,7 @@
 #define COMMAND_Bluetooth_Disconnect_Device_CONST 1145
 #define COMMAND_Start_Egg_Timer_CONST 1156
 #define COMMAND_Cancel_Egg_Timer_CONST 1157
+#define COMMAND_Swap_Media_CONST 1158
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
