@@ -57,12 +57,11 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class EmulatorFactory;
-	class EmulatorController;
+  class EmulatorController;
+  class EmulatorFactory;
 	class Game_Player : public Game_Player_Command
 	{
 //<-dceag-decl-e->
-
     friend class EmulatorController;
     // Private member variables
 
@@ -717,6 +716,17 @@ public:
 
 	virtual void CMD_Get_Game_Options(string sPath,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Game_Options(sPath.c_str(),sValue_To_Assign,sCMD_Result,NULL);};
 	virtual void CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1158 - Swap Media */
+	/** Swap media in a given slot. */
+		/** @param #13 Filename */
+			/** Filename to swap in, with full path. */
+		/** @param #291 Slot */
+			/** Game Player slot to swap Filename into. */
+
+	virtual void CMD_Swap_Media(string sFilename,string sSlot) { string sCMD_Result; CMD_Swap_Media(sFilename.c_str(),sSlot.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Swap_Media(string sFilename,string sSlot,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 

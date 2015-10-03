@@ -1675,3 +1675,16 @@ void Game_Player::CMD_Select_B(string &sCMD_Result,Message *pMessage)
       m_pEmulatorController->selectB();
     }
 }
+//<-dceag-c1158-b->
+
+	/** @brief COMMAND: #1158 - Swap Media */
+	/** Swap media in a given slot. */
+		/** @param #13 Filename */
+			/** Filename to swap in, with full path. */
+		/** @param #291 Slot */
+			/** Game Player slot to swap Filename into. */
+
+void Game_Player::CMD_Swap_Media(string sFilename,string sSlot,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1158-e->
+{
+}
