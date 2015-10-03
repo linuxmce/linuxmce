@@ -45,6 +45,7 @@ namespace DCE
     virtual void ejectMediaFromSlot(string sSlot="default");
     virtual void ejectAllMedia();
     virtual bool getMediaInSlot(string& sMediaFile, string sSlot="default");
+    virtual void updateDisks(string sMediaFile);
     virtual void setStreaming(bool bStreaming);
     virtual void setStreamingMaster(bool bStreamingMaster);
     virtual void setHostName(string sHostName);

@@ -40,6 +40,7 @@ namespace DCE
     m_bCanSaveState=false; // assume that emulator can't save state unless overriden.
     m_iExit_Code=-1; // -1 = hasn't started yet.
     m_bEmitsMenuChanges=false; // assume emulator can't emit menu changes unless patched.
+    m_iCurrentDisk=0;
   }
 
   EmulatorModel::~EmulatorModel()
@@ -58,6 +59,8 @@ namespace DCE
     m_sHostName="";
     m_bIsRecording=false;
     m_iExit_Code=-1;
+    m_dequeDisks.clear();
+    m_iCurrentDisk=0;
   }
 
   void EmulatorModel::coldReset()
