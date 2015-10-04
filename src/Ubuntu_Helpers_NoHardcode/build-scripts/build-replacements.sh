@@ -8,7 +8,8 @@
 set -e
 set -x
 
-BUILD_ALL_PKGS="no"
+#BUILD_ALL_PKGS="no"
+BUILD_ALL_PKGS="yes"
 
 build_opts="-tc"
 make_jobs=""
@@ -62,7 +63,7 @@ function Build_Replacement_Package
 		pushd "$dir_"
 
 if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/\-${build_name}1)/" debian/changelog
+	sed -i "1s/)/\+${build_name}1)/" debian/changelog
 fi
 
 		DisplayMessage "Building ${pkg_name}"
@@ -77,9 +78,9 @@ fi
 
 function Build_Replacements_Common_all
 {
-	Build_Replacement_Package lmce-mame-metadata extra/mamedata
+	[[ -n "$MAME_EXTRAS" ]] && Build_Replacement_Package lmce-mame-metadata extra/mamedata
 
-	Build_Replacement_Package lmce-mame-snaps extra/snap
+	[[ -n "$MAME_EXTRAS" ]] && Build_Replacement_Package lmce-mame-snaps extra/snap
 
 	Build_Replacement_Package lmce-sample-media extra/sample_media
 
@@ -137,7 +138,7 @@ function Build_Replacements_Common_ubuntu
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+	sed -i "1s/)/\+${build_name}1)/" debian/changelog
 fi
 		DisplayMessage "Building ola-0.9.0"
 		autoreconf -i && \
@@ -156,7 +157,7 @@ fi
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 #if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-#	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+#	sed -i "1s/)/\+${build_name}1)/" debian/changelog
 #fi
 		DisplayMessage "Building pluto-asterisk"
 		./make_package_ubuntu.sh $KVER && \
@@ -194,7 +195,7 @@ fi
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 #if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-#	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+#	sed -i "1s/)/\+${build_name}1)/" debian/changelog
 #fi
 		DisplayMessage "Building linux-image-diskless for $KVER"
 		./makepackage.sh && \
