@@ -13,6 +13,7 @@ BUILD_ALL_PKGS="yes"
 
 build_opts="-tc"
 make_jobs=""
+ver_split="~"
 # set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
 [[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j$NUM_CORES"
 
@@ -63,7 +64,7 @@ function Build_Replacement_Package
 		pushd "$dir_"
 
 if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/\+${build_name}1)/" debian/changelog
+	sed -i "1s/)/\${ver_split}${build_name}1)/" debian/changelog
 fi
 
 		DisplayMessage "Building ${pkg_name}"
@@ -138,7 +139,7 @@ function Build_Replacements_Common_ubuntu
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/\+${build_name}1)/" debian/changelog
+	sed -i "1s/)/\${ver_split}${build_name}1)/" debian/changelog
 fi
 		DisplayMessage "Building ola-0.9.0"
 		autoreconf -i && \
@@ -157,7 +158,7 @@ fi
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 #if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-#	sed -i "1s/)/\+${build_name}1)/" debian/changelog
+#	sed -i "1s/)/\${ver_split}${build_name}1)/" debian/changelog
 #fi
 		DisplayMessage "Building pluto-asterisk"
 		./make_package_ubuntu.sh $KVER && \
@@ -177,7 +178,7 @@ fi
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
 
 	# Open ZWave library
-	Build_Replacement_Package zwave external/openzwave-1.3.1025
+	ver_split="-" Build_Replacement_Package zwave external/openzwave-1.3.1025
         cp ${svn_dir}/${svn_branch_name}/external/*zwave*.deb "${replacements_dir}"
         cp ${svn_dir}/${svn_branch_name}/external/*zwave*.changes "${replacements_dir}"
 
@@ -195,7 +196,7 @@ fi
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 #if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-#	sed -i "1s/)/\+${build_name}1)/" debian/changelog
+#	sed -i "1s/)/\${ver_split}${build_name}1)/" debian/changelog
 #fi
 		DisplayMessage "Building linux-image-diskless for $KVER"
 		./makepackage.sh && \
