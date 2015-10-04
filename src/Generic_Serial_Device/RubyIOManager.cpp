@@ -306,7 +306,7 @@ RubyIOManager::RouteMessage(DeviceData_Base* pdevdata, Message *pMessage) {
 
 void handler_for_bad_things(int signal)
 {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "A CRITICAL ERROR HAS OCCURED (CHECK YOUR RUBY CODE)");
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "A CRITICAL ERROR HAS OCCURED (CHECK YOUR RUBY CODE) %i", signal);
 	exit(1);
 }
 
@@ -332,6 +332,7 @@ RubyIOManager::_Run() {
 			}
 			*/
 		} else {
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "_Run: handle message");
 			mmsg_.Unlock();
 			
 			Message *pmsg = NULL;
@@ -358,8 +359,10 @@ RubyIOManager::_Run() {
 					break;
 				}
 			}
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "_Run: message handling complete");
 		}
 	}
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "_Run: stop requested");
 	return 0;
 }
 
