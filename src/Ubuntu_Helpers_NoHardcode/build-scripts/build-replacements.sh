@@ -64,7 +64,7 @@ function Build_Replacement_Package
 		pushd "$dir_"
 
 if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/\${ver_split}${build_name}1)/" debian/changelog
+	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
 fi
 
 		DisplayMessage "Building ${pkg_name}"
@@ -139,7 +139,7 @@ function Build_Replacements_Common_ubuntu
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/\${ver_split}${build_name}1)/" debian/changelog
+	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
 fi
 		DisplayMessage "Building ola-0.9.0"
 		autoreconf -i && \
@@ -158,7 +158,7 @@ fi
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 #if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-#	sed -i "1s/)/\${ver_split}${build_name}1)/" debian/changelog
+#	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
 #fi
 		DisplayMessage "Building pluto-asterisk"
 		./make_package_ubuntu.sh $KVER && \
@@ -196,7 +196,7 @@ fi
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 #if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-#	sed -i "1s/)/\${ver_split}${build_name}1)/" debian/changelog
+#	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
 #fi
 		DisplayMessage "Building linux-image-diskless for $KVER"
 		./makepackage.sh && \
