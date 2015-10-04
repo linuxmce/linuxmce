@@ -60,6 +60,15 @@ if [[ -z "$MAC" ]] ; then
 fi
 [[ -z "$MAC" ]] && exit 2
 
+# Get the description of the device to add it to the commandline for naming the squeezelite
+
+Q="SELECT Description FROM EntertainArea 
+	JOIN Device_EntertainArea 
+		ON PK_EntertainArea = FK_EntertainArea 
+	WHERE FK_Device = $DEVICE;"
+BOXNAME=$(RunSQL "$Q")
+
+
 AUDIO_DEVICE=$(GetDeviceData "$DEVICE" "$DEVICEDATA_Alsa_Output_Device")
 OUTPUT=""
 # echo "Mac $MAC audio device $AUDIO_DEVICE"
@@ -109,6 +118,7 @@ if [[ "$SQUEEZESLAVE" = "$SQUEEZELITE" ]]; then
 	[[ -n "$OUTPUT" ]] && OUTPUT="-o $OUTPUT"
 	[[ -n "$SERVER" ]] && SERVER="-s $SERVER"
 	[[ -n "$MAC" ]] && MAC="-m $MAC"
+	[[ -n "$BOXNAME" ]] && OUTPUT="$OUTPUT -n '$BOXNAME'"
 	CONFIGURATION=$(GetDeviceData "$DEVICE" "$DEVICEDATA_Configuration")
 else
 	[[ -n "$OUTPUT" ]] && OUTPUT="-o$OUTPUT"
@@ -118,3 +128,4 @@ PARAMS="$OUTPUT $MAC $SERVER $CONFIGURATION"
 
 echo "Starting squeezeslave: $SQUEEZESLAVE $PARAMS"
 $SQUEEZESLAVE $PARAMS
+exit $?
