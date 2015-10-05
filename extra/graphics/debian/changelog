@@ -1,4 +1,10 @@
-lmce-skins-all (2.0.0.47.9~lmce4~trusty1) precise; urgency=medium
+lmce-skins-all (2.0.0.47.9~lmce5) unstable; urgency=medium
+
+  * Fix avwizard skin basic packaging
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Mon, 05 Oct 2015 14:52:33 -0400
+
+lmce-skins-all (2.0.0.47.9~lmce4) unstable; urgency=medium
 
   * Fix pkg name
 
