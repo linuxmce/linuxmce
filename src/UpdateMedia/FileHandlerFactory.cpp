@@ -166,6 +166,7 @@ FileHandlerFactory::~FileHandlerFactory(void)
 	  (sExtension == "atr") ||
 	  (sExtension == "xfd") ||
 	  (sExtension == "rom") ||
+          (sExtension == "xex") ||
 			   (sExtension == "fds") ||
 	  (sExtension == "rpk");
 
