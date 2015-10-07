@@ -12,7 +12,39 @@ DEVICEDATA_Use_OpenGL_effects=172
 DEVICEDATA_Use_alpha_blended_UI=169
 DEVICEDATA_PK_UI=104
 
-function AddBookmark {
+# These need to abstract the service commands for different distro releases.  ( SysV,LSB,UpStart,systemd )
+Service_Start() {
+	service="$1"
+
+	service $service start
+}
+
+Service_Stop() {
+	service="$1"
+
+	service $service stop || :
+}
+
+Service_Status() {
+	service="$1"
+
+	service $service status || :
+}
+
+Service_Restart() {
+	service="$1"
+
+	Service_Stop $service
+	Service_Start $service
+}
+
+Service_Reload() {
+	service="$1"
+
+	Service_Restart $service
+}
+
+AddBookmark() {
 	return 0
 	Url="$1"
 	Name="$2"
@@ -44,7 +76,7 @@ function AddBookmark {
 
 }
 
-function DelBookmark {
+DelBookmark() {
 	return 0
 	Url="$1"
 	Name="$2"
@@ -132,7 +164,7 @@ UseAlternativeLibs()
 	export LD_LIBRARY_PATH=/opt/libsdl/lib:/opt/libxine/lib:/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib:/opt/linphone-1.3.5/lib
 }
 
-function ListTemplates_Category {
+ListTemplates_Category() {
 	local FK_DeviceCategory_Parent="$1"
 	local PK_DeviceTemplate_List=""
 	local PK_DeviceCategory=""
@@ -781,6 +813,7 @@ DriverRank() {
 			case "$preferred_nvidia" in
 				nvidia-173) driver_rank="6" ;;
 				nvidia-current) driver_rank="10" ;;
+				nvidia-340) driver_rank="10" ;;
 			esac
 	esac
 
@@ -828,7 +861,7 @@ InstallVideoDriver() {
 
 		# nVidia cards
 		nvidia)
-			if ! PackageIsInstalled nvidia-173 && ! PackageIsInstalled nvidia-current ; then
+			if ! PackageIsInstalled nvidia-173 && ! PackageIsInstalled nvidia-current && ! PackageIsInstalled nvidia-340; then
 				VerifyExitCode "Install Pluto nVidia Driver"
 				nv_pid=$(pidof nvidia-install.sh)
 				if [[ -n $nv_pid ]] ; then
