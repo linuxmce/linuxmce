@@ -121,9 +121,10 @@ MD_Config_MySQL_Client () {
 }
 
 MD_Populate_Debcache () {
-	StatsMessage "Creating deb-cache dir"
-	CreateBasePackagesFiles		# install-common.sh
+	#StatsMessage "Creating deb-cache dir"
+	#CreateBasePackagesFiles		# install-common.sh
 	#UpdateDebCache "$DEB_CACHE"	# install-common.sh
+	:
 }
 
 MD_Cleanup () {
