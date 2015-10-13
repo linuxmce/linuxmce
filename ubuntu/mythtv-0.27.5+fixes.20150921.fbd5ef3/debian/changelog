@@ -1,3 +1,9 @@
+mythtv (2:0.27.5+fixes.20150921.fbd5ef3-0ubuntu0mythbuntu4-lmce1) precise; urgency=medium
+
+  * Build for LMCE, remove ${misc:Depends}
+
+ -- phenigma <phenigma@hotmail.com>  Mon, 12 Oct 2015 00:00:00 +0000
+
 mythtv (2:0.27.5+fixes.20150921.fbd5ef3-0ubuntu0mythbuntu4) precise; urgency=medium
 
   * Scripted Build from fixes git packaging [fcc99fc]
