@@ -10,6 +10,8 @@ Section: libs
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${dist:Depends}, libudev0 | libudev1
+Conflicts: libopenzwave1.0
+Replaces: libopenzwave1.0
 Description: API to use a Z-Wave controller
  OpenZWave is an open-source, cross-platform library designed to enable 
  anyone to add support for Z-Wave home-automation devices to their 
