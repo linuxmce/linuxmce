@@ -178,7 +178,7 @@ fi
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
 
 	# Open ZWave library
-	ver_split="-" Build_Replacement_Package zwave external/openzwave-1.3.1025
+	ver_split="-" Build_Replacement_Package zwave external/openzwave-1.3.1224
         cp ${svn_dir}/${svn_branch_name}/external/*zwave*.deb "${replacements_dir}"
         cp ${svn_dir}/${svn_branch_name}/external/*zwave*.changes "${replacements_dir}"
 
@@ -286,7 +286,7 @@ function Build_Replacements_Common_raspbian
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
 
 	# Open ZWave library
-	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025
+	Build_Replacement_Package zwave external/openzwave-1.3.1224
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}"
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}"
 
