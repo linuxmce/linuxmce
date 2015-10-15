@@ -1,6 +1,6 @@
 #!/bin/bash
 # Configure Mediatomb to properly integrate with LMCE.
-. /usr/pluto/bin/Sql_Ops.sh
+. /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Network_Parameters.sh
 
 sed -i "s/^INTERFACE=\"*.*\"*/INTERFACE=\"${IntIf}\"/" /etc/default/mediatomb
@@ -10,7 +10,7 @@ usermod -G public -a mediatomb
 
 # Create database
 Q="CREATE DATABASE IF NOT EXISTS pluto_mediatomb"
-RunSQL("$Q")
+RunSQL "$Q"
 
 ## TODO: WHAT IS THIS DOING HERE?
 #route del -net 239.0.0.0 netmask 255.0.0.0 || /bin/true
