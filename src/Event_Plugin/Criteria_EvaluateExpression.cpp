@@ -139,7 +139,7 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 			{
 			        Row_EventParameter* eventParameter = pRouter->GetDatabase()->EventParameter_get()->GetRow(PK_EventParameter);
 				PK_ParameterType = eventParameter->FK_ParameterType_get();
-				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Criteria::EvaluateExpression parameterType %d", PK_ParameterType);
+				LoggerWrapper::GetInstance()->Write(LV_EVENT,"Criteria::EvaluateExpression parameterType %d", PK_ParameterType);
 				if (PK_ParameterType == PARAMETERTYPE_int_CONST || PK_ParameterType == PARAMETERTYPE_bool_CONST)
 				{
 				        iTmp = (unsigned long)atoi(sLValue->c_str());
@@ -160,7 +160,7 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 			} else {
 				PK_Device = atoi( pCriteriaParm->m_sParm.c_str() );
 			}
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Criteria::EvaluateExpression Device State: PK_Device = %d, valueType = %d", PK_Device, valueType);
+			LoggerWrapper::GetInstance()->Write(LV_EVENT,"Criteria::EvaluateExpression Device State: PK_Device = %d, valueType = %d", PK_Device, valueType);
 			
 			if (PK_Device > 0) 
 			{
@@ -172,7 +172,7 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 					{
 						string sOn;	string sMode; string sFan; string sSetPoint; string sTemp;
 						Climate_Plugin::GetStateVar(pDevice, sOn, sMode, sFan, sSetPoint, sTemp);
-						LoggerWrapper::GetInstance()->Write(LV_STATUS,"Criteria::EvaluateExpression Climate device: sOn = %s, sMode = %s, sFan = %s, sSetPoint = %s, sTemp = %s", sOn.c_str(), sMode.c_str(), sFan.c_str(), sSetPoint.c_str(), sTemp.c_str());
+						LoggerWrapper::GetInstance()->Write(LV_EVENT,"Criteria::EvaluateExpression Climate device: sOn = %s, sMode = %s, sFan = %s, sSetPoint = %s, sTemp = %s", sOn.c_str(), sMode.c_str(), sFan.c_str(), sSetPoint.c_str(), sTemp.c_str());
 						switch (valueType)
 						{
 						case 1:
@@ -199,6 +199,11 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 							iLValue = &iTmp;
 							break;
 						}
+					} else if (pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Brightness_sensor_CONST)
+					{
+						PK_ParameterType = PARAMETERTYPE_int_CONST;
+						iTmp = atoi(pDevice->m_sState_get().c_str());
+						iLValue = &iTmp;
 					} else {
 						// Here we can add special handling for more types of devices, just make sure to
 						// also make changes to the web admin (utils.inc.php::displayCriteria)
@@ -236,7 +241,7 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 
 	if (PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST ) {
 		if (bCriteriaList) {
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Criteria::EvaluateExpression criteria is a list of values: %s", sRValue.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_EVENT,"Criteria::EvaluateExpression criteria is a list of values: %s", sRValue.c_str());
 			vector<string> vecValues;
 			StringUtils::Tokenize(sRValue, ",", vecValues);
 			if (pCriteriaParm->m_Operator == OPERATOR_EQUALS) {
