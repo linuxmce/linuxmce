@@ -174,7 +174,6 @@ Item{
         onMediaObjectChanged: {
             console.log(JSON.stringify(metaData, null, "\t"))
             lmceData.playbackInfoUpdated(metaData);
-
         }
 
         onDurationChanged: {

@@ -115,6 +115,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     currentSkin="default";
     QString path;
 
+
     if(m_skinOverridePath==""){
 #ifdef NOQRC
         qDebug() << "Using NOQRC";
@@ -250,8 +251,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         qDebug() << "Set QQuickWindow Ptr";
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
-
-
         connect(m_window, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
         connect(m_window, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
 
@@ -2775,23 +2774,28 @@ void qorbiterManager::checkOrientation(QSize s)
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
     qDebug() << Q_FUNC_INFO << m_window->size();
-    //setOrientation(appHeight > appWidth);
+
     //return;
-    appHeight=m_window->size().height();
-    appWidth=m_window->size().width();
 
     switch (o) {
     case Qt::InvertedLandscapeOrientation: qDebug() << "Inverted Landscape";
-    case Qt::LandscapeOrientation: setOrientation(false);  qDebug() << "Landscape";
+    case Qt::LandscapeOrientation:
+        appHeight=m_window->width();
+        appWidth=m_window->height();
+      //  setOrientation(false);  qDebug() << "Landscape";
         break;
     case Qt::PrimaryOrientation: qDebug() << "Primary ";
     case Qt::InvertedPortraitOrientation:qDebug() << "Inverted portait";
-    case Qt::PortraitOrientation: setOrientation(true);qDebug() << "Portrait";
+    case Qt::PortraitOrientation:
+        appHeight=m_window->height();
+        appWidth=m_window->width();
+       // setOrientation(true);qDebug() << "Portrait";
         break;
     default: qDebug() << "unknown orientation";
         break;
     }
 
+    setOrientation(appHeight > appWidth);
 }
 #endif
 

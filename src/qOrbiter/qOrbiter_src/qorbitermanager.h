@@ -968,10 +968,10 @@ public slots:
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
     void setAppH(int h) { if(appHeight==h)return;  appHeight = h;checkOrientation(QSize(appWidth, appHeight));}
-    int getAppH() {return appHeight;}
+    int getAppH() { if(!m_window)return 0;  return m_window->height();}
 
     void setAppW(int w) {if(appWidth==w)return;  appWidth = w; checkOrientation(QSize(appWidth, appHeight));}
-    int getAppW(){return appWidth; }
+    int getAppW(){ if(!m_window) return 0; return m_window->width(); }
 
     /*Network State property functions*/
     void setInternalIp(QString s) { if(s==m_ipAddress) {return;} m_ipAddress = s; setDceResponse("got ip address, sending to dce"); emit internalIpChanged(m_ipAddress); setInternalHost(m_ipAddress);}
@@ -1034,7 +1034,7 @@ public slots:
      * \brief setOrientation. true if height < width (wide) or false if profile.
      * \param s
      */
-    void setOrientation (bool s) {  /*appHeight = qorbiterUIwin->height(); appWidth=qorbiterUIwin->width();*/  isProfile = s; setDceResponse(QString("setOrientation::orientation changed to  profile? %1").arg(isProfile)); emit orientationChanged();}
+    void setOrientation (bool s) {  /*appHeight = qorbiterUIwin->height(); appWidth=qorbiterUIwin->width();*/   isProfile = s; setDceResponse(QString("setOrientation::orientation changed to  profile? %1").arg(isProfile)); emit orientationChanged();}
     //! Returns the current screen in string format
     QString getCurrentScreen();
     //! Sets the current screen in string format.
