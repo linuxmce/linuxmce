@@ -41,6 +41,7 @@ DEVICEDATA_Diskless_Archives_CONST=258
 DEVICEDATA_Release_CONST=262
 
 DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
+DEVICEDATA_DISTRO_Raspbian_Jessie_CONST=22
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
 DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
 
@@ -54,15 +55,16 @@ DD="$DD|$DEVICEDATA_Is_Diskless_Boot_CONST|0"
 # get PK_Distro from OS
 RELEASE=$(lsb_release -cs)
 case "$RELEASE" in
+	wheezy)
+		release=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST ;;
+	jessie)
+		release=$DEVICEDATA_DISTRO_Raspbian_Jessie_CONST ;;
 	precise)
-		release=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
-		;;
+		release=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST ;;
 	trusty)
-		release=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
-		;;
+		release=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST ;;
 	*)
-		echo "ERR: Unknown release (distro)"
-		;;
+		echo "ERR: Unknown release (distro)" ;;
 esac
 [ -n "$release" ] && DD="$DD|$DEVICEDATA_PK_Distro_CONST|$release"
 [ -n "$RELEASE" ] && DD="$DD|$DEVICEDATA_Release_CONST|$RELEASE"
