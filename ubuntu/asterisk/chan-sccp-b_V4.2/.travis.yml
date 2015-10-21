@@ -1,0 +1,52 @@
+language: c
+
+# Setup Build Matrix
+compiler: 
+ - clang
+ - gcc
+env:
+# - REPOS=lucid
+ - REPOS=precise
+ - REPOS=trusty
+ - REPOS=trusty13
+ - REPOS=utopic
+# - REPOS=vivid
+
+# Install Required Devel Packages
+before_install:
+ - if [ "${REPOS}" != "trusty13" ]; 
+   then
+     echo "deb http://archive.ubuntu.com/ubuntu ${REPOS} main restricted universe multiverse"            | sudo tee -a /etc/apt/sources.list.d/trusty.list;
+     echo "deb http://archive.ubuntu.com/ubuntu ${REPOS}-updates main restricted universe multiverse"    | sudo tee -a /etc/apt/sources.list.d/trusty.list;
+     echo "deb http://security.ubuntu.com/ubuntu/ ${REPOS}-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/trusty.list;
+     echo "deb http://archive.canonical.com/ubuntu/ ${REPOS} partner"                                    | sudo tee -a /etc/apt/sources.list.d/trusty.list;
+     sudo apt-get update -qq;
+     sudo apt-get install -qq libblocksruntime0 libblocksruntime-dev asterisk asterisk-dev asterisk-config asterisk-modules binutils.dev libc6-dev;
+   else
+     echo "deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse"              | sudo tee -a /etc/apt/sources.list.d/trusty.list;
+     echo "deb http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse"      | sudo tee -a /etc/apt/sources.list.d/trusty.list;
+     echo "deb http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse"   | sudo tee -a /etc/apt/sources.list.d/trusty.list;
+     echo "deb http://archive.canonical.com/ubuntu/ trusty partner"                                      | sudo tee -a /etc/apt/sources.list.d/trusty.list;
+     sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 9C245DE2;
+     echo "deb http://ppa.launchpad.net/jan-hoffmann/asterisk13/ubuntu trusty main"                      | sudo tee -a /etc/apt/sources.list.d/asterisk13.list;
+     echo "deb-src http://ppa.launchpad.net/jan-hoffmann/asterisk13/ubuntu trusty main"			 | sudo tee -a /etc/apt/sources.list.d/asterisk13.list;
+     sudo apt-get update -qq;
+     sudo apt-get install -qq libblocksruntime0 libblocksruntime-dev libpj2 libpjmedia2 libpjnath2 libpjproject-dev libpjsip2 libpjsua2 libpjsua2-2 asterisk asterisk-dev asterisk-config asterisk-modules asterisk-dbg binutils.dev libc6-dev;
+   fi
+
+# Prepare Configure Script
+before_script:
+ - autoreconf -fi
+
+# Report Results
+notifications:
+  slack: chan-sccp:yfQzKYTnTf4cD1iHElnTYsXD
+  email:
+    recipients:
+      - ddegroot@talon.nl
+      - marcelloceschia@users.sourceforge.net
+
+#matrix:
+#  exclude:
+#      - os: osx
+#        compiler: gcc

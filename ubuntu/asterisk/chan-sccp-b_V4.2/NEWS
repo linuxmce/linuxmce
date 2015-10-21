@@ -1,0 +1,186 @@
+Version: v4.2_STABLE
+=====================
+New Features in V4.2
+ - Enums processed using awk generation script
+ - Multi channel Direct RTP (Partial)
+ - Enums processed using meta programming (Renewed macro implementation)
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+ - Added Support for Asterisk-12
+ - Added Support for Asterisk-13
+ - Support for IPv4 and IPv6
+ - Updated/Changed DTMF Handling to always take rfc2833
+ - Multi Channel Direct RTP (ie: SIP-SCCP direct media)
+ - Enums processed using meta programming (Renewed macro implementation)
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+ - Added support for earlyrtp=immediate
+ - Added Scheduled Hangup (So that you can hear the hangupcause)
+ - Reworked digittimeout
+ - Improved sccp.conf / buttonconfig button change detection on sccp reload
+ - Allow HASH() dialplan function when using SCCPDEVICE(), SCCPLINE() and SCCPCHANNEL()
+ - Added Audio Quality Statistics in CHANNEL() and SCCPDEVICE() / SCCPCHANNEL)()
+ - Updated hangup / queue_hangup handling
+ - Support for UTF-8 config file (allowing accented characters in labels and description on older phones)
+
+Bug Fixes
+ - Fixed Some asterisk-12 / asterisk-13 issues
+ - Fixed buttontemplate instance issue
+ - Fixed RTP Handling
+ - Replaced Asterisk Scheduled Macro Use
+ - Numerous smaller / bigger fixes (Check ChangeLog for details)
+
+Version: 4.2.0_RC3
+==================
+New Features in V4.2
+ - Same as RC2
+ - Enums processed using awk generation script
+
+Bug Fixes
+ - Fixed Some asterisk-12 / asterisk-13 issues
+ - Fixed buttontemplate instance issue
+ - Serveral smaller / bigger fixes (Check ChangeLog for details)
+
+Version: 4.2.0_RC2
+==================
+New Features in V4.2
+ - Added Support for Asterisk-12
+ - Added Support for Asterisk-13
+ - Support for IPv4 and IPv6
+ - Updated/Changed DTMF Handling to always take rfc2833
+ - Multi Channel Direct RTP (ie: SIP-SCCP direct media)
+ - Enums processed using meta programming (Renewed macro implementation)
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+ - Added support for earlyrtp=immediate
+ - Added Scheduled Hangup (So that you can hear the hangupcause)
+ - Reworked digittimeout
+ - Improved sccp.conf / buttonconfig button change detection on sccp reload
+ - Allow HASH() dialplan function when using SCCPDEVICE(), SCCPLINE() and SCCPCHANNEL()
+ - Added Audio Quality Statistics in CHANNEL() and SCCPDEVICE() / SCCPCHANNEL)()
+ - Updated hangup / queue_hangup handling
+ - Support for UTF-8 config file (allowing accented characters in labels and description on older phones)
+
+Bug Fixes
+ - Serveral smaller / bigger fixes (Check ChangeLog for details)
+ - Fixed RTP Handling
+ - Replaced Asterisk Scheduled Macro Use
+
+Version: 4.2.0_RC1
+==================
+New Features in V4.2
+ - Added Support for Asterisk-12
+ - Support for IPv4 and IPv6
+ - Changed DTMF Handling to always take rfc2833
+ - Multi channel Direct RTP (Partial)
+ - Enums processed using meta programming (Renewed macro implementation)
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+
+Bug Fixes
+ - Numerous smaller / bigger fixes (Check ChangeLog for details)
+
+Version: 4.2.0_DEV
+==================
+New Features in V4.2
+ - Direct RTP
+ - Enums processed using meta programming
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+
+Bug Fixes
+ - 
+
+Version: V4.1_STABLE
+==================
+New features with V4.1:
+ - Compatible with multitute of asterisk versions from asterisk-1.6.2 up to asterisk-11, using one code base
+ - New sccp.conf handling system, using a flexible TABLE as the basis for all config parsing
+ - Integrated Conference implementation / Conference List
+ - Connected Line Update -> More accurate callerid information
+ - Call List State Update (Showing hint status in PhoneBook Entries)
+ - New and Improved AMI/Manager Functions
+ - Removed most of the old locking implementation in favor of reference counting
+
+Bug Fixes:
+ - Updated audio/video/codec handling
+ - Reworked hint handling / callinfo on hinted speeddial
+ - auto select line
+ - Audio issues during transfer
+ - Updated for asterisk devstate api change
+ - sccp reload issues
+ - socket / poll issues
+ - permit/deny issues / global ip reject
+ - realtime line updates
+ - module unload taking a lot of time
+ - refcount issues
+ - asterisk module dependency / load order
+ - park call crash / group pickup with active call
+ - voicemail message not cleared
+ - linkedid not set correctly
+ - passthrupartyid without a valid channel
+ - monitor feature
+ - memory leaks
+ - sccp_dump_packet
+ - 1 second audio delay
+ - ami/manager output formatting
+
+Version: 4.1.0_RC1
+==================
+ - Updated audio/video/codec handling
+ - Reworked hint handling
+ - Updated refcount system
+ - Updated for asterisk devstate api change
+ - Compatible with multitute of asterisk versions from 1.6 up to trunk, using one code base
+ - new Conference implementation
+ - New sccp.conf handling system, using a flexible TABLE as the basis for all config parsing
+
+Version: 4.1.0_DEV
+==================
+ - Updated audio/video/codec handling
+ - Reworked hint handling
+ - Updated refcount system
+ - Updated for asterisk devstate api change
+ - Compatible with multitute of asterisk versions from 1.6 up to trunk, using one code base
+ - new Conference implementation
+ - New sccp.conf handling system, using a flexible TABLE as the basis for all config parsing
+
+Version: 3.0_RC3
+===================
+Added Functionality:
+ - Dialplan Function SCCPDEVICE, SCCPLINE and SCCPCHANNEL
+ - DevState Feature Button (--enable-devstate)
+ - some parameters in configure have change from --with to --enable/disable.
+   A couple of parameters which used to be disabled are now enabled by
+   default. Please Check them !!
+ - Dynamic Speeddials (and dynamic speeddials with call info) for newer SCCP Phones
+ - Early Beginnings of Video Support
+
+Fixed/Improved:
+ - bug fixes for device re-registering
+ - bug fixes for hints
+ - bug fixes for channel indications (DTMF / Inband Messages during Progress)
+ - configure script, os detection
+ - lots of small bugs reported by users
+ - documentation updates
+
+Version: 3.0_RC2
+================
+Added Functionality:
+ - sccp reload
+ - dynamic speeddial with and without callerid
+
+Fixed/Improved:
+ - transfer + callerid
+ - improved callerid passing during call forward
+
+Version: 3.0_RC1
+================
+Added Functionality: 
+ - HotLine
+ - Shared Lines
+ - Dynamic speed dials
+ - New configuration file handling using templating 
+
+Fixed/Improved: 
+ - Realtime database support
+ - Debug indications
+ - Direct transfer
+ - Group pickup
+ - Call parking
+
