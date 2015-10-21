@@ -62,7 +62,7 @@ MD_Setup_Plutoconf() {
 	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
 
 	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
-	[ -n "$PK_Distro" ] || [ -n "$TARGET_DISTRO_ID" ] && ConfSet "PK_Distro" "$TARGET_DISTRO_ID"
+	[ -n "$TARGET_DISTRO_ID" ] && ConfSet "PK_Distro" "$TARGET_DISTRO_ID"
 	[ -n "$LogLevels" ] || ConfSet "LogLevels" "1,5,7,8"
 	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
 	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
@@ -71,7 +71,6 @@ MD_Setup_Plutoconf() {
 	# Set the AVWizard to NOT done
 	[ -n "$AVWizardDone" ] || ConfSet "AVWizardDone" "0"
 	[ -n "$UseVideoWizard" ] || ConfSet "UseVideoWizard" "1"
-
 }
 
 ###########################################################
