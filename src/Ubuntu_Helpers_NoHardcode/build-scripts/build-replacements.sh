@@ -118,7 +118,7 @@ function Build_Replacements_Common_ubuntu
 	#Package: lmce-core-locator
 	Build_Replacement_Package core-locator src/Core/locator
 
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.2
 
 	#Package: libxine2
 	build_opts="" Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
