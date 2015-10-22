@@ -183,13 +183,9 @@ start() {
 
 	service kdm stop || :
 
-	if [[ "$AutostartCore" -eq "1" ]] ; then
-		# Disable display manager
-		mkdir -p "/etc/X11"
-		echo "/bin/false" >/etc/X11/default-display-manager
-		#update-rc.d -f kdm remove >/dev/null
-		#update-rc.d -f lightdm remove >/dev/null
-	fi
+	# Disable display manager
+	mkdir -p "/etc/X11"
+	echo "/bin/false" >/etc/X11/default-display-manager
 
 	setterm -blank >/dev/console             # disable console blanking
 	mkdir -p /var/log/pluto                  # setup log dir
@@ -222,6 +218,7 @@ start() {
 		/usr/pluto/install/firstboot
 		err=$?
 		if [[ "$err" != "0" ]]; then
+			Message "FIRSTBOOT ERROR $err, FIRSTBOOT DID NOT COMPLETE"
 			return $err
 		fi
 	fi
@@ -237,7 +234,7 @@ start() {
 	# start ubiquity *after* network config has been done
 	if grep -q ubiquity /proc/cmdline ; then
 		service ubiquity start
-		exit 0
+		return 0
 	fi
 
 	StartService "Starting LinuxMCE Update Service" "/usr/pluto/bin/LMCEUpdate_Apply.sh"
@@ -267,38 +264,38 @@ start() {
 
 	# Load MD modules in case they are needed for AV Output
 	if [[ "$AutostartMedia" -eq "1" ]] ; then
-	StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
+		StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
 	fi
 
 	# Launch AV Wizard after module loading
 	StartService "Starting LinuxMCE AV Wizard" "/usr/pluto/bin/Start_AVWizard.sh start"
 
-#	# Check AV Wizard completion prior to continuing to launch linuxmce.
-#	ConfEval;
-#	if [[ "$AutostartMedia" == "1" ]] ; then
-#		if [[ "$AVWizardDone" != "1" ]] ; then
-#			Message "AVWIZARD NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
+	# Check AV Wizard completion prior to continuing to launch linuxmce.
+	ConfEval;
+	if [[ "$AutostartMedia" == "1" ]] ; then
+		if [[ "$AVWizardDone" != "1" ]] ; then
+			Message "AVWIZARD NOT COMPLETE, LINUXMCE MAY NOT LOAD PROPERLY."
 #			err=1
 #			return $err
-#		fi
-#	fi
+		fi
+	fi
 
+	export DISPLAY=":${Display}"
 	# hack: cleaning lockfile on M/D start to allow local devices to start
 	# TODO: remove this when correct locking will be implemented
 	rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
 	if [[ "$AutostartMedia" -eq "1" ]] ; then
-		export DISPLAY=":${Display}"
 		/usr/pluto/bin/SetupAudioVideo.sh
 
 		Q="SELECT FK_DeviceTemplate FROM Device WHERE PK_Device=$PK_Device"
 		FK_DeviceTemplate=$(RunSQL "$Q")
 
-		# FIXME: Look for an Orbiter on non-rpi-qMDs to determine if is X is needed?
+		# FIXME: Look for an Orbiter on non-rpi-qMDs to determine if X is needed?
 		if [[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_GenericPC_as_MD" ]] ||
 			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_GenericPC_as_qMD" ]] ||
 			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_RPi_B_as_MD" ]] ||
 			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Core" ]] ||
-			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Joggler" ]]; then
+			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Joggler" ]] ; then
 				StartX
 		fi
 	fi
@@ -352,7 +349,7 @@ StopService() {
 	ServiceCmd=$2
 	ServiceName=$3
 
-log_daemon_msg "$ServiceDescription" "$ServiceCmd"
+	log_daemon_msg "$ServiceDescription" "$ServiceCmd"
 
 	screenpid=$(basename $(find /var/run/screen | grep "$ServiceName") 2>/dev/null)
 	err=$?
