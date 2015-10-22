@@ -38,20 +38,29 @@ using namespace DCE;
 #include "../pluto_media/Table_Bookmark.h"
 #include "../DCE/DataGrid.h"
 
+#define ALARM_UPDATE_EPG	1
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 VDRPlugin::VDRPlugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: VDRPlugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
-	, m_VDRMutex("vdr"), m_ConMutex( "VDR Connection" )
+	, m_VDRMutex("vdr"), m_ConMutex( "VDR Connection" ), m_EPGMutex("epg")
 {
 	pthread_cond_init( &m_VDRCond, NULL );
 	m_VDRMutex.Init(NULL,&m_VDRCond);
 	pthread_cond_init( &m_ConCond, NULL );
 	m_ConMutex.Init(NULL,&m_ConCond);
+	pthread_cond_init( &m_EPGCond, NULL );
+	m_EPGMutex.Init(NULL,&m_EPGCond);
 	m_sVDRIp="127.0.0.1";
-	m_timeUpdateInterval = 86000; // intervals between updating EPG from VDR in seconds (1 day)
+	m_timeUpdateInterval = 7200; // intervals between updating EPG from VDR in seconds (2 hour)
 	m_VDRConnection.SetAddress(m_sVDRIp, "2001");
+
+	m_pAlarmManager=NULL;
+	m_pAlarmManager = new AlarmManager();
+	m_pAlarmManager->Start(1);
+	m_iEPGUpdateNo = 0;
 }
 //<-dceag-getconfig-b->
 bool VDRPlugin::GetConfig()
@@ -137,7 +146,7 @@ bool VDRPlugin::Register()
 	BuildChannelList();
 	m_bBookmarksNeedRefreshing=false;
 	RefreshBookmarks();
-    UpdateTimers();
+	UpdateTimers();
 
 	return Connect(PK_DeviceTemplate_get()); 
 }
@@ -232,7 +241,6 @@ bool VDRPlugin::StartMedia( class MediaStream *pMediaStream,string &sError )
 		it->second = false;
 
 	PLUTO_SAFETY_LOCK(vm,m_VDRMutex);
-	
 	if(!m_ListVDRChannel.empty())
 	{
 		VDRChannel *pVDRChannel = *(m_ListVDRChannel.begin());
@@ -421,6 +429,7 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 	if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
 		UpdateEPGFromVDR(sChannelID, "");
 
+	PLUTO_SAFETY_LOCK(em,m_EPGMutex);
 	VDRProgramInstance *pVDRProgramInstance = pVDRChannel->m_pVDRProgramInstance_First;
 	while(pVDRProgramInstance && pVDRProgramInstance->m_tStartTime!=tStartTime)
 		pVDRProgramInstance = pVDRProgramInstance->m_pVDRProgramInstance_Next;
@@ -521,6 +530,7 @@ class DataGridTable *VDRPlugin::CurrentShows(string GridID, string Parms, void *
 	if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
 		UpdateEPGFromVDR(sChanId, "");
 
+	PLUTO_SAFETY_LOCK(em,m_EPGMutex);
 	VDRRecording vdrRecording;
 	vdrRecording.data.time.channel_id = atoi(sChanId.c_str());
 
@@ -657,6 +667,8 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 		pVDRChannel->m_pCell = GetChannelCell(pVDRChannel);
 	}
 
+	int requireEPGUpdate = -1;
+	int chanNo = 0;
 	int iRow=0;
 	for(ListVDRChannel::iterator it=m_ListVDRChannel.begin();it!=m_ListVDRChannel.end();++it)
 	{
@@ -668,9 +680,10 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 //			continue;
 
 		// Refresh channel EPG if last time was more than X ago
-		if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
-			UpdateEPGFromVDR(pVDRChannel->m_sID, "");
+		if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval) && requireEPGUpdate == -1)
+			requireEPGUpdate = chanNo;
 
+		PLUTO_SAFETY_LOCK(em,m_EPGMutex);
 		VDRProgramInstance *pVDRProgramInstance = pVDRChannel->GetCurrentProgramInstance(tNow);
 
 		if( pVDRChannel->m_pPic )
@@ -722,6 +735,7 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 			// It's a user's favorited series.
 			pDataGridTable->SetData(0,iRow++,new DataGridCell(pVDRChannel->m_pCell)); // A copy since we'll add this one later too
 		}
+		chanNo++;
 	}
 
 	for(ListVDRChannel::iterator it=m_ListVDRChannel.begin();it!=m_ListVDRChannel.end();++it)
@@ -734,6 +748,8 @@ class DataGridTable *VDRPlugin::AllShows(string GridID, string Parms, void *Extr
 //	LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRTV_PlugIn::AllShows cells: %d source %d plist %p map %d",
 //		(int) pDataGridTable->m_MemoryDataTable.size(), PK_Device_Source, p_list_int, (int) m_mapDevicesToSources.size() );
 
+	if (requireEPGUpdate >= 0)
+		ScheduleEPGUpdate(1, requireEPGUpdate);
 	return pDataGridTable;
 }
 
@@ -800,6 +816,7 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
             if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
                 UpdateEPGFromVDR(pVDRChannel->m_sID, "");
 
+	    PLUTO_SAFETY_LOCK(em,m_EPGMutex);
             VDRProgramInstance *pVDRProgramInstance = pVDRChannel->GetCurrentProgramInstance(startTime);
 
             while ( pVDRProgramInstance && pVDRProgramInstance->m_tStartTime < endTime)
@@ -1278,10 +1295,9 @@ void VDRPlugin::BuildChannelList()
 		m_mapVDRChannel[sChannelID]=pVDRChannel;
 		m_ListVDRChannel.push_back(pVDRChannel);
 
-        UpdateEPGFromVDR(sChannelID, "");
-
 		i++;
 	}
+	ScheduleEPGUpdate(30, 0);
 }
 
 /**
@@ -1310,6 +1326,7 @@ void VDRPlugin::UpdateEPGFromVDR(string channelId, string restrictParm)
 	VDRProgramInstance *pVDRProgramInstance = NULL, *pVDRProgramInstance_Last = NULL;
 	string sSeriesDescription="",sSeriesID="",sEpisodeDescription="",sEpisodeID="",sDescription="";
 	string::size_type pos=0;
+	PLUTO_SAFETY_LOCK(em,m_EPGMutex);
 	while( true )
 	{
 		string sLine = StringUtils::Tokenize(sVDRResponse,"\n",pos);
@@ -1693,6 +1710,7 @@ void VDRPlugin::UpdateTimers()
                 int min = atoi(stime.substr(2).c_str());
                 time_t tStartTime = StringUtils::MakeTime(y, m, d, h, min);
 
+		PLUTO_SAFETY_LOCK(em,m_EPGMutex);
                 VDRProgramInstance *pVDRProgramInstance = pVDRChannel->m_pVDRProgramInstance_First;
                 while(pVDRProgramInstance && pVDRProgramInstance->m_tStartTime!=tStartTime)
                     pVDRProgramInstance = pVDRProgramInstance->m_pVDRProgramInstance_Next;
@@ -1751,4 +1769,42 @@ void VDRPlugin::CMD_Sync_Storage_Groups(string &sCMD_Result,Message *pMessage)
 //<-dceag-c986-e->
 {
 
+}
+
+void VDRPlugin::ScheduleEPGUpdate(int delay, int chanNo)
+{
+	PLUTO_SAFETY_LOCK(em,m_EPGMutex);
+	m_iEPGUpdateNo = chanNo;
+	m_pAlarmManager->AddRelativeAlarm(delay,this,ALARM_UPDATE_EPG, NULL);
+}
+
+void VDRPlugin::AlarmCallback(int id, void* param)
+{
+	if( id == ALARM_UPDATE_EPG )
+	{
+		PLUTO_SAFETY_LOCK(em,m_EPGMutex);
+		if(!m_ListVDRChannel.empty())
+		{
+			VDRChannel *pVDRChannel = m_ListVDRChannel[m_iEPGUpdateNo];
+			em.Release();
+			if (pVDRChannel)
+			{
+				if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval)) // Might have been updated elsewhere
+				{
+					UpdateEPGFromVDR(pVDRChannel->m_sID, "");
+
+				}
+			}
+			PLUTO_SAFETY_LOCK(em,m_EPGMutex);
+			m_iEPGUpdateNo++;
+			if (m_iEPGUpdateNo >= m_ListVDRChannel.size())
+			{
+				// Start over after the update interval has passed
+				m_iEPGUpdateNo = 0;
+				m_pAlarmManager->AddRelativeAlarm(m_timeUpdateInterval,this,ALARM_UPDATE_EPG, NULL);
+			} else {
+				m_pAlarmManager->AddRelativeAlarm(4,this,ALARM_UPDATE_EPG, NULL); // 2 second between to allow some time off
+			}
+		}
+	}
 }

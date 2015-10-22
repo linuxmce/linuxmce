@@ -204,8 +204,8 @@ namespace DCE
 		}
 	};
 
-	typedef list<VDRChannel *> ListVDRChannel;
-	class VDRPlugin : public VDRPlugin_Command, public MediaHandlerBase, public DataGridGeneratorPlugIn
+	typedef vector<VDRChannel *> ListVDRChannel;
+	class VDRPlugin : public VDRPlugin_Command, public MediaHandlerBase, public DataGridGeneratorPlugIn, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -227,7 +227,10 @@ namespace DCE
 		VDRConnection m_VDRConnection;
 		pluto_pthread_mutex_t m_ConMutex; // VDRConnection mutex
 		pthread_cond_t m_ConCond;
-
+		pluto_pthread_mutex_t m_EPGMutex; // EPG mutex
+		pthread_cond_t m_EPGCond;
+		class AlarmManager *m_pAlarmManager;
+		int m_iEPGUpdateNo;
 		class Orbiter_Plugin *m_pOrbiter_Plugin;
 		class Datagrid_Plugin *m_pDatagrid_Plugin;
 	    pluto_pthread_mutex_t m_VDRMutex; // Protect the maps
@@ -256,11 +259,13 @@ public:
 		void PurgeChannelList();
 		void BuildChannelList();
 		void UpdateEPGFromVDR(string channelId, string restrictParm);
+		void ScheduleEPGUpdate(int delay, int chanNo);
 		void RefreshBookmarks();
 		VDRSource *GetNewSource(string sSource);
 		VDRSeries *GetNewSeries(string sSeriesID);
 		bool MediaInfoChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 		bool PlaybackStarted( class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo);
+		void AlarmCallback(int id, void* param);
 
 		virtual void PrepareToDelete();
 		// Datagrids
