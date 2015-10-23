@@ -651,12 +651,12 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 			m_pZWInterface->Lock();
 			if (targetId > 0)
 			{
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() Adding association: (node %d, group %d) -> (node %d)", iNodeID, iGroup_ID, targetId);
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::CMD_Set_Association() Adding association: (node %d, group %d) -> (node %d)", iNodeID, iGroup_ID, targetId);
 				OpenZWave::Manager::Get()->AddAssociation(m_pZWInterface->GetHomeId(), iNodeID, iGroup_ID, targetId);
 			} else if (targetId < 0)
 			{
 				uint8 id = -targetId;
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() Removing association: (node %d, group %d) -> (node %d)", iNodeID, iGroup_ID, id);
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::CMD_Set_Association() Removing association: (node %d, group %d) -> (node %d)", iNodeID, iGroup_ID, id);
 				OpenZWave::Manager::Get()->RemoveAssociation(m_pZWInterface->GetHomeId(), iNodeID, iGroup_ID, id);
 			}
 			m_pZWInterface->UnLock();
@@ -871,6 +871,8 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			int PKDevice = nodeInfo->GetPKDeviceForValue(id);
 			if (PKDevice > 0)
 			{
+				// TODO: find value type of id
+
 				if ( label == "Battery Level" )
 				{
 					uint8 level = 0;
@@ -1518,13 +1520,13 @@ void ZWave::ReportBatteryStatus(int PK_Device, uint8 status)
 void ZWave::SendTemperatureChangedEvent(unsigned int PK_Device, float value)
 {
 	string sVal = StringUtils::Format("%.2f", value);
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::SendTemperatureChangedEvent(): PK_Device %d, value %s", PK_Device, sVal.c_str());
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sending EVENT_Temperature_Changed_CONST event from PK_Device %d, value %s", PK_Device, sVal.c_str());
 	SendEvent(PK_Device, EVENT_Temperature_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal);
 }
 
 void ZWave::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
 {
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending sensor tripped event from PK_Device %d, value %s", PK_Device, (value ? "true" : "false"));
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Sensor_Tripped_CONST event from PK_Device %d, value %s", PK_Device, (value ? "true" : "false"));
 	SendEvent(PK_Device, EVENT_Sensor_Tripped_CONST, EVENTPARAMETER_Tripped_CONST, value ? "1" : "0");
 }
 
@@ -1570,21 +1572,21 @@ void ZWave::SendOnOffEvent(unsigned int PK_Device, int value) {
 void ZWave::SendBrightnessChangedEvent(unsigned int PK_Device, float value)
 {
 	string sVal = StringUtils::Format("%.1f", value);
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, sVal.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Brightness_Changed_CONST event from PK_Device %d, value %d",PK_Device, sVal.c_str());
 	SendEvent(PK_Device, EVENT_Brightness_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }
 
 void ZWave::SendSetpointChangedEvent(unsigned int PK_Device, float value)
 {
 	string sVal = StringUtils::Format("%.0f", value);
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending setpoint changed event from PK_Device %d, value %s",PK_Device, sVal.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_Thermostat_Set_Point_Chan_CONST event from PK_Device %d, value %s",PK_Device, sVal.c_str());
 	SendEvent(PK_Device, EVENT_Thermostat_Set_Point_Chan_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }
 
 void ZWave::SendRelativeHumidityChangedEvent(unsigned int PK_Device, float value)
 {
 	string sVal = StringUtils::Format("%.0f", value);
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending  Humidity Changed event from PK_Device %d, value %s",PK_Device, sVal.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_Humidity_Changed_CONST event from PK_Device %d, value %s",PK_Device, sVal.c_str());
 	SendEvent(PK_Device, EVENT_Humidity_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }
 

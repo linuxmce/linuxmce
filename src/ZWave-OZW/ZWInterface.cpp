@@ -195,7 +195,11 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 		
 	case OpenZWave::Notification::Type_ValueRefreshed:
 	case OpenZWave::Notification::Type_Group:
+		break;
 	case OpenZWave::Notification::Type_NodeQueriesComplete:
+		// If we get here after init, write the configuration
+		if ( m_bInitDone && !g_initFailed )
+			OpenZWave::Manager::Get()->WriteConfig( _notification->GetHomeId() );
 		break;
 	case OpenZWave::Notification::Type_DriverReady:
 	{
@@ -236,6 +240,9 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_EssentialNodeQueriesComplete nodeId = %d", nodeInfo->m_nodeId);
 			nodeInfo->m_generic = OpenZWave::Manager::Get()->GetNodeGeneric(nodeInfo->m_homeId, nodeInfo->m_nodeId);
 			nodeInfo->m_specific = OpenZWave::Manager::Get()->GetNodeSpecific(nodeInfo->m_homeId, nodeInfo->m_nodeId);
+			// If we get here after init, write the configuration
+			if ( m_bInitDone && !g_initFailed )
+				OpenZWave::Manager::Get()->WriteConfig( nodeInfo->m_homeId );
 		}
 		break;
 	}
@@ -368,9 +375,9 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			break;
 		default:
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_Notification, unhandled/new code = %d", _notification->GetNotification());
-		break;
+			break;
 		}
-
+		break;
 	}	
 	default:
 	{
