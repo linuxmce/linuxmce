@@ -8,6 +8,8 @@ AddBookmark "http://dcerouter/mythweb/" "MythWeb"
 adduser mythtv public || :
 rm -rf /root/.mythtv || :
 ln -s /etc/mythtv /root/.mythtv && touch /root/.mythtv/ignoregroup || :
+ln -sf /etc/mythtv /home/mythtv/.mythtv || :
+chown mythtv /etc/mythtv || :
 
 #Alter mythconverg.storagegroup - the default VARCHAR(32) is too short for some LMCE drive names to fully be displayed
 Q="ALTER TABLE storagegroup MODIFY dirname VARCHAR(203) NOT NULL, MODIFY groupname VARCHAR(64) NOT NULL"
@@ -35,11 +37,6 @@ RunSQL "$Q"
 Q="UPDATE settings SET data='192.168.80.1' where value='MasterServerIP'"
 UseDB "mythconverg"
 RunSQL "$Q"
-
-mkdir -p /home/mythtv/.mythtv
-chown -R mythtv:mythtv /home/mythtv/
-ln -sf /etc/mythtv/channels /home/mythtv/.mythtv/channels
-chmod a+rw -R /etc/mythtv/channels
 
 #Re-run SetupUsers_Homes PlutoStorageDevices to make sure that the mythtv user gets added to each user's group
 /usr/pluto/bin/SetupUsers_Homes.sh
