@@ -29,12 +29,17 @@ Q="UPDATE settings SET data=1 where value='TruncateDeletesSlowly'"
 UseDB "mythconverg"
 RunSQL "$Q"
 
-## FIXME: DO NOT HARDCODE IP ADDRESS
+## FIXME: TODO: DO NOT HARDCODE IP ADDRESS
 
 #Alter mythconverg.settings to force MasterServerIP to the core's internal NIC
 Q="UPDATE settings SET data='192.168.80.1' where value='MasterServerIP'"
 UseDB "mythconverg"
 RunSQL "$Q"
+
+mkdir -p /home/mythtv/.mythtv
+chown -R mythtv:mythtv /home/mythtv/
+ln -sf /etc/mythtv/channels /home/mythtv/.mythtv/channels
+chmod a+rw -R /etc/mythtv/channels
 
 #Re-run SetupUsers_Homes PlutoStorageDevices to make sure that the mythtv user gets added to each user's group
 /usr/pluto/bin/SetupUsers_Homes.sh
@@ -42,7 +47,7 @@ RunSQL "$Q"
 
 #hack to fix broken mythweb package
 #FIXME: remove once mythtv packages are fixed
-chown -R www-data: /var/www/mythweb/data || :
+chown -R www-data: /var/www/mythweb || :
 
 # make sure that mythweb hasn't taken over web admin
 a2dissite default-mythbuntu || /bin/true
