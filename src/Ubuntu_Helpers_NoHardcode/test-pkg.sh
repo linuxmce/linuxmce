@@ -37,6 +37,10 @@ case "${flavor}" in
                                 Distro_ID="21"
                                 RepositorySource=25
                                 ;;
+                        "xenial")
+                                Distro_ID="23"
+                                RepositorySource=25
+                                ;;
                 esac
                 ;;
         "raspbian")
