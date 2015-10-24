@@ -103,12 +103,6 @@ function Build_Replacements_Common_ubuntu
 	Build_Replacement_Package bcusdk external/bcusdk-0.0.5
 	cp -fr ${svn_dir}/${svn_branch_name}/external/*eib*.deb ${replacements_dir}
 
-	#Package: platform for libcec
-	Build_Replacement_Package platform ubuntu/platform-1.0.10
-
-	#Package: libcec
-	Build_Replacement_Package cec ubuntu/libcec-3.0.1
-
 	#Package: mbrola
 	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1
 
@@ -120,14 +114,8 @@ function Build_Replacements_Common_ubuntu
 
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.2
 
-	#Package: libxine2
-	build_opts="" Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
-
 	#Package: logitechmediaserver-7.8.1
 	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1
-
-	#Package: squeezelite-1.8
-	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
 
 	#Package: lirc
 	build_opts="" Build_Replacement_Package lirc ubuntu/lirc-0.9.0-0ubuntu1+lmce1
@@ -212,6 +200,18 @@ function Build_Replacements_ubuntu_precise
 {
 	mkdir -pv "$replacements_dir"
 
+	#Package: squeezelite-1.8
+	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
+
+	#Package: libxine2
+	build_opts="" Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
+
+	#Package: platform for libcec
+	Build_Replacement_Package platform ubuntu/platform-1.0.10
+
+	#Package: libcec
+	Build_Replacement_Package cec ubuntu/libcec-3.0.1
+
 	# libical-1.0 for asterisk 11.7
 	Build_Replacement_Package libical ubuntu/libical-1.0
 
@@ -239,6 +239,18 @@ function Build_Replacements_ubuntu_precise
 function Build_Replacements_ubuntu_trusty
 {
 	mkdir -pv "$replacements_dir"
+
+	#Package: squeezelite-1.8
+	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
+
+	#Package: libxine2
+	build_opts="" Build_Replacement_Package xine ubuntu/xine-lib-1.2.6
+
+	#Package: platform for libcec
+	Build_Replacement_Package platform ubuntu/platform-1.0.10
+
+	#Package: libcec
+	Build_Replacement_Package cec ubuntu/libcec-3.0.1
 
 	# shairport (AirPlay Audio)
 	Build_Replacement_Package shairport ubuntu/shairport-0.05
