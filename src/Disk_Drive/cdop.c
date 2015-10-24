@@ -20,14 +20,15 @@
 #include <unistd.h>
 #include <linux/cdrom.h>
 
+int main(int argc, const char * argv[])
+{
+
 inline int usage()
 {
 	printf("Usage: cdop <device> {lock|unlock}\n");
 	return 1;
 }
 
-int main(int argc, const char * argv[])
-{
 	int dev;
 	int state;
 
