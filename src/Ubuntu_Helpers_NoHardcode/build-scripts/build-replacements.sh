@@ -254,6 +254,24 @@ function Build_Replacements_ubuntu_trusty
 	Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
 }
 
+function Build_Replacements_ubuntu_xenial
+{
+	mkdir -pv "$replacements_dir"
+
+	# shairport (AirPlay Audio)
+	Build_Replacement_Package shairport ubuntu/shairport-0.05
+
+	#Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
+
+	# libhupnp and libhupnp-av need to build under qt4.
+	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
+
+	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
+
+	# mythtv
+	Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
+}
+
 function Build_Replacements_Common_raspbian
 {
 	#Package: pthsem for bcusdk
