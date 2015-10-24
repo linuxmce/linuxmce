@@ -129,6 +129,23 @@ function build_main_debs() {
 							;;
 					esac
 					;;
+ 				"xenial")
+					Distro_ID="23"
+					RepositorySource=25
+					Main_Version='2.0.0.47.'
+					exclude_list=$exclude_list,673,674 # lmce game player
+					exclude_list=$exclude_list,682,683 # mame
+					exclude_list=$exclude_list,879,881 # qorbiter android
+					case "${arch}" in
+						"armhf")
+							exclude_list=$exclude_list,452,453 # IRTrans - no armhf .so
+							exclude_list=$exclude_list,879,881 # qOrbiter for Android
+							;;
+						"amd64")
+							:
+							;;
+					esac
+					;;
 			esac
 			;;
 		"raspbian")
