@@ -863,13 +863,8 @@ InstallVideoDriver() {
 		nvidia)
 			if ! PackageIsInstalled nvidia-173 && ! PackageIsInstalled nvidia-current && ! PackageIsInstalled nvidia-340; then
 				VerifyExitCode "Install Pluto nVidia Driver"
-				nv_pid=$(pidof nvidia-install.sh)
-				if [[ -n $nv_pid ]] ; then
-					StatusMessage "Installing nVidia driver this may take a few minutes"
-					installCorrectNvidiaDriver
-				else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
-					installCorrectNvidiaDriver
-				fi
+				. /usr/pluto/bin/nvidia-install.sh
+				installCorrectNvidiaDriver
 				ConfSet "AVWizardOverride" "1"
 			fi ;;
 		nouveau)
