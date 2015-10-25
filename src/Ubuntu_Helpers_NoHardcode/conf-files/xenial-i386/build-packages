@@ -229,3 +229,5 @@ libplist-dev
 libshairport-dev
 indent
 fastjar
+libqpidmessaging2-dev
+libola-dev
