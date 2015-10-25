@@ -14,10 +14,11 @@ RunSQL "$Q"
 
 ## TODO: WHAT IS THIS DOING HERE?
 #route del -net 239.0.0.0 netmask 255.0.0.0 || /bin/true
-#cp /etc/mediatomb/config.xml.dpkg-dist /etc/mediatomb/config.xml
+
+[[ ! -f /etc/mediatomb/config.xml ]] && cp /etc/mediatomb/config.xml.dpkg-dist /etc/mediatomb/config.xml || :
 
 # ensure the config file is owned by the mediatomb user
-chown mediatomb:mediatomb /etc/mediatomb/config.xml
+chown mediatomb:mediatomb /etc/mediatomb/config.xml || :
 
 # restart the service
 service mediatomb stop || :
