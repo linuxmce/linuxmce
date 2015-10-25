@@ -122,22 +122,6 @@ function Build_Replacements_Common_ubuntu
 
 	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
-	# ola needs to be configured to the current build environment
-	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
-	if Changed_Since_Last_Build "$dir_" ;then
-		pushd "$dir_"
-if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
-fi
-		DisplayMessage "Building ola-0.9.0"
-		autoreconf -i && \
-		dpkg-buildpackage -uc -b $build_opts $make_jobs && \
-		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
-		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
-		Update_Changed_Since_Last_Build "$dir_"
-		popd
-	fi
-
 	#Package: tee-pluto
 	Build_Replacement_Package tee-pluto misc_utils/tee-pluto
 
@@ -200,6 +184,22 @@ function Build_Replacements_ubuntu_precise
 {
 	mkdir -pv "$replacements_dir"
 
+	# ola needs to be configured to the current build environment
+	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
+	if Changed_Since_Last_Build "$dir_" ;then
+		pushd "$dir_"
+		if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
+			sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
+		fi
+		DisplayMessage "Building ola-0.9.0"
+		autoreconf -i && \
+		dpkg-buildpackage -uc -b $build_opts $make_jobs && \
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
+		Update_Changed_Since_Last_Build "$dir_"
+		popd
+	fi
+
 	#Package: squeezelite-1.8
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
 
@@ -239,6 +239,22 @@ function Build_Replacements_ubuntu_precise
 function Build_Replacements_ubuntu_trusty
 {
 	mkdir -pv "$replacements_dir"
+
+	# ola needs to be configured to the current build environment
+	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
+	if Changed_Since_Last_Build "$dir_" ;then
+		pushd "$dir_"
+		if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
+			sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
+		fi
+		DisplayMessage "Building ola-0.9.0"
+		autoreconf -i && \
+		dpkg-buildpackage -uc -b $build_opts $make_jobs && \
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
+		Update_Changed_Since_Last_Build "$dir_"
+		popd
+	fi
 
 	#Package: squeezelite-1.8
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8
