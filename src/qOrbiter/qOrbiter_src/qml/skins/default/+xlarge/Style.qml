@@ -71,8 +71,8 @@ QtObject{
     property int fontSize_listAccent:12*dpRatio
 
     /* Application Navigation Bars */
-    readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
-    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(7) : scaleY(8)
+    readonly property string appbutton_navigationButtonHeight:scaleY(13)
+    readonly property string appNavigation_panelHeight: scaleY(7)
 
     /* Application Menu Panels */
     readonly property int appMenuPanel_height:scaleY(90)
