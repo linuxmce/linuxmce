@@ -15,6 +15,7 @@
 #include "ImageUtils.h"
 
 #include <cstdlib>
+#include <string.h>
 
 /**
  * The INotify Receive Thread - used to send data from
@@ -110,6 +111,34 @@ namespace DCE
     pthread_join(m_inotifyThread,NULL);
     return EmulatorController::stop();
   }
+  // ---------------------------------------------------------------------
+  
+  void INotifyEmulatorController::doMediaSwap(string sMediaFilename, string sSlot)
+  {
+    char buf1[2];
+    char buf2[1024];
+    char buf[1024];
+    FILE* fp;
+
+    memset(buf1,0,sizeof(buf1));
+    memset(buf2,0,sizeof(buf2));
+    memset(buf,0,sizeof(buf));
+
+    buf1[0] = 0xFE;
+    buf1[1] = 0x00;
+
+    strcpy(buf2,sMediaFilename.c_str());
+    buf2[sMediaFilename.size()] = 0x00;
+    strcat(buf,buf1);
+    strcat(buf,buf2);
+
+    PLUTO_SAFETY_LOCK(im,m_INotifyCommandMutex);
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"INotifyEmulatorController::doMediaSwap() - Sending media swap for %s into slot %s",buf,sSlot.c_str());
+    fp = fopen("/run/Game_Player/send","wb");
+    fwrite(buf,sizeof(char),strlen(buf)+1,fp);
+    fclose(fp);
+  }
+
   // ---------------------------------------------------------------------
 
   bool INotifyEmulatorController::doAction(string sAction)

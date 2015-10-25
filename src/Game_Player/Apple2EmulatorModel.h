@@ -7,11 +7,11 @@
 #ifndef APPLE2EMULATORMODEL_H
 #define APPLE2EMULATORMODEL_H
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 
 namespace DCE
 {
-  class Apple2EmulatorModel : public MESSEmulatorModel
+  class Apple2EmulatorModel : public MAMEEmulatorModel
   {
   public:
     Apple2EmulatorModel();

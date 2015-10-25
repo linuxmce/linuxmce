@@ -8,14 +8,14 @@
 #ifndef TI994AEMULATORCONTROLLER_H
 #define TI994AEMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "TI994AEmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class TI994AEmulatorController : public MESSEmulatorController
+  class TI994AEmulatorController : public MAMEEmulatorController
   {
   public:
     TI994AEmulatorController(Game_Player *pGame_Player, TI994AEmulatorModel *pEmulatorModel); // ctor

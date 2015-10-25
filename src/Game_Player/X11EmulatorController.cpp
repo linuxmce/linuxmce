@@ -261,6 +261,12 @@ namespace DCE
     stop();
   }
 
+  void X11EmulatorController::doMediaSwap(string sMediaFilename, string sSlot)
+  {
+    // Not implemented.
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::doMediaSwap(%s, %s): Not Implemented. Ignoring.",sMediaFilename.c_str(),sSlot.c_str());
+  }
+
   bool X11EmulatorController::doAction(string sAction) // from EmulatorController
   {
     PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);

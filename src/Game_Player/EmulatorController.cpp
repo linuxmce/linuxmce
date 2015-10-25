@@ -542,4 +542,29 @@ namespace DCE
     // Unimplemented here.
   }
 
+  void EmulatorController::swapMedia(int iSlot_Number, string sSlot)
+  {
+
+    if (!m_pEmulatorModel)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"EmulatorController::swapMedia(%d, %s): NULL EmulatorModel, SHOULD NOT HAPPEN! Bailing!",iSlot_Number,sSlot.c_str());
+	return;
+      }
+    
+    if (iSlot_Number < 0)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"EmulatorController::swapMedia(%d, %s): called with index less than 0. Bailing!",iSlot_Number,sSlot.c_str());
+	return;
+      }
+
+    if (iSlot_Number > m_pEmulatorModel->m_dequeDisks.size())
+      {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"EmulatorController::swapMedia(%d, %s): called with index greater than size of disks deque which is %d, bailing! ",iSlot_Number,sSlot.c_str(),m_pEmulatorModel->m_dequeDisks.size());
+	return;
+      }
+    
+    doMediaSwap(FileUtils::FilenameWithoutPath(m_pEmulatorModel->m_dequeDisks[iSlot_Number].GetFilename()),sSlot);
+
+  }
+
 }

@@ -55,6 +55,7 @@ namespace DCE
     virtual void setSystemConfiguration(string sSystemConfiguration);
     // Pure virtuals
     virtual bool doAction(string sAction) = 0;
+    virtual void doMediaSwap(string sMediaFilename, string sSlot) = 0;
     virtual void pleaseResend() = 0;
     // actions
     virtual bool P1Start();
@@ -105,6 +106,7 @@ namespace DCE
     virtual void getOption(string sPath, string &sValue_To_Assign, Message *pMessage);
     virtual void setOption(string sPath, string sValue_To_Assign, Message *pMessage);
     virtual void waitForEmulatorExit();
+    virtual void swapMedia(int iSlot_Number, string sSlot);
   };
 
 }
