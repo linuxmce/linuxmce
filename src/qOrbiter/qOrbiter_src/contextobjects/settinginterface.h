@@ -56,21 +56,27 @@ class SettingInterface : public QObject
 {
     Q_OBJECT
       Q_PROPERTY(bool ready READ getReady NOTIFY readyChanged)
+      Q_PROPERTY(int fontSizeMod READ fontSizeMod  NOTIFY fontSizeModChanged)
 public:
     explicit SettingInterface(QObject *parent = 0);
     bool ready;
 
+    void setSimpleOption(SettingsKeyType::SettingKey sk, QVariant sval);
     void setOption(SettingsInterfaceType::SettingsType st,  SettingsKeyType::SettingKey sk, QVariant sval);
     QVariant getOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk);
 
     bool getReady() const;
     void setReady(bool value);
+    int fontSizeMod() { return m_fontSizeMod;}
 
 signals:
     void newLogMessage(QString msg);
     void settingsDataCleared();
     void writeError(QString error);
     void readyChanged();
+
+signals://for 'live properties'
+    void fontSizeModChanged();
 
 public slots:
     void log(QString message);
@@ -84,6 +90,13 @@ public slots:
     Q_INVOKABLE  QVariant getOption(int settingType, int keyType){
         return getOption((SettingsInterfaceType::SettingsType)settingType, (SettingsKeyType::SettingKey)keyType);
     }
+
+    Q_INVOKABLE void setFontSizeMod(int m){
+        setSimpleOption(SettingsKeyType::Setting_Text_sizemod, m);
+        m_fontSizeMod = m;
+        emit fontSizeModChanged();
+    }
+
 private slots:
     void initializeSettings();
 
@@ -92,6 +105,8 @@ private:
     QString m_persistentName;
     QSettings m_settings;
     QMap <SettingsKeyType::SettingKey, QString> m_lookup;
+
+    int m_fontSizeMod;
 
 };
 
