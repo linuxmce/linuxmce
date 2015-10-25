@@ -10,10 +10,9 @@
 namespace DCE
 {
 
-  Apple2EmulatorModel::Apple2EmulatorModel() : MESSEmulatorModel()
+  Apple2EmulatorModel::Apple2EmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "apple2e";
-    m_bIsComputer=true;
   }
 
   Apple2EmulatorModel::~Apple2EmulatorModel()

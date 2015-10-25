@@ -51,6 +51,9 @@ namespace DCE
 		
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Inserting %s into slot %s",sSlot.c_str(),sMediaFile.c_str());
 	
+	// This is a hack, so that Disk swapping can work... ugh.
+	chdir(FileUtils::BasePath(it->second).c_str());
+
 	sRet += "-" + sSlot + "\t" +
 	  sMediaFile + "\t";
       }

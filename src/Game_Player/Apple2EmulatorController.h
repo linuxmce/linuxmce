@@ -8,14 +8,14 @@
 #ifndef APPLE2EMULATORCONTROLLER_H
 #define APPLE2EMULATORCONTROLLER_H
 
-#include "MESSEmulatorController.h"
+#include "MAMEEmulatorController.h"
 #include "Apple2EmulatorModel.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class Apple2EmulatorController : public MESSEmulatorController
+  class Apple2EmulatorController : public MAMEEmulatorController
   {
   public:
     Apple2EmulatorController(Game_Player *pGame_Player, Apple2EmulatorModel *pEmulatorModel); // ctor
@@ -24,7 +24,7 @@ namespace DCE
     Apple2EmulatorModel *m_pEmulatorModel;
 
     virtual void insertMediaNamed(string sMediaFile, string sSlot);
-    virtual string getRomPathFromSlot();
+    // virtual string getRomPathFromSlot();
 
   };
 

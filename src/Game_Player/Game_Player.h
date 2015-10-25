@@ -57,8 +57,8 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-  class EmulatorController;
   class EmulatorFactory;
+  class EmulatorController;
 	class Game_Player : public Game_Player_Command
 	{
 //<-dceag-decl-e->
@@ -720,13 +720,13 @@ public:
 
 	/** @brief COMMAND: #1158 - Swap Media */
 	/** Swap media in a given slot. */
-		/** @param #13 Filename */
-			/** Filename to swap in, with full path. */
+		/** @param #151 Slot Number */
+			/** The slot number to swap in.  */
 		/** @param #291 Slot */
 			/** Game Player slot to swap Filename into. */
 
-	virtual void CMD_Swap_Media(string sFilename,string sSlot) { string sCMD_Result; CMD_Swap_Media(sFilename.c_str(),sSlot.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Swap_Media(string sFilename,string sSlot,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Swap_Media(int iSlot_Number,string sSlot) { string sCMD_Result; CMD_Swap_Media(iSlot_Number,sSlot.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Swap_Media(int iSlot_Number,string sSlot,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 

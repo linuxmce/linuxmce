@@ -7,11 +7,11 @@
 #ifndef TI994AEMULATORMODEL_H
 #define TI994AEMULATORMODEL_H
 
-#include "MESSEmulatorModel.h"
+#include "MAMEEmulatorModel.h"
 
 namespace DCE
 {
-  class TI994AEmulatorModel : public MESSEmulatorModel
+  class TI994AEmulatorModel : public MAMEEmulatorModel
   {
   public:
     TI994AEmulatorModel();

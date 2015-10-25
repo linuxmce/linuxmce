@@ -10,10 +10,9 @@
 namespace DCE
 {
 
-  TI994AEmulatorModel::TI994AEmulatorModel() : MESSEmulatorModel()
+  TI994AEmulatorModel::TI994AEmulatorModel() : MAMEEmulatorModel()
   {
     m_sSystemName = "ti99_4a";
-    m_bIsComputer=true;
   }
 
   TI994AEmulatorModel::~TI994AEmulatorModel()

@@ -11,10 +11,11 @@ namespace DCE
 {
 
   Apple2EmulatorController::Apple2EmulatorController(Game_Player *pGame_Player, Apple2EmulatorModel *pEmulatorModel)
-    : MESSEmulatorController(pGame_Player, pEmulatorModel)
+    : MAMEEmulatorController(pGame_Player, pEmulatorModel)
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
+    m_pEmulatorModel->m_sSystemName="apple2e";
   }
 
   Apple2EmulatorController::~Apple2EmulatorController()
@@ -22,7 +23,7 @@ namespace DCE
   
   }
 
-  string Apple2EmulatorController::getRomPathFromSlot()
+/*  string Apple2EmulatorController::getRomPathFromSlot()
   {
     string sMedia;
     if (!this->getMediaInSlot(sMedia,"flop1"))
@@ -33,7 +34,7 @@ namespace DCE
       {
 	return FileUtils::BasePath(sMedia);
       }
-  }
+  } */
 
   void Apple2EmulatorController::insertMediaNamed(string sMediaFile, string sSlot)
   {

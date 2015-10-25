@@ -35,9 +35,9 @@ namespace DCE
 
   protected:
   private:
-    string getRomFromSlot();
-    string getRomPathFromSlot();
-    string getSlotsAndRoms();
+    virtual string getRomFromSlot();
+    virtual string getRomPathFromSlot();
+    virtual string getSlotsAndRoms();
   };
 }
 

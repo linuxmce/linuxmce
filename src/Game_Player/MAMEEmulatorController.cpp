@@ -36,7 +36,7 @@ namespace DCE
   string MAMEEmulatorController::getRomFromSlot()
   {
     string sMedia;
-    if (getMediaInSlot(sMedia))
+    /*     if (getMediaInSlot(sMedia))
       {
 	if (!FileUtils::FileExists(sMedia))
 	  {
@@ -46,9 +46,22 @@ namespace DCE
       }
     else
       {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MAMEEmulatorController::getRomFromSlot() - we fell through and failed!");
 	return "";
-      }
-    return (m_pEmulatorModel->m_sSystemName == "arcade" ? FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(sMedia)) : m_pEmulatorModel->m_sSystemName);
+	} */
+
+	if (m_pEmulatorModel->m_sSystemName != "arcade")
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"MAMEEmulatorController::getRomFromSlot() - Returning system name %s",m_pEmulatorModel->m_sSystemName.c_str());
+		return m_pEmulatorModel->m_sSystemName;
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"MAMEEmulatorController::getRomFromSlot() - Returning arcade ROM %s",FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(sMedia)).c_str());
+		return FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(sMedia));
+	}
+
+    return "";
   }
 
   string MAMEEmulatorController::getRomPathFromSlot()

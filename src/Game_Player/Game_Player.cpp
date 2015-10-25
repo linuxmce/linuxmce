@@ -1679,12 +1679,22 @@ void Game_Player::CMD_Select_B(string &sCMD_Result,Message *pMessage)
 
 	/** @brief COMMAND: #1158 - Swap Media */
 	/** Swap media in a given slot. */
-		/** @param #13 Filename */
-			/** Filename to swap in, with full path. */
+		/** @param #151 Slot Number */
+			/** The slot number to swap in.  */
 		/** @param #291 Slot */
 			/** Game Player slot to swap Filename into. */
 
-void Game_Player::CMD_Swap_Media(string sFilename,string sSlot,string &sCMD_Result,Message *pMessage)
+void Game_Player::CMD_Swap_Media(int iSlot_Number,string sSlot,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1158-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
+
+  if (!m_pEmulatorController)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Swap_Media() - Tried to send command with NULL EmulatorController. Bailing!");
+      return;
+    }
+
+  m_pEmulatorController->swapMedia(iSlot_Number,sSlot);
+
 }

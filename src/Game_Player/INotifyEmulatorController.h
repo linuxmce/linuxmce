@@ -32,6 +32,7 @@ namespace DCE
     virtual bool init();
 
     virtual bool doAction(string sAction);
+    virtual void doMediaSwap(string sMediaFilename, string sSlot);
     virtual void pleaseResend();
 
     /* TODO: Move these out of here and up above when done. */

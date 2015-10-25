@@ -42,6 +42,7 @@ namespace DCE
     void checkResend();
 
     virtual bool doAction(string sAction);
+    virtual void doMediaSwap(string sMediaFilename, string sSlot);
     virtual bool pressButton(int iPK_Button, Message *pMessage);
     virtual bool pressClick(int iPositionX, int iPositionY, Message *pMessage);
     virtual bool getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size);
