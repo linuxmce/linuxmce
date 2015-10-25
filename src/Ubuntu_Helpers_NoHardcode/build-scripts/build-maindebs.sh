@@ -133,18 +133,13 @@ function build_main_debs() {
 					Distro_ID="23"
 					RepositorySource=25
 					Main_Version='2.0.0.47.'
-					exclude_list=$exclude_list,673,674 # lmce game player
-					exclude_list=$exclude_list,682,683 # mame
-					exclude_list=$exclude_list,879,881 # qorbiter android
-					exclude_list=$exclude_list,772,773 # eib
-					exclude_list=$exclude_list,498,499 # simplephone - linphone upgrades
+					exclude_list=$exclude_list,673,674 # lmce game player - fails to build
+					exclude_list=$exclude_list,682,683 # mame - fails to build
+					exclude_list=$exclude_list,879,881 # qorbiter android - no sdk/ndk
 					exclude_list=$exclude_list,721,722 # dpms monitor - never work anyways
-					exclude_list=$exclude_list,782,785 # lmce ola
-					exclude_list=$exclude_list,819,820 # air player
-					exclude_list=$exclude_list,826,827 # ago bridge
-					exclude_list=$exclude_list,829,830 # omx player
-					exclude_list=$exclude_list,842,843 # dlna
-					exclude_list=$exclude_list,858,859 # qorbiter
+
+					exclude_list=$exclude_list,498,499 # simplephone - linphone upgrades
+					exclude_list=$exclude_list,826,827 # ago bridge - qpid & qpidmessaging discontinued in debian
 					case "${arch}" in
 						"armhf")
 							exclude_list=$exclude_list,452,453 # IRTrans - no armhf .so
