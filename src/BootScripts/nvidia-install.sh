@@ -71,7 +71,7 @@ getPreferredNvidiaDriver() {
 	PCI_Id=$(getPCI_Id)
  
 	case " $Driver_Current_Supported " in *" $PCI_Id "*)
-		case $(lsb_releae -cs) in
+		case $(lsb_release -cs) in
 			precise)
 				echo "nvidia-current"	;;
 			trusty)
@@ -85,7 +85,7 @@ getPreferredNvidiaDriver() {
 		return 1
 	esac
 
-	case $(lsb_releae -cs) in
+	case $(lsb_release -cs) in
 		precise)
 			echo "nvidia-current"
 			return 1
