@@ -185,11 +185,19 @@ StyledScreen{
                     height: keypadSection.flowButtonHeight
                     width: parent.width
                     buttonText: name
-                    onActivated: manager.setHouseMode(text_input1.text, mode)
+                    onActivated: {
+                        screenparams.addParam(text_input1.text, 24)
+                        screenparams.addParam(mode, 25)
+                        manager.setHouseMode(text_input1.text, mode, '')
+                    }
                 }
             }
 
         }
+    }
+
+    Keys.onPressed: {
+        content.typeText(event.text);
     }
 }
 
