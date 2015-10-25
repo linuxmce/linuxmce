@@ -43,14 +43,14 @@ QtObject{
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
     readonly property color appbutton_color:appcolor_background
-    property int appButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)
-    property int appButtonWidth: manager.isProfile ? scaleX(28) : scaleX(18)
-    readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
-    readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
-    readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(9) : scaleY(15)
-    readonly property int appButtonNumberPadSmallWidth:manager.isProfile ? scaleX(15) : scaleX(9)
-    readonly property int appButtonLargeHeight:manager.isProfile ? scaleY(15) : scaleY(20)
-    readonly property int appButtonLargeWidth:manager.isProfile ? scaleX(28) : scaleX(25)
+    property int appButtonHeight:scaleY(15)
+    property int appButtonWidth: scaleX(28)
+    readonly property int appButtonNumberPadHeight: scaleY(12)
+    readonly property int appButtonNumberPadWidth: scaleX(18)
+    readonly property int appButtonNumberPadSmallHeight:scaleY(9)
+    readonly property int appButtonNumberPadSmallWidth:scaleX(15)
+    readonly property int appButtonLargeHeight:scaleY(15)
+    readonly property int appButtonLargeWidth:scaleX(28)
     readonly property int buttonSpacing:5
 
     /* Application Fonts */
@@ -71,7 +71,7 @@ QtObject{
     property int fontSize_listAccent:10*dpRatio
 
     /* Application Navigation Bars */
-    readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)
+    readonly property string appbutton_navigationButtonHeight:scaleY(15)
     readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(10) : scaleY(15)
 
     /* Application Menu Panels */

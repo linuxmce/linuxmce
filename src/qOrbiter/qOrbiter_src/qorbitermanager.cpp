@@ -2757,17 +2757,13 @@ int qorbiterManager::loadSplash()
 void qorbiterManager::checkOrientation(QSize s)
 {
     if(s.height()==0 || s.width() == 0) return;
+
     setDceResponse("checkOrientation(QSize)::start");
     //NOTE: Is this not handled by the window manager and Orientation change signals?
 
-    appHeight=s.height();
-    appWidth = s.width();
-    if(appHeight < appWidth){
-        setOrientation(false);
-    }
-    else{
-        setOrientation( true);
-    }
+    appHeight=s.height();  appWidth = s.width();
+    setOrientation(appHeight > appWidth);
+
 }
 
 #ifdef QT5
@@ -2779,21 +2775,17 @@ void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 
     switch (o) {
     case Qt::InvertedLandscapeOrientation: qDebug() << "Inverted Landscape";
-    case Qt::LandscapeOrientation:
-        appHeight=m_window->width();
-        appWidth=m_window->height();
-      //  setOrientation(false);  qDebug() << "Landscape";
+    case Qt::LandscapeOrientation:setOrientation(false);  qDebug() << "Landscape";
         break;
     case Qt::PrimaryOrientation: qDebug() << "Primary ";
     case Qt::InvertedPortraitOrientation:qDebug() << "Inverted portait";
-    case Qt::PortraitOrientation:
-        appHeight=m_window->height();
-        appWidth=m_window->width();
-       // setOrientation(true);qDebug() << "Portrait";
+    case Qt::PortraitOrientation:qDebug() << "Portrait";
         break;
     default: qDebug() << "unknown orientation";
         break;
     }
+    appHeight=m_window->height();
+    appWidth=m_window->width();
 
     setOrientation(appHeight > appWidth);
 }
