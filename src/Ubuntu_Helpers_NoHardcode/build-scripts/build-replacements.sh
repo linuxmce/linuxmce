@@ -63,9 +63,9 @@ function Build_Replacement_Package
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 
-if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
-fi
+		if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
+			sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
+		fi
 
 		DisplayMessage "Building ${pkg_name}"
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b $build_opts $make_jobs"
@@ -129,9 +129,11 @@ function Build_Replacements_Common_ubuntu
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk"
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
-#if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-#	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
-#fi
+
+		#if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
+		#	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
+		#fi
+
 		DisplayMessage "Building pluto-asterisk"
 		./make_package_ubuntu.sh $KVER && \
 		cp -fr asterisk-pluto_*.deb ${replacements_dir} && \
@@ -163,20 +165,22 @@ function Build_Replacements_Common_ubuntu
 	#fi
 
 	if [[ "$arch" != "armhf" ]]; then
-	#Package: linux-image-diskless
-	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
-	if Changed_Since_Last_Build "$dir_" ;then
-		pushd "$dir_"
-#if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
-#	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
-#fi
-		DisplayMessage "Building linux-image-diskless for $KVER"
-		./makepackage.sh && \
-		cp -fr linux-image-diskless_*.deb "${replacements_dir}" && \
-		cp -fr linux-image-diskless_*.changes "${replacements_dir}" && \
-		Update_Changed_Since_Last_Build "$dir_"
-		popd
-	fi
+		#Package: linux-image-diskless
+		dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
+		if Changed_Since_Last_Build "$dir_" ;then
+			pushd "$dir_"
+
+			#if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
+			#	sed -i "1s/)/${ver_split}${build_name}1)/" debian/changelog
+			#fi
+
+			DisplayMessage "Building linux-image-diskless for $KVER"
+			./makepackage.sh && \
+			cp -fr linux-image-diskless_*.deb "${replacements_dir}" && \
+			cp -fr linux-image-diskless_*.changes "${replacements_dir}" && \
+			Update_Changed_Since_Last_Build "$dir_"
+			popd
+		fi
 	fi
 }
 
