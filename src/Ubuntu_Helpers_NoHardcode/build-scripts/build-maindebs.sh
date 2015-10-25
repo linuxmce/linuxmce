@@ -137,16 +137,12 @@ function build_main_debs() {
 					exclude_list=$exclude_list,682,683 # mame - fails to build
 					exclude_list=$exclude_list,879,881 # qorbiter android - no sdk/ndk
 					exclude_list=$exclude_list,721,722 # dpms monitor - never work anyways
-
-					exclude_list=$exclude_list,498,499 # simplephone - linphone upgrades
 					case "${arch}" in
 						"armhf")
 							exclude_list=$exclude_list,452,453 # IRTrans - no armhf .so
-							exclude_list=$exclude_list,879,881 # qOrbiter for Android
-							;;
+							: ;;
 						"amd64")
-							:
-							;;
+							: ;;
 					esac
 					;;
 			esac
