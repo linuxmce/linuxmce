@@ -776,7 +776,7 @@ signals:
     void gotMountDevices();
     void bReloadChanged();
 
-    void newHouseMode(QString pass, int mode);
+    void newHouseMode(QString pass, int mode, QString handling);
 
     /*DCE Signals*/
     void reloadRouter();
@@ -1058,7 +1058,7 @@ public slots:
      * \param pass
      * \ingroup qorbiter_properties
      */
-    void setHouseMode( QString pass, int mode);
+    void setHouseMode( QString pass, int mode, QString handling);
 
 
     /*! @name Media Metadata Slots*/
