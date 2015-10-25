@@ -156,7 +156,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_appEngine->load(QUrl(path));
 #endif
 
-    m_testScreenSize =testSize;
+    m_testScreenSize =testSize;   
+
     m_fontDir.setPath(QStandardPaths::standardLocations(QStandardPaths::FontsLocation).first());
 
     QString mlocale = QLocale::system().name().append(".qm");
@@ -246,13 +247,15 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
         connect(m_window, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
         //  connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+        connect(m_window, &QQuickWindow::widthChanged, [=](int w) { setAppW(w);} );
+        connect(m_window, &QQuickWindow::heightChanged, [=](int h) {setAppH(h);} );
+
         connect(m_window->screen(), SIGNAL(primaryOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         // connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         qDebug() << "Set QQuickWindow Ptr";
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
-        connect(m_window, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
-        connect(m_window, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
+
 
         if(m_testScreenSize==0){
             m_window->setVisibility(QWindow::FullScreen);
@@ -2536,7 +2539,6 @@ void qorbiterManager::beginSetup()
 bool qorbiterManager::setSizeSelector()
 {
 
-
     if(!m_window){
         qWarning() << " Window Not Set ";
         return false;
@@ -2546,7 +2548,6 @@ bool qorbiterManager::setSizeSelector()
 
     QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
     QStringList t;
-
 
     if(m_testScreenSize==-1){
         qDebug () << Q_FUNC_INFO << "Using device information ";
@@ -2769,9 +2770,8 @@ void qorbiterManager::checkOrientation(QSize s)
 #ifdef QT5
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
-    qDebug() << Q_FUNC_INFO << m_window->size();
-    appHeight=m_window->size().height();
-    appWidth=m_window->size().width();
+
+
     //return;
 
     switch (o) {

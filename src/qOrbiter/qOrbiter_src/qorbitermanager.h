@@ -171,8 +171,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (int iPK_Device READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)/*! \brief Contains the current device number \ingroup qorbiter_properties */
     Q_PROPERTY(int  deviceTemplate READ getDeviceTemplate WRITE setDeviceTemplate NOTIFY deviceTemplateChanged)
     Q_PROPERTY (int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged)
-    Q_PROPERTY (int appHeight READ getAppH WRITE setAppH NOTIFY orientationChanged)/*!< \brief Contains the application height \ingroup qorbiter_properties */
-    Q_PROPERTY (int appWidth READ getAppW WRITE setAppW NOTIFY orientationChanged)/*!< \brief Contains the application width \ingroup qorbiter_properties */
+    Q_PROPERTY (int appHeight READ getAppH WRITE setAppH NOTIFY appHeightChanged)/*!< \brief Contains the application height \ingroup qorbiter_properties */
+    Q_PROPERTY (int appWidth READ getAppW WRITE setAppW NOTIFY appWidthChanged)/*!< \brief Contains the application width \ingroup qorbiter_properties */
     Q_PROPERTY (int entertainArea READ entertainArea NOTIFY locationChanged )
     Q_PROPERTY (int room READ room NOTIFY locationChanged)
 
@@ -573,6 +573,8 @@ Param 10 - pk_attribute
     DCECommand* getDCECommand();
 
 signals:
+    void appHeightChanged();
+    void appWidthChanged();
     void currentThemeChanged();
     void uiReadyChanged();
     void skinEntryFileChanged();
@@ -967,10 +969,10 @@ public slots:
     void setLocation(const int& , const int& ) ;
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
-    void setAppH(int h) { if(appHeight==h)return;  appHeight = h;checkOrientation(QSize(appWidth, appHeight));}
+    void setAppH(int h) { if(appHeight==h)return;  appHeight = h; emit appHeightChanged(); }
     int getAppH() { return appHeight; }
 
-    void setAppW(int w) {if(appWidth==w)return;  appWidth = w; checkOrientation(QSize(appWidth, appHeight));}
+    void setAppW(int w) {if(appWidth==w)return;  appWidth = w; emit appWidthChanged();}
     int getAppW(){ return appWidth;   }
 
     /*Network State property functions*/
