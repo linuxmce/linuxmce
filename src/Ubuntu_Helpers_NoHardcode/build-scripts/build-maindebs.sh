@@ -139,7 +139,6 @@ function build_main_debs() {
 					exclude_list=$exclude_list,721,722 # dpms monitor - never work anyways
 
 					exclude_list=$exclude_list,498,499 # simplephone - linphone upgrades
-					exclude_list=$exclude_list,826,827 # ago bridge - qpid & qpidmessaging discontinued in debian
 					case "${arch}" in
 						"armhf")
 							exclude_list=$exclude_list,452,453 # IRTrans - no armhf .so
