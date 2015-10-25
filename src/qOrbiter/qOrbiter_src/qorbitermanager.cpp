@@ -270,7 +270,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         m_window->setVisibility(QWindow::FullScreen);
         appHeight = m_window->height();
         appWidth= m_window->width();
-        checkOrientation(m_window->screen()->orientation());
+        checkOrientation(m_window->screen()->size());
 #endif
 
     }
@@ -2148,19 +2148,19 @@ void qorbiterManager::getDeviceState(int PK_Device, string* data)
 
 int qorbiterManager::scheduleRecording(QString sType, QString sProgramID)
 {
-       //TODO: currently the media plugin does not allow us to send a this command through it if there is no
-       // active stream. We need to be able to do this to allow scheduling recordings from the EPG screen without
-       // actively watching TV. So we now do a slight hack and send to both VDT and MythTV plugin DTs
-       // only one of them is installed at once anyway.
+    //TODO: currently the media plugin does not allow us to send a this command through it if there is no
+    // active stream. We need to be able to do this to allow scheduling recordings from the EPG screen without
+    // actively watching TV. So we now do a slight hack and send to both VDT and MythTV plugin DTs
+    // only one of them is installed at once anyway.
 
-       DCECommand *pCmd = getDCECommand();
-       CMD_Schedule_Recording_DT *cmd = new CMD_Schedule_Recording_DT(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST,
-                                                                      BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(),
-                                                                      pCmd->getString(COMMANDPARAMETER_ID_CONST));
-       pCmd->setCommand(cmd);
-       emit sendDceCommandResponse(pCmd);
-       return pCmd->getCallback();
-/*
+    DCECommand *pCmd = getDCECommand();
+    CMD_Schedule_Recording_DT *cmd = new CMD_Schedule_Recording_DT(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST,
+                                                                   BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(),
+                                                                   pCmd->getString(COMMANDPARAMETER_ID_CONST));
+    pCmd->setCommand(cmd);
+    emit sendDceCommandResponse(pCmd);
+    return pCmd->getCallback();
+    /*
        CMD_Schedule_Recording_DT *cmd2 = new CMD_Schedule_Recording_DT(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST,
                                                                        BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(), ps2);
                                                                        */
@@ -2770,24 +2770,24 @@ void qorbiterManager::checkOrientation(QSize s)
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
     qDebug() << Q_FUNC_INFO << m_window->size();
-
+    appHeight=m_window->size().height();
+    appWidth=m_window->size().width();
     //return;
 
     switch (o) {
     case Qt::InvertedLandscapeOrientation: qDebug() << "Inverted Landscape";
-    case Qt::LandscapeOrientation:setOrientation(false);  qDebug() << "Landscape";
+    case Qt::LandscapeOrientation: qDebug() << "Landscape";
+        setOrientation(false);
         break;
-    case Qt::PrimaryOrientation: qDebug() << "Primary ";
-    case Qt::InvertedPortraitOrientation:qDebug() << "Inverted portait";
+    case Qt::PrimaryOrientation: qDebug() << "Primary "; ;
+    case Qt::InvertedPortraitOrientation:qDebug() << "Inverted portait"; ;
     case Qt::PortraitOrientation:qDebug() << "Portrait";
+        setOrientation(true);
         break;
     default: qDebug() << "unknown orientation";
         break;
     }
-    appHeight=m_window->height();
-    appWidth=m_window->width();
 
-    setOrientation(appHeight > appWidth);
 }
 #endif
 

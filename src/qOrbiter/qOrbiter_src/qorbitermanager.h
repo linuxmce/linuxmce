@@ -968,10 +968,10 @@ public slots:
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
     void setAppH(int h) { if(appHeight==h)return;  appHeight = h;checkOrientation(QSize(appWidth, appHeight));}
-    int getAppH() { if(!m_window)return 0;  return m_window->height();}
+    int getAppH() { return appHeight; }
 
     void setAppW(int w) {if(appWidth==w)return;  appWidth = w; checkOrientation(QSize(appWidth, appHeight));}
-    int getAppW(){ if(!m_window) return 0; return m_window->width(); }
+    int getAppW(){ return appWidth;   }
 
     /*Network State property functions*/
     void setInternalIp(QString s) { if(s==m_ipAddress) {return;} m_ipAddress = s; setDceResponse("got ip address, sending to dce"); emit internalIpChanged(m_ipAddress); setInternalHost(m_ipAddress);}
