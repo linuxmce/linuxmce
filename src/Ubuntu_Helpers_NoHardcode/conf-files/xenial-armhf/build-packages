@@ -167,7 +167,6 @@ libxml++2.6-dev
 libao4
 libao-dev
 libssl-dev
-
 libcrystalhd-dev
 libvorbis-dev
 libva-dev
@@ -222,3 +221,11 @@ libsdl2-mixer-dev
 libsdl2-net-dev
 libsdl2-ttf-dev
 qt5-default
+libdbus-c++-dev
+qtdeclarative5-dev
+qtmultimedia5-dev
+qtscript5-dev
+libplist-dev
+libshairport-dev
+indent
+fastjar
