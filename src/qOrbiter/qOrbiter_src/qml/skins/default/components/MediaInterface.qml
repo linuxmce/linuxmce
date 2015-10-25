@@ -210,7 +210,7 @@ Item{
 
     VideoOutput{
         id:videoPlane
-        visible:qmlPlayer.hasVideo
+        visible:true //qmlPlayer.hasVideo
         height: manager.appHeight
         width: manager.appWidth
         anchors.centerIn: parent

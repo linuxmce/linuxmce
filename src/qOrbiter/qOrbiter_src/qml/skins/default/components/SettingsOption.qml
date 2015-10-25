@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.settings 1.0
+import QtQuick.Controls 1.2 as QtControls
 import "../"
 Item{
     id:settingsRow
@@ -10,7 +11,62 @@ Item{
     property string settingName:""
     property variant settingValue:settings.getOption( cat, val)
     property bool useSwitch:false
+    property bool useSpinbox:false
+
+    signal valueChanged(int localValue)
+    function save(){
+
+    }
+
+    onSettingValueChanged: {
+        var t = typeof(settingValue)
+        console.log("Setting value type " + t)
+    }
+
+    onUseSpinboxChanged: {
+         control_component.sourceComponent=combo_bx
+    }
+
+    onUseSwitchChanged: {
+        if(useSwitch) control_component.sourceComponent=switch_comp
+    }
+
     signal activated();
+
+    Component{
+        id:switch_comp
+        Switch {
+            id: sw_root
+            visible:useSwitch
+            switchLabel: settingName
+            enabled: settingValue
+
+            anchors{
+                right:parent.right
+                verticalCenter: parent.verticalCenter
+            }
+            onTriggered: {
+                activated()
+                settings.setOption(cat,val,!settingValue)
+                settingValue = settings.getOption( cat, val)
+            }
+        }
+    }
+
+    Component{
+        id:combo_bx
+        QtControls.SpinBox{
+            anchors{
+                right:parent.right
+                verticalCenter: parent.verticalCenter
+            }
+            value: Number(settingValue)
+            onValueChanged:{
+                settingsRow.valueChanged(value)
+               }
+        }
+    }
+
     StyledText{
         anchors{
             left:parent.left
@@ -32,26 +88,18 @@ Item{
         text:useSwitch ? "" : settingValue
     }
 
-    Switch {
-        id: sw_root
-        visible:useSwitch
-        switchLabel: settingName
-        enabled: settingValue
 
+    Loader{
+        id:control_component
         anchors{
             right:parent.right
             verticalCenter: parent.verticalCenter
-        }
-        onTriggered: {
-            activated()
-            settings.setOption(cat,val,!settingValue)
-            settingValue = settings.getOption( cat, val)
         }
     }
 
     MouseArea{
         anchors.fill: parent
         onClicked: activated()
-        enabled: !useSwitch
+        enabled: !useSwitch && !useSpinbox
     }
 }

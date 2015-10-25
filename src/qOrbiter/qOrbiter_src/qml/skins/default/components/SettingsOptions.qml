@@ -46,12 +46,17 @@ Item{
                 cat:SettingsType.Settings_UI
                 val:SettingsKey.Setting_Ui_PrefSize
                 settingName: qsTr("Preferred Size")
+
             }
             SettingsOption {
                 id: text_size_option
                 cat:SettingsType.Settings_Text
                 val:SettingsKey.Setting_Text_sizemod
-                settingName: qsTr("Text Modifier")
+                settingName: qsTr("Text Modifier:")
+                useSpinbox: true
+                onValueChanged: {
+                    settings.setFontSizeMod(localValue)
+                }
             }
 
             SettingsOption {
@@ -59,7 +64,8 @@ Item{
                 cat:SettingsType.Settings_Text
                 val:SettingsKey.Setting_Text_font
                 settingName: qsTr("Font Option")
-                onActivated: {extendedView.model=manager.systemFontList(); settingsOption.state="extended"}
+                onActivated: {extendedView.model=manager.systemFontList();
+                    settingsOption.state="extended"}
             }
             SettingsOption {
                 id: lang_option

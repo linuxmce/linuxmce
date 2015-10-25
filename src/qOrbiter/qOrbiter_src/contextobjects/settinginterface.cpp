@@ -10,11 +10,12 @@ SettingInterface::SettingInterface(QObject *parent) :
     QObject(parent),
     m_settings(0),
     m_persistentName(""),
+    m_fontSizeMod(0),
     ready(false)
 {
     /** Note that application name, org, and domain are set via QCoreApplication in main.cpp */
 
-    m_settings.setFallbacksEnabled(false);    
+    m_settings.setFallbacksEnabled(false);
     m_lookup.insert(SettingsKeyType::Setting_Network_DeviceName, "deviceName");
     m_lookup.insert(SettingsKeyType::Setting_Network_Router, "router");
     m_lookup.insert(SettingsKeyType::Setting_Network_Device_ID, "device");
@@ -35,9 +36,26 @@ SettingInterface::SettingInterface(QObject *parent) :
 
     if(!m_settings.status()==QSettings::AccessError){
         connect(this, SIGNAL(settingsDataCleared()), this,SLOT(initializeSettings()));
-            initializeSettings();
+        initializeSettings();
     }  else {
-            log(tr("Could not access settings in constructor"));
+        log(tr("Could not access settings in constructor"));
+    }
+
+
+}
+
+void SettingInterface::setSimpleOption(SettingsKeyType::SettingKey sk, QVariant sval)
+{
+
+    switch (sk) {
+    case SettingsKeyType::Setting_Network_Router:
+        setOption(SettingsInterfaceType::Settings_Network, sk, sval);
+        break;
+    case SettingsKeyType::Setting_Text_sizemod:
+        setOption(SettingsInterfaceType::Settings_Text, sk, sval);
+        break;
+    default:
+        break;
     }
 
 
@@ -60,7 +78,7 @@ void SettingInterface::initializeSettings()
 {
     //device name is tricky because it used as an Entertain area identifier. We want to ensure its always read correctly so we do our best to maintain it.
     //the problem case is when the user clears settings. the device name should remain the same but there is nowhere to place it in a simple manner, so we do it behind the scenes.
-setReady(false);
+    setReady(false);
 
     if(!m_settings.childGroups().contains("network")){
         log(tr("Initializing network Settings"));
@@ -105,8 +123,10 @@ setReady(false);
         log(tr("Finished Initializing Media settings"));
     }
 
+    setFontSizeMod(getOption(SettingsInterfaceType::Settings_Text, SettingsKeyType::Setting_Text_sizemod).toInt());
+
     log(tr("Settings are ready"));
-   setReady(true);
+    setReady(true);
 }
 
 void SettingInterface::destroySettingsData()

@@ -83,8 +83,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     #endif
     QObject(parent),qorbiterUIwin(view), tskinModel(NULL),
     m_appEngine(engine),
-    // appHeight(view->height()),
-    //  appWidth(view->width()),
+    appHeight(view->height()),
+    appWidth(view->width()),
     settingsInterface(appSettings),
     m_style(0),
     m_fontDir(""),
@@ -111,7 +111,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
     m_appEngine->rootContext()->setContextProperty("manager", this);
     m_appEngine->rootContext()->setContextProperty("settings", settingsInterface);
-
+    //appHeight=480; appWidth=640;
     currentSkin="default";
     QString path;
 
@@ -261,10 +261,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
             m_window->setVisibility(QWindow::FullScreen);
         } else{
             m_window->setVisibility(QWindow::Windowed);
-            setAppW(640);
-            setAppH(480);
             m_window->resize(appWidth, appHeight);
-            m_window->hide();
             m_window->show();
         }
 
@@ -386,12 +383,7 @@ void qorbiterManager::initiateRestart(){
  * \param url - The relative or absolute path of the skin to the binary.
  */
 void qorbiterManager::refreshUI(QUrl url){
-
-#if (QT5)
-    // qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
-#else
-    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-#endif
+Q_UNUSED(url);
     emit currentSkinChanged();
 }
 
@@ -2962,8 +2954,8 @@ void qorbiterManager::resetScreenSize(){
         t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
+
         m_window->resize(appWidth, appHeight);
-        m_window->hide();
         m_window->showNormal();
 #else
         m_window->showFullScreen();

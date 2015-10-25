@@ -1838,6 +1838,8 @@ public slots:
             if(tH < tW ){
                 appHeight=tW;
                 appWidth=tH;
+                emit appHeightChanged();
+                emit appWidthChanged();
             }
             break;
         case Qt::LandscapeOrientation:
@@ -1845,10 +1847,13 @@ public slots:
             if(tW < tH){
                 appHeight=tW;
                 appWidth=tH;
+                emit appHeightChanged();
+                emit appWidthChanged();
             }
         default:
             break;
         }
+
         checkOrientation(QSize(appWidth, appHeight));
        m_appEngine->clearComponentCache();
         // updateProfileSelector();
