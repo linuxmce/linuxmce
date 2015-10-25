@@ -423,7 +423,6 @@ int main(int argc, char* argv[])
 #endif
         orbiterWin.setMessage("Setting up Lmce");
 
-
 #ifndef ANDROID
 
         qorbiterManager  w(&pqOrbiter, &orbiterWin.mainView, &engine, screenSize, &settings, overrideDir);

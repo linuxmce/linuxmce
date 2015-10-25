@@ -18,7 +18,7 @@
 #   This file is to be used when you are intending to build the application using Qt for android targeting
 #   Qt version 5.*.*
 
-CONFIG += thread
+CONFIG += thread c++11
 
 # define deployment destination and target executable name
 TARGET=qorbiterqt5

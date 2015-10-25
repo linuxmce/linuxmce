@@ -114,6 +114,7 @@ Item {
         }
     }
 
+
     DefaultHeader {
         id: header
         focus:true

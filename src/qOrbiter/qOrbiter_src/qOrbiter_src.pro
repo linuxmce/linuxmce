@@ -22,7 +22,7 @@
 #		possy
 
 
-CONFIG += thread
+CONFIG += thread c++11
 # define deployment destination and target executable name
 
 local-development{
