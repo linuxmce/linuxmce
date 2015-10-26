@@ -93,21 +93,22 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         case ScreenData::Device_Small:
             testW=480;
             testH=854;
-           // mainView.setGeometry(0,0,480*.75, 854*.75);
+           mainView.setGeometry(0,0,480*.75, 854*.75);
             break;
         case ScreenData::Device_Medium:
             testW=1280;
-            testH=720;
-            // mainView.rootObject()->setScale(.65);
+            testH=720;          
             mainView.setGeometry(0,0,1280*.65, 720*.65);
             break;
         case ScreenData::Device_Large:
-            testW=1600;
-            testH=900;
+            testW=1980;
+            testH=1080;
+             mainView.setGeometry(0,0,1920*.65, 1080*.65);
             break;
         default:
             testW=800;
             testH=600;
+              mainView.setGeometry(0,0,800*.65, 600*.65);
             break;
         }
 
@@ -128,8 +129,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     }
 
 
-    mainView.rootContext()->setContextProperty("appW", testW);
-    mainView.rootContext()->setContextProperty("appH", testH);
+    mainView.rootContext()->setContextProperty("appW", mainView.width());
+    mainView.rootContext()->setContextProperty("appH", mainView.height());
 
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));

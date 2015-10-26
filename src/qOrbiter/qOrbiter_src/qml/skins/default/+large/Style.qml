@@ -56,18 +56,18 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:12*dpRatio
-    readonly property int appFontSize_header:15*dpRatio
-    readonly property int appFontSize_description:12*dpRatio
-    readonly property int appFontSize_title:14*dpRatio
+    readonly property int appFontSize_list:20*dpRatio+settings.fontSizeMod
+    readonly property int appFontSize_header:24*dpRatio+settings.fontSizeMod
+    readonly property int appFontSize_description:18*dpRatio+settings.fontSizeMod
+    readonly property int appFontSize_title:28*dpRatio+settings.fontSizeMod
 
-    property int fontSize_small:6*dpRatio
-    property int fontSize_medium:8*dpRatio
-    property int fontSize_large:appFontSize_title
+    property int fontSize_small:18*dpRatio+settings.fontSizeMod
+    property int fontSize_medium:22*dpRatio+settings.fontSizeMod
+    property int fontSize_large:appFontSize_title+settings.fontSizeMod
 
-    property int fontSize_listItem:appFontSize_list
-    property int fontSize_listTitle:appFontSize_title
-    property int fontSize_listAccent:10*dpRatio
+    property int fontSize_listItem:appFontSize_list+settings.fontSizeMod
+    property int fontSize_listTitle:appFontSize_title+settings.fontSizeMod
+    property int fontSize_listAccent:20*dpRatio+settings.fontSizeMod
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
