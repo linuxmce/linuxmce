@@ -91,6 +91,14 @@ MD_Copy_SSH_Keys () {
 	[[ -f ${BASE_DIR}/keys/id_dsa_pluto.pub ]] && mkdir -p /root/.ssh && cat ${BASE_DIR}/keys/id_dsa_pluto.pub >> /root/.ssh/authorized_keys
 }
 
+MD_Set_Timezone () {
+	. ${BASE_DIR}/bin/Config_Ops.sh
+	StatsMessage "Setting MDs timezone to core's timezone"
+	TimeZone=$(ssh $DCERouter cat /etc/timezone)
+	echo $TimeZone > /etc/timezone
+	dpkg-reconfigure --frontend noninteractive tzdata
+}
+
 MD_System_Level_Prep () {
 	ConfigSources		# install-common.sh
 	MD_Copy_SSH_Keys	# install-md.sh
