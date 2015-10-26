@@ -209,6 +209,15 @@ sed -i "s/@LOGFILE/ssl_access.log/" /etc/apache2/sites-available/$defaultssl
 a2ensite $defaultssl
 a2enmod ssl
 
+if ! BlacklistConfFiles '/etc/apache2/apache2.conf' ;then
+	if [ ! -e '/etc/apache2/apache2.conf.pbackup' ] && [ -e '/etc/apache2/apache2.conf' ] ;then
+		cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.pbackup || :
+	fi
+	if ! grep ServerName ./apache2.conf >/dev/null ; then 
+		echo "ServerName ${HostName}" > /etc/apache2/apache2.conf
+	fi
+fi
+
 if ! BlacklistConfFiles '/etc/apache2/ports.conf' ;then
 	if [ ! -e '/etc/apache2/ports.conf.pbackup' ] && [ -e '/etc/apache2/ports.conf' ] ;then
 		cp /etc/apache2/ports.conf /etc/apache2/ports.conf.pbackup || :
