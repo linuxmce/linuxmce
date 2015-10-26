@@ -73,6 +73,14 @@ MD_Setup_Plutoconf() {
 	[ -n "$UseVideoWizard" ] || ConfSet "UseVideoWizard" "1"
 }
 
+MD_Setup_Hostname() {
+	. ${BASE_DIR}/bin/Config_Ops.sh
+
+	NEW_HOSTNAME="moon${PK_Device}"
+	echo ${NEW_HOSTNAME} > /etc/hostname
+	sed -i 's/127.0.1.1.*/127.0.1.1\t'"$NEW_HOSTNAME"'/g' /etc/hosts
+}
+
 ###########################################################
 ### Setup Functions - General functions
 ###########################################################

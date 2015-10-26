@@ -26,7 +26,7 @@ FirstNetwork () {
 			auto eth1
 			iface eth1 inet dhcp
 			EOF
-		ifconfig eth1 del 192.168.80.0 || :
+		#ifconfig eth1 del 192.168.80.0 || :
 	else
 		cat <<-EOF > /etc/network/interfaces
 			auto lo
