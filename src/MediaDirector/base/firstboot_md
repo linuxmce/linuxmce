@@ -26,6 +26,7 @@ done
 ##########################################################################################################
 MD_Setup_Fstab
 MD_Setup_Plutoconf
+MD_Setup_Hostname
 MD_Copy_SSH_Keys
 MD_Config_MySQL_Client
 ConfigSources
