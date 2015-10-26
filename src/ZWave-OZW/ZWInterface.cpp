@@ -379,6 +379,48 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 		}
 		break;
 	}	
+	case OpenZWave::Notification::Type_ControllerCommand:
+	{
+		switch (_notification->GetEvent()) {
+		case OpenZWave::Driver::ControllerState_Normal:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Normal");
+			break;
+		case OpenZWave::Driver::ControllerState_Starting:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Starting");
+			break;
+		case OpenZWave::Driver::ControllerState_Cancel:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Cancel");
+			break;
+		case OpenZWave::Driver::ControllerState_Error :
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Error ");
+			break;
+		case OpenZWave::Driver::ControllerState_Waiting:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Waiting for user action");
+			break;
+		case OpenZWave::Driver::ControllerState_Sleeping:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Command is on sleep queue waiting for device");
+			break;
+		case OpenZWave::Driver::ControllerState_InProgress:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Controller is communicating with device");
+			break;
+		case OpenZWave::Driver::ControllerState_Completed:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Command has completed successfully");
+			break;
+		case OpenZWave::Driver::ControllerState_Failed:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Command has failed");
+			break;
+		case OpenZWave::Driver::ControllerState_NodeOK:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Controller thinks node is OK");
+			break;
+		case OpenZWave::Driver::ControllerState_NodeFailed:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State Controller thinks node has failed");
+			break;
+		default:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_ControllerCommand: State (new state unhandled by code):  %d", _notification->GetNotification());
+			break;
+		}
+		break;
+	}
 	default:
 	{
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : unhandled/ignored notification = %d", _notification->GetType());

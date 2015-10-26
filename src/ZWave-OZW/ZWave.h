@@ -52,7 +52,7 @@ namespace DCE
 
 		// Private methods
 
-		static void controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context);
+		//		static void controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context);
 
 
 public:

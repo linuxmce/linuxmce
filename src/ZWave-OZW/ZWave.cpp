@@ -451,7 +451,7 @@ void ZWave::CMD_Download_Configuration(string sText,string &sCMD_Result,Message 
 //<-dceag-c757-e->
 {
 	m_pZWInterface->Lock();
-	OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_ReceiveConfiguration, controller_update, (void*)NULL, true, 0, 0);
+//	OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_ReceiveConfiguration, controller_update, (void*)NULL, true, 0, 0);
 	m_pZWInterface->UnLock();
 }
 
@@ -535,11 +535,11 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 	if (StringUtils::StartsWith(sArguments,"NNU")) {
 		uint8 nodeId = atoi(sArguments.substr(3).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() RequestNodeNeighborUpdate node %d", nodeId);
-		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RequestNodeNeighborUpdate, controller_update, NULL, false, nodeId, 0);
+		OpenZWave::Manager::Get()->RequestNodeNeighborUpdate(m_pZWInterface->GetHomeId(), nodeId);
 	} else if (StringUtils::StartsWith(sArguments,"NU")) {
 		uint8 nodeId = atoi(sArguments.substr(2).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() RequestNetworkUpdate node %d", nodeId);
-		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RequestNetworkUpdate, controller_update, NULL, false, nodeId, 0);
+		OpenZWave::Manager::Get()->RequestNetworkUpdate(m_pZWInterface->GetHomeId(), nodeId);
 	} else if (StringUtils::StartsWith(sArguments,"HNN")) {
 		uint8 nodeId = atoi(sArguments.substr(3).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() HealNodeNetwork node %d", nodeId);
@@ -550,7 +550,7 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 	} else if (StringUtils::StartsWith(sArguments,"RFN")) {
 		uint8 nodeId = atoi(sArguments.substr(3).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() ReplaceFailedNode node %d", nodeId);
-		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_ReplaceFailedNode, controller_update, NULL, false, nodeId, 0);
+		OpenZWave::Manager::Get()->ReplaceFailedNode(m_pZWInterface->GetHomeId(), nodeId);
 	} else if (StringUtils::StartsWith(sArguments,"TNN")) {
 		uint8 nodeId = atoi(sArguments.substr(3).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() TestNetworkNode node %d", nodeId);
@@ -574,7 +574,7 @@ void ZWave::CMD_Assign_Return_Route(int iNodeID,int iDestNodeID,string &sCMD_Res
 //<-dceag-c820-e->
 {
 
-	OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_AssignReturnRoute, controller_update, NULL, false, iNodeID, iDestNodeID);
+	OpenZWave::Manager::Get()->AssignReturnRoute(m_pZWInterface->GetHomeId(), iNodeID);
 }
 
 //<-dceag-c840-b->
@@ -738,7 +738,7 @@ void ZWave::CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultip
 	{
 		OpenZWave::Manager::Get()->CancelControllerCommand(m_pZWInterface->GetHomeId());
 	} else {
-		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_AddDevice, controller_update, NULL, sOptions == "H");
+		OpenZWave::Manager::Get()->AddNode(m_pZWInterface->GetHomeId(), sOptions == "S");
 	}
 	m_pZWInterface->UnLock();
 }
@@ -766,9 +766,9 @@ void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMul
 	} else if ( iValue < 0)
 	{
 		uint8 nodeId = -iValue;
-		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RemoveFailedNode, controller_update, NULL, true, nodeId);
+		OpenZWave::Manager::Get()->RemoveNode(m_pZWInterface->GetHomeId());
 	} else {
-		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RemoveDevice, controller_update, NULL, true);
+		OpenZWave::Manager::Get()->RemoveNode(m_pZWInterface->GetHomeId());
 	}
 	m_pZWInterface->UnLock();
 }
@@ -787,7 +787,7 @@ void ZWave::CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage)
 	OpenZWave::Manager::Get()->RefreshNodeInfo(m_pZWInterface->GetHomeId(), iNodeID);
 }
 
-
+/*
 void ZWave::controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context) {
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"controller state update:");
 	switch(state) {
@@ -821,7 +821,7 @@ void ZWave::controller_update(OpenZWave::Driver::ControllerState state, OpenZWav
 			break;
 	}
 }
-
+*/
 void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInfo* nodeInfo) {
 
 	switch( _notification->GetType() )
@@ -1305,8 +1305,13 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
 		{
 			devicetemplate = DEVICETEMPLATE_Brightness_sensor_CONST;
 			PK_Device_Parent = m_dwPK_ClimateInterface;
+		} else if ( label == "Relative Humidity" )
+		{
+			devicetemplate = DEVICETEMPLATE_Humidity_sensor_CONST;
+			PK_Device_Parent = m_dwPK_ClimateInterface;
 		} else if ( label == "Sensor" )
 		{
+			// TODO: maybe this is a motion sensor. Check product id??
 			devicetemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
 			PK_Device_Parent = m_dwPK_SecurityInterface;
 		}
@@ -1374,6 +1379,9 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
 			// TODO support other types of meters
 			devicetemplate = DEVICETEMPLATE_Standard_Energy_Meter_CONST;
 			break;
+	        case GENERIC_TYPE_ENTRY_CONTROL:
+			devicetemplate = DEVICETEMPLATE_Generic_Access_Control_Panel_CONST;
+			break;
 	        default:
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "    -> No device template for node with generic %d, specific %d, label %s", node->m_generic, node->m_specific, label.c_str());
 			break;
@@ -1424,6 +1432,9 @@ string ZWave::DTToName(unsigned long PK_DeviceTemplate)
 		break;
 	case DEVICETEMPLATE_Standard_Energy_Meter_CONST:
 		name = "Standard Energy Meter";
+		break;
+	case DEVICETEMPLATE_Siren_CONST:
+		name = "Siren";
 		break;
 
 	}
@@ -1604,132 +1615,137 @@ void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_
 {
 	string s = "";
 	s += "{ ";
-
-	s += "\"nodes\" : [";
-	list<NodeInfo*>::iterator it;
-	list<NodeInfo*> nodes = m_pZWInterface->GetNodes();
-	for (it = nodes.begin(); it != nodes.end(); it++)
+	if (sText == "status")
 	{
-		NodeInfo *node = *it;
-		uint8 node_id = node->m_nodeId;
-		uint32 homeId = m_pZWInterface->GetHomeId();
-		s += "{ \"id\" : " + StringUtils::itos(node_id) + ",";
 
-		s += " \"manufacturerName\": \""+OpenZWave::Manager::Get()->GetNodeManufacturerName(homeId, node_id)+"\",";
-		s += " \"productName\": \""+OpenZWave::Manager::Get()->GetNodeProductName(homeId, node_id)+"\",";
-		s += " \"queryStage\": \""+OpenZWave::Manager::Get()->GetNodeQueryStage(homeId, node_id)+"\",";
-		s += " \"isFailed\": ";
-		if (OpenZWave::Manager::Get()->IsNodeFailed(homeId, node_id))
-			s += "true";
-		else
-			s+= "false";
-		s += ",";
-		s += " \"isAwake\": ";
-		if (OpenZWave::Manager::Get()->IsNodeAwake(homeId, node_id))
-			s += "true";
-		else
-			s += "false";
-		s += ",";
-
-		s += " \"devices\": [";
-		for (vector<LMCEDevice*>::iterator it = node->m_vectDevices.begin(); it != node->m_vectDevices.end(); ++it)
+	} else {
+		s += "\"nodes\" : [";
+		list<NodeInfo*>::iterator it;
+		list<NodeInfo*> nodes = m_pZWInterface->GetNodes();
+		for (it = nodes.begin(); it != nodes.end(); it++)
 		{
-			LMCEDevice* pLmceDevice = *it;
-			s += "{ \"pkDevice\": " + StringUtils::itos(pLmceDevice->m_dwPK_Device) + ",";
-			s += " \"fkDeviceTemplate\": " + StringUtils::itos(pLmceDevice->m_dwFK_DeviceTemplate);
-			s += "},";
-		}
-		if (node->m_vectDevices.size() > 0)
-			s = s.substr(0, s.length()-1);
-		s += "],";
-
-		uint8 *neighbors;
-		int neighborsCount = OpenZWave::Manager::Get()->GetNodeNeighbors(homeId, node_id, &neighbors);
-		s += "\"neighbors\": [";
-		for (int i = 0; i < neighborsCount; i++) {
-			s += StringUtils::itos(neighbors[i])+",";
-		}
-		if (neighborsCount > 0)
-			s = s.substr(0, s.length()-1);
-		delete[] neighbors;
-		s += "]";
-
-		OpenZWave::Node::NodeData nodeData;
-		OpenZWave::Manager::Get()->GetNodeStatistics(homeId, node_id, &nodeData);
-		s += ", \"statistics\": {";
-		s+= "\"sentCnt\":" + StringUtils::itos(nodeData.m_sentCnt) + ",";
-		s+= "\"sentFailed\":" + StringUtils::itos(nodeData.m_sentFailed) + ",";
-		s+= "\"retries\":" + StringUtils::itos(nodeData.m_retries) + ",";
-		s+= "\"receivedCnt\":" + StringUtils::itos(nodeData.m_receivedCnt) + ",";
-		s+= "\"receivedDups\":" + StringUtils::itos(nodeData.m_receivedDups) + ",";
-		s+= "\"receivedUnsolicited\":" + StringUtils::itos(nodeData.m_receivedUnsolicited) + ",";
-		s+= "\"sentTS\":\"" + nodeData.m_sentTS + "\",";
-		s+= "\"receivedTS\":\"" + nodeData.m_receivedTS + "\",";
-		s+= "\"lastRequestRTT\":" + StringUtils::itos(nodeData.m_lastRequestRTT) + ",";
-		s+= "\"averageRequestRTT\":" + StringUtils::itos(nodeData.m_averageRequestRTT) + ",";
-		s+= "\"lastResponseRTT\":" + StringUtils::itos(nodeData.m_lastResponseRTT) + ",";
-		s+= "\"averageResponseRTT\":" + StringUtils::itos(nodeData.m_averageResponseRTT) + ",";
-		s+= "\"quality\":" + StringUtils::itos(nodeData.m_quality);
-		/*      uint8 m_lastReceivedMessage[254];
-                        list<CommandClassData> m_ccData;   */
-		s += "},";
-
-		s += " \"values\": [";
-		int valCount = 0;
-		for (vector<LMCEDevice*>::iterator nodeit = node->m_vectDevices.begin(); nodeit != node->m_vectDevices.end(); ++nodeit)
-		{
-			LMCEDevice* pLmceDevice = *nodeit;
-			for (vector<OpenZWave::ValueID>::iterator it = pLmceDevice->m_vectValues.begin(); it != pLmceDevice->m_vectValues.end(); ++it)
+			NodeInfo *node = *it;
+			uint8 node_id = node->m_nodeId;
+			uint32 homeId = m_pZWInterface->GetHomeId();
+			s += "{ \"id\" : " + StringUtils::itos(node_id) + ",";
+			
+			s += " \"manufacturerName\": \""+OpenZWave::Manager::Get()->GetNodeManufacturerName(homeId, node_id)+"\",";
+			s += " \"productName\": \""+OpenZWave::Manager::Get()->GetNodeProductName(homeId, node_id)+"\",";
+			s += " \"queryStage\": \""+OpenZWave::Manager::Get()->GetNodeQueryStage(homeId, node_id)+"\",";
+			s += " \"isFailed\": ";
+			if (OpenZWave::Manager::Get()->IsNodeFailed(homeId, node_id))
+				s += "true";
+			else
+				s+= "false";
+			s += ",";
+			s += " \"isAwake\": ";
+			if (OpenZWave::Manager::Get()->IsNodeAwake(homeId, node_id))
+				s += "true";
+			else
+				s += "false";
+			s += ",";
+			
+			s += " \"devices\": [";
+			for (vector<LMCEDevice*>::iterator it = node->m_vectDevices.begin(); it != node->m_vectDevices.end(); ++it)
 			{
-				OpenZWave::ValueID value = *it;
-				s += "{ \"label\": \"" + OpenZWave::Manager::Get()->GetValueLabel(value) + "\",";
-				s += " \"help\": \"" + StringUtils::Replace(OpenZWave::Manager::Get()->GetValueHelp(value), "\"", "&quot;") + "\",";
-				s += " \"index\": " + StringUtils::itos(value.GetIndex()) + ",";
-				string val;
-				OpenZWave::Manager::Get()->GetValueAsString(value, &val);
-				s += " \"value\": \"" + val + "\",";
-				s += " \"units\": \"" + OpenZWave::Manager::Get()->GetValueUnits(value) + "\",";
-				s += " \"min\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMin(value)) + ",";
-				s += " \"max\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMax(value)) + ",";
-				string genreText = string(OpenZWave::Value::GetGenreNameFromEnum(value.GetGenre()));
-				s += " \"genre\": \"" + genreText + "\",";
-				s += " \"pk_device\": " + StringUtils::itos(pLmceDevice->m_dwPK_Device) + ",";
-				string polled = OpenZWave::Manager::Get()->isPolled(value) ? "true" : "false";
-				s += " \"polling\": " + polled;
+				LMCEDevice* pLmceDevice = *it;
+				s += "{ \"pkDevice\": " + StringUtils::itos(pLmceDevice->m_dwPK_Device) + ",";
+				s += " \"fkDeviceTemplate\": " + StringUtils::itos(pLmceDevice->m_dwFK_DeviceTemplate);
 				s += "},";
-				valCount++;
 			}
-		}
-		if (valCount > 0)
-			s = s.substr(0, s.length()-1);
-		s += "],";
-
-		s += " \"associationGroups\": [";
-		uint8 numGroups = OpenZWave::Manager::Get()->GetNumGroups(homeId, node_id);
-		for (int i = 0; i < numGroups; i++)
-		{
-		        s += "{ \"name\": \"" + OpenZWave::Manager::Get()->GetGroupLabel(homeId, node_id, i+1) + "\",";
-			uint8 maxAssoc = OpenZWave::Manager::Get()->GetMaxAssociations(homeId, node_id, i+1);
-			uint8* assoc = new uint8[maxAssoc];
-			uint8 numAssoc = OpenZWave::Manager::Get()->GetAssociations(homeId, node_id, i+1, &assoc);
-			s += " \"nodes\": [";
-			for (int j = 0; j < numAssoc; j++) {
-			        s += StringUtils::itos((int)assoc[j]) + ",";
+			if (node->m_vectDevices.size() > 0)
+				s = s.substr(0, s.length()-1);
+			s += "],";
+			
+			uint8 *neighbors;
+			int neighborsCount = OpenZWave::Manager::Get()->GetNodeNeighbors(homeId, node_id, &neighbors);
+			s += "\"neighbors\": [";
+			for (int i = 0; i < neighborsCount; i++) {
+				s += StringUtils::itos(neighbors[i])+",";
 			}
-			delete[] assoc;
-			if (numAssoc > 0)
-			        s = s.substr(0, s.length() - 1);
+			if (neighborsCount > 0)
+				s = s.substr(0, s.length()-1);
+			delete[] neighbors;
 			s += "]";
+			
+			OpenZWave::Node::NodeData nodeData;
+			OpenZWave::Manager::Get()->GetNodeStatistics(homeId, node_id, &nodeData);
+			s += ", \"statistics\": {";
+			s+= "\"sentCnt\":" + StringUtils::itos(nodeData.m_sentCnt) + ",";
+			s+= "\"sentFailed\":" + StringUtils::itos(nodeData.m_sentFailed) + ",";
+			s+= "\"retries\":" + StringUtils::itos(nodeData.m_retries) + ",";
+			s+= "\"receivedCnt\":" + StringUtils::itos(nodeData.m_receivedCnt) + ",";
+			s+= "\"receivedDups\":" + StringUtils::itos(nodeData.m_receivedDups) + ",";
+			s+= "\"receivedUnsolicited\":" + StringUtils::itos(nodeData.m_receivedUnsolicited) + ",";
+			s+= "\"sentTS\":\"" + nodeData.m_sentTS + "\",";
+			s+= "\"receivedTS\":\"" + nodeData.m_receivedTS + "\",";
+			s+= "\"lastRequestRTT\":" + StringUtils::itos(nodeData.m_lastRequestRTT) + ",";
+			s+= "\"averageRequestRTT\":" + StringUtils::itos(nodeData.m_averageRequestRTT) + ",";
+			s+= "\"lastResponseRTT\":" + StringUtils::itos(nodeData.m_lastResponseRTT) + ",";
+			s+= "\"averageResponseRTT\":" + StringUtils::itos(nodeData.m_averageResponseRTT) + ",";
+			s+= "\"quality\":" + StringUtils::itos(nodeData.m_quality);
+			/*      uint8 m_lastReceivedMessage[254];
+				list<CommandClassData> m_ccData;   */
+			s += "},";
+			
+			s += " \"values\": [";
+			int valCount = 0;
+			for (vector<LMCEDevice*>::iterator nodeit = node->m_vectDevices.begin(); nodeit != node->m_vectDevices.end(); ++nodeit)
+			{
+				LMCEDevice* pLmceDevice = *nodeit;
+				for (vector<OpenZWave::ValueID>::iterator it = pLmceDevice->m_vectValues.begin(); it != pLmceDevice->m_vectValues.end(); ++it)
+				{
+					OpenZWave::ValueID value = *it;
+					s += "{ \"label\": \"" + OpenZWave::Manager::Get()->GetValueLabel(value) + "\",";
+					s += " \"help\": \"" + StringUtils::Replace(OpenZWave::Manager::Get()->GetValueHelp(value), "\"", "&quot;") + "\",";
+					s += " \"index\": " + StringUtils::itos(value.GetIndex()) + ",";
+					string val;
+					OpenZWave::Manager::Get()->GetValueAsString(value, &val);
+					s += " \"value\": \"" + val + "\",";
+					s += " \"units\": \"" + OpenZWave::Manager::Get()->GetValueUnits(value) + "\",";
+					s += " \"min\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMin(value)) + ",";
+					s += " \"max\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMax(value)) + ",";
+					string genreText = string(OpenZWave::Value::GetGenreNameFromEnum(value.GetGenre()));
+					s += " \"genre\": \"" + genreText + "\",";
+					s += " \"pk_device\": " + StringUtils::itos(pLmceDevice->m_dwPK_Device) + ",";
+					string polled = OpenZWave::Manager::Get()->isPolled(value) ? "true" : "false";
+					s += " \"polling\": " + polled;
+					s += "},";
+					valCount++;
+				}
+			}
+			if (valCount > 0)
+				s = s.substr(0, s.length()-1);
+			s += "],";
+			
+			s += " \"associationGroups\": [";
+			uint8 numGroups = OpenZWave::Manager::Get()->GetNumGroups(homeId, node_id);
+			for (int i = 0; i < numGroups; i++)
+			{
+				s += "{ \"name\": \"" + OpenZWave::Manager::Get()->GetGroupLabel(homeId, node_id, i+1) + "\",";
+				uint8 maxAssoc = OpenZWave::Manager::Get()->GetMaxAssociations(homeId, node_id, i+1);
+				uint8* assoc = new uint8[maxAssoc];
+				uint8 numAssoc = OpenZWave::Manager::Get()->GetAssociations(homeId, node_id, i+1, &assoc);
+				s += " \"nodes\": [";
+				for (int j = 0; j < numAssoc; j++) {
+					s += StringUtils::itos((int)assoc[j]) + ",";
+				}
+				delete[] assoc;
+				if (numAssoc > 0)
+					s = s.substr(0, s.length() - 1);
+				s += "]";
+				s += "},";
+			}
+			if (numGroups > 0)
+				s = s.substr(0, s.length()-1);
+			s += "]";
+			
 			s += "},";
 		}
-		if (numGroups > 0)
-			s = s.substr(0, s.length()-1);
+		s = s.substr(0, s.length()-1);
 		s += "]";
-
-		s += "},";
 	}
-	s = s.substr(0, s.length()-1);
-	s += "]}";
+	s += "}";
 
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Get Data() returning %s", s.c_str());	
 	(*pData) = new char[s.length()+1];
