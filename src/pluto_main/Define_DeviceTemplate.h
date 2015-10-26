@@ -2167,6 +2167,7 @@
 #define DEVICETEMPLATE_UPnP_Client_CONST 2339
 #define DEVICETEMPLATE_windows_shared_printer_CONST 2340
 #define DEVICETEMPLATE_Generic_Access_Control_Panel_CONST 2341
+#define DEVICETEMPLATE_Humidity_sensor_CONST 2342
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"
