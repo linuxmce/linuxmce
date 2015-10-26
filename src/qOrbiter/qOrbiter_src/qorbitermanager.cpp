@@ -2490,7 +2490,13 @@ void qorbiterManager::setupUiSelectors(){
 
 #elif defined Q_OS_LINUX
     //  m_localQmlPath=qApp->applicationDirPath()+"/";
+
+#ifdef NOQRC
+    m_localQmlPath="";
+#else
     m_localQmlPath="qrc:/qml/";
+#endif
+
 #ifdef simulate
 
 #ifdef NOQRC
@@ -2593,7 +2599,11 @@ bool qorbiterManager::createThemeStyle()
     }
 
     setSkinEntryFile(selectPath( "skins/"+currentSkin+"/Main.qml"));
-    QString fp ="skins/"+currentSkin+"/Style.qml";
+#ifdef NOQRC
+    QString fp =m_localQmlPath+"skins/"+currentSkin+"/Style.qml";
+#else
+     QString fp ="skins/"+currentSkin+"/Style.qml";
+#endif
     qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
     qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
     QString filePath =  selectPath(fp);
@@ -2885,8 +2895,6 @@ void qorbiterManager::reloadQml()
 
     selector->setSelector(m_selector);
 
-
-
     qDebug() << m_selector->select("skins/"+currentSkin+"/Main.qml");
     qDebug() << m_appEngine->baseUrl();
 
@@ -2905,10 +2913,8 @@ void qorbiterManager::reloadQml()
     }
 
 #endif
+
     qDebug() << "Style file path " << filePath;
-
-
-
     QQmlComponent nustyle(m_appEngine , QUrl(filePath), QQmlComponent::PreferSynchronous);
     m_style = nustyle.create();
 
@@ -2954,7 +2960,6 @@ void qorbiterManager::resetScreenSize(){
         t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
-
         m_window->resize(appWidth, appHeight);
         m_window->showNormal();
 #else
@@ -2973,7 +2978,7 @@ void qorbiterManager::resetScreenSize(){
         default: testDeviceString="large"; break;
         }
 
-        t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
+        t <<testDeviceString << psize << QString::number(m_window->height() );
     }
 
     m_selector->setExtraSelectors(t);
