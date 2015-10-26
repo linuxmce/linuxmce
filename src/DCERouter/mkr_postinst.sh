@@ -40,7 +40,8 @@ RunSQL "update Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
 /usr/pluto/bin/generateRcScripts.sh
 
 mkdir -p /tftpboot/pxelinux.cfg
-cp /usr/lib/syslinux/pxelinux.0 /tftpboot
+[[ -f /usr/lib/syslinux/pxelinux.0 ]] && cp /usr/lib/syslinux/pxelinux.0 /tftpboot || :
+[[ -f /usr/lib/PXELINUX/pxelinux.0 ]] && cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot || :
 
 if [[ "$TestInstallation" == 1 ]]; then 
 	sed -i 's/#log..= \/var\/log\/mysql\/mysql.log/log = \/var\/log\/mysql\/mysql.log/g' /etc/mysql/my.cnf
