@@ -580,7 +580,8 @@ td.cell_config:hover {
 	        $node = $_POST['node'];
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 842 239 '.$id.' 249 '.$group.' 250 -'.$node;
 	    } else if (isset($_POST['addNode'])) {
-                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967';
+	      	// TODO: allow user to specify secure inclusion or not (parameter 39:S below)
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 39 "S"';
 	    } else if (isset($_POST['cancelControllerCommand'])) {
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 48 5';
 	    } else if (isset($_POST['removeNode'])) {
