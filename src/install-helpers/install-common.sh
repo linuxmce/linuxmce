@@ -29,6 +29,7 @@ DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
 DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
 DEVICEDATA_DISTRO_Raspbian_Jessie_CONST=22
+DEVICEDATA_DISTRO_Ubuntu_Xenial_CONST=23
 
 mce_wizard_data_shell=/tmp/mce_wizard_data.sh
 
@@ -53,6 +54,11 @@ case "$TARGET_RELEASE" in
 		TARGET_REPO_DISTRO_SRC=24
 		TARGET_REPO_LMCE_SRC=25
 		TARGET_LTS_HES="-lts-utopic"	;;
+	xenial)
+		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Ubuntu_Xenial_CONST
+		TARGET_REPO_DISTRO_SRC=24
+		TARGET_REPO_LMCE_SRC=25
+		TARGET_LTS_HES=""	;;
 	wheezy)
 		TARGET_DISTRO_ID=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
 		TARGET_REPO_DISTRO_SRC=22
@@ -307,6 +313,8 @@ ListXPkgs () {
 			echo "xserver-xorg${LTS_HES} xserver-xorg-video-all${LTS_HES} libgl1-mesa-glx${LTS_HES}"	;;
 		"trusty")       # 1404
 			echo "xserver-xorg-core${LTS_HES} xserver-xorg${LTS_HES} xserver-xorg-video-all${LTS_HES} xserver-xorg-input-all${LTS_HES} libwayland-egl1-mesa${LTS_HES}"	;;
+		"xenial")       # 1604
+			echo "xserver-xorg-core${LTS_HES} xserver-xorg${LTS_HES} xserver-xorg-video-all${LTS_HES} xserver-xorg-input-all${LTS_HES} libwayland-egl1-mesa${LTS_HES}"	;;
 		*)      # *
 			echo "xserver-xorg xserver-xorg-video-all"	;;
 	esac
@@ -341,7 +349,7 @@ Install_KUbuntu_Desktop () {
 
 addAdditionalTTYStart () {
 	# TODO: this is ubuntu specific, alter to fn properly for debian/raspbian as well
-	if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]] || [[ "$TARGET_RELEASE" == "trusty" ]]; then
+	if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]] || [[ "$TARGET_RELEASE" == "trusty" ]] || [[ "$TARGET_RELEASE" == "xenial" ]] ; then
 		sed -i 's/23/235/' /etc/init/tty2.conf
 		sed -i 's/23/235/' /etc/init/tty3.conf
 		sed -i 's/23/235/' /etc/init/tty4.conf
