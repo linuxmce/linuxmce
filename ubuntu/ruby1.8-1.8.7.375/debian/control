@@ -58,7 +58,7 @@ Description: Debugging symbols for Ruby 1.8
 
 Package: ruby1.8-dev
 Architecture: any
-Depends: libruby1.8 (= ${binary:Version}), libc6-dev, ${misc:Depends}, gcc (<< 4:4.7) | gcc-4.6, libgoogle-perftools-dev
+Depends: libruby1.8 (= ${binary:Version}), libc6-dev, ${misc:Depends}, gcc (<< 4:4.7) | gcc-4.6 | gcc-4.7, libgoogle-perftools-dev
 Recommends: ruby1.8 (= ${binary:Version})
 Provides: ruby-dev
 Description: Header files for compiling extension modules for the Ruby 1.8
