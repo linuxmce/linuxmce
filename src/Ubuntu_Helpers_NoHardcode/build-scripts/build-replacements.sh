@@ -244,6 +244,10 @@ function Build_Replacements_ubuntu_trusty
 {
 	mkdir -pv "$replacements_dir"
 
+	#Package: ruby1.8-1.8.7.375
+	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/ri*1.8*.deb "${replacements_dir}"
+
 	# ola needs to be configured to the current build environment
 	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
 	if Changed_Since_Last_Build "$dir_" ;then
@@ -289,6 +293,10 @@ function Build_Replacements_ubuntu_trusty
 function Build_Replacements_ubuntu_xenial
 {
 	mkdir -pv "$replacements_dir"
+
+	#Package: ruby1.8-1.8.7.375
+	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/ri*1.8*.deb "${replacements_dir}"
 
 	# shairport (AirPlay Audio)
 	Build_Replacement_Package shairport ubuntu/shairport-0.05
