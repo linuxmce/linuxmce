@@ -22,6 +22,8 @@ function advancedZWave($output,$dbADO){
 	var movingNode;
 	var nodePos = new Object();
 	var topOffset = 180;
+        var lastStatusId = -1;
+        var isStatusOn = false;
 	    function loadData() {
 	        new Ajax.Request("index.php", {
 		    method:"get",
@@ -193,6 +195,39 @@ function advancedZWave($output,$dbADO){
 		    }
 		   });
 		}
+		function showStatus(start, clearOnStart) {
+		  if (start || isStatusOn) {
+		      if (clearOnStart && !isStatusOn) {
+		          var listEl = $("statusList");
+		          while (listEl.firstChild) {
+		              listEl.removeChild(listEl.firstChild);
+                          }
+		      }
+		      isStatusOn = true;
+		      $("statusArea").show();
+		      new Ajax.Request("index.php", {
+		          method:"get",
+		          parameters:{section: "advancedZWave", action:"ajax", getStatus:"1" },
+		          onSuccess: function(transport) {
+		  	      var response = transport.responseText || "";
+		  	      var json;
+		   	      try {			
+			          json = response.evalJSON(true);
+			      } catch (a) {
+			          alert(a);
+			      }
+			      for (var i = 0; i < json.statusList.length; i++) {
+			          var stat = json.statusList[i];
+				  var pel = document.createElement("p");
+				  pel.className = "status";
+				  pel.insert(stat.description);
+			      	  $("statusList").appendChild(pel);
+			      }
+		         }
+		    });
+		    setTimeout(function(){ showStatus(false, false); }, 1000);
+		  }
+		}
 		function selectTab(tab,id) {
 		    $("statusTab_"+id).hide();
 		    $("commandTab_"+id).hide();
@@ -213,13 +248,16 @@ function advancedZWave($output,$dbADO){
 		        });
 		
 		}
-		function addNode() {
-		    performCommand({"addNode":1});
+		function addNode(secure) {
+		    showStatus(true, true);
+		    performCommand({"addNode":1, "secure": (secure ? "true" : false)});
 		}
 		function removeNode() {
+		    showStatus(true, true);
 		    performCommand({"removeNode":1});
 		}
 		function cancelControllerCommand() {
+		    showStatus(true, true);
 		    performCommand({"cancelControllerCommand":1});
 		}
 		function addAssociation(id, groupid) {
@@ -234,13 +272,16 @@ function advancedZWave($output,$dbADO){
 		    performCommand({healNode:id});
 		}
 		function replaceNode(id) {
-		    if (confirm("To replace a failed node, press OK, then perform the inclusion operation(se devices manual) on the new device."))
+		    if (confirm("To replace a failed node, press OK, then perform the inclusion operation(se devices manual) on the new device.")) {
+		        showStatus(true, true);
 		        performCommand({replaceNode:id});
+		    }
 		}
 		function testNode(id) {
 		    performCommand({testNode:id});
 		}
 		function updateNodeNeighbors(id) {
+		    showStatus(true, true);
 		    performCommand({updateNodeNeighbors:id});
 		}
 		function setConfigParam(nodeId, index) {
@@ -435,6 +476,19 @@ td.cell_config:hover {
     margin: 0;
     margin-top: 2px;
 }
+#statusArea {
+    position: absolute;
+    width: 350px;
+    left: 200px;
+    top: 250px;
+    border: 1px solid black;
+    background-color: grey;
+    padding: 3px;
+    z-index: 1000;
+}
+p.status {
+    margin: 1px;
+}
 </style>
 ';
 	$out.='<input class="command" type="button" value="Refresh" onclick="refresh()" />';
@@ -442,10 +496,17 @@ td.cell_config:hover {
 	$out.='<input class="command" type="button" value="Network Update" onclick="networkUpdate()" />';
 	$out.='<input class="command" type="button" value="Test network" onclick="testNetwork()" />';
 	$out.='<input class="command" type="button" value="Soft reset controller" onclick="softReset()" />';
-	$out.='<input class="command" type="button" value="Add Node" onclick="addNode()" />';
+	$out.='<input class="command" type="button" value="Add Node" onclick="addNode(true)" />';
 	$out.='<input class="command" type="button" value="Remove Node" onclick="removeNode()" />';
 	$out.='<input class="command" type="button" value="Cancel Add/Remove" onclick="cancelControllerCommand()" />';
+	$out.='<input class="command" type="button" value="Add Node(unsecure)" onclick="addNode(false)" />';
+	$out.='<input class="command" type="button" value="Show Status" onclick="showStatus(true, false)" />';
 	$out.='<div id="nodedisplay"></div>';
+	$out.='<div id="statusArea" style="display:none;">
+<div><span><strong>Status messages from ZWave:</strong></span>
+<span style="float: right" onclick="$(\'statusArea\').hide(); isStatusOn = false;">[Close]</span></div>
+<div id="statusList"></div>
+</div>';
 
     } else {
         // Ajax
@@ -502,7 +563,19 @@ td.cell_config:hover {
                 print(json_encode($o));
 		exit();
 	    }
-        }
+        } else if (isset($_GET['getStatus'])) {
+	    header('Content-type: application/json');
+            $cmd='/usr/pluto/bin/MessageSend localhost -targetType template -o 0 1754 1 870 9 "status"';
+	    $ret=exec_batch_command($cmd,1);
+	    $retArray=explode("\n",$ret);
+	    if ($retArray[0].strrpos("OK") >= 0) {
+		$startPos = strpos($retArray[1],"{");
+	        $json = substr($retArray[1], $startPos, strrpos($retArray[1],"}")-$startPos+1);
+		$o = json_decode($json);
+                print(json_encode($o));
+		exit();
+	    }
+	}
 	if (isset($_POST['updateNodePosition'])) {
 	    header('Content-type: application/json');
 	    $id = $_POST['updateNodePosition'];
@@ -580,8 +653,7 @@ td.cell_config:hover {
 	        $node = $_POST['node'];
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 842 239 '.$id.' 249 '.$group.' 250 -'.$node;
 	    } else if (isset($_POST['addNode'])) {
-	      	// TODO: allow user to specify secure inclusion or not (parameter 39:S below)
-                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 39 "S"';
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 39 '.($_POST['secure'] == 'S' ? '"S"' : '" "');
 	    } else if (isset($_POST['cancelControllerCommand'])) {
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 48 5';
 	    } else if (isset($_POST['removeNode'])) {
