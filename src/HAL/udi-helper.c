@@ -653,7 +653,21 @@ dvb_compute_udi (struct udev_device *d)
 	return	udi_helper_add_to_map(udi, syspath);
 }
 
-/*
+const char *
+firewire_compute_udi (struct udev_device *d)
+{
+	gchar udi[256];
+
+	const char *syspath = udev_device_get_syspath(d);
+
+	hald_compute_udi (udi, sizeof (udi), "%s_firewire",
+			  udi_helper_compute_parent_udi(d) );
+
+
+	return	udi_helper_add_to_map(udi, syspath);
+}
+
+/*  old
 static gboolean
 firewire_compute_udi (HalDevice *d)
 {
@@ -1855,17 +1869,17 @@ static DevHandler dev_handler_dvb =
 //	.remove       = dev_remove
 };
 
-/*
+
 // krh's new firewire stack
 static DevHandler dev_handler_firewire = {
 	.subsystem    = "firewire",
-	.add          = firewire_add,
-	.get_prober   = firewire_get_prober,
-	.post_probing = firewire_post_probing,
+//	.add          = firewire_add,
+//	.get_prober   = firewire_get_prober,
+//	.post_probing = firewire_post_probing,
 	.compute_udi  = firewire_compute_udi,
-	.remove       = dev_remove
+//	.remove       = dev_remove
 };
-*/
+
 
 static DevHandler dev_handler_hid = {
 	.subsystem   = "hid",
@@ -2236,7 +2250,7 @@ static DevHandler *dev_handlers[] = {
 //	&dev_handler_ccwgroup,
 //	&dev_handler_drm,
 	&dev_handler_dvb,
-//	&dev_handler_firewire,
+	&dev_handler_firewire,
 	&dev_handler_hid,
 	&dev_handler_hidraw,
 //	&dev_handler_ibmebus,
