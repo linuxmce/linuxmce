@@ -49,7 +49,7 @@ namespace DCE
 		long m_dwPK_SecurityInterface;
 		map<string, int> m_mapLabels;
 		class AlarmManager *m_pAlarmManager;
-
+		list<string> m_listStatus;
 		// Private methods
 
 		//		static void controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context);

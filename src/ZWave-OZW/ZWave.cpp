@@ -1012,8 +1012,51 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 		}
 		break;
 
-	}	
-
+	}
+	case OpenZWave::Notification::Type_ControllerCommand:
+	{
+		switch (_notification->GetEvent()) {
+		case OpenZWave::Driver::ControllerState_Normal:
+			m_listStatus.push_back("Normal");
+			break;
+		case OpenZWave::Driver::ControllerState_Starting:
+			m_listStatus.push_back("Starting");
+			break;
+		case OpenZWave::Driver::ControllerState_Cancel:
+			m_listStatus.push_back("Cancelled");
+			break;
+		case OpenZWave::Driver::ControllerState_Error:
+			m_listStatus.push_back("Error");
+			break;
+		case OpenZWave::Driver::ControllerState_Waiting:
+			m_listStatus.push_back("Waiting for user action");
+			break;
+		case OpenZWave::Driver::ControllerState_Sleeping:
+			m_listStatus.push_back("Command is on sleep queue waiting for device");
+			break;
+		case OpenZWave::Driver::ControllerState_InProgress:
+			m_listStatus.push_back("Communicating with other device");
+			break;
+		case OpenZWave::Driver::ControllerState_Completed:
+			m_listStatus.push_back("Command has completed successfully");
+			break;
+		case OpenZWave::Driver::ControllerState_Failed:
+			m_listStatus.push_back("Command has failed");
+			break;
+		case OpenZWave::Driver::ControllerState_NodeOK:
+			m_listStatus.push_back("NodeOK");
+			break;
+		case OpenZWave::Driver::ControllerState_NodeFailed:
+			m_listStatus.push_back("NodeFailed");
+			break;
+		default:
+			m_listStatus.push_back("Unknown");
+			break;
+		}
+		if (m_listStatus.size() > 100)
+			m_listStatus.pop_front();
+		break;
+	}
 	default:
 	{
 	}
@@ -1617,7 +1660,17 @@ void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_
 	s += "{ ";
 	if (sText == "status")
 	{
-
+		s += " \"statusList\": [";
+		bool added = false;
+		while (m_listStatus.size() > 0) 
+		{
+			s+= "{ \"description\": \"" + m_listStatus.front() + "\" },";
+			m_listStatus.pop_front();
+			added = true;
+		}
+		if (added)
+			s = s.substr(0, s.length()-1);
+		s += "]";
 	} else {
 		s += "\"nodes\" : [";
 		list<NodeInfo*>::iterator it;
