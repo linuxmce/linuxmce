@@ -1,0 +1,17 @@
+102_configure.in-crosscompile.patch
+803_soap_massmem.patch
+808_rexml_document_transitive.patch
+809_update_lib_README.patch
+901_ri_pager.patch
+902_extra_search_path.patch
+903_rdoc_documents.patch
+090613_exclude_rdoc.patch
+090812_openssl_x509_warning.patch
+100730_disable_getsetcontext_on_nptl.patch
+100730_verbose-tests.patch
+100901_threading_fixes.patch
+tcltk-no-rpath.patch
+120302_ruby_ee.patch
+use-ldflags.patch
+131122_float_parsing_overflow.patch
+131124_version.patch
