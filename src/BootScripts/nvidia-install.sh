@@ -62,20 +62,22 @@ getNvidiaInstalled() {
 # getInstalledNvidiaDriver()
 # echos the currently installed nVidia driver (if there is one)
 getInstalledNvidiaDriver() {
-	(dpkg-query -l "nvidia-173" "nvidia-340" "nvidia-current" | grep "^ii" | awk '{print $2}') 2>/dev/null
+	(dpkg-query -l "nvidia-173" "nvidia-304" "nvidia-340" "nvidia-352" | grep "^ii" | awk '{print $2}') 2>/dev/null
 }
 
 # getPreferredNvidiaDriver()
 # returns the preferred driver to install for the currently installed nVidia card.
 getPreferredNvidiaDriver() {
 	PCI_Id=$(getPCI_Id)
- 
+
 	case " $Driver_Current_Supported " in *" $PCI_Id "*)
 		case $(lsb_release -cs) in
 			precise)
-				echo "nvidia-current"	;;
+				echo "nvidia-340"	;;
 			trusty)
 				echo "nvidia-340"	;;
+			xenial)
+				echo "nvidia-352"	;;
 		esac
 		return 1
 	esac
@@ -87,11 +89,15 @@ getPreferredNvidiaDriver() {
 
 	case $(lsb_release -cs) in
 		precise)
-			echo "nvidia-current"
+			echo "nvidia-340"
 			return 1
 			;;
 		trusty)
 			echo "nvidia-340"
+			return 1
+			;;
+		xenial)
+			echo "nvidia-352"
 			return 1
 			;;
 	esac

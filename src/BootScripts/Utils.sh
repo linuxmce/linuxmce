@@ -812,8 +812,9 @@ DriverRank() {
 			preferred_nvidia=$(getPreferredNvidiaDriver)
 			case "$preferred_nvidia" in
 				nvidia-173) driver_rank="6" ;;
-				nvidia-current) driver_rank="10" ;;
-				nvidia-340) driver_rank="10" ;;
+				nvidia-304) driver_rank="10" ;;
+				nvidia-340) driver_rank="11" ;;
+				nvidia-352) driver_rank="12" ;;
 			esac
 	esac
 
@@ -861,7 +862,7 @@ InstallVideoDriver() {
 
 		# nVidia cards
 		nvidia)
-			if ! PackageIsInstalled nvidia-173 && ! PackageIsInstalled nvidia-current && ! PackageIsInstalled nvidia-340; then
+			if ! PackageIsInstalled nvidia-173 && ! PackageIsInstalled nvidia-304 && ! PackageIsInstalled nvidia-340 && ! PackageIsInstalled nvidia-352 ; then
 				VerifyExitCode "Install Pluto nVidia Driver"
 				. /usr/pluto/bin/nvidia-install.sh
 				installCorrectNvidiaDriver
