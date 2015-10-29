@@ -23,7 +23,7 @@ fi
 #"${build_scripts_dir}/cd2-build.sh"
 
 # push stuff into deb
-pushd /var/lmce-build/out/tmp
+pushd "$local_mirror_dir"
 dupload --to linuxmce *.changes
 popd
 
