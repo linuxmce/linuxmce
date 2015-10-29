@@ -13,21 +13,25 @@ function MoveDebs2Repo {
 
 	# Remove any existing debs and Packages files
 	DisplayMessage "Removing old debs from repository"
-	rm -f "$local_mirror_dir"/*.deb
+	rm -f "$local_mirror_dir"/*deb
+	rm -f "$local_mirror_dir"/*changes
 	rm -f "$local_mirror_dir"/Packages*
 
 	# Copy the debs built by make-release
 	DisplayMessage "Copying make-release debs to repository"
-	cp "${out_dir}/tmp/"*.deb "$local_mirror_dir"
+	cp "${out_dir}/tmp/"*deb "$local_mirror_dir"
+	cp "${out_dir}/tmp/"*.changes "$local_mirror_dir"
 
 	# Copy the debs from replacements
 	DisplayMessage "Copying replacements debs to repository"
-	cp "${replacements_dir}"/*.deb "$local_mirror_dir"
+	cp "${replacements_dir}"/*deb "$local_mirror_dir"
+	cp "${replacements_dir}"/*.changes "$local_mirror_dir"
 
 	# Copy the debs from extra
-	if [ x"$(ls ${extras_dir}/*.deb)" != x"" ] ; then
+	if [ x"$(ls ${extras_dir}/*deb)" != x"" ] ; then
 		DisplayMessage "Copying extra (downloaded) debs to repository"
-		cp "${extras_dir}"/*.deb "$local_mirror_dir"
+		cp "${extras_dir}"/*deb "$local_mirror_dir"
+		cp "${extras_dir}"/*.changes "$local_mirror_dir"
 	fi
 
 	# Generate the Packages files
@@ -68,7 +72,8 @@ function PublishPrivateDebs {
 
 	local temp_dir=$(mktemp -d)
         for pkg in "${priv_debs[@]}"; do
-                cp "$out_dir"/tmp/"$pkg"_*.deb "$temp_dir"
+                cp "$out_dir"/tmp/"$pkg"_*deb "$temp_dir"
+                cp "$out_dir"/tmp/"$pkg"_*.changes "$temp_dir"
         done
 
 	echo "$(svn info "$svn_dir/$svn_branch_name/src/ZWave" | grep Revision | sed 's/Revision: //g')" > "${temp_dir}/revision"
