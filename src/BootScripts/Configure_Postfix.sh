@@ -89,7 +89,8 @@ chmod 400 key.pem
 	 
 cat /etc/ssl/certs/Thawte_Premium_Server_CA.pem >> cacert.pem  
  	 
-/etc/init.d/postfix restart 
+service postfix stop || :
+service postfix start
 	 
 sleep 10 
 	 
