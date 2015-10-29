@@ -1063,8 +1063,8 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 		SearchAndReplace(m_sTemplateInput + "Makefile_Template", sTemplateOutput + "Makefile", Name, &deviceInfo,sMergeTo,sDescription);
 		SearchAndReplace(m_sTemplateInput + "DCE_Template.def", sTemplateOutput + Name + ".def", Name, &deviceInfo,sMergeTo,sDescription);
 		SearchAndReplace(m_sTemplateInput + "Package.Info", sTemplateOutput + "Package.Info", Name, &deviceInfo,sMergeTo,sDescription);
-		SearchAndReplace(m_sTemplateInput + "make_package.sh", sTemplateOutput + "make_package.sh", Name, &deviceInfo,sMergeTo,sDescription);
-		SearchAndReplace(m_sTemplateInput + "post_make.sh", sTemplateOutput + "post_make.sh", Name, &deviceInfo,sMergeTo,sDescription);
+		// SearchAndReplace(m_sTemplateInput + "make_package.sh", sTemplateOutput + "make_package.sh", Name, &deviceInfo,sMergeTo,sDescription);
+		// SearchAndReplace(m_sTemplateInput + "post_make.sh", sTemplateOutput + "post_make.sh", Name, &deviceInfo,sMergeTo,sDescription);
 	}
 	else if( m_sTemplateInput.length() )
 	{
