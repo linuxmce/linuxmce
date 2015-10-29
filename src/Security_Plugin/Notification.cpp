@@ -287,7 +287,8 @@ bool Notification::ExecuteNotification(string sPhoneNumber, int iDelay, bool bNo
 
 string Notification::GenerateWavFile(long nAlertType, long nDeviceID)
 {
-    const string csMenuWavFile("/tmp/pluto-security-voicemenu.wav");
+    const string csMenuWavFile("/tmp/pluto-security-voicemenu_tmp");
+    const string csMenuGsmFile("/tmp/pluto-security-voicemenu.gsm");
     string sRoom("an unknown room");
 
     Row_Device *pRow_Device = m_pSecurity_Plugin->m_pDatabase_pluto_main->Device_get()->GetRow(nDeviceID);
@@ -298,7 +299,7 @@ string Notification::GenerateWavFile(long nAlertType, long nDeviceID)
             sRoom = pRow_Room->Description_get();
     }
 
-    string sText = "This is Pluto. " + GetAlertInfo(nAlertType) + " in " + sRoom;
+    string sText = "This is Linux M.C.E. " + GetAlertInfo(nAlertType) + " in " + sRoom;
     
     char *pData = NULL;
     int iSize = 0;
@@ -317,7 +318,12 @@ string Notification::GenerateWavFile(long nAlertType, long nDeviceID)
 
     FileUtils::WriteBufferIntoFile(csMenuWavFile, pData, size_t(iSize));
     delete []pData;
-    return csMenuWavFile;
+
+    // File need to be GSM style/8k sample rate
+    string sCmd2 = "/usr/bin/sox "+csMenuWavFile+" -c 1 "+csMenuGsmFile+" rate -q 8000";
+    system(sCmd2.c_str());
+
+    return csMenuGsmFile;
 }
 
 string Notification::GetAlertInfo(long nAlertType)
@@ -332,7 +338,7 @@ string Notification::GetAlertInfo(long nAlertType)
         case ALERTTYPE_Information_CONST:   sText += "Information";                    break;
         case ALERTTYPE_Doorbell_CONST:      sText += "Doorbell";                       break;
         case ALERTTYPE_Monitor_mode_CONST:  sText += "Monitor mode";                   break;
-		case ALERTTYPE_BabySitter_mode_CONST:  sText += "BabySitter";                  break;
+	case ALERTTYPE_BabySitter_mode_CONST:  sText += "BabySitter";                  break;
 
         default: sText+= "Unknown security event";
     }
