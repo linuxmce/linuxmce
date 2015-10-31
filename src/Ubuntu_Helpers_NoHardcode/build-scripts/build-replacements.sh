@@ -14,6 +14,7 @@ BUILD_ALL_PKGS="yes"
 build_opts="-tc"
 make_jobs=""
 ver_split="~"
+
 # set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
 [[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j$NUM_CORES"
 
@@ -321,12 +322,6 @@ function Build_Replacements_Common_raspbian
 	Build_Replacement_Package bcusdk external/bcusdk-0.0.5
 	cp -fr ${svn_dir}/${svn_branch_name}/external/*eib*.deb ${replacements_dir}
 
-	#Package: platform for libcec
-	Build_Replacement_Package platform ubuntu/platform-1.0.10
-
-	#Package: libcec
-	Build_Replacement_Package cec raspbian/libcec-3.0.1
-
 	#Package: mbrola
 	Build_Replacement_Package mbrola ubuntu/mbrola-3.01h+1
 
@@ -365,8 +360,11 @@ function Build_Replacements_raspbian_wheezy
 {
 	mkdir -pv "$replacements_dir"
 
+	#Package: libcec
+	Build_Replacement_Package cec raspbian/libcec-2.2.0
+
 	# mythtv
-	QT_SELECT=4 Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
+#	QT_SELECT=4 Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
 }
 
 function Build_Replacements_raspbian_jessie
@@ -375,6 +373,12 @@ function Build_Replacements_raspbian_jessie
 
 	# mythtv
 	Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
+
+	#Package: platform for libcec
+	Build_Replacement_Package platform ubuntu/platform-1.0.10
+
+	#Package: libcec
+	Build_Replacement_Package cec raspbian/libcec-3.0.1
 }
 
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
