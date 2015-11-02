@@ -372,7 +372,7 @@ function Build_Replacements_raspbian_jessie
 	mkdir -pv "$replacements_dir"
 
 	#Package: platform for libcec
-	Build_Replacement_Package platform ubuntu/libcec-platform-1.0.10+dfsg1
+	Build_Replacement_Package platform raspbian/libcec-platform-1.0.10+dfsg1
 
 	#Package: libcec
 	Build_Replacement_Package cec raspbian/libcec-3.0.1+dfsg2
