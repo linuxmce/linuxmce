@@ -1,0 +1,33 @@
+Source: libcec-platform
+Priority: extra
+Maintainer: Lars Op den Kamp <lars.opdenkamp@pulse-eight.com>
+Uploaders: Balint Reczey <balint@balintreczey.hu>
+Build-Depends: debhelper (>= 9), cmake (>= 2.8.9), libfstrcmp-dev
+Standards-Version: 3.9.6
+Section: libs
+Homepage: https://github.com/Pulse-Eight/platform
+Vcs-Git: git://anonscm.debian.org/collab-maint/libcec-platform.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/libcec-platform.git
+
+Package: libcec-platform-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libcec-platform1 (= ${binary:Version}), ${misc:Depends}, libfstrcmp-dev
+Provides: libcec-platform-dev
+Description: CEC Platform support library -- development files
+ Platform support library for libCEC. It includes C++ wrappers for
+ platform-specific atomic operations, threading, sockets and also
+ string utilities.
+ .
+ This package provides the necessary files needed for development.
+
+Package: libcec-platform1
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: libcec-platform
+Description: CEC Platform support library
+ Platform support library for libCEC. It includes C++ wrappers for
+ platform-specific atomic operations, threading, sockets and also
+ string utilities.

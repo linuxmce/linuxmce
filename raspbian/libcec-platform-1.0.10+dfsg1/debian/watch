@@ -1,0 +1,3 @@
+version=3
+opts=repacksuffix=+dfsg1,uversionmangle=s/_/./g,dversionmangle=s/.dfsg[0-9]*// \
+	 https://github.com/Pulse-Eight/platform/tags .*/(?:v||platform[_\-])(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))
