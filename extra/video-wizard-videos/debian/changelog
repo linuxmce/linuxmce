@@ -1,3 +1,9 @@
+video-wizard-videos (2.0.0.47.9~lmce3) precise; urgency=medium
+
+  * use find & install rather than cp -avR in Makefile
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Mon, 02 Nov 2015 12:55:00 -0500
+
 video-wizard-videos (2.0.0.47.9~lmce2) precise; urgency=medium
 
   * use find & install rather than cp -avR in Makefile

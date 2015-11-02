@@ -7,4 +7,4 @@ clean:
 
 
 install:
-	find . -iname "*.mpg" -exec install -m644 -D {} $(DESTDIR)/{} \;
+	find ./home -iname "*.mpg" -exec install -m644 -D {} $(DESTDIR)/{} \;
