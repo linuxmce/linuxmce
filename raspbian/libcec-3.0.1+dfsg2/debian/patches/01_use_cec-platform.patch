@@ -1,0 +1,104 @@
+Description: Use platform library under libcec-platform name.
+ The library is renamed for packaging it in Debian under a less generic name.
+ .
+Author: Balint Reczey <balint@balintreczey.hu>
+Forwarded: not-needed
+--- a/src/cec-client/CMakeLists.txt
++++ b/src/cec-client/CMakeLists.txt
+@@ -18,7 +18,7 @@
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+ endif()
+ 
+-find_package(platform REQUIRED)
++find_package(cec-platform REQUIRED)
+ find_package(Threads REQUIRED)
+ 
+ set(cecclient_SOURCES cec-client.cpp)
+@@ -31,7 +31,7 @@
+ 
+ add_executable(cec-client ${cecclient_SOURCES})
+ set_target_properties(cec-client PROPERTIES VERSION ${LIBCEC_VERSION_MAJOR}.${LIBCEC_VERSION_MINOR}.${LIBCEC_VERSION_PATCH})
+-target_link_libraries(cec-client ${platform_LIBRARIES})
++target_link_libraries(cec-client ${cec-platform_LIBRARIES})
+ target_link_libraries(cec-client ${CMAKE_THREAD_LIBS_INIT})
+ 
+ if (NOT WIN32)
+@@ -63,7 +63,7 @@
+   endif()
+ endif()
+ 
+-include_directories(${platform_INCLUDE_DIRS}
++include_directories(${cec-platform_INCLUDE_DIRS}
+                     ${PROJECT_SOURCE_DIR}
+                     ${PROJECT_SOURCE_DIR}/../../include)
+ 
+--- a/src/libcec/CMakeLists.txt
++++ b/src/libcec/CMakeLists.txt
+@@ -18,10 +18,10 @@
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+ endif()
+ 
+-find_package(platform REQUIRED)
++find_package(cec-platform REQUIRED)
+ find_package(Threads REQUIRED)
+ 
+-include_directories(${platform_INCLUDE_DIRS}
++include_directories(${cec-platform_INCLUDE_DIRS}
+                     ${PROJECT_SOURCE_DIR}
+                     ${PROJECT_SOURCE_DIR}/../../include)
+ 
+@@ -62,7 +62,7 @@
+                                 implementations/RHCommandHandler.cpp
+                                 implementations/AQCommandHandler.cpp)
+ 
+-# /platform/*
++# /cec-platform/*
+ set(CEC_SOURCES_PLATFORM platform/adl/adl-edid.cpp
+                          platform/nvidia/nv-edid.cpp)
+ 
+@@ -142,7 +142,7 @@
+                         ${CEC_SOURCES_PLATFORM})
+ 
+ # write env.h
+-set(LIBCEC_LIBREQUIRES "platform ${PLATFORM_LIBREQUIRES}")
++set(LIBCEC_LIBREQUIRES "cec-platform ${PLATFORM_LIBREQUIRES}")
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/env.h.in ${CMAKE_CURRENT_SOURCE_DIR}/env.h)
+ if (WIN32)
+   # write libcec.rc
+@@ -175,7 +175,7 @@
+         DESTINATION ${LIB_DESTINATION})
+ set_target_properties(cec PROPERTIES VERSION   ${LIBCEC_VERSION_MAJOR}.${LIBCEC_VERSION_MINOR}.${LIBCEC_VERSION_PATCH}
+                                      SOVERSION ${LIBCEC_VERSION_MAJOR}.0)
+-target_link_libraries(cec ${platform_LIBRARIES})
++target_link_libraries(cec ${cec-platform_LIBRARIES})
+ target_link_libraries(cec ${CMAKE_THREAD_LIBS_INIT})
+ 
+ include(cmake/LinkPlatformSupport.cmake)
+--- a/src/cecc-client/CMakeLists.txt
++++ b/src/cecc-client/CMakeLists.txt
+@@ -12,14 +12,14 @@
+ include(CheckLibraryExists)
+ include(CheckIncludeFiles)
+ 
+-find_package(platform REQUIRED)
++find_package(cec-platform REQUIRED)
+ find_package(Threads REQUIRED)
+ 
+ set(ceccclient_SOURCES cecc-client.c)
+ 
+ add_executable(cecc-client ${ceccclient_SOURCES})
+ set_target_properties(cecc-client PROPERTIES VERSION ${LIBCEC_VERSION_MAJOR}.${LIBCEC_VERSION_MINOR}.${LIBCEC_VERSION_PATCH})
+-target_link_libraries(cecc-client ${platform_LIBRARIES})
++target_link_libraries(cecc-client ${cec-platform_LIBRARIES})
+ target_link_libraries(cecc-client ${CMAKE_THREAD_LIBS_INIT})
+ 
+ if (NOT WIN32)
+@@ -40,7 +40,7 @@
+   endif()
+ endif()
+ 
+-include_directories(${platform_INCLUDE_DIRS}
++include_directories(${cec-platform_INCLUDE_DIRS}
+                     ${PROJECT_SOURCE_DIR}
+                     ${PROJECT_SOURCE_DIR}/../../include)
+ 

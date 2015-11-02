@@ -1,0 +1,66 @@
+Source: libcec
+Section: libs
+Priority: optional
+Maintainer: Sjoerd Simons <sjoerd@debian.org>
+Uploaders: Balint Reczey <balint@balintreczey.hu>
+Build-Depends: debhelper (>= 9),
+ pkg-config,
+ libudev-dev [linux-any],
+ libcec-platform-dev (>= 1.0.10+dfsg1-5),
+ python-dev,
+ dh-python,
+ cmake (>= 2.8.9),
+ swig,
+ libxrandr-dev,
+ x11proto-core-dev,
+ libncurses5-dev
+Standards-Version: 3.9.6
+Homepage: http://libcec.pulse-eight.com/
+Vcs-Git: git://anonscm.debian.org/collab-maint/libcec.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/libcec.git
+
+Package: libcec-dev
+Architecture: any
+Section: libdevel
+Depends: libcec3v4 (= ${binary:Version}),
+         ${misc:Depends}
+Description: USB CEC Adaptor communication Library (development files)
+ This library provides support for the Pulse-Eight USB-CEC adapter and
+ other CEC capable hardware, like the Raspberry Pi.
+ .
+ This package provides the necessary files needed for development.
+
+Package: libcec3v4
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: USB CEC Adaptor communication Library (shared library)
+ This library provides support for the Pulse-Eight USB-CEC adapter and
+ other CEC capable hardware, like the Raspberry Pi.
+ .
+ This package provides the shared library.
+
+Package: cec-utils
+Architecture: any
+Section: utils
+Depends: libcec3v4 (= ${binary:Version}),
+         ${shlibs:Depends},
+         ${misc:Depends}
+Description: USB CEC Adaptor communication Library (utility programs)
+ This library provides support for the Pulse-Eight USB-CEC adapter and
+ other CEC capable hardware, like the Raspberry Pi.
+ .
+ This package provides the CEC utility programs.
+
+Package: python-libcec
+Architecture: any
+Section: python
+Pre-Depends: ${misc:Pre-Depends}
+Depends: libcec3v4 (= ${binary:Version}), ${misc:Depends},
+         ${shlibs:Depends}, ${python:Depends}
+Description: Python bindings for USB CEC Adaptor
+ This library provides support for the Pulse-Eight USB-CEC adapter and
+ other CEC capable hardware, like the Raspberry Pi.
+ .
+ This package provides Python bindings for libcec.
