@@ -1,0 +1,162 @@
+Description: Rename library to cec-platform to use a less generic name
+ .
+Author: Balint Reczey <balint@balintreczey.hu>
+Forwarded: not-needed
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,11 +9,11 @@
+ include(UseMultiArch.cmake)
+ include(CheckAtomic.cmake)
+ 
+-set(platform_NAME platform)
+-set(platform_DESCRIPTION "Platform support library")
+-set(platform_VERSION_MAJOR 1)
+-set(platform_VERSION_MINOR 0)
+-set(platform_VERSION_PATCH 10)
++set(cec-platform_NAME cec-platform)
++set(cec-platform_DESCRIPTION "libCEC Platform support library")
++set(cec-platform_VERSION_MAJOR 1)
++set(cec-platform_VERSION_MINOR 0)
++set(cec-platform_VERSION_PATCH 10)
+ 
+ set(CMAKE_POSITION_INDEPENDENT_CODE on)
+ 
+@@ -22,72 +22,72 @@
+                    src/windows/os-threads.cpp)
+ endif()
+ 
+-set(platform_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/platform")
++set(cec-platform_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/cec-platform")
+ IF(WIN32)
+-  LIST(APPEND platform_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/platform/windows")
++  LIST(APPEND cec-platform_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/cec-platform/windows")
+ ENDIF(WIN32)
+-set(platform_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} fstrcmp)
++set(cec-platform_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} fstrcmp)
+ 
+ if(NOT ${CORE_SYSTEM_NAME} STREQUAL "")
+   if(${CORE_SYSTEM_NAME} STREQUAL "darwin" OR ${CORE_SYSTEM_NAME} STREQUAL "ios")
+-    list(APPEND platform_LIBRARIES "-framework CoreVideo -framework IOKit")
++    list(APPEND cec-platform_LIBRARIES "-framework CoreVideo -framework IOKit")
+   endif()
+ endif()
+ 
+ set(SOURCES
+             src/util/StringUtils.cpp)
+ 
+-add_library(platform ${SOURCES} ${PLAT_SOURCES})
+-target_link_libraries(platform ${platform_LIBRARIES})
+-set_target_properties(platform PROPERTIES VERSION ${platform_VERSION_MAJOR}.${platform_VERSION_MINOR}.${platform_VERSION_PATCH}
+-                                              SOVERSION ${platform_VERSION_MAJOR}.0)
++add_library(cec-platform ${SOURCES} ${PLAT_SOURCES})
++target_link_libraries(cec-platform ${cec-platform_LIBRARIES})
++set_target_properties(cec-platform PROPERTIES VERSION ${cec-platform_VERSION_MAJOR}.${cec-platform_VERSION_MINOR}.${cec-platform_VERSION_PATCH}
++                                              SOVERSION ${cec-platform_VERSION_MAJOR})
+ 
+-install(TARGETS platform DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-install(FILES src/os.h DESTINATION include/platform)
++install(TARGETS cec-platform DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(FILES src/os.h DESTINATION include/cec-platform)
+ IF(WIN32)
+   INSTALL(FILES src/windows/dlfcn-win32.h
+                 src/windows/os-socket.h
+                 src/windows/os-threads.h
+                 src/windows/os-types.h
+-          DESTINATION include/platform/windows)
++          DESTINATION include/cec-platform/windows)
+ ELSE(WIN32)
+   install(FILES src/posix/os-socket.h
+                 src/posix/os-threads.h
+                 src/posix/os-types.h
+-          DESTINATION include/platform/posix)
++          DESTINATION include/cec-platform/posix)
+ ENDIF(WIN32)
+ install(FILES src/sockets/cdevsocket.h
+               src/sockets/socket.h
+               src/sockets/tcp.h
+-        DESTINATION include/platform/sockets)
++        DESTINATION include/cec-platform/sockets)
+ install(FILES src/threads/atomics.h
+               src/threads/mutex.h
+               src/threads/threads.h
+-        DESTINATION include/platform/threads)
++        DESTINATION include/cec-platform/threads)
+ install(FILES src/util/atomic.h
+               src/util/buffer.h
+               src/util/StringUtils.h
+               src/util/StdString.h
+               src/util/timeutils.h
+               src/util/util.h
+-        DESTINATION include/platform/util)
++        DESTINATION include/cec-platform/util)
+ 
+ IF(NOT WIN32)
+   # Pkgconfig
+   include(PkgConfigHandler.cmake)
+-  configure_pc_file(platform platform.pc.in
+-                                 platform.pc
++  configure_pc_file(cec-platform platform.pc.in
++                                 cec-platform.pc
+                                  ${CMAKE_INSTALL_PREFIX}
+                                  ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
+                                  ${CMAKE_INSTALL_PREFIX}/include)
+ 
+-  install(FILES ${CMAKE_BINARY_DIR}/platform.pc
++  install(FILES ${CMAKE_BINARY_DIR}/cec-platform.pc
+           DESTINATION ${CMAKE_INSTALL_LIBDIR_NOARCH}/pkgconfig)
+ ENDIF(NOT WIN32)
+ 
+ # config mode
+ configure_file (platform-config.cmake.in
+-                platform-config.cmake @ONLY)
+-install(FILES ${CMAKE_BINARY_DIR}/platform-config.cmake
+-        DESTINATION ${CMAKE_INSTALL_LIBDIR_NOARCH}/platform)
++                cec-platform-config.cmake @ONLY)
++install(FILES ${CMAKE_BINARY_DIR}/cec-platform-config.cmake
++        DESTINATION ${CMAKE_INSTALL_LIBDIR_NOARCH}/cec-platform)
+ 
+--- a/platform-config.cmake.in
++++ b/platform-config.cmake.in
+@@ -9,22 +9,22 @@
+ #  platform_LIBRARY_DIRS - directories in which the libraries are situated
+ #
+ # propagate these properties from one build system to the other
+-set (platform_VERSION "@platform_VERSION_MAJOR@.@platform_VERSION_MINOR@")
+-set (platform_INCLUDE_DIRS @platform_INCLUDE_DIRS@ @CMAKE_INSTALL_PREFIX@/include)
+-set (platform_LIBRARY_DIRS "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@")
+-set (platform_LINKER_FLAGS "@platform_LINKER_FLAGS@")
+-set (platform_CONFIG_VARS "@platform_CONFIG_VARS@")
++set (cec-platform_VERSION "@cec-platform_VERSION_MAJOR@.@cec-platform_VERSION_MINOR@")
++set (cec-platform_INCLUDE_DIRS @cec-platform_INCLUDE_DIRS@ @CMAKE_INSTALL_PREFIX@/include)
++set (cec-platform_LIBRARY_DIRS "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@")
++set (cec-platform_LINKER_FLAGS "@cec-platform_LINKER_FLAGS@")
++set (cec-platform_CONFIG_VARS "@cec-platform_CONFIG_VARS@")
+ 
+ # libraries come from the build tree where this file was generated
+ if(WIN32)
+-  set (platform_LIBRARY "@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@/platform.lib")
++  set (cec-platform_LIBRARY "@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@/cec-platform.lib")
+ else(WIN32)
+-  set (platform_LIBRARY "-L@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@ -lplatform")
++  set (cec-platform_LIBRARY "-L@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@ -lcec-platform")
+ endif(WIN32)
+-set (platform_LIBRARIES ${platform_LIBRARY} "@platform_LIBRARIES@")
+-mark_as_advanced (platform_LIBRARY)
++set (cec-platform_LIBRARIES ${cec-platform_LIBRARY} "@cec-platform_LIBRARIES@")
++mark_as_advanced (cec-platform_LIBRARY)
+ 
+ # add the library as a target, so that other things in the project including
+ # this file may depend on it and get rebuild if this library changes.
+-add_library (platform UNKNOWN IMPORTED)
+-set_property (TARGET platform PROPERTY IMPORTED_LOCATION "${platform_LIBRARY}")
++add_library (cec-platform UNKNOWN IMPORTED)
++set_property (TARGET cec-platform PROPERTY IMPORTED_LOCATION "${cec-platform_LIBRARY}")
+--- a/platform.pc.in
++++ b/platform.pc.in
+@@ -6,5 +6,5 @@
+ Name: @name@
+ Description: @description@ @major@.@minor@
+ Version: @major@.@minor@
+-Libs: -L${libdir} -lplatform
++Libs: -L${libdir} -lcec-platform
+ Cflags: -I${includedir}

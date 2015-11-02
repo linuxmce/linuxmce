@@ -1,0 +1,26 @@
+Description: Moce cec-platform.pc and cec-platform-config.cmake to multiarch location
+ .
+Author: Balint Reczey <balint@balintreczey.hu>
+Forwarded: not-needed
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -78,16 +78,16 @@
+   configure_pc_file(cec-platform platform.pc.in
+                                  cec-platform.pc
+                                  ${CMAKE_INSTALL_PREFIX}
+-                                 ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
++                                 ${CMAKE_INSTALL_LIBDIR}
+                                  ${CMAKE_INSTALL_PREFIX}/include)
+ 
+   install(FILES ${CMAKE_BINARY_DIR}/cec-platform.pc
+-          DESTINATION ${CMAKE_INSTALL_LIBDIR_NOARCH}/pkgconfig)
++          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ ENDIF(NOT WIN32)
+ 
+ # config mode
+ configure_file (platform-config.cmake.in
+                 cec-platform-config.cmake @ONLY)
+ install(FILES ${CMAKE_BINARY_DIR}/cec-platform-config.cmake
+-        DESTINATION ${CMAKE_INSTALL_LIBDIR_NOARCH}/cec-platform)
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cec-platform)
+ 

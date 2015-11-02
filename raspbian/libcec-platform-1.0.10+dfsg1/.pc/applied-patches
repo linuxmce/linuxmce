@@ -1,0 +1,3 @@
+01_use_system_fstrcmp.patch
+02_rename_lib_to_cec-platform.patch
+03_fix_pkgconfig_and_config.cmake.patch
