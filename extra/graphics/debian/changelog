@@ -1,3 +1,9 @@
+lmce-skins-all (2.0.0.47.9~lmce6) unstable; urgency=medium
+
+  * find files in skin dirs only, avoid copying from fakeroot
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Mon, 02 Nov 2015 13:14:52 -0400
+
 lmce-skins-all (2.0.0.47.9~lmce5) unstable; urgency=medium
 
   * Fix avwizard skin basic packaging
