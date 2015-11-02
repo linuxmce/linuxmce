@@ -1,3 +1,9 @@
+lmce-avwizard-sounds (2.0.0.47.9-lmce3) unstable; urgency=medium
+
+  * copy only from ./home to avoid duplicates
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Mon, 02 Nov 2015 13:05:001 -0500
+
 lmce-avwizard-sounds (2.0.0.47.9-lmce3) precise; urgency=medium
 
   * fix replaces/conflicts data
