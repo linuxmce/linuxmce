@@ -371,14 +371,14 @@ function Build_Replacements_raspbian_jessie
 {
 	mkdir -pv "$replacements_dir"
 
-	# mythtv
-	Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
-
 	#Package: platform for libcec
-	Build_Replacement_Package platform ubuntu/platform-1.0.10
+	Build_Replacement_Package platform ubuntu/libcec-platform-1.0.10+dfsg1
 
 	#Package: libcec
-	Build_Replacement_Package cec raspbian/libcec-3.0.1
+	Build_Replacement_Package cec raspbian/libcec-3.0.1+dfsg2
+
+	# mythtv
+	Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
 }
 
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
