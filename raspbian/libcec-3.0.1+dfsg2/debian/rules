@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+%:
+	dh  $@ --with python2
+
+override_dh_auto_configure:
+	ln -fs /usr/include/cec-platform include/platform && \
+	dh_auto_configure -- -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=1 -DCMAKE_INSTALL_LIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH) -DRPI_INCLUDE_DIR=/opt/vc/include -DRPI_LIB_DIR=/opt/vc/lib
+
+override_dh_auto_install:
+	dh_auto_install
+	mv debian/tmp/usr/lib/pkgconfig debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/
+	rm debian/tmp/usr/bin/cec-client
+	mv debian/tmp/usr/bin/cec-client-* debian/tmp/usr/bin/cec-client

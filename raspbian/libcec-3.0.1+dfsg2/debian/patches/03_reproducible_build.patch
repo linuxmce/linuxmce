@@ -1,0 +1,17 @@
+Description: Remove non-determinism from build process
+ .
+Author: Balint Reczey <balint@balintreczey.hu>
+Forwarded: not-needed
+diff --git a/src/libcec/CMakeLists.txt b/src/libcec/CMakeLists.txt
+index 4cc3666..974ba92 100644
+--- a/src/libcec/CMakeLists.txt
++++ b/src/libcec/CMakeLists.txt
+@@ -122,7 +122,7 @@ set(CEC_HEADERS devices/CECRecordingDevice.h
+ source_group("Header Files" FILES ${CEC_HEADERS})
+ 
+ # platform and device specific
+-include(cmake/SetBuildInfo.cmake)
++set(LIB_INFO "compiled on ${CMAKE_SYSTEM} ... ")
+ include(cmake/CheckPlatformSupport.cmake)
+ 
+ ## create project groups

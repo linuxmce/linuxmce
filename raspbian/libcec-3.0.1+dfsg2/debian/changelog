@@ -1,0 +1,185 @@
+libcec (3.0.1+dfsg2-8~bpo8+1) jessie-backports; urgency=medium
+
+  * Rebuild for jessie-backports.
+  * Build libcec with pre-libcxx11 (libcxx98) ABI
+
+ -- Balint Reczey <balint@balintreczey.hu>  Wed, 07 Oct 2015 20:16:52 +0200
+
+libcec (3.0.1+dfsg2-8) unstable; urgency=medium
+
+  * Handle transition from libcec3v4 to libcec3
+
+ -- Balint Reczey <balint@balintreczey.hu>  Wed, 07 Oct 2015 20:06:06 +0200
+
+libcec (3.0.1+dfsg2-7) unstable; urgency=medium
+
+  * Stop using lockdev again (Closes: #728023)
+
+ -- Balint Reczey <balint@balintreczey.hu>  Mon, 28 Sep 2015 10:49:52 +0200
+
+libcec (3.0.1+dfsg2-6) unstable; urgency=medium
+
+  * Fix SOVERSION handling in CEC clients (Closes: #798472)
+
+ -- Balint Reczey <balint@balintreczey.hu>  Sat, 12 Sep 2015 21:42:38 +0200
+
+libcec (3.0.1+dfsg2-5) unstable; urgency=medium
+
+  * Fix crash on systems lacking /sys/class/drm (Closes: #798190)
+
+ -- Balint Reczey <balint@balintreczey.hu>  Sun, 06 Sep 2015 19:11:37 +0200
+
+libcec (3.0.1+dfsg2-4) unstable; urgency=medium
+
+  * Update symbols based on armel build failure
+
+ -- Balint Reczey <balint@balintreczey.hu>  Sun, 16 Aug 2015 21:06:33 +0200
+
+libcec (3.0.1+dfsg2-3) experimental; urgency=medium
+
+  * Add versioned build dependencies for the GCC 5 transition (Closes: #791103)
+  * Update symbols file with the GCC 5 transition changes
+  * Make build more deterministic
+  * Fix libdir in pkgconfig file
+
+ -- Balint Reczey <balint@balintreczey.hu>  Fri, 07 Aug 2015 00:07:02 +0200
+
+libcec (3.0.1+dfsg2-2) experimental; urgency=medium
+
+  * Update symbols file based on powerpc build
+
+ -- Balint Reczey <balint@balintreczey.hu>  Sat, 01 Aug 2015 13:38:00 +0200
+
+libcec (3.0.1+dfsg2-1) experimental; urgency=medium
+
+  * New Upstream version 3.0.1
+  * Merge upstream packaging changes
+  * Drop patches integrated upstream
+  * Add libcec-platform-dev as build dependency
+  * Use cec-platform
+  * Call cmake from debian/rules more conventionally
+  * Fix pkgconfig file install location
+  * Stop shipping libcec.a
+  * Fix missing space in debian/control
+  * Add misc:Depends to python-libcec dependencies
+  * Update debian/copyright with changed and excluded files
+  * Build depend on Debhelper 9
+  * Drop libcec meta package
+  * Fix library SONAME version
+  * Update symbols file
+  * Install CLI utilities in cec-utils and Python scripts in python-libcec
+  * Add shlibs:Depends and python:Depends to python-libcec dependencies
+  * Build depend on dh-python
+  * Extend extended description a bit
+  * Call debhelper with python2 in debian/rules
+  * Install Python client script as an example
+  * Add repack suffix to debian/watch
+  * Drop prebuilt windows binary from source
+  * Drop obsoleted Lintian override
+
+ -- Balint Reczey <balint@balintreczey.hu>  Tue, 07 Jul 2015 16:17:34 -0700
+
+libcec (2.2.0+dfsg1-3) unstable; urgency=medium
+
+  * Upload to unstable
+  * Update symbols file for GCC 5 (Closes: #777940)
+
+ -- Balint Reczey <balint@balintreczey.hu>  Sun, 26 Apr 2015 20:57:42 +0200
+
+libcec (2.2.0+dfsg1-2) experimental; urgency=medium
+
+  * Provide both C & C++ versions of cec_set_configuration()
+    to match upstream's latest ABI
+
+ -- Balint Reczey <balint@balintreczey.hu>  Sat, 08 Nov 2014 22:57:17 +0100
+
+libcec (2.2.0+dfsg1-1) experimental; urgency=medium
+
+  * Add working watch file
+  * Update libcec-get-orig-source for 2.2.0.
+    Add +dfsg1 suffix to repacked version
+    Compress tarball using xz
+  * New upstream version 2.2.0
+  * Fix ABI breakage due to changed cec_set_configuration()
+  * Update symbols file with new ABI symbols
+  * Mangle local version in watch file
+  * Bump standards version, no changes needed
+
+ -- Balint Reczey <balint@balintreczey.hu>  Sat, 08 Nov 2014 18:20:25 +0100
+
+libcec (2.1.4-2) unstable; urgency=low
+
+  [ Balint Reczey ]
+  * Add myself to uploaders
+  * Set Sjoerd as maintainer
+  * Remove Andres Mejia as maintainer since he is tracked as MIA
+    Thanks to Andres for creating and taking care of the package.
+    (Closes: #743513)
+  * Provide symbols file (Closes: #737769)
+  * Bump standards version
+
+  [ Roger Leigh ]
+  * Stop using lockdev (Closes: #728023)
+
+  [ Logan Rosen ]
+  * Use dh-autoreconf to fix FTBFS on ppc64e (Closes: #735217)
+
+ -- Balint Reczey <balint@balintreczey.hu>  Thu, 07 Aug 2014 18:55:00 +0200
+
+libcec (2.1.4-1) unstable; urgency=low
+
+  * New upstream release (Closes: #730510)
+  * Add myself to uploaders
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 01 Jan 2014 19:02:43 +0100
+
+libcec (2.0.3-1) experimental; urgency=low
+
+  * New upstream release. (Closes: #685058)
+  * Change library package to libcec2 for soname bump.
+  * Add new build-dependency liblockdev-dev.
+  * Add new manpage for cec-config utility program.
+
+ -- Andres Mejia <amejia@debian.org>  Fri, 16 Nov 2012 12:27:06 -0500
+
+libcec (1.6.2-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Andres Mejia <amejia@debian.org>  Wed, 02 May 2012 22:35:02 -0400
+
+libcec (1.6.1-2) unstable; urgency=low
+
+  * Build depends on pkg-config. (Closes: #669919)
+  * libudev-dev only optionally needed for Linux.
+
+ -- Andres Mejia <amejia@debian.org>  Sat, 21 Apr 2012 19:03:19 -0400
+
+libcec (1.6.1-1) unstable; urgency=low
+
+  [ Mario Limonciello ]
+  * New upstream version (LP: #982272)
+
+  [ Andres Mejia ]
+  * New release fixes build failure with GCC-4.7. (Closes: #667241)
+  * Bump to Standards-Version 3.9.3.
+
+ -- Andres Mejia <amejia@debian.org>  Sat, 21 Apr 2012 00:02:08 -0400
+
+libcec (1.3.2-3) unstable; urgency=low
+
+  * Make dpkg-source options default for packaging.
+
+ -- Andres Mejia <amejia@debian.org>  Tue, 10 Jan 2012 18:12:57 -0500
+
+libcec (1.3.2-2) unstable; urgency=low
+
+  * Add options to pass to dpkg-source.
+
+ -- Andres Mejia <amejia@debian.org>  Sun, 08 Jan 2012 22:59:34 -0500
+
+libcec (1.3.2-1) unstable; urgency=low
+
+  * Initial release. (Closes: #655143)
+
+ -- Andres Mejia <amejia@debian.org>  Sun, 08 Jan 2012 15:36:49 -0500

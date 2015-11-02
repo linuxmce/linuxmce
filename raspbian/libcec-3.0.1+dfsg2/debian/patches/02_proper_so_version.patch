@@ -1,0 +1,37 @@
+Description: Use a single number as major so version like others
+ .
+Author: Balint Reczey <balint@balintreczey.hu>
+Forwarded: not-needed
+--- a/src/libcec/CMakeLists.txt
++++ b/src/libcec/CMakeLists.txt
+@@ -174,7 +174,7 @@
+ install(TARGETS cec
+         DESTINATION ${LIB_DESTINATION})
+ set_target_properties(cec PROPERTIES VERSION   ${LIBCEC_VERSION_MAJOR}.${LIBCEC_VERSION_MINOR}.${LIBCEC_VERSION_PATCH}
+-                                     SOVERSION ${LIBCEC_VERSION_MAJOR}.0)
++                                     SOVERSION ${LIBCEC_VERSION_MAJOR})
+ target_link_libraries(cec ${cec-platform_LIBRARIES})
+ target_link_libraries(cec ${CMAKE_THREAD_LIBS_INIT})
+ 
+--- a/include/ceccloader.h
++++ b/include/ceccloader.h
+@@ -225,7 +225,7 @@
+   #if defined(__APPLE__)
+     lib =  dlopen(strLib ? strLib : "libcec." CEC_LIB_VERSION_MAJOR_STR ".dylib", RTLD_LAZY);
+   #else
+-    lib = dlopen(strLib ? strLib : "libcec.so." CEC_LIB_VERSION_MAJOR_STR ".0", RTLD_LAZY);
++    lib = dlopen(strLib ? strLib : "libcec.so." CEC_LIB_VERSION_MAJOR_STR, RTLD_LAZY);
+   #endif
+   if (lib == NULL)
+     printf("%s\n", dlerror());
+--- a/include/cecloader.h
++++ b/include/cecloader.h
+@@ -121,7 +121,7 @@
+ #if defined(__APPLE__)
+     g_libCEC = dlopen(strLib ? strLib : "libcec." CEC_LIB_VERSION_MAJOR_STR ".dylib", RTLD_LAZY);
+ #else
+-    g_libCEC = dlopen(strLib ? strLib : "libcec.so." CEC_LIB_VERSION_MAJOR_STR ".0", RTLD_LAZY);
++    g_libCEC = dlopen(strLib ? strLib : "libcec.so." CEC_LIB_VERSION_MAJOR_STR, RTLD_LAZY);
+ #endif
+     if (!g_libCEC)
+     {
