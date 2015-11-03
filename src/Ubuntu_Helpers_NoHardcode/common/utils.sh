@@ -18,11 +18,15 @@ remove_duplicate_debs() {
 				if dpkg --compare-versions "$dup_ver" lt "$ver" ;then
 					echo "Remove duplicate package $pkg $dup_ver $dup_arch"
 					rm -f "${pkg}_${dup_ver}_"*.deb
+					rm -f "${pkg}_${dup_ver}_"*.changes || :
+					rm -f "${pkg}_${dup_ver}_"*.upload || :
 				fi
-	
+
 				if dpkg --compare-versions "$dup_ver" gt "$ver" ;then
 					echo "Remove duplicate package $pkg $ver $arch"
 					rm -f "${pkg}_${ver}_"*.deb
+					rm -f "${pkg}_${dup_ver}_"*.changes || :
+					rm -f "${pkg}_${dup_ver}_"*.upload || :
 					ver=$dup_ver
 				fi
 			fi
