@@ -6407,7 +6407,7 @@ _ACEOF
 
 
 cat >>confdefs.h <<_ACEOF
-#define SCCP_REVISION "${SCCP_REVISION}"
+#define SCCP_REVISION ${SCCP_REVISION}
 _ACEOF
 
 
