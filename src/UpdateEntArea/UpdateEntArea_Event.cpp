@@ -625,7 +625,8 @@ CommandGroup *UpdateEntArea::CreateSecurityAlertCommandGroup(CommandGroupArray &
 		pCommandGroup->AddCommand(m_dwPK_Device_MediaPlugIn,COMMAND_MH_Stop_Media_CONST,iOrder++,1,
 			COMMANDPARAMETER_PK_EntertainArea_CONST,StringUtils::itos(it->first).c_str());
 
-		pCommandGroup->AddCommand(m_dwPK_Device_MediaPlugIn,COMMAND_MH_Play_Media_CONST,iOrder++,2,
+		pCommandGroup->AddCommand(m_dwPK_Device_MediaPlugIn,COMMAND_MH_Play_Media_CONST,iOrder++,3,
+			COMMANDPARAMETER_Bypass_Event_CONST,"1",
 			COMMANDPARAMETER_PK_EntertainArea_CONST,StringUtils::itos(it->first).c_str(),
 			COMMANDPARAMETER_Filename_CONST,sFile.c_str());
 	}

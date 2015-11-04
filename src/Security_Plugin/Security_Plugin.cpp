@@ -954,7 +954,7 @@ void Security_Plugin::ProcessCountdown(int id,Row_Alert *pRow_Alert)
 void Security_Plugin::SayToDevices(string sText,DeviceData_Router *pDeviceData_Router)
 {
 	string sPhones = "";
-	bool bBypass_Event = 0; // TODO aaronspecial
+	bool bBypass_Event = 1; // We don't want to trigger the normal "watching/listening to media" events when doing countdowns or notification
 	bool bDont_Setup_AV = 0;
 	string sVoice = ""; //TODO: Once we get some decent voices, set this to one of them!
 
