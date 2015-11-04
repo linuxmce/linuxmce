@@ -156,7 +156,7 @@ namespace DCE
 
 		map< u_int64_t, pair<char,int> > m_mapScheduledRecordings;  // A list of all upcoming recordings and the char=type of recording, int=recording id
 
-		string m_sTzOffset = "+00:00";
+		string m_sTzOffset;
 
         MythTvWrapper *m_pMythWrapper;
 

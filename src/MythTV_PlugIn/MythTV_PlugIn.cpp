@@ -120,6 +120,10 @@ bool MythTV_PlugIn::GetConfig()
 		row=db_wrapper_fetch_row(result.r);
 		m_sTzOffset = row[0];
 	}
+	else
+	{
+		m_sTzOffset = "+00:00";
+	}
 
 	m_pEPGGrid = new EPGGrid(m_pDBHelper_Myth);
 
