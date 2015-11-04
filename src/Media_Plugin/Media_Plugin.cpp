@@ -1594,7 +1594,7 @@ bool Media_Plugin::MediaInserted( class Socket *pSocket, class Message *pMessage
 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling Start Media from Media Inserted with orbiter %d",PK_Orbiter);
 
-			MediaStream *pMediaStream = StartMedia(pMediaHandlerInfo,0,PK_Orbiter,vectEntertainArea,pDeviceFrom->m_dwPK_Device,&dequeMediaFile,false,false,0,"");
+			MediaStream *pMediaStream = StartMedia(pMediaHandlerInfo,0,PK_Orbiter,vectEntertainArea,pDeviceFrom->m_dwPK_Device,&dequeMediaFile,false,false,0,"", false);
 			if( pMediaStream )
 				pMediaStream->m_discid = discid;
 /*
@@ -1825,7 +1825,7 @@ void Media_Plugin::HandleAVAdjustments(MediaStream *pMediaStream,string sAudio,s
 	}
 }
 
-void Media_Plugin::StartMedia( int iPK_MediaType, int iPK_MediaProvider, unsigned int iPK_Device_Orbiter, vector<EntertainArea *>  &vectEntertainArea, int iPK_Device, int iPK_DeviceTemplate, deque<MediaFile *> *p_dequeMediaFile, bool bQueue, bool bResume, int iRepeat, string sStartingPosition, vector<MediaStream *> *p_vectMediaStream)
+void Media_Plugin::StartMedia( int iPK_MediaType, int iPK_MediaProvider, unsigned int iPK_Device_Orbiter, vector<EntertainArea *>  &vectEntertainArea, int iPK_Device, int iPK_DeviceTemplate, deque<MediaFile *> *p_dequeMediaFile, bool bQueue, bool bResume, int iRepeat, string sStartingPosition, bool bBypass_Event, vector<MediaStream *> *p_vectMediaStream)
 {
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia - Main function start");
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::StartMedia iPK_MediaType %d iPK_MediaProvider %d iPK_Device_Orbiter %d vectEntertainArea %d iPK_Device %d iPK_DeviceTemplate %d p_dequeMediaFile %p bResume %d iRepeat %d sStartingPosition %s p_vectMediaStream %p",
@@ -1916,7 +1916,7 @@ void Media_Plugin::StartMedia( int iPK_MediaType, int iPK_MediaProvider, unsigne
 		}
 
 		MediaStream *pMediaStream = StartMedia(pMediaHandlerInfo,iPK_MediaProvider,iPK_Device_Orbiter,vectEA_to_MediaHandler[s].second,
-						       iPK_Device,p_dequeMediaFile,bQueue,bResume,iRepeat,sStartingPosition,0,&mapEntertainmentArea_OutputZone);  // We'll let the plug-in figure out the source, and we'll use the default remote
+						       iPK_Device,p_dequeMediaFile,bQueue,bResume,iRepeat,sStartingPosition,bBypass_Event,0,&mapEntertainmentArea_OutputZone);  // We'll let the plug-in figure out the source, and we'll use the default remote
 
 		//who will take care of pMediaStream ?
 
@@ -1982,7 +1982,7 @@ int Media_Plugin::GetMediaTypeForFile(deque<MediaFile *> *p_dequeMediaFile,vecto
 	return 0;
 }
 
-MediaStream *Media_Plugin::StartMedia( MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, unsigned int PK_Device_Orbiter, vector<EntertainArea *> &vectEntertainArea, int PK_Device_Source, deque<MediaFile *> *dequeMediaFile, bool bQueue, bool bResume,int iRepeat, string sStartingPosition, int iPK_Playlist,map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone)
+MediaStream *Media_Plugin::StartMedia( MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, unsigned int PK_Device_Orbiter, vector<EntertainArea *> &vectEntertainArea, int PK_Device_Source, deque<MediaFile *> *dequeMediaFile, bool bQueue, bool bResume,int iRepeat, string sStartingPosition, bool bBypass_Event, int iPK_Playlist,map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone)
 {
     PLUTO_SAFETY_LOCK(mm,m_MediaMutex);
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia OutputZone begin.");
@@ -2136,13 +2136,13 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia OutputZone end.");
 
-	if( StartMedia(pMediaStream,p_mapEntertainmentArea_OutputZone) )
+	if( StartMedia(pMediaStream,p_mapEntertainmentArea_OutputZone, bBypass_Event) )
 		return pMediaStream;
 	// delete pMediaStream; // can't do this here because I'm not sure we always still own the pointer at this point
 	return NULL;
 }
 
-bool Media_Plugin::StartMedia(MediaStream *pMediaStream,map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone)
+bool Media_Plugin::StartMedia(MediaStream *pMediaStream,map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone, bool bBypass_Event)
 {
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia OutputZone - MediaStream - Begin");
 	if( !pMediaStream->m_pMediaDevice_Source )
@@ -2196,10 +2196,13 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream,map<int, pair<MediaDevic
 
 		pEntertainArea->m_pMediaStream=pMediaStream;
 		pEntertainArea->m_pMediaDevice_OutputZone=NULL;
-		if( pMediaStream->ContainsVideo() )
-			EVENT_Watching_Media(pEntertainArea->m_pRoom->m_dwPK_Room);
-		else
-			EVENT_Listening_to_Media(pEntertainArea->m_pRoom->m_dwPK_Room);
+		if (!bBypass_Event)
+		{
+			if( pMediaStream->ContainsVideo() )
+				EVENT_Watching_Media(pEntertainArea->m_pRoom->m_dwPK_Room);
+			else
+				EVENT_Listening_to_Media(pEntertainArea->m_pRoom->m_dwPK_Room);
+		}
 	}
 
 	FindActiveDestination(pMediaStream,p_mapEntertainmentArea_OutputZone);
@@ -3914,7 +3917,7 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_MH_Play_Media playing MediaType: %d Provider %d Orbiter %d Device %d Template %d",
 		iPK_MediaType,iPK_MediaProvider,iPK_Device_Orbiter,iPK_Device,iPK_DeviceTemplate);
-	StartMedia(iPK_MediaType,iPK_MediaProvider,iPK_Device_Orbiter,vectEntertainArea,iPK_Device,iPK_DeviceTemplate,&dequeMediaFile,bQueue,bResume,iRepeat,"");  // We'll let the plug-in figure out the source, and we'll use the default remote
+	StartMedia(iPK_MediaType,iPK_MediaProvider,iPK_Device_Orbiter,vectEntertainArea,iPK_Device,iPK_DeviceTemplate,&dequeMediaFile,bQueue,bResume,iRepeat,"", bBypass_Event);  // We'll let the plug-in figure out the source, and we'll use the default remote
 }
 
 //<-dceag-c65-b->
@@ -4216,7 +4219,7 @@ LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media_Plugin::CMD_MH_Move_Media 
 		}
 		StartMedia( pMediaStream->m_iPK_MediaType, pMediaStream->m_iPK_MediaProvider, (pMediaStream->m_pOH_Orbiter_StartedMedia ? pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device : 0),
 			vectEntertainArea, PK_Device, 0,
-			    &pMediaStream->m_dequeMediaFile, false, pMediaStream->m_bResume, pMediaStream->m_iRepeat,pMediaStream->m_sLastPosition);
+			    &pMediaStream->m_dequeMediaFile, false, pMediaStream->m_bResume, pMediaStream->m_iRepeat,pMediaStream->m_sLastPosition, false);
 
 		pMediaStream->m_dequeMediaFile.clear();  // We don't want to delete the media files since we will have re-used the same pointers above
 		delete pMediaStream; // We will have started with new copies
