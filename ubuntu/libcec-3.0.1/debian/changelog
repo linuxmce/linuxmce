@@ -1,3 +1,9 @@
+libcec (3.0.1-1lmce1) unstable; urgency=low
+
+  * remove replaces/conflicts/provides data so libcec2 & libcec3 can co-exist
+
+ -- phenigma <phenigma@hotmail.com>  Wed, 04 Nov 2015 21:02:41 +0000
+
 libcec (3.0.1-1) unstable; urgency=low
 
   * changed / added:
