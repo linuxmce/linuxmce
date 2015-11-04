@@ -74,7 +74,7 @@ void EPGGrid::ToData(string GridID,int &Size, char* &Data, int *ColStart, int *R
 		DataGridCell *pCell = GetData(0,irow);
 		string chanid = pCell->GetValue();
 		// Todo "description" in this table will contain the longer program description
-		string sSQL = "SELECT title FROM program WHERE program.chanid = "+chanid+" AND program.starttime < NOW() AND program.endtime > NOW()";
+		string sSQL = "SELECT title FROM program WHERE program.chanid = "+chanid+" AND program.starttime < UTC_TIMESTAMP() AND program.endtime > UTC_TIMESTAMP()";
 		if ((result_set.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) && (row = db_wrapper_fetch_row(result_set.r)))
 		{
 			SetData(2, irow, new DataGridCell(row[0]));

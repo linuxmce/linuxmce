@@ -637,7 +637,17 @@ string MythTV_PlugIn::GetRecordingURL(string sBaseName, string sHostName, string
 void MythTV_PlugIn::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign )
 {
 
-  string sSQL, sDescription, sMediaURL, sDateTime, sPictureFilename;
+  string sSQL, sDescription, sMediaURL, sDateTime, sPictureFilename, sTzOffset;
+
+  // Get timezone offset to correct time values displayed on orbiters, mythtv passes everything in UTC since 0.26
+  sSQL = "SELECT TIME_FORMAT( NOW() - UTC_TIMESTAMP(), '%H:%i' ) AS tz_offset";
+  PlutoSqlResult result;
+  DB_ROW row;
+  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+  {
+    row=db_wrapper_fetch_row(result.r);
+    sTzOffset = row[0];
+  }
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"XXX POPULATEDATAGRID XXX PK_AttributeType_Sort %d sPK_Attribute is %s",PK_AttributeType_Sort, sPK_Attribute.c_str());
 
@@ -652,7 +662,7 @@ void MythTV_PlugIn::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid
 	  string sSeriesId = StringUtils::Tokenize(sPK_Attribute,"|",tokenPos);
 	  string sProgramId = StringUtils::Tokenize(sPK_Attribute,"|",tokenPos);
 
-	  sSQL = "SELECT title, seriesid, programid, basename, subtitle, description, lastmodified, hostname, storagegroup from recorded WHERE seriesid = '"+sSeriesId+"' OR programid = '"+sProgramId+"'";
+	  sSQL = "SELECT title, seriesid, programid, basename, subtitle, description, CONVERT_TZ(lastmodified,'+00:00','"+sTzOffset+"'), hostname, storagegroup from recorded WHERE seriesid = '"+sSeriesId+"' OR programid = '"+sProgramId+"'";
  	  PlutoSqlResult result;
 	  DB_ROW row;
 	  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
@@ -723,7 +733,7 @@ void MythTV_PlugIn::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid
       else
 	{
 	  // Title, Top level, show one of each.
-	  sSQL = "SELECT title, COUNT(title) as numitems, seriesid, programid, basename, subtitle, description, lastmodified, hostname, storagegroup from recorded GROUP by title;";
+	  sSQL = "SELECT title, COUNT(title) as numitems, seriesid, programid, basename, subtitle, description, CONVERT_TZ(lastmodified,'+00:00','"+sTzOffset+"'), hostname, storagegroup from recorded GROUP by title;";
  	  PlutoSqlResult result;
 	  DB_ROW row;
 	  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
