@@ -110,10 +110,21 @@ bool MythTV_PlugIn::GetConfig()
 	// This will produce a harmless error after the first run.  By default myth doesn't index the start time, making 
 	// the AllShows grid take a very, very long time to execute the sql select
 	m_pDBHelper_Myth->threaded_db_wrapper_query("alter table `mythconverg`.`program` add index `starttime` ( `starttime` )",true);
+
+	// Get timezone offset to correct time values displayed on orbiters, mythtv passes everything in UTC since 0.26
+	string sSQL = "SELECT TIME_FORMAT( NOW() - UTC_TIMESTAMP(), '%H:%i' ) AS tz_offset";
+	PlutoSqlResult result;
+	DB_ROW row;
+	if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+	{
+		row=db_wrapper_fetch_row(result.r);
+		m_sTzOffset = row[0];
+	}
+
 	m_pEPGGrid = new EPGGrid(m_pDBHelper_Myth);
 
 	m_pAlarmManager = new AlarmManager();
-    m_pAlarmManager->Start(2);      //4 = number of worker threads
+	m_pAlarmManager->Start(2);      //4 = number of worker threads
 	return true;
 }
 
@@ -637,17 +648,7 @@ string MythTV_PlugIn::GetRecordingURL(string sBaseName, string sHostName, string
 void MythTV_PlugIn::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign )
 {
 
-  string sSQL, sDescription, sMediaURL, sDateTime, sPictureFilename, sTzOffset;
-
-  // Get timezone offset to correct time values displayed on orbiters, mythtv passes everything in UTC since 0.26
-  sSQL = "SELECT TIME_FORMAT( NOW() - UTC_TIMESTAMP(), '%H:%i' ) AS tz_offset";
-  PlutoSqlResult result;
-  DB_ROW row;
-  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
-  {
-    row=db_wrapper_fetch_row(result.r);
-    sTzOffset = row[0];
-  }
+  string sSQL, sDescription, sMediaURL, sDateTime, sPictureFilename;
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"XXX POPULATEDATAGRID XXX PK_AttributeType_Sort %d sPK_Attribute is %s",PK_AttributeType_Sort, sPK_Attribute.c_str());
 
@@ -662,7 +663,7 @@ void MythTV_PlugIn::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid
 	  string sSeriesId = StringUtils::Tokenize(sPK_Attribute,"|",tokenPos);
 	  string sProgramId = StringUtils::Tokenize(sPK_Attribute,"|",tokenPos);
 
-	  sSQL = "SELECT title, seriesid, programid, basename, subtitle, description, CONVERT_TZ(lastmodified,'+00:00','"+sTzOffset+"'), hostname, storagegroup from recorded WHERE seriesid = '"+sSeriesId+"' OR programid = '"+sProgramId+"'";
+	  sSQL = "SELECT title, seriesid, programid, basename, subtitle, description, CONVERT_TZ(lastmodified,'+00:00','"+m_sTzOffset+"'), hostname, storagegroup from recorded WHERE seriesid = '"+sSeriesId+"' OR programid = '"+sProgramId+"'";
  	  PlutoSqlResult result;
 	  DB_ROW row;
 	  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
@@ -733,7 +734,7 @@ void MythTV_PlugIn::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid
       else
 	{
 	  // Title, Top level, show one of each.
-	  sSQL = "SELECT title, COUNT(title) as numitems, seriesid, programid, basename, subtitle, description, CONVERT_TZ(lastmodified,'+00:00','"+sTzOffset+"'), hostname, storagegroup from recorded GROUP by title;";
+	  sSQL = "SELECT title, COUNT(title) as numitems, seriesid, programid, basename, subtitle, description, CONVERT_TZ(lastmodified,'+00:00','"+m_sTzOffset+"'), hostname, storagegroup from recorded GROUP by title;";
  	  PlutoSqlResult result;
 	  DB_ROW row;
 	  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
@@ -963,9 +964,9 @@ class DataGridTable *MythTV_PlugIn::AllShows(string GridID, string Parms, void *
 	}
 
 	// When tune to channel gets an 'i' in front, it's assumed that it's a channel id
-	string sSQL = "SELECT chanid, title, starttime, endtime, seriesid, programid "
+	string sSQL = "SELECT chanid, title, CONVERT_TZ(starttime,'+00:00','"+m_sTzOffset+"') as tz_starttime, CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') as tz_endtime, seriesid, programid "
 		"FROM program "
-		"WHERE starttime < '" + StringUtils::SQLDateTime() + "' AND endtime>'" + StringUtils::SQLDateTime() + "' " + sProvider;
+		"WHERE tz_starttime < '" + StringUtils::SQLDateTime() + "' AND tz_endtime >'" + StringUtils::SQLDateTime() + "' " + sProvider;
 
 	bool bAllSource = mapVideoSourcesToUse.empty();
 	int iRow=0;
@@ -1170,10 +1171,10 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
     }
 
   // Grab the current channels and programs for current time.
-  string sCurrentSQL = "SELECT chanid, title, starttime, endtime, seriesid, programid "
+  string sCurrentSQL = "SELECT chanid, title, CONVERT_TZ(starttime,'+00:00','"+m_sTzOffset+"') as tz_starttime, CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') as tz_endtime, seriesid, programid "
     "FROM program "
-    "WHERE starttime < '"+StringUtils::SQLDateTime()+
-    "' AND endtime > '"+StringUtils::SQLDateTime()+"'";
+    "WHERE tz_starttime < '"+StringUtils::SQLDateTime()+
+    "' AND tz_endtime > '"+StringUtils::SQLDateTime()+"'";
 
   PlutoSqlResult result;
   DB_ROW row;
@@ -1231,7 +1232,7 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
   // Now, fill in the guide data in the middle. For now, this query is fixed to today
   // so that I can work on the column span logic.
   
-  string sGuideSQL = "SELECT * from program WHERE (endtime > '2010-06-20' AND endtime < '2010-06-21')";
+  string sGuideSQL = "SELECT * from program WHERE ( CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') > '2010-06-20' AND CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') < '2010-06-21')";
 
   if ( ( result.r=m_pDBHelper_Myth->db_wrapper_query_result(sGuideSQL) ) != NULL  )
     {
@@ -1399,11 +1400,11 @@ class DataGridTable *MythTV_PlugIn::CurrentShows(string GridID,string Parms,void
 	string sProvider;
 	// When tune to channel gets an 'i' in front, it's assumed that it's a channel id
 	string sSQL =
-		"SELECT program.chanid, program.programid, program.seriesid, title, starttime, endtime, description, Picture_series.EK_Picture AS Picture_series, Picture_program.EK_Picture AS Picture_program "
+		"SELECT program.chanid, program.programid, program.seriesid, title, CONVERT_TZ(starttime,'+00:00','"+m_sTzOffset+"') as tz_starttime, CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') as tz_endtime, description, Picture_series.EK_Picture AS Picture_series, Picture_program.EK_Picture AS Picture_program "
 		"FROM program "
 		"LEFT JOIN `pluto_myth`.`Picture` AS Picture_series ON Picture_series.seriesid=program.seriesid "
 		"LEFT JOIN `pluto_myth`.`Picture` AS Picture_program ON Picture_program.programid=program.programid "
-		"WHERE program.chanid=" + sChanId + " AND endtime>'" + StringUtils::SQLDateTime() + "' ORDER BY endtime";
+		"WHERE program.chanid=" + sChanId + " AND tz_endtime >'" + StringUtils::SQLDateTime() + "' ORDER BY endtime";
 
 	if( bOnePageOnly )
 		sSQL += " LIMIT " + StringUtils::itos(nHeight);
@@ -1627,6 +1628,7 @@ void MythTV_PlugIn::CMD_Schedule_Recording(string sType,string sOptions,string s
 		// sType is a number, and is already set at this point.
 	}
 
+	// FIXME: need to convert timezone values here, sStart & sStop are local times, db needs UTC 
 	string sSQL = "INSERT INTO record(type,chanid,startdate,starttime,enddate,endtime,title,subtitle,description,category,"
 		"station,seriesid,programid,autocommflag,autoexpire,autouserjob1) "
 		"SELECT " + sType + ",program.chanid,"
@@ -1764,7 +1766,7 @@ void MythTV_PlugIn::CMD_Get_Extended_Media_Data(string sPK_DesignObj,string sPro
 	PlutoSqlResult result;
 	DB_ROW row;
 
-	string sSQL = "SELECT * from program WHERE chanid = '"+sChanID+"' AND starttime = '"+sStartTime+"' AND endtime = '"+sEndTime+"'";
+	string sSQL = "SELECT * from program WHERE chanid = '"+sChanID+"' AND starttime = CONVERT_TZ('"+sStartTime+"','"+m_sTzOffset+"','+00:00') AND endtime = CONVERT_TZ('"+sEndTime+"','"+m_sTzOffset+"','+00:00')";
 
 	if ( (result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL ) 
 	{
@@ -2562,7 +2564,7 @@ void MythTV_PlugIn::CheckForNewRecordings()
 		// Find the file isn mythconverg.recorded and import the attributes
 
 		sSQL = 
-			"SELECT recorded.chanid, recorded.starttime, recorded.title, recorded.subtitle, recorded.stars, recorded.category, recorded.description,"
+			"SELECT recorded.chanid, CONVERT_TZ(recorded.starttime,'+00:00','"+m_sTzOffset+"') as tz_starttime, recorded.title, recorded.subtitle, recorded.stars, recorded.category, recorded.description,"
 			"recordedprogram.hdtv, recordedprogram.category_type, channel.name, recordedrating.rating, recgroup, recordedprogram.seriesid, recordedprogram.programid, channel.icon, CONCAT(storagegroup.dirname,'/',recorded.basename,'.png') AS screenshot FROM recorded "
 			"LEFT JOIN recordedprogram ON recorded.chanid=recordedprogram.chanid and recorded.starttime=recordedprogram.starttime "
 			"LEFT JOIN channel ON recorded.chanid=channel.chanid "
@@ -3050,7 +3052,7 @@ class DataGridTable *MythTV_PlugIn::ThumbnailableAttributes( string GridID, stri
 	// Try to find what series/program is on now
 	string sSQL = "SELECT seriesid, programid, title "
 		"FROM program "
-		"WHERE starttime < '" + StringUtils::SQLDateTime() + "' AND endtime>'" + StringUtils::SQLDateTime() + "' " 
+		"WHERE CONVERT_TZ(starttime,'+00:00','"+m_sTzOffset+"') < '" + StringUtils::SQLDateTime() + "' AND CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') >'" + StringUtils::SQLDateTime() + "' " 
 		" AND chanid=" + StringUtils::itos(pMythTvMediaStream->m_iCurrentProgramChannelID);
 
 	PlutoSqlResult result;
@@ -3729,7 +3731,7 @@ bool MythTV_PlugIn::PlaybackStarted( class Socket *pSocket,class Message *pMessa
 	pMythTvMediaStream->m_iCurrentProgramChannelID = pMythTvMediaStream->m_iTrackOrSectionOrChannel = pMythChannel->m_dwID;
 
 	string sSQL = "SELECT title,subtitle,description FROM program WHERE chanid=" + sMRL + " AND "
-		"starttime <= '" + StringUtils::SQLDateTime() + "' AND endtime>='" + StringUtils::SQLDateTime() + "'";
+		" CONVERT_TZ(starttime,'+00:00','"+m_sTzOffset+"') <= '" + StringUtils::SQLDateTime() + "' AND CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') >='" + StringUtils::SQLDateTime() + "'";
 	PlutoSqlResult result;
 	DB_ROW row;
 	if( (result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))==NULL || (row=db_wrapper_fetch_row(result.r))==NULL )
