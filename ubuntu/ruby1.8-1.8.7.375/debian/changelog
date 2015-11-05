@@ -1,4 +1,10 @@
-ruby1.8 (1:1.8.7.375-1bbox2~trusty1) trusty; urgency=high
+ruby1.8 (1:1.8.7.375-1bbox2lmce1) unstable; urgency=medium
+
+  * add gcc-4.8 as possible depends
+
+ -- phenigma <phenigma@hotmail.com>  Wed, 04 Nov 2015 20:43:11 -0500
+
+ruby1.8 (1:1.8.7.375-1bbox2) trusty; urgency=high
 
   * Fix a problem with the patch for CVE-2013-4164.
   * Fix building on Raring and Saucy

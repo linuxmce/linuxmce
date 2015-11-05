@@ -3,7 +3,7 @@ Section: ruby
 Priority: optional
 Maintainer: John Leach <john@brightbox.co.uk>
 Uploaders: John Leach <john@brightbox.co.uk>
-Build-Depends: cdbs, debhelper (>= 5), autotools-dev, autoconf, m4, quilt (>= 0.40), patch, bison, binutils (>= 2.14.90.0.7), libgdbm-dev, libncurses5-dev, libreadline-gplv2-dev | libreadline5-dev | libreadline6-dev, zlib1g-dev, libssl-dev (>= 0.9.6b), file, coreutils, gcc (<< 4:4.7) | gcc-4.6 | gcc-4.7, libgoogle-perftools-dev, lsb-release
+Build-Depends: cdbs, debhelper (>= 5), autotools-dev, autoconf, m4, quilt (>= 0.40), patch, bison, binutils (>= 2.14.90.0.7), libgdbm-dev, libncurses5-dev, libreadline-gplv2-dev | libreadline5-dev | libreadline6-dev, zlib1g-dev, libssl-dev (>= 0.9.6b), file, coreutils, gcc (<< 4:4.7) | gcc-4.6 | gcc-4.7 | gcc-4.8, libgoogle-perftools-dev, lsb-release
 Standards-Version: 3.9.2
 Homepage: http://www.ruby-lang.org/
 Vcs-Git: git://github.com/brightbox/deb-ruby1.8-ng.git
@@ -58,7 +58,7 @@ Description: Debugging symbols for Ruby 1.8
 
 Package: ruby1.8-dev
 Architecture: any
-Depends: libruby1.8 (= ${binary:Version}), libc6-dev, ${misc:Depends}, gcc (<< 4:4.7) | gcc-4.6 | gcc-4.7, libgoogle-perftools-dev
+Depends: libruby1.8 (= ${binary:Version}), libc6-dev, ${misc:Depends}, gcc (<< 4:4.7) | gcc-4.6 | gcc-4.7 | gcc-4.8, libgoogle-perftools-dev
 Recommends: ruby1.8 (= ${binary:Version})
 Provides: ruby-dev
 Description: Header files for compiling extension modules for the Ruby 1.8
