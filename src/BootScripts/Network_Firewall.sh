@@ -562,33 +562,39 @@ echo "Setting default Policy"
 #Create all the chains manual defined created.
 #ipv4
 if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
-	echo "Set manual defined chains for ipv4"
-	Q="SELECT Matchname FROM Firewall WHERE Protocol='chain-ipv4' ORDER BY 	Place, PK_Firewall"
-	R=$(RunSQL "$Q")
-
-	for Chain in $R; do
-		chain=$(Field 1 "$Chain")
-		echo "iptables -N " $chain 
-		$IPTABLES -N $chain
-
-		Manual_CHain_Rules "ipv4" "$chain"
-	done
+        echo "Set manual defined chains for ipv4"
+        Q="SELECT Matchname FROM Firewall WHERE Protocol='chain-ipv4' ORDER BY  Place, PK_Firewall"
+        R=$(RunSQL "$Q")
+        #add the chains to iptables before rules connecting to it
+        for Chain in $R; do
+                chain=$(Field 1 "$Chain")
+                echo "iptables -N " $chain
+                $IPTABLES -N $chain
+        done
+        #apply the rules to the chains
+        for Chain in $R; do
+                chain=$(Field 1 "$Chain")
+                Manual_CHain_Rules "ipv4" "$chain"
+        done
 fi
-	
+
 #ipv6
 if [[ ! "$DisableIPv6Firewall" == "1" ]]; then
-	echo "Set manual defined chains for ipv6"
+        echo "Set manual defined chains for ipv6"
 
-	Q="SELECT Matchname FROM Firewall WHERE Protocol='chain-ipv6' ORDER BY Place, PK_Firewall"
-	R=$(RunSQL "$Q")	
-
-	for Chain in $R; do
-		chain=$(Field 1 "$Chain")
-		echo "ip6tables -N " $chain
-		$IP6TABLES -N $chain
-	
-		Manual_CHain_Rules "ipv6" "$chain"
-	done
+        Q="SELECT Matchname FROM Firewall WHERE Protocol='chain-ipv6' ORDER BY Place, PK_Firewall"
+        R=$(RunSQL "$Q")
+        #add the chains to iptables before rules connecting to it
+        for Chain in $R; do
+                chain=$(Field 1 "$Chain")
+                echo "ip6tables -N " $chain
+                $IP6TABLES -N $chain
+        done
+        #apply the rules to the chains
+        for Chain in $R; do
+                chain=$(Field 1 "$Chain")
+                Manual_CHain_Rules "ipv6" "$chain"
+        done
 fi
 
 # Configuring open ports on core
