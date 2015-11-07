@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 if [[ -n "$HEADER_FB_RPI2" ]]; then
 	return 0
@@ -87,9 +87,9 @@ EOF
 
 
 firstboot_md_rpi2_kernel() {
-	StatsMessage "Installing RPi2 kernel and headers"
-	apt-get -f -y --no-install-recommends install linux-headers-rpi2 linux-image-rpi2 || :
-	VerifyExitCode "Install linux image & headers for rpi2 failed"
+#	StatsMessage "Installing RPi2 kernel and headers"
+#	apt-get -f -y --no-install-recommends install linux-headers-rpi2 linux-image-rpi2 || :
+#	VerifyExitCode "Install linux image & headers for rpi2 failed"
 
 	return 0
 }
