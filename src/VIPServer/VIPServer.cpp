@@ -47,7 +47,7 @@
 #include "RA/RAServer.h"
 #include "DCE/DCEConfig.h"
 
-#define  VERSION "<=version=>"
+#include "../version.h"
 
 using namespace std;
 using namespace DCE;

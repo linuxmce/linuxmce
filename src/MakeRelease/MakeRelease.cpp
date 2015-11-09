@@ -47,7 +47,7 @@
 
 #include "PlutoUtils/StringUtils.h"
 
-#define  VERSION "<=version=>"
+#include "../version.h"
 
 using namespace std;
 using namespace DCE;

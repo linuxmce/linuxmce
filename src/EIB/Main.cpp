@@ -37,10 +37,7 @@ Usage: EIB [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename
 
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
 // and the svn revision as a global variable that can be inspected within a core dump
-#define  VERSION "<=version=>"
-const char *g_szCompile_Date="<=compile_date=>";
-/*SVN_REVISION*/
-
+#include "../version.h"
 
 using namespace DCE;
 
