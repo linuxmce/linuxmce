@@ -258,8 +258,10 @@ string TableInfo_Generator::get_getters_definition()
 	string s;
 	
 	for ( vector<FieldInfo*>::iterator i = m_Fields.begin(); i != m_Fields.end(); i++ )
+	{
 		s = s + (*i)->getCType() + " Row_"+m_sTableName+"::" + (*i)->m_pcFieldName + "_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);\n\nreturn m_" + (*i)->m_pcFieldName + ";}" + "\n";
-	
+	}
+
 	return s;
 }
 
@@ -269,8 +271,10 @@ string TableInfo_Generator::get_setters_declaration()
 	int iIndex=0;
 	
 	for ( vector<FieldInfo*>::iterator i = m_Fields.begin(); i != m_Fields.end(); i++, iIndex++ )
+	{
 		s = s + "void " + (*i)->m_pcFieldName + "_set(" + (*i)->getCType() + " val);" + "\n";
-	
+	}
+
 	return s;
 }
 
@@ -280,8 +284,10 @@ string TableInfo_Generator::get_setters_definition()
 	int iIndex=0;
 	
 	for ( vector<FieldInfo*>::iterator i = m_Fields.begin(); i != m_Fields.end(); i++, iIndex++ )
+	{
 		s = s + "void " + "Row_"+m_sTableName+"::"+ (*i)->m_pcFieldName + "_set(" + (*i)->getCType() + " val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);\n\nm_" + (*i)->m_pcFieldName + " = val; is_modified=true; is_null["+int2string(iIndex)+"]=false;}" + "\n";
-	
+	}
+
 	return s;
 }
 
@@ -291,9 +297,11 @@ string TableInfo_Generator::get_null_getters_declaration()
 	int iIndex=0;
 	
 	for ( vector<FieldInfo*>::iterator i = m_Fields.begin(); i != m_Fields.end(); i++, iIndex++ )
+	{
 		if (!((*i)->m_iFlags & NOT_NULL_FLAG))
 			s = s + "bool " + (*i)->m_pcFieldName + "_isNull();" + "\n";
-	
+	}
+
 	return s;
 }
 
@@ -303,9 +311,11 @@ string TableInfo_Generator::get_null_getters_definition()
 	int iIndex=0;
 	
 	for ( vector<FieldInfo*>::iterator i=m_Fields.begin(); i != m_Fields.end(); i++, iIndex++ )
+	{
 		if (!((*i)->m_iFlags & NOT_NULL_FLAG))
 			s = s + "bool " + "Row_"+m_sTableName+"::" + (*i)->m_pcFieldName + "_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);\n\nreturn is_null["+int2string(iIndex)+"];}" + "\n";
-	
+	}
+
 	return s;
 }
 
@@ -316,10 +326,12 @@ string TableInfo_Generator::get_null_setters_declaration()
 	int iIndex=0;
 	
 	for ( vector<FieldInfo*>::iterator i = m_Fields.begin(); i!=m_Fields.end(); i++, iIndex++ )
+	{
 		if (!((*i)->m_iFlags & NOT_NULL_FLAG))
 			s = s + "void " + (*i)->m_pcFieldName + "_setNull(bool val);" + "\n";
+	}
 
-	return s;	
+	return s;
 }
 
 string TableInfo_Generator::get_null_setters_definition()
@@ -328,10 +340,12 @@ string TableInfo_Generator::get_null_setters_definition()
 	int iIndex=0;
 	
 	for ( vector<FieldInfo*>::iterator i = m_Fields.begin(); i != m_Fields.end(); i++, iIndex++ )
+	{
 		if (!((*i)->m_iFlags & NOT_NULL_FLAG))
 			s = s + "void " +  "Row_"+m_sTableName+"::"+(*i)->m_pcFieldName + "_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);\nis_null["+int2string(iIndex)+"]=val;\nis_modified=true;\n}\n";
+	}
 
-	return s;	
+	return s;
 }
 
 string TableInfo_Generator::get_primary_fields_declaration()
@@ -339,9 +353,11 @@ string TableInfo_Generator::get_primary_fields_declaration()
 	string s;
 	
 	for ( vector<FieldInfo*>::iterator i = m_Fields.begin(); i != m_Fields.end(); i++ )
+	{
 		if ((*i)->m_iFlags & PRI_KEY_FLAG)
 			s = s + (*i)->getCType() + " pk_" + (*i)->m_pcFieldName + ";" + "\n";
-	
+	}
+
 	return s;
 }
 
@@ -925,9 +941,12 @@ string TableInfo_Generator::rows_getters_includes()
 	
 	for ( vector<FieldInfo*>::iterator i=m_Fields.begin(); i != m_Fields.end(); i++ )
 	{
-      	string m_sTableName = getTableFromForeignKey((*i)->m_pcFieldName,m_pTables);
-        if( m_sTableName.length()==0 && m_sTableName!=get_table_name() )
-            continue;
+	      	string m_sTableName = getTableFromForeignKey((*i)->m_pcFieldName,m_pTables);
+	        if( m_sTableName.length()==0 && m_sTableName!=get_table_name() )
+			continue;
+		// don't include entries to pluto sqlcvs accessor files, they are not created
+		if ( m_sTableName.find("_psch")!=string::npos )
+			continue;
 		s = s + "#include \"Table_"+m_sTableName+".h\"\n";
 
 	}
@@ -946,6 +965,11 @@ string TableInfo_Generator::fk_rows_getters_declaration()
 		for( size_t i=0; i < info->m_Fields.size(); ++i )
 		{
 			FieldInfo *field = info->m_Fields[i];
+
+			// don't include entries to pluto sqlcvs accessor files, they are not created
+			if ( info->get_table_name().find("_psch")!=string::npos )
+				continue;
+
 			if( getTableFromForeignKey(field->m_pcFieldName,m_pTables)==get_table_name() )
 			{
 				s = s + "void " + info->get_table_name() + "_" + field->m_pcFieldName + "_getrows(vector <class Row_" + info->get_table_name() + "*> *rows);\n";
@@ -967,6 +991,11 @@ string TableInfo_Generator::fk_rows_getters_definition()
         for( size_t i=0; i < info->m_Fields.size(); ++i )
         {
             FieldInfo *field = info->m_Fields[i];
+
+	    // don't include entries to pluto sqlcvs accessor files, they are not created
+	    if ( info->get_table_name().find("_psch")!=string::npos )
+		continue;
+
             if( getTableFromForeignKey(field->m_pcFieldName,m_pTables)==get_table_name() )
             {
                 s = s + "void Row_" + get_table_name() + "::"+ info->get_table_name() + "_" + field->m_pcFieldName + "_getrows(vector <class Row_" + info->get_table_name() + "*> *rows)\n";
@@ -989,12 +1018,19 @@ string TableInfo_Generator::fk_rows_getters_includes()
     for ( i=m_pTables->begin(); i != m_pTables->end(); ++i )
     {
         TableInfo_Generator *info = (*i).second;
+
+	// don't include entries to pluto sqlcvs accessor files, they are not created
+	if ( info->get_table_name().find("_psch")!=string::npos )
+	{
+		continue;
+	}
+
         for( size_t i=0; i < info->m_Fields.size(); ++i )
         {
             FieldInfo *field = info->m_Fields[i];
             if( getTableFromForeignKey( field->m_pcFieldName, m_pTables ) == get_table_name() )
             {
-                s = s + "#include \"Table_" + info->get_table_name() + ".h\"\n";
+	            s = s + "#include \"Table_" + info->get_table_name() + ".h\"\n";
             }
         }
     }

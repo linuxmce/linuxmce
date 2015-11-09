@@ -188,6 +188,10 @@ int main( int argc, char *argv[] )
 	{
 		TableInfo *pTableInfo = (*it);
 
+		// don't create accessor files for pluto sqlcvs history
+		if ( pTableInfo->get_table_name().find("_psch")!=string::npos )
+			continue;
+
 		if (pTableInfo->HasPrimaryKeys())
 		{
 			string s;	
@@ -291,6 +295,11 @@ int main( int argc, char *argv[] )
 	for ( it=p_listTableInfo->begin(); it<p_listTableInfo->end(); ++it )
 	{
 		TableInfo *pTableInfo = (*it);
+
+		// don't add accessor files for pluto sqlcvs history
+		if ( pTableInfo->get_table_name().find("_psch")!=string::npos )
+			continue;
+
 		Sources += "\t\t\t<File\r\n\t\t\t\tRelativePath=\".\\Table_" + pTableInfo->get_table_name() + ".cpp\">\r\n\t\t\t</File>\r\n";
 	}
 
@@ -360,6 +369,10 @@ int main( int argc, char *argv[] )
 	db_h_out << "private:" << endl;
 	for (vector<TableInfo_Generator *>::iterator i=dbInfo.listTableInfo_get()->begin(); i!=dbInfo.listTableInfo_get()->end(); i++)
 	{
+		// don't create accessor files for pluto sqlcvs history
+		if ( (*i)->get_table_name().find("_psch")!=string::npos )
+			continue;
+
 		db_h_out << "class Table_" + (*i)->get_table_name() + "* tbl"+(*i)->get_table_name()+";" << endl;
 		db_h_out << "bool Commit_" + (*i)->get_table_name() + "(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);" << endl;
 		makefile_out << " \\" << endl << "Table_" + (*i)->get_table_name() + ".cpp";
@@ -382,6 +395,10 @@ int main( int argc, char *argv[] )
 	db_h_out << "public:" << endl;
 	for (vector<TableInfo_Generator *>::iterator i=dbInfo.listTableInfo_get()->begin(); i<dbInfo.listTableInfo_get()->end(); i++)
 	{
+		// don't create accessor files for pluto sqlcvs history
+		if ( (*i)->get_table_name().find("_psch")!=string::npos )
+			continue;
+
 		db_h_out << "class Table_" + (*i)->get_table_name() + "* " + (*i)->get_table_name() + "_get() { if( !tbl"+(*i)->get_table_name()+" ) CreateTable_" + (*i)->get_table_name() + "(); return tbl"+(*i)->get_table_name()+"; }" << endl;
 	}
 	db_h_out << "string m_sLastDBError;" << endl;
@@ -393,10 +410,21 @@ int main( int argc, char *argv[] )
 	db_h_out << "private:" << endl;
 
 	for (vector<TableInfo_Generator *>::iterator i=dbInfo.listTableInfo_get()->begin(); i<dbInfo.listTableInfo_get()->end(); i++)
-		db_h_out << "void CreateTable_" + (*i)->get_table_name() + "();" << endl;
+	{
+		// don't create accessor files for pluto sqlcvs history
+		if ( (*i)->get_table_name().find("_psch")!=string::npos )
+			continue;
 
+		db_h_out << "void CreateTable_" + (*i)->get_table_name() + "();" << endl;
+	}
 	for (vector<TableInfo_Generator *>::iterator i=dbInfo.listTableInfo_get()->begin(); i!=dbInfo.listTableInfo_get()->end(); i++)
+	{
+		// don't create accessor files for pluto sqlcvs history
+		if ( (*i)->get_table_name().find("_psch")!=string::npos )
+			continue;
+
 		db_h_out << "void DeleteTable_" + (*i)->get_table_name() + "();" << endl;
+	}
 
 	db_h_out << "};" << endl;
 
@@ -406,7 +434,7 @@ int main( int argc, char *argv[] )
 	string db_cpp = sOutputPath + "Database_" + sDBName + ".cpp";
 	ofstream db_cpp_out(db_cpp.c_str());
 
-	db_cpp_out << "#ifdef WIN32" << endl << "\t#include <winsock.h>" << endl << "#endif" << endl;
+	db_cpp_out << "#ifdef WIN32" << endl << "\t#include <WinSock2.h>" << endl << "#endif" << endl;
 
 	db_cpp_out << "#include <iostream>" << endl
 		<< "#include <stdio.h>" << endl
@@ -427,6 +455,10 @@ int main( int argc, char *argv[] )
 	db_cpp_out << "\tLoggerWrapper::SetInstance(pLogger);" << endl;
 	for (vector<TableInfo_Generator *>::iterator i=dbInfo.listTableInfo_get()->begin(); i!=dbInfo.listTableInfo_get()->end(); i++)
 	{
+		// don't create accessor files for pluto sqlcvs history
+		if ( (*i)->get_table_name().find("_psch")!=string::npos )
+			continue;
+
 		db_cpp_out << "tbl"+(*i)->get_table_name()+"=NULL;" << endl;
 	}
 	db_cpp_out << "}" << endl << endl;
@@ -441,6 +473,10 @@ int main( int argc, char *argv[] )
 	db_cpp_out << "bool bResult=true;" << endl;
 	for (vector<TableInfo_Generator *>::iterator i=dbInfo.listTableInfo_get()->begin(); i!=dbInfo.listTableInfo_get()->end(); i++)
 	{
+		// don't create accessor files for pluto sqlcvs history
+		if ( (*i)->get_table_name().find("_psch")!=string::npos )
+			continue;
+
 		db_cpp_out << "if( tbl"+(*i)->get_table_name()+"!=NULL )" << endl;
 		db_cpp_out << "\tif( !Commit_"+(*i)->get_table_name()+"(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )" << endl;
 		db_cpp_out << "\t\tbResult=false;" << endl;
@@ -451,7 +487,13 @@ int main( int argc, char *argv[] )
 	db_cpp_out << "void Database_" << sDBName << "::DeleteAllTables()" << endl;
 	db_cpp_out << "{" << endl;
 	for (vector<TableInfo_Generator *>::iterator i=dbInfo.listTableInfo_get()->begin(); i!=dbInfo.listTableInfo_get()->end(); i++)
+	{
+		// don't create accessor files for pluto sqlcvs history
+		if ( (*i)->get_table_name().find("_psch")!=string::npos )
+			continue;
+
 		db_cpp_out << "DeleteTable_"+(*i)->get_table_name()+"();" << endl;
+	}
 	db_cpp_out << "}" << endl << endl;
 
 	db_cpp_out << "bool Database_" << sDBName << "::Connect(string host, string user, string pass, string sDBName, int port)" << endl;
