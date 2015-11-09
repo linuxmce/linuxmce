@@ -28,6 +28,7 @@
 #define SIZE_Asus_TF700T_CONST 26
 #define SIZE_Jolla_Android_CONST 27
 #define SIZE_2560x1440_CONST 28
+#define SIZE_2048x1536_CONST 29
 
 #define SIZE_TABLE "Size"
 #define SIZE_PK_SIZE_FIELD "PK_Size"

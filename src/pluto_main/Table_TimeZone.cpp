@@ -20,7 +20,7 @@
 #endif
 
 #ifdef WIN32
-#include <winsock.h>
+#include <WinSock2.h>
 #endif
 
 #include <iostream>
@@ -263,8 +263,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[301];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ZoneName.c_str(), (unsigned long) min((size_t)150,m_ZoneName.size()));
+char *buf = new char[101];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ZoneName.c_str(), (unsigned long) min((size_t)50,m_ZoneName.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -277,8 +277,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[91];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Coordinate.c_str(), (unsigned long) min((size_t)45,m_Coordinate.size()));
+char *buf = new char[31];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Coordinate.c_str(), (unsigned long) min((size_t)15,m_Coordinate.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -317,8 +317,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[601];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)300,m_Comments.size()));
+char *buf = new char[201];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)100,m_Comments.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -331,8 +331,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[31];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_CountryCode.c_str(), (unsigned long) min((size_t)15,m_CountryCode.size()));
+char *buf = new char[11];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_CountryCode.c_str(), (unsigned long) min((size_t)5,m_CountryCode.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

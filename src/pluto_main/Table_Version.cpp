@@ -20,7 +20,7 @@
 #endif
 
 #ifdef WIN32
-#include <winsock.h>
+#include <WinSock2.h>
 #endif
 
 #include <iostream>
@@ -33,6 +33,7 @@ using namespace std;
 #include "Table_Version.h"
 
 #include "Table_Installation.h"
+#include "Table_Package_Version.h"
 #include "Table_Schema.h"
 
 
@@ -377,8 +378,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[133];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VersionName.c_str(), (unsigned long) min((size_t)66,m_VersionName.size()));
+char *buf = new char[45];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VersionName.c_str(), (unsigned long) min((size_t)22,m_VersionName.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -391,8 +392,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[79];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_BuildName.c_str(), (unsigned long) min((size_t)39,m_BuildName.size()));
+char *buf = new char[27];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_BuildName.c_str(), (unsigned long) min((size_t)13,m_BuildName.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -419,8 +420,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[181];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
+char *buf = new char[61];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -487,8 +488,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[9])
 return "NULL";
 
-char *buf = new char[151];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_SvnBranch.c_str(), (unsigned long) min((size_t)75,m_SvnBranch.size()));
+char *buf = new char[51];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_SvnBranch.c_str(), (unsigned long) min((size_t)25,m_SvnBranch.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1297,6 +1298,13 @@ void Row_Version::Installation_FK_Version_getrows(vector <class Row_Installation
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Installation *pTable = table->database->Installation_get();
+pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
+}
+void Row_Version::Package_Version_FK_Version_getrows(vector <class Row_Package_Version*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Version *pTable = table->database->Package_Version_get();
 pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
 }
 void Row_Version::Schema_FK_Version_getrows(vector <class Row_Schema*> *rows)

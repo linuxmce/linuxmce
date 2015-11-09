@@ -20,7 +20,7 @@
 #endif
 
 #ifdef WIN32
-#include <winsock.h>
+#include <WinSock2.h>
 #endif
 
 #include <iostream>
@@ -652,8 +652,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[181];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)90,m_Description.size()));
+char *buf = new char[61];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)30,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -706,8 +706,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[181];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)90,m_Define.size()));
+char *buf = new char[61];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)30,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -746,8 +746,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[8])
 return "NULL";
 
-char *buf = new char[601];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_CommandLine.c_str(), (unsigned long) min((size_t)300,m_CommandLine.size()));
+char *buf = new char[201];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_CommandLine.c_str(), (unsigned long) min((size_t)100,m_CommandLine.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -838,8 +838,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[15])
 return "NULL";
 
-char *buf = new char[301];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_DestinationDir.c_str(), (unsigned long) min((size_t)150,m_DestinationDir.size()));
+char *buf = new char[101];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_DestinationDir.c_str(), (unsigned long) min((size_t)50,m_DestinationDir.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -904,8 +904,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[20])
 return "NULL";
 
-char *buf = new char[601];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ConfigureScript.c_str(), (unsigned long) min((size_t)300,m_ConfigureScript.size()));
+char *buf = new char[201];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ConfigureScript.c_str(), (unsigned long) min((size_t)100,m_ConfigureScript.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -918,8 +918,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[21])
 return "NULL";
 
-char *buf = new char[601];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ManufacturerURL.c_str(), (unsigned long) min((size_t)300,m_ManufacturerURL.size()));
+char *buf = new char[201];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ManufacturerURL.c_str(), (unsigned long) min((size_t)100,m_ManufacturerURL.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -932,8 +932,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[22])
 return "NULL";
 
-char *buf = new char[301];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_InternalURLSuffix.c_str(), (unsigned long) min((size_t)150,m_InternalURLSuffix.size()));
+char *buf = new char[101];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_InternalURLSuffix.c_str(), (unsigned long) min((size_t)50,m_InternalURLSuffix.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -946,8 +946,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[23])
 return "NULL";
 
-char *buf = new char[301];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_WizardURL.c_str(), (unsigned long) min((size_t)150,m_WizardURL.size()));
+char *buf = new char[101];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_WizardURL.c_str(), (unsigned long) min((size_t)50,m_WizardURL.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1012,8 +1012,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[28])
 return "NULL";
 
-char *buf = new char[1531];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL.c_str(), (unsigned long) min((size_t)765,m_HelpURL.size()));
+char *buf = new char[511];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL.c_str(), (unsigned long) min((size_t)255,m_HelpURL.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

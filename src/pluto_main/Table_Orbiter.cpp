@@ -20,7 +20,7 @@
 #endif
 
 #ifdef WIN32
-#include <winsock.h>
+#include <WinSock2.h>
 #endif
 
 #include <iostream>
@@ -396,7 +396,7 @@ if (is_null[1])
 return "NULL";
 
 char *buf = new char[5000000];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FloorplanInfo.c_str(), (unsigned long) min((size_t)50331645,m_FloorplanInfo.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FloorplanInfo.c_str(), (unsigned long) min((size_t)16777215,m_FloorplanInfo.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -436,8 +436,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[301];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Size.c_str(), (unsigned long) min((size_t)150,m_Size.size()));
+char *buf = new char[101];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Size.c_str(), (unsigned long) min((size_t)50,m_Size.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -463,8 +463,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[301];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RegenStatus.c_str(), (unsigned long) min((size_t)150,m_RegenStatus.size()));
+char *buf = new char[101];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RegenStatus.c_str(), (unsigned long) min((size_t)50,m_RegenStatus.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -490,8 +490,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[8])
 return "NULL";
 
-char *buf = new char[1531];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScenariosFloorplans.c_str(), (unsigned long) min((size_t)765,m_ScenariosFloorplans.size()));
+char *buf = new char[511];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScenariosFloorplans.c_str(), (unsigned long) min((size_t)255,m_ScenariosFloorplans.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
