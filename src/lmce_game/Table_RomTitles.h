@@ -134,6 +134,7 @@ bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
+bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -143,6 +144,7 @@ void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
+void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	

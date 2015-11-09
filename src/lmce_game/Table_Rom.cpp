@@ -20,7 +20,7 @@
 #endif
 
 #ifdef WIN32
-#include <winsock.h>
+#include <WinSock2.h>
 #endif
 
 #include <iostream>
@@ -153,8 +153,7 @@ is_null[7] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[8] = false;
-m_psc_mod = "0000-00-00 00:00:00";
-is_null[9] = false;
+is_null[9] = true;
 is_null[10] = true;
 m_psc_restrict = 0;
 
@@ -255,6 +254,9 @@ return is_null[7];}
 bool Row_Rom::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[8];}
+bool Row_Rom::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[9];}
 bool Row_Rom::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[10];}
@@ -286,6 +288,10 @@ is_modified=true;
 }
 void Row_Rom::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[8]=val;
+is_modified=true;
+}
+void Row_Rom::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[9]=val;
 is_modified=true;
 }
 void Row_Rom::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -327,8 +333,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[1531];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Romname.c_str(), (unsigned long) min((size_t)765,m_Romname.size()));
+char *buf = new char[511];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Romname.c_str(), (unsigned long) min((size_t)255,m_Romname.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -341,8 +347,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[193];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_md5.c_str(), (unsigned long) min((size_t)96,m_md5.size()));
+char *buf = new char[65];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_md5.c_str(), (unsigned long) min((size_t)32,m_md5.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
