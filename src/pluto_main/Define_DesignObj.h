@@ -2778,10 +2778,10 @@
 #define DESIGNOBJ_graCommoUpDn2_CONST 6171
 #define DESIGNOBJ_graCommoLfRt_CONST 6172
 #define DESIGNOBJ_graCommoLfRt2_CONST 6173
-#define DESIGNOBJ_butEmuKB_commoF1F2_CONST 6177
-#define DESIGNOBJ_butEmuKB_commoF3F4_CONST 6178
-#define DESIGNOBJ_butEmuKB_commoF5F6_CONST 6179
-#define DESIGNOBJ_butEmuKB_commoF7F8_CONST 6180
+#define DESIGNOBJ_butEmuKB_commoF1_CONST 6177
+#define DESIGNOBJ_butEmuKB_commoF3_CONST 6178
+#define DESIGNOBJ_butEmuKB_commoF5_CONST 6179
+#define DESIGNOBJ_butEmuKB_commoF7_CONST 6180
 #define DESIGNOBJ_butEmuKB_2Quote_CONST 6181
 #define DESIGNOBJ_butEmuKB_6Amp_CONST 6182
 #define DESIGNOBJ_butEmuKB_7Apo_CONST 6183
@@ -3044,6 +3044,13 @@
 #define DESIGNOBJ_butBack_Alt_CONST 6450
 #define DESIGNOBJ_butGameSelectAlt_CONST 6451
 #define DESIGNOBJ_butGameStartAlt_CONST 6452
+#define DESIGNOBJ_butEmuKB_CommoF2_CONST 6454
+#define DESIGNOBJ_butEmuKB_commoF4_CONST 6455
+#define DESIGNOBJ_butEmuKB_commoF6_CONST 6456
+#define DESIGNOBJ_butEmuKB_commoF8_CONST 6457
+#define DESIGNOBJ_dgGPDisks_CONST 6458
+#define DESIGNOBJ_mnuSwapDisks_CONST 6459
+#define DESIGNOBJ_butSwapDisks_CONST 6460
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

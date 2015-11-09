@@ -313,6 +313,8 @@ class Table_Package_Source_Compat* tblPackage_Source_Compat;
 bool Commit_Package_Source_Compat(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Package_Users* tblPackage_Users;
 bool Commit_Package_Users(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_Package_Version* tblPackage_Version;
+bool Commit_Package_Version(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_PageSetup* tblPageSetup;
 bool Commit_PageSetup(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_PaidLicense* tblPaidLicense;
@@ -638,6 +640,7 @@ class Table_Package_Package* Package_Package_get() { if( !tblPackage_Package ) C
 class Table_Package_Source* Package_Source_get() { if( !tblPackage_Source ) CreateTable_Package_Source(); return tblPackage_Source; }
 class Table_Package_Source_Compat* Package_Source_Compat_get() { if( !tblPackage_Source_Compat ) CreateTable_Package_Source_Compat(); return tblPackage_Source_Compat; }
 class Table_Package_Users* Package_Users_get() { if( !tblPackage_Users ) CreateTable_Package_Users(); return tblPackage_Users; }
+class Table_Package_Version* Package_Version_get() { if( !tblPackage_Version ) CreateTable_Package_Version(); return tblPackage_Version; }
 class Table_PageSetup* PageSetup_get() { if( !tblPageSetup ) CreateTable_PageSetup(); return tblPageSetup; }
 class Table_PaidLicense* PaidLicense_get() { if( !tblPaidLicense ) CreateTable_PaidLicense(); return tblPaidLicense; }
 class Table_ParameterType* ParameterType_get() { if( !tblParameterType ) CreateTable_ParameterType(); return tblParameterType; }
@@ -878,6 +881,7 @@ void CreateTable_Package_Package();
 void CreateTable_Package_Source();
 void CreateTable_Package_Source_Compat();
 void CreateTable_Package_Users();
+void CreateTable_Package_Version();
 void CreateTable_PageSetup();
 void CreateTable_PaidLicense();
 void CreateTable_ParameterType();
@@ -1112,6 +1116,7 @@ void DeleteTable_Package_Package();
 void DeleteTable_Package_Source();
 void DeleteTable_Package_Source_Compat();
 void DeleteTable_Package_Users();
+void DeleteTable_Package_Version();
 void DeleteTable_PageSetup();
 void DeleteTable_PaidLicense();
 void DeleteTable_ParameterType();

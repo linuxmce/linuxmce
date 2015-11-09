@@ -2,6 +2,9 @@
 #define __Define_Criteria_H__
 
 #define CRITERIA_Leave_Home_CONST 1
+#define CRITERIA_Watching_Media_CONST 2
+#define CRITERIA_Stop_Watching_CONST 3
+#define CRITERIA_event_CONST 4
 
 #define CRITERIA_TABLE "Criteria"
 #define CRITERIA_PK_CRITERIA_FIELD "PK_Criteria"

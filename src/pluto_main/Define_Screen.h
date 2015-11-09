@@ -38,7 +38,7 @@
 #define SCREEN_ModeChanged_CONST 35
 #define SCREEN_SensorsNotReady_CONST 36
 #define SCREEN_RecordedTVShows_CONST 37
-#define SCREEN_DeviceControl_CONST 38
+#define SCREEN_Control_Devices_CONST 38
 #define SCREEN_Computing_CONST 39
 #define SCREEN_OpenFile_CONST 40
 #define SCREEN_BrowserConsole_CONST 41
@@ -204,7 +204,7 @@
 #define SCREEN_Sensors_Viewed_By_Camera_CONST 206
 #define SCREEN_PVR_OSD_CONST 207
 #define SCREEN_PVR_Recordings_CONST 208
-#define SCREEN_Demo_Media_CONST 209
+#define SCREEN_Swap_Disks_CONST 209
 #define SCREEN_Download_are_ready_to_install_CONST 210
 #define SCREEN_mnuAmbiance_CONST 212
 #define SCREEN_TVConfirmInputsToggle_CONST 216

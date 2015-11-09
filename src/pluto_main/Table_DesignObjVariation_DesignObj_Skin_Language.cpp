@@ -20,7 +20,7 @@
 #endif
 
 #ifdef WIN32
-#include <winsock.h>
+#include <WinSock2.h>
 #endif
 
 #include <iostream>
@@ -793,8 +793,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[21])
 return "NULL";
 
-char *buf = new char[85];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_sFK_DesignObj_TiedTo.c_str(), (unsigned long) min((size_t)42,m_sFK_DesignObj_TiedTo.size()));
+char *buf = new char[29];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_sFK_DesignObj_TiedTo.c_str(), (unsigned long) min((size_t)14,m_sFK_DesignObj_TiedTo.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -807,8 +807,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[22])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VisibleStates.c_str(), (unsigned long) min((size_t)30,m_VisibleStates.size()));
+char *buf = new char[21];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VisibleStates.c_str(), (unsigned long) min((size_t)10,m_VisibleStates.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

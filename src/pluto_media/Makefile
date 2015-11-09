@@ -11,8 +11,6 @@ LDFLAGS += -lmysqlclient_r
 
 #
 
-headers += *.h
-
 sources +=  \
 Table_Attribute.cpp \
 Table_AttributeType.cpp \
@@ -62,19 +60,14 @@ all: libpluto_media.so all-recursive
 
 libpluto_media.so: $(sources:.cpp=.o)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
-	mkdir -p ../lib
 	cp $@ ../lib
-
-distclean: clean
 
 clean: clean-recursive
 	rm -f *.o *.d libpluto_media.so >/dev/null
 
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp $@ /usr/pluto/bin
+
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
-
-install: 
-	mkdir -p $(DESTDIR)/usr/pluto/lib $(DESTDIR)/usr/include/lmce
-	cp libpluto_media.so $(DESTDIR)/usr/pluto/lib
-	cp $(headers) $(DESTDIR)/usr/include/lmce
-	

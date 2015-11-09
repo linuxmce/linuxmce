@@ -3,7 +3,7 @@ CXXFLAGS = -pipe -Wall -O2 -D_GNU_SOURCE -fPIC -g -ggdb3
 CPPFLAGS =  -I.. -I../.. -I../DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DMULTI_THREADED -DNO_SQL_THREAD_LOG
 CXX = g++
 LDFLAGS = -L$(ROOT)/lib
-
+sources = Database_pluto_main.cpp TableRow.cpp
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
@@ -11,7 +11,7 @@ LDFLAGS += -lmysqlclient_r
 
 #
 
-sources = ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp Database_pluto_main.cpp TableRow.cpp \
+sources +=  \
 Table_Array.cpp \
 Table_Broadcast.cpp \
 Table_Button.cpp \
@@ -156,6 +156,7 @@ Table_Package_Package.cpp \
 Table_Package_Source.cpp \
 Table_Package_Source_Compat.cpp \
 Table_Package_Users.cpp \
+Table_Package_Version.cpp \
 Table_PageSetup.cpp \
 Table_PaidLicense.cpp \
 Table_ParameterType.cpp \
@@ -254,7 +255,11 @@ libpluto_main.so: $(sources:.cpp=.o)
 	cp $@ ../lib
 
 clean: clean-recursive
-	rm -f $(sources:.cpp=.o) $(sources:.cpp=.d) libpluto_main.so >/dev/null
+	rm -f *.o *.d libpluto_main.so >/dev/null
+
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp $@ /usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)

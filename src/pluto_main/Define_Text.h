@@ -1189,10 +1189,10 @@
 #define TEXT_colon_bracket_CONST 2132
 #define TEXT_semicolon_bracket_CONST 2133
 #define TEXT_Equals_CONST 2134
-#define TEXT_F1F2_CONST 2135
-#define TEXT_F3F4_CONST 2136
-#define TEXT_F5F6_CONST 2137
-#define TEXT_F7F8_CONST 2138
+#define TEXT_F1_CONST 2135
+#define TEXT_F2_CONST 2136
+#define TEXT_F3_CONST 2137
+#define TEXT_F4_CONST 2138
 #define TEXT_SixAmp_CONST 2139
 #define TEXT_7Apo_CONST 2140
 #define TEXT_8Par_CONST 2141
@@ -1348,6 +1348,12 @@
 #define TEXT_TIDown_CONST 2292
 #define TEXT_TIBacktick_CONST 2293
 #define TEXT_GOption_CONST 2294
+#define TEXT_F5_CONST 2295
+#define TEXT_F6_CONST 2296
+#define TEXT_F7_CONST 2297
+#define TEXT_F8_CONST 2298
+#define TEXT_Disk_Select_CONST 2299
+#define TEXT_Swap_Disks_CONST 2300
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
