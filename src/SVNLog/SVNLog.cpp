@@ -55,7 +55,7 @@ See the GNU General Public License for more details.
 #define mkdir _mkdir  // Why, Microsoft, why?
 #endif
 
-#define  VERSION "<=version=>"
+#include "../version.h"
 
 
 

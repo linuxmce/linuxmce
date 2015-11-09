@@ -35,7 +35,7 @@
 //uncomment next line to see if AllScreens.h is compilable
 //#include "Gen_Devices/AllScreens.h"
 
-#define  VERSION "<=version=>"
+#include "../version.h"
 //-----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 static string g_sAppPath;
