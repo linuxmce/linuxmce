@@ -133,7 +133,11 @@ namespace DCE
 				{
 
 					struct tm t;
+#ifdef WIN32
+					_localtime64_s(&t, (time_t *)&tv.tv_sec);
+#else
 					localtime_r((time_t *)&tv.tv_sec,&t);
+#endif
 					char c[50];
 					double sec = (double)(tv.tv_usec/1E6) + t.tm_sec;
 					snprintf(c,sizeof(c),"%02d/%02d/%02d %d:%02d:%06.3f",(int) t.tm_mon+1,(int) t.tm_mday,(int) t.tm_year-100,(int) t.tm_hour,(int) t.tm_min, sec);

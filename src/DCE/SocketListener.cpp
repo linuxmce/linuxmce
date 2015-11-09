@@ -14,6 +14,11 @@ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU Lesser General Public License for more details.
 */
 
+#ifdef WIN32
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#endif
+
 #include "PlutoUtils/CommonIncludes.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
