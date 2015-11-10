@@ -51,7 +51,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..;../DCE;../../libs/Libraries/pthreads-win32/include;/mysql/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PTHREAD2;UNICODE;WIN32;_DEBUG;_LIB;DEBUG;EXPORT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PTHREAD2;WIN32;_DEBUG;_LIB;DEBUG;EXPORT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -91,6 +91,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\db_wrapper\db_wrapper.cpp" />
     <ClCompile Include="Database_pluto_main.cpp" />
     <ClCompile Include="TableRow.cpp" />
     <ClCompile Include="Table_Array.cpp" />

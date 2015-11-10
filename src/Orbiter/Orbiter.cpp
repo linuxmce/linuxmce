@@ -247,7 +247,12 @@ Orbiter::Orbiter( int DeviceID, int PK_DeviceTemplate, string ServerAddress,  st
 				 : Orbiter_Command( DeviceID,  ServerAddress, true, bLocalMode ), IRReceiverBase(),
 				 m_MaintThreadMutex("MaintThread"), m_ScreenMutex( "rendering" ),
 				 m_VariableMutex( "variable" ), m_DatagridMutex( "datagrid" ),
-				 m_TimeCodeMutex( "timecode" ), m_TimeCodeID(0)
+				 m_TimeCodeMutex( "timecode" ), 
+#ifdef PTHREAD2
+	m_TimeCodeID( { NULL,0 } )
+#else
+	m_TimeCodeID(0)
+#endif
 				 //<-dceag-const-e->
 {
 	IRReceiverBase::Setup(this);
@@ -259,7 +264,11 @@ Orbiter::Orbiter( int DeviceID, int PK_DeviceTemplate, string ServerAddress,  st
     m_GenericHidThreadID=(pthread_t)NULL;
 #endif
 
+#ifdef PTHREAD2
+	m_MaintThreadID = pthread_t{ NULL, 0 };
+#else
 	m_MaintThreadID = (pthread_t)NULL;
+#endif
 	
 	WriteStatusOutput((char *)(string("Orbiter version: ") + VERSION).c_str());
 	WriteStatusOutput("Orbiter constructor");
@@ -589,11 +598,19 @@ Orbiter::~Orbiter()
 	vm.Release();
 
 	//wait TimeCodeThread to finish
+#ifdef PTHREAD2
+	if (m_TimeCodeID.p)
+#else
 	if(m_TimeCodeID)
+#endif
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Waiting for TimeCode thread to finish...");
 		pthread_join(m_TimeCodeID, NULL);
+#ifdef PTHREAD2
+		m_TimeCodeID.p = 0;
+#else
 		m_TimeCodeID = 0;
+#endif
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Done with TimeCode thread.");
 	}
 
@@ -6934,10 +6951,18 @@ void Orbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,s
 		m_bUpdateTimeCodeLoopRunning=true;
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateTimeCode starting thread");
 
+#ifdef PTHREAD2
+		if (m_TimeCodeID.p)
+#else
 		if(m_TimeCodeID)
+#endif
 		{
 			pthread_join(m_TimeCodeID, NULL);
+#ifdef PTHREAD2
+			m_TimeCodeID.p = 0;
+#else
 			m_TimeCodeID = 0;
+#endif
 		}
 		
 		pthread_create(&m_TimeCodeID, NULL, UpdateTimeCodeThread, (void*)this);
@@ -7454,11 +7479,19 @@ void Orbiter::KillMaintThread()
 		}
 	}
 
+#ifdef PTHREAD2
+	if (m_MaintThreadID.p)
+#else
 	if(m_MaintThreadID)
+#endif
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Waiting for Maint thread to finish...");
 		pthread_join(m_MaintThreadID, NULL);
+#ifdef PTHREAD2
+		m_MaintThreadID.p = 0;
+#else
 		m_MaintThreadID = 0;
+#endif
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Done with Maint thread.");
 	}
 }

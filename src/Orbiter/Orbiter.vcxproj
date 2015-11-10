@@ -59,7 +59,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.;..;Win32;../DCE;../../libs/Libraries/pthreads-win32/include;../../libs/CrossPlatform/sge030809-w32/src;../../libs/CrossPlatform/SDL_ttf-2.0.6;../../libs/CrossPlatform/SDL_image-1.2.3;../../libs/CrossPlatform/SDL-1.2.7/include;../Splitter;../../libs/CrossPlatform/zlib;../../libs/CrossPlatform/lpng127;../PlutoUtils;SDL;../../libs/CrossPlatform/SDL_rotozoom-1.6;../OrbiterGen;\mysql\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;ORBITER;DEBUG;ENABLE_MOUSE_BEHAVIOR;TEST_OSD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PTHREAD2;WIN32;_DEBUG;_CONSOLE;ORBITER;DEBUG;ENABLE_MOUSE_BEHAVIOR;TEST_OSD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -72,7 +72,7 @@
     <Link>
       <AdditionalDependencies>pthreadVC2.lib;wsock32.lib;SDL-pluto-d.lib;SDL_image-pluto-d.lib;SDL_ttf-pluto-d.lib;SGE-pluto-d.lib;DCE.lib;zlib1-pluto-d.lib;libpng-pluto-d.lib;SDL_rotozoom-pluto-d.lib;OpenGL32.lib;libmysql.lib;SDL_Helpers.lib;pluto_main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>../Debug/Orbiter_SDL.exe</OutputFile>
-      <AdditionalLibraryDirectories>../../libs/Libraries/pthreads-win32/lib/x86;../../libs/CrossPlatform/SDL-1.2.7/VisualC7/SDL/Debug;../../libs/CrossPlatform/SDL_image-1.2.3/VisualC/Debug;../../libs/CrossPlatform/SDL_ttf-2.0.6/VisualC/Debug;../../libs/CrossPlatform/sge030809-w32/sge-msvc/sge/VisualC/Debug;../lib;../../libs/CrossPlatform/lpng127/projects/visualc6/Win32_DLL_Debug;../../libs/CrossPlatform/zlib/projects/visualc6/Win32_DLL_Debug;../../libs/CrossPlatform/SDL_rotozoom-1.6/VisualC/SDL_rotozoom/Debug;../../libs/Libraries/jpgsrc6b/vc7/Debug;\mysql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../libs/Libraries/pthreads-win32/lib;../../libs/CrossPlatform/SDL-1.2.7/VisualC7/SDL/Debug;../../libs/CrossPlatform/SDL_image-1.2.3/VisualC/Debug;../../libs/CrossPlatform/SDL_ttf-2.0.6/VisualC/Debug;../../libs/CrossPlatform/sge030809-w32/sge-msvc/sge/VisualC/Debug;../lib;../../libs/CrossPlatform/lpng127/projects/visualc6/Win32_DLL_Debug;../../libs/CrossPlatform/zlib/projects/visualc6/Win32_DLL_Debug;../../libs/CrossPlatform/SDL_rotozoom-1.6/VisualC/SDL_rotozoom/Debug;../../libs/Libraries/jpgsrc6b/vc7/Debug;\mysql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)Orbiter.pdb</ProgramDatabaseFile>

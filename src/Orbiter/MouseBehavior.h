@@ -70,7 +70,10 @@ namespace DCE
 		virtual void Notch(int PK_Direction,int iRepeat) {} // The user moved a 'notch' in the given direction
 		virtual bool MovedOutside(int PK_Direction) { return false; } // Override this and return true if you don't want the framework to automatically reposition the pointer inside the object
 		virtual bool SlowDrift(int &X,int &Y) { return false; } // We're about to call a move after the user has been slowly drifting.  The handler can alter the position, and/or return true to ignore the move
-		typedef enum EMouseHandler { mh_Locked, mh_Speed, mh_Light, mh_Volume, mh_Media, mh_Keyboard, mh_MediaBrowser, mh_HorizMenu };
+#ifndef WIN32
+		typedef
+#endif
+		enum EMouseHandler { mh_Locked, mh_Speed, mh_Light, mh_Volume, mh_Media, mh_Keyboard, mh_MediaBrowser, mh_HorizMenu };
 		virtual EMouseHandler TypeOfMouseHandler()=0;
 	};
 

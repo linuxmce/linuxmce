@@ -50,7 +50,11 @@ IRReceiverBase::IRReceiverBase(Command_Impl *pCommand_Impl)
 #endif
 
 	m_bRepeatKey=false;
+#ifdef PTHREAD2
+	m_pt_Repeat.p = 0;
+#else
 	m_pt_Repeat=0;
+#endif
 
 	m_mapAVWCommands["ok"] = "return";
 	m_mapAVWCommands["volup"] = "plus";
@@ -127,12 +131,20 @@ void IRReceiverBase::GetConfig(DeviceData_Impl *pData)
 
 IRReceiverBase::~IRReceiverBase()
 {
+#ifdef PTHREAD2
+	if (m_pt_Repeat.p)
+#else
 	if( m_pt_Repeat )
+#endif
 	{
 		m_bRepeatKey = false;
 		pthread_cond_broadcast(&m_RepeatThreadCond);
 		pthread_join(m_pt_Repeat,NULL);
+#ifdef PTHREAD2
+		m_pt_Repeat.p = 0;
+#else
 		m_pt_Repeat=0;
+#endif
 	}
 
 	for(map<string,MapKeysToMessages *>::iterator it=m_mapKeyMapping.begin();it!=m_mapKeyMapping.end();++it)
@@ -226,8 +238,14 @@ void IRReceiverBase::ReceivedCode(int PK_Device_Remote,const char *pCode,const c
 	// See if we've got a code to repeat
 	if( pRepeat && *pRepeat )
 	{
-		if( m_pt_Repeat )
+#ifdef PTHREAD2
+		if (m_pt_Repeat.p)
+#else
+		if (m_pt_Repeat)
+#endif
+		{
 			StopRepeatCode();
+		}
 
 		m_bRepeatKey=true;
 		m_sRepeatCode=pRepeat;
@@ -242,11 +260,19 @@ void IRReceiverBase::StopRepeatCode()
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"IRReceiverBase::StopRepeatCode");
 #endif
 	m_bRepeatKey=false;
+#ifdef PTHREAD2
+	if (m_pt_Repeat.p)
+#else
 	if( m_pt_Repeat )
+#endif
 	{
 		pthread_cond_broadcast(&m_RepeatThreadCond);
 		pthread_join(m_pt_Repeat,NULL);
+#ifdef PTHREAD2
+		m_pt_Repeat.p = 0;
+#else
 		m_pt_Repeat=0;
+#endif
 	}
 }
 
