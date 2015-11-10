@@ -41,7 +41,7 @@ void* ServerLoggerThread(void* param)
 
 ServerLogger::ServerLogger(int DeviceID, int PK_DeviceTemplate, string server) :ClientSocket(DeviceID, server, string("Logger ") + StringUtils::itos(DeviceID))
 {
-#ifdef WIN32
+#ifdef PTHREAD2
     m_Thread.p = 0;
 #else
     m_Thread = 0;
@@ -57,7 +57,7 @@ ServerLogger::ServerLogger(int DeviceID, int PK_DeviceTemplate, string server) :
 ServerLogger::~ServerLogger()
 {
 	m_bQuit_set(true);
-#ifdef WIN32
+#ifdef PTHREAD2
         if (m_Thread.p)
 #else
         if (m_Thread)

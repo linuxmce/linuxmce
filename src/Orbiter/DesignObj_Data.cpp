@@ -518,7 +518,11 @@ bool DesignObj_Data::Serialize( bool bWriting, char *&pcDataBlock, unsigned long
 				long Row = Read_long();
 				string sObjectID;
 				Read_string(sObjectID);
+#ifdef WIN32
+				mapDgObjects[sObjectID] = make_pair (Col, Row);
+#else
 				mapDgObjects[sObjectID] = make_pair<int,int> (Col,Row);
+#endif
 			}
 		}
 
@@ -550,7 +554,11 @@ bool DesignObj_Data::Serialize( bool bWriting, char *&pcDataBlock, unsigned long
 						pDesignObj_Data->m_pDesignObj_DataGrid = ( (DesignObj_DataGrid *)this );
 						pDesignObj_Data->m_iGridCol=it->second.first;
 						pDesignObj_Data->m_iGridRow=it->second.second;
+#ifdef WIN32
+						pDesignObj_Data->m_pDesignObj_DataGrid->m_mapChildDgObjects[make_pair (it->second.first, it->second.second)] = pDesignObj_Data;
+#else
 						pDesignObj_Data->m_pDesignObj_DataGrid->m_mapChildDgObjects[ make_pair<int,int> (it->second.first,it->second.second) ] = pDesignObj_Data;
+#endif
 					}
 				}
 #elif defined(OrbiterGen)

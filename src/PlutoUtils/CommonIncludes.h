@@ -81,7 +81,9 @@ using namespace std;
 
 	#define trunc(s) s
 
+#ifndef WIN32
 	typedef __int8  int8_t;
+#endif
 	typedef __int16 int16_t;
 	typedef __int32 int32_t;
 	typedef __int64 int64_t;

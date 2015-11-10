@@ -129,7 +129,7 @@ Command_Impl::Command_Impl( int DeviceID, string ServerAddress, bool bLocalMode,
 	m_bGeneric = false;
 	m_dwMessageInterceptorCounter=1;
 	m_pMessageBuffer=NULL;
-#ifdef WIN32
+#ifdef PTHREAD2
         m_pthread_queue_id.p=0;
 #else
         m_pthread_queue_id=0;
@@ -157,7 +157,7 @@ Command_Impl::Command_Impl( Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl
 	m_bGeneric = false;
 	m_dwMessageInterceptorCounter=0;
         m_pMessageBuffer=NULL;
-#ifdef WIN32
+#ifdef PTHREAD2
         m_pthread_queue_id.p=0;
 #else
         m_pthread_queue_id=0;
@@ -217,7 +217,7 @@ void Command_Impl::PrepareToDelete()
 	}
 
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Message queue thread quit" );
-#ifdef WIN32
+#ifdef PTHREAD2
         if( m_pthread_queue_id.p != 0 )
         {
                 pthread_join(m_pthread_queue_id, NULL);
@@ -460,7 +460,7 @@ bool Command_Impl::Connect(int iPK_DeviceTemplate, std::string)
 	if( bResult )
 	{
 		m_bMessageQueueThreadRunning = true;
-#ifdef WIN32
+#ifdef PTHREAD2
                 if(m_pthread_queue_id.p==0 && pthread_create( &m_pthread_queue_id, NULL, MessageQueueThread_DCECI, (void*)this) )
                 {
                         m_pthread_queue_id.p=0;
@@ -1030,7 +1030,7 @@ void Command_Impl::StartWatchDog( clock_t Timeout )
 
 void Command_Impl::StopWatchDog()
 {
-#ifdef WIN32
+#ifdef PTHREAD2
     if ( m_pThread.p != 0 )
     {
         m_bStopWatchdog = true;

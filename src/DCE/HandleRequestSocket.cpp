@@ -37,7 +37,7 @@ void *BeginHandleRequestThread( void *HRqSock )
 HandleRequestSocket::HandleRequestSocket( int iDeviceID, string sIPAddress, string sName ) :
 	ClientSocket( iDeviceID, sIPAddress, sName )
 {
-#ifdef WIN32
+#ifdef PTHREAD2
     m_RequestHandlerThread.p = 0;
 #else
     m_RequestHandlerThread = 0;
@@ -80,7 +80,11 @@ void HandleRequestSocket::DisconnectAndWait()
 		Sleep(10);
 	}
 #ifdef WIN32
-        if( m_bRunning && m_RequestHandlerThread.p )
+#ifdef PTHREAD2
+	if (m_bRunning && m_RequestHandlerThread.p != 0)
+#else
+	if( m_bRunning && m_RequestHandlerThread )
+#endif
         {
                 LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Requesthandler %p (device: %d) runThread won't die!", this, m_dwPK_Device );
 
@@ -89,7 +93,11 @@ void HandleRequestSocket::DisconnectAndWait()
 #endif
         }
 
-        m_RequestHandlerThread.p = 0;
+#ifdef PTHREAD2
+	m_RequestHandlerThread.p = 0;
+#else
+	m_RequestHandlerThread = 0;
+#endif
 }
 #else
         if( m_bRunning && m_RequestHandlerThread )

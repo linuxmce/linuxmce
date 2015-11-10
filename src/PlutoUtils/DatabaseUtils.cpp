@@ -112,8 +112,15 @@ void DatabaseUtils::GetUnusedPortsOnAllPCs(DBHelper *pDBHelper,vector< pair<int,
 			int PK_Device = atoi(row[0]);
 			vector<string> vectPorts;
 			GetUnusedPortsOnPC(pDBHelper,PK_Device,vectPorts);
-			for(size_t s=0;s<vectPorts.size();++s)
-				vectAllPorts.push_back( make_pair<int,string> (PK_Device,vectPorts[s]));
+			for (size_t s = 0;s < vectPorts.size();++s)
+			{
+#ifdef WIN32
+				// this is c++11
+				vectAllPorts.push_back(make_pair (PK_Device, vectPorts[s]));
+#else
+				vectAllPorts.push_back(make_pair<int, string>(PK_Device, vectPorts[s]));
+#endif // WIN32
+			}
 		}
 	}
 }
@@ -210,8 +217,14 @@ void DatabaseUtils::GetAllDevicesInTree(DBHelper *pDBHelper,int PK_Device,map<in
 		string sSQL = "SELECT FK_DeviceTemplate FROM Device WHERE PK_Device=" + StringUtils::itos(PK_Device);
 		PlutoSqlResult result;
 		DB_ROW row;
-		if( ( result.r=pDBHelper->db_wrapper_query_result( sSQL ) ) && ( row=db_wrapper_fetch_row( result.r ) ) && row[0] )
-			mapDeviceTree[PK_Device]=make_pair<int,int> (atoi(row[0]),Generation);
+		if ((result.r = pDBHelper->db_wrapper_query_result(sSQL)) && (row = db_wrapper_fetch_row(result.r)) && row[0])
+		{
+#ifdef WIN32
+			mapDeviceTree[PK_Device] = make_pair (atoi(row[0]), Generation);
+#else
+			mapDeviceTree[PK_Device] = make_pair<int, int>(atoi(row[0]), Generation);
+#endif
+		}
 	}
 	if( bCheckParent )
 	{

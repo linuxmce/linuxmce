@@ -41,8 +41,11 @@ void *ServerSocket::BeginWapClientThread(void *SvSock)
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Detected disconnect: detaching thread for %d", pServerSocket->m_dwPK_Device);
 		pServerSocket->SelfDestroying();
 		pthread_detach(pServerSocket->m_ClientThreadID);
-		pServerSocket->m_ClientThreadID = (pthread_t)NULL;
-
+//#ifdef WIN32
+//		pServerSocket->m_ClientThreadID = pthread_t{ NULL,0 };
+//#else
+//		pServerSocket->m_ClientThreadID = (pthread_t)NULL;
+//#endif
 		//Remove me from listener's lists
 		pServerSocket->m_pListener->RemoveAndDeleteSocket(pServerSocket);
 	}
@@ -54,7 +57,11 @@ ServerSocket::ServerSocket( SocketListener *pListener, SOCKET Sock, string sName
 	Socket( sName, sIPAddress, sMacAddress ),
 	m_bSelfDestroying(false),
 	m_ConnectionMutex( "connection " + sName ),
+#ifdef PTHREAD2
+	m_ClientThreadID(pthread_t { NULL, 0 })
+#else
 	m_ClientThreadID((pthread_t)NULL)
+#endif
 {
 	m_iInstanceID = 0;
 	m_bSendOnlySocket = false;
@@ -89,11 +96,19 @@ ServerSocket::~ServerSocket()
 		m_pListener->RemoveAndDeleteSocket(this, true /*don't delete me*/);
 
 	//Wait for our thread to finish
-	if( ((pthread_t)NULL) != m_ClientThreadID )
+#ifdef PTHREAD2
+	if (NULL != m_ClientThreadID.p)
+#else
+	if ( ((pthread_t)NULL) != m_ClientThreadID )
+#endif
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Forcing a disconnect: joining thread for %d", m_dwPK_Device);
 		pthread_join(m_ClientThreadID, NULL);
+#ifdef PTHREAD2
+		m_ClientThreadID = pthread_t { NULL, 0 };
+#else
 		m_ClientThreadID = (pthread_t)NULL;
+#endif
 	}
 
 	//Wait for any outstanding locks to finish

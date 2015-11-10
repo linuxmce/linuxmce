@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>Orbiter_SDL</ProjectName>
+    <ProjectGuid>{D94938CE-D141-4C24-AA0C-5C7A6A415773}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>14.0.23107.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Debug\</OutDir>
+    <IntDir>Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;..;Win32;../DCE;../../libs/Libraries/pthreads-win32/include;../../libs/CrossPlatform/sge030809-w32/src;../../libs/CrossPlatform/SDL_ttf-2.0.6;../../libs/CrossPlatform/SDL_image-1.2.3;../../libs/CrossPlatform/SDL-1.2.7/include;../Splitter;../../libs/CrossPlatform/zlib;../../libs/CrossPlatform/lpng127;../PlutoUtils;SDL;../../libs/CrossPlatform/SDL_rotozoom-1.6;../OrbiterGen;\mysql\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;ORBITER;DEBUG;ENABLE_MOUSE_BEHAVIOR;TEST_OSD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>pthreadVC2.lib;wsock32.lib;SDL-pluto-d.lib;SDL_image-pluto-d.lib;SDL_ttf-pluto-d.lib;SGE-pluto-d.lib;DCE.lib;zlib1-pluto-d.lib;libpng-pluto-d.lib;SDL_rotozoom-pluto-d.lib;OpenGL32.lib;libmysql.lib;SDL_Helpers.lib;pluto_main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>../Debug/Orbiter_SDL.exe</OutputFile>
+      <AdditionalLibraryDirectories>../../libs/Libraries/pthreads-win32/lib/x86;../../libs/CrossPlatform/SDL-1.2.7/VisualC7/SDL/Debug;../../libs/CrossPlatform/SDL_image-1.2.3/VisualC/Debug;../../libs/CrossPlatform/SDL_ttf-2.0.6/VisualC/Debug;../../libs/CrossPlatform/sge030809-w32/sge-msvc/sge/VisualC/Debug;../lib;../../libs/CrossPlatform/lpng127/projects/visualc6/Win32_DLL_Debug;../../libs/CrossPlatform/zlib/projects/visualc6/Win32_DLL_Debug;../../libs/CrossPlatform/SDL_rotozoom-1.6/VisualC/SDL_rotozoom/Debug;../../libs/Libraries/jpgsrc6b/vc7/Debug;\mysql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)Orbiter.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>.;..;../DCE;../../libs/Libraries/pthreads-win32/include;/mysql/include;../../libs/CrossPlatform/sge030809-w32/src;../../libs/CrossPlatform/SDL_ttf-2.0.6;../../libs/CrossPlatform/SDL_image-1.2.3;../../libs/CrossPlatform/SDL-1.2.7/include;../Splitter;../../libs/CrossPlatform/zlib;../../libs/CrossPlatform/lpng127;../PlutoUtils;Win32;../../libs/CrossPlatform/SDL_rotozoom-1.6;\mysql\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;ORBITER;CACHE_IMAGES;ENABLE_MOUSE_BEHAVIOR;TEST_OSD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>pthreadVC.lib;wsock32.lib;SDL-pluto-r.lib;SDL_image-pluto-r.lib;SDL_ttf-pluto-r.lib;SGE-pluto-r.lib;dce-r.lib;zlib1-pluto-r.lib;libpng-pluto-r.lib;SDL_rotozoom-pluto-r.lib;opengl32.lib;libmySQL.lib;SDL_Helpers-r.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>../bin/Orbiter_SDL.exe</OutputFile>
+      <AdditionalLibraryDirectories>/mysql/lib/Debug;../../libs/Libraries/pthreads-win32/lib;../../libs/CrossPlatform\SDL-1.2.7\VisualC7\SDL\Release;../../libs/CrossPlatform/SDL_image-1.2.3/VisualC/Release;../../libs/CrossPlatform/SDL_ttf-2.0.6/VisualC/Release;../../libs/CrossPlatform/sge030809-w32/sge-msvc/sge/VisualC/Release;../../libs/CrossPlatform/lpng127/projects/visualc6/Win32_DLL_Release;../../libs/CrossPlatform/zlib/projects/visualc6/Win32_DLL_Release;../lib/;../../libs/CrossPlatform/SDL_rotozoom-1.6/VisualC/SDL_rotozoom/Release;../../libs\CrossPlatform\SDL-1.2.7\VisualC7\SDLmain\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\CreateDevice\UserUtils.cpp" />
+    <ClCompile Include="..\Dce\DataGrid.cpp" />
+    <ClCompile Include="..\Gen_Devices\OrbiterBase.cpp" />
+    <ClCompile Include="..\Lirc_dce\IRReceiverBase.cpp" />
+    <ClCompile Include="..\Splitter\TextSplitter.cpp" />
+    <ClCompile Include="..\Splitter\TextWrapper.cpp" />
+    <ClCompile Include="CacheImageManager.cpp" />
+    <ClCompile Include="CallBackData.cpp" />
+    <ClCompile Include="DatagridMouseHandlerHelper.cpp" />
+    <ClCompile Include="DataGridRenderer.cpp" />
+    <ClCompile Include="DesignObj_Data.cpp" />
+    <ClCompile Include="DesignObj_DataGrid.cpp" />
+    <ClCompile Include="DesignObj_Orbiter.cpp" />
+    <ClCompile Include="EPGMouseHandler.cpp" />
+    <ClCompile Include="GraphicBuilder.cpp" />
+    <ClCompile Include="HorizMenuMouseHandler.cpp" />
+    <ClCompile Include="KeyboardMouseHandler.cpp" />
+    <ClCompile Include="LightMouseHandler.cpp" />
+    <ClCompile Include="Linux\OSDScreenHandler.cpp" />
+    <ClCompile Include="LockedMouseHandler.cpp" />
+    <ClCompile Include="MediaBrowserMouseHandler.cpp" />
+    <ClCompile Include="MediaMouseHandler.cpp" />
+    <ClCompile Include="MouseBehavior.cpp" />
+    <ClCompile Include="MouseGovernor.cpp" />
+    <ClCompile Include="MouseIterator.cpp" />
+    <ClCompile Include="ObjectRenderer.cpp" />
+    <ClCompile Include="ObjectRendererFactory.cpp" />
+    <ClCompile Include="Orbiter.cpp" />
+    <ClCompile Include="OrbiterFileBrowser.cpp" />
+    <ClCompile Include="OrbiterRenderer.cpp" />
+    <ClCompile Include="OrbiterRendererFactory.cpp" />
+    <ClCompile Include="PlutoGraphic.cpp" />
+    <ClCompile Include="RendererMNG.cpp" />
+    <ClCompile Include="RendererOCG.cpp" />
+    <ClCompile Include="ScreenHandler.cpp" />
+    <ClCompile Include="ScreenHistory.cpp" />
+    <ClCompile Include="Sdl\OrbiterRenderer_SDL.cpp" />
+    <ClCompile Include="Sdl\SDLGraphic.cpp" />
+    <ClCompile Include="Sdl\SDLRendererOCGHelper.cpp" />
+    <ClCompile Include="Sdl\Win32\OrbiterRenderer_SDL_Win32.cpp" />
+    <ClCompile Include="SelfUpdate.cpp" />
+    <ClCompile Include="Simulator.cpp" />
+    <ClCompile Include="SpeedMouseHandler.cpp" />
+    <ClCompile Include="TextStyle.cpp" />
+    <ClCompile Include="VolumeMouseHandler.cpp" />
+    <ClCompile Include="Win32\main.cpp" />
+    <ClCompile Include="Win32\MainDialog.cpp" />
+    <ClCompile Include="Win32\MouseBehavior_Win32.cpp" />
+    <ClCompile Include="Win32\Orbiter_Win32.cpp" />
+    <ClCompile Include="Win32\PopupMessage.cpp" />
+    <ClCompile Include="Win32\ProgressDialog.cpp" />
+    <ClCompile Include="Win32\StartOrbiter.cpp" />
+    <ClCompile Include="Win32\VirtualKeysTranslator.cpp" />
+    <ClCompile Include="WizardLogic.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\OrbiterGen\Renderer.h" />
+    <ClInclude Include="..\Splitter\TextSplitter.h" />
+    <ClInclude Include="..\Splitter\TextWrapper.h" />
+    <ClInclude Include="..\version.h" />
+    <ClInclude Include="CacheImageManager.h" />
+    <ClInclude Include="GraphicBuilder.h" />
+    <ClInclude Include="nvshaderprogram.h" />
+    <ClInclude Include="OpenGL\Mesh\MeshBuilder.h" />
+    <ClInclude Include="OpenGL\Mesh\MeshContainer.h" />
+    <ClInclude Include="OpenGL\Mesh\MeshFrame.h" />
+    <ClInclude Include="OpenGL\Mesh\MeshPainter.h" />
+    <ClInclude Include="OpenGL\Mesh\MeshTransform.h" />
+    <ClInclude Include="OpenGL\Mesh\MeshTriangle.h" />
+    <ClInclude Include="OpenGL\Mesh\MeshVertex.h" />
+    <ClInclude Include="OpenGL\Mesh\Point3D.h" />
+    <ClInclude Include="OpenGL\nvidia\nv_combiners.h" />
+    <ClInclude Include="Orbiter.h" />
+    <ClInclude Include="RendererImage.h" />
+    <ClInclude Include="RendererMNG.h" />
+    <ClInclude Include="RendererOCG.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Sdl\PlutoSDLDefs.h" />
+    <ClInclude Include="Sdl\SDLGraphic.h" />
+    <ClInclude Include="Sdl\SDLRendererOCGHelper.h" />
+    <ClInclude Include="Win32\MainDialog.h" />
+    <ClInclude Include="Win32\OrbiterSDL_Win32.h" />
+    <ClInclude Include="Win32\StartOrbiter_Win32.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Orbiter.ico" />
+    <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Orbiter.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

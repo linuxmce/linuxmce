@@ -790,7 +790,11 @@ string StringUtils::HourMinute(time_t t,bool b24Hour)
     if( t == 0 )
         t = time(NULL);
     struct tm tm;
+#ifdef WIN32
+	_localtime64_s(&tm, &t);
+#else
 	localtime_r(&t,&tm);
+#endif
 
 	if( !b24Hour )
 	{
@@ -810,7 +814,11 @@ string StringUtils::Hour(time_t t)
   char acDateTime[100];
   struct tm tm;
   
+#ifdef WIN32
+  _localtime64_s(&tm, &t);
+#else
   localtime_r(&t,&tm);
+#endif
   sprintf( acDateTime, "%d", tm.tm_hour);
   return acDateTime;
 }
@@ -860,8 +868,12 @@ string StringUtils::SQLDateTime(time_t t)
     if( t == 0 )
 	    t = time(NULL);
 	struct tm tm;
+#ifdef WIN32
+	_localtime64_s(&tm, &t);
+#else
 	localtime_r(&t,&tm);
-    sprintf( acDateTime, "%04d-%02d-%02d %02d:%02d:%02d",
+#endif
+	sprintf( acDateTime, "%04d-%02d-%02d %02d:%02d:%02d",
 	        tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec );
 
     return acDateTime;
@@ -1161,7 +1173,11 @@ string StringUtils::PrecisionTime()
     timespec ts;
 	gettimeofday( &ts, NULL );
 	struct tm t;
+#ifdef WIN32
+	_localtime64_s(&t, (time_t *)&ts.tv_sec);
+#else
 	localtime_r((time_t *)&ts.tv_sec,&t);
+#endif
 	char acBuff[50];
 	double dwSec = (double)(ts.tv_nsec/1E9) + t.tm_sec;
 	snprintf( acBuff, sizeof(acBuff), "%02d/%02d/%02d %d:%02d:%06.3f", (int)t.tm_mon + 1, (int)t.tm_mday, (int)t.tm_year - 100, (int)t.tm_hour, (int)t.tm_min, dwSec );

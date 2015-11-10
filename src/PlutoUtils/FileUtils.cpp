@@ -1192,8 +1192,12 @@ string FileUtils::GetLastModifiedDateStr(string sFile)
     if(!result && (buf.st_mode & S_IFDIR))
     {
         struct tm tm;
-        localtime_r(&buf.st_mtime,&tm);   // Convert time to struct tm form
-        char acDateTime[100];
+#ifdef WIN32
+		_localtime64_s(&tm, &buf.st_mtime);
+#else
+		localtime_r(&buf.st_mtime,&tm);   // Convert time to struct tm form
+#endif
+		char acDateTime[100];
         sprintf( acDateTime, "%04d%02d%02d%02d%02d%02d",
                  tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec );
 
