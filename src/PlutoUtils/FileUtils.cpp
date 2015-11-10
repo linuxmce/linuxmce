@@ -455,9 +455,10 @@ bool FileUtils::DelFile(string sFileName)
     mbstowcs(pFileNameW, sFileName.c_str(), 256);
     return ::DeleteFile(pFileNameW)!=0;
 #else
-    wchar_t pFileNameW[256];
-    mbstowcs(pFileNameW, sFileName.c_str(), 256);
-    return ::DeleteFile(pFileNameW)!=0;
+//    wchar_t pFileNameW[256];
+//    mbstowcs(pFileNameW, sFileName.c_str(), 256);
+//    return ::DeleteFile(pFileNameW)!=0;
+    return ::DeleteFile((LPCSTR)sFileName.c_str())!=0;
 #endif
 
 #else
@@ -474,19 +475,24 @@ bool FileUtils::DelDir(string sDirectory)
     WIN32_FIND_DATA findData;
     ::ZeroMemory(&findData, sizeof(findData));
 
-    wchar_t pDirectoryW[256];
-    mbstowcs(pDirectoryW, sDir.c_str(), 256);
-    HANDLE findFileHandle = FindFirstFile(pDirectoryW, &findData);
+//    wchar_t pDirectoryW[256];
+//    mbstowcs(pDirectoryW, sDir.c_str(), 256);
+//    HANDLE findFileHandle = FindFirstFile(pDirectoryW, &findData);
+    HANDLE findFileHandle = FindFirstFile((LPCSTR)sDir.c_str(), &findData);
 
     do
     {
         string sPath = sDirectory + "/";
         string sCurrentItem;
 
-        char pPath[256];
-        wcstombs(pPath, findData.cFileName, 256);
-        sPath += pPath;
-        sCurrentItem = string(pPath);
+//        char pPath[256];
+//        wcstombs(pPath, findData.cFileName, 256);
+//		sPath += pPath;
+//		sCurrentItem = string(pPath);
+
+		sCurrentItem = findData.cFileName;
+		sPath += sCurrentItem;
+
 
         if(sCurrentItem == "." || sCurrentItem == "..")
             continue;
@@ -499,8 +505,9 @@ bool FileUtils::DelDir(string sDirectory)
     while(FindNextFile(findFileHandle, &findData));
 
     FindClose(findFileHandle);
-    mbstowcs(pDirectoryW, sDirectory.c_str(), 256);
-    return ::RemoveDirectory(pDirectoryW)!=0;
+//    mbstowcs(pDirectoryW, sDirectory.c_str(), 256);
+//    return ::RemoveDirectory(pDirectoryW)!=0;
+    return ::RemoveDirectory((LPCSTR)sDirectory.c_str())!=0;
 #else
     system(("rm -rf " + sDirectory).c_str());
     return true; // Don't know if it was successful or not
@@ -1109,8 +1116,9 @@ bool FileUtils::LaunchProcessInBackground(string sCommandLine)
     ZeroMemory (&si, sizeof(si));
     si.cb = sizeof(si);
     ZeroMemory (&pi, sizeof(pi));
-    CreateProcess(L"C:\\WINDOWS\\system32\\cmd.exe", L"/c bogus.bat", NULL, NULL, false, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
-    return true;
+//	CreateProcess(L"C:\\WINDOWS\\system32\\cmd.exe", L"/c bogus.bat", NULL, NULL, false, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+	CreateProcess("C:\\WINDOWS\\system32\\cmd.exe", "/c bogus.bat", NULL, NULL, false, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+	return true;
 #endif
 }
 
