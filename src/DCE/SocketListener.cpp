@@ -48,7 +48,11 @@ void *BeginListenerThread( void *pSockListener )
 }
 
 SocketListener::SocketListener( string sName )
+#ifdef PTHREAD2
+	: m_ListenerThreadID(pthread_t{ NULL, 0 }),
+#else
 	: m_ListenerThreadID((pthread_t)NULL),
+#endif
 	  m_iListenPort(0),
 	  m_Socket( INVALID_SOCKET ),
 	  m_bAllowIncommingConnections(true),
@@ -76,7 +80,11 @@ SocketListener::~SocketListener()
 		m_Socket = INVALID_SOCKET; // now it is invalid
 	}
 
+#ifdef PTHREAD2
+	if (m_ListenerThreadID.p )
+#else
 	if (m_ListenerThreadID)
+#endif
 		pthread_join( m_ListenerThreadID, 0 ); // wait for it to finish
 
 	//drop all sockets
@@ -360,7 +368,12 @@ string SocketListener::GetIPAddress()
 	char acBuf[256];
 	gethostname( acBuf, sizeof(acBuf) );
 
-	struct hostent *he = gethostbyname2 ( acBuf, AF_INET6 );
+	struct hostent * he;
+#ifdef WIN32
+	he = gethostbyname(acBuf);
+#else
+	he = gethostbyname2 ( acBuf, AF_INET6 );
+#endif
 
 	char* addr = he->h_addr_list[0];
 	if (addr) // got an address

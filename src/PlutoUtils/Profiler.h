@@ -68,8 +68,14 @@ public:
 		LARGE_INTEGER tStart;
 		QueryPerformanceCounter(&tStart);
 		MapProfiles::iterator it = m_MapProfiles.find(pName);
-		if( it==m_MapProfiles.end() )
-			m_MapProfiles[pName] = make_pair<LARGE_INTEGER,int> (tStart,0);
+		if (it == m_MapProfiles.end())
+		{
+#ifdef WIN32
+			m_MapProfiles[pName] = make_pair (tStart, 0);
+#else
+			m_MapProfiles[pName] = make_pair<LARGE_INTEGER, int>(tStart, 0);
+#endif
+		}
 		else if( it->second.first.QuadPart!=0 )
 			Error(pName,"Already started");
 		else

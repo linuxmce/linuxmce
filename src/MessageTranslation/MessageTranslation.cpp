@@ -81,18 +81,18 @@ MessageTranslationManager
 *****************************************************************/
 
 MessageTranslationManager::MessageTranslationManager()
-	: threadid_(0),
-	  stopqueue_(false),
+	: stopqueue_(false),
 	  ptranslator_(NULL),
 	  pdispatcher_(NULL)
 {
+	threadid_.p = 0;
 	ProcessUtils::ResetMsTime();
 }
 
 MessageTranslationManager::MessageTranslationManager(MessageTranslator* ptranslator, MessageDispatcher* pdispatcher)
-	: threadid_(0),
-	  stopqueue_(false)
+	: stopqueue_(false)
 {
+	threadid_.p = 0;
 	ProcessUtils::ResetMsTime();
 	setTranslator(ptranslator);
 	setDispatcher(pdispatcher);
@@ -101,7 +101,7 @@ MessageTranslationManager::MessageTranslationManager(MessageTranslator* ptransla
 MessageTranslationManager::~MessageTranslationManager()
 {
 	stopqueue_ = true;
-	if(threadid_ != 0) {
+	if(threadid_.p != 0) {
 		pthread_join(threadid_, 0);
 	}
 	
@@ -116,7 +116,7 @@ MessageTranslationManager::ProcessMessage(Message* pmsg) {
 		return false;
 	};
 
-	if(threadid_ == 0) {
+	if(threadid_.p == 0) {
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MessageTranslationManager::Start was never called");
 		return false;
 	}
@@ -134,7 +134,7 @@ MessageTranslationManager::ProcessMessage(Message* pmsg) {
 
 void 
 MessageTranslationManager::Start() {
-	if(threadid_ == 0) {
+	if(threadid_.p == 0) {
 		pthread_create(&threadid_, NULL, _queueproc, (void*)this);
 	}
 }

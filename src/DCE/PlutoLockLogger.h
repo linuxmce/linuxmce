@@ -102,9 +102,15 @@ namespace DCE
 				char Message[2000];
 				// Under Linux pthread_self is an int, under Windows it's a pointer
 	#if defined(WIN32) || defined(__APPLE_CC__)
+		#if defined (PTHREAD2)
 				snprintf(Message,sizeof(Message),"Logger failed to get lock(%p): %s:%d thread: %p used by: %s:%d thread:%p got: %d\n",
-					m_pLock, m_sFileName.c_str(),m_Line, pthread_self(),m_pLock->m_sFileName.c_str(),m_pLock->m_Line,
-					m_pLock->m_thread,(m_bGotLock ? 1 : 0));
+					m_pLock, m_sFileName.c_str(),m_Line, pthread_self().p,m_pLock->m_sFileName.c_str(),m_pLock->m_Line,
+					m_pLock->m_thread.p,(m_bGotLock ? 1 : 0));
+		#else
+				snprintf(Message, sizeof(Message), "Logger failed to get lock(%p): %s:%d thread: %p used by: %s:%d thread:%p got: %d\n",
+					m_pLock, m_sFileName.c_str(), m_Line, pthread_self(), m_pLock->m_sFileName.c_str(), m_pLock->m_Line,
+					m_pLock->m_thread, (m_bGotLock ? 1 : 0));
+		#endif
 	#else
 				snprintf(Message,sizeof(Message),"Logger failed to get lock(%p): %s:%d thread: %d used by: %s:%d thread:%d got: %d\n",
 					m_pLock, m_sFileName.c_str(),m_Line, (int) pthread_self(),m_pLock->m_sFileName.c_str(),m_pLock->m_Line,
@@ -145,10 +151,14 @@ namespace DCE
 					fprintf(file, "%02d\t%s\t%s\t", LV_CRITICAL,c,"Logger");
 					fwrite(Message, strlen(Message), 1, file);
 	#if defined(WIN32) || defined(__APPLE_CC__)
-					fprintf(file, " <%p>\n",pthread_self());
+		#if defined (PTHREAD2)
+					fprintf(file, " <%p>\n",pthread_self().p);
+		#else
+					fprintf(file, " <%p>\n", pthread_self());
+		#endif // PTHREAD2
 	#else
 					fprintf(file, " <%d>\n",(int) pthread_self());
-	#endif
+	#endif // WIN32
 					fwrite("\n", 1, 1, file);
 					fflush(file);
 					fclose(file);

@@ -348,12 +348,14 @@ void FileLogger::WriteEntry( Entry& Entry )
 #endif
     fwrite( pcLp, strlen( pcLp ), 1, m_LogFile );
 #ifdef DEBUG
-
-    fprintf( m_LogFile, " <%p>\n", reinterpret_cast<void *>(pthread_self()) );
-
+#ifdef PTHREAD2
+	fprintf(m_LogFile, " <%p>\n", reinterpret_cast<void *>(pthread_self().p));
+#else
+	fprintf(m_LogFile, " <%p>\n", reinterpret_cast<void *>(pthread_self()));
+#endif // PTHREAD2
 #else
     fwrite( "\n", 1, 1, m_LogFile );
-#endif
+#endif // DEBUG
 
 #ifdef DEBUG
     fflush( m_LogFile );

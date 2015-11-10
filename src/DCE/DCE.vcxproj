@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8DC05A62-0079-4399-8538-BCE593147DE1}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>14.0.23107.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Debug\</OutDir>
+    <IntDir>Debug\</IntDir>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\libs\Libraries\pthreads-win32\include;..;/mysql/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PTHREAD2;UNICODE;WIN32;_DEBUG;_LIB;LINK_TO_ROUTER;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Lib>
+      <OutputFile>../lib/DCE.lib</OutputFile>
+    </Lib>
+    <Link>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>..\..\libs\Libraries\pthreads-win32\include;..;/mysql/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>../lib/DCE-r.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\MessageTranslation\AVMessageTranslation.cpp" />
+    <ClCompile Include="..\MessageTranslation\DefaultMessageTranslation.cpp" />
+    <ClCompile Include="..\MessageTranslation\MessageTranslation.cpp" />
+    <ClCompile Include="..\PlutoUtils\CommonIncludes.cpp" />
+    <ClCompile Include="..\PlutoUtils\DatabaseUtils.cpp" />
+    <ClCompile Include="..\PlutoUtils\FileUtils.cpp" />
+    <ClCompile Include="..\PlutoUtils\LinuxSerialUSB.cpp" />
+    <ClCompile Include="..\PlutoUtils\md5c.cpp" />
+    <ClCompile Include="..\PlutoUtils\minilzo.cpp" />
+    <ClCompile Include="..\PlutoUtils\MultiThreadIncludes.cpp" />
+    <ClCompile Include="..\PlutoUtils\Other.cpp" />
+    <ClCompile Include="..\PlutoUtils\ProcessUtils.cpp" />
+    <ClCompile Include="..\PlutoUtils\StringUtils.cpp" />
+    <ClCompile Include="..\PlutoUtils\ThreadedClass.cpp" />
+    <ClCompile Include="..\PlutoUtils\uuencode.cpp" />
+    <ClCompile Include="..\SerializeClass\SerializeClass.cpp" />
+    <ClCompile Include="AlarmManager.cpp" />
+    <ClCompile Include="ClientSocket.cpp" />
+    <ClCompile Include="Command_Impl.cpp" />
+    <ClCompile Include="DataGrid.cpp" />
+    <ClCompile Include="DCEConfig.cpp" />
+    <ClCompile Include="DeviceData_Base.cpp" />
+    <ClCompile Include="DeviceData_Impl.cpp" />
+    <ClCompile Include="DeviceData_Router.cpp" />
+    <ClCompile Include="Event_Impl.cpp" />
+    <ClCompile Include="HandleRequestSocket.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="Message.cpp" />
+    <ClCompile Include="MessageBuffer.cpp" />
+    <ClCompile Include="PlainClientSocket.cpp" />
+    <ClCompile Include="ServerLogger.cpp" />
+    <ClCompile Include="ServerSocket.cpp" />
+    <ClCompile Include="Socket.cpp" />
+    <ClCompile Include="SocketListener.cpp" />
+    <ClCompile Include="Virtual_Device_Translator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\PlutoUtils\PlutoDefs.h" />
+    <ClInclude Include="..\SerializeClass\SerializeClass.h" />
+    <ClInclude Include="AlarmManager.h" />
+    <ClInclude Include="arp-cache.h" />
+    <ClInclude Include="BinarySerialize.h" />
+    <ClInclude Include="BufferedLogger.h" />
+    <ClInclude Include="ClientSocket.h" />
+    <ClInclude Include="Command_Impl.h" />
+    <ClInclude Include="CommonIncludes.h" />
+    <ClInclude Include="CorpServerDefines.h" />
+    <ClInclude Include="DataGrid.h" />
+    <ClInclude Include="DCEConfig.h" />
+    <ClInclude Include="DCEMySqlConfig.h" />
+    <ClInclude Include="DCERouter.h" />
+    <ClInclude Include="DeviceData_Base.h" />
+    <ClInclude Include="DeviceData_Impl.h" />
+    <ClInclude Include="DeviceData_Router.h" />
+    <ClInclude Include="EmailLogger.h" />
+    <ClInclude Include="Event_Impl.h" />
+    <ClInclude Include="FileTransfer.h" />
+    <ClInclude Include="FilterLogger.h" />
+    <ClInclude Include="GraphicFormat.h" />
+    <ClInclude Include="HandleRequestSocket.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="lzoconf.h" />
+    <ClInclude Include="md5.h" />
+    <ClInclude Include="Message.h" />
+    <ClInclude Include="MessageBuffer.h" />
+    <ClInclude Include="minilzo.h" />
+    <ClInclude Include="MultiLogger.h" />
+    <ClInclude Include="MySQLHelper.h" />
+    <ClInclude Include="ParseLogger.h" />
+    <ClInclude Include="Picture.h" />
+    <ClInclude Include="PlainClientSocket.h" />
+    <ClInclude Include="PlugIn.h" />
+    <ClInclude Include="PlutoLockLogger.h" />
+    <ClInclude Include="PreformedCommand.h" />
+    <ClInclude Include="ServerLogger.h" />
+    <ClInclude Include="ServerSocket.h" />
+    <ClInclude Include="Socket.h" />
+    <ClInclude Include="SocketListener.h" />
+    <ClInclude Include="Virtual_Device_Translator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

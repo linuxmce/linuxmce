@@ -1132,7 +1132,11 @@ void MediaFileBrowserOptions::SelectArrays(DesignObj_Orbiter *pObj,int PK_Array,
 		string sPK_Array = pDesignObj_Orbiter->GetVariableAssignment(VARIABLE_PK_Array_CONST);
 		if( PK_Array!=atoi(sPK_Array.c_str()) )
 			continue; // It's not this array
+#ifdef WIN32
+		m_mapObjectsValues[make_pair (pDesignObj_Orbiter->m_iBaseObjectID, sArrayValue)] = pDesignObj_Orbiter;
+#else
 		m_mapObjectsValues[ make_pair<int,string> (pDesignObj_Orbiter->m_iBaseObjectID,sArrayValue) ] = pDesignObj_Orbiter;
+#endif
 		if( sArrayValue.size() && sArrayValue==sValues || StringUtils::StartsWith(sValues,sArrayValue + ",") )  // If it's the only one, or the first one
 			pDesignObj_Orbiter->m_GraphicToDisplay_set("sh0",GRAPHIC_SELECTED,false,true);
 		else if( sArrayValue.size()==0 || atoi(sArrayValue.c_str())==0 )
@@ -1157,8 +1161,12 @@ void MediaFileBrowserOptions::SelectArrays(DesignObj_Orbiter *pObj,int PK_Array,
 		string sPK_Array = pDesignObj_Orbiter->GetVariableAssignment(VARIABLE_PK_Array_CONST);
 		if( PK_Array!=atoi(sPK_Array.c_str()) )
 			continue; // It's not this array
+#ifdef WIN32
+		m_mapObjectsValues[make_pair (pDesignObj_Orbiter->m_iBaseObjectID, sArrayValue)] = pDesignObj_Orbiter;
+#else
 		m_mapObjectsValues[ make_pair<int,string> (pDesignObj_Orbiter->m_iBaseObjectID,sArrayValue) ] = pDesignObj_Orbiter;
-		if( atoi(sArrayValue.c_str())==iValue )
+#endif // WIN32
+if( atoi(sArrayValue.c_str())==iValue )
 			pDesignObj_Orbiter->m_GraphicToDisplay_set("sh4",GRAPHIC_SELECTED,false,true);
 		else
 			pDesignObj_Orbiter->m_GraphicToDisplay_set("sh5",GRAPHIC_NORMAL,false,true);
@@ -1200,7 +1208,11 @@ void MediaFileBrowserOptions::SelectedArray(DesignObj_Orbiter *pObj,int PK_Array
 	if( bTreatZeroAsAll )
 	{
 		// Clear the 'all' unless the user selected all, in which case clear everything else
+#ifdef WIN32
+		map< pair<int,string>, DesignObj_Orbiter * >::iterator it = m_mapObjectsValues.find( make_pair ( pObj->m_iBaseObjectID, "0" ) );
+#else
 		map< pair<int,string>, DesignObj_Orbiter * >::iterator it = m_mapObjectsValues.find( make_pair<int,string> ( pObj->m_iBaseObjectID, "0" ) );
+#endif
 		if( it != m_mapObjectsValues.end() )
 		{
 			DesignObj_Orbiter *pObj_All = it->second;
@@ -1249,7 +1261,11 @@ void MediaFileBrowserOptions::SelectedArray(DesignObj_Orbiter *pObj,int PK_Array
 		return; // User just chose the same thing
 
 	// Find the old one if it's changed
+#ifdef WIN32
+	map< pair<int, string>, DesignObj_Orbiter * >::iterator it = m_mapObjectsValues.find(make_pair (pObj->m_iBaseObjectID, StringUtils::itos(iValue)));
+#else
 	map< pair<int,string>, DesignObj_Orbiter * >::iterator it= m_mapObjectsValues.find( make_pair<int,string> (pObj->m_iBaseObjectID,StringUtils::itos(iValue)) );
+#endif // WIN32
 	if( it!=m_mapObjectsValues.end() )
 	{
 		DesignObj_Orbiter *pObj_PriorSelected = it->second;

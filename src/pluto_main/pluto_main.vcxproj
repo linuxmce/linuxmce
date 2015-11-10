@@ -1,0 +1,338 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0627DAA4-A0AB-4486-8D17-3F1F3089AD6F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>14.0.23107.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>../lib\</OutDir>
+    <IntDir>Debug\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>../lib\</OutDir>
+    <IntDir>Release\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..;../DCE;../../libs/Libraries/pthreads-win32/include;/mysql/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PTHREAD2;UNICODE;WIN32;_DEBUG;_LIB;DEBUG;EXPORT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>pthreadVC2.lib;wsock32.lib;libmysql.lib;DCE.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>../Debug/pluto_main.dll</OutputFile>
+      <AdditionalLibraryDirectories>/mysql/lib;../../libs/Libraries/pthreads-win32/lib;../lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>pluto_main.def</ModuleDefinitionFile>
+      <ImportLibrary>../lib/pluto_main.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>..;../DCE;../../libs/Libraries/pthreads-win32/include;/mysql/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;EXPORT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>pthreadVC.lib;wsock32.lib;libmySQL.lib;DCE-r.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>../Bin/pluto_main-r.dll</OutputFile>
+      <AdditionalLibraryDirectories>/mysql/lib/Debug;../../libs/Libraries/pthreads-win32/lib;../lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>pluto_main.def</ModuleDefinitionFile>
+      <ImportLibrary>../lib/pluto_main-r.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Database_pluto_main.cpp" />
+    <ClCompile Include="TableRow.cpp" />
+    <ClCompile Include="Table_Array.cpp" />
+    <ClCompile Include="Table_Broadcast.cpp" />
+    <ClCompile Include="Table_Button.cpp" />
+    <ClCompile Include="Table_CachedScreens.cpp" />
+    <ClCompile Include="Table_CannedEvents.cpp" />
+    <ClCompile Include="Table_CannedEvents_CriteriaParmList.cpp" />
+    <ClCompile Include="Table_City.cpp" />
+    <ClCompile Include="Table_Command.cpp" />
+    <ClCompile Include="Table_CommandCategory.cpp" />
+    <ClCompile Include="Table_CommandGroup.cpp" />
+    <ClCompile Include="Table_CommandGroup_Command.cpp" />
+    <ClCompile Include="Table_CommandGroup_Command_CommandParameter.cpp" />
+    <ClCompile Include="Table_CommandGroup_D.cpp" />
+    <ClCompile Include="Table_CommandGroup_D_Command.cpp" />
+    <ClCompile Include="Table_CommandGroup_D_Command_CommandParameter.cpp" />
+    <ClCompile Include="Table_CommandGroup_EntertainArea.cpp" />
+    <ClCompile Include="Table_CommandGroup_Room.cpp" />
+    <ClCompile Include="Table_CommandParameter.cpp" />
+    <ClCompile Include="Table_Command_CommandParameter.cpp" />
+    <ClCompile Include="Table_Command_Pipe.cpp" />
+    <ClCompile Include="Table_CommMethod.cpp" />
+    <ClCompile Include="Table_ConfigType.cpp" />
+    <ClCompile Include="Table_ConfigType_File.cpp" />
+    <ClCompile Include="Table_ConfigType_Setting.cpp" />
+    <ClCompile Include="Table_ConfigType_Token.cpp" />
+    <ClCompile Include="Table_ConnectorType.cpp" />
+    <ClCompile Include="Table_Country.cpp" />
+    <ClCompile Include="Table_Criteria.cpp" />
+    <ClCompile Include="Table_CriteriaList.cpp" />
+    <ClCompile Include="Table_CriteriaList_CriteriaParmList.cpp" />
+    <ClCompile Include="Table_CriteriaParm.cpp" />
+    <ClCompile Include="Table_CriteriaParmList.cpp" />
+    <ClCompile Include="Table_CriteriaParmNesting.cpp" />
+    <ClCompile Include="Table_DataGrid.cpp" />
+    <ClCompile Include="Table_DesignObj.cpp" />
+    <ClCompile Include="Table_DesignObjCategory.cpp" />
+    <ClCompile Include="Table_DesignObjParameter.cpp" />
+    <ClCompile Include="Table_DesignObjType.cpp" />
+    <ClCompile Include="Table_DesignObjType_DesignObjParameter.cpp" />
+    <ClCompile Include="Table_DesignObjVariation.cpp" />
+    <ClCompile Include="Table_DesignObjVariation_DesignObj.cpp" />
+    <ClCompile Include="Table_DesignObjVariation_DesignObjParameter.cpp" />
+    <ClCompile Include="Table_DesignObjVariation_DesignObj_Skin_Language.cpp" />
+    <ClCompile Include="Table_DesignObjVariation_Text.cpp" />
+    <ClCompile Include="Table_DesignObjVariation_Text_Skin_Language.cpp" />
+    <ClCompile Include="Table_DesignObjVariation_Zone.cpp" />
+    <ClCompile Include="Table_Device.cpp" />
+    <ClCompile Include="Table_DeviceCategory.cpp" />
+    <ClCompile Include="Table_DeviceCategory_DeviceData.cpp" />
+    <ClCompile Include="Table_DeviceCategory_Event.cpp" />
+    <ClCompile Include="Table_DeviceCommandGroup.cpp" />
+    <ClCompile Include="Table_DeviceCommandGroup_Command.cpp" />
+    <ClCompile Include="Table_DeviceCommandGroup_DeviceCommandGroup_Parent.cpp" />
+    <ClCompile Include="Table_DeviceData.cpp" />
+    <ClCompile Include="Table_DeviceGroup.cpp" />
+    <ClCompile Include="Table_DeviceTemplate.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_AV.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DesignObj.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DeviceCategory_ControlledVia.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DeviceCommandGroup.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DeviceData.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DeviceTemplate_ControlledVia.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DeviceTemplate_Related.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_DSPMode.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_Event.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_InfraredGroup.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_Input.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_MediaType.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_MediaType_DesignObj.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_Output.cpp" />
+    <ClCompile Include="Table_DeviceTemplate_PageSetup.cpp" />
+    <ClCompile Include="Table_Device_Command.cpp" />
+    <ClCompile Include="Table_Device_CommandGroup.cpp" />
+    <ClCompile Include="Table_Device_DeviceData.cpp" />
+    <ClCompile Include="Table_Device_DeviceGroup.cpp" />
+    <ClCompile Include="Table_Device_Device_Pipe.cpp" />
+    <ClCompile Include="Table_Device_Device_Related.cpp" />
+    <ClCompile Include="Table_Device_EntertainArea.cpp" />
+    <ClCompile Include="Table_Device_HouseMode.cpp" />
+    <ClCompile Include="Table_Device_MRU.cpp" />
+    <ClCompile Include="Table_Device_Orbiter.cpp" />
+    <ClCompile Include="Table_Device_QuickStart.cpp" />
+    <ClCompile Include="Table_Device_StartupScript.cpp" />
+    <ClCompile Include="Table_Device_Users.cpp" />
+    <ClCompile Include="Table_DHCPDevice.cpp" />
+    <ClCompile Include="Table_DHCPDevice_DeviceData.cpp" />
+    <ClCompile Include="Table_Direction.cpp" />
+    <ClCompile Include="Table_Directory.cpp" />
+    <ClCompile Include="Table_Distro.cpp" />
+    <ClCompile Include="Table_Document.cpp" />
+    <ClCompile Include="Table_Document_Comment.cpp" />
+    <ClCompile Include="Table_Effect.cpp" />
+    <ClCompile Include="Table_EffectType.cpp" />
+    <ClCompile Include="Table_EffectType_Effect_Skin.cpp" />
+    <ClCompile Include="Table_EntertainArea.cpp" />
+    <ClCompile Include="Table_Event.cpp" />
+    <ClCompile Include="Table_EventCategory.cpp" />
+    <ClCompile Include="Table_EventHandler.cpp" />
+    <ClCompile Include="Table_EventParameter.cpp" />
+    <ClCompile Include="Table_Event_EventParameter.cpp" />
+    <ClCompile Include="Table_FAQ.cpp" />
+    <ClCompile Include="Table_Firewall.cpp" />
+    <ClCompile Include="Table_Floorplan.cpp" />
+    <ClCompile Include="Table_FloorplanObjectType.cpp" />
+    <ClCompile Include="Table_FloorplanObjectType_Color.cpp" />
+    <ClCompile Include="Table_FloorplanType.cpp" />
+    <ClCompile Include="Table_HorizAlignment.cpp" />
+    <ClCompile Include="Table_Household.cpp" />
+    <ClCompile Include="Table_Household_Installation.cpp" />
+    <ClCompile Include="Table_HouseMode.cpp" />
+    <ClCompile Include="Table_Icon.cpp" />
+    <ClCompile Include="Table_Image.cpp" />
+    <ClCompile Include="Table_InfraredGroup.cpp" />
+    <ClCompile Include="Table_InfraredGroup_Command.cpp" />
+    <ClCompile Include="Table_InfraredGroup_Command_Preferred.cpp" />
+    <ClCompile Include="Table_Installation.cpp" />
+    <ClCompile Include="Table_Installation_RepositorySource_URL.cpp" />
+    <ClCompile Include="Table_Installation_Users.cpp" />
+    <ClCompile Include="Table_InstallWizard.cpp" />
+    <ClCompile Include="Table_InstallWizard_Distro.cpp" />
+    <ClCompile Include="Table_Language.cpp" />
+    <ClCompile Include="Table_License.cpp" />
+    <ClCompile Include="Table_Licensing.cpp" />
+    <ClCompile Include="Table_Manufacturer.cpp" />
+    <ClCompile Include="Table_MediaType.cpp" />
+    <ClCompile Include="Table_MediaType_Broadcast.cpp" />
+    <ClCompile Include="Table_MediaType_DesignObj.cpp" />
+    <ClCompile Include="Table_News.cpp" />
+    <ClCompile Include="Table_OperatingSystem.cpp" />
+    <ClCompile Include="Table_Orbiter.cpp" />
+    <ClCompile Include="Table_Orbiter_Users_PasswordReq.cpp" />
+    <ClCompile Include="Table_Orbiter_Variable.cpp" />
+    <ClCompile Include="Table_Package.cpp" />
+    <ClCompile Include="Table_PackageType.cpp" />
+    <ClCompile Include="Table_Package_Compat.cpp" />
+    <ClCompile Include="Table_Package_Device.cpp" />
+    <ClCompile Include="Table_Package_Directory.cpp" />
+    <ClCompile Include="Table_Package_Directory_File.cpp" />
+    <ClCompile Include="Table_Package_Package.cpp" />
+    <ClCompile Include="Table_Package_Source.cpp" />
+    <ClCompile Include="Table_Package_Source_Compat.cpp" />
+    <ClCompile Include="Table_Package_Users.cpp" />
+    <ClCompile Include="Table_Package_Version.cpp" />
+    <ClCompile Include="Table_PageSetup.cpp" />
+    <ClCompile Include="Table_PaidLicense.cpp" />
+    <ClCompile Include="Table_ParameterType.cpp" />
+    <ClCompile Include="Table_PhoneLineType.cpp" />
+    <ClCompile Include="Table_Pipe.cpp" />
+    <ClCompile Include="Table_PnpLevel.cpp" />
+    <ClCompile Include="Table_PnpProtocol.cpp" />
+    <ClCompile Include="Table_PnpQueue.cpp" />
+    <ClCompile Include="Table_PostalCode.cpp" />
+    <ClCompile Include="Table_psc_constants_batdet.cpp" />
+    <ClCompile Include="Table_psc_constants_bathdr.cpp" />
+    <ClCompile Include="Table_psc_constants_batuser.cpp" />
+    <ClCompile Include="Table_psc_constants_repset.cpp" />
+    <ClCompile Include="Table_psc_constants_schema.cpp" />
+    <ClCompile Include="Table_psc_constants_tables.cpp" />
+    <ClCompile Include="Table_psc_dce_batdet.cpp" />
+    <ClCompile Include="Table_psc_dce_bathdr.cpp" />
+    <ClCompile Include="Table_psc_dce_batuser.cpp" />
+    <ClCompile Include="Table_psc_dce_repset.cpp" />
+    <ClCompile Include="Table_psc_dce_schema.cpp" />
+    <ClCompile Include="Table_psc_dce_tables.cpp" />
+    <ClCompile Include="Table_psc_designer_batdet.cpp" />
+    <ClCompile Include="Table_psc_designer_bathdr.cpp" />
+    <ClCompile Include="Table_psc_designer_batuser.cpp" />
+    <ClCompile Include="Table_psc_designer_repset.cpp" />
+    <ClCompile Include="Table_psc_designer_schema.cpp" />
+    <ClCompile Include="Table_psc_designer_tables.cpp" />
+    <ClCompile Include="Table_psc_document_batdet.cpp" />
+    <ClCompile Include="Table_psc_document_bathdr.cpp" />
+    <ClCompile Include="Table_psc_document_batuser.cpp" />
+    <ClCompile Include="Table_psc_document_repset.cpp" />
+    <ClCompile Include="Table_psc_document_schema.cpp" />
+    <ClCompile Include="Table_psc_document_tables.cpp" />
+    <ClCompile Include="Table_psc_ir_batdet.cpp" />
+    <ClCompile Include="Table_psc_ir_bathdr.cpp" />
+    <ClCompile Include="Table_psc_ir_batuser.cpp" />
+    <ClCompile Include="Table_psc_ir_repset.cpp" />
+    <ClCompile Include="Table_psc_ir_schema.cpp" />
+    <ClCompile Include="Table_psc_ir_tables.cpp" />
+    <ClCompile Include="Table_psc_local_batdet.cpp" />
+    <ClCompile Include="Table_psc_local_bathdr.cpp" />
+    <ClCompile Include="Table_psc_local_batuser.cpp" />
+    <ClCompile Include="Table_psc_local_repset.cpp" />
+    <ClCompile Include="Table_psc_local_schema.cpp" />
+    <ClCompile Include="Table_psc_local_tables.cpp" />
+    <ClCompile Include="Table_psc_website_batdet.cpp" />
+    <ClCompile Include="Table_psc_website_bathdr.cpp" />
+    <ClCompile Include="Table_psc_website_batuser.cpp" />
+    <ClCompile Include="Table_psc_website_repset.cpp" />
+    <ClCompile Include="Table_psc_website_schema.cpp" />
+    <ClCompile Include="Table_psc_website_tables.cpp" />
+    <ClCompile Include="Table_QuickStartCategory.cpp" />
+    <ClCompile Include="Table_QuickStartTemplate.cpp" />
+    <ClCompile Include="Table_Region.cpp" />
+    <ClCompile Include="Table_RemoteControl.cpp" />
+    <ClCompile Include="Table_RemoteMapping.cpp" />
+    <ClCompile Include="Table_RepositorySource.cpp" />
+    <ClCompile Include="Table_RepositorySource_URL.cpp" />
+    <ClCompile Include="Table_RepositoryType.cpp" />
+    <ClCompile Include="Table_Room.cpp" />
+    <ClCompile Include="Table_RoomType.cpp" />
+    <ClCompile Include="Table_Room_Users.cpp" />
+    <ClCompile Include="Table_Schema.cpp" />
+    <ClCompile Include="Table_Screen.cpp" />
+    <ClCompile Include="Table_Screen_CommandParameter.cpp" />
+    <ClCompile Include="Table_Screen_DesignObj.cpp" />
+    <ClCompile Include="Table_SetupStep.cpp" />
+    <ClCompile Include="Table_Size.cpp" />
+    <ClCompile Include="Table_Skin.cpp" />
+    <ClCompile Include="Table_Software.cpp" />
+    <ClCompile Include="Table_Software_Device.cpp" />
+    <ClCompile Include="Table_Software_Source.cpp" />
+    <ClCompile Include="Table_StabilityStatus.cpp" />
+    <ClCompile Include="Table_StartupScript.cpp" />
+    <ClCompile Include="Table_Style.cpp" />
+    <ClCompile Include="Table_StyleVariation.cpp" />
+    <ClCompile Include="Table_System.cpp" />
+    <ClCompile Include="Table_Template.cpp" />
+    <ClCompile Include="Table_Text.cpp" />
+    <ClCompile Include="Table_TextCategory.cpp" />
+    <ClCompile Include="Table_Text_LS.cpp" />
+    <ClCompile Include="Table_Text_LS_AltVersions.cpp" />
+    <ClCompile Include="Table_TimeZone.cpp" />
+    <ClCompile Include="Table_UI.cpp" />
+    <ClCompile Include="Table_UnknownDevices.cpp" />
+    <ClCompile Include="Table_UserMode.cpp" />
+    <ClCompile Include="Table_Users.cpp" />
+    <ClCompile Include="Table_Variable.cpp" />
+    <ClCompile Include="Table_Version.cpp" />
+    <ClCompile Include="Table_VertAlignment.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
