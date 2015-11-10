@@ -59,7 +59,7 @@
 /* Include everything */
 #endif
 
-#ifdef _UWIN
+#ifdef WIN32
 #   define HAVE_STRUCT_TIMESPEC 1
 #   define HAVE_SIGNAL_H	1
 #   undef HAVE_CONFIG_H
