@@ -625,10 +625,15 @@ CommandGroup *UpdateEntArea::CreateSecurityAlertCommandGroup(CommandGroupArray &
 		pCommandGroup->AddCommand(m_dwPK_Device_MediaPlugIn,COMMAND_MH_Stop_Media_CONST,iOrder++,1,
 			COMMANDPARAMETER_PK_EntertainArea_CONST,StringUtils::itos(it->first).c_str());
 
-		pCommandGroup->AddCommand(m_dwPK_Device_MediaPlugIn,COMMAND_MH_Play_Media_CONST,iOrder++,3,
-			COMMANDPARAMETER_Bypass_Event_CONST,"1",
-			COMMANDPARAMETER_PK_EntertainArea_CONST,StringUtils::itos(it->first).c_str(),
-			COMMANDPARAMETER_Filename_CONST,sFile.c_str());
+		// Reset Alarm does not have a file, don't send play commands without file
+		// (squeeze-based devices will start playing previous file on repeat if we do)
+		if (!sFile.empty())
+		{
+			pCommandGroup->AddCommand(m_dwPK_Device_MediaPlugIn,COMMAND_MH_Play_Media_CONST,iOrder++,3,
+						  COMMANDPARAMETER_Bypass_Event_CONST,"1",
+						  COMMANDPARAMETER_PK_EntertainArea_CONST,StringUtils::itos(it->first).c_str(),
+						  COMMANDPARAMETER_Filename_CONST,sFile.c_str());
+		}
 	}
 
 	// Turn on all lights if this is not just resetting the alarm
