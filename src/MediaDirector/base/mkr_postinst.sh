@@ -27,7 +27,12 @@ cat <<-EOF > /root/.my.cnf
 
 StatsMessage "Setting up $DEB_CACHE"
 #Make sure there is are Packages files on the MD so apt-get update does not fail
-/usr/pluto/bin/UpdateDebCache.sh
+#/usr/pluto/bin/UpdateDebCache.sh
+rm -f /var/cache/apt/archives/*
+mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+touch /usr/pluto/deb-cache/Packages
+gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
+cp /usr/pluto/deb-cache/Packages* /usr/pluto/deb-cache/$DEB_CACHE
 
 case "$TARGET_DISTRO" in
 	raspbian)
