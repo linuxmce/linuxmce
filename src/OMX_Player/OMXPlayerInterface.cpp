@@ -82,6 +82,10 @@ OMXPlayerInterface::OMXPlayerInterface(string sAudioDevice, bool bPassthrough, s
 
   DBus::_init_threading();
   DBus::default_dispatcher = &dispatcher;
+
+  // launch omxplayer with no options forcing it to create a dbus session and session id files.
+  string sFullname = "/usr/bin/omxplayer";
+  system( sFullname.c_str() );
 }
 
 // destructor
