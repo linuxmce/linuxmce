@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #1701 External Media Identifier
+Maintainer = JayName
+Email = jason@murduck.net
+Depend = DCE_Dependencies
+<-dceag-p-e->
+
