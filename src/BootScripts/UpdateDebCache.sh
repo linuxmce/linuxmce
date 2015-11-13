@@ -1,6 +1,8 @@
 #!/bin/bash
 export LC_ALL="C"
 
+. /usr/pluto/bin/Config_Ops.sh
+
 UPDATE_CACHE=""
 HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 HOST_RELEASE=$(lsb_release -c -s)
@@ -68,16 +70,18 @@ rm -f /usr/pluto/deb-cache/Packages*
 touch /usr/pluto/deb-cache/Packages
 gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
 
-# move files to new deb_cache
-if [[ -n "$(find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
-	echo "Moving the Core's apt cache to /usr/pluto/deb-cache/${DEB_CACHE}"
-	find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
-	UPDATE_CACHE="${DEB_CACHE}"
-fi
-if [[ -n "$(find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
-	echo "Moving the Core's deb-cache to /usr/pluto/deb-cache/${DEB_CACHE}"
-	find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
-	UPDATE_CACHE="${DEB_CACHE}"
+if [[ "$PK_Device" == "1" ]] || mountpoint -q /usr/pluto/deb-cache/ ; then
+	# move files to new deb_cache
+	if [[ -n "$(find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
+		echo "Moving the old deb-cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+		find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+		UPDATE_CACHE="${DEB_CACHE}"
+	fi
+	if [[ -n "$(find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
+		echo "Moving the apt cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+		find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+		UPDATE_CACHE="${DEB_CACHE}"
+	fi
 fi
 
 # add any empty dirs in deb-cache so they get Packages files as well
@@ -85,7 +89,6 @@ for cache in $(find /usr/pluto/deb-cache/ -depth -type d -empty 2>/dev/null) ; d
 	[[ -n "$UPDATE_CACHE" ]] && UPDATE_CACHE="${UPDATE_CACHE} $(basename ${cache})" || UPDATE_CACHE="$(basename ${cache})"
 done
 
-export LC_ALL="C"
 for Moon_RootLocation in $(find /usr/pluto/diskless/* -maxdepth 0 -type d 2>/dev/null); do
 if [[ -n "$Moon_RootLocation" && -e "$Moon_RootLocation/etc/pluto.conf" ]]; then
 	TARGET_DISTRO=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -i -s | tr '[:upper:]' '[:lower:]')
@@ -95,16 +98,16 @@ if [[ -n "$Moon_RootLocation" && -e "$Moon_RootLocation/etc/pluto.conf" ]]; then
 
 	mkdir -p ${Moon_RootLocation}/usr/pluto/deb-cache/${DEB_CACHE}
 
-	if [[ -n "$(find ${Moon_RootLocation}/var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
-		echo "Moving this MDs apt cache to /usr/pluto/deb-cache/${DEB_CACHE}"
-		find ${Moon_RootLocation}/var/cache/apt/archives/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+	if [[ -n "$(find ${Moon_RootLocation}/usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
+		echo "Moving the MD's deb-cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+		find ${Moon_RootLocation}/usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
 		if [[ "$UPDATE_CACHE" != "*${DEB_CACHE}*" ]]; then
 			UPDATE_CACHE="$UPDATE_CACHE ${DEB_CACHE}"
 		fi
 	fi
-	if [[ -n "$(find ${Moon_RootLocation}/usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
-		echo "Moving the MD's deb-cache to /usr/pluto/deb-cache/${DEB_CACHE}"
-		find ${Moon_RootLocation}/usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
+	if [[ -n "$(find ${Moon_RootLocation}/var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
+		echo "Moving this MDs apt cache to /usr/pluto/deb-cache/${DEB_CACHE}"
+		find ${Moon_RootLocation}/var/cache/apt/archives/ -maxdepth 1 -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/${DEB_CACHE} \;
 		if [[ "$UPDATE_CACHE" != "*${DEB_CACHE}*" ]]; then
 			UPDATE_CACHE="$UPDATE_CACHE ${DEB_CACHE}"
 		fi
@@ -117,8 +120,11 @@ if [[ -n "$Moon_RootLocation" && -e "$Moon_RootLocation/etc/pluto.conf" ]]; then
 		fi
 	fi
 
-	# fix sources.list, replace "/deb-cache " with "/deb-cache/${DEB_CACHE} "
-	sed -i "s:/deb-cache :/deb-cache/${DEB_CACHE} :" ${Moon_RootLocation}/etc/apt/sources.list
+	# update sources.list for any old/existing entries
+	if [[ ! $(grep ${DEB_CACHE} ${Moon_RootLocation}/etc/apt/sources.list) ]] ; then
+		# fix sources.list, replace "/deb-cache " with "/deb-cache/${DEB_CACHE} "
+		sed -i "s:/deb-cache :/deb-cache/${DEB_CACHE} :" ${Moon_RootLocation}/etc/apt/sources.list
+	fi
 
 	# clear the original packages lists to avoid problems.
 	rm -f ${Moon_RootLocation}/usr/pluto/deb-cache/Packages*
