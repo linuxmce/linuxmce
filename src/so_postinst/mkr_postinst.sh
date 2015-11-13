@@ -22,5 +22,5 @@ if [[ "$1" == "configure" ]] ;then
 	else
 		echo "/usr/pluto/lib" > /etc/ld.so.conf.d/plutolibs.conf
 	fi
-	/sbin/ldconfig.real || ldconfig
+	ldconfig
 fi
