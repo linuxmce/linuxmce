@@ -7,10 +7,17 @@
 #ln -s /usr/lib/libXmu.so.6.2.0 /usr/lib/libXmu.so || :
 # END  : Hack to get mythtv working
 
+# If this is not the hybrid, copy the mysql.txt file from hybrid
+if [[ "$PK_Device" != "1" ]] ;then
+	scp -o 'StrictHostKeyChecking no' -o 'PasswordAuthentication no' root@dcerouter:/etc/mythtv/config.xml /etc/mythtv/ || :
+	scp -o 'StrictHostKeyChecking no' -o 'PasswordAuthentication no' root@dcerouter:/etc/mythtv/mysql.txt /etc/mythtv/ || :
+	touch /etc/mythtv/mysql.txt
+fi
+
 # In case we have a later MythTV, we need to transpose the information
 # from the config.xml file.
 # If this is the hybrid, create the mysql.txt
-if [[ "$PK_Device" == "1" ]] && [[ -f /etc/mythtv/config.xml ]] ; then
+if [[ -f /etc/mythtv/config.xml ]] ; then
 	HOST='Host'
 	USERNAME='UserName'
 	PASSWORD='Password'
@@ -32,18 +39,14 @@ if [[ "$PK_Device" == "1" ]] && [[ -f /etc/mythtv/config.xml ]] ; then
 	# END: Hack to transpose xml
 fi
 
-# If this is not the hybrid, copy the mysql.txt file from hybrid
+# If this is not the hybrid, fix the DBHostName
 if [[ "$PK_Device" != "1" ]] ;then
-	scp -o 'StrictHostKeyChecking no' -o 'PasswordAuthentication no' root@dcerouter:/etc/mythtv/mysql.txt /etc/mythtv/ || :
-	touch /etc/mythtv/mysql.txt
-
-## FIXME: DO NOT HARDCODE IP ADDRESS, GET FROM /etc/pluto.conf??
-
-	sed -i "s/^DBHostName.*/DBHostName=192.168.80.1/g" /etc/mythtv/mysql.txt || :
+	sed -i "s/^DBHostName.*/DBHostName=$MySqlHost/g" /etc/mythtv/mysql.txt || :
 fi
 
 # make the proper ownership's because the backend can't read it otherwise
-chown mythtv /etc/mythtv/mysql.txt
+chown mythtv /etc/mythtv/config.xml || :
+chown mythtv /etc/mythtv/mysql.txt || :
 
 ## Get a valid mysql connection string to mythconvert
 eval `cat /etc/mythtv/mysql.txt | grep -v "^#" | grep -v "^$"`;
