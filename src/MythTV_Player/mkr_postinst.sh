@@ -48,12 +48,27 @@ fi
 chown mythtv /etc/mythtv/config.xml || :
 chown mythtv /etc/mythtv/mysql.txt || :
 
-## Get a valid mysql connection string to mythconvert
+## Add the myth user to the public group so it will be able to write intro /public/data dir
+adduser --quiet mythtv public
+
+## Set root user to mythtv group
+if grep -q 'mythtv' /etc/group ;then
+	addRootUser
+else
+	groupadd mythtv || :
+	addRootUser
+fi
+
+mkdir -p /root/.mythtv/ || :
+touch /root/.mythtv/ignoregroup || :
+
+## Get a valid mysql connection string to mythconverg
 eval `cat /etc/mythtv/mysql.txt | grep -v "^#" | grep -v "^$"`;
 
 if ( [[ -z "$DBUserName" ]] || [[ -z "$DBHostName" ]] || [[ -z "$DBPassword" ]] || [[ -z "$DBName" ]] ) ; then
 	echo "********";
 	echo "There is an error in the mythtv backend setup. It looks like /etc/mythtv/mysql.txt didn't create properly";
+	echo "This is normal during diskless image creation.";
 	echo "********";
 	exit 0;
 fi
@@ -103,7 +118,7 @@ function addRootUser
 echo "LOCK TABLE schemalock WRITE;" | $mysql_command  || :
 invoke-rc.d mythtv-backend force-reload || /bin/true
 
-echo "Waiting 3 seconds so that myth backed is able to actually create the schema"
+echo "Waiting 3 seconds so that mythtv-backend is able to create the schema"
 FOUND=0;
 TRIES=20;
 SLEEP=0.5;
@@ -133,32 +148,16 @@ else
 	invoke-rc.d mythtv-backend restart || /bin/true
 fi
 
-#Create a shortcut to MythTV Setup
+#Create a shortcut to MythTV Setup in the Computing Menu
 #Find the media director -- it could be a child if this is a hybrid
 Q="SELECT PK_Device FROM Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory=8 AND (PK_Device=$PK_Device OR FK_Device_ControlledVia=$PK_Device) LIMIT 1"
 PK_Device_MD="$(RunSQL "$Q")"
 
-
 #Do we have a quick launch already?
 Q="SELECT PK_Device_QuickStart FROM Device_QuickStart where FK_Device=$PK_Device_MD AND Description='MythTV Setup'"
 PK_Device_QuickStart="$(RunSQL "$Q")"
-
 if [ "$PK_Device_QuickStart" = "" ]; then
-
 	Q="INSERT INTO Device_QuickStart(FK_Device,Description,SortOrder,FK_QuickStartTemplate) SELECT $PK_Device_MD,Description,1,PK_QuickStartTemplate FROM QuickStartTemplate WHERE PK_QuickStartTemplate=8"
 	RunSQL "$Q"
 fi
 
-## Add the myth user to the public group so it will be able to write intro /public/data dir
-adduser --quiet mythtv public
-
-## Set root user to mythtv group
-if grep -q 'mythtv' /etc/group ;then
-	addRootUser
-else
-	groupadd mythtv || :
-	addRootUser
-fi
-
-mkdir -p /root/.mythtv/ || :
-touch /root/.mythtv/ignoregroup || :
