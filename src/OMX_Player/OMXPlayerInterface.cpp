@@ -1016,7 +1016,6 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
 #endif
 
     int i=0;
-    const char *dbus_addr;
     string line("");
     ifstream infile;
 /*
@@ -1055,73 +1054,17 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
       m_s_dbus_addr = line;
     }
 
-    dbus_addr = m_s_dbus_addr.c_str();
-
     Log("Play() - Calling Connect_Player()");
     if ( !Connect_Player() )
       return false;
-/*
-    // setup the dbus 'Player' connection and client
-    if (g_player_conn == NULL) {
-      Log("Play() - Creating connection to 'Player' bus");
-      g_player_conn = new DBus::Connection(dbus_addr, bPrivate);
-      if (!g_player_conn->connected()) {
-        Log("Play() - g_player_conn not connected(), exiting.");
-      }
-      if (!g_player_conn->register_bus()) {
-        Log("Play() - g_player_conn unable to register_bus(), exiting.");
-        return false;
-      }
-    }
-    if (g_player_client == NULL) {
-      Log("Play() - Creating Player_proxy client interface");
-      g_player_client = new OMXPlayerClient(*g_player_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-    }
-*/
 
     Log("Play() - Calling Connect_Properties()");
     if ( !Connect_Properties() )
       return false;
-/*
-    // setup the dbus 'Properties' connection and client
-    if (g_props_conn == NULL) {
-      Log("Play() - Creating connection to 'Propertiess' bus");
-      g_props_conn = new DBus::Connection(dbus_addr, bPrivate);
-      if (!g_props_conn->connected()) {
-        Log("Play() - g_props_conn not connected(), exiting.");
-      }
-      if (!g_props_conn->register_bus()) {
-        Log("Play() - g_props_conn unable to register_bus(), exiting.");
-        return false;
-      }
-    }
-    if (g_props_client == NULL) {
-      Log("Play() - Creating Properties_proxy client interface");
-      g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-    }
-*/
 
     Log("Play() - Calling Connect_Root()");
     if ( !Connect_Root() )
       return false;
-/*
-    // setup the dbus 'Root' connection and client
-    if (g_root_conn == NULL) {
-      Log("Play() - Creating connection to 'Root' bus");
-      g_root_conn = new DBus::Connection(dbus_addr, bPrivate);
-      if (!g_root_conn->connected()) {
-        Log("Play() - g_root_conn not connected(), exiting.");
-      }
-      if (!g_root_conn->register_bus()) {
-        Log("Play() - g_root_conn unable to register_bus(), exiting.");
-        return false;
-      }
-    }
-    if (g_root_client == NULL) {
-      Log("Play() - Creating Root_proxy client interface");
-      g_root_client = new OMXRootClient(*g_root_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-    }
-*/
 
     // setup the monitoring thread to waitpid()
     m_bRunPlayerMonitor = true;
