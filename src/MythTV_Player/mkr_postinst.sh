@@ -7,6 +7,37 @@
 #ln -s /usr/lib/libXmu.so.6.2.0 /usr/lib/libXmu.so || :
 # END  : Hack to get mythtv working
 
+function addEntries
+{
+	if [ "$3" = "" ]; then
+		echo "insert into settings(value, data) values('$1', '$2')" | $mysql_command;
+	else
+		echo "insert into settings(value, data, hostname) values('$1', '$2', '$3')" | $mysql_command;
+	fi;
+}
+
+function addRootUser
+{
+	is_in_group="false"
+	for group in `id -nG root` ;do
+		if [[ "$group" == "mythtv" ]] ;then
+			is_in_group="true"
+		fi
+	done
+
+	if [[ "$is_in_group" == "false" ]] ;then
+		group_line=$(grep "^mythtv:" /etc/group)
+		if [[ "$(echo $group_line | cut -d':' -f4)" == "" ]] ;then
+			group_line="${group_line}root"
+		else
+		    group_line="${group_line},root"
+		fi
+		grep -v "^mythtv:" /etc/group > /etc/group.$$
+		echo $group_line >> /etc/group.$$
+		mv /etc/group.$$ /etc/group
+	fi
+}
+
 # If this is not the hybrid, copy the mysql.txt file from hybrid
 if [[ "$PK_Device" != "1" ]] ;then
 	scp -o 'StrictHostKeyChecking no' -o 'PasswordAuthentication no' root@dcerouter:/etc/mythtv/config.xml /etc/mythtv/ || :
@@ -82,37 +113,6 @@ if [[ "$AutoConf" == "1" ]]; then
     echo "Auto Configure is set"
 	exit 0
 fi
-
-function addEntries
-{
-	if [ "$3" = "" ]; then
-		echo "insert into settings(value, data) values('$1', '$2')" | $mysql_command;
-	else
-		echo "insert into settings(value, data, hostname) values('$1', '$2', '$3')" | $mysql_command;
-	fi;
-}
-
-function addRootUser
-{
-	is_in_group="false"
-	for group in `id -nG root` ;do
-		if [[ "$group" == "mythtv" ]] ;then
-			is_in_group="true"
-		fi
-	done
-
-	if [[ "$is_in_group" == "false" ]] ;then
-		group_line=$(grep "^mythtv:" /etc/group)
-		if [[ "$(echo $group_line | cut -d':' -f4)" == "" ]] ;then
-			group_line="${group_line}root"
-		else
-		    group_line="${group_line},root"
-		fi
-		grep -v "^mythtv:" /etc/group > /etc/group.$$
-		echo $group_line >> /etc/group.$$
-		mv /etc/group.$$ /etc/group
-	fi
-}
 
 ## Force the backend to make the database structure
 echo "LOCK TABLE schemalock WRITE;" | $mysql_command  || :
