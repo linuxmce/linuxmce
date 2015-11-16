@@ -2,6 +2,7 @@
  * Create LinuxMCE asterisk database
  * and realtime tables
  *
+ * v0.3 - 16/11/2015 - phenigma - updates for chan_sccp-v4.2
  * v0.2 - 15/04/2012 - foxi352 - removed asteriskcdrdb and created cdr table in asterisk db
  * v0.1 - 22/09/2011 - foxi352 - initial version
  * 
@@ -84,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `sccpdevice` (
   `pickupmodeanswer` varchar(5) default 'on',
   `private` varchar(5) default 'off',
   `privacy` varchar(100) default 'full',
-  `nat` varchar(15) default 'off',
+  `nat` varchar(4) default 'auto',
   `softkeyset` varchar(100) default '',
   `setvar` varchar(100) default NULL,
   `disallow` varchar(255) DEFAULT NULL,
@@ -120,7 +121,7 @@ CREATE TABLE IF NOT EXISTS `sccpline` (
   `callgroup` varchar(45) default NULL,
   `pickupgroup` varchar(45) default NULL,
   `amaflags` varchar(45) default NULL,
-  `dnd` varchar(5) default 'on',
+  `dnd` varchar(7) default 'reject',
   `setvar` varchar(50) default NULL,
   `name` varchar(45) NOT NULL default '',
   PRIMARY KEY  (`name`)
@@ -147,7 +148,7 @@ CREATE OR REPLACE ALGORITHM = MERGE
 VIEW sccpdeviceconfig AS
 	SELECT GROUP_CONCAT( CONCAT_WS( ',', buttonconfig.type, buttonconfig.name, buttonconfig.options )
 	ORDER BY instance ASC
-	SEPARATOR ';' ) AS button, sccpdevice . *
+	SEPARATOR ';' ) AS button, sccpdevice.*
 	FROM sccpdevice
 	LEFT JOIN buttonconfig ON ( buttonconfig.device = sccpdevice.name )
 GROUP BY sccpdevice.name;
@@ -168,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `sip_devices` (
   `remotesecret` varchar(250) DEFAULT NULL,
   `transport` enum('tcp','udp','udp,tcp') DEFAULT 'udp,tcp',
   `host` varchar(31) NOT NULL DEFAULT 'dynamic',
-  `nat` varchar(5) NOT NULL DEFAULT 'yes',
+  `nat` varchar(19) NOT NULL DEFAULT 'force_rport,comedia',
   `type` enum('user','peer','friend') NOT NULL DEFAULT 'friend',
   `accountcode` varchar(20) DEFAULT NULL,
   `amaflags` varchar(13) DEFAULT NULL,
