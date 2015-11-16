@@ -1,3 +1,10 @@
+lmce-asterisk (0+0.3.5-1) unstable; urgency=low
+
+  * update configs for chan_sccp-v4.2
+  * add new reload command so phone register on boot
+
+ -- phenigma <phenigma@linuxmce.org>  Mon, 16 Nov 2015 13:28:00 -0500
+
 lmce-asterisk (0+0.3.4-1) precise; urgency=low
 
   * add externnotify fn to voicemail.conf and associated script
