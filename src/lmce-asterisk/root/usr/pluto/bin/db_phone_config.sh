@@ -659,8 +659,12 @@ devices2astdb
 chown asterisk.asterisk /usr/share/asterisk/agi-bin/* /etc/asterisk/*
 
 # reload needed asterisk modules to activate config
-asterisk -r -x "sip reload" >> /dev/null
-asterisk -r -x "iax2 reload" >> /dev/null
+asterisk -r -x "core reload" >> /dev/null
 asterisk -r -x "sccp reload" >> /dev/null
-asterisk -r -x "jabber reload" >> /dev/null
+
+# the following are deprecated
+#asterisk -r -x "sip reload" >> /dev/null
+#asterisk -r -x "iax2 reload" >> /dev/null
+#asterisk -r -x "sccp reload" >> /dev/null
+#asterisk -r -x "jabber reload" >> /dev/null
 
