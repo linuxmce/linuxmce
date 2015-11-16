@@ -79,17 +79,6 @@ fi
 chown mythtv /etc/mythtv/config.xml || :
 chown mythtv /etc/mythtv/mysql.txt || :
 
-## Add the myth user to the public group so it will be able to write intro /public/data dir
-adduser --quiet mythtv public
-
-## Set root user to mythtv group
-if grep -q 'mythtv' /etc/group ;then
-	addRootUser
-else
-	groupadd mythtv || :
-	addRootUser
-fi
-
 mkdir -p /root/.mythtv/ || :
 touch /root/.mythtv/ignoregroup || :
 
@@ -161,3 +150,13 @@ if [ "$PK_Device_QuickStart" = "" ]; then
 	RunSQL "$Q"
 fi
 
+## Add the myth user to the public group so it will be able to write intro /public/data dir
+adduser --quiet mythtv public
+
+## Set root user to mythtv group
+if grep -q 'mythtv' /etc/group ;then
+	addRootUser
+else
+	groupadd mythtv -f
+	addRootUser
+fi
