@@ -6,6 +6,15 @@
 if [[ -f "$log_file" ]] ;then
 	mv "$log_file" "$log_file.$(date '+%Y%m%d-%H%M%S')"
 fi
+# Clean up old changes files from broken duploads, as well as any upload file.
+pushd /var/lmce-build/replacements
+rm *.changes || :
+rm *.upload || :
+popd
+pushd "$local_mirror_dir"
+rm *.changes || :
+rm *.upload || :
+popd
 
 "${build_scripts_dir}/checkout-svn.sh"
 "${build_scripts_dir}/import-win32bins.sh"
@@ -26,6 +35,9 @@ fi
 pushd "$local_mirror_dir"
 dupload --to linuxmce *.changes
 popd
+pushd /var/lmce-build/replacements
+dupload --to linuxmce *.changes
+popd
 
-
-wget --no-check-certificate  https://vt100.at/announce.php?text=precise\ fluffy\ is\ done -O /dev/null
+VERSION=`grep "int g_SvnRevision" /var/lmce-build/svn/trunk/src/version.h | grep -v extern | cut -f2 -d"=" | cut -f1 -d";"`
+wget --no-check-certificate  https://vt100.at/announce.php?text=precise\ fluffy\ is\ done\ with\ $VERSION -O /dev/null
