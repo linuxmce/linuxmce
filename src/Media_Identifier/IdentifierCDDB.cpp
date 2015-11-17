@@ -6,12 +6,17 @@
  */
 
 
+#include <stdlib.h>
+#include <string.h>
 #include <cddb/cddb.h>
 
 #include "IdentifierCDDB.h"
 
 using namespace DCE;
 using namespace std;
+
+/* free pointer when it's pointing at something */
+#define FREE_NOT_NULL(p) if (p) { free(p); p = NULL; }
 
 // forward declarations
 cddb_disc_t *do_read(cddb_conn_t *conn, const char *category, int discid, int quiet);
@@ -115,7 +120,7 @@ string IdentifierCDDB::GetIdentifiedData()
     // fabricate return string from disc data here
     if (!disc) {
         //error_exit(cddb_errno(conn), "could not read disc data");
-        return false;
+        return "";
     }
 
     string sRet;
@@ -174,9 +179,6 @@ IdentifierBase::eIdentityType IdentifierCDDB::GetIdentityType()
 #include <stdlib.h>
 #include <string.h>
 #include <cdio/cdio.h>
-
-/* free pointer when it's pointing at something */
-#define FREE_NOT_NULL(p) if (p) { free(p); p = NULL; }
 
 #define STR_OR_NULL(s) ((s) ? s : "(null)")
 
