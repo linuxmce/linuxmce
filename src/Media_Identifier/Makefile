@@ -22,7 +22,7 @@ sources = Main.cpp Media_Identifier.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lcdio
+XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb
 
 Gen_Dev_Files +=
 sources += IdentifierBase.cpp \
