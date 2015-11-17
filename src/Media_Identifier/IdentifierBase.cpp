@@ -1,7 +1,8 @@
 /**
  * IdentifierBase - the base class for media identification
  *
- * Author: Thomas Cherryhomes <thom.cherryhomes@gmail.com>
+ * Author: Thomas Cherryhomes <thom.cherryhomes@gmail.com> - class structure
+ * Author: phenigma <phenigma@hotmail.com> - functionality
  */
 
 #include "IdentifierBase.h"
