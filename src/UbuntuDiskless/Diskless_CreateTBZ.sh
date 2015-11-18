@@ -627,10 +627,12 @@ MD_Install_Packages () {
 			echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
 			mkdir -p $TEMP_DIR/etc/init/
 			echo 'manual' > "$TEMP_DIR/etc/init/kdm.override"
+			echo 'manual' > "$TEMP_DIR/etc/init/sddm.override"
 			echo 'manual' > "$TEMP_DIR/etc/init/lightdm.override"
 
 			# Update startup to remove kdm and network manager
-			LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove
+			LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove || :
+			LC_ALL=C chroot $TEMP_DIR update-rc.d -f sddm remove || :
 			LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
 
 			#Install ancillary programs

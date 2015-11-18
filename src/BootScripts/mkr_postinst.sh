@@ -143,6 +143,7 @@ fi
 mkdir -p "/etc/X11"
 echo "/bin/false" >/etc/X11/default-display-manager
 update-rc.d kdm disable >/dev/null || :
+update-rc.d sddm disable >/dev/null || :
 update-rc.d lightdm disable >/dev/null || :
 
 ###. /usr/pluto/install/install-common.sh ; Fix_LSB_Data

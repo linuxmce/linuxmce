@@ -8,9 +8,10 @@ update-rc.d -f firstboot start 91 2 3 4 5 . >/dev/null
 ###########################################################
 
 MD_Preseed () {
-	update-rc.d -f kdm remove
-	update-rc.d -f lightdm remove
-	update-rc.d -f NetworkManager remove
+	update-rc.d -f kdm remove || :
+	update-rc.d -f sddm remove || :
+	update-rc.d -f lightdm remove || :
+	update-rc.d -f NetworkManager remove || :
 
 #	cat <<-EOF > /etc/network/interfaces
 #		auto lo
