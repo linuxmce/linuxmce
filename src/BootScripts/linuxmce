@@ -182,6 +182,7 @@ start() {
 	err=0
 
 	service kdm stop || :
+	service sddm stop || :
 
 	# Disable display manager
 	mkdir -p "/etc/X11"

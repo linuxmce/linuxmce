@@ -222,8 +222,9 @@ apt-get -f -y --no-install-recommends install $pkg_list
 	echo '/bin/false' >/etc/X11/default-display-manager
 
 	# Update startup to remove kdm and network manager
-	update-rc.d -f kdm remove
-	update-rc.d -f NetworkManager remove
+	update-rc.d -f kdm remove || :
+	update-rc.d -f sddm remove || :
+	update-rc.d -f NetworkManager remove || :
 
 	apt-get -y install pastebinit
 	VerifyExitCode "pastebinit"
