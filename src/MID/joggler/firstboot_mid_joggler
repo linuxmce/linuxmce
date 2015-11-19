@@ -4,7 +4,7 @@ if [[ -n "$HEADER_FB_JOGGLER" ]]; then
 fi
 HEADER_FB_JOGGLER=included
 
-firstboot_lmce_joggler_preinst() {
+firstboot_mid_joggler_preinst() {
 	rm -f /etc/init/tty1.conf* || :
 	rm -f /home/joggler/.xinitrc || :
 
@@ -37,7 +37,12 @@ firstboot_lmce_joggler_preinst() {
 		EEOF
 }
 
-firstboot_lmce_joggler_postinst() {
+
+firstboot_mid_joggler_kernel() {
+	:
+}
+
+firstboot_mid_joggler_postinst() {
 	echo -e "Setting up joggler specific boot settings" >&2
 
 	. /usr/pluto/bin/Config_Ops.sh
