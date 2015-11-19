@@ -88,7 +88,7 @@ fi
 #	fi
 	# Setup pluto's apt.conf
 	pluto_apt_conf='// Pluto apt conf add-on
-Apt::Cache-Limit "12582912";
+#Apt::Cache-Limit "12582912";
 Dpkg::Options { "--force-confold"; };
 Acquire::http::timeout "10";
 Acquire::ftp::timeout "10";
