@@ -25,7 +25,7 @@ MD_Preseed () {
 
 	cat <<-EOF > /etc/apt/apt.conf.d/30pluto
 		// Pluto apt conf add-on
-		APT::Cache-Limit "43554432";
+		#APT::Cache-Limit "43554432";
 		Dpkg::Options { "--force-confold"; };
 		Acquire::http::timeout "10";
 		Acquire::ftp::timeout "10";
