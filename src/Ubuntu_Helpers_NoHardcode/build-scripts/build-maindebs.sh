@@ -132,7 +132,7 @@ function build_main_debs() {
  				"xenial")
 					Distro_ID="23"
 					RepositorySource=25
-					Main_Version='2.0.0.47.'
+					Main_Version='2.0.0.48.'
 					exclude_list=$exclude_list,673,674 # lmce game player - fails to build
 					exclude_list=$exclude_list,682,683 # mame - fails to build
 					exclude_list=$exclude_list,879,881 # qorbiter android - no sdk/ndk
