@@ -248,7 +248,7 @@ Configure_Network_Files () {
 	#echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
 	echo "127.0.1.1 dcerouter $(/bin/hostname)"    >> /etc/hosts
 
-	ifup -a >/dev/null 2>/dev/null &
+	ifup eth0 eth1 >/dev/null 2>/dev/null &
 }
 
 Configure_Network_Database () {

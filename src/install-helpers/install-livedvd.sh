@@ -18,7 +18,7 @@ FirstNetwork () {
 	echo "creating dumb DHCP interfaces template" > /var/log/pluto/firstnet.log
 	nic_num=$(lspci | grep -ic "Ethernet")
 	if [[ $nic_num -gt "1" ]]; then
-		cat <<-EOF > /etc/network/interfaces
+		cat <<-EOF > /etc/network/interfaces.lmce
 			auto lo
 			iface lo inet loopback
 			auto eth0
@@ -26,17 +26,16 @@ FirstNetwork () {
 			auto eth1
 			iface eth1 inet dhcp
 			EOF
-		#ifconfig eth1 del 192.168.80.0 || :
+		ifup eth0 eth1 -i /etc/network/interfaces.lmce
 	else
-		cat <<-EOF > /etc/network/interfaces
+		cat <<-EOF > /etc/network/interfaces.lmce
 			auto lo
 			iface lo inet loopback
 			auto eth0
 			iface eth0 inet dhcp
 			EOF
+		ifup eth0 -i /etc/network/interfaces.lmce
 	fi
-	/etc/init.d/networking stop
-	service networking start --no-wait
 }
 
 SetupNetworking () {
