@@ -214,11 +214,11 @@ if ! BlacklistConfFiles '/etc/apache2/apache2.conf' ;then
 		cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.pbackup || :
 	fi
 
-	if ! grep ServerName ./apache2.conf >/dev/null ; then 
+	if ! grep ServerName /etc/apache2/conf.d/lmce >/dev/null ; then 
 		if [[ -z "${HostName}" ]] ; then
 			HostName="dcerouter"
 		fi
-		echo "ServerName ${HostName}" >> /etc/apache2/apache2.conf
+		echo "ServerName ${HostName}" > /etc/apache2/conf.d/lmce
 	fi
 fi
 
