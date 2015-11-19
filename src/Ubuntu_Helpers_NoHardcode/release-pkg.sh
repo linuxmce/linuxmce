@@ -43,7 +43,7 @@ case "${flavor}" in
                         "xenial")
                                 Distro_ID="23"
                                 RepositorySource=25
-				Main_Version="2.0.0.47."
+				Main_Version="2.0.0.48."
                                 ;;
                 esac
                 ;;
