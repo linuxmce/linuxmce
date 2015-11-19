@@ -215,7 +215,7 @@ if ! BlacklistConfFiles '/etc/apache2/apache2.conf' ;then
 	fi
 
 	if ! grep ServerName ./apache2.conf >/dev/null ; then 
-		if [[ -n "${HostName}" ]] ; then
+		if [[ -z "${HostName}" ]] ; then
 			HostName="dcerouter"
 		fi
 		echo "ServerName ${HostName}" >> /etc/apache2/apache2.conf
