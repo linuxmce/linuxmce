@@ -8,7 +8,7 @@ function BlacklistConfFiles {
 
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 
-if [[ "$1" == "configure" ]] ;then
+#if [[ "$1" == "configure" ]] ;then
 	if [ ! -e /etc/ld.so.conf.d ] ;then
 		if ! BlacklistConfFiles '/etc/ld.so.conf' ;then
 			if [ ! -e /etc/ld.so.conf.pbackup ] ;then
@@ -22,5 +22,5 @@ if [[ "$1" == "configure" ]] ;then
 	else
 		echo "/usr/pluto/lib" > /etc/ld.so.conf.d/plutolibs.conf
 	fi
-	ldconfig
-fi
+	/sbin/ldconfig.real 2>/dev/null || ldconfig
+#fi
