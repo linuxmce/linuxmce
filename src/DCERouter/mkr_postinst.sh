@@ -4,21 +4,6 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
-# 2005-04-11 * Disabled. Considered not needed anymore
-#echo "Converting all tables except 'mysql' to InnoDB (this may take a while)"
-#DBs=$(RunSQL 'SHOW DATABASES')
-#for DB in $DBs; do
-#	[[ "$DB" == mysql ]] && continue
-#	Tables=$(RunSQL "SHOW TABLES FROM $DB")
-#	for Table in $Tables; do
-#		RunSQL "ALTER TABLE \`$DB\`.\`$Table\` TYPE=$DefTableType"
-#	done
-#done
-#echo "Finished converting tables to InnoDB"
-
-# When we're getting a new software version, be sure we do a full regen 
-# on all the orbiters
-
 device="$PK_Device"
 code="$Activation_Code"
 
@@ -26,7 +11,7 @@ PrevVersion="$2"
 
 DEVICETEMPLATE_HAL=1808
 
-echo "setting up dce router2"
+echo "setting up dce router"
 hasRecords=$(RunSQL "SELECT count(PK_Installation) FROM Installation")
 if [[ $hasRecords -ne 0 ]]; then
 	echo "Database already setup";
@@ -42,11 +27,6 @@ RunSQL "update Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
 mkdir -p /tftpboot/pxelinux.cfg
 [[ -f /usr/lib/syslinux/pxelinux.0 ]] && cp /usr/lib/syslinux/pxelinux.0 /tftpboot || :
 [[ -f /usr/lib/PXELINUX/pxelinux.0 ]] && cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot || :
-
-if [[ "$TestInstallation" == 1 ]]; then 
-	sed -i 's/#log..= \/var\/log\/mysql\/mysql.log/log = \/var\/log\/mysql\/mysql.log/g' /etc/mysql/my.cnf
-	sed -i 's/#log.= \/var\/log\/mysql\/mysql.log/log = \/var\/log\/mysql\/mysql.log/g' /etc/mysql/my.cnf
-fi
 
 # update atftp entry in inet.d
 update-inetd --remove tftp
@@ -115,19 +95,3 @@ if [[ -n "$PrevVersion" ]]; then
 	done
 fi
 
-#<-mkr_b_ubuntu_b->
-#File="/etc/event.d/media-center-startup"
-#Content="
-#start on runlevel 2
-#
-#stop on shutdown
-#stop on runlevel 3
-#stop on runlevel 4
-#stop on runlevel 5
-#
-#script
-#/usr/pluto/bin/startup-script.sh
-#end script
-#"
-#echo "${Content}" > ${File} || :
-#<-mkr_b_ubuntu_e->
