@@ -99,8 +99,8 @@ trap 'Error "Undefined error in $0"' EXIT
 DisplayMessage "*** STEP: Creating local repository"
 MoveDebs2Repo
 
-DisplayMessage "*** STEP: Copy debs to diskless common directory (for dvd)"
-CopyDebsToDisklessSync
+#DisplayMessage "*** STEP: Copy debs to diskless common directory (for dvd)"
+#CopyDebsToDisklessSync
 
 if [[ "$svn_private_url" != "" ]] && [[ "$svn_private_user" != "" ]] && [[ "$svn_private_pass" != "" ]] ;then
 	DisplayMessage "*** STEP: Publish private debs"
