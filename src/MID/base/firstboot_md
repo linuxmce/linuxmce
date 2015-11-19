@@ -1,0 +1,65 @@
+#!/bin/bash
+
+#set -e
+
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/bin/SQL_Ops.sh
+. /usr/pluto/bin/Utils.sh
+
+. /usr/pluto/install/install-md.sh
+
+if [ ! -f "$DEVID_FILE" ]; then
+	echo "ERR: interactor has not yet created '$DEVID_FILE'."
+	return 10
+fi
+
+##########################################################################################################
+##########################################################################################################
+# run any device specific firstboot add-on scripts
+for f in /usr/pluto/install/firstboot_mid_* ; do
+	StatsMessage "Running script: ${f}_preinst - Begin"
+	. "$f" || :
+	$(basename "$f")_preinst || :
+	StatsMessage "Running script: ${f}_preinst - End"
+done
+##########################################################################################################
+##########################################################################################################
+MD_Setup_Fstab
+MD_Setup_Plutoconf
+MD_Setup_Hostname
+MD_Copy_SSH_Keys
+MD_Set_Timezone
+MD_Config_MySQL_Client
+ConfigSources
+gpgUpdate
+
+# FIXME: This assumes kernel is done if any script fn is called.
+kernel_done=""
+ run any device specific firstboot kernel scripts
+for f in /usr/pluto/install/firstboot_mid_* ; do
+	StatsMessage "Running script: ${f}_kernel - Begin"
+	. "$f" || :
+	$(basename "$f")_preinst || :
+	StatsMessage "Running script: ${f}_kernel - End"
+	kernel_done="0"
+done
+if [[ "$kernel_done" != "0" ]] ; then
+	Install_HWE # install kernel and X for all targets
+fi
+
+AptDistUpgrade
+MD_Populate_Debcache
+MD_Cleanup
+##########################################################################################################
+##########################################################################################################
+# run any device specific firstboot add-on scripts
+for f in /usr/pluto/install/firstboot_mid_* ; do
+	StatsMessage "Running script: ${f}_postinst - Begin"
+	. "$f" || :
+	$(basename "$f")_postinst || :
+	StatsMessage "Running script: ${f}_postinst - End"
+done
+##########################################################################################################
+##########################################################################################################
+
+return 0
