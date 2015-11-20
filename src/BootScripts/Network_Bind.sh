@@ -228,4 +228,4 @@ if [[ -e /etc/apparmor.d/usr.sbin.dhcpd && $( grep '/etc/bind/' /etc/apparmor.d/
 	service isc-dhcp-server restart
 fi
 rm -f /var/cache/bind/*.jnl
-service bind9 start 
+service bind9 restart

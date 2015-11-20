@@ -6,10 +6,14 @@
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 
 #enable MySQL networking
-MyCnf=/etc/mysql/my.cnf
+if [[ -e /etc/mysql/mysql.conf.d/mysqld.cnf ]] ; then
+	MyCnf=/etc/mysql/mysql.conf.d/mysqld.cnf
+else
+	MyCnf=/etc/mysql/my.cnf
+fi
 DefTableType=innodb
 if ! BlacklistConfFiles "$MyCnf" ;then
-	if [ ! -e /etc/mysql/my.cnf.pbackup ] ;then
+	if [ ! -e "${MyCnf}.pbackup" ] ;then
 		cp "$MyCnf" "$MyCnf".pbackup || :
 	fi
 	sed -i "s/^skip-networking/#skip-networking/; s/^skip-innodb/#skip-innodb/;" "$MyCnf"
@@ -17,7 +21,7 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 	sed -i 's/^expire_logs_days/#expire_logs_days/g' "$MyCnf"
 	grep -q '^skip-name-resolve' "$MyCnf" || sed -i 's/^\[mysqld\].*$/[mysqld]\nskip-name-resolve/g' "$MyCnf"
 
-	cat <<-EOF > /etc/mysql/conf.d/lmce-my.cnf
+	cat <<-EOF > /etc/mysql/conf.d/lmce.cnf
 		# Make sure we have a UTF-8 functioning system
 		init_connect='SET NAMES utf8; SET collation_connection = utf8_general_ci;' # Set UTF8 for connection
 		character-set-server=utf8
@@ -36,5 +40,5 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
 
-	restart mysql || :
+	service mysql restart
 fi

@@ -97,5 +97,5 @@ if [ "$tls" == "yes" ]; then
 fi
 
 # reload new config
-service postfix reload 
+service postfix reload
 exit 0

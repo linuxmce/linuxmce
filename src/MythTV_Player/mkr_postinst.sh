@@ -105,7 +105,7 @@ fi
 
 ## Force the backend to make the database structure
 echo "LOCK TABLE schemalock WRITE;" | $mysql_command  || :
-invoke-rc.d mythtv-backend force-reload || /bin/true
+service mythtv-backend restart || :
 
 echo "Waiting 3 seconds so that mythtv-backend is able to create the schema"
 FOUND=0;
@@ -129,12 +129,12 @@ if [ "$FOUND" == "0" ]; then
 	exit 0;
 fi
 
-PID=`pidof /usr/bin/mythbackend` || /bin/true;
+PID=`pidof /usr/bin/mythbackend` || :
 echo "LOCK TABLE schemalock WRITE;" | $mysql_command  || :
 if [ "$PID" != "" ]; then
-	invoke-rc.d mythtv-backend start || /bin/true
+	service mythtv-backend start || :
 else
-	invoke-rc.d mythtv-backend restart || /bin/true
+	service mythtv-backend restart || :
 fi
 
 #Create a shortcut to MythTV Setup in the Computing Menu

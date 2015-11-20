@@ -17,7 +17,7 @@ function addEntries
 }
 
 #Force the backend to make the database structure
-invoke-rc.d mythtv-backend force-reload 2>/dev/null || :
+service mythtv-backend restart 2>/dev/null || :
 
 echo "Waiting until the schema is actually created or no more than 10 seconds"
 

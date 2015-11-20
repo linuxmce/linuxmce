@@ -46,7 +46,7 @@ fi
 
 ## Check and start/reload the nfs-kernel-server
 if [[ "$(pidof smbd)" == "" ]] ;then
-	invoke-rc.d samba start || invoke-rc.d smbd start
+	service smbd restart
 else
-	invoke-rc.d samba reload || invoke-rc.d smbd reload
+	service smbd reload
 fi

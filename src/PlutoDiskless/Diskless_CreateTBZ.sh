@@ -186,7 +186,7 @@ mv "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,}
 mv "$TEMP_DIR"/usr/sbin/invoke-rc.d{.pluto-install,}
 rm -f "$TEMP_DIR"/etc/chroot-install
 
-#invoke-rc.d nfs-common restart
+#service nfs-common restart
 
 chroot "$TEMP_DIR" apt-get clean
 

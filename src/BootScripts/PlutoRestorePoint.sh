@@ -61,7 +61,7 @@ Restore() {
 	# MISC. CLEANUP
 	# -------------
 	chown -R  www-data /usr/pluto/orbiter/floorplans/
-	/etc/init.d/asterisk restart
+	service asterisk restart
 	
 	## Reinstall this packages so we'll have an updates database schema
 	apt-get -y --reinstall install pluto-system-database
@@ -139,7 +139,7 @@ LegacyRestore() {
 	# restore asterisk settings
 	cd $BKPDIR/asterisk
 	/usr/bin/mysql -u root asterisk < asterisk.sql
-	/etc/init.d/asterisk restart
+	service asterisk restart
 
 	## Reinstall this packages so we'll have an updates database schema
 	apt-get -y --reinstall install pluto-system-database

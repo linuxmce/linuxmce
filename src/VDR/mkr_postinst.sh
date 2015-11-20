@@ -28,7 +28,7 @@ if ! grep -q "^VDR_CHARSET_OVERRIDE=UTF-8" /etc/default/vdr; then
 fi
 
 # We can't have VDR running during setup file edit
-invoke-rc.d vdr stop || :
+service vdr stop || :
 
 # If we have an entry for svdrpservice already, we don't touch the setup.conf
 if grep -q "^svdrpservice" /var/lib/vdr/setup.conf; then

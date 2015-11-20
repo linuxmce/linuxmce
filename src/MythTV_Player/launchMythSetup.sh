@@ -52,7 +52,7 @@ fi;
 
 # Be sure we're not in the middle of a schema upgrade -- myth doesn't check this
 echo "LOCK TABLE schemalock WRITE; UNLOCK TABLES;" | $mysql_command
-invoke-rc.d mythtv-backend stop
+service mythtv-backend stop
 PID=`pidof mythbackend`
 
 if [ x"$PID" != x"" ] ; then 

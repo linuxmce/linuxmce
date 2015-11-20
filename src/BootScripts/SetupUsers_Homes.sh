@@ -250,8 +250,7 @@ if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 	fi
 
 	if [[ "$NeedToRestart" == "true" &&  "$(pidof smbd)" != "" ]] ;then
-		service smbd stop || :
-		service smbd start
+		service smbd restart
 	fi
 fi
 

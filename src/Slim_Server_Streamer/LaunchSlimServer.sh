@@ -23,7 +23,7 @@ if [ "$found" -ne "3" ] ; then
 	sed -i 's|'"audiodir: ''"'|audiodir: /home/public/data/audio|' /var/lib/squeezeboxserver/prefs/server.prefs
 	sed -i 's|'"playlistdir: ''"'|playlistdir: /home/public/data/audio|' /var/lib/squeezeboxserver/prefs/server.prefs
 	echo 'wizardDone: 1' >> /var/lib/squeezeboxserver/prefs/server.prefs
-	invoke-rc.d squeezeboxserver restart
+	service squeezeboxserver restart
 fi                                
 
 ./Slim_Server_Streamer -d $DeviceID

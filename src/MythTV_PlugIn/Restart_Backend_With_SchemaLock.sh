@@ -22,13 +22,13 @@ WaitLock "MythBackend" "Restart_Backend_With_SchemaLock.sh" nolog
 echo "LOCK TABLE schemalock WRITE; UNLOCK TABLES;" | $mysql_command
 
 # Actually perform the restart..
-invoke-rc.d mythtv-backend restart &> /dev/null
+service mythtv-backend restart &> /dev/null
 
 # Restart slave backends as well
 SLAVES=`echo "SELECT hostname from capturecard WHERE hostname IS NOT NULL GROUP BY hostname;" | $mysql_command | grep -v dcerouter`
 if [ x"$SLAVES" != x"" ] ; then
         for SLAVE in $SLAVES ; do
-                ssh $SLAVE "invoke-rc.d mythtv-backend restart" &> /dev/null
+                ssh $SLAVE "service mythtv-backend restart" &> /dev/null
         done
 fi
 

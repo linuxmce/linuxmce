@@ -48,7 +48,7 @@ if ! grep -q "^ENABLE_SHUTDOWN=0" /etc/default/vdr; then
 fi
                                                                 
 # We can't have VDR running during setup file edit
-invoke-rc.d vdr stop
+service vdr stop
 
 #
 # Make a backup copy of the existing setup.conf
@@ -376,7 +376,7 @@ XKeySym.Volume-    KP_Subtract
 
 # We restart VDR after the install on the core
 if [[ "$PK_Device" -eq "1" ]]; then
-        invoke-rc.d vdr restart
+        service vdr restart
 fi    
     ;;
 

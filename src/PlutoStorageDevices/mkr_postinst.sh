@@ -24,7 +24,7 @@ if [[ "$PK_Device" -eq "1" ]]; then
 	cronEntry="*/10 * * * * root bash -c '/usr/pluto/bin/StorageDevices_FileServerRadar.sh &>/dev/null'"
 	if [[ ! -e /etc/cron.d/StorageDevicesFileServerRadar ]] ;then
 	        echo "$cronEntry" >>/etc/cron.d/StorageDevicesFileServerRadar
-	        invoke-rc.d cron reload || :
+	        service cron reload || :
 	fi
 fi
 

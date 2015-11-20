@@ -347,5 +347,6 @@ CreateDialplanUsers
 CreateConferenceRooms
 CreateVoiceMenu
 
-asterisk -r -x "dialplan reload" >> /dev/null
-asterisk -r -x "sip reload" >> /dev/null
+asterisk -r -x "core reload" >> /dev/null
+#asterisk -r -x "dialplan reload" >> /dev/null
+#asterisk -r -x "sip reload" >> /dev/null

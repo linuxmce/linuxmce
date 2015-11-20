@@ -189,5 +189,5 @@ close(FILE);
 #`/usr/pluto/bin/GenerateSCCP.sh`;
 
 #A HARD RELOAD FOR ASTERISK (no longer needed in realtime env.)
-#exec("invoke-rc.d asterisk restart");
+#exec("service asterisk restart");
 
