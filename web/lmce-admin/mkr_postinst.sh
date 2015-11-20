@@ -214,19 +214,25 @@ if ! BlacklistConfFiles '/etc/apache2/apache2.conf' ;then
 		cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.pbackup || :
 	fi
 
-	if ! grep ServerName /etc/apache2/conf.d/lmce >/dev/null ; then 
+	if [ -d /etc/apache2/conf.d ] ; then
+		ConfDir="/etc/apache2/conf.d"
+	elif [ -d /etc/apache2/conf-available ] ; then
+		ConfDir="/etc/apache2/conf-available"
+	fi
+	if ! grep ServerName "${ConfDir}/lmce.conf" >/dev/null ; then
 		if [[ -z "${HostName}" ]] ; then
 			HostName="dcerouter"
 		fi
-		echo "ServerName ${HostName}" > /etc/apache2/conf.d/lmce
+		echo "ServerName ${HostName}" > "${ConfDir}/lmce.conf"
 	fi
+	a2enconf lmce || :
 fi
 
 if ! BlacklistConfFiles '/etc/apache2/ports.conf' ;then
 	if [ ! -e '/etc/apache2/ports.conf.pbackup' ] && [ -e '/etc/apache2/ports.conf' ] ;then
 		cp /etc/apache2/ports.conf /etc/apache2/ports.conf.pbackup || :
 	fi
-						
+
 echo "Listen 80
 Listen 8080
 Listen 443" >/etc/apache2/ports.conf
