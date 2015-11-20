@@ -14,7 +14,5 @@ fi
 
 /sbin/modprobe evdev
 
-if [[ -x /etc/init.d/udev ]] ;then
-	service udev reload
-fi
+service udev reload || :
 

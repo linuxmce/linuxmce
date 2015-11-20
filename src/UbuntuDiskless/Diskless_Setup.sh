@@ -439,14 +439,6 @@ if [[ $(CheckSectionExists "/etc/samba/smb.conf" "Home Hosts Allow") == "true" ]
 	PopulateSection "/etc/samba/smb.conf" "Home Hosts Allow" "hosts allow = $MoonIPs"
 fi
 
-## Do the update fix for current debian computers
-#for dir in /usr/pluto/diskless/* ;do
-#	if [[ -f "${dir}/debian/etc/init.d/fastboot/rcS" ]] ;then
-#		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "${dir}/debian/etc/init.d/fastboot/rcS" || :
-#		rm -f "${dir}/debian/etc/rc2.d/S98LMCEUpdate" || :
-#	fi
-#done
-
 echo "Checking number of users, auto reload if less than 1"
 . /usr/pluto/bin/Config_Ops.sh
 if [[ "$PK_Users" -lt "1" ]]; then

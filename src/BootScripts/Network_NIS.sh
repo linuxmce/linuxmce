@@ -32,6 +32,7 @@ if ! BlacklistConfFiles '/etc/ypserv.securenets' ;then
 	$IntNetmask $IntNetIP
 	" > /etc/ypserv.securenets
 fi
+#FIXME: this won't be in init.d for long
 sed -i 's/master|slave|\[Yy\]/slave|[Yy]/g' /etc/init.d/nis
 
 # Rebuilding NIS database and reloading config
