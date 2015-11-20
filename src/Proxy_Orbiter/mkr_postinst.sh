@@ -11,9 +11,7 @@ if [ -x /etc/bluetooth/hcid.conf ]; then
 		fi
 
 		sed -i 's!\<pin_helper.*$!pin_helper /usr/pluto/bin/pluto-pinhelper.sh;!' /etc/bluetooth/hcid.conf
-		if [ -x /etc/init.d/bluez-utils ]; then
-			service bluez-utils restart
-		fi
+		service bluez-utils restart || :
 	fi
 fi
 mkdir -p /usr/pluto/orbiter/bits
