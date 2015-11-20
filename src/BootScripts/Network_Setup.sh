@@ -670,7 +670,7 @@ service isc-dhcp-server start
 
 # Start DHCPv6 client if activated on any interface other then ppp0 (will be started from ppp scripts)
 if [[ ${#dhcpv6[@]} > 0 ]]; then
-	service wide-dhcpv6-client start
+	service wide-dhcpv6-client restart
 fi
 
 service cron reload
@@ -787,8 +787,7 @@ SambaDomainHost="
 PopulateSection "/etc/samba/smb.conf" "Domain and Hostname" "$SambaDomainHost"
 
 if [[ "$(pidof smbd)" != "" ]] ;then
-	service smbd stop || :
-	service smbd start
+	service smbd restart
 fi
 
 if ! BlacklistConfFiles '/etc/defaultdomain' && ! BlacklistConfFiles '/etc/default/nis' ;then

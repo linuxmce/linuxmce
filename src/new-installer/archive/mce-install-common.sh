@@ -179,7 +179,6 @@ function Install_DCERouter {
 	apt-get -y --force-yes -f install mysql-server
 	VerifyExitCode "MySQL Server"
 	service mysql start
-	# invoke-rc.d mysql start # Because of this : https://bugs.launchpad.net/bugs/107224
 
 	# Fix for http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=512309
 	# to address http://svn.linuxmce.org/trac.cgi/ticket/397

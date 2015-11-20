@@ -47,7 +47,7 @@ function configure_fuppes() {
 }
 
 function reload_fuppes() {
-	/etc/init.d/fuppes restart
+	service fuppes restart
 }
 
 #configure_ushare

@@ -156,8 +156,8 @@ function InstallAptCacherNg
     echo "Installing apt-cacher-ng"
     # this should be installed first of all.
 #    apt-get -y install apt-cacher-ng
-#    invoke-rc.d apt-cacher-ng stop
-#    invoke-rc.d apt-cacher-ng start
+#    service apt-cacher-ng stop
+#    service apt-cacher-ng start
 }
  
 function ConfigureApt

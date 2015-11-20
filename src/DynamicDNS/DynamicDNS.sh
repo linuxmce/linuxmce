@@ -76,7 +76,7 @@ if [[ "$1" == "set" ]] ;then
 		echo 'daemon_interval="300"' >> /etc/default/ddclient
 	fi
 
-	invoke-rc.d ddclient restart
+	service ddclient restart
 
 ## Called to display the dynamic dns settings
 elif [[ "$1" == "get" ]] ;then

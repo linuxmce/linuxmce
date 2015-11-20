@@ -123,6 +123,6 @@ PopulateSection "/etc/exports" "DisklessMDRoots" "$Exports_DisklessMDRoots"
 
 ## Check and start/reload the nfs-kernel-server
 if [[ "$(pidof rpc.mountd)" == "" ]] ;then
-        invoke-rc.d nfs-kernel-server restart
+        service nfs-kernel-server restart
 fi
-invoke-rc.d nfs-kernel-server reload
+service nfs-kernel-server reload

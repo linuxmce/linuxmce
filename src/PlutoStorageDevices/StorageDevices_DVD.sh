@@ -76,9 +76,9 @@ if [[ "$Action" == "start" ]] ;then
 
 		PopulateSection "/etc/samba/smb.conf" "Optical_Drive_${BlockDevice}" "$SambaSection"
 		if [[ "$(pidof smbd)" == "" ]] ;then
-			invoke-rc.d samba start &>/dev/null || invoke-rc.d smbd start &>/dev/null
+			service smbd restart &>/dev/null
 		else
-			invoke-rc.d samba reload &>/dev/null || invoke-rc.d smbd reload &>/dev/null
+			service smbd reload &>/dev/null
 		fi
 
 	## If is from another computer

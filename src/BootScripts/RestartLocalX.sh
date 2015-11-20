@@ -29,6 +29,6 @@ if [[ -f /etc/event.d/pluto || "$PK_Distro" == 1 ]] || grep -q Startup_Core-Hybr
 	fi
 else
 	export TERM=linux
-	/etc/init.d/kdm restart &>/dev/null </dev/null
+	service kdm restart &>/dev/null </dev/null
 	echo "kdm restart exit code: $?"
 fi

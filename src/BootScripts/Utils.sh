@@ -12,38 +12,6 @@ DEVICEDATA_Use_OpenGL_effects=172
 DEVICEDATA_Use_alpha_blended_UI=169
 DEVICEDATA_PK_UI=104
 
-# These need to abstract the service commands for different distro releases.  ( SysV,LSB,UpStart,systemd )
-Service_Start() {
-	service="$1"
-
-	service $service start
-}
-
-Service_Stop() {
-	service="$1"
-
-	service $service stop || :
-}
-
-Service_Status() {
-	service="$1"
-
-	service $service status || :
-}
-
-Service_Restart() {
-	service="$1"
-
-	Service_Stop $service
-	Service_Start $service
-}
-
-Service_Reload() {
-	service="$1"
-
-	Service_Restart $service
-}
-
 AddBookmark() {
 	return 0
 	Url="$1"

@@ -78,4 +78,4 @@ if [[ $TrigerCascade == "true" ]] ;then
 	/usr/pluto/bin/MessageSend "$DCERouter" -targetType template 0 26 1 67 13 "/usr/pluto/bin/StorageDevices_Setup.sh" 51 "--nocascade"
 fi
 
-invoke-rc.d samba restart || invoke-rc.d smbd restart
+service smbd restart

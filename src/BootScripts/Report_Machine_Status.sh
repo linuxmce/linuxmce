@@ -15,7 +15,7 @@ if [[ ! -e /etc/cron.d/ReportMachineStatus ]] ;then
 	echo "$cronEntry" >>/etc/cron.d/ReportMachineStatus
 	service cron reload
 fi
-		
+
 Q="SELECT FK_DeviceTemplate
 	FROM Device
 	WHERE PK_Device='$PK_Device' LIMIT 1"

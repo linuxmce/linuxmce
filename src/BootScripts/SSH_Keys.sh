@@ -51,5 +51,4 @@ File='/root/.ssh/authorized_keys'
 
 [ -z "$KeyPresent" ] && cat $Dir/$Key.pub >>"$File"
 
-service ssh stop || :
-service ssh start
+service ssh restart

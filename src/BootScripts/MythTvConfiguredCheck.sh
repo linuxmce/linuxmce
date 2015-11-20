@@ -24,7 +24,7 @@ if [ $QueryResult -eq 0 ]; then
 fi;
 
 echo "LOCK TABLE schemalock WRITE;" | $MysqlCommand  # Be sure we're not in the middle of a schema upgrade -- myth doesn't check this
-service mythtv-backend force-reload;
+service mythtv-backend restart
 
 # looking for XServer pid
 

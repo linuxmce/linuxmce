@@ -120,7 +120,7 @@ else
 	/usr/pluto/bin/StorageDevices_PlutoDirStructure.sh -d $Device
 	/usr/pluto/bin/StorageDevices_Setup.sh
 
-	invoke-rc.d mdadm reload
+	service mdadm reload
 
 	rm $LogFile
 fi

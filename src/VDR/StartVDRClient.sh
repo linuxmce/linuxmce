@@ -18,11 +18,11 @@ if [[ "$PK_Device" -eq "1" ]]; then
 	# We are running on the core, and do not want to stop VDR
 	trap 'killall -KILL vdr-sxfe' EXIT
 	# Make sure VDR is running
-	invoke-rc.d vdr start
+	service vdr restart
 else
 	# We are running on a MD, and don't want VDR running after the user closes the TV app.
-	trap 'killall -KILL vdr-sxfe ; rm -f $LOCKFILE ;  invoke-rc.d vdr restart' EXIT
-	invoke-rc.d vdr start
+	trap 'killall -KILL vdr-sxfe ; rm -f $LOCKFILE ;  service vdr restart' EXIT
+	service vdr restart
 
 fi
 if  [ -x /usr/bin/nmap ] ; then
