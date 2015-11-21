@@ -22,6 +22,7 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 	grep -q '^skip-name-resolve' "$MyCnf" || sed -i 's/^\[mysqld\].*$/[mysqld]\nskip-name-resolve/g' "$MyCnf"
 
 	cat <<-EOF > /etc/mysql/conf.d/lmce.cnf
+		[mysqld]
 		# Make sure we have a UTF-8 functioning system
 		init_connect='SET NAMES utf8; SET collation_connection = utf8_general_ci;' # Set UTF8 for connection
 		character-set-server=utf8
