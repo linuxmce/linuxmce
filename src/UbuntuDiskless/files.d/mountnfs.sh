@@ -59,21 +59,5 @@ cat <<-'EOF' >"${Parm_RootLocation}/$File"
 	EOF
 chmod +x "${Parm_RootLocation}/${File}"
 
-DISTRO=$(LC_ALL=C chroot ${Parm_RootLocation} lsb_release -is)
-case "$DISTRO" in
-	Debian|Raspbian)
-		# debian/raspbian (LSB)
-                INSSERV=$(LC_ALL=C chroot ${Parm_RootLocation} which insserv)
-		LC_ALL=C chroot "${Parm_RootLocation}" "${INSSERV}" -fv mountnfs.sh >/dev/null
-		;;
-	Ubuntu)
-		# ubuntu (sysv)
-		LC_ALL=C chroot "${Parm_RootLocation}" update-rc.d -f mountnfs.sh start 30 2 3 4 5 . >/dev/null
-		;;
-        *)
-                echo "Unknown Distro!"
-esac
-
-## This script is broken so we better remove it
-rm -f "${Parm_RootLocation}"/etc/init.d/waitnfs.sh
+LC_ALL=C chroot "${Parm_RootLocation}" update-rc.d mountnfs.sh defaults >/dev/null
 

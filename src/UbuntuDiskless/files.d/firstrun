@@ -28,25 +28,13 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 
 	raspbian() {
-		trap '${INSSERV} -rfv firstrun' EXIT
-
-		INSSERV=$(which insserv)
-
-		echo -e "\n\n\n\n\n\n\n\n\nRPI FIRSTRUN\n\n" >&2
+		trap 'update-rc.d -f firstrun remove' EXIT
 
 		echo -e "Updating RPI SDCARD from diskless image" >&2
 		# copy contents of /boot to /sdcard
 		mkdir -p /sdcard/
 		mount /sdcard
 		cp /boot/* /sdcard/
-
-		# not required with working u-boot
-		# remove u-boot kernel from /sdcard/config.txt
-		#[[ ! -f /sdcard/config.txt.lmcebackup ]] && cp /sdcard/config.txt /sdcard/config.txt.lmcebackup
-		#sed -i 's/^[kK]ernel/#&/' /sdcard/config.txt
-		# add extra kernel boot args to /sdcard/cmdline.txt
-		#[[ ! -f /sdcard/cmdline.txt.lmcebackup ]] && cp /sdcard/cmdline.txt /sdcard/cmdline.txt.lmcebackup
-		#echo "dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 elevator=deadline rootwait root=/dev/nfs nfsroot=192.168.80.1:/usr/pluto/diskless/$PK_Device ip=dhcp rootfstype=nfs" > /sdcard/cmdline.txt
 
 		echo -e "Creating cpu governor boot script" >&2
 		cat <<-'EOFF' >/etc/init.d/switch_cpu_governor
@@ -88,18 +76,19 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		chmod +x /etc/init.d/switch_cpu_governor
 
 		echo -e "Setting up boot scripts" >&2
-		"$INSSERV" -fv switch_cpu_governor
-		"$INSSERV" -fv linuxmce
-		"$INSSERV" -rfv firstrun
-		echo -e "\n\nRPI FIRSTRUN\n\n\n\n\n\n\n\n\n" >&2
+		update-rc.d switch_cpu_governor defaults
+		update-rc.d linuxmce defaults
+		update-rc.d -f firstrun remove
+
 		reboot
-		return 1
+		return 0
 	}
 
 	ubuntu() {
 		trap 'update-rc.d -f firstrun remove' EXIT
 
 		apt-get update
+		apt-get -y dist-upgrade
 		update-pciids
 
 		## Handle libdvdcss2
@@ -164,19 +153,4 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	EOF
 chmod +x "${Parm_RootLocation}/${File}"
 
-DISTRO=$(LC_ALL=C chroot ${Parm_RootLocation} lsb_release -is)
-case "$DISTRO" in
-        Debian|Raspbian)
-                # debian/raspbian (LSB)
-                INSSERV=$(LC_ALL=C chroot ${Parm_RootLocation} which insserv)
-                LC_ALL=C chroot "${Parm_RootLocation}" "${INSSERV}" -fv firstrun >/dev/null
-                ;;
-        Ubuntu)
-                # ubuntu (sysv)
-                LC_ALL=C chroot "${Parm_RootLocation}" update-rc.d -f firstrun start 50 2 3 4 5 . >/dev/null
-                ;;
-        *)
-		echo "Unknown Moon Distro!" >&2
-		exit 1
-                ;;
-esac
+LC_ALL=C chroot "${Parm_RootLocation}" update-rc.d -f firstrun start 50 2 3 4 5 . >/dev/null

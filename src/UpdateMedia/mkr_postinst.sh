@@ -8,7 +8,7 @@
 # One time also update the thumbnails and search tokens
 # /usr/pluto/bin/UpdateMedia -t -s -d /home/public/data || :
 
-update-rc.d update-media stop 10 6 0 .
+#update-rc.d update-media stop 10 6 0 .
 exit 0
 
 #

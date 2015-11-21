@@ -25,8 +25,6 @@ else
 	apt-get install -y --force-yes alsa-modules-`uname -r`
 fi
 
-# update-rc.d -f kdm remove
-
 ## NOTE: Fix for initramfs-tools - no longer needed - done in mce-install.sh
 #patch -Np0 -i mkinitramfs_dot-fix1.patch -r /dev/null >/dev/null 2>&1 || echo "The initramfs-tools dot-problem was already fixed."
 
