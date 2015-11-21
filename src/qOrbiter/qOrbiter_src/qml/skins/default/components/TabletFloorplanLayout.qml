@@ -147,9 +147,6 @@ Panel{
             Component.onCompleted: parent=fp_panel.headerRow
         }
 
-
-
-
         ScrollRow{
             id:row_button_scroll
             visible:floorplan_devices.floorplanType===5

@@ -97,11 +97,6 @@ Panel{
             }
         }
 
-
-
-
-
-
         Component.onCompleted: {
             manager.setBoundStatus(true)
             forceActiveFocus()
@@ -181,18 +176,13 @@ Panel{
         MediaNumberPad{
             id:numbers
             anchors.left: playlistPanel.right
-            anchors.top: playlistPanel.top
+            anchors.top: manager.playlistPanel.top
             visible:true
         }
 
         TvButtonPanel{
             id:buttonPanel
-            anchors{
-                top:parent.top
-                left:parent.left
-                right:parent.right
-                bottom:parent.bottom
-            }
+            anchors.fill: parent
             visible:false
         }
 

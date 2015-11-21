@@ -2,18 +2,18 @@ import QtQuick 2.2
 import "../."
 Panel {
     useHeader: false
-
+    content:
     Item {
         id: remote1
-        height:parent.height
-        width: parent.width
+       anchors.fill: parent
         property int rowHeight:Style.scaleY(12)
+
         Column {
             id:leftCol
             height: childrenRect.height
             width: childrenRect.width
             anchors{
-               left:parent.left
+                left:parent.left
                 top:mainDiamond.top
             }
 
@@ -92,7 +92,7 @@ Panel {
             height: Style.appButtonHeight
             anchors{
                 bottom:transports.top
-               horizontalCenter: parent.horizontalCenter
+                horizontalCenter: parent.horizontalCenter
             }
             StyledButton {
                 state:"round"
@@ -131,14 +131,14 @@ Panel {
             width: childrenRect.width
             height: Style.appButtonHeight
             anchors{
-               horizontalCenter: parent.horizontalCenter
+                horizontalCenter: parent.horizontalCenter
                 bottom:colorButtons.top
             }
             StyledButton {
                 id: btStop
                 state:"round"
                 buttonText: ""
-                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
                 // This is the Live TV remote, so we use the "Stop" CMD (AV control), and not the "Stop Media" CMD (DCE players)
                 onActivated: manager.stop_AV()
                 Image {
@@ -152,7 +152,7 @@ Panel {
             StyledButton {
                 id: btRewind
                 state:"round"
-                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
                 buttonText: ""
                 Image {
                     id: rwImg
@@ -173,21 +173,21 @@ Panel {
                     width: height
                     anchors.centerIn: parent
                 }
-                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
                 buttonText: ""
                 onActivated: manager.pauseMedia()
             }
             StyledButton {
                 id: btPlay
                 state:"round"
-                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
                 buttonText: "Play"
                 onActivated: manager.playResume()
             }
             StyledButton {
                 id: btFFwd
                 state:"round"
-                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
                 buttonText: ""
                 Image {
                     id: ffimg
