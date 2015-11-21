@@ -1,8 +1,10 @@
 #!/bin/bash
-/usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
+:
+# This is no longer required, sqlcvs handles our schema updates appropriately
 
-PrevVer="$2"
+#/usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 
-if [[ -n "$PrevVer" ]]; then
-	/usr/pluto/bin/sqlcvs_db_fixer.sh
-fi
+#PrevVer="$2"
+#if [[ -n "$PrevVer" ]]; then
+#	/usr/pluto/bin/sqlcvs_db_fixer.sh
+#fi
