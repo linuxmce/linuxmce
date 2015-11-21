@@ -29,7 +29,7 @@ else
 	ifneq (,$(findstring armhf, $(arch)))
 	        CPPFLAGS += -I/usr/lib/ruby/1.8/arm-linux-eabihf
 	else
-	        CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux -I/usr/lib/ruby/1.8/i686-linux
+	        CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux -I/usr/lib/ruby/1.8/i686-linux -I/usr/lib/ruby/1.8/x86_64-linux/
 	endif
 endif
 
