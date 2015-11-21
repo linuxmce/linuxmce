@@ -4,12 +4,40 @@ import "../."
 Panel{
     id:fp_panel
     headerTitle:qsTr("Floorplan")
+
     buttonContent:[
         StyledButton{
             buttonText: qsTr("Show List")
             height: Style.appNavigation_panelHeight
             onActivated:{
                 outerContainer.state="list"
+            }
+        },
+        GenericListModel{
+            id:pageView
+            model: floorplan_pages
+            label: qsTr("Floorplan(s) : %1").arg(modelCount)
+            width: Style.scaleX(25)
+            height: Style.scaleY(45)
+            delegate:Rectangle{
+                height: Style.scaleY(9)
+                width:parent.width
+                color: Style.appcolor_background
+                border.color: Style.appcolor_foregroundColor
+                StyledText {
+                    id: desc
+                    text: m_description
+                    width: parent.width
+                    height: parent.height
+                    fontSize: Style.fontSize_small
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    onPressed:{
+                        floorplan_devices.clearAllSelections()
+                        floorplan_devices.setCurrentPage(m_page)
+                    }
+                }
             }
         }
     ]
@@ -110,34 +138,7 @@ Panel{
             }
         }
 
-        GenericListModel{
-            id:pageView
-            model: floorplan_pages
-            label: qsTr("Floorplan(s) : %1").arg(modelCount)
-            Component.onCompleted: parent = fp_panel.headerRow
-            width: Style.scaleX(25)
-            height: Style.scaleY(45)
-            delegate:Rectangle{
-                height: Style.scaleY(9)
-                width:parent.width
-                color: Style.appcolor_background
-                border.color: Style.appcolor_foregroundColor
-                StyledText {
-                    id: desc
-                    text: m_description
-                    width: parent.width
-                    height: parent.height
-                    fontSize: Style.fontSize_small
-                }
-                MouseArea{
-                    anchors.fill: parent
-                    onPressed:{
-                        floorplan_devices.clearAllSelections()
-                        floorplan_devices.setCurrentPage(m_page)
-                    }
-                }
-            }
-        }
+
 
         SendCommandBox {
             id: sendCommandBox

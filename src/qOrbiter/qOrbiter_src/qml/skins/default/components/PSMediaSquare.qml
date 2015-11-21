@@ -1,9 +1,10 @@
 import QtQuick 2.2
+import "."
 import "../components"
 Item {
     id: mediaSquare
-    height: manager.isProfile ? scaleY(33) : scaleY(50)
-    width:manager.isProfile ? scaleX(50) : scaleX(33)
+    height: manager.isProfile ? Style.scaleY(33) : Style.scaleY(50)
+    width:manager.isProfile ? Style.scaleX(50) : Style.scaleX(33)
     Rectangle{
         opacity: .25
         anchors.fill: parent
