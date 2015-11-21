@@ -142,9 +142,9 @@ fi
 # TODO: figure out what systemd will need, perhaps diversion is the answer
 mkdir -p "/etc/X11"
 echo "/bin/false" >/etc/X11/default-display-manager
-update-rc.d kdm disable >/dev/null || :
-update-rc.d sddm disable >/dev/null || :
-update-rc.d lightdm disable >/dev/null || :
+update-rc.d -f kdm disable >/dev/null || :
+update-rc.d -f sddm disable >/dev/null || :
+update-rc.d -f lightdm disable >/dev/null || :
 
 ###. /usr/pluto/install/install-common.sh ; Fix_LSB_Data
 case "$TARGET_DISTRO" in
@@ -157,7 +157,6 @@ case "$TARGET_DISTRO" in
 esac
 
 # Add a single new startup script.
-#update-rc.d -f linuxmce remove >/dev/null || :
 update-rc.d -f linuxmce defaults 99 1 >/dev/null
 
 if [[ "$1" == "install" ]] ; then
