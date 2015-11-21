@@ -14,7 +14,7 @@ Item {
         verticalOffset: 3
         radius: 8.0
         samples: 24
-        color:ms.pressed ? "#08000000" : "#80000000"
+        color:ms.pressed ? "#ffffff" : "#43acff"
         source: img
         rotation: img.rotation
     }
