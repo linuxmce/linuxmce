@@ -153,4 +153,4 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	EOF
 chmod +x "${Parm_RootLocation}/${File}"
 
-LC_ALL=C chroot "${Parm_RootLocation}" update-rc.d -f firstrun start 50 2 3 4 5 . >/dev/null
+LC_ALL=C chroot "${Parm_RootLocation}" update-rc.d -f firstrun defaults >/dev/null

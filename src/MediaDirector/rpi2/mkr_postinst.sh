@@ -11,7 +11,7 @@ ln -f -s /usr /opt/vc || :
 echo "rpi_b" > $DTVENDOR_FILE
 echo "select" > $COMMAND_FILE
 
-update-rc.d -f switch_cpu_governor start 50 2 3 4 5 . >/dev/null
+update-rc.d -f switch_cpu_governor defaults >/dev/null
 
 TARGET_DISTRO=$(lsb_release -cs)
 cat <<-EOF > /etc/lsb-release

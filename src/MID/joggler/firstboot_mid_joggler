@@ -50,5 +50,5 @@ firstboot_mid_joggler_postinst() {
 	ConfSet "AVWizardOverride" "0"
 	ConfSet "AVWizardDone" "1"
 
-	update-rc.d -f backlight defaults 10 >/dev/null
+	update-rc.d -f backlight defaults >/dev/null
 }

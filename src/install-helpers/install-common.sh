@@ -252,9 +252,7 @@ TimeUpdate () {
 }
 
 Disable_NetworkManager () {
-	# pluto-boot-scripts takes care of this
 	:
-	#update-rc.d -f NetworkManager remove
 }
 
 ConfigSources () {
