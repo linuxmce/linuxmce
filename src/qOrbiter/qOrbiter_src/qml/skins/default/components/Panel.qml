@@ -4,7 +4,7 @@ Item {
     id:panelRoot
     height: Style.scaleY(99)
     width: Style.scaleX(99)
-
+    property bool centered:true
     property alias headerRect:panelHeader
     property int panelHeaderHeight: useHeader ? Style.appNavigation_panelHeight : 0
     property string headerTitle:"Lorem Ipsum"
@@ -17,7 +17,7 @@ Item {
     property alias buttonContent:control_row.children
 
     clip:true
-    anchors.centerIn: parent
+    anchors.centerIn: centered ? parent : undefined
 
     Rectangle{
         id:bgfill
@@ -31,7 +31,7 @@ Item {
         id:panelContent
         sourceComponent: content
         anchors{
-            top:panelHeader.bottom
+            top: useHeader ? panelHeader.bottom : parent.top
             left:parent.left
             right:parent.right
             bottom:parent.bottom
@@ -70,14 +70,14 @@ Item {
             width: children.length*Style.appButtonWidth
             height: panelHeader.height *95
             Component.onCompleted: console.log("ctrl row len"+children.length)
-//            onChildrenChanged:{
-//                if(children.length===0)
-//                    return
+            onChildrenChanged:{
+                if(children.length===0)
+                    return
 
-//                var h = children[children.length-1].height
-//                children[children.length-1].height=25
-//               children[children.length-1].height=h
-//            }
+                var h = children[children.length-1].height
+                children[children.length-1].height=25
+               children[children.length-1].height=h
+            }
         }
     }
 

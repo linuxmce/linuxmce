@@ -1,11 +1,12 @@
 import QtQuick 2.2
 import "../."
+
 Panel {
     id:numberPad
     height: Style.appButtonHeight*5
     width: manager.isProfile ? parent.width *.65 : parent.width *.30
     headerTitle: qsTr("Channel:", "Tv Channel Entry") + targetChannel
-
+    centered: false
     function submit(){
         manager.gridChangeChannel(targetChannel, targetChannel)
         //        var pad = 3 - targetChannel.length

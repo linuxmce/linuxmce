@@ -166,6 +166,7 @@ Item{
                 target: styled_button
                 width:height
                 buttonRadius:height
+                height:Style.scaleY(9)
             }
 
             PropertyChanges{
