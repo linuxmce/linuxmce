@@ -46,17 +46,18 @@ int CecLogMessage(void *cbParam, const cec_log_message message)
   switch (message.level)
     {
     case CEC_LOG_ERROR:
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"libCEC: %s",message.message);
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"libCEC - ERR: %s",message.message);
       break;
     case CEC_LOG_WARNING:
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"libCEC: %s",message.message);
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"libCEC - WARN: %s",message.message);
       break;
     case CEC_LOG_NOTICE:
     case CEC_LOG_TRAFFIC:
     case CEC_LOG_DEBUG:
-      LoggerWrapper::GetInstance()->Write(LV_DEBUG,"libCEC: %s",message.message);
+      LoggerWrapper::GetInstance()->Write(LV_DEBUG,"libCEC - DEBUG: %s",message.message);
       break;
     default:
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECLogMessage: CALLBACK! Unhandled!" );
       break;
     }
   return 0;
@@ -162,6 +163,11 @@ int CecCommand(void *cbParam, const cec_command command)
   return 0;
 }
 
+int CecConfigurationChanged(void *cbParam, const libcec_configuration config)
+{
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECConfigurationChanged: CALLBACK! Unhandled!");
+}
+
 int CecAlert(void *cbParam, const libcec_alert type, const libcec_parameter param)
 {
   switch (type)
@@ -182,6 +188,16 @@ int CecAlert(void *cbParam, const libcec_alert type, const libcec_parameter para
   return 0;
 }
 
+
+int CecMenuStateChanged(void *cbParam, const cec_menu_state state)
+{
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECMenuStateChanged: CALLBACK! Unhandled!");
+}
+
+void CecSourceActivated(void *cbParam, const cec_logical_address, const uint8_t val)
+{
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECSourceActivated: CALLBACK! Unhandled!");
+}
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -394,7 +410,10 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	g_callbacks.CBCecLogMessage = &CecLogMessage;
 	g_callbacks.CBCecKeyPress = &CecKeyPress;
 	g_callbacks.CBCecCommand = &CecCommand;
+	g_callbacks.CBCecConfigurationChanged = &CecConfigurationChanged;
 	g_callbacks.CBCecAlert = &CecAlert;
+	g_callbacks.CBCecMenuStateChanged = &CecMenuStateChanged;
+	g_callbacks.CBCecSourceActivated = &CecSourceActivated;
 	g_config.callbacks = &g_callbacks;
 	g_config.callbackParam = this;
 
@@ -453,7 +472,7 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 //	m_pParser->SetLogicalAddress(CECDEVICE_RECORDINGDEVICE1);
 
 	m_myCECAddresses = m_pParser->GetLogicalAddresses(); // Seems to return logical addresses for *this* device
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Primary CEC Logical Address   : %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.primary ) );
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Primary CEC Logical Address  : %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.primary ) );
 	for ( uint8_t iPtr = 0; iPtr <= 11; iPtr++ ) {
 		if ( m_myCECAddresses.addresses[iPtr] ) {
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Secondary CEC Logical Address: %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.addresses[iPtr] ) );
@@ -538,10 +557,12 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	}
 //	m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_Device_MD,DEVICEDATA_Audio_Settings_CONST);
 
+	m_pParser->SetActiveSource();
+
 	cec_logical_address ActiveSource = m_pParser->GetActiveSource();
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"CEC Active Source: %s", m_pParser->ToString(ActiveSource) );
 
-	m_pParser->SwitchMonitoring(true);
+//	m_pParser->SwitchMonitoring(true);
 
 	return true;
 }
@@ -703,6 +724,13 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       sPhysicalAddress[found]=cPort;
 
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Make input active: %s",  sPhysicalAddress.c_str() );
+
+uint64_t iPhysicalAddress = m_mapPK_Device_to_PA[pMessage->m_dwPK_Device_To];
+cout << "**Physical Address: " << sPhysicalAddress << ", " << iPhysicalAddress << endl;
+
+cec_logical_address LogicalAddress = (cec_logical_address) m_mapPhysicalAddress_to_LA[iPhysicalAddress];
+
+LoggerWrapper::GetInstance()->Write(LV_STATUS,"TRYINGTOSETACTIVE???? - To PA: %s, LA: %i", sPhysicalAddress.c_str(), (int) LogicalAddress );
 
       // TODO: get our address from m_myCECAddresses and remove hardcode
       uint8_t from = ( m_myCECAddresses.primary << 4 ) | 0x0F;
