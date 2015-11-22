@@ -140,9 +140,6 @@ bool VDRPlugin::Register()
 		}
 	}
 
-	if (!m_VDRConnection.Connect()) {
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to connect to VDR (SVDRP)");
-	}
 	BuildChannelList();
 	m_bBookmarksNeedRefreshing=false;
 	RefreshBookmarks();
@@ -460,6 +457,7 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 			(tmStop.tm_hour<10 ? "0" : "")+StringUtils::itos(tmStop.tm_hour) + (tmStop.tm_min<10 ? "0" : "") + StringUtils::itos(tmStop.tm_min) + ":" + 
 			"50:99:" + pVDRProgramInstance->GetTitle() + ":",sVDRResponse);
 
+		m_VDRConnection.Close();
 		int iTimer = atoi(sVDRResponse.c_str());
 		if( !bResult || iTimer<1 )
 		{
@@ -483,7 +481,7 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 		string sVDRResponse;
 		PLUTO_SAFETY_LOCK(vc, m_ConMutex);
 		bool bResult = m_VDRConnection.SendVDRCommand(sCommand,sVDRResponse);
-
+		m_VDRConnection.Close();
 		int iTimer = atoi(sVDRResponse.c_str());
 		if( !bResult || iTimer<1 )
 		{
@@ -1239,12 +1237,14 @@ void VDRPlugin::BuildChannelList()
 	string sVDRResponse;
 	{
 		PLUTO_SAFETY_LOCK(vc, m_ConMutex);
-		if( !m_VDRConnection.SendVDRCommand("LSTC",sVDRResponse) )
+		bool result = m_VDRConnection.SendVDRCommand("LSTC",sVDRResponse);
+		m_VDRConnection.Close();
+		if( !result )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot get channel list");
 			return;
 		}
-	}
+ 	}
 	LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA,"VDRPlugin::BuildChannelList received channel list");
 	        
 	string::size_type pos_line=0;
@@ -1313,8 +1313,9 @@ void VDRPlugin::UpdateEPGFromVDR(string channelId, string restrictParm)
 		cmd += restrictParm;
 
 	PLUTO_SAFETY_LOCK(vc, m_ConMutex);
-	if( !m_VDRConnection.SendVDRCommand(cmd,sVDRResponse) )
-
+	bool result = m_VDRConnection.SendVDRCommand(cmd,sVDRResponse);
+	m_VDRConnection.Close();
+	if( !result )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::UpdateEPGFromVDR cannot get epg, cmd = %s", cmd.c_str());
 		return;
@@ -1662,6 +1663,7 @@ void VDRPlugin::CMD_Remove_Scheduled_Recording(string sID,string sProgramID,stri
             m_mapVDRRecording.erase(iTimerID);
         }
     }
+    m_VDRConnection.Close();
 }
 
 void VDRPlugin::UpdateTimers()
@@ -1669,7 +1671,10 @@ void VDRPlugin::UpdateTimers()
 	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
 	string sVDRResponse;
 	PLUTO_SAFETY_LOCK(vc, m_ConMutex);
-	if( m_VDRConnection.SendVDRCommand("LSTT",sVDRResponse) )
+	bool result = m_VDRConnection.SendVDRCommand("LSTT",sVDRResponse);
+	m_VDRConnection.Close();
+
+	if( result )
 	{
 		string::size_type pos=0;
 		while(true)
