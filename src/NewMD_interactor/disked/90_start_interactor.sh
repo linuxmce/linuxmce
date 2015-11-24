@@ -44,6 +44,7 @@ DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 DEVICEDATA_DISTRO_Raspbian_Jessie_CONST=22
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
 DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
+DEVICEDATA_DISTRO_Ubuntu_Xenial_CONST=23
 
 DEVICETEMPLATE_Generic_PC_as_MD_CONST=28
 
@@ -63,6 +64,8 @@ case "$RELEASE" in
 		release=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST ;;
 	trusty)
 		release=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST ;;
+	xenial)
+		release=$DEVICEDATA_DISTRO_Ubuntu_Xenial_CONST ;;
 	*)
 		echo "ERR: Unknown release (distro)" ;;
 esac
