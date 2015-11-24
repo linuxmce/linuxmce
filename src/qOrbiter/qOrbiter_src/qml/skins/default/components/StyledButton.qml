@@ -72,7 +72,7 @@ Item{
         fontSize: textSize
         font.weight: Font.Light
         verticalAlignment: Text.AlignVCenter
-        horizontalAlignment:Text.AlignHCenter       
+        horizontalAlignment:Text.AlignHCenter
         color:Style.apptext_color_active
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }

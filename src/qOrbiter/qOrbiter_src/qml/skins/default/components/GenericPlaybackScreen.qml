@@ -15,9 +15,21 @@ Panel{
         Component.onCompleted: manager.setBoundStatus(true)
         NowPlayingImage {
             id: imgContainer
+            Connections{
+                target:manager
+                onIsProfileChanged:{
+                    if(manager.isProfile){
+                        anchors.verticalCenter = undefined
+                        anchors.top = generic_playback.top
+                    } else {
+                        anchors.top = undefined
+                        anchors.verticalCenter = generic_playback.verticalCenter
+                    }
+                }
+            }
+
             anchors{
-                verticalCenter: parent.verticalCenter
-                left:!manager.isProfile ? playlistPanel.right :generic_playback.left
+                left:playlistPanel.right
             }
         }
         Item{
@@ -139,6 +151,7 @@ Panel{
             width: parent.width *.75
 
             updateValueWhileDragging: false
+            tickmarksEnabled: true
 
             minimumValue: 0
             maximumValue: roomList.currentEaTimecode.timecodeLength
@@ -157,7 +170,6 @@ Panel{
 
         PlaylistPanel {
             id: playlistPanel
-
         }
 
         TransportButtons {
@@ -208,6 +220,18 @@ Panel{
 
                 PropertyChanges {
                     target: transport_buttons
+                    visible:false
+                }
+                PropertyChanges {
+                    target: control_diamond
+                    visible:true
+                }
+                PropertyChanges {
+                    target:arrows
+                    visible:false
+                }
+                PropertyChanges {
+                    target: imgContainer
                     visible:true
                 }
 

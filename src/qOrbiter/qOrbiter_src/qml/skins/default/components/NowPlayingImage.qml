@@ -7,6 +7,8 @@ Item{
     id:imgContainer
     height:0
     width: 0
+
+
     property string s_aspect: dcenowplaying.aspect
     property double dvdPosterRatio:955/1080
     property double hdPosterRatio:755/1080
@@ -22,6 +24,14 @@ Item{
     onS_aspectChanged: {
         nowplayingimage.source="image://listprovider/updateobject/"+securityvideo.timestamp
         console.log("checking mediatype "+manager.i_current_mediaType)
+
+        if(nowplayingimage.source!==""){
+            console.log("invalid image")
+            state="audio-default"
+            return;
+        }
+
+
         switch(manager.i_current_mediaType){
         case MediaTypes.LMCE_StoredAudio:
             console.log("LMCE_StoredAudio::ASPECT RATIO==>"+dcenowplaying.aspect)
@@ -42,6 +52,8 @@ Item{
             }
             break;
         }
+
+
     }
     
     
@@ -49,7 +61,11 @@ Item{
         target:dcenowplaying
         onImageChanged:refreshtimer.start()
     }
-    
+    StyledText{
+        id:noImageLabel
+        text:qsTr("No Image Available")
+        anchors.centerIn: parent
+    }
     Image {
         id: nowplayingimage
         anchors.fill: parent
@@ -65,6 +81,7 @@ Item{
             console.log("nowplayingimage::ASPECT==>"+dcenowplaying.aspect)
             console.log("Source Size ==>"+sourceSize)
         }
+
     }
     
     Timer{
@@ -89,8 +106,7 @@ Item{
             PropertyChanges {
                 target: imgContainer
                 height:Style.remote_albumHeight
-                width: Style.remote_albumWidth
-                
+                width: Style.remote_albumWidth                
             }
         },
         State{
@@ -100,6 +116,15 @@ Item{
                 height:Style.remote_posterHeight
                 width: Style.remote_posterWidth
             }
+        },
+        State{
+            name:"audio-default"
+            PropertyChanges{
+                target: imgContainer
+                height: manager.isProfile ? Style.scaleX(35) : Style.scaleX(25)
+                width:imgContainer.height
+            }
+
         }
         
     ]

@@ -414,6 +414,8 @@ int main(int argc, char* argv[])
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize, &engine);
 
         engine.rootContext()->setContextProperty("settings", &settings);
+        engine.rootContext()->setContextProperty("orbiterVersion", QString::fromLocal8Bit(VERSION));
+        engine.rootContext()->setContextProperty("buildDate", QString::fromLocal8Bit(g_szCompile_Date));
 
 #ifdef __ANDROID__
         engine.rootContext()->setContextProperty("androidSystem", &androidHelper);
