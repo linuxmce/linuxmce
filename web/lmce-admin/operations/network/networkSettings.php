@@ -1118,7 +1118,7 @@ function networkSettings($output,$dbADO) {
 			$amount_otherInterfaces=$_POST['amount_otherInterfaces'];
 			$amount_otherInterfaces--;
 			$i=0;
-			while ( $i <= $amount_otherInterfaces ) {
+			while ( $i < $amount_otherInterfaces ) {
 			if ($_POST['otv4'.$i]=='disabled') {
 				$networkInterfaces.=$_POST['otherInterface'.$i].'|';
 			} elseif ($_POST['otv4'.$i]=='dhcp') {
@@ -1176,7 +1176,7 @@ function networkSettings($output,$dbADO) {
 			$amount_otherInterfaces=$_POST['amount_otherInterfaces'];
 			$amount_otherInterfaces--;
 			$i=0;
-			while ( $i <= $amount_otherInterfaces ) {
+			while ( $i < $amount_otherInterfaces ) {
 			if ($_POST['otv6'.$i]=='disabled') {
 				$networkInterfaces.=$_POST['otherInterface'.$i].'|';
 			} elseif ($_POST['otv6'.$i]=='ra') {
