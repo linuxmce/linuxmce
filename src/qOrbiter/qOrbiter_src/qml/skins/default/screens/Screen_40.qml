@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import "../components"
+import "../."
 StyledScreen{
     id:ps3_harmony_ir
 
@@ -8,82 +9,107 @@ StyledScreen{
         state:"gamepad"
         headerTitle: "Playstation " + ps3Panel.state.toString()
         anchors.fill: parent
-        Row{
-            parent:ps3Panel.headerRect
-            anchors{
-                left:parent.horizontalCenter
-                right:parent.right
-                bottom:parent.bottom
-                top:parent.top
-            }
-
+        buttonContent:[
             StyledButton{
-                buttonText: "gamepad"
-                onActivated: ps3Panel.state="gamepad"
-            }
+                buttonText: qsTr("Gamepad", "Gamepad remote")
+                onActivated: panelContent.state="gamepad"
+                height:parent.height
+
+            },
             StyledButton{
-                buttonText: "remote"
-                onActivated: ps3Panel.state="remote"
+                buttonText: qsTr("Remote", "Video Game Remote")
+                onActivated: panelContent.state="remote"
+                height:parent.height
+            },
+            StyledButton{
+                buttonText: qsTr("Options", "Media Options")
+                onActivated: panelContent.state="remote"
+                height:parent.height
+            },
+            StyledButton{
+                buttonText: qsTr("Power", "Stop Media")
+                onActivated: manager.stopMedia()
+                height:parent.height
             }
-        }
+        ]
 
-        Item{
-            id:gamePadPanel
-            anchors{
-                top:ps3Panel.headerRect.bottom
-                left:parent.left
-                right:parent.right
-                bottom: parent.bottom
-            }
+        content: Item{
+            id:panelContent
+            anchors.fill: parent
 
-            Column{
-                id:lButtons
+            Item{
+                id:gamePadPanel
                 anchors{
                     top:parent.top
                     left:parent.left
+                    right:parent.right
+                    bottom: parent.bottom
                 }
-                height: parent.height *.25
-                StyledButton{
 
-                    buttonText:"L3"
-                    onActivated: manager.extraButtonPressed(buttonText)
-                }
-                StyledButton{
+                Column{
+                    id:lButtons
+                    anchors{
+                        top:parent.top
+                        left:parent.left
+                    }
+                    height: parent.height *.25
+                    width: Style.appButtonWidth/2
 
-                    buttonText:"L2"
-                    onActivated: manager.extraButtonPressed(buttonText)
-                }
-                StyledButton{
-
-                    buttonText:"L1"
-                    onActivated: manager.extraButtonPressed(buttonText)
+                    StyledButton{
+                        width: parent.width
+                        buttonText:"L3"
+                        onActivated: manager.extraButtonPressed(buttonText)
+                        height:parent.height/3
+                    }
+                    StyledButton{
+                        width: parent.width
+                         height:parent.height/3
+                        buttonText:"L2"
+                        onActivated: manager.extraButtonPressed(buttonText)
+                    }
+                    StyledButton{
+                        width: parent.width
+                         height:parent.height/3
+                        buttonText:"L1"
+                        onActivated: manager.extraButtonPressed(buttonText)
+                    }
                 }
             }
 
-            Row{
-                id:center_btns
-                width: parent.width *.25
-                height: childrenRect.height
-                anchors.horizontalCenter: parent.horizontalCenter
-                StyledButton{
-                    buttonText: "Select"
-                    onActivated: manager.extraButtonPressed("select")
-                }
-                StyledButton{
-                    buttonText: "start"
-                    onActivated: manager.EnterGo()
-                }
-
-            }
-            StyledButton{
+            Column{
                 anchors{
-                    left:center_btns.left
-                    right:center_btns.right
-                    top:center_btns.bottom
+                    top:parent.top
+                    horizontalCenter: parent.horizontalCenter
                 }
-                buttonText: "PS"
-                onActivated: manager.extraButtonPressed("psbutton")
+                width: parent.width *.35
+                height: parent.height/4
+                Row{
+                    id:center_btns
+                    width: parent.width
+                    height: childrenRect.height
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    StyledButton{
+                        width: parent.width/2
+                        buttonText: "Select"
+                        onActivated: manager.extraButtonPressed("select")
+                    }
+                    StyledButton{
+                        width: parent.width/2
+
+                        buttonText: "start"
+                        onActivated: manager.EnterGo()
+                    }
+
+                }
+                StyledButton{
+                   width: parent.width
+                   height: parent.height/2
+                    buttonText: "PS"
+                    onActivated: manager.extraButtonPressed("psbutton")
+                }
+
             }
+
 
             Column{
                 id:rButtons
@@ -92,39 +118,59 @@ StyledScreen{
                     right:parent.right
                 }
                 height: parent.height *.25
+                width: Style.appButtonWidth/2
                 StyledButton{
+                    width: parent.width
+                    height: parent.height/3
                     buttonText:"R3"
                     onActivated: manager.extraButtonPressed(buttonText)
                 }
                 StyledButton{
+                    width: parent.width
+                    height: parent.height/3
                     buttonText:"R2"
                     onActivated: manager.extraButtonPressed(buttonText)
                 }
                 StyledButton{
+                    width: parent.width
+                    height: parent.height/3
                     buttonText:"R1"
                     onActivated: manager.extraButtonPressed(buttonText)
                 }
             }
+
+            DirectionPad{
+                visible:true
+                anchors{
+                    left:parent.left
+                    bottom:parent.bottom
+                }
+            }
+
             PSMediaSquare {
                 id: mediaSquare
                 anchors{
-                    verticalCenter: parent.verticalCenter
-                    verticalCenterOffset: scaleY(8)
-                    left:parent.left
+                    bottom:parent.bottom
+                    right:parent.right
+                    rightMargin: width*.20
+                    bottomMargin: width*.20
                 }
             }
 
             Item{
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: scaleY(8)
+                id:numberEntry
+                visible: !manager.isProfile
+               anchors{
+                bottom:parent.bottom
+                horizontalCenter: parent.horizontalCenter
+               }
                 height: childrenRect.height
                 width: parent.width *.30
                 Flow {
                     id: flow1
                     anchors.top:parent.top
                     width: parent.width
-                    height:3*scaleY(15)
+                    height:3*Style.scaleY(15)
 
                     Repeater{
                         model: 9
@@ -175,8 +221,8 @@ StyledScreen{
                     visible:false
                 }
                 PropertyChanges {
-                    target: gamePadPanel
-                    visible:true
+                    //target: gamePadPanel
+                   // visible:true
                 }
             },
             State {
@@ -194,8 +240,8 @@ StyledScreen{
 
     }
 
-
-
 }
+
+
 
 

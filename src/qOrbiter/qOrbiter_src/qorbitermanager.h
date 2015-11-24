@@ -70,6 +70,7 @@
 #include <QtXml/QDomDocument>
 
 
+
 #ifdef ANDROID
 #include "plugins/AndroidInfo/androidsystem.h"
 
@@ -811,6 +812,8 @@ signals:
     void CMD_makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
 
 public slots:
+
+
     int entertainArea() {return iea_area;}
     int room() {return iFK_Room;}
     void setHostDevice(int d){ if(hostDevice != d ) {hostDevice=d; emit hostDeviceChanged(); }  }
@@ -1275,35 +1278,11 @@ public slots:
 
     /*! @name Media Control Slots*/
     //{@
-    Q_INVOKABLE void playMedia(QString FK_Media) {
-        if(FK_Media == "!G"){
-            FK_Media.append(QString::number(iPK_Device));
-        }
-        //changed to remove media type as that is decided on by the media plugin and passed back
-        CMD_MH_Play_Media cmd(iPK_Device, iMediaPluginID, 0 , FK_Media.toStdString(), 0, 0, sEntertainArea, false, false, false, false, false);
-        emit sendDceCommand(cmd);
-    }
+    Q_INVOKABLE void playMedia(QString FK_Media);
 
-    void mythTvPlay(){
-        qDebug() << "Sending play to mythtv";
-        CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, this->nowPlayingButton->getStreamID() , 1000, true);
-        emit sendDceCommand(cmd);
-    }
-
-    void playResume(){
-        if(nowPlayingButton->getStreamID() != -1){
-            CMD_Play cmd(iPK_Device, nowPlayingButton->nowPlayingDevice(), nowPlayingButton->getStreamID());
-            emit sendDceCommand(cmd);
-        }
-    }
-
-    void stopMedia() {/*emit stopPlayback();*/
-        CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,sEntertainArea,false);
-        string response;
-        emit sendDceCommand(endMedia);
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Response: %s", response.c_str());
-        setDirectAv(false);
-    }
+    void mythTvPlay();
+    void playResume();
+    void stopMedia();
 
     void tvChannelUp(){CMD_Channel_up cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void tvChannelDown(){CMD_Channel_down cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
@@ -1356,16 +1335,7 @@ public slots:
     void yellowButtonPress(){ CMD_Yellow cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void startRecordingPress(){CMD_Record cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
     int scheduleRecording(QString sType, QString sProgramID);
-    int cancelRecording(QString sID, QString sProgramID) {
-        DCECommand *pCmd = getDCECommand();
-        CMD_Remove_Scheduled_Recording_DT *cmd = new CMD_Remove_Scheduled_Recording_DT(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
-        pCmd->setCommand(cmd);
-        emit sendDceCommandResponse(pCmd);
-/*        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
-        emit sendDceCommand(cmd2, cbno);
-        return cbno;*/
-        return pCmd->getCallback();
-    }
+    int cancelRecording(QString sID, QString sProgramID);
     void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, iMediaPluginID); sendDceCommand( cmd);}
     void mute(){DCE::CMD_Mute cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void doMoveMedia(QString eas, int streamID) {CMD_MH_Move_Media cmd(iPK_Device, iMediaPluginID, streamID, eas.toStdString()); sendDceCommand( cmd);}
@@ -1373,10 +1343,7 @@ public slots:
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
-    void updatePlaylist(){  qDebug() << "playlist updating;";
-                            GenericFlatListModel *pModel = getDataGridModel("Playlist", 18, "38");
-                                                if(pModel){pModel->refreshData();}
-                         }
+    void updatePlaylist();
     //@}
 
     /*! @name Screenshot & Images slots*/

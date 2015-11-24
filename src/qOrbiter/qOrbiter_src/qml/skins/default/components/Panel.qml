@@ -68,16 +68,15 @@ Item {
             id:control_row
             spacing: 2
             width: children.length*Style.appButtonWidth
-            height: panelHeader.height *95
+            height: panelHeader.height *.95
             Component.onCompleted: console.log("ctrl row len"+children.length)
-            onChildrenChanged:{
-                if(children.length===0)
-                    return
+//            onChildrenChanged:{
+//                if(children.length===0)
+//                    return
 
-                var h = children[children.length-1].height
-                children[children.length-1].height=25
-               children[children.length-1].height=h
-            }
+//               // children[children.length-1].height=height-5
+//                return;
+//            }
         }
     }
 

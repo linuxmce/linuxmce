@@ -226,6 +226,17 @@ StyledScreen {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Pixel Ratio: %1").arg(screenInfo.primaryScreen.pixelRatio)
                     }
+
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Version %1").arg(orbiterVersion)
+                    }
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Compile Date %1").arg(buildDate)
+                    }
                 }
             }
         }

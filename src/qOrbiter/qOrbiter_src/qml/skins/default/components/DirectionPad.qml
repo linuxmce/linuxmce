@@ -8,8 +8,6 @@ Item{
     visible:false
     height: manager.isProfile ? Style.scaleY(27) :Style.scaleY(50)
     width: height
-    
-
     Rectangle{
         id:centerOk
 

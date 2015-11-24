@@ -6,7 +6,8 @@ import "../."
 Item{
     id:playlistPanel
     height: Style.scaleY(75)
-    width: Style.listViewWidth_medium
+    width: visible ? Style.listViewWidth_medium :0
+    clip:true
     //  visible:showingPlaylist
 
     Connections{

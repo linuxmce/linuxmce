@@ -156,7 +156,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_appEngine->load(QUrl(path));
 #endif
 
-    m_testScreenSize =testSize;   
+    m_testScreenSize =testSize;
 
     m_fontDir.setPath(QStandardPaths::standardLocations(QStandardPaths::FontsLocation).first());
 
@@ -383,7 +383,7 @@ void qorbiterManager::initiateRestart(){
  * \param url - The relative or absolute path of the skin to the binary.
  */
 void qorbiterManager::refreshUI(QUrl url){
-Q_UNUSED(url);
+    Q_UNUSED(url);
     emit currentSkinChanged();
 }
 
@@ -1738,6 +1738,36 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
     storageDevices = p;
 }
 
+void qorbiterManager::playMedia(QString FK_Media) {
+    if(FK_Media == "!G"){
+        FK_Media.append(QString::number(iPK_Device));
+    }
+    //changed to remove media type as that is decided on by the media plugin and passed back
+    CMD_MH_Play_Media cmd(iPK_Device, iMediaPluginID, 0 , FK_Media.toStdString(), 0, 0, sEntertainArea, false, false, false, false, false);
+    emit sendDceCommand(cmd);
+}
+
+void qorbiterManager::mythTvPlay(){
+    qDebug() << "Sending play to mythtv";
+    CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, this->nowPlayingButton->getStreamID() , 1000, true);
+    emit sendDceCommand(cmd);
+}
+
+void qorbiterManager::playResume(){
+    if(nowPlayingButton->getStreamID() != -1){
+        CMD_Play cmd(iPK_Device, nowPlayingButton->nowPlayingDevice(), nowPlayingButton->getStreamID());
+        emit sendDceCommand(cmd);
+    }
+}
+
+void qorbiterManager::stopMedia() {/*emit stopPlayback();*/
+    CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,sEntertainArea,false);
+    string response;
+    emit sendDceCommand(endMedia);
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Response: %s", response.c_str());
+    setDirectAv(false);
+}
+
 
 bool qorbiterManager::loadSkins(QUrl base)
 {
@@ -2159,6 +2189,23 @@ int qorbiterManager::scheduleRecording(QString sType, QString sProgramID)
        CMD_Schedule_Recording_DT *cmd2 = new CMD_Schedule_Recording_DT(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST,
                                                                        BL_SameHouse, sType.toStdString(), "", sProgramID.toStdString(), ps2);
                                                                        */
+}
+
+int qorbiterManager::cancelRecording(QString sID, QString sProgramID) {
+    DCECommand *pCmd = getDCECommand();
+    CMD_Remove_Scheduled_Recording_DT *cmd = new CMD_Remove_Scheduled_Recording_DT(iPK_Device, DEVICETEMPLATE_VDRPlugin_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
+    pCmd->setCommand(cmd);
+    emit sendDceCommandResponse(pCmd);
+    /*        CMD_Remove_Scheduled_Recording_DT cmd2(iPK_Device, DEVICETEMPLATE_MythTV_PlugIn_CONST, BL_SameHouse, sID.toStdString(), sProgramID.toStdString());
+        emit sendDceCommand(cmd2, cbno);
+        return cbno;*/
+    return pCmd->getCallback();
+}
+
+void qorbiterManager::updatePlaylist(){
+    qDebug() << "playlist updating;";
+    GenericFlatListModel *pModel = getDataGridModel("Playlist", 18, "38");
+    if(pModel){pModel->refreshData();}
 }
 
 DCECommand* qorbiterManager::getDCECommand()
@@ -2602,7 +2649,7 @@ bool qorbiterManager::createThemeStyle()
 #ifdef NOQRC
     QString fp =m_localQmlPath+"skins/"+currentSkin+"/Style.qml";
 #else
-     QString fp ="skins/"+currentSkin+"/Style.qml";
+    QString fp ="skins/"+currentSkin+"/Style.qml";
 #endif
     qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
     qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
