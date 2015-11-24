@@ -4,23 +4,23 @@ import "../components"
 Item {
     id: mediaSquare
 
-    height: manager.isProfile ? Style.scaleY(20) : Style.scaleY(35)
+    height: manager.isProfile ? Style.scaleY(15) : Style.scaleY(25)
     width:height
     Rectangle{
         opacity: .25
         anchors.fill: parent
+        radius: height
+        color:"black"
     }
+    rotation: 45
+    property int buttonSize:height*.45
 
-    StyledButton{
+    ImageButton{
         id:topLeft
         state:"round"
-        height: parent.height*.25
-
-        buttonText:"\&#8420; "
-        txtObj.color: "green"
-
-        txtObj.textFormat: Text.RichText
-        fontSize: 24
+        rotation: -45
+        height: buttonSize
+        upImage: "../images/ps3_tri.png"
         anchors{
             left:parent.left
             top:parent.top
@@ -28,15 +28,12 @@ Item {
         onActivated: manager.extraButtonPressed("triangle")
     }
     
-    StyledButton{
+    ImageButton{
         id:topRight
-        height: parent.height*.25
+        height: buttonSize
 
         state: "round"
-        buttonText: "\&#8413;"
-        txtObj.color: "red"
-        txtObj.textFormat: Text.RichText
-        fontSize: 24
+        upImage: "../images/ps3_o.png"
         anchors{
             right:parent.right
             top:parent.top
@@ -44,31 +41,27 @@ Item {
         onActivated:manager.extraButtonPressed("circle")
     }
     
-    StyledButton{
+    ImageButton{
         id:bottomLeft
-        height: 75
+        height: buttonSize
         state: "round"
-        buttonText: "\&#8414;"
-        txtObj.color: "pink"
-        fontSize: 24
-
-        txtObj.textFormat: Text.RichText
+        upImage: "../images/ps3_sq.png"
+        rotation: 45
         anchors{
             left:parent.left
             bottom:parent.bottom
         }
         onActivated:manager.extraButtonPressed("square")
     }
-    
-    StyledButton{
-        id:bottomRight
-        height: parent.height*.25
-        state: "round"
-        buttonText: "\&#88;"
-        txtObj.color: "skyblue"
 
-        fontSize: 24
-        txtObj.textFormat: Text.RichText
+
+    
+    ImageButton{
+        id:bottomRight
+        height: buttonSize
+        state: "round"
+        rotation: -45
+        upImage:"../images/ps3_x.png"
         anchors{
             right:parent.right
             bottom:parent.bottom

@@ -60,52 +60,66 @@ StyledScreen{
                         buttonText:"L3"
                         onActivated: manager.extraButtonPressed(buttonText)
                         height:parent.height/3
+                        txtObj.font.family: "1979"
+                        txtObj.font.bold: true
                     }
                     StyledButton{
                         width: parent.width
-                         height:parent.height/3
+                        height:parent.height/3
                         buttonText:"L2"
+                        txtObj.font.bold: true
+                        txtObj.font.family: "1979"
                         onActivated: manager.extraButtonPressed(buttonText)
                     }
                     StyledButton{
                         width: parent.width
-                         height:parent.height/3
+                        height:parent.height/3
                         buttonText:"L1"
+                        txtObj.font.bold: true
+                        txtObj.font.family: "1979"
                         onActivated: manager.extraButtonPressed(buttonText)
                     }
                 }
             }
 
             Column{
+                id:centerCol
                 anchors{
                     top:parent.top
                     horizontalCenter: parent.horizontalCenter
                 }
                 width: parent.width *.35
-                height: parent.height/4
+                height: parent.height*.15
                 Row{
                     id:center_btns
                     width: parent.width
-                    height: childrenRect.height
+                    height: parent.height/2
                     anchors.horizontalCenter: parent.horizontalCenter
                     StyledButton{
                         width: parent.width/2
-                        buttonText: "Select"
+                        height: parent.height
+                        buttonText: qsTr("Select", "Game Controller Select Button")
                         onActivated: manager.extraButtonPressed("select")
+                        txtObj.font.bold: true
+                        txtObj.font.family: "1979"
                     }
                     StyledButton{
                         width: parent.width/2
-
-                        buttonText: "start"
+                        height: parent.height
+                        buttonText: qsTr("Start", "Game Controller Start Button")
                         onActivated: manager.EnterGo()
+                        txtObj.font.bold: true
+                        txtObj.font.family: "1979"
                     }
 
                 }
                 StyledButton{
-                   width: parent.width
-                   height: parent.height/2
+                    width: parent.width
+                    height: parent.height/2
                     buttonText: "PS"
                     onActivated: manager.extraButtonPressed("psbutton")
+                    txtObj.font.bold: true
+                    txtObj.font.family: "1979"
                 }
 
             }
@@ -124,18 +138,24 @@ StyledScreen{
                     height: parent.height/3
                     buttonText:"R3"
                     onActivated: manager.extraButtonPressed(buttonText)
+                    txtObj.font.bold: true
+                    txtObj.font.family: "1979"
                 }
                 StyledButton{
                     width: parent.width
                     height: parent.height/3
                     buttonText:"R2"
                     onActivated: manager.extraButtonPressed(buttonText)
+                    txtObj.font.bold: true
+                    txtObj.font.family: "1979"
                 }
                 StyledButton{
                     width: parent.width
                     height: parent.height/3
                     buttonText:"R1"
                     onActivated: manager.extraButtonPressed(buttonText)
+                    txtObj.font.bold: true
+                    txtObj.font.family: "1979"
                 }
             }
 
@@ -159,24 +179,26 @@ StyledScreen{
 
             Item{
                 id:numberEntry
-                visible: !manager.isProfile
-               anchors{
-                bottom:parent.bottom
-                horizontalCenter: parent.horizontalCenter
-               }
+                //visible: !manager.isProfile
+                anchors{
+                    top:centerCol.bottom
+                    horizontalCenter: parent.horizontalCenter
+                }
                 height: childrenRect.height
-                width: parent.width *.30
+                width: manager.isProfile ? parent.width *.50 : parent.width *.30
                 Flow {
                     id: flow1
                     anchors.top:parent.top
                     width: parent.width
-                    height:3*Style.scaleY(15)
+                    height: childrenRect.height
 
                     Repeater{
                         model: 9
                         StyledButton {
                             state:"numberpad-small"
                             buttonText: (index+1)
+                            txtObj.font.bold: true
+                            txtObj.font.family: "1979"
                             //onActivated: content.typeText(index+1)
                         }
                     }
@@ -190,16 +212,22 @@ StyledScreen{
                     StyledButton {
                         state:"numberpad-small"
                         buttonText: "<"
+                        txtObj.font.bold: true
+                        txtObj.font.family: "1979"
 
                     }
                     StyledButton {
                         state:"numberpad-small"
                         buttonText: "0"
+                        txtObj.font.bold: true
+                        txtObj.font.family: "1979"
 
                     }
                     StyledButton {
                         state:"numberpad-small"
                         buttonText: "back"
+                        txtObj.font.bold: true
+                        txtObj.font.family: "1979"
                         onActivated: {
 
                         }
@@ -222,7 +250,7 @@ StyledScreen{
                 }
                 PropertyChanges {
                     //target: gamePadPanel
-                   // visible:true
+                    // visible:true
                 }
             },
             State {
