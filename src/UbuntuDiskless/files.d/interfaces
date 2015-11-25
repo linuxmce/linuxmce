@@ -24,6 +24,7 @@ if [[ -z "$IPaddress" ]]; then
 	exit 1
 fi
 
+# FIXME: this will break with kernel 4.0/xenial, MD may need to announce its' NIC name to interactor
 Content="auto lo
 iface lo inet loopback
 

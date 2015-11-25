@@ -21,6 +21,7 @@ if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 	NetSettings=$(ParseInterfaces)
 	ExtData=$(echo "$NetSettings" | head -1)
 	ExtractData "$ExtData"
+	NICS=$(ip -o link | grep "link/ether" | awk '{ print $2; }' | cut -d':' -f1)
 	if [[ -z "$DHCPsetting" ]]; then
 		echo "No DHCP Setting found. Not storing internal interface data"
 		if [ "$ExtIP" == "dhcp" ]; then
@@ -29,9 +30,15 @@ if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 			NetIfConf="$ExtIf,$ExtIP,$ExtNetmask,$Gateway,$DNS|"
 		fi
 		if [[ "$NCards" -eq 1 ]]; then
-			IntIf="eth0:0"
+			IntIf="${ExtIf}:0"
 		else
-			[[ "$ExtIf" == "eth0" ]] && IntIf="eth1" || IntIf="eth0"
+			# Use next available NIC for internal interface
+			for interface in $NICS ; do
+				if [ "$interface" != "$ExtIf" ] ; then
+					IntIf=$interface
+					break
+				fi
+			done
 		fi
 
 		Q="SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7"
@@ -46,9 +53,15 @@ if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 		IntNetmask="255.255.255.0"
 		IntIP="$(echo "$DHCPsetting" | cut -d. -f-3).1"
 		if [[ "$NCards" -eq 1 ]]; then
-			IntIf="eth0:0"
+			IntIf="${ExtIf}:0"
 		else
-			[[ "$ExtIf" == "eth0" ]] && IntIf="eth1" || IntIf="eth0"
+			# Use next available NIC for internal interface
+			for interface in $NICS ; do
+				if [ "$interface" != "$ExtIf" ] ; then
+					IntIf=$interface
+					break
+				fi
+			done
 		fi
 		if [[ "$ExtIP" == "dhcp" ]]; then
 			NetIfConf="$ExtIf,dhcp|$IntIf,$IntIP,$IntNetmask"

@@ -60,7 +60,6 @@ fi
 ## FIXME: Ouch
 chmod 777 /usr/pluto/locks
 
-
 ## Copy our logrotate policy -- every package should have its own policy but we are from Pluto :)
 if ! BlacklistConfFiles '/etc/logrotate.d/pluto' ;then
 	rm -f /etc/logrotate.d/pluto
@@ -122,10 +121,6 @@ if [[ ! -f /etc/skel/Desktop/LinuxMCE ]] ; then
 		EOF
 fi
 
-# wtf?  why are we wiping out the desktop continually? doesn't seem very friendly.
-#if [[ -f /root/Desktop ]] ; then
-#	rm -f /root/Desktop
-#fi
 if [[ ! -f /root/Desktop/LinuxMCE ]] ; then
 	mkdir -p /root/Desktop
 	cp -r /etc/skel/Desktop/* /root/Desktop
@@ -138,8 +133,6 @@ if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
 fi
 
 ###. /usr/pluto/install/install-common.sh ; Disable_DisplayManager
-# TODO: dpkg-divert this so it doesn't come back ? - overrides work for upstart atm
-# TODO: figure out what systemd will need, perhaps diversion is the answer
 mkdir -p "/etc/X11"
 echo "/bin/false" >/etc/X11/default-display-manager
 update-rc.d -f kdm disable >/dev/null || :
@@ -158,14 +151,3 @@ esac
 
 # Add a single new startup script.
 update-rc.d -f linuxmce defaults 99 1 >/dev/null
-
-if [[ "$1" == "install" ]] ; then
-	cat <<-EOF >/etc/network/interfaces
-		auto lo
-			iface lo inet loopback
-		allow-hotplug eth0
-			iface eth0 inet dhcp
-		allow-hotplug eth1
-			iface eth1 inet dhcp
-		EOF
-fi

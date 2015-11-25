@@ -19,8 +19,12 @@ exec 1>&2
 
 DT=$(/scripts/DeviceTemplate)
 
-MyIP=`ifconfig eth0 | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
-MyMAC=`ifconfig eth0 | grep "HWaddr "  | sed -r 's/^.* HWaddr ([a-zA-Z0-9:]*)/\1/g'`
+NICS=$(ip -o link | grep "link/ether" | awk '{ print $2; }' | cut -d':' -f1)
+NIC_COUNT=$(wc -w <<< $NICS)
+ExtIf=$(awk '{ print $1; }' <<< $NICS)
+
+MyIP=`ifconfig $ExtIf | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
+MyMAC=`ifconfig $ExtIf | grep "HWaddr "  | sed -r 's/^.* HWaddr ([a-zA-Z0-9:]*)/\1/g'`
 Gateway=`ip route | grep "default via" | cut -d " " -f3`
 
 Architecture="i386"
