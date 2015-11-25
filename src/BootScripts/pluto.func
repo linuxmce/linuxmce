@@ -22,8 +22,6 @@ SYSTEM_IP=10.0.0.149
 NAMESERVER=10.0.0.1
 ACTIVATION_KEY=0
 FILE_VERSION=19
-INTERNAL_IFACE=eth0
-EXTERNAL_IFACE=eth1
 
 ulimit -c unlimited #core dump in all scripts that use pluto.func (most of them)
 

@@ -16,25 +16,27 @@ FirstNetwork () {
 	:
 
 	echo "creating dumb DHCP interfaces template" > /var/log/pluto/firstnet.log
-	nic_num=$(lspci | grep -ic "Ethernet")
-	if [[ $nic_num -gt "1" ]]; then
-		cat <<-EOF > /etc/network/interfaces.lmce
+	NICS=$(ip -o link | grep "link/ether" | awk '{print $2;}' | cut -d':' -f1)
+	NIC_COUNT=$(wc -w <<< $NICS)
+	if [[ "$NIC_COUNT" -gt "1" ]]; then
+		cat <<-EOF > /etc/network/interfaces
 			auto lo
 			iface lo inet loopback
-			auto eth0
-			iface eth0 inet dhcp
-			auto eth1
-			iface eth1 inet dhcp
 			EOF
-		ifup eth0 eth1 -i /etc/network/interfaces.lmce
+		for interface in $NICS ; do
+			cat <<-EOF >> /etc/network/interfaces
+				auto $interface
+				iface $interface inet dhcp
+				EOF
+		ifup $NICS
 	else
-		cat <<-EOF > /etc/network/interfaces.lmce
+		cat <<-EOF > /etc/network/interfaces
 			auto lo
 			iface lo inet loopback
-			auto eth0
-			iface eth0 inet dhcp
+			auto $NICS
+			iface $NICS inet dhcp
 			EOF
-		ifup eth0 -i /etc/network/interfaces.lmce
+		ifup $NICS
 	fi
 }
 

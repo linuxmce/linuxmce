@@ -27,12 +27,12 @@ cat <<-EOF > /root/.my.cnf
 
 StatsMessage "Setting up $DEB_CACHE"
 #Make sure there is are Packages files on the MD so apt-get update does not fail
-#/usr/pluto/bin/UpdateDebCache.sh
-#rm -f /var/cache/apt/archives/*
-mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
-touch /usr/pluto/deb-cache/Packages
-gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
-cp /usr/pluto/deb-cache/Packages* /usr/pluto/deb-cache/$DEB_CACHE
+if [[ ! -f /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz ]]
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	touch /usr/pluto/deb-cache/$DEB_CACHE/Packages
+	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
+	cp /usr/pluto/deb-cache/Packages* /usr/pluto/deb-cache/$DEB_CACHE
+fi
 
 case "$TARGET_DISTRO" in
 	raspbian)
@@ -43,15 +43,6 @@ case "$TARGET_DISTRO" in
 			EOF
 		;;
 esac
-
-# TOCO: FIXME: setup eth0, need to look at wlan0 setup perhaps?
-if [[ ! $(grep eth0 /etc/network/interfaces) ]] ; then
-	echo "" >> /etc/network/interfaces
-	echo "auto eth0" >> /etc/network/interfaces
-	echo "iface eth0 inet dhcp" >> /etc/network/interfaces
-	echo "" >> /etc/network/interfaces
-fi
-
 
 #Exit successfully
 exit 0

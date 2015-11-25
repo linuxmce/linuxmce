@@ -351,17 +351,20 @@ if PackageStatus pluto-dcerouter | grep -q '^Status: install '; then
 	if [[ -z "$IntIf" ]]; then
 		if [[ "$NCards" -eq 1 ]]; then
 			IntIf="$ExtIf:0"
-		elif [[ "$ExtIf" == eth0 ]]; then
-			IntIf="eth1"
 		else
-			IntIf="eth0"
+			NICS=$(ip -o link | grep "link/ether" | awk '{ print $2; }' | cut -d':' -f1)
+			for interface in $NICS ; do
+				if [ "$interface" != "$extif" ] ; then
+					intif=$interface
+					break
+				fi
+			done
 		fi
 		Q="SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7"
                 IntIP=$(RunSQL "$Q")
 		if [[ "$IntIP" == "" ]] ;then
 			IntIP=192.168.80.1
 		fi
-		#IntIP=192.168.80.1
 		IntNetmask=255.255.255.0
 	fi
 	if [[ "$ExtIP" == dhcp ]]; then

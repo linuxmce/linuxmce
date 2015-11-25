@@ -72,23 +72,23 @@ c_singleNIC=1
 
 Nic_Config () {
 	StatsMessage "Starting NIC Discovery and Configuration"
-	# Find out, what nic configuration we have. This is needed for later on to fill the database
-	# correctly.
-	if  [[ `ifconfig -s -a  | awk '$1 != "Iface" && $1 != "lo" && $1 != "pan0" { print $1 }' | wc -l` > 1 ]]; then
+	# Find out, what nic configuration we have. This is needed for later on to fill the database correctly.
+	# Grab available interface names
+	NICS=$(ip -o link | grep "link/ether" | awk '{ print $2; }' | cut -d':' -f1)
+	NIC_COUNT=$(wc -w <<< $NICS)
+	if  [[ "$NIC_COUNT" > 1 ]]; then
 		Create_Wizard_Data-Double_Nic_Shell > ${mce_wizard_data_shell}
-		#Use these for the defaults if we cannot automatically determine which to use
-		#TODO: Error out and instruct the user to setup a working connection? Or ask them to manually choose?
-		extif="eth0"
-		intif="eth1"
+		# Use these for the defaults if we cannot automatically determine which to use
+		# TODO: Error out and instruct the user to setup a working connection? Or ask them to manually choose?
+		extif=$(awk '{ print $1; }' <<< $NICS)
+		intif=$(awk '{ print $2; }' <<< $NICS)
 		if route -n | grep -q '^0.0.0.0'; then
-			#We have a default route, use it for finding external interface.
+			# We have a default route, use it for finding external interface.
 			extif=`route -n | awk '$1 == "0.0.0.0" { print $8 }'`
-			#Use the first available interface as the internal interface.
-			for if in `ifconfig -s -a | awk '$1 != "Iface" && $1 != "lo"  && $1 != "pan0" { print $1 }'`
-			do
-				if [ "$if" != "$extif" ]
-				then
-					intif=$if
+			# Use the first available interface as the internal interface.
+			for interface in $NICS ; do
+				if [ "$interface" != "$extif" ] ; then
+					intif=$interface
 					break
 				fi
 			done
@@ -99,7 +99,8 @@ Nic_Config () {
 		sed --in-place -e "s,\({extif}\),$extif,g" ${mce_wizard_data_shell}
 		sed --in-place -e "s,\({intif}\),$intif,g" ${mce_wizard_data_shell}
 	else
-		extif=eth0
+		# Only one interface
+		extif="$NICS"
 		if route -n | grep -q '^0.0.0.0'; then
 			#We have a default route, use it for finding external interface.
 			extif=`route -n | awk '$1 == "0.0.0.0" { print $8 }'`
@@ -248,7 +249,7 @@ Configure_Network_Files () {
 	#echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
 	echo "127.0.1.1 dcerouter $(/bin/hostname)"    >> /etc/hosts
 
-	ifup eth0 eth1 >/dev/null 2>/dev/null &
+	ifup $c_netExtName $c_netIntName >/dev/null 2>/dev/null &
 }
 
 Configure_Network_Database () {

@@ -346,8 +346,8 @@ Install_KUbuntu_Desktop () {
 }
 
 addAdditionalTTYStart () {
-	# TODO: this is ubuntu specific, alter to fn properly for debian/raspbian as well
-	if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]] || [[ "$TARGET_RELEASE" == "trusty" ]] || [[ "$TARGET_RELEASE" == "xenial" ]] ; then
+	# TODO: this is upstart specific, alter to fn properly for systemd as well?
+	if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]] || [[ "$TARGET_RELEASE" == "trusty" ]] ; then
 		sed -i 's/23/235/' /etc/init/tty2.conf
 		sed -i 's/23/235/' /etc/init/tty3.conf
 		sed -i 's/23/235/' /etc/init/tty4.conf

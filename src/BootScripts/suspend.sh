@@ -10,17 +10,7 @@ echo "LMCE Suspend Process Started" > /var/log/pluto/sus.log
 
 /usr/pluto/bin/enable_wol.sh
 
-## Find local IP address
-
-LocalIP=$(ip addr show dev eth0|grep "inet "|cut -f6 -d" "|cut -f1 -d/)
-
-## Use local IP address to find MD device number
-
-FindMDDeviceQ="SELECT PK_Device FROM Device
-WHERE IPAddress='$LocalIP';
-"
-
-DeviceID=$(RunSQL "$FindMDDeviceQ")
+DeviceID="$PK_Device"
 
 ## Identify immediate children DCE devices that are currently Registered
 

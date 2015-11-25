@@ -39,6 +39,11 @@ SQL_DB="pluto_main"
 ###########################################################
 
 Trap_Exit () {
+	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
+	[[ -n "${PIDS}" ]] && kill ${PIDS}
+	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
+	[[ -n "${PIDS}" ]] && kill ${PIDS}
+
 	umount -fl $TEMP_DIR/var/cache/apt || :
 	umount -fl $TEMP_DIR/usr/pluto/deb-cache
 	umount -fl $TEMP_DIR/dev/pts
@@ -677,6 +682,12 @@ MD_Populate_Debcache () {
 
 MD_Cleanup () {
 	StatsMessage "Cleaning up from package installations..."
+
+	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
+	[[ -n "${PIDS}" ]] && kill ${PIDS}
+	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
+	[[ -n "${PIDS}" ]] && kill ${PIDS}
+
 	umount $TEMP_DIR/var/cache/apt || :
 	umount $TEMP_DIR/usr/pluto/deb-cache
 	umount $TEMP_DIR/dev/pts
