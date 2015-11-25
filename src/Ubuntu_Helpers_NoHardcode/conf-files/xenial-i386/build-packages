@@ -208,7 +208,7 @@ python-protobuf.socketrpc
 python-protobuf
 libprotoc-dev
 linux-source
-linux-headers-$(uname -r)
+linux-headers-generic
 libqjson-dev
 libcec-platform-dev
 libow-dev
@@ -229,5 +229,6 @@ libplist-dev
 libshairport-dev
 indent
 fastjar
-libqpidmessaging2-dev
 libola-dev
+libgdbm-dev
+libgoogle-perftools-dev

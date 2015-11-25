@@ -306,7 +306,8 @@ function Build_Replacements_ubuntu_xenial
 
 	# libhupnp and libhupnp-av need to build under qt4.
 	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
-
+	# hupnp core debs need to be installed for hupnp_av building
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 
 	# mythtv
