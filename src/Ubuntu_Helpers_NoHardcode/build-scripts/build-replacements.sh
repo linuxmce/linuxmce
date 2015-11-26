@@ -100,7 +100,7 @@ function Build_Replacements_Common_ubuntu
 {
 	#Package: pthsem for bcusdk
 	pushd 	${svn_dir}/${svn_branch_name}/external/pthsem-2.0.8
-	autoconf -i
+	autoreconf -i
 	popd
 	make_jobs="" Build_Replacement_Package pthsem external/pthsem-2.0.8
 	dpkg -i ${svn_dir}/${svn_branch_name}/external/libpthsem-dev_*.deb ${svn_dir}/${svn_branch_name}/external/libpthsem20_*.deb
