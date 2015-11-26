@@ -12,11 +12,13 @@ function try_deb() {
 	# create an empty file, if deb doesn't
 	# carry it.
 	file=$1
-	wget http://deb.linuxmce.org/$1 || touch $1
+	touch $1
+	wget http://deb.linuxmce.org/$1 -O $1 &> /dev/null
 }
 	
 
 function fake_win32bins() {
+	DisplayMessage "*** STEP: Fake Importing WIN32 binaries"
 	pushd ${svn_dir}/${svn_branch_name}/src/bin
 	try_deb Pluto_S60.sis
 	try_deb Pluto_S60.sisx

@@ -103,6 +103,7 @@ function Build_Replacements_Common_ubuntu
 
 	#Package: bcusdk (eib)
 	Build_Replacement_Package bcusdk external/bcusdk-0.0.5
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/libeibclient*.deb
 	cp -fr ${svn_dir}/${svn_branch_name}/external/*eib*.deb ${replacements_dir}
 
 	#Package: mbrola
@@ -155,12 +156,13 @@ function Build_Replacements_Common_ubuntu
 
 	# Open ZWave library
 	ver_split="-" Build_Replacement_Package zwave external/openzwave-1.3.1224
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/libopenzwave*deb
         cp ${svn_dir}/${svn_branch_name}/external/*zwave*.deb "${replacements_dir}"
         cp ${svn_dir}/${svn_branch_name}/external/*zwave*.changes "${replacements_dir}"
 
 	# qhttpserver (for LinuxMCE NVR)
 	Build_Replacement_Package qhttpserver external/qhttpserver
-
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb
 	##Package: raspi2png
 	#if [[ "$arch" == "armhf" ]]; then
 	#	Build_Replacement_Package raspi2png external/raspi2png
@@ -248,6 +250,7 @@ function Build_Replacements_ubuntu_trusty
 
 	#Package: ruby1.8-1.8.7.375
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/ruby*dev*deb ${svn_dir}/${svn_branch_name}/ubuntu/libruby1.8_*deb
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/ri*1.8*.deb "${replacements_dir}"
 
 	# ola needs to be configured to the current build environment
@@ -310,7 +313,7 @@ function Build_Replacements_ubuntu_xenial
 	# hupnp core debs need to be installed for hupnp_av building
 	dpkg -i ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
-
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av-dev*deb  ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av_*deb
 	# mythtv
 	Build_Replacement_Package myth ubuntu/mythtv-0.27.5+fixes.20150921.fbd5ef3
 }
@@ -342,6 +345,7 @@ function Build_Replacements_Common_raspbian
 
 	# Open ZWave library
 	Build_Replacement_Package zwave external/openzwave-1.3.1224
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/libopenzwave*deb
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}"
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}"
 
