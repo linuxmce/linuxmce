@@ -6,6 +6,9 @@ case "$1" in
       rm -Rf /etc/openzwave 2>/dev/null
       set -e
   ;;
+  upgrade)
+    echo "upgrading" 
+  ;;
   *)
     echo "postrm called with unknown argument '$1'" 1>&2
     exit 1
