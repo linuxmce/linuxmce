@@ -28,6 +28,7 @@ function getScreensaverFiles($path,$attribute,$attribute2,$mediadbADO,$page,$rec
 	    $query.=' AND Path=?';
 	    $parameters[2] = $path;
 	}
+	$query.=' ORDER BY Filename';
 	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page, false, false);
 }
 function getPhotoFiles($criteria,$mediadbADO,$page,$records_per_page, $returnFileList){
