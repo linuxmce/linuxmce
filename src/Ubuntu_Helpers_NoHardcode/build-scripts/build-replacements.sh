@@ -19,6 +19,7 @@ ver_split="~"
 [[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j$NUM_CORES"
 
 cache_name=".cache"
+[[ -z "$cache_replacements" ]] && rm -f "${replacements_dir}/${cache_name}" || :
 
 function Changed_Since_Last_Build
 {
