@@ -7,8 +7,10 @@ case "$1" in
       set -e
   ;;
   upgrade)
-  abort-upgrade)
-    echo "upgrading" 
+    echo "upgrading"
+  ;;
+  failed-upgrade)
+    echo "abort-upgrading" 
   ;;
   *)
     echo "postrm called with unknown argument '$1'" 1>&2
