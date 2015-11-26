@@ -248,8 +248,8 @@ start() {
 		StartService "Starting MySQL Server" "service mysql start"
 		StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh" "&"
 		StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
-		StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh" "&"
 
+		StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"
 		if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
 			Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
 			R="$(RunSQL "$Q")"
