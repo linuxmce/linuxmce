@@ -42,4 +42,4 @@ dupload --to linuxmce *.changes
 popd
 
 VERSION=`grep "int g_SvnRevision" /var/lmce-build/svn/trunk/src/version.h | grep -v extern | cut -f2 -d"=" | cut -f1 -d";"`
-wget --no-check-certificate  https://vt100.at/announce.php?text=precise\ fluffy\ is\ done\ with\ $VERSION -O /dev/null
+wget --no-check-certificate  https://vt100.at/announce.php?text=$build_name\ $arch\ fluffy\ is\ done\ with\ $VERSION -O /dev/null
