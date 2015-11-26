@@ -13,7 +13,7 @@ function try_deb() {
 	# carry it.
 	file=$1
 	touch $1
-	wget http://deb.linuxmce.org/$1 -O $1 &> /dev/null
+	wget http://deb.linuxmce.org/$1 -O $1 &> /dev/null || : 
 }
 	
 
