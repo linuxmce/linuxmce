@@ -35,19 +35,6 @@ start() {
 	ConfSet "FirstBoot" "false"
 	sync
 
-	StatsMessage "Rebooting to complete resize"
-	StatsMessage "Rebooting in 5 seconds..."
-	sleep 1
-	StatsMessage "Rebooting in 4 seconds..."
-	sleep 1
-	StatsMessage "Rebooting in 3 seconds..."
-	sleep 1
-	StatsMessage "Rebooting in 2 seconds..."
-	sleep 1
-	StatsMessage "Rebooting in 1 seconds..."
-	sleep 1
-	reboot
-
 	return 0
 }
 
