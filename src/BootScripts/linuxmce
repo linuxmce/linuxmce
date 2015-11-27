@@ -15,6 +15,7 @@
 
 DD_DISTRO_Raspbian_Wheezy_CONST=19
 DD_DISTRO_Raspbian_Jessie_CONST=22
+DD_DISTRO_Ubuntu_Xenial_CONST=23
 DD_DEVICETEMPLATE_Core=7
 DD_DEVICETEMPLATE_GenericPC_as_MD=28
 DD_DEVICETEMPLATE_GenericPC_as_qMD=2277
@@ -243,22 +244,28 @@ start() {
 
 	# Start core services required for DCERouter and networking
 	if [[ "$AutostartCore" -eq "1" ]] ; then
+		StartService "Starting MySQL Server" "service mysql start"
 		StartService "Starting DHCP Server" "service isc-dhcp-server start" "&"
 		StartService "Starting DNS Server" "service bind9 start" "&"
-		StartService "Starting MySQL Server" "service mysql start"
+
+		if [[ "$PK_Distro" == "$DD_DISTRO_Ubuntu_Xenial_CONST" ]] ; then
+			while ! systemctl is-active mysql ; do
+				sleep 1
+			done
+		fi
 		StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh" "&"
 		StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
-
 		StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"
-		if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
-			Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
-			R="$(RunSQL "$Q")"
-			ConfSet PK_Installation "$R"
 
-			Q="SELECT PK_Users FROM Users LIMIT 1"
-			R="$(RunSQL "$Q")"
-			ConfSet PK_Users "$R"
-		fi
+		# Update PK_Installation in case it has changed in the DB (see ConfirmInstallation.sh)
+		Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
+		R="$(RunSQL "$Q")"
+		ConfSet PK_Installation "$R"
+
+		# Update PK_Users in case the number of users has changed
+		Q="SELECT PK_Users FROM Users LIMIT 1"
+		R="$(RunSQL "$Q")"
+		ConfSet PK_Users "$R"
 
 		# un-set any RegenInProgress values for OrbiterGen status
 		RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
