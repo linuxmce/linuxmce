@@ -216,6 +216,13 @@ start() {
 	# Enable SSH asap
 	StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
 
+	# start ubiquity *after* network config has been done
+	if grep -q ubiquity /proc/cmdline ; then
+		/usr/pluto/install/firstboot
+		service ubiquity start
+		exit 0
+	fi
+
 	# check firstboot completion and launch firstboot from here
 	if [[ "$FirstBoot" != "false" ]] ; then
 		/usr/pluto/install/firstboot
@@ -232,12 +239,6 @@ start() {
 		Message "FIRSTBOOT NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
 		err=1
 		return $err
-	fi
-
-	# start ubiquity *after* network config has been done
-	if grep -q ubiquity /proc/cmdline ; then
-		service ubiquity start
-		return 0
 	fi
 
 	StartService "Starting LinuxMCE Update Service" "/usr/pluto/bin/LMCEUpdate_Apply.sh"
