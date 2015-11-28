@@ -5,7 +5,7 @@
 
 # if our options are all in one long quoted string... fix this.
 if [ x"$2" = x"" ] ; then
-    if [ x$MYTHTV_SYNC_DB_LOOP != x"1" ] ; then
+    if [ x$MYTHTV_SYNC_DB_LOOP != x1 ] ; then
         export MYTHTV_SYNC_DB_LOOP=1
         $0 $1
         exit
