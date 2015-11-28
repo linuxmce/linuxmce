@@ -19,11 +19,11 @@ if test -f /usr/local/bin/mythfilldatabase ; then
 fi
 
 # Run mythfilldatabase on a single core if possible
-if test x"" != x'which taskset' ; then
+if test x"" != x"$(which taskset)" ; then
 	FILLDB="taskset -c 0 "$FILLDB
 fi
 
-HAS_IGNORE_BACKEND=`$FILLDB --help | grep ignore-backend`
+HAS_IGNORE_BACKEND=`$FILLDB --help 2>&1 | grep ignore-backend`
 if test x"" != x"$HAS_IGNORE_BACKEND" ; then
 	FILLDB=$FILLDB" --ignore-backend"
 fi
@@ -42,7 +42,7 @@ MYSQLPIPE="mysql --skip-column-names -B -h $DBHostName  -P $DBPort -u $DBUserNam
 MYSQLPIPE_WITH_COL="mysql -B -h $DBHostName  -P $DBPort -u $DBUserName -p$DBPassword $DBName"
 NAMES="empty"
 
-function UpdateMythSetting {
+UpdateMythSetting() {
 	SETTING_VALUE="$1"
 	SETTING_DATA="$2"
 	SETTING_HOST="$3"
@@ -56,7 +56,7 @@ function UpdateMythSetting {
 	fi
 }
 
-function InsertMythSetting {
+InsertMythSetting() {
 	SETTING_VALUE="$1"
 	SETTING_DATA="$2"
 	SETTING_HOST="$3"
@@ -67,12 +67,12 @@ function InsertMythSetting {
 		COUNT=$(echo "SELECT count(1) FROM settings WHERE value = '${SETTING_VALUE}' AND hostname = '${SETTING_HOST}';" | $MYSQLPIPE)
 	fi
 
-	if [ x"$COUNT" == x"0" ] ; then
+	if [ x"$COUNT" = x"0" ] ; then
 		UpdateMythSetting "$SETTING_VALUE" "$SETTING_DATA" "$SETTING_HOST"
 	fi
 }
 
-function UpdateMythSettingAllHosts {
+UpdateMythSettingAllHosts() {
 	SETTING_VALUE="$1"
 	SETTING_DATA="$2"
 
@@ -85,7 +85,7 @@ function UpdateMythSettingAllHosts {
 	done
 }
 
-function InsertMythSettingAllHosts {
+InsertMythSettingAllHosts() {
 	SETTING_VALUE="$1"
 	SETTING_DATA="$2"
 
@@ -98,7 +98,7 @@ function InsertMythSettingAllHosts {
 	done	
 }
 
-function DownloadChannelIcons {
+DownloadChannelIcons() {
 	MASTER_ICON_MAP=/home/mythtv/master_iconmap.xml
 	DESTINATION_DIR=/home/mythtv/channels
 
@@ -141,12 +141,12 @@ function DownloadChannelIcons {
 	echo "UPDATE channel SET icon=REPLACE(icon,'$DIR','/home/mythtv')" | $MYSQLPIPE
 }
 
-function SetMythTvInitialFillDBRun {
+SetMythTvInitialFillDBRun() {
 	touch $FILLDBINITRUN ; chown mythtv:mythtv $FILLDBINITRUN
 	date +%s > $FILLDBINITRUN
 }
 
-function WaitUntilMythTvInitialRunXMinutesOld {
+WaitUntilMythTvInitialRunXMinutesOld() {
 	STARTTIME=`date +%s`
 	if [ -r $FILLDBINITRUN -a -s $FILLDBINITRUN ] ; then
 		STARTTIME=$(cat $FILLDBINITRUN)
