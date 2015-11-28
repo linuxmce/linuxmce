@@ -40,16 +40,23 @@ SQL_DB="pluto_main"
 
 Trap_Exit () {
 	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
-	[[ -n "${PIDS}" ]] && kill ${PIDS}
-	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
-	[[ -n "${PIDS}" ]] && kill ${PIDS}
+	until [[ -z "${PIDS}" ]] ; do
+		kill ${PIDS}
+		PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
+	done
 
-	umount -fl $TEMP_DIR/var/cache/apt || :
-	umount -fl $TEMP_DIR/usr/pluto/deb-cache
-	umount -fl $TEMP_DIR/dev/pts
-	umount -fl $TEMP_DIR/dev || :
-	umount -fl $TEMP_DIR/proc
-	umount -fl $TEMP_DIR/sys
+	MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
+	until [[ -z "${MNTS}" ]] ; do
+		umount ${MNTS}
+		MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
+	done
+
+#	umount -fl $TEMP_DIR/var/cache/apt || :
+#	umount -fl $TEMP_DIR/usr/pluto/deb-cache
+#	umount -fl $TEMP_DIR/dev/pts
+#	umount -fl $TEMP_DIR/dev || :
+#	umount -fl $TEMP_DIR/proc
+#	umount -fl $TEMP_DIR/sys
 
 	rm -rf $TEMP_DIR
 }
@@ -252,6 +259,8 @@ MD_System_Level_Prep () {
 	fi
 
 	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	touch /usr/pluto/deb-cache/$DEB_CACHE/Packages
+	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
 	mount --bind /usr/pluto/deb-cache $TEMP_DIR/usr/pluto/deb-cache
 	mount none -t devpts $TEMP_DIR/dev/pts
@@ -684,15 +693,22 @@ MD_Cleanup () {
 	StatsMessage "Cleaning up from package installations..."
 
 	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
-	[[ -n "${PIDS}" ]] && kill ${PIDS}
-	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
-	[[ -n "${PIDS}" ]] && kill ${PIDS}
+	until [[ -z "${PIDS}" ]] ; do
+		kill ${PIDS}
+		PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
+	done
 
-	umount $TEMP_DIR/var/cache/apt || :
-	umount $TEMP_DIR/usr/pluto/deb-cache
-	umount $TEMP_DIR/dev/pts
-	umount $TEMP_DIR/sys
-	umount $TEMP_DIR/proc
+	MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
+	until [[ -z "${MNTS}" ]] ; do
+		umount ${MNTS}
+		MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
+	done
+
+#	umount $TEMP_DIR/var/cache/apt || :
+#	umount $TEMP_DIR/usr/pluto/deb-cache
+#	umount $TEMP_DIR/dev/pts
+#	umount $TEMP_DIR/sys
+#	umount $TEMP_DIR/proc
 
 	#Make sure there is are Packages files on the MD so apt-get update does not fail
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
