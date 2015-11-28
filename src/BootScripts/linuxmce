@@ -231,6 +231,8 @@ start() {
 			Message "FIRSTBOOT ERROR $err, FIRSTBOOT DID NOT COMPLETE"
 			return $err
 		fi
+		# TODO: this is here because avwizard gets skipped without it for some reason, need to investigate
+		reboot
 	fi
 
 	# check firstboot completion prior to continuing to launch linuxmce.
