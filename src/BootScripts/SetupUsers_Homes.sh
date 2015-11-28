@@ -258,11 +258,11 @@ fi
 /usr/pluto/bin/BootMessage.sh "Rebuilding NIS cache"
 make -C /var/yp
 
-/usr/pluto/bin/UpdateMediaDaemonControl.sh  -disable
+#/usr/pluto/bin/UpdateMediaDaemonControl.sh  -disable
 Q="SELECT Enabled FROM Device_StartupScript WHERE FK_Device=$PK_Device AND FK_StartupScript=61"
 StartUpdateMedia=$(RunSQL "$Q")
-if [ "$StartUpdateMedia" -ne "0" ] ; then
-/usr/pluto/bin/UpdateMediaDaemonControl.sh -enable
+if [ x"$StartUpdateMedia" != x"" ] && [ "$StartUpdateMedia" -ne "0" ] ; then
+	/usr/pluto/bin/UpdateMediaDaemonControl.sh -enable
 fi
 
 exit 0
