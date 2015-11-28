@@ -37,9 +37,11 @@ popd
 pushd "$local_mirror_dir"
 dupload --to linuxmce *.changes
 popd
-pushd /var/lmce-build/replacements
-dupload --to linuxmce *.changes
-popd
+
+# Don't dupload twice, these files are copied into $local_mirror_dir during create-repo.sh
+#pushd /var/lmce-build/replacements
+#dupload --to linuxmce *.changes
+#popd
 
 VERSION=`grep "int g_SvnRevision" /var/lmce-build/svn/trunk/src/version.h | grep -v extern | cut -f2 -d"=" | cut -f1 -d";"`
 wget --no-check-certificate  https://vt100.at/announce.php?text=$build_name\ $arch\ fluffy\ is\ done\ with\ $VERSION -O /dev/null
