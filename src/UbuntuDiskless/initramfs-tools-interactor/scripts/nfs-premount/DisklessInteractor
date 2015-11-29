@@ -20,8 +20,8 @@ exec 1>&2
 DT=$(/scripts/DeviceTemplate)
 
 NICS=$(ip -o link | grep "link/ether" | awk '{ print $2; }' | cut -d':' -f1)
-NIC_COUNT=$(wc -w <<< $NICS)
-ExtIf=$(awk '{ print $1; }' <<< $NICS)
+NIC_COUNT=$(echo $NICS | wc -w)
+ExtIf=$(echo $NICS | awk '{ print $1; }')
 
 MyIP=`ifconfig $ExtIf | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
 MyMAC=`ifconfig $ExtIf | grep "HWaddr "  | sed -r 's/^.* HWaddr ([a-zA-Z0-9:]*)/\1/g'`
