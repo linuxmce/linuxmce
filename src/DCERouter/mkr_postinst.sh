@@ -24,9 +24,11 @@ RunSQL "update Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
 /usr/pluto/bin/Update_StartupScrips.sh
 /usr/pluto/bin/generateRcScripts.sh
 
+# TODO: This should be moved to the diskless tools mkr_postinst, not here
 mkdir -p /tftpboot/pxelinux.cfg
 [[ -f /usr/lib/syslinux/pxelinux.0 ]] && cp /usr/lib/syslinux/pxelinux.0 /tftpboot || :
 [[ -f /usr/lib/PXELINUX/pxelinux.0 ]] && cp /usr/lib/PXELINUX/pxelinux.0 /tftpboot || :
+[[ -f /usr/lib/syslinux/modules/bios/ldlinux.c32 ]] && cp /usr/lib/syslinux/modules/bios/ldlinux.c32 /tftpboot || :
 
 # update atftp entry in inet.d
 update-inetd --remove tftp
