@@ -42,7 +42,7 @@ namespace DCE
 		map<int,EntertainArea*> m_mapEntertainAreas;
 public:
 		// Public member variables
-		bool m_bEnableMediaRenderer, m_bEnableMediaServer, m_bEnableMediaController;
+		bool m_bEnableMediaRenderer, m_bEnableMediaServer, m_bEnableControlPoints;
 
 //<-dceag-const-b->
 public:

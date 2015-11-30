@@ -16,7 +16,12 @@
 #include <HUpnpCore/HServerDevice>
 #include <HUpnpCore/HServerService>
 #include <HUpnpAv/HMediaRendererDeviceConfiguration>
+#include <HUpnpAv/HFileSystemDataSource>
+#include <HUpnpAv/HMediaServerDeviceConfiguration>
+#include <HUpnpAv/HContentDirectoryServiceConfiguration>
+#include <HUpnpAv/HRootDir>
 
+#include <QtCore/QDir>
 #include <QtNetwork/QHostAddress>
 #include <QtCore/QList>
 
@@ -43,7 +48,6 @@ int DLNAEngine::Init()
 
 	Herqq::Upnp::SetLoggingLevel(Information);
 
-	// Initialize hupnp with the xml file
 	m_pDeviceHost = new HDeviceHost(this);
 
 	HDeviceHostConfiguration hostConf;
@@ -54,19 +58,19 @@ int DLNAEngine::Init()
 	list.append(QHostAddress(sCoreIP.c_str()));
 	hostConf.setNetworkAddressesToUse(list);
 
+	// Device model creator - common to all devices
+	HAvDeviceModelCreator creator;
+
 	// Set up Media Renderer devices (if enabled)
 	if ( m_pDLNA->m_bEnableMediaRenderer ) {
-		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() starting Media Renderers");
+		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() setting up Media Renderers");
 
 		// Set up device creator and configuration manager
-		HAvDeviceModelCreator creator;
 		HMediaRendererDeviceConfiguration mrConf;
 		LMCERendererConnectionManager* pRcm = new LMCERendererConnectionManager(m_pDLNA);
 
 		mrConf.setRendererConnectionManager(pRcm, true);
 		creator.setMediaRendererConfiguration(mrConf);
-
-		hostConf.setDeviceModelCreator(creator);
 
 		// Write a xml file representing a DLNA device for each entertainment areas
 		map<int, EntertainArea*> *pMapEntertainAreas = m_pDLNA->GetEntertainAreas();
@@ -101,17 +105,39 @@ int DLNAEngine::Init()
 
 	// Set up Media Server (if enabled)
 	if ( m_pDLNA->m_bEnableMediaServer ) {
-//		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() starting Media Server");
+		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() setting up Media Server");
+
+		HFileSystemDataSourceConfiguration datasourceConfig;
+		datasourceConfig.addRootDir(HRootDir(QDir("/home/public/data/audio/"), HRootDir::RecursiveScan, HRootDir::WatchForChanges));
+		datasourceConfig.addRootDir(HRootDir(QDir("/home/public/data/videos/"), HRootDir::RecursiveScan, HRootDir::WatchForChanges));
+		datasourceConfig.addRootDir(HRootDir(QDir("/home/public/data/pictures/"), HRootDir::RecursiveScan, HRootDir::WatchForChanges));
+		HFileSystemDataSource* m_datasource = new HFileSystemDataSource(datasourceConfig);
+		
+		HContentDirectoryServiceConfiguration cdsConfig;
+		cdsConfig.setDataSource(m_datasource, false);
+		
+		HMediaServerDeviceConfiguration mediaServerConfig;
+		mediaServerConfig.setContentDirectoryConfiguration(cdsConfig);
+		creator.setMediaServerConfiguration(mediaServerConfig);
+
+		HDeviceConfiguration config;
+		config.setPathToDeviceDescription("./xml/lmceDlnaMediaServer.xml");
+		config.setCacheControlMaxAge(180);
+
+		hostConf.add(config);
+
+	}
+
+	hostConf.setDeviceModelCreator(creator);
+
+	// Set up Control Points (if enabled)
+	if ( m_pDLNA->m_bEnableControlPoints ) {
+//		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() starting Control Points");
+
 		// TODO:
 	}
 
-	// Set up Media Controller (if enabled)
-	if ( m_pDLNA->m_bEnableMediaController ) {
-//		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() starting Media Controllers");
-
-		// TODO:
-	}
-
+	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() initing m_pDeviceHost");
 	if (!m_pDeviceHost->init(hostConf)) 
 	{
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "DLNAEngine::Run(): devicehost init failed:");
