@@ -83,7 +83,7 @@ Item{
         onPluginVolumeUp:{
             console.log("dceplayer::vol up")
             if(qmlPlayer.volume < 1.0){
-                qmlPlayer.volume= qmlPlayer.volume+.10
+                qmlPlayer.volume= qmlPlayer.volume+.02
             }
 
 
@@ -92,7 +92,7 @@ Item{
         onPluginVolumeDown:{
             console.log("dceplayer::vol down")
             if(qmlPlayer.volume > 0.0){
-                qmlPlayer.volume= qmlPlayer.volume-.10
+                qmlPlayer.volume= qmlPlayer.volume-.02
             }
         }
 
@@ -205,6 +205,10 @@ Item{
             } else {
                 videoPlane.visible=false
             }
+        }
+
+        onVolumeChanged: {
+            console.log("QML Media Player volume is "+volume)
         }
     }
 
