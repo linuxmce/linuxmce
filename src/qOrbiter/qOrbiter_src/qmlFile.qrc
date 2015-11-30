@@ -277,5 +277,6 @@
         <file>qml/skins/default/images/ps3_sq.png</file>
         <file>qml/skins/default/images/ps3_tri.png</file>
         <file>qml/skins/default/images/ps3_x.png</file>
+        <file>qml/skins/default/screens/Screen_259.qml</file>
     </qresource>
 </RCC>
