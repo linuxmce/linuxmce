@@ -1,3 +1,9 @@
+vdr-plugin-streamdev (0.6.1.git20151004-0yavdr0) unstable; urgency=medium
+
+  * rebuild
+
+ -- phenigma <phenigma@hotmail.com>  Fri, 09 Oct 2015 20:21:14 +0200
+
 vdr-plugin-streamdev (0.6.1.git20151004-0yavdr0~trusty) trusty; urgency=medium
 
   * new upstream snapshot
