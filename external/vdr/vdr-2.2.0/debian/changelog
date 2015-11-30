@@ -1,427 +1,140 @@
-vdr (2.2.0-0yavdr0~trusty) trusty; urgency=medium
+vdr (2.2.0-6yavdr0~trusty) trusty; urgency=medium
 
-  * new upstream version
+  * remove osdbase-maxitems patch
+    it's incompatible with skindesigner and text2skin is obsolete
 
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 20 Feb 2015 10:34:25 +0100
+ -- Lars Hanisch <dvb@flensrocker.de>  Mon, 27 Jul 2015 18:57:55 +0200
 
-vdr (2.1.10-0yavdr0~trusty) trusty; urgency=medium
+vdr (2.2.0-5yavdr0~trusty) trusty; urgency=medium
 
-  * new upstream version
+  * remove --lirc from 00-vdr.conf
+    it will be replaced with a templated file
 
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 11 Feb 2015 22:40:17 +0100
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 03 Jun 2015 16:41:41 +0200
 
-vdr (2.1.9-1yavdr0~trusty) trusty; urgency=medium
+vdr (2.2.0-4yavdr0~trusty) trusty; urgency=medium
 
-  * increase abi-version
+  * remove redundant --vfat from 00-vdr.conf
+  * add "missing plugin" patch, so vdr starts even if plugins are missing
 
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 08 Feb 2015 15:54:28 +0100
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 27 May 2015 23:29:31 +0200
 
-vdr (2.1.9-0yavdr0~trusty) trusty; urgency=medium
-
-  * new upstream version
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 08 Feb 2015 15:25:32 +0100
-
-vdr (2.1.8-0yavdr0~trusty) trusty; urgency=medium
-
-  * new upstream version
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 01 Feb 2015 15:35:49 +0100
-
-vdr (2.1.7-0yavdr0~trusty) trusty; urgency=medium
-
-  * new upstream version
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 18 Jan 2015 14:05:32 +0100
-
-vdr (2.1.6-10yavdr0~trusty) trusty; urgency=medium
-
-  * create /var/run/vdr in Upstart job and init script
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 14 Jan 2015 18:50:37 +0100
-
-vdr (2.1.6-9yavdr0~trusty) trusty; urgency=medium
-
-  * simplify Upstart start on condition
-    sometimes vdr doesn't respond to svdrp or dbus requests
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sat, 10 Jan 2015 12:26:42 +0100
-
-vdr (2.1.6-8yavdr0~trusty) trusty; urgency=medium
-
-  * add gdb to vdr-dbg dependencies for generating backtraces
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 12 Nov 2014 21:11:19 +0100
-
-vdr (2.1.6-7yavdr0~trusty) trusty; urgency=medium
-
-  * correct vdr.postrm
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 23 Jul 2014 19:29:07 +0200
-
-vdr (2.1.6-6yavdr2~precise) precise; urgency=medium
-
-  * sync build number with trusty
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 21 May 2014 15:03:24 +0200
-
-vdr (2.1.6-6yavdr1~precise) precise; urgency=medium
-
-  * re-add series to version
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 21 May 2014 14:49:43 +0200
-
-vdr (2.1.6-6yavdr0) precise; urgency=medium
-
-  * remove the dpkg-divert, compatibility with
-    testing/precise will be maintained with a git branch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 23 Apr 2014 18:28:59 +0200
-
-vdr (2.1.6-5yavdr0) precise; urgency=medium
-
-  * add a dpkg-divert for the Upstart conf-file
-    for better compatibility with testing
-  * correct menuorg patch (osUserX)
-
- -- Lars Hanisch <dvb@flensrocker.de>  Tue, 22 Apr 2014 19:26:34 +0200
-
-vdr (2.1.6-4yavdr0) precise; urgency=medium
-
-  * bugfix in hide-first-recording-level patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Tue, 15 Apr 2014 19:42:31 +0200
-
-vdr (2.1.6-3yavdr0) precise; urgency=medium
-
-  * new version of conf.d patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 06 Apr 2014 12:34:56 +0200
-
-vdr (2.1.6-2yavdr0) precise; urgency=medium
-
-  * add new recording commands 'started' and 'deleted' to custom template
-  * sync vdr.default with old package
-
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 04 Apr 2014 13:14:33 +0200
-
-vdr (2.1.6-1yavdr0) precise; urgency=medium
+vdr (2.2.0-3yavdr0~trusty) trusty; urgency=medium
 
   * increase abi-version
 
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 02 Apr 2014 21:21:22 +0200
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 23 Apr 2015 22:03:28 +0200
 
-vdr (2.1.6-0yavdr0) precise; urgency=medium
+vdr (2.2.0-2yavdr0~trusty) trusty; urgency=medium
 
-  * new upstream release
+  * add patch for pin plugin
+  * install plugins.mk to /usr/include/vdr
 
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 02 Apr 2014 20:02:41 +0200
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 23 Apr 2015 20:15:37 +0200
 
-vdr (2.1.4-4yavdr0) precise; urgency=medium
+vdr (2.2.0-1yavdr3~trusty) trusty; urgency=medium
 
-  * correct quoting of plugin parameter
+  * rebuild yavdr's package based on Debian's git
+  * change videodir to /srv/vdr/video
+  * add upstart job for vdr
+  * add conf-file and upstart job for vdr-dbg
+  * don't restart vdr on update
+  * don't use debconf
+  * add a bunch of vdr patches
 
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 21 Mar 2014 11:20:54 +0100
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 25 Mar 2015 20:45:45 +0100
 
-vdr (2.1.4-3yavdr0) precise; urgency=medium
-
-  * conf.d patch v5
-
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 21 Mar 2014 10:02:31 +0100
-
-vdr (2.1.4-2yavdr0) precise; urgency=medium
-
-  * add conf.d patch v3 (with whitespace removal)
-
- -- Lars Hanisch <dvb@flensrocker.de>  Thu, 20 Mar 2014 01:10:38 +0100
-
-vdr (2.1.4-1yavdr0) precise; urgency=medium
-
-  * add conf.d patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 19 Mar 2014 22:30:00 +0100
-
-vdr (2.1.4-0yavdr0) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 05 Feb 2014 17:30:06 +0100
-
-vdr (2.1.3-1yavdr0) precise; urgency=medium
-
-  * add following patches:
-    jumpplay, graphtft, pin, jumpingseconds, permashift,
-    hide-first-recording-level
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 05 Feb 2014 17:07:49 +0100
-
-vdr (2.1.3-0yavdr0) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 05 Jan 2014 14:37:52 +0100
-
-vdr (2.1.2-3yavdr0) precise; urgency=medium
-
-  * re-enable dynamite and externalci patches
-    (don't expect dynamite to work with positioners)
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 15 Dec 2013 14:59:03 +0100
-
-vdr (2.1.2-2yavdr0) precise; urgency=medium
-
-  * picked patches for shutdown-wrapper and upstart job from master
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 27 Nov 2013 23:18:20 +0100
-
-vdr (2.1.2-1yavdr0) precise; urgency=medium
-
-  * add remote-instant-recordings patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 20 Nov 2013 23:21:03 +0100
-
-vdr (2.1.2-0yavdr0) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sat, 16 Nov 2013 15:13:38 +0100
-
-vdr (2.0.4-0yavdr0) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sat, 26 Oct 2013 09:19:37 +0200
-
-vdr (2.0.3-3yavdr0) precise; urgency=medium
-
-  * finetuning on lirc-reconnect patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 25 Oct 2013 19:20:16 +0200
-
-vdr (2.0.3-2yavdr0) precise; urgency=medium
-
-  * correct MOVR/CPYR from vasarajanauloja patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Tue, 22 Oct 2013 18:45:16 +0200
-
-vdr (2.0.3-1yavdr0) precise; urgency=medium
-
-  * add lirc-reconnect patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Mon, 14 Oct 2013 23:08:06 +0200
-
-vdr (2.0.3-0yavdr0) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 11 Sep 2013 23:28:17 +0200
-
-vdr (2.0.2-5yavdr0) precise; urgency=medium
-
-  * add epghandler segment transfer patch
-  * update extra video directories patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 11 Sep 2013 22:54:27 +0200
-
-vdr (2.0.2-4yavdr0) precise; urgency=medium
-
-  * update pin patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 01 Sep 2013 10:32:57 +0200
-
-vdr (2.0.2-3yavdr0) precise; urgency=medium
-
-  * update extra video directory patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 26 Jul 2013 15:04:45 +0200
-
-vdr (2.0.2-2yavdr0) precise; urgency=medium
-
-  * vdr-plugin-dvbhddevice breaks old vdr packages
-    vdr-1.7.27 package contains a file from vdr-plugin-dvbhddevice
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 17 Jul 2013 23:32:45 +0200
-
-vdr (2.0.2-1yavdr0) precise; urgency=medium
-
-  * update extra video directory patch
-  * add simple bash completion for svdrpsend
-
- -- Lars Hanisch <dvb@flensrocker.de>  Thu, 11 Jul 2013 22:08:47 +0200
-
-vdr (2.0.2-0yavdr0) precise; urgency=medium
-
-  * new upstream release
-  * update permashift patch
-  * add loglevel patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 23 Jun 2013 09:13:37 +0200
-
-vdr (2.0.1-7yavdr0) precise; urgency=medium
-
-  * Upstart: start on static-network-up, not "stopping networking"
-    With Raring "networking" is not a task anymore.
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 08 May 2013 13:00:44 +0200
-
-vdr (2.0.1-6yavdr0) precise; urgency=medium
-
-  * increase version to sync with yavdr-0.5
-
- -- Lars Hanisch <dvb@flensrocker.de>  Tue, 07 May 2013 19:36:06 +0200
-
-vdr (2.0.1-5yavdr0) precise; urgency=medium
-
-  * set uid/gid of vdr/vdr to 666
-
- -- Lars Hanisch <dvb@flensrocker.de>  Tue, 07 May 2013 19:32:50 +0200
-
-vdr (2.0.1-4yavdr0) precise; urgency=medium
-
-  * don't fail if owner on recordings can't be set
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 21 Apr 2013 11:47:48 +0200
-
-vdr (2.0.1-3yavdr0) precise; urgency=medium
-
-  * no restart on upgrade
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sat, 20 Apr 2013 10:04:59 +0200
-
-vdr (2.0.1-2yavdr0) precise; urgency=medium
-
-  * remove all channels.conf on purge
-  * yaVDR uses /srv/vdr/video.00 as video directory
-  * don't start/stop vdr on install/upgrade
-  * don't use series name in version anymore
-
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 19 Apr 2013 08:20:41 +0200
-
-vdr (2.0.1-1yavdr0~precise) precise; urgency=medium
-
-  * add LIRC socket /var/run/lirc/lircd to config-loader.sh as default
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sat, 13 Apr 2013 22:17:58 +0200
-
-vdr (2.0.1-0yavdr0~precise) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sat, 13 Apr 2013 16:44:47 +0200
-
-vdr (2.0.0-4yavdr0~precise) precise; urgency=medium
-
-  * add olddvbapi patch
-  * The patchinfo is now generated with debian/rules accept-patches
-  * add cut-prio patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 10 Apr 2013 18:14:56 +0200
-
-vdr (2.0.0-3yavdr0~precise) precise; urgency=medium
-
-  * Append CPPFLAGS to CFLAGS, so this gets stored in vdr.pc and can be used by plugins
-  * extract-patchinfo: grep auhtor and description from quilt header
-  * update some patch headers
-  * simplify commands-loader.sh, use "sort" instead of order.*.conf
-  * add keeptracks patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Thu, 04 Apr 2013 20:57:26 +0200
-
-vdr (2.0.0-2yavdr0~precise) precise; urgency=medium
-
-  * add extra-video-directory patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 03 Apr 2013 21:47:04 +0200
-
-vdr (2.0.0-1yavdr0~precise) precise; urgency=medium
-
-  * add permashift patch
-
- -- Lars Hanisch <dvb@flensrocker.de>  Tue, 02 Apr 2013 18:52:20 +0200
-
-vdr (2.0.0-0yavdr0~precise) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Tue, 02 Apr 2013 13:50:56 +0200
-
-vdr (1.7.42-3yavdr0~precise) precise; urgency=medium
-
-  * pick some patches from etobi's repository
-
- -- Lars Hanisch <dvb@flensrocker.de>  Thu, 28 Mar 2013 21:59:01 +0100
-
-vdr (1.7.42-2yavdr0~precise) precise; urgency=medium
-
-  * update vasarajanauloja patch
-  * add vdr-dbg Upstart job for collection crash log
-  * add support for "LIRC=/dev/path" in /etc/default/vdr
-
- -- Lars Hanisch <dvb@flensrocker.de>  Tue, 26 Mar 2013 19:47:17 +0100
-
-vdr (1.7.42-1yavdr0~precise) precise; urgency=medium
-
-  * add new plugin-loader
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sun, 24 Mar 2013 15:58:33 +0100
-
-vdr (1.7.42-0yavdr0~precise) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sat, 23 Mar 2013 15:49:09 +0100
-
-vdr (1.7.41-0yavdr0~precise) precise; urgency=medium
-
-  * new upstream release
-
- -- Lars Hanisch <dvb@flensrocker.de>  Sat, 16 Mar 2013 15:42:10 +0100
-
-vdr (1.7.40-9yavdr0~precise) precise; urgency=medium
-
-  * don't install /etc/init.d/vdr, can now be found in
-    /usr/share/doc/vdr/examples/vdr-init.d
-
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 15 Mar 2013 10:51:21 +0100
-
-vdr (1.7.40-8yavdr0~precise) precise; urgency=medium
-
-  * rm db_stop from vdr.postinst
-
- -- Lars Hanisch <dvb@flensrocker.de>  Fri, 15 Mar 2013 09:11:11 +0100
-
-vdr (1.7.40-7yavdr0~precise) precise; urgency=medium
-
-  * remove debconf stuff from vdr.postinst
-  * add 'lastplugin' feature to plugin-loader.sh and order.conf
-  * add dirnamesdefaults patch
-  * use '--dirnames=,,1' if VFAT is set
-
- -- Lars Hanisch <dvb@flensrocker.de>  Thu, 14 Mar 2013 18:20:08 +0100
-
-vdr (1.7.40-6yavdr0~precise) precise; urgency=medium
-
-  * install Make.config to VDRDIR
-
- -- Lars Hanisch <dvb@flensrocker.de>  Thu, 14 Mar 2013 00:14:32 +0100
-
-vdr (1.7.40-5yavdr0~precise) precise; urgency=medium
-
-  * add Make.config
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 13 Mar 2013 22:27:06 +0100
-
-vdr (1.7.40-4yavdr0~precise) precise; urgency=medium
-
-  * add patches
-  * install header of dvbhddevice and dvbsddevice
-  * set videodir to yavdr's default
-
- -- Lars Hanisch <dvb@flensrocker.de>  Wed, 13 Mar 2013 19:56:47 +0100
-
-vdr (1.7.40-1) unstable; urgency=low
+vdr (2.2.0-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * Dropped upgrade code for pre-Squeeze releases
+  * Default video directory is now /var/lib/video because multiple video
+    directories are not supported anymore
+  * When LIRC is set to an empty string, disable LIRC. By default use
+    /var/run/lirc/lircd
+  * Updated copyright
+  * Arguments for vdr are now read from /etc/vdr/conf.d/
+  * Plugins must provide a config, which may cointain plugin arguments, in
+    /etc/vdr/conf.d/ in order to be loaded
+  * Install a debhelper addon in vdr-dev which supports the plugin packaging
+  * Delete /etc/vdr/conf.d on purge
+  * Removed the VDR_CHARSET_OVERRIDE from /etc/default/vdr - replaced with the
+   --chartab command line argument
+  * Removed dvb-modules reloading code (Closes: #512362)
+  * Added bash completion for svdrpesend (taken from yaVDR / Lars Hanisch)
+  * Added systemd support
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 07 Mar 2015 13:02:02 +0100
+
+vdr (2.0.6-2) unstable; urgency=medium
+
+  * Merged from Jessie-version 2.0.3-3: Fixed use of getent in postinst script
+    for detecting existing vdr user and group (Closes: #770773)
+  * Standards-Version: 3.9.6
+
+ -- Tobias Grimm <etobi@debian.org>  Mon, 08 Dec 2014 22:48:55 +0100
+
+vdr (2.0.6-1) unstable; urgency=medium
+
+  * New upstream release
+  * Standards-Version: 3.9.5
+  * Source /lib/lsb/init-functions in init script
+  * Replaced ttf-freefont by fonts-freefont-ttf (Closes: #738254)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 26 Oct 2014 12:01:40 +0100
+
+vdr (2.0.3-3) testing; urgency=medium
+
+  * Fixed use of getent in postinst script for detecting existing vdr user and
+    group (Closes: #770773)
+
+ -- Tobias Grimm <etobi@debian.org>  Mon, 08 Dec 2014 00:20:19 +0100
+
+vdr (2.0.3-2) unstable; urgency=medium
+
+  * Fix "unhandled symlink to directory conversion of vdr-dbg (Closes: #736297)
+
+ -- Tobias Grimm <etobi@debian.org>  Mon, 31 Mar 2014 22:57:52 +0200
+
+vdr (2.0.3-1) unstable; urgency=low
+
+  * New upstream release
+  * Install sample channels.conf's to /usr/share/vdr/examples/ (Closes: #709749)
+
+ -- Tobias Grimm <etobi@debian.org>  Wed, 04 Sep 2013 13:53:51 +0200
+
+vdr (2.0.2-1) unstable; urgency=low
+
+  * New upstream release
+  * vdr-plugin-dvbhddevice and vdr-plugin-examples Replaces/Breaks
+    vdr << 2.0.1-1 - manpages have been moved from vdr into the plugin
+    packages  (Closes: #709152)
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 25 May 2013 09:12:01 +0200
+
+vdr (2.0.1-2) unstable; urgency=low
+
+  * Added new LIRC option to /etc/default/vdr to allow to change the lirc path
+    or to disable lirc by setting it to /dev/null (Closes: #708683)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 19 May 2013 11:57:39 +0200
+
+vdr (2.0.1-1) unstable; urgency=low
+
+  * New upstream release (Closes: #707413)
+  * Added new config option ENABLE_CORE_DUMPS in /etc/default/vdr
+  * Append CPPFLAGS to CFLAGS, so this gets stored in vdr.pc
+    and can be used by plugins
+  * Simplified the commands loader and dropped the ordering via
+    order.reccmds.conf / order.commands.conf
+  * Fixed collection of patch info to work with quilt patches
+  * Standards-Version: 3.9.4
+  * Removed bugging message if shutdown is disabled (which is the default)
+  * Improved plugin loading now allows one to explicitly load specific plugins
+    after all other plugins (based on suggestions by Lars Hanisch from yaVDR)
+  * Use `svdrpsend updr` to update recordings from the OSD command menu in order
+    to be independent of the video directory location
+    (suggested by Frank Neumann from yaVDR)
   * Dropped 11_sortrecordings.patch - The recording list sorting now is as it is
     meant to be sortded by the upstream developer
   * Dropped fix-gcc-issue.patch - fixed upstream
@@ -433,7 +146,7 @@ vdr (1.7.40-1) unstable; urgency=low
   * Clean up /var/lib/vdr/themes when purging package
   * vdr-dbg and vdr-plugin-*-dbg now install the debug symbols
 
- -- Tobias Grimm <etobi@debian.org>  Wed, 23 Jan 2013 22:47:45 +0100
+ -- Tobias Grimm <etobi@debian.org>  Sat, 11 May 2013 22:45:58 +0200
 
 vdr (1.7.28-1) unstable; urgency=low
 

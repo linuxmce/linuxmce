@@ -10,16 +10,16 @@ else
    logger -t "vdr-crash" "vdr exit with signal $EXIT_SIGNAL"
 fi
 
-# cleanup possible leftovers after core dump 
-if [ -e /tmp/vdr-xine ]; then 
+# cleanup possible leftovers after core dump
+if [ -e /tmp/vdr-xine ]; then
     rm -rf /tmp/vdr-xine
 fi
 
-# save other artifacts helping to debug 
+# save other artifacts helping to debug
 
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 # stdout output (which should not happen, but anyway)
-if [ -e /tmp/vdr.log ]; then 
+if [ -e /tmp/vdr.log ]; then
     cp /tmp/vdr.log /var/log/vdr/stdout.vdr.$TIMESTAMP.log
 fi
 if [ -e /tmp/vdr-frontend.log ]; then
@@ -42,7 +42,7 @@ echo "" >> $CRASHLOG
 echo "Backtrace:" >> $CRASHLOG
 echo "----------" >> $CRASHLOG
 echo "" >> $CRASHLOG
-for CORE in $(find /var/log/vdr -name 'core.*') ; do 
+for CORE in $(find /var/log/vdr -name 'core.*') ; do
     gdb /usr/bin/vdr --core="$CORE" --batch -ex "where" >> $CRASHLOG
     echo "" >> $CRASHLOG
     echo "" >> $CRASHLOG
@@ -52,6 +52,6 @@ for CORE in $(find /var/log/vdr -name 'core.*') ; do
     echo "Detailed Backtrace with Threads" >> $CRASHLOG
     gdb /usr/bin/vdr --core="$CORE" --batch -ex "thread apply all bt" >> $CRASHLOG
     rm -f $CORE
-done  
+done
 
 end script

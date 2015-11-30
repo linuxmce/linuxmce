@@ -38,7 +38,6 @@ private:
   int start;
   int stop;
   int priority;
-  int fskProtection;                                               // PIN PATCH
   int lifetime;
   mutable char file[NAME_MAX * 2 + 1]; // *2 to be able to hold 'title' and 'episode', which can each be up to 255 characters long
   char *aux;
@@ -60,7 +59,6 @@ public:
   int Start(void) const { return start; }
   int Stop(void) const { return stop; }
   int Priority(void) const { return priority; }
-  int FskProtection(void) const { return fskProtection; }          // PIN PATCH
   int Lifetime(void) const { return lifetime; }
   const char *File(void) const { return file; }
   time_t FirstDay(void) const { return weekdays ? day : 0; }
@@ -97,7 +95,6 @@ public:
   void SetAux(const char *Aux);
   void SetDeferred(int Seconds);
   void SetFlags(uint Flags);
-  void SetFskProtection(int aFlag);                                // PIN PATCH
   void ClrFlags(uint Flags);
   void InvFlags(uint Flags);
   bool HasFlags(uint Flags) const;

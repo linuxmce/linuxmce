@@ -42,17 +42,14 @@ SVDRP_PORT=6419
 # Enable / Disable vdr daemon
 ENABLED=0
 
+# Enable / Disable core dumps
+ENABLE_CORE_DUMPS=0
+
 # Enable / Disable automatic shutdown
 ENABLE_SHUTDOWN=0
 
 # Video-Directory
-VIDEO_DIR="/srv/vdr/video.00"
-
-# Cache-Directory
-CACHE_DIR="/var/cache/vdr"
-
-# Resource-Directory
-RES_DIR="/usr/share/vdr"
+VIDEO_DIR="/srv/vdr/video"
 
 # Set this to load only startable plugins (check with "vdr -V -P plugin")
 PLUGIN_CHECK_STARTABLE="yes"
@@ -80,8 +77,7 @@ ENV_FILE="none"
 # Enable VFAT file system support by default
 VFAT=1
 
-# if you want to use a specific lirc device, set it in /etc/default/vdr
-# if you want to disable lirc, set LIRC=""
-LIRC="/var/run/lirc/lircd"
+# Default LIRC device
+LIRC=/var/run/lirc/lircd
 
 test -f /etc/default/vdr && . /etc/default/vdr

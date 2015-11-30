@@ -6,7 +6,7 @@
  * $Id: skincurses.c 3.3 2015/02/17 13:13:17 kls Exp $
  */
 
-#include <ncursesw/ncurses.h>
+#include <ncurses.h>
 #include <vdr/osd.h>
 #include <vdr/plugin.h>
 #include <vdr/skins.h>

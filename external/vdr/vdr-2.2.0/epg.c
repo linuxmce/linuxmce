@@ -429,21 +429,6 @@ cString cEvent::GetVpsString(void) const
   return buf;
 }
 
-void cEvent::AddDetail(char* value)
-{
-  std::string strValue = std::string(value);
-  int delim = strValue.find_first_of(' ');
-  AddDetail(strValue.substr(0, delim), strValue.substr(delim+1));
-}
-
-void cEvent::AddDetail(std::string key, std::string value)
-{
-  tEpgDetail detail;
-  detail.key = key;
-  detail.value = value;
-  details.push_back(detail);
-}
-
 void cEvent::Dump(FILE *f, const char *Prefix, bool InfoOnly) const
 {
   if (InfoOnly || startTime + duration + Setup.EPGLinger * 60 >= time(NULL)) {
@@ -457,12 +442,6 @@ void cEvent::Dump(FILE *f, const char *Prefix, bool InfoOnly) const
         fprintf(f, "%sD %s\n", Prefix, description);
         strreplace(description, '|', '\n');
         }
-     for(int i=0;i<(int)details.size();i++) {
-        char* value = (char*)details[i].value.c_str();
-        strreplace(value, '\n', '|');
-        fprintf(f, "K %s %s\n", details[i].key.c_str(), value);
-        strreplace(value, '|', '\n');
-     }
      if (contents[0]) {
         fprintf(f, "%sG", Prefix);
         for (int i = 0; Contents(i); i++)
@@ -494,9 +473,6 @@ bool cEvent::Parse(char *s)
               break;
     case 'D': strreplace(t, '|', '\n');
               SetDescription(t);
-              break;
-    case 'K': strreplace(t, '|', '\n');
-              AddDetail(t);
               break;
     case 'G': {
                 memset(contents, 0, sizeof(contents));
@@ -562,7 +538,6 @@ bool cEvent::Read(FILE *f, cSchedule *Schedule)
                                 }
                              }
                           }
-                          if (Event != NULL) { Event->ClearDetails(); }
                        break;
              case 'e': if (Event && !Event->Title())
                           Event->SetTitle(tr("No title"));

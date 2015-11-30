@@ -1,0 +1,37 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+PLG_PACKAGE = $(filter-out %-dbg, $(shell dh_listpackages))
+DBG_PACKAGE = $(filter %-dbg, $(shell dh_listpackages))
+
+MAKE_OPTIONS = NOSIGNAL_IMAGE_FILE=/usr/share/libxine1-xvdr/nosignal.mpg
+
+%:
+	dh $@ --with vdrplugin
+
+override_dh_auto_configure:
+	./configure
+
+override_dh_auto_build:
+	dh_auto_build -- all $(MAKE_OPTIONS)
+	txt2man -s 1 -t vdr-sxfe -v "Remote X-Server frontend for vdr-plugin-xineliboutput" debian/vdr-sxfe.1.txt >vdr-sxfe.1
+	txt2man -s 1 -t vdr-fbfe -v "Remote Framebuffer frontend for vdr-plugin-xineliboutput" debian/vdr-fbfe.1.txt >vdr-fbfe.1
+
+override_dh_auto_clean:
+	$(MAKE) -o .dependencies clean $(MAKE_OPTIONS)
+	rm -f vdr-sxfe.1 vdr-fbfe.1
+
+override_dh_gencontrol:
+	dpkg -p libxine-dev | sed -re '/^Version:/! d; s/^Version: (([0-9]+\.){2}[0-9]+).*$$/xine:Depends=libxine1 (>= \1)/' \
+	>> debian/libxine1-xvdr.substvars
+	dh_gencontrol
+
+override_dh_auto_install:
+	dh_auto_install -- $(MAKE_OPTIONS)
+	install -m 644 -D debian/icon.svg debian/xineliboutput-sxfe/usr/share/icons/xineliboutput-sxfe.svg
+	install -m 644 -D debian/icon.svg debian/xineliboutput-sxfe/usr/share/icons/xineliboutput-fbfe.svg
+
+get-vcs-snapshot:
+	sh debian/get-vcs-snapshot.sh

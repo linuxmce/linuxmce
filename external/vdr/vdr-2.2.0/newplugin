@@ -24,7 +24,7 @@ $PLUGIN_VERSION = "0.0.1";
 $PLUGIN_DESCRIPTION = "Enter description for '$PLUGIN_NAME' plugin";
 $PLUGIN_MAINENTRY = $PLUGIN_CLASS;
 
-$PLUGINS_SRC = "./";
+$PLUGINS_SRC = "PLUGINS/src";
 
 $README = qq
 {This is a "plugin" for the Video Disk Recorder (VDR).
@@ -172,7 +172,7 @@ dist: \$(I18Npo) clean
 	\@-rm -rf \$(TMPDIR)/\$(ARCHIVE)
 	\@mkdir \$(TMPDIR)/\$(ARCHIVE)
 	\@cp -a * \$(TMPDIR)/\$(ARCHIVE)
-	\@tar czf \$(PACKAGE).tgz -C \$(TMPDIR) --exclude debian --exclude CVS --exclude .svn --exclude .hg --exclude .git \$(ARCHIVE)
+	\@tar czf \$(PACKAGE).tgz -C \$(TMPDIR) \$(ARCHIVE)
 	\@-rm -rf \$(TMPDIR)/\$(ARCHIVE)
 	\@echo Distribution package created as \$(PACKAGE).tgz
 
@@ -346,7 +346,7 @@ The next steps you should perform now are:
 * fill in the code skeleton in "$PLUGIN_NAME.c" to implement your plugin function
 * add further source files if necessary
 * adapt the "Makefile" if necessary
-* do "make all" from the plugin's source directory to build your plugin
+* do "make plugins" from the VDR source directory to build your plugin
 
 };
 

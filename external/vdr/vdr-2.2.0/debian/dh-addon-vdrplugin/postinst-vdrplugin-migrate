@@ -1,0 +1,69 @@
+#
+# Update new config in /etc/vdr/conf.avail with the settings from the old config
+# /etc/vdr/plugins/plugin.*.conf.
+#
+dh_vdrplugin_migrate_config() {
+  perl -e '
+  use warnings;
+  use strict;
+
+  my ($originalConfig, $newConfig, $tmpConfig) = @ARGV;
+
+  open(my $originalConfigFile , "<" , $originalConfig);
+  open(my $newConfigFile , "<" , $newConfig);
+  open(my $modifiedConfigFile , ">" , "$tmpConfig");
+
+  my %options = ();
+  while(<$originalConfigFile>) {
+    if ( $_ =~ /^(\s*-.+?)[\s=]/ ) {
+      $options{$1}=$_;
+    }
+  }
+
+  my @updatedOptions;
+
+  # Update options in new config with values from old one
+  while(<$newConfigFile>) {
+    my $line = $_;
+    while (my ($key, $value) = each(%options)) {
+      if ($line =~ /^$key/) {
+        $line = $value;
+        push(@updatedOptions,$key);
+      }
+    }
+    print $modifiedConfigFile $line;
+  }
+
+  # Add additional values from old config to new one
+  while (my ($key, $value) = each(%options)) {
+    if (! grep {$_ eq $key} @updatedOptions) {
+      print $modifiedConfigFile $value;
+    }
+  }
+
+  close($originalConfigFile);
+  close($newConfigFile);
+  close($modifiedConfigFile);
+  ' $@
+}
+
+dh_vdrplugin_migrate_configs() {
+  while [ $# -gt 1 ] ; do
+    local oldconfig="$1"
+    local newconfig="$2"
+    shift 2
+    rm -f "$oldconfig.dpkg-remove"
+    if [ -e "$oldconfig.dpkg-migrate" ]; then
+      if [ -e "$newconfig" ] ; then
+        mv "$newconfig" "$newconfig.dpkg-dist"
+        dh_vdrplugin_migrate_config "$oldconfig.dpkg-migrate" "$newconfig.dpkg-dist" "$newconfig.tmp"
+        mv -f "$newconfig.tmp" "$newconfig"
+      fi
+      mv "$oldconfig.dpkg-migrate" "$oldconfig.dpkg-bak"
+    fi
+  done
+}
+
+if [ "$1" = configure ]; then
+  dh_vdrplugin_migrate_configs #CONFIGS#
+fi

@@ -23,71 +23,103 @@ set -e
 #     installation fails and the `postinst' is called with `abort-upgrade',
 #     `abort-remove' or `abort-deconfigure'.
 
+# source debconf lib
+#. /usr/share/debconf/confmodule
+
+#
+# Create /srv/vdr/video and a symlink to video.00 if /srv/vdr/video does not exist.
+# If /srv/vdr/video.00 exists, /srv/vdr/video will become a symlink
+#
+TryCreateVideoDir() {
+    if [ ! -e /srv/vdr/video -a ! -L /srv/vdr/video ]; then
+        if [ -e /srv/vdr/video.00 ]; then
+            # No /srv/vdr/video but /srv/vdr/video.00 -> Make video a symlink pointing to video.00
+            ln -s video.00 /srv/vdr/video
+        else
+            # create /srv/vdr/video and link it to video.00
+            mkdir -p /srv/vdr/video
+            ln -s video /srv/vdr/video.00
+        fi
+    fi
+}
+
+InstallChannelsConf() {
+    [ -e /var/lib/vdr/channels.conf ] && return
+    case "$1" in
+        Satellite)
+            cp /usr/share/vdr/channels.conf-examples/channels.conf.sat /var/lib/vdr/channels.conf
+            chmod 644 /var/lib/vdr/channels.conf
+            ;;
+        Terrestrial)
+            cp /usr/share/vdr/channels.conf-examples/channels.conf.terr /var/lib/vdr/channels.conf
+            chmod 644 /var/lib/vdr/channels.conf
+            ;;
+        Cable)
+            cp /usr/share/vdr/channels.conf-examples/channels.conf.cable /var/lib/vdr/channels.conf
+            chmod 644 /var/lib/vdr/channels.conf
+            ;;
+    esac
+}
+
+InstallUserAndGroupVdr() {
+    USER=vdr
+    GROUP=vdr
+    if ! getent group "$GROUP"| grep -q "^$GROUP:" ; then
+        echo -n "Adding group $GROUP.."
+        addgroup --quiet --gid 666 --system $GROUP
+        echo "..done"
+    fi
+    if ! getent passwd "$USER"| grep -q "^$USER:"; then
+        echo -n "Adding user $USER.."
+        adduser --system --uid 666 --home /var/lib/vdr --shell /bin/false \
+                --gecos "VDR user" --no-create-home \
+                --disabled-login --disabled-password \
+                --ingroup $GROUP \
+                $USER
+        echo "...done"
+    fi
+
+    # put vdr in group video so that it can access the DVB device nodes
+    adduser $USER video > /dev/null || true
+}
+
+ConfigureOwnerShip() {
+    # ensure that vdr's config and recording files are correctly owned
+    [ -e /srv/vdr/video ] && chown -R $USER:$GROUP /srv/vdr/video/
+    if [ -e /var/lib/vdr ] ; then
+        chown $USER:$GROUP /var/lib/vdr
+        chown $USER:$GROUP /var/lib/vdr/* > /dev/null 2>&1 || true
+    fi
+    if [ -e /var/cache/vdr ] ; then
+        chown $USER:$GROUP /var/cache/vdr
+        chown $USER:$GROUP /var/cache/vdr/* > /dev/null 2>&1|| true
+    fi
+
+    # make /usr/lib/vdr/vdr-shutdown.wrapper setuid/setgid
+    # (owner root:vdr, mode 6750)
+    if [ -e /usr/lib/vdr/vdr-shutdown.wrapper ] ; then
+        chown root:$GROUP /usr/lib/vdr/vdr-shutdown.wrapper && \
+        chmod 6750 /usr/lib/vdr/vdr-shutdown.wrapper
+    fi
+}
 
 case "$1" in
     configure)
+        #db_get vdr/select_dvb_card
+        #InstallChannelsConf "$RET"
 
-        # install/move channels.conf 
-        if [ ! -e /var/lib/vdr/channels.conf ]; then
-                cp /usr/share/doc/vdr/examples/channels.conf* /var/lib/vdr/
-                gunzip /var/lib/vdr/channels.conf*.gz
-        fi
+        #db_get vdr/create_video_dir
+        #if $RET; then
+            TryCreateVideoDir
+        #fi
 
-        [ ! -d /var/lib/video.00 ] && mkdir /var/lib/video.00
-        [ ! -d /srv/vdr/video.00 ] && mkdir -p /srv/vdr/video.00
+        InstallUserAndGroupVdr
 
-        # ensure that user and group 'vdr' exist
-        USER=vdr
-        GROUP=vdr
-        if ! getent group | grep -q "^$GROUP:" ; then
-                echo -n "Adding group $GROUP.."
-                addgroup --quiet --gid 666 --system $GROUP
-                echo "..done"
-        fi
-        if ! getent passwd | grep -q "^$USER:"; then
-                echo -n "Adding user $USER.."
-                adduser --system --uid 666 --home /var/lib/vdr --shell /bin/false \
-                        --gecos "VDR user" --no-create-home \
-                        --disabled-login --disabled-password \
-                        --ingroup $GROUP \
-                        $USER
-                echo "...done"
-        fi
+        ConfigureOwnerShip
 
-        # put vdr in group video so that it can access the DVB device nodes
-        adduser $USER video > /dev/null || true
-
-        # ensure that vdr's config and recording files are correctly owned
-        [ -e /var/lib/video ] && chown -R $USER:$GROUP /var/lib/video/
-        [ -e /var/lib/video.00 ] && chown -R $USER:$GROUP /var/lib/video.00/
-        if [ -e /srv/vdr/video.00 ] ; then
-            chown -R $USER:$GROUP /srv/vdr/video.00/ > /dev/null 2>&1 || true
-        fi
-        if [ -e /var/lib/vdr ] ; then 
-            chown $USER:$GROUP /var/lib/vdr
-            chown $USER:$GROUP /var/lib/vdr/* > /dev/null 2>&1 || true
-        fi
-        if [ -e /var/cache/vdr ] ; then
-            chown $USER:$GROUP /var/cache/vdr
-            chown $USER:$GROUP /var/cache/vdr/* > /dev/null 2>&1|| true
-        fi
-        
-        # set execution bit for /etc/vdr/recording-hooks/R90.custom
-        chmod +x /etc/vdr/recording-hooks/R90.custom  > /dev/null 2>&1 || true
-
-        # make /usr/lib/vdr/vdr-shutdown.wrapper setuid/setgid
-        # (owner root:vdr, mode 6750)
-        if [ -e /usr/lib/vdr/vdr-shutdown.wrapper ] ; then
-            chown root:$GROUP /usr/lib/vdr/vdr-shutdown.wrapper && \
-            chmod 6750 /usr/lib/vdr/vdr-shutdown.wrapper
-        fi
-
-        # Dropped alternatives from old package version
-        # (This can be dropped at squeeze +2)
-        #update-alternatives --remove vdr /usr/bin/vdr-daemon
-        #update-alternatives --remove vdr /usr/bin/vdr-kbd
-        #update-alternatives --remove vdr /usr/bin/vdr-lirc
-        #update-alternatives --remove vdr /usr/bin/vdr-rcu
+        #if dpkg --compare-versions "$2" lt "2.2.0-1"; then
+        #    sh /usr/share/vdr/migrate-old-config.sh || true
+        #fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
@@ -99,9 +131,10 @@ case "$1" in
     ;;
 esac
 
+#db_stop
+
 # dh_installdeb will replace this with shell code automatically
 # generated by other debhelper scripts.
-
 #DEBHELPER#
 
 exit 0

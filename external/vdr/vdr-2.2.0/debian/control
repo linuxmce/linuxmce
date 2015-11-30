@@ -3,18 +3,18 @@ Section: video
 Priority: extra
 Maintainer: Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>
 Uploaders: Thomas Schmidt <tschmidt@debian.org>, Tobias Grimm <etobi@debian.org>, Thomas Günther <tom@toms-cafe.de>
-Build-Depends: debhelper (>= 9), quilt, libjpeg-dev, libcap-dev,
+Build-Depends: debhelper (>= 9), libjpeg-dev, libcap-dev, dh-systemd,
   libncursesw5-dev, libfreetype6-dev, libfontconfig-dev, gettext,
-  python, linux-libc-dev (>= 3.0), libfribidi-dev
-Standards-Version: 3.9.4
+  python, linux-libc-dev (>= 3.0), libfribidi-dev, libsystemd-daemon-dev
+Standards-Version: 3.9.6
 Vcs-Git: git://git.debian.org/pkg-vdr-dvb/vdr.git
 Vcs-Browser: http://git.debian.org/?p=pkg-vdr-dvb/vdr.git
 Homepage: http://www.tvdr.de/
 
 Package: vdr
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, psmisc
-Recommends: lirc, ttf-bitstream-vera | ttf-freefont
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
+Recommends: lirc, ttf-bitstream-vera | fonts-freefont-ttf
 Suggests: vdr-plugin-dvbsddevice
 Provides: ${vdr:Provides}
 Description: Video Disk Recorder for DVB cards
@@ -83,8 +83,9 @@ Description: Plugin that adds support for full featured SD-DVB cards to VDR
 
 Package: vdr-plugin-dvbhddevice
 Architecture: any
-Breaks: vdr (<< 2.0.0)
 Depends: ${shlibs:Depends}, ${misc:Depends}, vdr (= ${binary:Version})
+Replaces: vdr (<< 2.0.1-1)
+Breaks: vdr (<< 2.0.1-1)
 Description: Plugin that adds support for full featured HD-DVB cards to VDR
  Video Disk Recorder (VDR) is a digital sat-receiver program using
  Linux and DVB technologies. It allows one to record MPEG2 streams,
@@ -108,6 +109,8 @@ Description: Plugin that adds support for full featured HD-DVB cards to VDR
 Package: vdr-plugin-examples
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, vdr (= ${binary:Version})
+Replaces: vdr (<< 2.0.1-1)
+Breaks: vdr (<< 2.0.1-1)
 Description: Plugins for vdr to show some possible features
  Video Disk Recorder (VDR) is a digital sat-receiver program using
  Linux and DVB technologies. It allows one to record MPEG2 streams,

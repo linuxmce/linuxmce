@@ -36,12 +36,6 @@
 // plugins to work with newer versions of the core VDR as long as no
 // VDR header files have changed.
 
-// The MainMenuHook Patch's version number:
-#define MAINMENUHOOKSVERSION "1.0.1"
-#define MAINMENUHOOKSVERSNUM 10001  // Version * 10000 + Major * 100 + Minor
-
-#define REMOTEINSTANTVERSION 1.0
-
 #define MAXPRIORITY       99
 #define MINPRIORITY       (-MAXPRIORITY)
 #define LIVEPRIORITY      0                  // priority used when selecting a device for live viewing

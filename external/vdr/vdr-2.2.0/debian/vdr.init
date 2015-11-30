@@ -13,11 +13,13 @@
 #                    if it is enabled in /etc/default/vdr.
 ### END INIT INFO
 
+. /lib/lsb/init-functions
+
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=vdr
 DESC="Linux Video Disk Recorder"
 
-DAEMON=/usr/sbin/runvdr
+DAEMON=/usr/lib/vdr/runvdr
 PIDFILE=/var/run/runvdr.pid
 VDRPRG=/usr/bin/vdr
 
@@ -26,14 +28,6 @@ test -x $VDRPRG || exit 0
 
 . /usr/lib/vdr/config-loader.sh
 
-mkdir -p /var/run/vdr
-chown -R vdr:vdr /var/run/vdr
-
-# Set shutdown command
-test "$ENABLE_SHUTDOWN" = "1" && VDRSHUTDOWN="/usr/lib/vdr/vdr-shutdown.wrapper" \
-                              || VDRSHUTDOWN=""
-
-. /usr/lib/vdr/plugin-loader.sh
 . /usr/lib/vdr/commands-loader.sh
 
 
@@ -77,29 +71,12 @@ startvdr()
         if start-stop-daemon --start --startas $DAEMON --test \
             --name $(basename $DAEMON) --pidfile $PIDFILE >/dev/null
         then
-            getplugins
             mergecommands "commands"
             mergecommands "reccmds"
             configure_console_input
 
-            if [ -n "$LIRC" ]; then
-                OPTIONS="--lirc=$LIRC $OPTIONS"
-            fi
-            if [ "$VFAT" == "1" ]; then
-                OPTIONS="--dirname=,,1 $OPTIONS"
-            fi
-            if [ "$CACHE_DIR" != "" ]; then
-                OPTIONS="--cachedir=$CACHE_DIR $OPTIONS"
-            fi
-            if [ "$RES_DIR" != "" ]; then
-                OPTIONS="--resdir=$RES_DIR $OPTIONS"
-            fi
-
-            start-stop-daemon --start --quiet --startas $DAEMON --background \
-                --name $(basename $DAEMON) --pidfile $PIDFILE --make-pidfile -- \
-                -v $VIDEO_DIR -c $CFG_DIR -L $PLUGIN_DIR -r $REC_CMD \
-                -s $VDRSHUTDOWN -E $EPG_FILE -u $USER -g /tmp \
-                --port $SVDRP_PORT $OPTIONS $PLUGINS $REDIRECT
+            start-stop-daemon --start --quiet --startas $DAEMON --background -d /tmp \
+                --name $(basename $DAEMON) --pidfile $PIDFILE --make-pidfile -- $REDIRECT
         else
             echo -n " - seems to be running already"
         fi

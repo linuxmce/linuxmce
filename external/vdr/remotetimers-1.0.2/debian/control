@@ -1,0 +1,29 @@
+Source: vdr-plugin-remotetimers
+Section: video
+Priority: extra
+Maintainer: Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>
+Uploaders: Tobias Grimm <etobi@debian.org>, Thomas Günther <tom@toms-cafe.de>
+Build-Depends: debhelper (>= 7.0.50~), vdr-dev (>= 2.2.0-1), gettext, pkg-config
+Standards-Version: 3.9.2
+Vcs-Svn: svn://svn.debian.org/pkg-vdr-dvb/vdr/vdr-plugin-remotetimers/trunk/
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-vdr-dvb/vdr/vdr-plugin-remotetimers/trunk/
+Homepage: http://vdr.schmirler.de
+
+Package: vdr-plugin-remotetimers
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${vdr:Depends}, vdr-plugin-svdrpservice
+Description: VDR plugin to edit timers on a remote VDR
+ With the remotetimers plugin you can add/edit/remove timers on both, the
+ local (client) VDR and a remote (server) VDR. You can even move timers
+ between both VDRs. The plugin has its own implementations of the Schedule,
+ Timer and Recordings menus. All of them are feature extended copies of VDR's
+ original menus, adding e.g. multiuser support.
+
+Package: vdr-plugin-remotetimers-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: vdr-plugin-remotetimers (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for vdr-plugin-remotetimers
+ .
+ This package contains only the debugging symbols for vdr-plugin-remotetimers

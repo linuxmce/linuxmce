@@ -220,7 +220,6 @@ public:
   cMenuSetupPage(void);
   virtual eOSState ProcessKey(eKeys Key);
   void SetPlugin(cPlugin *Plugin);
-  const char* MenuKind() { return "MenuSetupPage"; }
   };
 
 #endif //__MENUITEMS_H

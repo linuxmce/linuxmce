@@ -43,7 +43,7 @@ Re-Authored: Lars Hanisch <dvb@flensrocker.de>
 +RESDIR    = $(PREFIX)/share/vdr
 +#DVBDIR    = /usr/src/v4l-dvb/linux/include/uapi
 +
-+VIDEODIR  = /srv/vdr/video.00
++VIDEODIR  = /srv/vdr/video
 +CONFDIR   = /var/lib/vdr
 +ARGSDIR   = /etc/vdr/conf.d
 +CACHEDIR  = /var/cache/vdr
@@ -71,7 +71,7 @@ Re-Authored: Lars Hanisch <dvb@flensrocker.de>
 +
 +# Use this if you want to have a central place where you configure compile time
 +# parameters for plugins:
-+#PLGCFG = $(CONFDIR)/plugins.mk
++PLGCFG = $(INCDIR)/vdr/plugins.mk
 +
 +### The remote control:
 +LIRC_DEVICE = /var/run/lirc/lircd
@@ -89,7 +89,7 @@ Re-Authored: Lars Hanisch <dvb@flensrocker.de>
 +#BIDI = 1
 +
 +### Define if you want 'systemd' notification:
-+#SDNOTIFY = 1
++SDNOTIFY = 1
 +
 +### Fallback for plugins with old makefiles:
 +ifdef PLUGIN

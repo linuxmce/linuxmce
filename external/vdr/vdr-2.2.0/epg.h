@@ -17,8 +17,6 @@
 #include "libsi/section.h"
 #include "thread.h"
 #include "tools.h"
-#include <string>
-#include <vector>
 
 #define MAXEPGBUGFIXLEVEL 3
 
@@ -66,12 +64,6 @@ public:
                                                                  // In case of an audio stream the 'type' check actually just distinguishes between "normal" and "Dolby Digital"
   };
 
-#define EPG_DETAILS_PATCH
-struct tEpgDetail {
-  std::string key;
-  std::string value;
- };
-
 class cSchedule;
 
 typedef u_int32_t tEventID;
@@ -95,7 +87,6 @@ private:
   int duration;            // Duration of this event in seconds
   time_t vps;              // Video Programming Service timestamp (VPS, aka "Programme Identification Label", PIL)
   time_t seen;             // When this event was last seen in the data stream
-  std::vector< struct tEpgDetail > details; // additional information provided by epg source
 public:
   cEvent(tEventID EventID);
   ~cEvent();
@@ -126,7 +117,6 @@ public:
   cString GetTimeString(void) const;
   cString GetEndTimeString(void) const;
   cString GetVpsString(void) const;
-  const std::vector< struct tEpgDetail >& Details(void) const { return details; };
   void SetEventID(tEventID EventID);
   void SetTableID(uchar TableID);
   void SetVersion(uchar Version);
@@ -141,9 +131,6 @@ public:
   void SetDuration(int Duration);
   void SetVps(time_t Vps);
   void SetSeen(void);
-  void AddDetail(char* value);
-  void AddDetail(std::string key, std::string value);
-  void ClearDetails() { details.erase(details.begin(), details.end()); };
   cString ToDescr(void) const;
   void Dump(FILE *f, const char *Prefix = "", bool InfoOnly = false) const;
   bool Parse(char *s);
