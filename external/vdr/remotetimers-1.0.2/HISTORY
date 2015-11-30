@@ -1,0 +1,170 @@
+VDR Plugin 'remotetimers' Revision History
+------------------------------------------
+
+2015-07-29: Version 1.0.2
+
+- Added compatibility for VDR 2.1.2 (thanks to Christopher Reimer and Lars
+  Hanisch)
+- Added support for graphtft. Use -DUSE_GRAPHTFT when compiling to enable.
+  (thanks to Jörg Wendel)
+- Updated MainMenuHooks patch for VDR 2.0.4
+
+2013-08-12: Version 1.0.1
+
+- Fixed channel name width in schedule menus (reported by hummel99@vdrportal)
+- Added custom schedule times in addition to "Now" and "Next" as in epgsearch
+  (suggested by hummel99@vdrportal)
+- Show timer conflicts reported by epgsearch in timers menu (suggested by
+  Manfred Heindl)
+
+2013-06-07: Version 1.0.0
+
+- Updated the menu parts copied from VDR to 2.0.2
+- Added service call to open schedule or timers menu
+- Updated Makefile for VDR 1.7.36 and dropped compatibility with older VDR
+  versions
+- Updated the menu parts copied from VDR to 2.0.1
+- Updated Slovak translations (thanks to Milan Hrala)
+- Included a copy of svdrpservice.h
+- Updated skin LCARS patch for 1.7.29 and above
+- New setup options to control if the plugin's schedule, timers and recordings
+  menus should indicate the correct menu category (since VDR 1.7.28) and call
+  SetItemEvent/Timer/Recording (since VDR 1.7.34). Some skins will then use
+  their own way to display the item. However the skin is not aware of multiuser
+  or local and remote timers. So it will display all items the same way (thanks
+  to seahawk1986@vdrportal for tuning and debugging this for skinnopacity).
+- Set menu category of main menu to mcMain (thanks to seahawk1986@vdrportal)
+- Updated the menu parts copied from VDR to 1.7.35 including support for
+  sorting recordings with VDR 1.7.29 and above.
+
+2012-06-27: Version 0.1.7
+
+- If server recordings are mounted in a subdirectory of local video dir,
+  make server and other clients aware of changes made by this client.
+- Fixed occasionally missed video directory mounts during startup. Now getting
+  mtime and device id of .update file already in SetupParse(), i.e. before VDR
+  starts to scan recordings.
+- Updated Slovak translations (thanks to Milan Hrala)
+- Added vdr-1.7.28-skinlcars.patch to display remote timers in skin LCARS'
+  main menu view
+- Fixed RemoteTimers::ForEach service call
+- With 1.7.28 or newer, show remaining disk space in minutes based on size and
+  length of currently selected recording in menus "Recording info" and "Edit
+  recording".
+- With 1.7.28 or newer, calculate remaining disk space in minutes based on
+  size and length of all recordings on current filesystem.
+- Updated Italian translations (thanks to Diego Pierotto)
+- Updated the menu parts copied from VDR to 1.7.28
+- New option to map channels by number instead of channel id when syncing
+  between client and server. Useful if you want to view and record different
+  variants of a simulcast channel on client and server (e.g. HD/SD or DVB-T/
+  DVB-S). Requires channels to be in same order (suggested by woz@vdrportal)
+- API changes of VDR 1.7.28
+- Updated MainMenuHooks patch (thanks to Manuel Reimer)
+- Fixed compile error due to unknown type 'tI18nPhrase'
+- Released recordings must be re-read or they reappear in recordings menu
+
+2011-10-05: Version 0.1.6
+
+- Adapted handler of SVDRP command LSTR to VDR 1.7.21+ format, including
+  the recording's length.
+- Updated the menu parts copied from VDR to 1.7.21
+- README now mentions the new VDR default port.
+- Fixed RecordingInfo update for TS recordings. The altered lines were
+  appended but re-writing a clean version of the info file failed. So the
+  recording in the menu was not updated, instead an error message appeared.
+- Adapted to API change of VDR 1.7.21 (access recording priority/lifetime)
+- Fixed crash when moving a local timer to the server
+
+2011-04-18: Version 0.1.5
+
+- Always update help keys when changing user filter in recordings menu
+- Fixed wrong help keys in recordings menu when user filter is active
+- The "red" key to open a recordings directory didn't work
+- No longer using cRecordingInfo::Read(FILE) in VDR 1.7.3+. It's going to
+  be a private member in VDR 1.7.18
+- Added Slovak translation (thanks to Milan Hrala)
+
+2011-03-01: Version 0.1.4
+
+- Improved German translations
+- Updated Italian translations (thanks to Diego Pierotto)
+- Default server port is now 0, i.e. taken from svdrpservice
+- Fixed missing timer markers when opening the Schedule for the first time
+- Implemented moving recording to a different filesystem with optional
+  bandwidth throttle
+- Cutting from menu failed for PES recordings since VDR 1.7.3 due to missing
+  parameters to cMarks::Load
+- Moving recordings into folders named ' ' failed or caused unexpected
+  results as VDR's text input control strips trailing whitespace. Now
+  folder ' ' is assumed when renaming a recording and the name ends with
+  the folder delimiter character
+- Don't rename a recording if the user completely wiped out the name
+- Added service interface for operating on timers
+- Updated MainMenuHooks patch to v1.0.1
+
+2010-02-22: Version 0.1.3
+
+- API changes for VDR 1.7.12+
+- Backported VDR 1.7.12 folders.conf. "Edit timer" and "Edit recording"
+  menus feature folder selection regardless of VDR version.
+- Updated Italian translations (thanks to Diego Pierotto)
+- Dropped the now obsolete cMenuEditPathItem
+- Updated the menu parts copied from VDR to 1.7.12
+- Silenced warning about suggested parentheses
+
+2009-11-04: Version 0.1.2
+
+- When navigating to subdirectories in the Recordings menu, show diskspace
+  information of the corresponding filesystem
+- Added recording size and length to titlebar of "Edit recording" and
+  "Recording info" menus
+- Support for TS recordings (rename, change priority/lifetime)
+- API change for VDR 1.7.3+ (thanks to Thomas Günther)
+- Updated the menu parts copied from VDR to 1.7.7
+- Silenced warning about suggested parentheses
+- Fixed segfault when parsing a currently recording remote timer of a
+  channel which is unknown to the local VDR
+
+2009-02-23: Version 0.1.1
+
+- New setup option for swapping the key bindings of "Ok" and "Blue" in the
+  "What's on now/next" menus (suggested by HolgerR@vdrportal)
+- Update recordings list after mount/unmount of video directory
+- Fixed remote cutting which didn't work if local video directory is equal
+  to the server's video directory (reported by kris@vdrportal)
+- Fixed compile error in remote_instant_recordings-patch (reported by
+  kris@vdrportal)
+- Fixed incompatibility with switchtimer-patch (reported by Andreas Schott)
+- Updated Italian translations (thanks to Diego Pierotto)
+
+2008-10-30: Version 0.1.0
+
+- Plugin now has its own Recordings menu. Features:
+  * filtering by user
+  * editing of recordings (name, priority, lifetime, user)
+  * starting local/remote cutter
+  * replacement for VDR's Recordings menu (requires MainMenuHooks patch)
+- Multiuser support for Timers and Recordings
+- Dedicated setup options for user filter in Schedule, Timers and Recordings
+  menus, either backed by VDR's "Resume ID" or set to a static value
+- Progress bars for "What's on now?" menu (thanks to HolgerR@vdrportal)
+- Patch for server-side instant recordings and paused live view
+- Keep recordings list up-to-date if server's video directory is mounted
+  in a subdirectory of the local video directory
+- Updated Italian translations (thanks to Diego Pierotto)
+
+2008-03-28: Version 0.0.2
+
+- Updated the menu parts copied from VDR to 1.6.0
+- Gettext support for VDR 1.5.7+
+  Credits to Udo Richter for his po218n.pl backward compatibility script
+- API change for VDR 1.5.3+ (thanks to Dr.Nop@vdrportal)
+- Svdrpservice no longer needs to be loaded before remotetimers
+- Ignore recording flag when verifying that a timer hasn't been modified
+- Removed duplicate check when deleting timer
+- Italian translations (thanks to Diego Pierotto)
+
+2007-03-13: Version 0.0.1
+
+- Initial revision.

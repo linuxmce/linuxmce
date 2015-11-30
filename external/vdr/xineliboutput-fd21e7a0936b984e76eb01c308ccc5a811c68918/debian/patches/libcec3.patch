@@ -1,0 +1,135 @@
+--- a/xine_frontend_cec.c
++++ b/xine_frontend_cec.c
+@@ -36,6 +36,7 @@
+ static pthread_t cec_thread;
+ static int cec_hdmi_port = 0;
+ static int cec_dev_type = 0; /* 0 - TV, 5 - AVR */
++static libcec_connection_t cec_conn = 0;
+ 
+ 
+ static const struct keymap_item {
+@@ -254,8 +255,8 @@
+   p->baseDevice = CEC_DEFAULT_BASE_DEVICE;
+   p->iHDMIPort = CEC_DEFAULT_HDMI_PORT;
+   p->tvVendor = CEC_VENDOR_UNKNOWN;
+-  p->clientVersion = CEC_CLIENT_VERSION_CURRENT;
+-  p->serverVersion = CEC_SERVER_VERSION_CURRENT;
++  p->clientVersion = LIBCEC_VERSION_CURRENT;
++  p->serverVersion = LIBCEC_VERSION_CURRENT;
+   p->bAutodetectAddress = CEC_DEFAULT_SETTING_AUTODETECT_ADDRESS;
+   p->bGetSettingsFromROM = CEC_DEFAULT_SETTING_GET_SETTINGS_FROM_ROM;
+   p->bUseTVMenuLanguage = CEC_DEFAULT_SETTING_USE_TV_MENU_LANGUAGE;
+@@ -349,13 +350,13 @@
+   return 0;
+ }
+ 
+-static int libcec_init(void *fe_gen)
++static int my_libcec_init(void *fe_gen)
+ {
+   libcec_configuration config;
+ 
+   libcec_config_clear(&config);
+ 
+-  config.clientVersion = CEC_CLIENT_VERSION_CURRENT;
++  config.clientVersion = LIBCEC_VERSION_CURRENT;
+   strncpy(config.strDeviceName, "VDR", sizeof(config.strDeviceName));
+ 
+   config.iPhysicalAddress = detect_hdmi_address(fe_gen);
+@@ -371,12 +372,13 @@
+   config.deviceTypes.types[2] = CEC_DEVICE_TYPE_TUNER;
+   //config.deviceTypes.types[3] = CEC_DEVICE_TYPE_AUDIO_SYSTEM;
+ 
+-  if (!cec_initialise(&config)) {
++  cec_conn = libcec_initialise(&config);
++  if (!cec_conn) {
+     LOGMSG("cec_initialize() failed");
+     return 0;
+   }
+ 
+-  cec_init_video_standalone();
++  libcec_init_video_standalone(cec_conn);
+ 
+   return 1;
+ }
+@@ -385,10 +387,10 @@
+  *
+  */
+ 
+-static int libcec_open(void)
++static int my_libcec_open(void)
+ {
+   cec_adapter devices[10];
+-  int count = cec_find_adapters(devices, 10, NULL);
++  int count = libcec_find_adapters(cec_conn, devices, 10, NULL);
+   if (count < 1) {
+     LOGMSG("No HDMI-CEC adapters found");
+     return 0;
+@@ -396,7 +398,7 @@
+ 
+   LOGMSG("%d adapters found. Opening %s", count, devices[0].comm);
+ 
+-  if (!cec_open(devices[0].comm, 3000)) {
++  if (!libcec_open(cec_conn, devices[0].comm, 3000)) {
+     LOGMSG("error opening CEC adapter");
+     return 0;
+   }
+@@ -406,10 +408,10 @@
+   return 1;
+ }
+ 
+-static int libcec_check_device(void)
++static int my_libcec_check_device(void)
+ {
+-  if (!cec_ping_adapters()) {
+-    LOGMSG("cec_ping_adapters() failed");
++  if (!libcec_ping_adapters(cec_conn)) {
++    LOGMSG("libcec_ping_adapters() failed");
+     return 0;
+   }
+ 
+@@ -418,8 +420,9 @@
+ 
+ static void cleanup(void *p)
+ {
+-  cec_close();
+-  cec_destroy();
++  libcec_close(cec_conn);
++  libcec_destroy(cec_conn);
++  cec_conn = 0;
+ }
+ 
+ static void *cec_receiver_thread(void *fe_gen)
+@@ -437,19 +440,19 @@
+ 
+     switch (state) {
+     case INIT:
+-      if (!libcec_init(fe_gen)) {
++      if (!my_libcec_init(fe_gen)) {
+ 	return NULL;
+       }
+       state = WAIT_DEVICE;
+       break;
+     case WAIT_DEVICE:
+-      if (libcec_open()) {
++      if (my_libcec_open()) {
+ 	state = RUNNING;
+       }
+       usleep(5000*1000);
+       break;
+     case RUNNING:
+-      if (!libcec_check_device()) {
++      if (!my_libcec_check_device()) {
+         state = WAIT_DEVICE;
+       }
+       usleep(1000*1000);
+--- a/configure
++++ b/configure
+@@ -374,7 +374,7 @@
+   test_library   JPEG    libjpeg      "jpeglib.h"              "-ljpeg"      "jpeg_create_compress(0)"
+   test_library   X11     x11          "X11/X.h"                "-lX11"       "XInitThreads()"
+   test_library   PTHREAD pthread      "pthread.h"              "-lpthread"   "pthread_create(0,0,0,0)"
+-  test_library   CEC     libcec       "libcec/cecc.h"          "-lcec"       "cec_initialize(0)"
++  test_library   CEC     libcec       "libcec/cecc.h"          "-lcec -lplatform"       "libcec_initialize(0)"
+   if enabled x11; then
+     test_library X11  xext         "X11/extensions/Xext.h"     "-lXext"      ""
+     test_library X11  xshm         "X11/extensions/XShm.h"     "-lXext"      "XShmQueryExtension(0)"

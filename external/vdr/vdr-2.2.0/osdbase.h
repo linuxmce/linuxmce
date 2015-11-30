@@ -138,7 +138,6 @@ public:
   void Ins(cOsdItem *Item, bool Current = false, cOsdItem *Before = NULL);
   virtual void Display(void);
   virtual eOSState ProcessKey(eKeys Key);
-  virtual const char* MenuKind() { return "MenuUnknown"; }
   };
 
 #endif //__OSDBASE_H

@@ -6,25 +6,28 @@
 CXXFLAGS += $(CPPFLAGS)
 CFLAGS += $(CPPFLAGS)
 PREFIX = /usr
-VIDEODIR = /srv/vdr/video.00
+VIDEODIR = /srv/vdr/video
 LIBDIR = /usr/lib/vdr/plugins
-MAKE_OPTIONS = PREFIX=$(PREFIX) VIDEODIR=$(VIDEODIR) LIBDIR=$(LIBDIR)
+MAKE_OPTIONS = PREFIX=$(PREFIX) VIDEODIR=$(VIDEODIR) LIBDIR=$(LIBDIR) SDNOTIFY=1
 
 %:
-	dh $@
+	dh $@ --with systemd
 
 override_dh_auto_build:
 	dh_auto_build -- $(MAKE_OPTIONS)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o debian/vdr-shutdown.wrapper debian/vdr-shutdown-wrapper.c
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o debian/plugin-loader2 debian/plugin-loader2.cpp
+	for file in $$(ls debian/dh-addon-vdrplugin/dh_*); do \
+		pod2man --section=1 --utf8 $$file $$file.1; \
+	done
 
 override_dh_auto_clean:
 	dh_auto_clean
 	rm -f debian/vdr-shutdown.wrapper
-	rm -f debian/plugin-loader2
+	rm -f debian/dh-addon-vdrplugin/*.1
 
 override_dh_auto_install:
 	dh_auto_install -- $(MAKE_OPTIONS)
+	mv debian/tmp/var/lib/vdr/channels.conf debian/tmp/var/lib/vdr/channels.conf.sat
 
 override_dh_install:
 	dh_install --fail-missing -Xlibvdr-epgtableid0.so
@@ -52,7 +55,7 @@ override_dh_installchangelogs:
 	dh_installchangelogs
 
 check-patches:
-	python debian/patchcheck.py -c $(PATCHCHECKOPTION)
+	python debian/patchcheck.py -c
 
 accept-patches:
-	python debian/patchcheck.py -u $(PATCHCHECKOPTION)
+	python debian/patchcheck.py -u

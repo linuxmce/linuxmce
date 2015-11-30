@@ -10,18 +10,15 @@
 #include "dvbci.h"
 #include <linux/dvb/ca.h>
 #include <sys/ioctl.h>
-#include "dvbdevice.h"
+#include "device.h"
 
 // --- cDvbCiAdapter ---------------------------------------------------------
 
-cDvbCiAdapter::cDvbCiAdapter(cDevice *Device, int Fd, int Adapter, int Frontend)
+cDvbCiAdapter::cDvbCiAdapter(cDevice *Device, int Fd)
 {
   device = Device;
   SetDescription("device %d CI adapter", device->DeviceNumber());
   fd = Fd;
-  adapter = Adapter;
-  frontend = Frontend;
-  idle = false;
   ca_caps_t Caps;
   if (ioctl(fd, CA_GET_CAP, &Caps) == 0) {
      if ((Caps.slot_type & CA_CI_LINK) != 0) {
@@ -44,44 +41,10 @@ cDvbCiAdapter::cDvbCiAdapter(cDevice *Device, int Fd, int Adapter, int Frontend)
 cDvbCiAdapter::~cDvbCiAdapter()
 {
   Cancel(3);
-  if (device->IsSubDevice() || device->HasSubDevice())
-     CloseCa();
-}
-
-bool cDvbCiAdapter::OpenCa(void)
-{
-  if (fd >= 0)
-     return true;
-  fd = cDvbDevice::DvbOpen(DEV_DVB_CA, adapter, frontend, O_RDWR);
-  return (fd >= 0);
-}
-
-void cDvbCiAdapter::CloseCa(void)
-{
-  if (fd < 0)
-     return;
-  close(fd);
-  fd = -1;
-}
-
-bool cDvbCiAdapter::SetIdle(bool Idle, bool TestOnly)
-{
-  if ((adapter < 0) || (frontend < 0))
-     return false;
-  if (TestOnly || (idle == Idle))
-     return true;
-  if (Idle)
-     CloseCa();
-  else
-     OpenCa();
-  idle = Idle;
-  return true;
 }
 
 int cDvbCiAdapter::Read(uint8_t *Buffer, int MaxLength)
 {
-  if (idle || (fd < 0))
-     return 0;
   if (Buffer && MaxLength > 0) {
      struct pollfd pfd[1];
      pfd[0].fd = fd;
@@ -98,8 +61,6 @@ int cDvbCiAdapter::Read(uint8_t *Buffer, int MaxLength)
 
 void cDvbCiAdapter::Write(const uint8_t *Buffer, int Length)
 {
-  if (idle || (fd < 0))
-     return;
   if (Buffer && Length > 0) {
      if (safe_write(fd, Buffer, Length) != Length)
         esyslog("ERROR: can't write to CI adapter on device %d: %m", device->DeviceNumber());
@@ -108,8 +69,6 @@ void cDvbCiAdapter::Write(const uint8_t *Buffer, int Length)
 
 bool cDvbCiAdapter::Reset(int Slot)
 {
-  if (idle || (fd < 0))
-     return false;
   if (ioctl(fd, CA_RESET, 1 << Slot) != -1)
      return true;
   else
@@ -119,8 +78,6 @@ bool cDvbCiAdapter::Reset(int Slot)
 
 eModuleStatus cDvbCiAdapter::ModuleStatus(int Slot)
 {
-  if (idle || (fd < 0))
-     return msNone;
   ca_slot_info_t sinfo;
   sinfo.num = Slot;
   if (ioctl(fd, CA_GET_SLOT_INFO, &sinfo) != -1) {
@@ -142,10 +99,10 @@ bool cDvbCiAdapter::Assign(cDevice *Device, bool Query)
   return true;
 }
 
-cDvbCiAdapter *cDvbCiAdapter::CreateCiAdapter(cDevice *Device, int Fd, int Adapter, int Frontend)
+cDvbCiAdapter *cDvbCiAdapter::CreateCiAdapter(cDevice *Device, int Fd)
 {
   // TODO check whether a CI is actually present?
   if (Device)
-     return new cDvbCiAdapter(Device, Fd, Adapter, Frontend);
+     return new cDvbCiAdapter(Device, Fd);
   return NULL;
 }

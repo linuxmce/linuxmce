@@ -84,7 +84,6 @@ public:
   const cEvent *GetEvent(void) const { return event; }
   const char *Title(void) const { return event->Title(); }
   const char *ShortText(void) const { return event->ShortText(); }
-  tEventID EventID(void) const { return event->EventID(); }
   const char *Description(void) const { return event->Description(); }
   const cComponents *Components(void) const { return event->Components(); }
   const char *Aux(void) const { return aux; }
@@ -105,7 +104,6 @@ private:
   mutable char *sortBufferTime;
   mutable char *fileName;
   mutable char *name;
-  cString firstLevelFolderIfHidden;
   mutable int fileSizeMB;
   mutable int numFrames;
   int channel;

@@ -29,7 +29,6 @@ public:
   void SetText(const char *Text);
   virtual void Display(void);
   virtual eOSState ProcessKey(eKeys Key);
-  virtual const char* MenuKind() { return "MenuText"; }
   };
 
 class cMenuFolder : public cOsdMenu {
@@ -87,7 +86,6 @@ public:
   cMenuEditTimer(cTimer *Timer, bool New = false);
   virtual ~cMenuEditTimer();
   virtual eOSState ProcessKey(eKeys Key);
-  virtual const char* MenuKind() { return "MenuTimerEdit"; }
   };
 
 class cMenuEvent : public cOsdMenu {
@@ -97,7 +95,6 @@ public:
   cMenuEvent(const cEvent *Event, bool CanSwitch = false, bool Buttons = false);
   virtual void Display(void);
   virtual eOSState ProcessKey(eKeys Key);
-  virtual const char* MenuKind() { return "MenuEvent"; }
   };
 
 class cMenuMain : public cOsdMenu {
@@ -114,7 +111,6 @@ public:
   cMenuMain(eOSState State = osUnknown, bool OpenSubMenus = false);
   virtual eOSState ProcessKey(eKeys Key);
   static cOsdObject *PluginOsdObject(void);
-  virtual const char* MenuKind() { return "MenuMain"; }
   };
 
 class cDisplayChannel : public cOsdObject {
@@ -231,7 +227,6 @@ public:
   virtual eOSState ProcessKey(eKeys Key);
   static void SetPath(const char *Path);
   static void SetRecording(const char *FileName);
-  virtual const char* MenuKind() { return "MenuRecordings"; }
   };
 
 class cRecordControl {

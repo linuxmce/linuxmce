@@ -14,7 +14,6 @@
 #include "device.h"
 #include "player.h"
 #include "tools.h"
-#include "plugin.h"
 
 enum eTimerChange { tcMod, tcAdd, tcDel };
 
@@ -85,33 +84,6 @@ protected:
                // The OSD displays the single line Text with the current channel information.
   virtual void OsdProgramme(time_t PresentTime, const char *PresentTitle, const char *PresentSubtitle, time_t FollowingTime, const char *FollowingTitle, const char *FollowingSubtitle) {}
                // The OSD displays the given programme information.
-  virtual void OsdSetRecording(const cRecording* recording) {}
-               // The OSD displays the recording information.
-  virtual void OsdSetEvent(const cEvent* event) {}
-               // The OSD displays the event information.
-  virtual void OsdMenuDisplay(const char* kind) {}
-               // report menu creation
-  virtual void OsdMenuDestroy() {}
-               // report menu destruvtion
-  virtual void OsdEventItem(const cEvent* Event, const char *Text, int Index, int Count) {}
-               // The OSD displays the given single line Event as menu item at Index.
-  virtual bool ChannelProtected(const cDevice *Device, const cChannel* Channel)  { return false; }         // PIN PATCH
-               // Checks if a channel is protected.
-  virtual bool ReplayProtected(const cRecording* Recording, const char* Name,
-                               const char* Base, bool isDirectory, int menuView = false) { return false; } // PIN PATCH
-               // Checks if a recording is protected.
-  virtual void RecordingFile(const char* FileName) {}                                                      // PIN PATCH
-               // The given DVB device has started recording to FileName. FileName is the name of the
-               // recording directory
-  virtual void TimerCreation(cTimer* Timer, const cEvent *Event) {}                                        // PIN PATCH
-               // The given timer is created
-  virtual bool PluginProtected(cPlugin* Plugin, int menuView = false)  { return false; }                   // PIN PATCH
-               // Checks if a plugin is protected.
-  virtual void UserAction(const eKeys key, const cOsdObject* Interact) {}                                  // PIN PATCH
-               // report user action
-  virtual bool MenuItemProtected(const char* Name, int menuView = false)  { return false; }                // PIN PATCH
-               // Checks if a menu entry is protected.
-
 public:
   cStatus(void);
   virtual ~cStatus();
@@ -134,19 +106,6 @@ public:
   static void MsgOsdTextItem(const char *Text,  bool Scroll = false);
   static void MsgOsdChannel(const char *Text);
   static void MsgOsdProgramme(time_t PresentTime, const char *PresentTitle, const char *PresentSubtitle, time_t FollowingTime, const char *FollowingTitle, const char *FollowingSubtitle);
-  static void MsgOsdSetEvent(const cEvent* event);
-  static void MsgOsdSetRecording(const cRecording* recording);
-  static void MsgOsdMenuDisplay(const char* kind);
-  static void MsgOsdMenuDestroy();
-  static void MsgOsdEventItem(const cEvent* Event, const char *Text, int Index, int Count);
-  static bool MsgChannelProtected(const cDevice* Device, const cChannel* Channel);                 // PIN PATCH
-  static bool MsgReplayProtected(const cRecording* Recording, const char* Name,
-                                 const char* Base, bool isDirectory, int menuView = false);        // PIN PATCH
-  static void MsgRecordingFile(const char* FileName);                                              // PIN PATCH
-  static void MsgTimerCreation(cTimer* Timer, const cEvent *Event);                                // PIN PATCH
-  static bool MsgPluginProtected(cPlugin* Plugin, int menuView = false);                           // PIN PATCH
-  static void MsgUserAction(const eKeys key, const cOsdObject* Interact);
-  static bool MsgMenuItemProtected(const char* Name, int menuView = false);                        // PIN PATCH
   };
 
 #endif //__STATUS_H

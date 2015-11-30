@@ -1,0 +1,4 @@
+libvdr-xineliboutput.so.*       usr/lib/vdr/plugins/
+examples/allowed_hosts.conf         etc/vdr/plugins/xineliboutput/
+#debian/plugin.xineliboutput.conf    etc/vdr/plugins/
+debian/tmp/usr/share/locale

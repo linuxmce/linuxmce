@@ -1643,7 +1643,6 @@ int cOsd::osdWidth = 0;
 int cOsd::osdHeight = 0;
 cVector<cOsd *> cOsd::Osds;
 cMutex cOsd::mutex;
-bool cOsd::pinValid = false;   // PIN PATCH
 
 cOsd::cOsd(int Left, int Top, uint Level)
 {

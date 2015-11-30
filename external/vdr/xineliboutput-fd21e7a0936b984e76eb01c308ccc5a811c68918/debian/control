@@ -1,0 +1,72 @@
+Source: vdr-plugin-xineliboutput
+Section: video
+Priority: extra
+Maintainer: Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>
+Uploaders: Tobias Grimm <etobi@debian.org>, Thomas Schmidt <tschmidt@debian.org>, Thomas Günther <tom@toms-cafe.de>
+Build-Depends: debhelper (>= 8), gettext, txt2man,
+ vdr-dev (>= 2.2.0-1),
+ x11proto-core-dev,
+ libxine2-dev,
+ libxext-dev,
+ libjpeg-dev,
+ libx11-dev,
+ libdbus-glib-1-dev,
+ libextractor-dev,
+ libxinerama-dev,
+ libxrender-dev,
+ libavutil-ffmpeg-opti-dev | libavutil-ffmpeg-dev | libavutil-dev,
+ libcap-dev,
+ libplatform-dev,
+ libcec-dev,
+ libbluray-dev,
+ libvdpau-dev,
+ freeglut3-dev
+Standards-Version: 3.9.4
+Vcs-Svn: svn://svn.debian.org/pkg-vdr-dvb/vdr/vdr-plugin-xineliboutput/trunk/
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-vdr-dvb/vdr/vdr-plugin-xineliboutput/trunk/
+Homepage: http://sourceforge.net/projects/xineliboutput
+
+Package: vdr-plugin-xineliboutput
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${vdr:Depends}
+Description: VDR plugin for Xine based sofdevice frontends
+ This VDR plugin provides an audio, video and control stream, that several
+ libxine based local and remote frontends can use.
+
+Package: libxineliboutput-fbfe
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, vdr-plugin-xineliboutput (= ${binary:Version}), libxine1-xvdr (= ${binary:Version}), libxine2
+Description: Local framebuffer frontend for the xineliboutput plugin
+ The xineliboutput vdr plugin requires this library to provide the built-in
+ local frontend for framebuffer devices.
+
+Package: libxineliboutput-sxfe
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, vdr-plugin-xineliboutput (= ${binary:Version}), libxine1-xvdr (= ${binary:Version}), libxine2, dbus
+Description: Local X-Server frontend for the xineliboutput plugin
+ The xineliboutput vdr plugin requires this library to provide the built-in
+ local frontend for X, Xv or XvMC window systems.
+
+Package: xineliboutput-fbfe
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libxine1-xvdr (= ${binary:Version}), libxine2
+Description: Remote Framebuffer frontend for vdr-plugin-xineliboutput
+ This frambuffer remote frontend plays back streams provided by
+ vdr-plugin-xineliboutput.
+
+Package: xineliboutput-sxfe
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libxine1-xvdr (= ${binary:Version}), libxine2, dbus
+Description: Remote X-Server frontend for vdr-plugin-xineliboutput
+ This X/Xv/XvMc remote frontend plays back streams provided by
+ vdr-plugin-xineliboutput.
+
+Package: libxine1-xvdr
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libxine2
+Replaces: libxine-xvdr (<< 1.0.0~rc2-5)
+Provides: libxine-xvdr
+Conflicts: libxine-xvdr (<< 1.0.0~rc2-5)
+Description: Xine input plugin for vdr-plugin-xineliboutput streams
+ This plugin adds a new mrl "xvdr://" to Xine, which allows one to play back
+ streams provided by vdr-plugin-xineliboutput.

@@ -106,7 +106,6 @@ cOsdMenu::~cOsdMenu()
   free(status);
   displayMenu->Clear();
   cStatus::MsgOsdClear();
-  cStatus::MsgOsdMenuDestroy();
   if (!--displayMenuCount)
      DELETENULL(displayMenu);
 }
@@ -231,7 +230,6 @@ void cOsdMenu::Display(void)
   cStatus::MsgOsdClear();
   if (menuCategory != displayMenu->MenuCategory())
      displayMenu->SetMenuCategory(menuCategory);
-  cStatus::MsgOsdMenuDisplay(MenuKind());
   displayMenu->SetMenuSortMode(menuSortMode);
   displayMenuItems = displayMenu->MaxItems();
   displayMenu->SetTabs(cols[0], cols[1], cols[2], cols[3], cols[4]);//XXX

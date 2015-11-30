@@ -941,7 +941,6 @@ public:
        ///<
        ///< If a plugin uses a derived cPixmap implementation, it needs to use that
        ///< type instead of cPixmapMemory.
-  static bool pinValid;   // PIN PATCH
   };
 
 #define MAXOSDIMAGES 64

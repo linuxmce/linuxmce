@@ -10,12 +10,9 @@ var/lib/vdr/svdrphosts.conf             etc/vdr/
 var/lib/vdr/*.conf                      usr/share/doc/vdr/examples/
 
 epg2html                                usr/lib/vdr/
-
-debian/runvdr                           usr/sbin/
+debian/runvdr                           usr/lib/vdr/
 
 debian/config-loader.sh                 usr/lib/vdr/
-debian/plugin-loader.sh                 usr/lib/vdr/
-debian/plugin-loader2                   usr/lib/vdr/
 debian/commands-loader.sh               usr/lib/vdr/
 debian/vdr-groups.sh                    usr/lib/vdr/
 debian/vdr-recordingaction              usr/lib/vdr/
@@ -23,14 +20,17 @@ debian/vdr-shutdown                     usr/lib/vdr/
 debian/vdr-shutdown.wrapper             usr/lib/vdr/
 
 debian/svdrpsend                        etc/bash_completion.d/
-
+debian/00-vdr.conf                      etc/vdr/conf.d/
 debian/vdr.groups                       etc/vdr/
 debian/R90.custom                       etc/vdr/recording-hooks/
 debian/S90.custom                       etc/vdr/shutdown-hooks/
-debian/order.conf                       etc/vdr/plugins/
 debian/commands.custom.conf             etc/vdr/command-hooks/
 debian/reccmds.custom.conf              etc/vdr/command-hooks/
 
 debian/commands.update-recordings.conf  usr/share/vdr/command-hooks/
 
 debian/themes/*.theme                   var/lib/vdr/themes/
+
+var/lib/vdr/channels.conf.sat           usr/share/vdr/channels.conf-examples/
+channels.conf.*                         usr/share/vdr/channels.conf-examples/
+debian/migrate-old-config.sh            usr/share/vdr/

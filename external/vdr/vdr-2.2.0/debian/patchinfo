@@ -13,6 +13,11 @@ Patches applied to vanilla vdr sources
     default unless someone specifies another port with the --port option when
     starting vdr
 
+12_osdbase-maxitems.patch
+    Andreas Brugger <brougs78@gmx.net>
+
+    Fixes problems with text2skin skin enigma.
+
 81_Make_config.patch
     Tobias Grimm <vdr@e-tobi.net>
 
@@ -22,13 +27,6 @@ Patches applied to vanilla vdr sources
     Tobias Grimm <tg@e-tobi.net>
 
     Use ncursesw header file
-
-opt-24_jumpplay.patch
-    Torsten Kunkel <vdr@tkunkel.de>, Thomas Günther <tom@toms-cafe.de>
-
-    Play after jump to next mark. Automatically jump over commercial breaks. See
-    README.jumpplay and MANUAL for details. 2011-03-19: Remove marks reloading
-    for VDR-1.7.17, by Udo Richter <udo_richter@gmx.de>
 
 opt-37-x_menuorg.patch
     Tobias Grimm <tg@e-tobi.net>
@@ -69,24 +67,19 @@ opt-65_pin.patch
 
     patch for the pin plugin
 
-opt-66_jumpingseconds.patch
-    ?
-
-    ?
-
-xprmtl-02_permashift-0.5.4.patch
-    Eike Sauer <eike@ein-eike.de>
-
-    patch for permashift plugin
-
-xprmtl-03_hide-first-recording-level-v3.patch
+vdr-2.2.0-hide-first-recording-level-v5.patch
     Lars Hanisch <dvb@flensrocker.de>
 
     Hide the first level of directories in the recordings menu, all recordings
     are stored at the "local" directory
 
-vdr-2.1.6-conf.d-v6.diff
-    Lars Hanisch <dvb@flensrocker.de>
+vdr-2.2.0-permashift.patch
+    Eike Sauer <eike@ein-eike.de>
 
-    Patch for VDR to support reading its arguments from files.
+    Patch for permashift plugin
+
+vdr-2.2.0-missing-plugin.patch
+    Ville Skyttä <ville.skytta@iki.fi>
+
+    Don't exit with an error if a plugin can't be loaded
 
