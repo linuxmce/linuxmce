@@ -104,6 +104,7 @@ a2dissite 000-default 2>/dev/null|| /bin/true
 a2dissite 000-default-ssl 2>/dev/null|| /bin/true
 
 # make sure that mythweb hasn't taken over web admin
+a2dissite 000-default-mythbuntu 2>/dev/null|| /bin/true
 a2dissite default-mythbuntu 2>/dev/null|| /bin/true
 
 #Index=$(grep DirectoryIndex /etc/apache/httpd.conf | sed 's/DirectoryIndex//g; s/^ *//g; s/ *$//g' | grep -v '^#')
