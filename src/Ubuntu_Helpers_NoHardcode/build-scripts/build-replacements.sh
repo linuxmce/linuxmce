@@ -255,7 +255,7 @@ function Build_Replacements_ubuntu_trusty
 
 	#Package: vdr-2.2.0
 	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
-	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr*dev*deb
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr*dev*deb
 
 	#Package: vdr-remotetimers-1.0.2
 	Build_Replacement_Package remotetimers external/vdr/remotetimers-1.0.2
