@@ -24,8 +24,8 @@ function MoveDebs2Repo {
 
 	# Copy the debs from replacements
 	DisplayMessage "Copying replacements debs to repository"
-	cp "${replacements_dir}"/*deb "$local_mirror_dir"
-	cp "${replacements_dir}"/*.changes "$local_mirror_dir"
+	cp "${replacements_dir}"/*deb "$local_mirror_dir" || :
+	cp "${replacements_dir}"/*.changes "$local_mirror_dir" || :
 
 	# Copy the debs from extra
 	if [ x"$(ls ${extras_dir}/*.deb)" != x"" ] ; then

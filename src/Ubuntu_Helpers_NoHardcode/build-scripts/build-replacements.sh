@@ -167,6 +167,7 @@ function Build_Replacements_Common_ubuntu
 	# qhttpserver (for LinuxMCE NVR)
 	Build_Replacement_Package qhttpserver external/qhttpserver
 	dpkg -i ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb
+
 	##Package: raspi2png
 	#if [[ "$arch" == "armhf" ]]; then
 	#	Build_Replacement_Package raspi2png external/raspi2png
@@ -252,6 +253,19 @@ function Build_Replacements_ubuntu_trusty
 {
 	mkdir -pv "$replacements_dir"
 
+	#Package: vdr-2.2.0
+	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr*dev*deb
+
+	#Package: vdr-remotetimers-1.0.2
+	Build_Replacement_Package remotetimers external/vdr/remotetimers-1.0.2
+
+	#Package: vdr-streamdev
+	Build_Replacement_Package streamdev external/vdr/vdr-plugin-streamdev-d66c635a80b312e2e7277a8fe10f500b05317acd
+
+	#Package: vdr-xineliboutput
+	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
+
 	#Package: ruby1.8-1.8.7.375
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
 	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/ruby*dev*deb ${svn_dir}/${svn_branch_name}/ubuntu/libruby1.8_*deb
@@ -303,6 +317,19 @@ function Build_Replacements_ubuntu_xenial
 {
 	mkdir -pv "$replacements_dir"
 
+	#Package: vdr-2.2.0
+	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr*dev*deb
+
+	#Package: vdr-remotetimers-1.0.2
+	Build_Replacement_Package remotetimers external/vdr/remotetimers-1.0.2
+
+	#Package: vdr-streamdev
+	Build_Replacement_Package streamdev external/vdr/vdr-plugin-streamdev-d66c635a80b312e2e7277a8fe10f500b05317acd
+
+	#Package: vdr-xineliboutput
+	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
+
 	#Package: ruby1.8-1.8.7.375
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/ri*1.8*.deb "${replacements_dir}"
@@ -324,7 +351,23 @@ function Build_Replacements_ubuntu_xenial
 
 function Build_Replacements_Common_raspbian
 {
+	#Package: vdr-2.2.0
+	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr*dev*deb
+
+	#Package: vdr-remotetimers-1.0.2
+	Build_Replacement_Package remotetimers external/vdr/remotetimers-1.0.2
+
+	#Package: vdr-streamdev
+	Build_Replacement_Package streamdev external/vdr/vdr-plugin-streamdev-d66c635a80b312e2e7277a8fe10f500b05317acd
+
+	#Package: vdr-xineliboutput
+	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
+
 	#Package: pthsem for bcusdk
+	pushd 	${svn_dir}/${svn_branch_name}/external/pthsem-2.0.8
+	autoreconf -i
+	popd
 	make_jobs="" Build_Replacement_Package pthsem external/pthsem-2.0.8
 
 	#Package: bcusdk (eib)
