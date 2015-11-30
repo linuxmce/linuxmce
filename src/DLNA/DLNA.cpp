@@ -30,12 +30,7 @@ using namespace DCE;
 #include "DLNAEngine.h"
 #include "LMCERenderer.h"
 
-#include "pluto_main/Database_pluto_main.h"
 #include "pluto_main/Define_EventParameter.h"
-#include "pluto_main/Table_EntertainArea.h"
-#include "pluto_main/Table_Device_EntertainArea.h"
-#include "pluto_main/Table_Room.h"
-#include "pluto_main/Table_Installation.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -72,8 +67,8 @@ bool DLNA::GetConfig()
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 	m_bEnableMediaRenderer = true; //DATA_Get_();
-	m_bEnableMediaServer = true;
-	m_bEnableMediaController = true;
+	m_bEnableMediaServer = false;
+    m_bEnableControlPoints = false;
 
 	LoadEntertainAreas();
 
@@ -165,47 +160,33 @@ bool DLNA::LoadEntertainAreas()
 {
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "DLNA::LoadEntertainAreas() start %d",  m_pData->m_dwPK_Installation );
 
-	Database_pluto_main* pDatabase_pluto_main = new Database_pluto_main(LoggerWrapper::GetInstance());
-// TODO: don't hardcode, load using command. The same command should be possible to use for qOrbiter to load EAs and Rooms
-	string host = "localhost", dbuser = "root", dbpass = "", dbname = "pluto_main";
-	int dbport = 3306;
-	if( !pDatabase_pluto_main->Connect( host, dbuser, dbpass, dbname, dbport ) )
-	{
-		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database!" );
-		OnQuit();
-		return false;
-	}
+    string eaString;
+    CMD_Get_Entertainment_Areas_DT cmdEA(m_dwPK_Device, DEVICETEMPLATE_General_Info_Plugin_CONST, BL_SameHouse, &eaString);
+    if (!SendCommand(cmdEA)) {
+        return false;
+    }
+    vector<string> vectEAs;
+    StringUtils::Tokenize(eaString, "\n", vectEAs);
+    for (size_t i = 0; i < vectEAs.size(); i++) {
+        vector<string> vectEAData;
+        StringUtils::Tokenize(vectEAs[i], "\t", vectEAData);
+        if (vectEAData.size() >= 2) {
+            long PK_EA = atoi(vectEAData[0].c_str());
+            long PK_Room = atoi(vectEAData[1].c_str());
+            LoggerWrapper::GetInstance()->Write( LV_STATUS, "DLNA::LoadEntertainAreas() EA %d",  PK_EA );
 
-	Row_Installation *pRow_Installation = pDatabase_pluto_main->Installation_get( )->GetRow( m_pData->m_dwPK_Installation );
-	vector<Row_Room *> vectRow_Room; // Ent Areas are specified by room. Get all the rooms first
-	pRow_Installation->Room_FK_Installation_getrows( &vectRow_Room );
-	for( size_t iRoom=0;iRoom<vectRow_Room.size( );++iRoom )
-	{
-		Row_Room *pRow_Room=vectRow_Room[iRoom];
-		vector<Row_EntertainArea *> vectRow_EntertainArea;
-		pRow_Room->EntertainArea_FK_Room_getrows( &vectRow_EntertainArea );
-		for( size_t s=0;s<vectRow_EntertainArea.size( );++s )
-		{
-			Row_EntertainArea *pRow_EntertainArea = vectRow_EntertainArea[s];
-			EntertainArea *pEntertainArea = new EntertainArea( pRow_EntertainArea->PK_EntertainArea_get( ),
-									   pRow_EntertainArea->Description_get() );
-			m_mapEntertainAreas[pEntertainArea->m_iPK_EntertainArea]=pEntertainArea;
-			// Now find all the devices in the ent area
-			vector<Row_Device_EntertainArea *> vectRow_Device_EntertainArea;
-			pRow_EntertainArea->Device_EntertainArea_FK_EntertainArea_getrows( &vectRow_Device_EntertainArea );
-			for( size_t s2=0;s2<vectRow_Device_EntertainArea.size( );++s2 )
-			{
-				Row_Device_EntertainArea *pRow_Device_EntertainArea = vectRow_Device_EntertainArea[s2];
-				if( !pRow_Device_EntertainArea || !pRow_Device_EntertainArea->FK_Device_getrow( ) )
-				{
-					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Device_EntertainArea refers to a NULL device %d %d",pRow_Device_EntertainArea->FK_EntertainArea_get(),pRow_Device_EntertainArea->FK_Device_get());
-					continue;
-				}
-				LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::LoadEntertainAreas() assigning PK_Device %d to EA %d", pRow_Device_EntertainArea->FK_Device_get(), pEntertainArea->m_iPK_EntertainArea);
-				pEntertainArea->m_setDevices.insert(pRow_Device_EntertainArea->FK_Device_get());
-			}
-		}
-	}
+            EntertainArea *pEntertainArea = new EntertainArea( PK_EA, vectEAData[2] );
+            m_mapEntertainAreas[pEntertainArea->m_iPK_EntertainArea]=pEntertainArea;
+            Map_DeviceData_Base devices = m_pData->m_AllDevices.m_mapDeviceData_Base;
+            for(Map_DeviceData_Base::iterator it=devices.begin(); it!=devices.end();++it) {
+                DeviceData_Base *pDeviceData_Base = (*it).second;
+                if (pDeviceData_Base->m_dwPK_Room == PK_Room) {
+                    LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNA::LoadEntertainAreas() assigning PK_Device %d to EA %d", pDeviceData_Base->m_dwPK_Device, PK_EA);
+                    pEntertainArea->m_setDevices.insert(pDeviceData_Base->m_dwPK_Device);
+                }
+            }
+        }
+    }
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "DLNA::LoadEntertainAreas() end" );
 }
 
@@ -254,7 +235,7 @@ bool DLNA::MediaCommandIntercepted( class Socket *pSocket, class Message *pMessa
 				if ((*it).second->m_pRenderer != NULL && (*it).second->m_pRenderer->GetStreamID() == iStreamID)
 				{
 					pEntertainArea = (*it).second;
-				}
+                }
 			}
 		}
 	}
