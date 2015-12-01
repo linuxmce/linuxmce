@@ -284,6 +284,11 @@ Configure_Network_Database () {
 	RunSQL "$Q"
 }
 
+Configure_SSH_Server() {
+	# generate SSH keys for openssh-server
+	dpkg-reconfigure -pcritical openssh-server
+}
+
 #######################################################
 ### Other Setup Functions
 #######################################################
