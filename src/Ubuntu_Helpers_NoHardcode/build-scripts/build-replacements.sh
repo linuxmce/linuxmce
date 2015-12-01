@@ -319,8 +319,8 @@ function Build_Replacements_ubuntu_xenial
 
 	#Package: vdr-2.2.0
 	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
-	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr-dev*deb
-
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr-dev_*deb
+	
 	#Package: vdr-remotetimers-1.0.2
 	Build_Replacement_Package remotetimers external/vdr/remotetimers-1.0.2
 
@@ -332,6 +332,7 @@ function Build_Replacements_ubuntu_xenial
 
 	#Package: ruby1.8-1.8.7.375
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/ruby*dev*deb ${svn_dir}/${svn_branch_name}/ubuntu/libruby1.8_*deb
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/ri*1.8*.deb "${replacements_dir}"
 
 	# shairport (AirPlay Audio)
