@@ -1,0 +1,120 @@
+This is a "plugin" for the Video Disk Recorder (VDR).
+
+Written by:                  Frank Schmirler <vdrdev@schmirler.de>
+
+Project's homepage:          http://vdr.schmirler.de/
+
+Latest version available at: http://vdr.schmirler.de/
+
+See the file COPYING for license information.
+
+Description:
+------------
+This plugin offers SVDRP connections as a service to other plugins.
+Connecting to streamdev's VTP server port is possible, too. VTP provides
+a subset of the SVDRP commands but in contrast to SVDRP it can handle
+multiple connections at a time.
+
+There's no reason to load this plugin if no other plugin relies on it.
+
+If you are a developer and your plugin needs connections to a remote
+SVDRP server, you might want to take a closer look at it. In particular
+as long as an SVDRP server cannot interact with multiple connections at
+a time, you will be able to share connections with other local plugins.
+
+Configuration:
+--------------
+In the plugin setup you can configure a default server IP and a default
+port, so you don't have to enter these values in the setup of all
+plugins which use svdrpservice. Still you can override the default
+settings in every plugin.
+
+There's also a commandline option for the default server IP and port. Use
+something like that:
+
+  vdr ... -P 'svdrpservice 192.0.2.1:6419' ...
+
+The port is optional and defaults to 6419. So this is equivalent:
+
+  vdr ... -P 'svdrpservice 192.0.2.1' ...
+
+Note that the default SVDRP port on VDR before 1.7.15 was 2001.
+
+When using the commandline option, the options for default server IP and
+port in the plugin setup will become read-only.
+
+The default IP is used when the target IP of a new connection is either
+an empty string or the special IP 0.0.0.0. Likewise default port is used
+instead of destination port 0. If defaults have been used when opening
+a connection, the service call will return the actual values to the
+caller.
+
+There are also two timeout settings, one for the initial connect and
+one for reading replies. Increase these values carefully! A plugin which
+calls svdrpservice from the VDR main loop will block the main loop
+until the timeout expires when there's a problem with the connection.
+
+Automatic charset conversion:
+-----------------------------
+If the client VDR (the one running svdrpservice) and the server VDR (the
+one svdrpservice connects to) use different charsets, svdrpservice will do
+an on the fly conversion of everything it sends and receives.
+
+Usage:
+------
+Add a copy of header file "svdrpservice.h" if you want to use svdrpservice
+in your plugin. Call the "Service" method to interact with svdrpservice.
+There are two services available:
+1. SvdrpConnection gets or releases an SVDRP server connection
+2. SvdrpCommand sends a command and returns the results
+
+Typically your plugin will require the following code snippets:
+
+// include the svdrpservice header file
+#include "svdrpservice.h"
+
+// get the svdrpservice plugin
+cPlugin *svdrpservice = cPluginManager::GetPlugin("svdrpservice");
+if (svdrpservice == NULL) // TODO: ERROR
+
+// get a connection handle. This will open the connection to the server
+// or for a shared connection simply add a referer to the existing one.
+SvdrpConnection_v1_0 conn;
+conn.serverIp = "192.0.2.1";   // you must not use 127.0.0.1
+                               // use "0.0.0.0" or "" for setup default
+conn.serverPort = 6419;        // 6419 for SVDRP since VDR 1.7.15,
+                               // 2001 for SVDRP before VDR 1.7.15,
+                               // 2004 for VTP
+                               // 0 to use svdrpservice setup default
+conn.shared = true;            // share connection with others
+conn.handle = -1;              // Handle < 0: get me a handle
+SvdrpService->Service("SvdrpConnection-v1.0", &conn);
+if (conn.handle < 0) // TODO: ERROR
+
+// if defaults have been used, conn now contains the actual values
+dsyslog("Connected to %s:%hu", *conn.serverIp, conn.serverPort);
+
+// now you can send your commands
+SvdrpCommand_v1_0 cmd;
+cmd.handle = conn.handle;
+cmd.command = "STAT\r\n";
+SvdrpService->Service("SvdrpCommand-v1.0", &cmd);
+
+// Check the response code. A code below 100 (currently only 0 is used)
+// indicates a local problem (e.g. timeout while talking to the server).
+#define EXPECTED 250
+if (cmd.responseCode != EXPECTED) // TODO: ERROR
+
+// Step through the reply
+for (cLine *line = cmd.reply.First(); line; line = cmd.reply.Next(line))
+   ...
+
+// Finally release the connection (handle >= 0). This will close the
+// SVDRP connection unless an other plugin still uses it.
+SvdrpService->Service("SvdrpConnection-v1.0", &conn);
+
+Debugging:
+----------
+Compile with SVDRPSERVICE_DEBUG=syslog if you want to see the commands
+and replies in the log. Use SVDRPSERVICE_DEBUG=stderr (actually any
+value will do) to get output on the terminal where you started vdr.
