@@ -1,0 +1,297 @@
+vdr-plugin-svdrpservice (1.0.0-5) unstable; urgency=medium
+
+  * Now supporting the /etc/vdr/conf.d mechanism
+
+ -- Tobias Grimm <etobi@debian.org>  Mon, 23 Mar 2015 23:23:53 +0100
+
+vdr-plugin-svdrpservice (1.0.0-4) unstable; urgency=medium
+
+  * Build-depend on vdr-dev (>= 2.2.0)
+
+ -- Tobias Grimm <etobi@debian.org>  Thu, 19 Feb 2015 12:39:58 +0100
+
+vdr-plugin-svdrpservice (1.0.0-3) unstable; urgency=medium
+
+  * Standards-Version: 3.9.6
+  * Build-depend on vdr-dev (>= 2.1.10)
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 14 Feb 2015 15:34:25 +0100
+
+vdr-plugin-svdrpservice (1.0.0-2) unstable; urgency=medium
+
+  * Build-depend on vdr-dev (>= 2.0.6)
+  * Standards-Version: 3.9.5
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 26 Oct 2014 14:25:32 +0100
+
+vdr-plugin-svdrpservice (1.0.0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 15 Sep 2013 10:32:20 +0200
+
+vdr-plugin-svdrpservice (0.0.4-19) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 2.0.0)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 31 Mar 2013 14:00:23 +0200
+
+vdr-plugin-svdrpservice (0.0.4-18) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.42)
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 23 Mar 2013 20:48:29 +0100
+
+vdr-plugin-svdrpservice (0.0.4-17) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.41)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 17 Mar 2013 19:52:32 +0100
+
+vdr-plugin-svdrpservice (0.0.4-16) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.40)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 10 Mar 2013 19:37:20 +0100
+
+vdr-plugin-svdrpservice (0.0.4-15) unstable; urgency=low
+
+  * Use debhelper 9
+  * Build-depend on vdr-dev (>= 1.7.39)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 03 Mar 2013 10:16:01 +0100
+
+vdr-plugin-svdrpservice (0.0.4-14) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.28)
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 09 Jun 2012 18:33:21 +0200
+
+vdr-plugin-svdrpservice (0.0.4-13) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.27)
+
+ -- Tobias Grimm <etobi@debian.org>  Thu, 19 Apr 2012 23:03:15 +0200
+
+vdr-plugin-svdrpservice (0.0.4-12) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.26)
+  * Standards-Version: 3.9.3
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 25 Mar 2012 13:35:54 +0200
+
+vdr-plugin-svdrpservice (0.0.4-11) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.23)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 29 Jan 2012 19:05:18 +0100
+
+vdr-plugin-svdrpservice (0.0.4-10) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.22)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 11 Dec 2011 17:16:35 +0100
+
+vdr-plugin-svdrpservice (0.0.4-9) unstable; urgency=low
+
+  * Switched to GIT using pristine tar
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 29 Oct 2011 20:11:29 +0200
+
+vdr-plugin-svdrpservice (0.0.4-8) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.21)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 18 Sep 2011 18:23:33 +0200
+
+vdr-plugin-svdrpservice (0.0.4-7) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.20)
+  * Standards-Version: 3.9.2
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 20 Aug 2011 15:25:35 +0200
+
+vdr-plugin-svdrpservice (0.0.4-6) unstable; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.7.18)
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 17 Apr 2011 20:06:13 +0200
+
+vdr-plugin-svdrpservice (0.0.4-5) unstable; urgency=low
+
+  * Build-depend on vdr-dev >= 1.7.17
+  * Updated debian/copyright
+  * Standards-Version: 3.9.1
+  * Switched to debhelper 7 and dropped cdbs
+
+ -- Tobias Grimm <etobi@debian.org>  Fri, 08 Apr 2011 20:20:27 +0200
+
+vdr-plugin-svdrpservice (0.0.4-4) unstable; urgency=low
+
+  * Build-depend on vdr-dev >= 1.6.0-16
+  * Bumped standards version to 3.8.4
+  * Minor debian/copyright update
+  * Added homepage field
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 28 Mar 2010 15:00:47 +0200
+
+vdr-plugin-svdrpservice (0.0.4-3) unstable; urgency=low
+
+  * Removed non-standard shebang line from debian/rules (Closes: #552660)
+  * Standards-Version: 3.8.3
+  * Added misc:Depends
+
+ -- Tobias Grimm <etobi@debian.org>  Mon, 09 Nov 2009 00:46:19 +0100
+
+vdr-plugin-svdrpservice (0.0.4-2) unstable; urgency=low
+
+  * Release for vdrdevel 1.7.6
+  * Bumped standards version to 3.8.1
+  * Updated debian/copyright
+  * Changed section to "video"
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 29 Apr 2009 23:11:09 +0200
+
+vdr-plugin-svdrpservice (0.0.4-1) unstable; urgency=low
+
+  * New upstream release
+  * Changed my maintainer/uploader email address
+  * Updated debian/copyright
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 15 Nov 2008 16:59:26 +0100
+
+vdr-plugin-svdrpservice (0.0.3-15) unstable; urgency=low
+
+  [ Tobias Grimm ]
+  * Dropped patchlevel control field
+  * Build-Depend on vdr-dev (>=1.6.0-5)
+  * Bumped Standards-Version to 3.8.0
+
+ -- Thomas Schmidt <tschmidt@debian.org>  Sat, 19 Jul 2008 18:33:25 +0200
+
+vdr-plugin-svdrpservice (0.0.3-14) unstable; urgency=low
+
+  * Upload to unstable
+
+ -- Thomas Schmidt <tschmidt@debian.org>  Mon, 09 Jun 2008 00:12:21 +0200
+
+vdr-plugin-svdrpservice (0.0.3-13) experimental; urgency=low
+
+  * Increased package version to force rebuild for vdr 1.6.0-1ctvdr7
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 12 May 2008 13:15:09 +0200
+
+vdr-plugin-svdrpservice (0.0.3-12) experimental; urgency=low
+
+  * Build-depend on vdr-dev (>= 1.6.0)
+  * Switched Build-System to cdbs, Build-Depend on cdbs
+  * Renamed XS-Vcs-* fields to Vcs-* in debian/control
+  * Bumped Standards-Version to 3.7.3
+
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 04 Apr 2008 14:14:52 +0200
+
+vdr-plugin-svdrpservice (0.0.3-11) experimental; urgency=low
+
+  * Force rebuild for vdr 1.5.15
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 18 Feb 2008 21:09:15 +0100
+
+vdr-plugin-svdrpservice (0.0.3-10) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.13
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 16 Jan 2008 10:31:40 +0100
+
+vdr-plugin-svdrpservice (0.0.3-9) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.12
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 20 Nov 2007 23:46:32 +0100
+
+vdr-plugin-svdrpservice (0.0.3-8) unstable; urgency=low
+
+  * Added Copyright information for Debian packaging to debian/copyright
+
+ -- Thomas Schmidt <tschmidt@debian.org>  Tue,  6 Nov 2007 23:34:24 +0100
+
+vdr-plugin-svdrpservice (0.0.3-7) unstable; urgency=low
+
+  * First upload to the official archive (Closes: #408637)
+  * Updated debian/copyright
+  * Changed Maintainer to the Debian VDR Team
+  * Added Tobias Grimm, Thomas Günther and myself to Uploaders
+  * Build-Depend on debhelper (>= 5), set COMPAT-Level to 5
+
+ -- Thomas Schmidt <tschmidt@debian.org>  Sun, 07 Oct 2007 13:36:39 +0200
+
+vdr-plugin-svdrpservice (0.0.3-6) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.9
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 28 Aug 2007 01:01:15 +0200
+
+vdr-plugin-svdrpservice (0.0.3-5) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.8
+
+ -- Thomas Günther <tom@toms-cafe.de>  Thu, 23 Aug 2007 01:09:13 +0200
+
+vdr-plugin-svdrpservice (0.0.3-4) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.6
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 14 Aug 2007 01:46:25 +0200
+
+vdr-plugin-svdrpservice (0.0.3-3) experimental; urgency=low
+
+  [ Thomas Schmidt ]
+  * Added XS-Vcs-Svn and XS-Vcs-Browser fields to debian/control
+
+  [ Thomas Günther ]
+  * Release for vdrdevel 1.5.5
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 27 Jun 2007 23:02:48 +0200
+
+vdr-plugin-svdrpservice (0.0.3-2) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.2
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sat, 28 Apr 2007 00:00:46 +0200
+
+vdr-plugin-svdrpservice (0.0.3-1) experimental; urgency=low
+
+  * New upstream release
+  * Removed 10_buffersize.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 10 Mar 2007 21:24:24 +0100
+
+vdr-plugin-svdrpservice (0.0.2-4) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.1
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 27 Feb 2007 19:59:24 +0100
+
+vdr-plugin-svdrpservice (0.0.2-3) unstable; urgency=low
+
+  * Added 10_buffersize.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 23 Jan 2007 00:03:23 +0100
+
+vdr-plugin-svdrpservice (0.0.2-2) experimental; urgency=low
+
+  [ Thomas Günther ]
+  * Replaced VDRdevel adaptions in debian/rules with make-special-vdr
+  * Adapted call of dependencies.sh and patchlevel.sh to the new location
+    in /usr/share/vdr-dev/
+
+  [ Tobias Grimm ]
+  * Build-Depend on vdr-dev (>=1.4.5-1)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 14 Jan 2007 20:17:46 +0100
+
+vdr-plugin-svdrpservice (0.0.2-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 11 Nov 2006 21:09:28 +0100
+
