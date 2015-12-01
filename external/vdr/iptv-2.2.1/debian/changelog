@@ -1,0 +1,398 @@
+vdr-plugin-iptv (2.2.1-0yavdr1) unstable; urgency=medium
+
+  * rebuild
+
+ -- phenigma <phenigma@hotmail.com>  Wed, 02 Dec 2015 13:21:07 -0500
+
+vdr-plugin-iptv (2.2.1-0yavdr1~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Wed, 05 Aug 2015 21:07:17 +0200
+
+vdr-plugin-iptv (2.2.1-0yavdr1~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Mon, 25 May 2015 17:39:29 +0200
+
+vdr-plugin-iptv (2.2.1-0yavdr0~trusty) trusty; urgency=medium
+
+  * rework debian dir
+  * new upstream version 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Tue, 28 Apr 2015 19:24:31 +0200
+
+vdr-plugin-iptv (2.0.3-1yavdr6~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Fri, 03 Apr 2015 15:17:53 +0200
+
+vdr-plugin-iptv (2.0.3-1yavdr5~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Fri, 20 Feb 2015 11:14:24 +0100
+
+vdr-plugin-iptv (2.0.3-1yavdr4~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 12 Feb 2015 00:34:26 +0100
+
+vdr-plugin-iptv (2.0.3-1yavdr3~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 08 Feb 2015 16:18:38 +0100
+
+vdr-plugin-iptv (2.0.3-1yavdr2~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 01 Feb 2015 16:17:02 +0100
+
+vdr-plugin-iptv (2.0.3-1yavdr1~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 18 Jan 2015 16:35:24 +0100
+
+vdr-plugin-iptv (2.0.3-1yavdr0~trusty) trusty; urgency=medium
+
+  * allow vlc-nox instead of vlc, too 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Wed, 17 Sep 2014 20:15:59 +0200
+
+vdr-plugin-iptv (2.0.3-0yavdr5~trusty) trusty; urgency=medium
+
+  * rebuild for testing-vdr
+
+ -- Alexander Grothe <seahawk1986@hotmail.com>  Tue, 22 Apr 2014 19:36:49 +0200
+
+vdr-plugin-iptv (2.0.3-0yavdr4~trusty) trusty; urgency=medium
+
+  * rebuild for trusty thar
+
+ -- Alexander Grothe <seahawk1986@hotmail.com>  Sat, 05 Apr 2014 14:31:03 +0200
+
+vdr-plugin-iptv (2.0.3-0yavdr3~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Wed, 02 Apr 2014 22:05:05 +0200
+
+vdr-plugin-iptv (2.0.3-0yavdr1~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Sun, 23 Mar 2014 15:58:45 +0100
+
+vdr-plugin-iptv (2.0.3-0yavdr0~precise) precise; urgency=medium
+
+  * new upstream release including all previous changes 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 09 Mar 2014 15:26:52 +0100
+
+vdr-plugin-iptv (2.0.2-3yavdr0~trusty) trusty; urgency=medium
+
+  * build for precise 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 09 Mar 2014 13:11:31 +0100
+
+vdr-plugin-iptv (2.0.2-2yavdr0~precise) precise; urgency=medium
+
+  * add patch to correct target directory for external scripts in Makefile form CFGDIR to RESDIR
+  * remove double install of files from iptv directory 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 09 Mar 2014 13:08:44 +0100
+
+vdr-plugin-iptv (2.0.2-1yavdr0~precise) precise; urgency=medium
+
+  * add vdr-abi dependency
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Fri, 24 Jan 2014 16:21:09 +0100
+
+vdr-plugin-iptv (2.0.2-0yavdr0~precise) precise; urgency=medium
+
+  * new upstream release
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 19 Jan 2014 11:49:20 +0100
+
+vdr-plugin-iptv (2.0.0-2yavdr4~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Sat, 26 Oct 2013 10:36:49 +0200
+
+vdr-plugin-iptv (2.0.0-2yavdr3~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 12 Sep 2013 13:05:28 +0200
+
+vdr-plugin-iptv (2.0.0-2yavdr2~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Fri, 12 Jul 2013 00:59:24 +0200
+
+vdr-plugin-iptv (2.0.0-2yavdr1~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 23 Jun 2013 10:23:20 +0200
+
+vdr-plugin-iptv (2.0.0-2yavdr0~precise) precise; urgency=high
+
+  * new stable release
+
+ -- Frank Neumann <fnu@yavdr.org>  Thu, 04 Apr 2013 08:53:17 +0200
+
+vdr-plugin-iptv (1.2.1-0yavdr3~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Tue, 02 Apr 2013 19:48:27 +0200
+
+vdr-plugin-iptv (1.2.1-0yavdr2~precise) precise; urgency=medium
+
+  * add libcurl4-openssl-dev 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Tue, 12 Mar 2013 18:25:58 +0100
+
+vdr-plugin-iptv (1.2.1-0yavdr1~precise) precise; urgency=medium
+
+  * add pkg-config 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Tue, 12 Mar 2013 18:17:44 +0100
+
+vdr-plugin-iptv (1.2.1-0yavdr0~precise) precise; urgency=medium
+
+  * new upstream version 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Tue, 12 Mar 2013 18:02:52 +0100
+
+vdr-plugin-iptv (0.5.2-0yavdr7~precise) precise; urgency=high
+
+  * Rebuild for yaVDR64 0.6.0alpha
+
+ -- Frank Neumann <fnu@yavdr.org>  Sun, 10 Mar 2013 21:22:22 +0100
+
+vdr-plugin-iptv (0.5.2-0yavdr6~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 09 Dec 2012 19:25:24 +0100
+
+vdr-plugin-iptv (0.5.2-0yavdr5~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 05 Dec 2012 21:06:29 +0100
+
+vdr-plugin-iptv (0.5.2-0yavdr4~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sat, 01 Dec 2012 15:53:20 +0100
+
+vdr-plugin-iptv (0.5.2-0yavdr3~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 21 Nov 2012 20:04:55 +0100
+
+vdr-plugin-iptv (0.5.2-0yavdr2~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Holger Schvestka <hotzenplotz5@gmx.de>  Wed, 21 Nov 2012 07:35:49 +0100
+
+vdr-plugin-iptv (0.5.2-0yavdr1~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Holger Schvestka <hotzenplotz5@gmx.de>  Thu, 11 Oct 2012 11:16:04 +0200
+
+vdr-plugin-iptv (0.5.2-0yavdr0~precise) precise; urgency=medium
+
+  * New upstream release
+
+ -- Gerald Dachs <gda@dachsweb.de>  Thu, 03 May 2012 15:49:47 +0200
+
+vdr-plugin-iptv (0.5.0-0yavdr0~precise) precise; urgency=medium
+
+  * New upstream release
+
+ -- Holger Schvestka <hotzenplotz5@gmx.de>  Sat, 31 Mar 2012 19:23:29 +0200
+
+vdr-plugin-iptv (0.4.2-1) experimental; urgency=low
+
+  * New upstream release
+  * source/format 3.0
+  * Removed README.source
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 08 Jun 2010 22:56:26 +0200
+
+vdr-plugin-iptv (0.4.1-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Thomas Günther <tom@toms-cafe.de>  Fri, 12 Mar 2010 23:12:34 +0100
+
+vdr-plugin-iptv (0.4.0-1) experimental; urgency=low
+
+  * New upstream release for vdr 1.7.x
+  * Removed INCLUDES from debian/rules ("INCLUDES +=" in Makefile not applied)
+  * Removed 02_libsi-include.dpatch
+  * Removed dpatch from Build-Depends
+  * Build-Depend on vdr-dev (>= 1.6.0-16)
+  * Adapted README.Debian
+  * Standards-Version: 3.8.4
+  * Updated debian/copyright
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sun, 07 Mar 2010 15:32:58 +0100
+
+vdr-plugin-iptv (0.3.1-2) experimental; urgency=low
+
+  * Removed non-standard shebang line from debian/rules
+  * Added README.source
+
+ -- Tobias Grimm <etobi@debian.org>  Mon, 09 Nov 2009 19:36:24 +0100
+
+vdr-plugin-iptv (0.3.1-1) experimental; urgency=low
+
+  * New upstream release
+  * Standards-Version: 3.8.3
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 03 Oct 2009 15:48:04 +0200
+
+vdr-plugin-iptv (0.3.0-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Tobias Grimm <etobi@debian.org>  Thu, 04 Jun 2009 20:51:40 +0200
+
+vdr-plugin-iptv (0.2.6-1) experimental; urgency=low
+
+  * New upstream release
+  * Fixed some typos in README.Debian, patch provided by Paul Menzel
+
+ -- Tobias Grimm <etobi@debian.org>  Sun, 03 May 2009 18:17:18 +0200
+
+vdr-plugin-iptv (0.2.5-2) experimental; urgency=low
+
+  * Release for vdrdevel 1.7.6
+  * Changed Maintainer to Debian VDR Team
+  * Added Tobias Grimm and myself to Uploaders
+  * Bumped standards version to 3.8.1
+  * Changed section to "video"
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 29 Apr 2009 23:10:55 +0200
+
+vdr-plugin-iptv (0.2.5-1) experimental; urgency=low
+
+  * New upstream release
+  * Updated copyright years
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 14 Mar 2009 20:24:53 +0100
+
+vdr-plugin-iptv (0.2.3-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 21 Feb 2009 15:35:38 +0100
+
+vdr-plugin-iptv (0.2.2-1) experimental; urgency=low
+
+  * New upstream release
+  * Changed my maintainer/uploader email address
+  * Fixed debian/watch
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 15 Nov 2008 16:49:56 +0100
+
+vdr-plugin-iptv (0.2.1-1) experimental; urgency=low
+
+  * New upstream release
+  * Dropped patchlevel control field
+  * Build-Depend on vdr-dev (>=1.6.0-5)
+  * Bumped Standards-Version to 3.8.0
+
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 25 Jul 2008 19:25:19 +0200
+
+vdr-plugin-iptv (0.2.0-2) experimental; urgency=low
+
+  * Increased package version to force rebuild for vdr 1.6.0-1ctvdr7
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 12 May 2008 12:59:33 +0200
+
+vdr-plugin-iptv (0.2.0-1) experimental; urgency=low
+
+  * New upstream release
+  * Build-depend on vdr-dev (>= 1.6.0)
+  * Updated debian/rules
+
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 03 Apr 2008 23:22:51 +0200
+
+vdr-plugin-iptv (0.0.7-1) experimental; urgency=low
+
+  * New upstream release
+  * Removed 03_vdr-1.5.15.dpatch - fixed upstream
+  * Removed 01_vdr-locale-support-detection.dpatch - fixed upstream
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 16 Mar 2008 19:22:52 +0100
+
+vdr-plugin-iptv (0.0.6-2) experimental; urgency=low
+
+  * Added 03_vdr-1.5.15.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 18 Feb 2008 21:08:09 +0100
+
+vdr-plugin-iptv (0.0.6-1) unstable; urgency=low
+
+  * New upstream release
+  * vlc2iptv became part of the upstream source, so using this now
+  * Switched Build-System to cdbs, Build-Depend on cdbs
+  * Added Homepage field to debian/control
+  * Added Vcs-* fields to debian/control
+  * Bumped Standards-Version to 3.7.3
+  * Added 01_vdr-locale-support-detection.dpatch
+  * Converted debian/copyright to UTF-8
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 27 Jan 2008 15:29:04 +0100
+
+vdr-plugin-iptv (0.0.4-1) unstable; urgency=low
+
+  * New upstream release
+  * Removed 03_de-po.dpatch (fixed upstream)
+  * Now vlc2iptv looks up the channel name in the channels.conf
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 25 Nov 2007 18:36:06 +0100
+
+vdr-plugin-iptv (0.0.3-2xeatre1) unstable; urgency=low
+
+  * Rebuild for new vdr 1.5.11-1xeatre1
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 12 Nov 2007 17:32:26 +0100
+
+vdr-plugin-iptv (0.0.3-2) unstable; urgency=low
+
+  * Force rebuild for vdr 1.4.7-2xeatre4 / 1.5.10-1xeatre3
+  * Build-Depend on vdr-dev >= 1.4.7-2
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 04 Nov 2007 01:19:21 +0100
+
+vdr-plugin-iptv (0.0.3-1) unstable; urgency=low
+
+  * New upstream release
+  * Added description of vlc2iptv
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 29 Oct 2007 20:49:24 +0100
+
+vdr-plugin-iptv (0.0.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #447906)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 29 Oct 2007 01:12:47 +0100

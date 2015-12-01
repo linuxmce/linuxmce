@@ -1,0 +1,37 @@
+Upstream Homepage:
+    http://www.saunalahti.fi/~rahrenbe/vdr/iptv/
+
+Upstream Authors:
+    Rolf Ahrenberg <Rolf.Ahrenberg AT sci.fi>
+    Antti Seppälä  <a.seppala AT gmail.com>
+
+Debian Maintainers:
+    Tobias Grimm <etobi@debian.org>
+    Thomas Günther <tom@toms-cafe.de>
+
+Copyright:
+    (C) 2007 - 2010 Rolf Ahrenberg, Antti Seppälä
+
+Copyright (Debian packaging):
+    (C) 2007 - 2010 Tobias Grimm, Thomas Günther
+
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+    The complete text of the GNU General Public License can be found
+    in /usr/share/common-licenses/GPL-2 on most Debian systems.
+
+License (Debian packaging):
+    The Debian packaging is licensed under the GPL, version 2 or any
+    later version, see /usr/share/common-licenses/GPL-2.

@@ -1,0 +1,33 @@
+Source: vdr-plugin-iptv
+Section: video
+Priority: extra
+Maintainer: Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>
+Uploaders: Tobias Grimm <etobi@debian.org>, Thomas Günther <tom@toms-cafe.de>
+Build-Depends: debhelper (>= 8), cdbs, vdr-dev (>= 2.2.0-1), gettext, pkg-config, libcurl4-openssl-dev
+Standards-Version: 3.9.4
+Vcs-Svn: svn://svn.debian.org/pkg-vdr-dvb/vdr/vdr-plugin-iptv/trunk/
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-vdr-dvb/vdr/vdr-plugin-iptv/trunk/
+Homepage: http://www.saunalahti.fi/~rahrenbe/vdr/iptv/
+
+Package: vdr-plugin-iptv
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${vdr:Depends}, vlc|vlc-nox
+Description: IPTV plug-in for VDR
+ This plug-in for the Linux Video Disc Recorder (VDR) seamlessly integrates
+ multicast IPTV transport streams. You can use any IPTV channel like any other
+ normal DVB channel for live viewing, recording, etc. The plug-in also features
+ full section filtering capabilities which allow for example information
+ to be extracted from the Event Information Tabel (EIT) embedded in the incoming
+ stream.
+ .
+ Currently the IPTV plug-in has direct support for both multicast UDP/RTP
+ and unicast HTTP MPEG1/2 transport streams.
+
+Package: vdr-plugin-iptv-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: vdr-plugin-iptv (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for vdr-plugin-iptv
+ .
+ This package contains only the debugging symbols for vdr-plugin-iptv 
