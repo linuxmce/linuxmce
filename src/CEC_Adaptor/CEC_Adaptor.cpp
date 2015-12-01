@@ -49,12 +49,12 @@ int CecLogMessage(void *cbParam, const cec_log_message message)
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"libCEC - ERR: %s",message.message);
       break;
     case CEC_LOG_WARNING:
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"libCEC - WARN: %s",message.message);
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"libCEC - WRN: %s",message.message);
       break;
     case CEC_LOG_NOTICE:
     case CEC_LOG_TRAFFIC:
     case CEC_LOG_DEBUG:
-      LoggerWrapper::GetInstance()->Write(LV_DEBUG,"libCEC - DEBUG: %s",message.message);
+      LoggerWrapper::GetInstance()->Write(LV_DEBUG,"libCEC - DBG: %s",message.message);
       break;
     default:
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECLogMessage: CALLBACK! Unhandled!" );
@@ -166,6 +166,7 @@ int CecCommand(void *cbParam, const cec_command command)
 int CecConfigurationChanged(void *cbParam, const libcec_configuration config)
 {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECConfigurationChanged: CALLBACK! Unhandled!");
+      return 0;
 }
 
 int CecAlert(void *cbParam, const libcec_alert type, const libcec_parameter param)
@@ -192,6 +193,7 @@ int CecAlert(void *cbParam, const libcec_alert type, const libcec_parameter para
 int CecMenuStateChanged(void *cbParam, const cec_menu_state state)
 {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECMenuStateChanged: CALLBACK! Unhandled!");
+      return 0;
 }
 
 void CecSourceActivated(void *cbParam, const cec_logical_address, const uint8_t val)
@@ -456,32 +458,28 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 		}
 	}
 
-//this fails in libcec2
-	//LoggerWrapper::GetInstance()->Write(LV_STATUS,"Attempting to set logical address");
 	if (!m_pParser->Open(m_sPort.c_str()))
-	  {
+	{
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not open serial port %s",m_sPort.c_str());
 	    UnloadLibCec(m_pParser);
 	    return false;
-	  }
+	}
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Setting Physical Address to: %s, %u", DATA_Get_PortChannel_Number().c_str() ,  strtol( DATA_Get_PortChannel_Number().c_str(), NULL, 16) );
-	m_pParser->SetPhysicalAddress( strtol( DATA_Get_PortChannel_Number().c_str(), NULL, 16) );
+	// Set the physical address of MD, in case it is not detected by libCEC?
+//	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Setting Physical Address to: %s, %u", DATA_Get_PortChannel_Number().c_str() ,  strtol( DATA_Get_PortChannel_Number().c_str(), NULL, 16) );
+//	m_pParser->SetPhysicalAddress( strtol( DATA_Get_PortChannel_Number().c_str(), NULL, 16) );
 
-//	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Setting Logical Address to: %s, %u", m_pParser->ToString( CECDEVICE_RECORDINGDEVICE1),  (int) CECDEVICE_RECORDINGDEVICE1 );
-//	m_pParser->SetLogicalAddress(CECDEVICE_RECORDINGDEVICE1);
-
-	m_myCECAddresses = m_pParser->GetLogicalAddresses(); // Seems to return logical addresses for *this* device
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Primary CEC Logical Address  : %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.primary ) );
+	m_myCECAddresses = m_pParser->GetLogicalAddresses(); // Return logical addresses for *this* device
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"My Primary CEC Logical Address  : %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.primary ) );
 	for ( uint8_t iPtr = 0; iPtr <= 11; iPtr++ ) {
 		if ( m_myCECAddresses.addresses[iPtr] ) {
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Secondary CEC Logical Address: %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.addresses[iPtr] ) );
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"My Secondary CEC Logical Address: %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.addresses[iPtr] ) );
 		}
 	}
 
 	// check all active devices on the CEC bus, let's try to match them to DTs in our tree
 	m_CECAddresses.Clear();
-	m_CECAddresses = m_pParser->GetActiveDevices(); // Seems to return logical addresses for all known CEC devices
+	m_CECAddresses = m_pParser->GetActiveDevices(); // Seems to return logical addresses for all known CEC devices on the bus
 
 	m_mapPhysicalAddress_to_LA.clear();
 	m_mapPK_Device_to_PA.clear();
@@ -535,11 +533,11 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 			string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Child's PK_Device=%i, CEC Physical Address: %s (N/A)", pChildDevice->m_dwPK_Device, tmp_node_id.c_str() );
 
-			// Check number of children (should only be one)
+			// Check number of children (should only be one - the embedded transmit device)
 			size_t size1 = pChildDevice->m_vectDeviceData_Impl_Children.size();
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Number of grand children=%i", size1 );
 
-			// iterate over grand children
+			// iterate over grand children - LCME DTs for CEC bus devices
 			DeviceData_Impl *pChildDevice1 = NULL;
 			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
 				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
@@ -555,14 +553,9 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 
 		}
 	}
-//	m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_Device_MD,DEVICEDATA_Audio_Settings_CONST);
-
-	m_pParser->SetActiveSource();
 
 	cec_logical_address ActiveSource = m_pParser->GetActiveSource();
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"CEC Active Source: %s", m_pParser->ToString(ActiveSource) );
-
-//	m_pParser->SwitchMonitoring(true);
 
 	return true;
 }
@@ -611,13 +604,11 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     cout << "Parameter: " << i->first << " Value: " << i->second << endl;
   }
 
-  string sPhysicalAddress = pDeviceData_Impl->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
-  uint64_t iPhysicalAddress = m_mapPK_Device_to_PA[pMessage->m_dwPK_Device_To];
+  string sPhysicalAddress = pDeviceData_Impl->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST]; // PortChannel of 'To' device
+  uint64_t iPhysicalAddress = m_mapPK_Device_to_PA[pMessage->m_dwPK_Device_To]; // Get the Physical Address based on PK_Device
   cout << "**Physical Address: " << sPhysicalAddress << ", " << iPhysicalAddress << endl;
 
   cec_logical_address LogicalAddress = (cec_logical_address) m_mapPhysicalAddress_to_LA[iPhysicalAddress];
-  cec_command cmd;
-  cmd.Clear();
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild - To PA: %s, LA: %i", sPhysicalAddress.c_str(), (int) LogicalAddress );
 
@@ -725,33 +716,37 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
 
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Make input active: %s",  sPhysicalAddress.c_str() );
 
-uint64_t iPhysicalAddress = m_mapPK_Device_to_PA[pMessage->m_dwPK_Device_To];
-cout << "**Physical Address: " << sPhysicalAddress << ", " << iPhysicalAddress << endl;
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"TRYINGTOSETACTIVE???? - To PA: %s, LA: %i", sPhysicalAddress.c_str(), (int) LogicalAddress );
 
-cec_logical_address LogicalAddress = (cec_logical_address) m_mapPhysicalAddress_to_LA[iPhysicalAddress];
-
-LoggerWrapper::GetInstance()->Write(LV_STATUS,"TRYINGTOSETACTIVE???? - To PA: %s, LA: %i", sPhysicalAddress.c_str(), (int) LogicalAddress );
-
-      // TODO: get our address from m_myCECAddresses and remove hardcode
+      // TODO: 0xXF - X = our LA
       uint8_t from = ( m_myCECAddresses.primary << 4 ) | 0x0F;
-//      sArguments = "4F 82" + sPhysicalAddress.substr(0, 2) + " " + sPhysicalAddress.substr(2, 2);
-//      cmd.PushBack(0x4F); /* from - to */
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Make input active from/to: %u",  from );
 
+      cec_command cmd;
+      cmd.Clear();
       cmd.PushBack(from); /* from - to */
       cmd.PushBack(0x82); /* cmd number */
       cmd.PushBack( strtol( sPhysicalAddress.substr(0, 2).c_str(), NULL, 16) );
       cmd.PushBack( strtol( sPhysicalAddress.substr(2, 2).c_str(), NULL, 16) );
 
-      if ( m_pParser->Transmit(cmd) ) {
-	sCMD_Result = "OK";
+      if ( m_pParser->Transmit(cmd) )
+      // SetStreamPath to destination PA
+//      if ( m_pParser->SetStreamPath( strtol( sPhysicalAddress.c_str(), NULL, 16 )) )
+      {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: SetStreamPath OK - %s", sPhysicalAddress.c_str() );
+
+	if ( LogicalAddress == m_myCECAddresses.primary && m_pParser->SetActiveSource() )
+	{
+	        LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: SetActiveSource!! OK - %s", sPhysicalAddress.c_str() );
+	}
+
+        sCMD_Result = "OK";
       }
       return;
       break;
   }
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: UNHANDLED COMMAND/CHILD - To: %i, ID: %i",  pMessage->m_dwPK_Device_To, pMessage->m_dwID);
-
 /*
   if (IRBase::ProcessMessage(pMessage))
     {
