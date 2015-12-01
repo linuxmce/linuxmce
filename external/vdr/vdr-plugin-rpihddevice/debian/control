@@ -1,0 +1,12 @@
+Source: vdr-plugin-rpihddevice
+Maintainer: developers <developers@linuxmce.org>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: vdr-plugin-rpihddevice
+Architecture: armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: RPi OMX output for vdr
+ RPi OMX output for vdr

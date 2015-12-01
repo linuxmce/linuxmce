@@ -1,0 +1,5 @@
+vdr-plugin-rpihddevice (1.0.0-lmce1) unstable; urgency=medium
+
+  * initial build
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Mon, 30 Nov 2015 12:55:00 -0500
