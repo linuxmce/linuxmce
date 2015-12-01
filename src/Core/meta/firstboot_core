@@ -29,6 +29,7 @@ if ! grep ubiquity /proc/cmdline ; then
 	Configure_Network_Database # write the network settings to the database
 	/usr/pluto/bin/Network_Setup.sh # setup all networking related services
 fi
+Configure_SSH_Server
 
 ###########################################################
 ###########################################################
