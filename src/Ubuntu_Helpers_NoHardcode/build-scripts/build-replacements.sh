@@ -321,11 +321,15 @@ function Build_Replacements_ubuntu_xenial
 	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
 	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr-dev_*deb
 	
+	#Package: vdr-plugin-svdrpservice is needed by remotetimers
+	Build_Replacement_Package vdr-plugin-svdrpservice external/vdr/vdr-plugin-svdrpservice-1.0.0
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/svdrpservice-dev_*.deb
+	
 	#Package: vdr-remotetimers-1.0.2
-	Build_Replacement_Package remotetimers external/vdr/remotetimers-1.0.2
+	Build_Replacement_Package vdr-plugin-remotetimers external/vdr/remotetimers-1.0.2
 
 	#Package: vdr-streamdev
-	Build_Replacement_Package streamdev external/vdr/vdr-plugin-streamdev-d66c635a80b312e2e7277a8fe10f500b05317acd
+	Build_Replacement_Package vdr-plugin-streamdev external/vdr/vdr-plugin-streamdev-d66c635a80b312e2e7277a8fe10f500b05317acd
 
 	#Package: vdr-xineliboutput
 	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
