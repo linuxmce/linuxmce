@@ -255,7 +255,11 @@ function Build_Replacements_ubuntu_trusty
 
 	#Package: vdr-2.2.0
 	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
-	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr-dev*deb
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr-dev_*deb
+
+	#Package: vdr-plugin-svdrpservice is needed by remotetimers
+	Build_Replacement_Package vdr-plugin-svdrpservice external/vdr/vdr-plugin-svdrpservice-1.0.0
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/svdrpservice-dev_*.deb
 
 	#Package: vdr-remotetimers-1.0.2
 	Build_Replacement_Package remotetimers external/vdr/remotetimers-1.0.2
@@ -265,6 +269,9 @@ function Build_Replacements_ubuntu_trusty
 
 	#Package: vdr-xineliboutput
 	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
+
+	#Package: vdr-iptv
+	Build_Replacement_Package iptv external/vdr/iptv-2.2.1
 
 	#Package: ruby1.8-1.8.7.375
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
@@ -320,11 +327,11 @@ function Build_Replacements_ubuntu_xenial
 	#Package: vdr-2.2.0
 	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
 	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr-dev_*deb
-	
+
 	#Package: vdr-plugin-svdrpservice is needed by remotetimers
 	Build_Replacement_Package vdr-plugin-svdrpservice external/vdr/vdr-plugin-svdrpservice-1.0.0
 	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/svdrpservice-dev_*.deb
-	
+
 	#Package: vdr-remotetimers-1.0.2
 	Build_Replacement_Package vdr-plugin-remotetimers external/vdr/remotetimers-1.0.2
 
@@ -333,6 +340,9 @@ function Build_Replacements_ubuntu_xenial
 
 	#Package: vdr-xineliboutput
 	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
+
+	#Package: vdr-iptv
+	Build_Replacement_Package iptv external/vdr/iptv-2.2.1
 
 	#Package: ruby1.8-1.8.7.375
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
@@ -358,7 +368,11 @@ function Build_Replacements_Common_raspbian
 {
 	#Package: vdr-2.2.0
 	Build_Replacement_Package vdr external/vdr/vdr-2.2.0
-	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr-dev*deb
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/vdr-dev_*deb
+
+	#Package: vdr-plugin-svdrpservice is needed by remotetimers
+	Build_Replacement_Package vdr-plugin-svdrpservice external/vdr/vdr-plugin-svdrpservice-1.0.0
+	dpkg -i ${svn_dir}/${svn_branch_name}/external/vdr/svdrpservice-dev_*.deb
 
 	#Package: vdr-remotetimers-1.0.2
 	Build_Replacement_Package remotetimers external/vdr/remotetimers-1.0.2
@@ -368,6 +382,9 @@ function Build_Replacements_Common_raspbian
 
 	#Package: vdr-plugin-rpihddevice
 	Build_Replacement_Package rpihddevice external/vdr/vdr-plugin-rpihddevice
+
+	#Package: vdr-iptv
+	Build_Replacement_Package iptv external/vdr/iptv-2.2.1
 
 	#Package: pthsem for bcusdk
 	pushd 	${svn_dir}/${svn_branch_name}/external/pthsem-2.0.8
