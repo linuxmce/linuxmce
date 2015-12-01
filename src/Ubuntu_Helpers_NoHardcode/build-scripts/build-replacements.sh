@@ -361,8 +361,8 @@ function Build_Replacements_Common_raspbian
 	#Package: vdr-streamdev
 	Build_Replacement_Package streamdev external/vdr/vdr-plugin-streamdev-d66c635a80b312e2e7277a8fe10f500b05317acd
 
-	#Package: vdr-xineliboutput
-	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
+	#Package: vdr-plugin-rpihddevice
+	Build_Replacement_Package rpihddevice external/vdr/vdr-plugin-rpihddevice
 
 	#Package: pthsem for bcusdk
 	pushd 	${svn_dir}/${svn_branch_name}/external/pthsem-2.0.8
