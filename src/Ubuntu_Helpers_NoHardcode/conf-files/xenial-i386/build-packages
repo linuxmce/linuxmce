@@ -232,3 +232,8 @@ fastjar
 libola-dev
 libgdbm-dev
 libgoogle-perftools-dev
+dh-systemd 
+libsystemd-daemon-dev
+libcec-platform-dev
+libbluray-dev 
+freeglut3-dev
