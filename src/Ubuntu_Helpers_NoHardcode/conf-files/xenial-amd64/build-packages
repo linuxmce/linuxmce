@@ -232,3 +232,5 @@ fastjar
 libola-dev
 libgdbm-dev
 libgoogle-perftools-dev
+dh-systemd 
+libsystemd-daemon-dev
