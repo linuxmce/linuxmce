@@ -234,6 +234,6 @@ libgdbm-dev
 libgoogle-perftools-dev
 dh-systemd 
 libsystemd-daemon-dev
-libubuntu-application-api-dev
+libcec-platform-dev
 libbluray-dev 
 freeglut3-dev
