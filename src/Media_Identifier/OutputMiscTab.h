@@ -57,7 +57,7 @@ namespace DCE
 
       sOutput = m_sDiskId + "\n";
 
-      for(vector<OutputMiscTabAttribute>::iterator it = v.begin(); it != v.end(); ++it) {
+      for(vector<OutputMiscTabAttribute>::iterator it = m_vAttributes.begin(); it != m_vAttributes.end(); ++it) {
         OutputMiscTabAttribute Attribute = *it;
 
         sOutput += Attribute.m_iTrack + "\t";
