@@ -16,18 +16,39 @@ namespace DCE
 {
   class OutputMiscTabAttribute
   {
-    int m_iPK_Attribute;
-    string m_sDescription;
     OutputMiscTabAttribute();
     ~OutputMiscTabAttribute();
     
+    int m_iPK_Attribute;
+    string m_sValue;
   };
 
   class OutputMiscTab 
   {
-    
     OutputMiscTab();
+    OutputMiscTab(string sDiskId);
     ~OutputMiscTab();
+
+    string m_sDiskID;
+    vector<OutPutMiscTabAttribute> Attribute;
+
+    void setDiskId(string sDiskId);
+    void addAttribute(int iTrack, int iAttributeType, int iSection, string sWholeName)
+    {
+      OutputMiscTabAttribute Attribute;
+
+      // Disk ID		PK_AttributeType=14
+      // Album			PK_AttributeType=3
+      // Performer		PK_AttributeType=2
+      // Conductor		PK_AttributeType=15
+      // ComposerWriter		PK_AttributeType=16
+      // Producer		PK_AttributeType=38
+      // Genre			PK_AttributeType=8
+      // Track			PK_AttributeType=5
+      // Release Date		PK_AttributeType=19
+      // Year			PK_AttributeType=48
+    };
+
   };
 }
 
