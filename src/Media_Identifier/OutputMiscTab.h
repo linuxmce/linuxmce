@@ -18,38 +18,56 @@ namespace DCE
   {
     OutputMiscTabAttribute();
     ~OutputMiscTabAttribute();
-    
-    int m_iPK_Attribute;
+
+    int m_iTrack;
+    int m_iPK_AttributeType;
+    int m_iSection;
     string m_sValue;
   };
 
-  class OutputMiscTab 
+  class OutputMiscTab
   {
     OutputMiscTab();
     OutputMiscTab(string sDiskId);
     ~OutputMiscTab();
 
-    string m_sDiskID;
-    vector<OutPutMiscTabAttribute> Attribute;
+    string m_sDiskId;
+    vector<OutPutMiscTabAttribute> m_vAttributes;
 
-    void setDiskId(string sDiskId);
-    void addAttribute(int iTrack, int iAttributeType, int iSection, string sWholeName)
+    void OutputMiscTab::setDiskId(string sDiskId)
+    {
+      m_sDiskId = sDiskId;
+    };
+
+    void OutputMiscTab::addAttribute(int iTrack, int iAttributeType, int iSection, string sWholeName)
     {
       OutputMiscTabAttribute Attribute;
 
-      // Disk ID		PK_AttributeType=14
-      // Album			PK_AttributeType=3
-      // Performer		PK_AttributeType=2
-      // Conductor		PK_AttributeType=15
-      // ComposerWriter		PK_AttributeType=16
-      // Producer		PK_AttributeType=38
-      // Genre			PK_AttributeType=8
-      // Track			PK_AttributeType=5
-      // Release Date		PK_AttributeType=19
-      // Year			PK_AttributeType=48
+      Attribute.m_iTrack = iTrack;
+      Attribute.m_iPK_AttributeType = iAttributeType;
+      Attribute.m_iSection = iSection;
+      Attribute.m_sValue = sWholeName;
+
+      m_vAttributes.push_back(Attribute);
     };
 
-  };
+    string OutputMiscTab::OutputAttributes()
+    {
+      string sOutput;
+
+      sOutput = m_sDiskId + "\n";
+
+      for(vector<OutputMiscTabAttribute>::iterator it = v.begin(); it != v.end(); ++it) {
+        OutputMiscTabAttribute Attribute = *it;
+
+        sOutput += Attribute.m_iTrack + "\t";
+	sOutput += Attribute.m_iPK_AttributeType + "\t";
+	sOutput += Attbibute.m_iSection + "\t";
+	sOutput += Attribute.m_sWholeName + "\n";
+      }
+
+      return sOutput;
+    };
 }
 
 #endif /* OUTPUTMISCTAB_H */
