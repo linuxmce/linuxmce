@@ -27,7 +27,7 @@ cat <<-EOF > /root/.my.cnf
 
 StatsMessage "Setting up $DEB_CACHE"
 #Make sure there is are Packages files on the MD so apt-get update does not fail
-if [[ ! -f /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz ]]
+if [[ ! -f /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz ]] ; then
 	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
 	touch /usr/pluto/deb-cache/$DEB_CACHE/Packages
 	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
