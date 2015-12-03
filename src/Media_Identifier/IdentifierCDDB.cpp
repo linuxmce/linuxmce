@@ -11,6 +11,7 @@
 #include <cddb/cddb.h>
 
 #include "IdentifierCDDB.h"
+#include "OutputMiscTab.h"
 
 using namespace DCE;
 using namespace std;
@@ -46,15 +47,16 @@ IdentifierCDDB::~IdentifierCDDB()
 bool IdentifierCDDB::Init()
 {
   if ( !IdentifierBase::Init() )
-    {
-      return false;
-    }
+  {
+    return false;
+  }
 
   /* much of this is based on the libcddb2 example application */
   /* create a new cddb connection */
   conn = cddb_new();
 
-  if (!conn) {
+  if (!conn)
+  {
     // error_exit(GENERIC_ERROR, "unable to create connection structure");
     return false;
   }
@@ -64,7 +66,8 @@ bool IdentifierCDDB::Init()
 
 bool IdentifierCDDB::Identify()
 {
-    if (!conn) {
+    if (!conn)
+    {
       // error_exit(GENERIC_ERROR, "unable to create connection structure");
       return false;
     }
@@ -76,7 +79,8 @@ bool IdentifierCDDB::Identify()
     }
 
     disc = cd_read((char *)m_sPath.c_str());
-    if (!disc) {
+    if (!disc)
+    {
         //error_exit(GENERIC_ERROR, "could not read CD in CD-ROM drive");
         return false;
     }
@@ -84,10 +88,13 @@ bool IdentifierCDDB::Identify()
     int matches;
     cddb_disc_calc_discid(disc);
     matches = cddb_query(conn, disc);
-    if (matches == -1) {
+    if (matches == -1)
+    {
         //error_exit(cddb_errno(conn), "could not query");
         return false;
-    } else if (matches == 0) {
+    }
+    else if (matches == 0)
+    {
         //error_exit(CDDB_ERR_DISC_NOT_FOUND, "no matching discs found");
         return false;
     }
@@ -102,7 +109,8 @@ bool IdentifierCDDB::Identify()
     int quiet = 1;
 
     disc = do_read(conn, category, discid, quiet);
-    if (!disc) {
+    if (!disc)
+    {
         //error_exit(cddb_errno(conn), "could not read disc data");
         return false;
     }
@@ -117,16 +125,21 @@ bool IdentifierCDDB::Identify()
 // returns the tab delimited string of data
 string IdentifierCDDB::GetIdentifiedData()
 {
-    // fabricate return string from disc data here
-    if (!disc) {
-        //error_exit(cddb_errno(conn), "could not read disc data");
-        return "";
-    }
+    string sRet = "";
 
-    string sRet;
+    // fabricate return string from disc data here
+    if (!disc)
+    {
+        //error_exit(cddb_errno(conn), "could not read disc data");
+        return sRet;
+    }
 
     category = strdup(cddb_disc_get_category_str(disc));
     discid = cddb_disc_get_discid(disc);
+
+    OutputMiscTab DiscAttributes(discid);
+
+// for each found item DiscAttribute.addAttribute(track,attributetype,section,wholename);
 
     // MISC-TAB format?
         // The format is as follows.  Each line (\n terminated) contains the following:
@@ -138,7 +151,7 @@ string IdentifierCDDB::GetIdentifiedData()
     // CDDB-TAB format
 	// CDDBID Performer\tAlbum\tGenre\tTitle\t
 
-    return "";
+    return sRet;
 }
 
 // tells lmce what format the returned data will be in

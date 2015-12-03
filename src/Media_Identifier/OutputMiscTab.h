@@ -16,58 +16,67 @@ namespace DCE
 {
   class OutputMiscTabAttribute
   {
-    OutputMiscTabAttribute();
-    ~OutputMiscTabAttribute();
+  public:
+    OutputMiscTabAttribute() { };
+    ~OutputMiscTabAttribute() { };
 
     int m_iTrack;
     int m_iPK_AttributeType;
     int m_iSection;
-    string m_sValue;
+    string m_sWholeName;
   };
 
   class OutputMiscTab
   {
-    OutputMiscTab();
-    OutputMiscTab(string sDiskId);
-    ~OutputMiscTab();
-
-    string m_sDiskId;
-    vector<OutPutMiscTabAttribute> m_vAttributes;
-
-    void OutputMiscTab::setDiskId(string sDiskId)
+  public:
+    OutputMiscTab() { };
+    OutputMiscTab(unsigned int iDiskId)
     {
-      m_sDiskId = sDiskId;
+       m_iDiskId = iDiskId;
+    };
+    ~OutputMiscTab() { };
+
+  private:
+    unsigned int m_iDiskId;
+    vector<OutputMiscTabAttribute> m_vAttributes;
+
+  public:
+    void setDiskId(unsigned int iDiskId)
+    {
+      m_iDiskId = iDiskId;
     };
 
-    void OutputMiscTab::addAttribute(int iTrack, int iAttributeType, int iSection, string sWholeName)
+    void addAttribute(int iTrack, int iAttributeType, int iSection, string sWholeName)
     {
       OutputMiscTabAttribute Attribute;
 
       Attribute.m_iTrack = iTrack;
       Attribute.m_iPK_AttributeType = iAttributeType;
       Attribute.m_iSection = iSection;
-      Attribute.m_sValue = sWholeName;
+      Attribute.m_sWholeName = sWholeName;
 
       m_vAttributes.push_back(Attribute);
     };
 
-    string OutputMiscTab::OutputAttributes()
+    string OutputAttributes()
     {
       string sOutput;
 
-      sOutput = m_sDiskId + "\n";
+      sOutput = m_iDiskId + "\n";
 
-      for(vector<OutputMiscTabAttribute>::iterator it = m_vAttributes.begin(); it != m_vAttributes.end(); ++it) {
+      for(vector<OutputMiscTabAttribute>::iterator it = m_vAttributes.begin(); it != m_vAttributes.end(); ++it)
+      {
         OutputMiscTabAttribute Attribute = *it;
 
         sOutput += Attribute.m_iTrack + "\t";
 	sOutput += Attribute.m_iPK_AttributeType + "\t";
-	sOutput += Attbibute.m_iSection + "\t";
+	sOutput += Attribute.m_iSection + "\t";
 	sOutput += Attribute.m_sWholeName + "\n";
       }
 
       return sOutput;
     };
-}
+  };
+};
 
 #endif /* OUTPUTMISCTAB_H */
