@@ -52,7 +52,8 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 	if ( pEventInfo->m_bTimedEvent && 
 	     (pCriteriaParm->m_iPK_CriteriaParmList == CRITERIAPARMLIST_Time_of_day_CONST ||
 	      pCriteriaParm->m_iPK_CriteriaParmList == CRITERIAPARMLIST_Day_Of_Week_CONST ||
-	      pCriteriaParm->m_iPK_CriteriaParmList == CRITERIAPARMLIST_Day_Of_Month_CONST))
+          pCriteriaParm->m_iPK_CriteriaParmList == CRITERIAPARMLIST_Day_Of_Month_CONST ||
+          pCriteriaParm->m_iPK_CriteriaParmList == CRITERIAPARMLIST_Specific_Date_CONST ||))
 	{
 		// if this is a timed event, these criteria are handled by the timer itself
 		return true;
