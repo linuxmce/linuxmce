@@ -35,22 +35,22 @@ StyledScreen {
 
             StyledButton {
                 label: qsTr("Bypass These Sensors and Arm Now")
-                width: snrScreen.width / 3
+                width: snrScreen.width / 2.2
                 onActivated: manager.setHouseMode(screenparams.getParam(24), screenparams.getParam(25), "B")
             }
             StyledButton {
                 label: qsTr("Try Again")
-                width: snrScreen.width / 3
+                width: snrScreen.width / 2.2
                 onActivated: manager.setHouseMode(screenparams.getParam(24), screenparams.getParam(25), "R")
             }
             StyledButton {
                 label: qsTr("Arm other sensors now, arm these when they clear")
-                width: snrScreen.width / 3
+                width: snrScreen.width / 2.2
                 onActivated: manager.setHouseMode(screenparams.getParam(24), screenparams.getParam(25), "W")
             }
             StyledButton {
                 label: qsTr("Cancel")
-                width: snrScreen.width / 3
+                width: snrScreen.width / 2.2
                 onActivated: manager.goBacktoQScreen()
 
             }
