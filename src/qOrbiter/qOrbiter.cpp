@@ -3736,9 +3736,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
 }
 
-void DCE::qOrbiter::SetSecurityMode(QString pin, int mode)
+void DCE::qOrbiter::SetSecurityMode(QString pin, int mode, QString handling)
 {
-    CMD_Set_House_Mode change_house_modes(m_dwPK_Device, iPK_Device_SecurityPlugin, StringUtils::itos(mode),i_user, pin.toStdString(), 0, "");
+    CMD_Set_House_Mode change_house_modes(m_dwPK_Device, iPK_Device_SecurityPlugin, StringUtils::itos(mode),i_user, pin.toStdString(), 0, handling.toStdString());
     SendCommand(change_house_modes);
 }
 

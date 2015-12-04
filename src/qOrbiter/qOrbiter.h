@@ -1983,7 +1983,7 @@ public slots:
 
 
     void changedTrack(QString direction);
-    void SetSecurityMode(QString pass, int mode);
+    void SetSecurityMode(QString pass, int mode, QString handling);
     void setLocation(int location, int ea);
     void setUser(int user);
     void quickReload();
