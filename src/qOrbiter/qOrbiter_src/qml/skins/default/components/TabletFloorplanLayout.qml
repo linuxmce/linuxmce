@@ -66,6 +66,16 @@ Panel{
             target:floorplan_devices
             onSelectedDevicesChanged:{processSelectedDevices(); floorplan_devices.updateDeviceData()}
         }
+        Connections{
+            target:floorplan_devices
+            onFloorplanTypeChanged:{
+                activeStreams.visible = floorplan_devices.floorplanType===5
+                if (activeStreams.visible) {
+                    activeStreams.dataGrid = DataGrids.Floorplan_Media_Streams
+                }
+                row_button_scroll.visible = activeStreams.visible
+            }
+        }
 
         Keys.onReleased: {
             event.accepted=true
@@ -105,14 +115,19 @@ Panel{
         }
 
         GenericListModel {
-            parent: fp_panel.headerRow
             id:activeStreams
             label:qsTr("Media Streams")
-            visible:floorplan_devices.floorplanType===5
+            visible: false
             width: Style.scaleX(25)
             height: Style.scaleY(45)
-            //   dataGrid:floorplan_devices.floorplanType === 5 ? DataGrids.Floorplan_Media_Streams : -1
-            // dataGridLabel:"mediaStreams"
+            dataGrid: -1
+            dataGridLabel:"mediaStreams"
+            extended: false
+            Component.onCompleted: {
+                parent = fp_panel.headerRow
+            }
+            onExtendedChanged: refresh()
+
             delegate:
                 StyledButton{
                 id:gridBtn
@@ -122,18 +137,20 @@ Panel{
                 width: parent.width
 
                 onActivated: {
-                    var list = floorplan_devices.getSelectedDevice()
-                    if (list.length > 0) {
-                        var eas = ''
-                        for (var i = 0; i < list.length; i++)
-                        {
-                            if (i > 0)
-                                eas += ','
-                            eas += list.get(0).device
-                        }
-                        manager.doMoveMedia(eas,streamID)
-                        activeStreams.model.refreshData()
+                    var eas = ''
+                    var i = 0;
+                    for (var prop in floorplan_devices.getSelectedDevices()){
+                        if (i > 0)
+                            eas += ','
+                        eas += prop
+                        i++;
                     }
+                    if (i > 0) {
+                        manager.doMoveMedia(eas,streamID)
+                    } else {
+                        // stop stream by stream id
+                    }
+                    activeStreams.refresh()
                 }
             }
         }
@@ -149,7 +166,7 @@ Panel{
 
         ScrollRow{
             id:row_button_scroll
-            visible:floorplan_devices.floorplanType===5
+            visible:false
             enabled:visible
             anchors{
                 left:phoneFloorplanLayout.left
@@ -170,13 +187,11 @@ Panel{
                     buttonText: "Stop"
                     // call stopMedia with selected EA
                     onActivated: {
-                        console.log("manager.stopPlayback with EA = " +  floorplan_devices.getSelectedDevice())
-                        var list = floorplan_devices.getSelectedDevice()
-                        if (list.count > 0) {
-                            console.log("manager.stopPlayback with EA = " + list.get(0).device)
-                            manager.stopMediaOtherLocation(list.get(0).device)
-                            activeStreams.model.refreshData()
+                        for (var ea in floorplan_devices.getSelectedDevices()) {
+                            console.log("manager.stopPlayback with EA = " + ea)
+                            manager.stopMediaOtherLocation(ea)
                         }
+                        activeStreams.refresh()
                     }
                 }
                 StyledButton {
