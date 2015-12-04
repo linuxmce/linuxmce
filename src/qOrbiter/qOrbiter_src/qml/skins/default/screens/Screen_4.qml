@@ -1,17 +1,23 @@
 import QtQuick 2.2
 import "../components"
+import "../."
+
 
 StyledScreen {
     navigation: "FloorplanNav.qml"
     property alias floorplan: climateFloorplan
-  onScreenClosing: floorplan_devices.setCurrentFloorPlanType(-1)
-  onScreenOpening:  floorplan_devices.clearAllSelections()
+    onScreenOpen: floorplan_devices.clearAllSelections()
+    onScreenClosing: floorplan_devices.setCurrentFloorPlanType(-1)
     TabletFloorplanLayout{
         id: climateFloorplan
-        Component.onCompleted: {
-            floorplan_devices.setCurrentFloorPlanType(4)
-          //  manager.getFloorplanDevices(4)
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
 
+        Component.onCompleted: {
+            floorplan_devices.setCurrentFloorPlanType(3)
+            manager.getFloorplanDevices(3)
         }
     }
 }
