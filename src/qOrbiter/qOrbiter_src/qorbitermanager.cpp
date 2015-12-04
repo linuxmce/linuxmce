@@ -1768,6 +1768,12 @@ void qorbiterManager::stopMedia() {/*emit stopPlayback();*/
     setDirectAv(false);
 }
 
+void qorbiterManager::stop_AV() {
+    // sends a Stop command, which is normally routed to an actual AV device through IR, CEC or other means
+    // this does not stop the "lmce activity"
+    CMD_Stop avStop(iPK_Device, iMediaPluginID, 0,false);
+    emit sendDceCommand(avStop);
+}
 
 bool qorbiterManager::loadSkins(QUrl base)
 {

@@ -1283,6 +1283,7 @@ public slots:
     void mythTvPlay();
     void playResume();
     void stopMedia();
+    void stop_AV();
 
     void tvChannelUp(){CMD_Channel_up cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void tvChannelDown(){CMD_Channel_down cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
