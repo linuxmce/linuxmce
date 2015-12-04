@@ -87,6 +87,14 @@ Item {
 
            visible: selected
        }
+    Colorize {
+        // color any tripped security sensors red
+        anchors.fill: fpDevice_image
+        source: fpDevice_image
+        hue: 0.0
+        saturation: 1
+        visible: floorplan_devices.getCurrentFloorPlanType() == 1 && deviceStatus == 'TRIPPED'
+    }
 
     Glow {
            anchors.fill: fpDevice_image
