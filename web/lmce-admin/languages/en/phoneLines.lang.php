@@ -27,6 +27,7 @@ $TEXT_PHONE_LINE_USERNAME_NOTE_CONST='The username to access provider\'s service
 $TEXT_PHONE_LINE_PASSWORD_NOTE_CONST='The password to access provider\'s service (not webpage)';
 $TEXT_PHONE_LINE_NUMBER_NOTE_CONST='The phone number assigned to you by provider';
 $TEXT_PHONE_LINE_HOST_NOTE_CONST='The host to register your asterisk with provider';
+$TEXT_PHONE_LINE_PROTOCOL_NOTE_CONST='Use SPA as the phoneline register himself to asterisks';
 $TEXT_LOCAL_PHONE_LINES_SETTINGS_CONST='Local phone lines settings';
 $TEXT_PREPEND_AREA_CODE_CONST='When dialing a local number, automatically prepend the area code';
 $TEXT_PREPEND_DIGIT_CONST='Also prepend a digit (1 for US/Canada, 0 for Europe)';
