@@ -112,7 +112,12 @@ function phoneLines($output,$astADO,$dbADO,$telecomADO) {
 					<td><select name="proto">';
 					foreach ($ProtocolList as $p) $out.='<option value="'.$p.'" '.(($editdata['protocol'] == $p)?'selected="selected"':'').'>'.$p.'</option>';
 					$out .='</select></td>
-				</tr>		
+					<td>'.translate('TEXT_PHONE_LINE_PROTOCOL_NOTE_CONST').'</td>
+				</tr>
+				<tr>
+				<td><B>'.translate('TEXT_PORT_CONST').' *</B></td>
+				<td><input type="text" name="port" value="'.((@$editdata['port']=='')?'5060"':$editdata['port']).'" /></td>
+				</tr>
 				<tr>
 					<td><B>'.translate('TEXT_DTMFMODE_CONST').'</B></td>
 					<td><select name="dtmf">';
@@ -175,6 +180,7 @@ function phoneLines($output,$astADO,$dbADO,$telecomADO) {
 					."',phonenumber='".$_POST['phone']
 					."',host='".$_POST['host']
 					."',protocol='".$_POST['proto']
+					."',port='".$_POST['port']
 					."',dtmfmode='".$_POST['dtmf']
 					."' WHERE id=".$editedID;
 				$res=$astADO->Execute($SQL);
@@ -275,6 +281,7 @@ function phoneLinesTable($astADO){
 			<td align="center"><B>'.translate('TEXT_PHONE_NUMBER_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_HOST_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_PORT_CONST').'<B></td>
 			<td align="center"><B>'.translate('TEXT_USERNAME_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_STATUS_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_ACTION_CONST').'</B></td>
@@ -299,6 +306,7 @@ function phoneLinesTable($astADO){
 			<td>'.$row['phonenumber'].'</td>
 			<td>'.$row['host'].'</td>
 			<td align="center">'.$row['protocol'].'</td>
+			<td align="enter">'.$row['port'].'</td>
 			<td>'.$row['username'].'</td>
 			<td>'.getLineState($row['protocol'],$row['username']).'</td>
 			<td align="center">
@@ -397,7 +405,9 @@ function getLineState($protocol, $username){
 	}
 
 	else if($protocol == 'SPA') {
-		$response='N/A';
+		$cmd='sudo -u root /usr/sbin/asterisk -rx "sip show peers" |  awk \'$1 == "'.$username.'/'.$username.'" { print $6}\'';
+		$response=exec_batch_command($cmd,1);
+		//$response='N/A';
 	}
 
 	else if($protocol == 'IAX') {
