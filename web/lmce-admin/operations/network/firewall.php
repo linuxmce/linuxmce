@@ -181,12 +181,20 @@ function firewall($output,$dbADO) {
 		"2"=>"output",
 		);
 	} else {
-		$start_chains=Array(
-		"0"=>"input",
-		"1"=>"forward",
-		"2"=>"port_forward (NAT)",
-		"3"=>"output",
-		);
+		if ($AdvancedFirewall == 1) {
+			$start_chains=Array(
+			"0"=>"input",
+			"1"=>"forward",
+			"2"=>"port_forward (NAT)",
+			"3"=>"output",
+			);
+		} else {
+			$start_chains=Array(
+			"0"=>"input",
+			"2"=>"port_forward (NAT)",
+			"3"=>"output",
+			);
+		}
 	};
 	
 	$RuleTYPE=Array(
@@ -196,12 +204,15 @@ function firewall($output,$dbADO) {
 	"3"=>"OUTPUT",
 	);
 	
-	$protocolarr=Array(
+	$protocolsarr=Array(
 	"0"=>"tcp",
 	"1"=>"udp",
 	"2"=>"tcp & udp",
-	"3"=>"icmp",
-	"4"=>"ip",
+	);
+
+	$protocolsarrAdvanced=Array(
+	"1"=>"icmp",
+	"2"=>"ip",
 	);
 	
 	$start_RPolicy=Array(
@@ -219,10 +230,12 @@ function firewall($output,$dbADO) {
 	$chains_id=array_merge($start_chains, $more_chains_id);
 	$save_chains=array_merge($start_chains, $more_chains);
 	$RPolicy=array_merge($start_RPolicy, $more_chains);
+	$protocolarr=array_merge($protocolsarr, $protocolsarrAdvanced);
 	} else {
 	$chains=$start_chains;
 	$save_chains=$start_chains;
 	$RPolicy=$start_RPolicy;
+	$protocolarr=$protocolsarr;
 	}
 	
 		foreach ($chains as $chainnr => $chain) {
@@ -468,10 +481,10 @@ function firewall($output,$dbADO) {
 		        	$out.='<td align="crnter"><B>'.translate('TEXT_MATCH_CONST').'</B></td>';
 			}
 			$out.='<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_SOURCE_IP_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_DESTINATION_IP_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'</B></td>';
+			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'</B></td>';
 			if (@$AdvancedFirewall == 1){
 				$out.='<td align="center"><B>'.translate('TEXT_RULE_POLICY_CONST').'</B></td>';
 			}
@@ -679,10 +692,10 @@ function firewall($output,$dbADO) {
 						$save_RuleType=explode('-', $row['RuleType']);
 						$out.='</select></td>
 					<input type="hidden" name="save_RuleType" value="'.$save_RuleType[1].'" />
-					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /> to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" /></B></td>
-                    <td align="center"><input type="text" name="save_DestinationPort" value="'.$row['DestinationPort'].'" size="4" /></td>
+					<td align="center"><input type="text" name="save_SourceIP" value="'.$row['SourceIP'].'" size="8"></td>
+					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /><!-- to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" />--></B></td>
 					<td align="center"><input type="text" name="save_DestinationIP" value="'.$row['DestinationIP'].'" size="8" /></td>
-					<td align="center"><input type="text" name="save_SourceIP" value="'.$row['SourceIP'].'" size="8"></td>';
+                    <td align="center"><input type="text" name="save_DestinationPort" value="'.$row['DestinationPort'].'" size="4" /></td>';
 					if (@$AdvancedFirewall == 1){
 						$out.='<td align="center"><select name="save_RPolicy" STYLE="width:70px">';
 						foreach ($RPolicy as $string){
@@ -744,16 +757,16 @@ function firewall($output,$dbADO) {
 							}
 							$out.='<td>'.$row['Matchname'].'</td>';
 						}
-						$out.='<td align="center">'.$protocol[0].'</td>';
+						$out.='<td align="center">'.$protocol[0].'</td>
+						<td align="center">'.$row['SourceIP'].'</td>';
                                                	if ( $row['SourcePort'] == ''){
                                                        	$out.='<td align="center"></td>';
                                                 }else{
        	                                                $out.='<td align="center">'.($protocol[0] == 'ip' ? 'protocol: ' : '').
 						$row['SourcePort'].($row['SourcePortEnd'] > 0 ? ' to '.$row['SourcePortEnd'] : '').'</B></td>';
                        	                        }
-                               	                $out.='<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>
-						<td align="center">'.$row['DestinationIP'].'</td>
-						<td align="center">'.$row['SourceIP'].'</td>';
+                               	                $out.='<td align="center">'.$row['DestinationIP'].'</td>
+						<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>';
 						if (@$AdvancedFirewall == 1){
 							$out.='<td align="center">'.$row['RPolicy'].'</td>';
 						}
@@ -786,14 +799,14 @@ function firewall($output,$dbADO) {
 				<td align="center"><B>'.translate('TEXT_MATCH_CONST').'*</B></td>';
 			}
 			$out.='<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'**</B></td>
-			<td align="center"><B>'.translate('TEXT_DESTINATION_IP_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'*</B></td>';
+			<td align="center"><B>'.translate('TEXT_SOURCE_IP_CONST').'*</B></td>
+			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'*</B></td>
+			<td align="center"><B>'.translate('TEXT_DESTINATION_IP_CONST').'**</B></td>
+			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'***</B></td>';
 			if (@$AdvancedFirewall == 1){
 				$out.='<td align="center"><B>'.translate('TEXT_RULE_POLICY_CONST').'</B></td>';
 			}
-			$out.='<td align="center"><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
+			$out.='<td align="center"><B>'.translate('TEXT_DESCRIPTION_CONST').'*</B></td>
 			<td>&nbsp;</td>
 		</tr>				
 		<tr>';
@@ -850,10 +863,10 @@ function firewall($output,$dbADO) {
 					}
 				}
 			$out.='</select></td>
-			<td align="center" width="120"><input type="text" name="SourcePort" size="4" /> to <input type="text" name="SourcePortEnd" size="2" /></td>
-			<td align="center"><input type="text" name="DestinationPort" size="4" /></td>
+			<td align="center"><input type="text" name="SourceIP" size="8"></td>
+			<td align="center" width="120"><input type="text" name="SourcePort" size="4" /><!-- to <input type="text" name="SourcePortEnd" size="2" />--></td>
 			<td align="center"><input type="text" name="DestinationIP" size="8" /></td>
-			<td align="center"><input type="text" name="SourceIP" size="8"></td>';
+			<td align="center"><input type="text" name="DestinationPort" size="4" /></td>';
 			if (@$AdvancedFirewall == 1){
 				$out.='<td align="center"><select name="RPolicy" STYLE="width:70px">">'.$RulePolicy_options.'</select></td>';
 			} else {
@@ -872,13 +885,15 @@ function firewall($output,$dbADO) {
 		}
 		$out.='<tr>
 			<td colspan="100%" align="left">* '.translate('TEXT_OPTIONAL_FIELD_CONST').'</td>
-		</tr>';
-		if ($fwVersion == "ipv6") {
-			$out.='<tr>
-				<td colspan="100%" align="left">** This field is '.translate('TEXT_OPTIONAL_FIELD_CONST').' only not with port_forward (NAT), input is then port 9000 on the core to go to port 9000 = 9000:9000</td>
-			</tr>';
-		}
-	$out.='</table>	
+		</tr>
+		<tr>
+			<td colspan="100%" align="left">** This field is '.translate('TEXT_OPTIONAL_FIELD_CONST').' only not with port_forward (NAT)</td>
+		</tr>
+		<tr>
+			<td colspan="100%" align="left">*** with port_forward (NAT), port on the core is 9000 and the destination port on the internal device is 9001 data on this field is 9000:9001</td>
+
+		</tr>
+	</table>	
 	</form>
 		<script>
 		 	var frmvalidator = new formValidator("firewall");
