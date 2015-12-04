@@ -179,7 +179,10 @@ void FloorPlanModel::updateStatus(QString status, QString state, int device)
 
 
             break;
-        default: d->setDeviceState(state); break;
+        default:
+            d->setDeviceState(state);
+            d->setDeviceStatus(status);
+            break;
         }
 
     }
