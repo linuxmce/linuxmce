@@ -123,6 +123,19 @@ Item {
 //        color:"black"
 //    }
 
+    function getDeviceText() {
+        // on the climate FP, we need to display the devicestate
+        if (floorplan_devices.getCurrentFloorPlanType() == 3) {
+            return deviceState;
+        } else if (floorplan_devices.getCurrentFloorPlanType() == 5 ||
+                   floorplan_devices.getCurrentFloorPlanType() == 1 ||
+                   floorplan_devices.getCurrentFloorPlanType() == 7) {
+            return ""; // nothing on media, security and telecom FP
+        } else {
+            return deviceLevel;
+        }
+    }
+
     Rectangle{
         id:sprite
         height: parent.height - 1
@@ -137,7 +150,7 @@ Item {
         StyledText {
             id: deviceNumLabel
             anchors.horizontalCenter: fpDevice_image.horizontalCenter
-            text:deviceLevel
+            text: getDeviceText() // need to display different text based on what floorplan (and device)
             visible: deviceLevel!==0
             anchors.top: fpDevice_image.bottom
             font.pixelSize: Style.fontSize_small
