@@ -50,6 +50,14 @@ function outsideAccess($output,$dbADO) {
 	$rowSSLAccessOnPort=$resAllowSSLPort->FetchRow();
 	$sslport=$rowSSLAccessOnPort['DestinationPort'];
 	
+	$resAllow22=$dbADO->Execute('SELECT * FROM Firewall WHERE Description="ssh access" AND DestinationPort="22"');
+	$allowAccessOn22=($resAllow22->RecordCount()>0)?1:0;
+
+	$resAllowSSHPort=$dbADO->Execute('SELECT * FROM Firewall WHERE Description="ssh access not default port" AND DestinationPort!="22"');
+	$allowSSHAccessOnPort=($resAllowSSHPort->RecordCount()>0)?1:0;
+	$rowSSHAccessOnPort=$resAllowSSHPort->FetchRow();
+	$sshport=$rowSSHAccessOnPort['DestinationPort'];
+	
 	if ($action=='form') {
 		
 
@@ -71,6 +79,12 @@ function outsideAccess($output,$dbADO) {
 		if(document.outsideAccess.allowSSLOnPort.checked && (isNaN(portValue) || portValue==443 || portValue<=0)){
 			alert("Please type the port, other value than 443.");
 			document.outsideAccess.sslport.focus();
+			return false;
+		}
+		portValue=parseInt(document.outsideAccess.sshport.value);
+		if(document.outsideAccess.allowSSHOnPort.checked && (isNaN(portValue) || portValue==22 || portValue<=0)){
+			alert("Please type the port, other value than 22.");
+			document.outsideAccess.sshport.focus();
 			return false;
 		}
 		
@@ -118,6 +132,16 @@ function outsideAccess($output,$dbADO) {
 			<td><input type="text" name="sslport" value="'.@$sslport.'"></td>
 		</tr>
 		<tr>
+			<td><input type="checkbox" name="allow22" value="1" '.(($allowAccessOn22==1)?'checked':'').'></td>
+			<td>'.translate('TEXT_ALLOW_OUTSIDE_ACCESS_22_CONST').'</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+		<td><input type="checkbox" name="allowSSHOnPort" value="1" '.(($allowSSHAccessOnPort==1)?'checked':'').'></td>
+		<td>'.translate('TEXT_ALLOW_OUTSIDE_ACCESS_22OTHER_CONST').'</td>
+		<td><input type"text" name="sshport" value="'.@$sshport.'" /></td>
+		</tr>
+		<tr>
 			<td><input type="checkbox" name="RAport" value="1" '.(((int)@$RAport==22)?'checked':'').'></td>
 			<td>'.translate('TEXT_USE_PORT_22_FOR_REMOTE_ASSISTANCE_CONST').'</td>
 			<td>&nbsp;</td>
@@ -146,6 +170,9 @@ function outsideAccess($output,$dbADO) {
 		<input type="hidden" name="oldAllow443" value="'.$allowSSLAccessOn443.'">
 		<input type="hidden" name="oldAllowSSLOnPort" value="'.$allowSSLAccessOnPort.'">
 		<input type="hidden" name="oldSSLPort" value="'.@$sslport.'">
+		<input type="hidden" name="oldAllow22" value="'.$allowAccessOn22.'">
+		<input type="hidden" name="oldAllowSSHOnPort" value="'.$allowSSHAccessOnPort.'">
+		<input type="hidden" name="oldSSHPort" value="'.@$sshport.'">
 	</form>
 		';
 	} else {
@@ -192,6 +219,8 @@ function outsideAccess($output,$dbADO) {
 			$oldAllow80=(int)@$_POST['oldAllow80'];
 			$allow443=(int)@$_POST['allow443'];
 			$oldAllow443=(int)@$_POST['oldAllow443'];
+			$allow22=(int)@$_POST['allow22'];
+			$oldAllow22=(int)@$_POST['oldAllow22'];
 
 			$oldAllowOnPort=@(int)$_POST['oldAllowOnPort'];
 			$allowOnPort=@(int)$_POST['allowOnPort'];
@@ -201,6 +230,10 @@ function outsideAccess($output,$dbADO) {
 			$allowSSLOnPort=@(int)$_POST['allowSSLOnPort'];
 			$oldSSLPort=(int)@$_POST['oldSSLPort'];
 			$sslport=(int)@$_POST['sslport'];
+			$oldAllowSSHOnPort=@(int)$_POST['oldAllowSSHOnPort'];
+			$allowSSHOnPort=@(int)$_POST['allowSSHOnPort'];
+			$oldSSHPort=(int)@$_POST['oldSSHPort'];
+			$sshport=(int)@$_POST['sshport'];
 
 			if($oldAllow80==0){
 				if($allow80==1){
@@ -247,6 +280,29 @@ function outsideAccess($output,$dbADO) {
 				}elseif($sslport!=$oldSSLPort){
 					$dbADO->Execute('UPDATE Firewall SET DestinationPort=? WHERE RuleType=? AND Description=?',array($sslport.':443','port_forward (NAT)','ssl webadmin'));
 					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND Description=?',array("$sslport",'forward','ssl webadmin'));
+				}
+			}
+			if($oldAllow22==0){
+				if($allow22==1){
+					$dbADO->Execute('INSERT INTO Firewall (Place,Protocol,DestinationPort,RuleType, RPolicy, Description) VALUES (?,?,?,?,?,?)',array('2','tcp-ipv4','22','input','ACCEPT','ssh access'));
+				}
+			}else{
+				if($allow22==0){
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND DestinationPort=? AND RPolicy=? AND Description=?',array('input','22','ACCEPT','ssh access'));
+				}
+			}
+			if($oldAllowSSHOnPort==0){
+				if($allowSSHOnPort==1){
+					$dbADO->Execute('INSERT INTO Firewall (Place,Protocol,RuleType,DestinationPort,DestinationIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?)',array('2','tcp-ipv4','port_forward (NAT)',$sshport.':22','127.0.0.1','ACCEPT','ssh access not default port'));
+					$dbADO->Execute('INSERT INTO Firewall (Place,Protocol,RuleType,SourcePort,DestinationPort,DestinationIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?)',array('2','tcp-ipv4','forward',$sshport,'22','127.0.0.1','ACCEPT','ssh access not default port'));
+				}
+			}else{
+				if($allowSSHOnPort==0){
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND Description=?',array('port_forward (NAT)','ssh access not default port'));
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND Description=?',array('forward','ssh access not default port'));
+				}elseif($sshport!=$oldSSHPort){
+					$dbADO->Execute('UPDATE Firewall SET DestinationPort=? WHERE RuleType=? AND Description=?',array($sshport.':22','port_forward (NAT)','ssh access not default port'));
+					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND Description=?',array("$sshport",'forward','ssh access not default port'));
 				}
 			}
 			exec('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
