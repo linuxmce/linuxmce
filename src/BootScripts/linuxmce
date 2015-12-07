@@ -319,10 +319,11 @@ start() {
 
 	# Start core services - not required until after DCERouter is running
 	if [[ "$AutostartCore" -eq "1" ]] ; then
+		# asterisk is not configured properly and sip phones cannot register otherwise
+		service asterisk restart
 		StartDaemon "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
 		StartDaemon "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
 		StartDaemon "Start PNP MD Plugin (interactor)" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
-		#StartService "Waking sleeping MDs" "/usr/pluto/bin/WakeMDs.sh" "&"
 		StartService "Starting Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
 		StartService "Starting NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
 		StartService "Update deb-cache" "/usr/pluto/bin/UpdateDebCache.sh"
