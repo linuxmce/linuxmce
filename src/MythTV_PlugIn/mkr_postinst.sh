@@ -52,3 +52,5 @@ a2dissite 000-default-mythbuntu || /bin/true
 
 #Run mythtv-setup.sh to make sure storage groups get added. -tschak
 /usr/pluto/bin/mythtv_setup.pl
+
+service apache2 force-reload || :
