@@ -31,7 +31,6 @@ if [[ ! -f /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz ]] ; then
 	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
 	touch /usr/pluto/deb-cache/$DEB_CACHE/Packages
 	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
-	cp /usr/pluto/deb-cache/Packages* /usr/pluto/deb-cache/$DEB_CACHE
 fi
 
 case "$TARGET_DISTRO" in
