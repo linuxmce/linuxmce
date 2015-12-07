@@ -226,7 +226,9 @@ if ! BlacklistConfFiles '/etc/apache2/apache2.conf' ;then
 		fi
 		echo "ServerName ${HostName}" > "${ConfDir}/lmce.conf"
 	fi
-	a2enconf lmce || :
+	if [[ -n "$(which a2enconf)" ]] ; then
+		a2enconf lmce
+	fi
 fi
 
 if ! BlacklistConfFiles '/etc/apache2/ports.conf' ;then
