@@ -2836,7 +2836,7 @@ string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile, map<string
 		{
 			vector<string> vectParam;
 			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
-			s_CallerID = "\"Cherryhomes, Tho\"\n" + vectParam[1];
+			s_CallerID = vectParam[1];
 		}
 
 		if (vectVoiceMailFile[i].find("origtime=") != string::npos) 
