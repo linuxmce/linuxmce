@@ -119,7 +119,7 @@ function Build_Replacements_Common_ubuntu
 	#Package: lmce-core-locator
 	Build_Replacement_Package core-locator src/Core/locator
 
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.2
+#        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.2
 
 	#Package: logitechmediaserver-7.8.1
 	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1
@@ -269,6 +269,7 @@ function Build_Replacements_ubuntu_trusty
 
 	#Package: vdr-xineliboutput
 	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
+	cp ${svn_dir}/${svn_branch_name}/external/vdr/*xine*.deb "${replacements_dir}"
 
 	#Package: vdr-iptv
 	Build_Replacement_Package iptv external/vdr/iptv-2.2.1
@@ -340,6 +341,7 @@ function Build_Replacements_ubuntu_xenial
 
 	#Package: vdr-xineliboutput
 	Build_Replacement_Package xineliboutput external/vdr/xineliboutput-fd21e7a0936b984e76eb01c308ccc5a811c68918
+	cp ${svn_dir}/${svn_branch_name}/external/vdr/*xine*.deb "${replacements_dir}"
 
 	#Package: vdr-iptv
 	Build_Replacement_Package iptv external/vdr/iptv-2.2.1
