@@ -104,6 +104,10 @@ public:
 
 	bool SendVDRCommand(string sCommand,string &sVDRResponse)
 	{
+		if ( !m_bConnected )
+		{
+			Connect();
+		}
 		string error = SendVDRCommandInternal(sCommand, sVDRResponse);
 		int retry = 0;
 		while (!error.empty() && retry < 3)
