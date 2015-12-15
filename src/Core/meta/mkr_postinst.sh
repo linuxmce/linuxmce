@@ -47,7 +47,7 @@ if ! BlacklistConfFiles '/etc/pluto.conf' ;then
 	[ -n "$PK_Distro" ] || ConfSet "PK_Distro" "$TARGET_DISTRO_ID"
 	[ -n "$UseVideoWizard" ] || ConfSet "UseVideoWizard" "1"
 	[ -n "$LogLevels" ] || ConfSet "LogLevels" "1,5,7,8"
-	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "1"
+	ConfSet "AutostartCore" "1"
 	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "0"
 	[ -n "$LTS_HES" ] || ConfSet "LTS_HES" "$TARGET_LTS_HES"
 fi
