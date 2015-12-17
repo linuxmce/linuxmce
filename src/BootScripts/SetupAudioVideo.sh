@@ -218,16 +218,26 @@ Setup_AsoundConf()
 	[[ -n "$NoAsoundConf" ]] && return
 
 	local AudioSetting="$1"
-	SoundOut="plughw:"
-	Yalpa=$(aplay -l 2>&1)
+
+	case "$AudioSetting" in
+		*P*)
+			rm -f /etc/asound.conf || :
+			return
+			;;
+	esac
+
+
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
-		return		
+		return
 	fi
 	# Do not mess with raspbian based systems
 	if [[ "$PK_Distro" == "$DEVICEDATA_Distro_Raspbian_Wheezy" ]] || [[  "$PK_Distro" == "$DEVICEDATA_Distro_Raspbian_Jessie" ]] ; then
 		return
 	fi
+
+	SoundOut="plughw:"
+	Yalpa=$(aplay -l 2>&1)
 	if grep 'no soundcards found' <<< "$Yalpa"; then
 		return
 	fi
@@ -364,42 +374,60 @@ Setup_XineConf()
 		XineConf="$XineConf_Override"
 	fi
 
-	if [[ "$AlternateSC" -ne "1" ]]; then
-		XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
-		XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
-		case "$AudioSetting" in
-			*[COH]*)
-				XineConfSet audio.device.alsa_pcm_device "$PlaybackCard" "$XineConf"
-
-				XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
-				XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
-
-				XineConfSet audio.device.alsa_surround40_device "$PlaybackCard" "$XineConf"
-				XineConfSet audio.device.alsa_surround41_device "$PlaybackCard" "$XineConf"
-				XineConfSet audio.device.alsa_surround50_device "$PlaybackCard" "$XineConf"
-				XineConfSet audio.device.alsa_surround51_device "$PlaybackCard" "$XineConf"
-				;;
-		esac
-	else
-		case "$AudioSetting" in
-			*[COH]*)
-				XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
-				;;
-			*)
-				sed -i '/audio\.device\.alsa_passthrough_device.*/d' "$XineConf"
-				;;
-		esac
-	fi
-
 	case "$AudioSetting" in
-		*3*)
-			XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
-			XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
+		*[P]*)
+			# PulseAudio Setup
+			XineConfSet audio.driver: pulseaudio "$XineConf"
+			#XineConfSet audio.pulseaudio_device: "$PlaybackCard" "$XineConf"
+			case "$AudioSetting" in
+				*3*)
+					XineConfSet audio.device.pulseaudio_a52_pass_through: 1 "$XineConf"
+					;;
+				*)
+					XineConfSet audio.device.pulseaudio_a52_pass_through: 0 "$XineConf"
+					;;
+			esac
 			;;
-
 		*)
-			XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$XineConf"
-			sed -i '/audio\.device\.alsa_passthrough_device.*/d' "$XineConf"
+			# ALSA Setup
+			if [[ "$AlternateSC" -ne "1" ]]; then
+				XineConfSet audio.device.alsa_front_device "$PlaybackCard" "$XineConf"
+				XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
+				case "$AudioSetting" in
+					*[COH]*)
+						XineConfSet audio.device.alsa_pcm_device "$PlaybackCard" "$XineConf"
+	
+						XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
+						XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
+
+						XineConfSet audio.device.alsa_surround40_device "$PlaybackCard" "$XineConf"
+						XineConfSet audio.device.alsa_surround41_device "$PlaybackCard" "$XineConf"
+						XineConfSet audio.device.alsa_surround50_device "$PlaybackCard" "$XineConf"
+						XineConfSet audio.device.alsa_surround51_device "$PlaybackCard" "$XineConf"
+						;;
+				esac
+			else
+				case "$AudioSetting" in
+					*[COH]*)
+						XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
+						;;
+					*)
+						sed -i '/audio\.device\.alsa_passthrough_device.*/d' "$XineConf"
+						;;
+				esac
+			fi
+
+			case "$AudioSetting" in
+				*3*)
+					XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
+					XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
+					;;
+
+				*)
+					XineConfSet audio.output.speaker_arrangement 'Stereo 2.0' "$XineConf"
+					sed -i '/audio\.device\.alsa_passthrough_device.*/d' "$XineConf"
+					;;
+			esac
 			;;
 	esac
 }
