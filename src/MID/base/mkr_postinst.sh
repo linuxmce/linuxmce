@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # setup the interactor and the firstboot script
-update-rc.d -f firstboot defaults >/dev/null
+#update-rc.d -f firstboot defaults >/dev/null
 
 ###########################################################
 ### Setup global variables
