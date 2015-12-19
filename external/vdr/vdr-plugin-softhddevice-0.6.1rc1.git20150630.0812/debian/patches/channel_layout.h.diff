@@ -1,0 +1,13 @@
+Index: vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124/codec.c
+===================================================================
+--- vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124.orig/codec.c	2013-12-20 22:24:16.000000000 +0100
++++ vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124/codec.c	2014-01-01 13:08:41.958098473 +0100
+@@ -56,6 +56,8 @@
+ 
+ #include <alsa/iatomic.h>
+ #include <libavcodec/avcodec.h>
++#include <libavutil/channel_layout.h>
++#include <libavutil/mem.h>
+ // support old ffmpeg versions <1.0
+ #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,18,102)
+ #define AVCodecID CodecID

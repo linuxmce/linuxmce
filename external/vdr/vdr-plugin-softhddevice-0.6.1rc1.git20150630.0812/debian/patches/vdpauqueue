@@ -1,0 +1,84 @@
+--- a/video.c
++++ b/video.c
+@@ -5950,7 +5950,10 @@
+ ///
+ ///	Initialize output queue.
+ ///
+-static void VdpauInitOutputQueue(void)
++///	@retval 0	ok
++///	@retval -1	failure
++///
++static int VdpauInitOutputQueue(void)
+ {
+     VdpStatus status;
+     VdpRGBAFormat format;
+@@ -5962,7 +5965,7 @@
+     if (status != VDP_STATUS_OK) {
+ 	Error(_("video/vdpau: can't create presentation queue target: %s\n"),
+ 	    VdpauGetErrorString(status));
+-	return;
++	return -1;
+     }
+ 
+     status =
+@@ -5973,7 +5976,7 @@
+ 	    VdpauGetErrorString(status));
+ 	VdpauPresentationQueueTargetDestroy(VdpauQueueTarget);
+ 	VdpauQueueTarget = 0;
+-	return;
++	return -1;
+     }
+ 
+     VdpauQueueBackgroundColor->red = 0.01;
+@@ -6014,6 +6017,8 @@
+     Debug(3,
+ 	"video/vdpau: created grab render output surface %dx%d with id 0x%08x\n",
+ 	VideoWindowWidth, VideoWindowHeight, VdpauGrabRenderSurface);
++
++    return 0;
+ }
+ 
+ ///
+@@ -6498,7 +6503,14 @@
+     //
+     //	Create presentation queue, only one queue pro window
+     //
+-    VdpauInitOutputQueue();
++    if (VdpauInitOutputQueue() < 0) {
++	if (VdpauDeviceDestroy) {
++	    VdpauDeviceDestroy(VdpauDevice);
++	}
++	VdpauDevice = 0;
++	VdpauPreemption = 1;
++	return -1;
++    }
+ 
+     return 1;
+ }
+@@ -8190,15 +8202,24 @@
+     if (status != VDP_STATUS_OK) {
+ 	Error(_("video/vdpau: can't register preemption callback: %s\n"),
+ 	    VdpauGetErrorString(status));
++	// FIXME: should i destroy the vdpau-device?
++	VdpauPreemption = 1;
++	return -1;
+     }
+ 
+     VdpauPreemption = 0;
+     Debug(3, "video/vdpau: display preemption recovery\n");
+ 
+-    VdpauInitOutputQueue();
++    if (VdpauInitOutputQueue() < 0) {	// failed fallback to preemption
++	// FIXME: should i destroy the vdpau-device?
++	VdpauPreemption = 1;
++	return -1;
++    }
+ 
+-    // mixer
+     for (i = 0; i < VdpauDecoderN; ++i) {
++	VdpauDecoders[i]->Device = VdpauDevice;
++
++	// mixer
+ 	VdpauDecoders[i]->VideoDecoder = VDP_INVALID_HANDLE;
+ 	VdpauDecoders[i]->VideoMixer = VDP_INVALID_HANDLE;
+ 	VdpauDecoders[i]->SurfaceFreeN = 0;

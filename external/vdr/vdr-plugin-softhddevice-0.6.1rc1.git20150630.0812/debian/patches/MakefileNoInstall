@@ -1,0 +1,13 @@
+--- a/Makefile
++++ b/Makefile
+@@ -164,10 +164,6 @@
+ clean:
+ 	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~ $(PODIR)/*.mo $(PODIR)/*.pot
+ 
+-install:	libvdr-$(PLUGIN).so
+-	cp --remove-destination libvdr-$(PLUGIN).so \
+-		/usr/lib/vdr/plugins/libvdr-$(PLUGIN).so.$(APIVERSION)
+-
+ HDRS=	$(wildcard *.h)
+ 
+ indent:

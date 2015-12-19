@@ -1,0 +1,43 @@
+Index: vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124/softhddev.c
+===================================================================
+--- vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124.orig/softhddev.c	2014-01-01 14:58:56.436612507 +0100
++++ vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124/softhddev.c	2014-01-01 15:27:16.420829506 +0100
+@@ -33,14 +33,17 @@
+ 
+ #include <stdio.h>
+ #include <stdint.h>
++#include <string.h>
+ #include <inttypes.h>
+ #include <unistd.h>
++#include <stdlib.h>
+ 
+ #include <libintl.h>
+ #define _(str) gettext(str)		///< gettext shortcut
+ #define _N(str) str			///< gettext_noop shortcut
+ 
+ #include <libavcodec/avcodec.h>
++#include <libavutil/mem.h>
+ // support old ffmpeg versions <1.0
+ #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,18,102)
+ #define AVCodecID CodecID
+Index: vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124/codec.c
+===================================================================
+--- vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124.orig/codec.c	2014-01-01 14:58:56.444616395 +0100
++++ vdr-plugin-softhddevice-0.6.1rc1.git20131220.2124/codec.c	2014-01-01 14:59:00.718698716 +0100
+@@ -41,6 +41,7 @@
+ 
+ #include <stdio.h>
+ #include <unistd.h>
++#include <stdlib.h>
+ #ifdef __FreeBSD__
+ #include <sys/endian.h>
+ #else
+@@ -56,6 +57,8 @@
+ 
+ #include <alsa/iatomic.h>
+ #include <libavcodec/avcodec.h>
++#include <libavutil/channel_layout.h>
++#include <libavutil/mem.h>
+ // support old ffmpeg versions <1.0
+ #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,18,102)
+ #define AVCodecID CodecID

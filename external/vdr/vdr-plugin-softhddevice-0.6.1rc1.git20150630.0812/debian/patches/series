@@ -1,0 +1,9 @@
+BUILDOPTIONS
+#channel_layout.h.diff
+#fix_includes.string.h.diff
+#fix_libavutils.diff
+#ffmpeg-2.2-compat
+#xlookupstring.patch
+#remote-debug.patch
+audioonly.patch
+Make-with-vaapi

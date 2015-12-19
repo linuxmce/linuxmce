@@ -1,0 +1,21 @@
+--- a/softhddevice.cpp
++++ b/softhddevice.cpp
+@@ -240,7 +240,7 @@
+ 	csoft = new cSoftRemote(keymap);
+     }
+ 
+-    //dsyslog("[softhddev]%s %s, %s, %s\n", __FUNCTION__, keymap, key, letter);
++    dsyslog("[softhddev]%s %s, %s, %s\n", __FUNCTION__, keymap, key, letter);
+     if (key[1]) {			// no single character
+ 	if (!csoft->Put(key, repeat, release) && letter
+ 	    && !cRemote::IsLearning()) {
+--- a/video.c
++++ b/video.c
+@@ -9775,6 +9775,7 @@
+ 	    break;
+ 	case KeyPress:
+ 	    VideoThreadLock();
++	    memset(letter, 0, sizeof(letter));
+ 	    XLookupString(&event.xkey, letter, sizeof(letter), &keysym, NULL);
+ 	    VideoThreadUnlock();
+ 	    if (keysym == NoSymbol) {
