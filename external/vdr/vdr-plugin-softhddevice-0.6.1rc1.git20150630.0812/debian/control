@@ -1,0 +1,24 @@
+Source: vdr-plugin-softhddevice
+Section: video
+Priority: extra
+Maintainer: yaVDR Team <team@yavdr.org>
+Build-Depends: debhelper (>= 7.0.50~), vdr-dev (>= 1.7.21), gettext, pkg-config, libva-dev, libva-x11-1, libva-glx1, libx11-xcb-dev, libxcb-dpms0-dev, libxcb-xv0-dev, libxcb-glx0-dev, libxcb-randr0-dev, libxcb-screensaver0-dev, libxcb-image0-dev, libxcb-util0-dev | libxcb-event1-dev,  libxcb-atom1-dev | libxcb-util0-dev, libxcb-icccm4-dev | libxcb-icccm1-dev, libxcb-keysyms1-dev, libavcodec-dev, libavformat-dev, i965-va-driver, vdpau-va-driver, libasound2-dev, libgl1-mesa-dev, libglu1-mesa-dev, libvdpau-dev, libxcb-ewmh1-dev
+Standards-Version: 3.9.4
+Homepage: http://projects.vdr-developer.org/projects/plg-softhddevice
+
+Package: vdr-plugin-softhddevice
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${vdr:Depends}
+Description: Plugin for VDR. A software and GPU emulated HD device
+ This plugin for the Linux Video Disc Recorder VDR. 
+ A software and GPU emulated HD device
+
+Package: vdr-plugin-softhddevice-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: vdr-plugin-softhddevice (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for vdr-plugin-softhddevice
+ .
+ This package contains only the debugging symbols for vdr-plugin-softhddevice
+

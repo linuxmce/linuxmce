@@ -1,0 +1,299 @@
+Index: vdr-plugin-softhddevice-0.5.2.git.20130129.1106/Makefile
+===================================================================
+--- vdr-plugin-softhddevice-0.5.2.git.20130129.1106.orig/Makefile	2013-03-03 17:27:53.974558097 +0100
++++ vdr-plugin-softhddevice-0.5.2.git.20130129.1106/Makefile	2013-03-03 17:28:19.714685738 +0100
+@@ -1,184 +1,163 @@
+ #
+ # Makefile for a Video Disk Recorder plugin
+ #
+-# $Id: 3467573893fabe4864cb5f01edf4506727de176b $
++# $Id$
+ 
+ # The official name of this plugin.
+ # This name will be used in the '-P...' option of VDR to load the plugin.
+ # By default the main source file also carries this name.
+-
++# IMPORTANT: the presence of this macro is important for the Make.config
++# file. So it must be defined, even if it is not used here!
++#
+ PLUGIN = softhddevice
+ 
+-### Configuration (edit this for your needs)
++### The version number of this plugin (taken from the main source file):
+ 
+-    # support alsa audio output module
+-ALSA ?= $(shell pkg-config --exists alsa && echo 1)
+-    # support OSS audio output module
+-OSS ?= 1
+-    # support VDPAU video output modue
+-VDPAU ?= $(shell pkg-config --exists vdpau && echo 1)
+-    # support VA-API video output modue
+-VAAPI ?= $(shell pkg-config --exists libva && echo 1)
+-    # screensaver disable/enable
+-SCREENSAVER ?= 1
+-    # use ffmpeg libswresample
+-SWRESAMPLE ?= $(shell pkg-config --exists libswresample && echo 1)
++VERSION = $(shell grep 'static const char \*const VERSION *=' $(PLUGIN).cpp | awk '{ print $$7 }' | sed -e 's/[";]//g')
++GIT_REV = $(shell git describe --always 2>/dev/null)
++
++### Configuration (edit this for your needs)
+ 
+-CONFIG := # -DDEBUG #-DOSD_DEBUG
+-CONFIG += -DAV_INFO -DAV_INFO_TIME=3000	# info/debug a/v sync
++CONFIG := #-DDEBUG #-DOSD_DEBUG
++CONFIG += -DAV_INFO -DAV_INFO_TIME=3000	# debug a/v sync
+ CONFIG += -DUSE_PIP			# PIP support
+ #CONFIG += -DHAVE_PTHREAD_NAME		# supports new pthread_setname_np
+ #CONFIG += -DNO_TS_AUDIO		# disable ts audio parser
+ #CONFIG += -DUSE_TS_VIDEO		# build new ts video parser
+-
+-ifeq ($(ALSA),1)
+-CONFIG += -DUSE_ALSA
+-_CFLAGS += $(shell pkg-config --cflags alsa)
+-LIBS += $(shell pkg-config --libs alsa)
+-endif
+-ifeq ($(OSS),1)
++					# use ffmpeg libswresample
++CONFIG += $(shell pkg-config --exists libswresample && echo "-DUSE_SWRESAMPLE")
++CONFIG += -DUSE_SCREENSAVER		# use functions to disable screensaver
++CONFIG += $(shell pkg-config --exists vdpau && echo "-DUSE_VDPAU")
++CONFIG += $(shell pkg-config --exists libva && echo "-DUSE_VAAPI")
++CONFIG += $(shell pkg-config --exists alsa && echo "-DUSE_ALSA")
+ CONFIG += -DUSE_OSS
+-endif
+-ifeq ($(VDPAU),1)
+-CONFIG += -DUSE_VDPAU
+-_CFLAGS += $(shell pkg-config --cflags vdpau)
+-LIBS += $(shell pkg-config --libs vdpau)
+-endif
+-ifeq ($(VAAPI),1)
+-CONFIG += -DUSE_VAAPI
+-_CFLAGS += $(shell pkg-config --cflags libva-x11 libva)
+-LIBS += $(shell pkg-config --libs libva-x11 libva)
+-endif
+-ifeq ($(SCREENSAVER),1)
+-CONFIG += -DUSE_SCREENSAVER
+-_CFLAGS += $(shell pkg-config --cflags xcb-screensaver xcb-dpms)
+-LIBS += $(shell pkg-config --libs xcb-screensaver xcb-dpms)
+-endif
+-ifeq ($(SWRESAMPLE),1)
+-CONFIG += -DUSE_SWRESAMPLE
+-_CFLAGS += $(shell pkg-config --cflags libswresample)
+-LIBS += $(shell pkg-config --libs libswresample)
+-endif
+ 
+-_CFLAGS += $(shell pkg-config --cflags libavcodec x11 x11-xcb xcb xcb-icccm)
+-LIBS += -lrt $(shell pkg-config --libs libavcodec x11 x11-xcb xcb xcb-icccm)
++### The C++ compiler and options:
+ 
+-### The version number of this plugin (taken from the main source file):
+-
+-VERSION = $(shell grep 'static const char \*const VERSION *=' $(PLUGIN).cpp | awk '{ print $$7 }' | sed -e 's/[";]//g')
+-GIT_REV = $(shell git describe --always 2>/dev/null)
++CC	 ?= gcc
++CXX	 ?= g++
++CFLAGS	 ?=	-g -O2 -W -Wall -Wextra -Winit-self \
++		-Wdeclaration-after-statement \
++		-ftree-vectorize -msse3 -flax-vector-conversions -fPIC
++CXXFLAGS ?= -g -O2 -W -Wall -Wextra -Werror=overloaded-virtual -fPIC
+ 
+ ### The directory environment:
+ 
+-# Use package data if installed...otherwise assume we're under the VDR source directory:
+-PKGCFG = $(if $(VDRDIR),$(shell pkg-config --variable=$(1) $(VDRDIR)/vdr.pc),$(shell pkg-config --variable=$(1) vdr || pkg-config --variable=$(1) ../../../vdr.pc))
+-LIBDIR = $(call PKGCFG,libdir)
+-LOCDIR = $(call PKGCFG,locdir)
+-PLGCFG = $(call PKGCFG,plgcfg)
+-#
++VDRDIR ?= ../../..
++LIBDIR ?= ../../lib
+ TMPDIR ?= /tmp
+ 
+-### The compiler options:
+-
+-export CFLAGS	= $(call PKGCFG,cflags)
+-export CXXFLAGS = $(call PKGCFG,cxxflags)
++### Make sure that necessary options are included:
+ 
+-ifeq ($(CFLAGS),)
+-$(error CFLAGS not set)
+-endif
+-ifeq ($(CXXFLAGS),)
+-$(error CXXFLAGS not set)
+-endif
++-include $(VDRDIR)/Make.global
+ 
+-### The version number of VDR's plugin API:
++### Allow user defined options to overwrite defaults:
+ 
+-APIVERSION = $(call PKGCFG,apiversion)
++-include $(VDRDIR)/Make.config
+ 
+-### Allow user defined options to overwrite defaults:
++### The version number of VDR's plugin API (taken from VDR's "config.h"):
+ 
+--include $(PLGCFG)
++APIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
+ 
+ ### The name of the distribution archive:
+ 
+ ARCHIVE = $(PLUGIN)-$(VERSION)
+ PACKAGE = vdr-$(ARCHIVE)
+ 
+-### The name of the shared object file:
+-
+-SOFILE = libvdr-$(PLUGIN).so
+-
+-### Includes and Defines (add further entries here):
++### Includes, Defines and dependencies (add further entries here):
+ 
+-INCLUDES +=
++INCLUDES += -I$(VDRDIR)/include
+ 
+-DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"' -D_GNU_SOURCE $(CONFIG) \
++DEFINES += $(CONFIG) -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"' \
+ 	$(if $(GIT_REV), -DGIT_REV='"$(GIT_REV)"')
+ 
+-### Make it standard
+-
+-override CXXFLAGS += $(_CFLAGS) $(DEFINES) $(INCLUDES) \
+-    -g -W -Wall -Wextra -Winit-self -Werror=overloaded-virtual
+-override CFLAGS	  += $(_CFLAGS) $(DEFINES) $(INCLUDES) \
+-    -g -W -Wall -Wextra -Winit-self -Wdeclaration-after-statement
++_CFLAGS = $(DEFINES) $(INCLUDES) \
++	$(shell pkg-config --cflags libavcodec) \
++	`pkg-config --cflags x11 x11-xcb xcb xcb-xv xcb-shm xcb-dpms xcb-atom\
++		xcb-screensaver xcb-randr xcb-glx xcb-icccm xcb-keysyms`\
++	`pkg-config --cflags gl glu` \
++	$(if $(findstring USE_SWRESAMPLE,$(CONFIG)), \
++		$(shell pkg-config --cflags libswresample)) \
++	$(if $(findstring USE_VAAPI,$(CONFIG)), \
++		`pkg-config --cflags libva-x11 libva-glx libva`) \
++	$(if $(findstring USE_ALSA,$(CONFIG)), \
++		`pkg-config --cflags alsa`)
++
++#override _CFLAGS  += -Werror
++override CXXFLAGS += $(_CFLAGS)
++override CFLAGS	  += $(_CFLAGS)
++
++LIBS += -lrt \
++	$(shell pkg-config --libs libavcodec) \
++	`pkg-config --libs x11 x11-xcb xcb xcb-xv xcb-shm xcb-dpms xcb-atom\
++		xcb-screensaver xcb-randr xcb-glx xcb-icccm xcb-keysyms`\
++	`pkg-config --libs gl glu` \
++	$(if $(findstring USE_SWRESAMPLE,$(CONFIG)), \
++		$(shell pkg-config --libs libswresample)) \
++	$(if $(findstring USE_VDPAU,$(CONFIG)), \
++		`pkg-config --libs vdpau`) \
++	$(if $(findstring USE_VAAPI,$(CONFIG)), \
++		`pkg-config --libs libva-x11 libva-glx libva`) \
++	$(if $(findstring USE_ALSA,$(CONFIG)), \
++		`pkg-config --libs alsa`)
+ 
+ ### The object files (add further files here):
+ 
+ OBJS = $(PLUGIN).o softhddev.o video.o audio.o codec.o ringbuffer.o
+-
+ SRCS = $(wildcard $(OBJS:.o=.c)) $(PLUGIN).cpp
+ 
+ ### The main target:
+ 
+-all: $(SOFILE) i18n
++all: libvdr-$(PLUGIN).so i18n
++
++### Implicit rules:
++#
++#%.o: %.cpp
++#	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $<
+ 
+ ### Dependencies:
+ 
+-MAKEDEP = $(CXX) -MM -MG
++MAKEDEP = $(CC) -MM -MG
+ DEPFILE = .dependencies
+ $(DEPFILE): Makefile
+-	@$(MAKEDEP) $(CXXFLAGS) $(SRCS) > $@
++	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(SRCS) >$@
++
++$(OBJS): Makefile
+ 
+ -include $(DEPFILE)
+ 
+ ### Internationalization (I18N):
+ 
+ PODIR	  = po
++LOCALEDIR = $(VDRDIR)/locale
+ I18Npo	  = $(wildcard $(PODIR)/*.po)
+-I18Nmo	  = $(addsuffix .mo, $(foreach file, $(I18Npo), $(basename $(file))))
+-I18Nmsgs  = $(addprefix $(DESTDIR)$(LOCDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
++I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
+ I18Npot	  = $(PODIR)/$(PLUGIN).pot
+ 
+ %.mo: %.po
+ 	msgfmt -c -o $@ $<
+ 
+-$(I18Npot): $(SRCS)
++$(I18Npot): $(wildcard *.cpp) $(wildcard *.c)
+ 	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP \
+-	-k_ -k_N --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) \
+-	--msgid-bugs-address='<see README>' -o $@ `ls $^`
++	-k_ -k_N --package-name=VDR --package-version=$(VDRVERSION) \
++	--msgid-bugs-address='<see README>' -o $@ $^
+ 
+ %.po: $(I18Npot)
+-	msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
++	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
+ 	@touch $@
+ 
+-$(I18Nmsgs): $(DESTDIR)$(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+-	install -D -m644 $< $@
++$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
++	@mkdir -p $(dir $@)
++	cp $< $@
+ 
+ .PHONY: i18n
+-i18n: $(I18Nmo) $(I18Npot)
+-
+-install-i18n: $(I18Nmsgs)
++i18n: $(I18Nmsgs) $(I18Npot)
+ 
+ ### Targets:
+ 
+-$(OBJS): Makefile
+-
+-$(SOFILE): $(OBJS)
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
+-
+-install-lib: $(SOFILE)
+-	install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
+-
+-install: install-lib install-i18n
++libvdr-$(PLUGIN).so: $(OBJS) Makefile
++	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared -fPIC $(OBJS) -o $@ $(LIBS)
++	@cp --remove-destination $@ $(LIBDIR)/$@.$(APIVERSION)
+ 
+ dist: $(I18Npo) clean
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+@@ -189,10 +168,11 @@
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
+-	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+-	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
++	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~ $(PODIR)/*.mo $(PODIR)/*.pot
+ 
+-## Private Targets:
++install:	libvdr-$(PLUGIN).so
++	cp --remove-destination libvdr-$(PLUGIN).so \
++		/usr/lib/vdr/plugins/libvdr-$(PLUGIN).so.$(APIVERSION)
+ 
+ HDRS=	$(wildcard *.h)
+ 
+@@ -204,5 +184,5 @@
+ 	done
+ 
+ video_test: video.c Makefile
+-	$(CC) -DVIDEO_TEST -DVERSION='"$(VERSION)"' $(CFLAGS) $(LDFLAGS) $< \
+-	$(LIBS) -o $@
++	$(CC) -DVIDEO_TEST -DVERSION='"$(VERSION)"' $(CFLAGS) $(LDFLAGS) $< $(LIBS) \
++	-o $@

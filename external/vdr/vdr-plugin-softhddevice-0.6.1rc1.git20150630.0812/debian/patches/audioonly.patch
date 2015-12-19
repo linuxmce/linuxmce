@@ -1,0 +1,14 @@
+--- a/softhddevice.cpp
++++ b/softhddevice.cpp
+@@ -2253,7 +2253,10 @@
+ 	    break;
+ 	case pmAudioOnly:
+ 	case pmAudioOnlyBlack:
+-	    break;
++	    dsyslog("[softhddev] play mode external audio\n");
++	    Suspend(0, 1, 0);
++	    SuspendMode = SUSPEND_EXTERNAL;
++	    return true;
+ 	case pmVideoOnly:
+ 	    break;
+ 	case pmNone:

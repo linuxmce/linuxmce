@@ -1,0 +1,22 @@
+Index: vdr-plugin-softhddevice-0.6.1rc1.git20140218.1126/codec.c
+===================================================================
+--- vdr-plugin-softhddevice-0.6.1rc1.git20140218.1126.orig/codec.c	2014-02-18 12:26:03.000000000 +0100
++++ vdr-plugin-softhddevice-0.6.1rc1.git20140218.1126/codec.c	2014-04-05 20:49:29.091636284 +0200
+@@ -215,7 +215,7 @@
+ 	if (video_ctx->pkt) {
+ 	    frame->pkt_pts = video_ctx->pkt->pts;
+ 	} else {
+-	    frame->pkt_pts = AV_NOPTS_VALUE;
++	    //frame->pkt_pts = AV_NOPTS_VALUE;
+ 	}
+ 	return 0;
+     }
+@@ -240,7 +240,7 @@
+ 	if (video_ctx->pkt) {
+ 	    frame->pkt_pts = video_ctx->pkt->pts;
+ 	} else {
+-	    frame->pkt_pts = AV_NOPTS_VALUE;
++	    //frame->pkt_pts = AV_NOPTS_VALUE;
+ 	}
+ 	return 0;
+     }
