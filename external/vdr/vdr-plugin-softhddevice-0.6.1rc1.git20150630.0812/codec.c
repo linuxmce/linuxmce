@@ -59,7 +59,9 @@
 #define _N(str) str			///< gettext_noop shortcut
 
 #include <libavcodec/avcodec.h>
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,35,0)
 #include <libavutil/channel_layout.h>
+#endif
 #include <libavutil/mem.h>
 // support old ffmpeg versions <1.0
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,18,102)
