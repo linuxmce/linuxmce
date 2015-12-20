@@ -1,8 +1,8 @@
-vdr-plugin-softhddevice (1:0.6.1rc1.git20150630.0812-0lmce1) ; urgency=medium
+vdr-plugin-softhddevice (1:0.6.1rc1.git20150630.0812-1lmce0~precise) precise; urgency=medium
 
-  * enable VA-API build and disable screensaver
+  * Enable VA-API option
 
- -- Peer Oliver Schmidt <developers@linuxmce.org>  Sat, 19 Dec 2015 14:15:07 +0100
+ -- Peer Oliver Schmidt <developer@linuxmce.org>  Sat, 19 Dec 2015 14:15:07 +0100
 
 vdr-plugin-softhddevice (1:0.6.1rc1.git20150630.0812-0yavdr1~precise) precise; urgency=medium
 
