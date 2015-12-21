@@ -196,3 +196,5 @@ chrpath
 libxml++2.6-dev
 libao2
 libao-dev
+libxcb-dpms0-dev libxcb-screensaver0-dev libxcb-image0-dev libxcb-util0-dev
+libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-ewmh-dev
