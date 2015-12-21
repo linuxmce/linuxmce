@@ -23,7 +23,7 @@ cache_name=".cache"
 
 function Changed_Since_Last_Build
 {
-#	return $(/bin/true) #Zaerc HACK
+	return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
 	DisplayMessage "Checking build stamp on '$fs_path'"
@@ -274,6 +274,12 @@ function Build_Replacements_ubuntu_trusty
 	#Package: vdr-iptv
 	Build_Replacement_Package iptv external/vdr/iptv-2.2.1
 
+	# softhddevice is build for Intel architecture.
+	if [[ "$arch" != "armhf" ]]; then  
+		#Package: vdr-plugin-softhddevice
+		Build_Replacement_Package softhddevice external/vdr/vdr-plugin-softhddevice-0.6.1rc1.git20150630.0812
+	fi
+
 	#Package: ruby1.8-1.8.7.375
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
 	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/ruby*dev*deb ${svn_dir}/${svn_branch_name}/ubuntu/libruby1.8_*deb
@@ -345,6 +351,12 @@ function Build_Replacements_ubuntu_xenial
 
 	#Package: vdr-iptv
 	Build_Replacement_Package iptv external/vdr/iptv-2.2.1
+
+	# softhddevice is build for Intel architecture.
+	if [[ "$arch" != "armhf" ]]; then  
+		#Package: vdr-plugin-softhddevice
+		Build_Replacement_Package softhddevice external/vdr/vdr-plugin-softhddevice-0.6.1rc1.git20150630.0812
+	fi
 
 	#Package: ruby1.8-1.8.7.375
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375
