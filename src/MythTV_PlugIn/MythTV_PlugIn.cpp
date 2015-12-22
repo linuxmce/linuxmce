@@ -968,9 +968,13 @@ class DataGridTable *MythTV_PlugIn::AllShows(string GridID, string Parms, void *
 	}
 
 	// When tune to channel gets an 'i' in front, it's assumed that it's a channel id
-	string sSQL = "SELECT chanid, title, CONVERT_TZ(starttime,'+00:00','"+m_sTzOffset+"') as tz_starttime, CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') as tz_endtime, seriesid, programid "
-		"FROM program "
-		"WHERE starttime < UTC_TIMESTAMP() AND endtime > UTC_TIMESTAMP() " + sProvider;
+string sSQL = "SELECT chanid, title, starttime, endtime, seriesid, programid "
+"FROM program "
+"WHERE starttime < '" + StringUtils::SQLDateTime() + "' AND endtime>'" + StringUtils::SQLDateTime() + "' " + sProvider;
+
+//	string sSQL = "SELECT chanid, title, CONVERT_TZ(starttime,'+00:00','"+m_sTzOffset+"') as tz_starttime, CONVERT_TZ(endtime,'+00:00','"+m_sTzOffset+"') as tz_endtime, seriesid, programid "
+//		"FROM program "
+//		"WHERE starttime < UTC_TIMESTAMP() AND endtime > UTC_TIMESTAMP() " + sProvider;
 
 	bool bAllSource = mapVideoSourcesToUse.empty();
 	int iRow=0;
@@ -1002,7 +1006,7 @@ class DataGridTable *MythTV_PlugIn::AllShows(string GridID, string Parms, void *
 			time_t tStop = StringUtils::SQLDateTime( row[3] );
 			string sTime = StringUtils::HourMinute(tStart) + " - " + StringUtils::HourMinute(tStop);
 			string sNumber = NULL != row[0] ? row[0] : "";
-			string sInfo = NULL != row[4] ? row[1]: "";
+			string sInfo = NULL != row[4] ? row[4]: "";
 
 			pMythChannel->m_pCell->m_mapAttributes["Number"] = sNumber;
 			pMythChannel->m_pCell->m_mapAttributes["Time"] = sTime;
