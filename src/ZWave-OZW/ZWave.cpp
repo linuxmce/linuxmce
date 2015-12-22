@@ -42,6 +42,7 @@ ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool b
 
 	m_dwPK_ClimateInterface = 0;
 	m_dwPK_SecurityInterface = 0;
+	m_iHouseMode = -1;
 
 	// Value labels we are interested in and their polling intensities
 	m_mapLabels["Switch"] = 1;
@@ -125,7 +126,13 @@ ZWave_Command *Create_ZWave(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl
 void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command for child");
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command for child %d", pDeviceData_Impl->m_dwPK_Device);
+	if (pDeviceData_Impl->m_dwPK_Device == m_dwPK_SecurityInterface) {
+		if (pMessage->m_dwID == COMMAND_Set_House_Mode_CONST) {
+  			m_iHouseMode = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
+		}
+		return;
+	}
 	string nodeInstance = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 	uint8 node_id;
 	uint8 instance_id;
@@ -280,6 +287,33 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 //				myZWApi->zwAVControlSet(node_id,sequence,3); // vol up
 				break;
 				;;
+		        case COMMAND_Assign_Access_Token_CONST:
+		        {
+				string id = pMessage->m_mapParameters[COMMANDPARAMETER_ID_CONST];
+				// Assumes 0xAB 0xBC 0xDC etc.etc. format on token
+				string token = pMessage->m_mapParameters[COMMANDPARAMETER_Tokens_CONST];
+				string uid = pMessage->m_mapParameters[COMMANDPARAMETER_UID_CONST];
+				vector<string> vect;
+				StringUtils::Tokenize(token, " ", vect);
+				uint8* data = new uint8[vect.size()];
+				char* ch = new char[3];
+				for (int i = 0; i < vect.size(); i++) {
+					strcpy(ch, vect[i].substr(2, 2).c_str());
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Code part: %s", ch);
+					data[i] = (uint8)StringUtils::HexByte2Num(ch);
+				}
+				delete ch;
+				OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Code " + id + ":");
+				if (valueID != NULL && OpenZWave::Manager::Get()->SetValue(*valueID, data, vect.size())) {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Code successful");
+				} else {
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Set Code FAILED!");
+				}
+				delete data;
+				break;
+				;;
+			}
+			
 		}
 	} else {
 		sCMD_Result = "UNHANDLED CHILD";
@@ -766,7 +800,7 @@ void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMul
 	} else if ( iValue < 0)
 	{
 		uint8 nodeId = -iValue;
-		OpenZWave::Manager::Get()->RemoveNode(m_pZWInterface->GetHomeId());
+		OpenZWave::Manager::Get()->RemoveFailedNode(m_pZWInterface->GetHomeId(), nodeId);
 	} else {
 		OpenZWave::Manager::Get()->RemoveNode(m_pZWInterface->GetHomeId());
 	}
@@ -787,41 +821,6 @@ void ZWave::CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage)
 	OpenZWave::Manager::Get()->RefreshNodeInfo(m_pZWInterface->GetHomeId(), iNodeID);
 }
 
-/*
-void ZWave::controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context) {
-	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"controller state update:");
-	switch(state) {
-		case OpenZWave::Driver::ControllerState_Normal:
-			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"no command in progress");
-			// nothing to do
-			break;
-		case OpenZWave::Driver::ControllerState_Waiting:
-			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"waiting for user action");
-			// waiting for user action
-			break;
-		case OpenZWave::Driver::ControllerState_InProgress:
-			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"communicating with other device");
-			// communicating with device
-			break;
-		case OpenZWave::Driver::ControllerState_Completed:
-			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"command has completed successfully");
-			break;
-		case OpenZWave::Driver::ControllerState_Failed:
-			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"command has failed");
-			// houston..
-			break;
-		case OpenZWave::Driver::ControllerState_NodeOK:
-			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"node ok");
-			break;
-		case OpenZWave::Driver::ControllerState_NodeFailed:
-			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"node failed");
-			break;
-		default:
-			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"unknown response");
-			break;
-	}
-}
-*/
 void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInfo* nodeInfo) {
 
 	switch( _notification->GetType() )
@@ -930,12 +929,37 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
 					SendSetpointChangedEvent(PKDevice, level);
+				} else if ( label == "Access Control" ) {
+					string val;
+					OpenZWave::Manager::Get()->GetValueAsString(id, &val);
+					HandleHouseModeChange(PKDevice, val);
 				}
 			}
 		}
 		break;
 	}
+	case OpenZWave::Notification::Type_ValueRefreshed:
+	{
+		if( nodeInfo != NULL )
+		{
+			// One of the node values has changed
+			OpenZWave::ValueID id = _notification->GetValueID();
+			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 
+			int PKDevice = nodeInfo->GetPKDeviceForValue(id);
+			if (PKDevice > 0)
+			{
+				// Special case for access control - OZW might think we have a different mode
+				// than we actually have, so we also check house mode when value is refreshed
+				if ( label == "Access Control" ) {
+					string val;
+					OpenZWave::Manager::Get()->GetValueAsString(id, &val);
+					HandleHouseModeChange(PKDevice, val);
+				}
+			}
+		}
+		break;
+	}
 	case OpenZWave::Notification::Type_NodeEvent:
 	{
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Notification::Type_NodeEvent");
@@ -1009,9 +1033,11 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 		else if (_notification->GetNotification() == OpenZWave::Notification::Code_Alive)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::OnNotification() : Node brought back to life, node id = %d", nodeInfo->m_nodeId);
+		} else if (_notification->GetNotification() == OpenZWave::Notification::Code_Timeout)
+		{
+			m_listStatus.push_back("Message timed out, node " + StringUtils::itos(_notification->GetNodeId()));
 		}
 		break;
-
 	}
 	case OpenZWave::Notification::Type_ControllerCommand:
 	{
@@ -1644,6 +1670,35 @@ void ZWave::SendRelativeHumidityChangedEvent(unsigned int PK_Device, float value
 	SendEvent(PK_Device, EVENT_Humidity_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }
 
+void ZWave::HandleHouseModeChange(unsigned int PK_Device, string id)
+{
+	DeviceData_Impl* pDevice = GetData()->FindChild(PK_Device);
+	string mappingString = pDevice->m_mapParameters_Find(DEVICEDATA_Mapping_CONST);
+	
+        // Split mappings into lines and compare with id
+	vector<string> mappings;
+	StringUtils::Tokenize(mappingString, "\n", mappings);
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Alarm Report: id = %s, mapping = %s", id.c_str(), mappingString.c_str());
+	for (int i = 0; i < mappings.size(); i++) {
+		vector<string> mapping;
+		StringUtils::Tokenize(mappings[i], ",", mapping);
+		if (mapping[0] == id) {
+			// See what to do for that event id
+			string houseMode = mapping[1];
+			// Only change house mode when it is actually a change
+			if (atoi(houseMode.c_str()) != m_iHouseMode)
+			{
+				string bypassMode = "";
+				if (mapping[2].size())
+					bypassMode = mapping[2];
+				string passwd = pDevice->m_mapParameters_Find(DEVICEDATA_Password_CONST);
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending Set_House_Mode, mode = %s, bypass = %s", houseMode.c_str(), bypassMode.c_str());
+				DCE::CMD_Set_House_Mode_DT CMD_Set_House_Mode(PK_Device,DEVICETEMPLATE_Security_Plugin_CONST,BL_SameHouse,houseMode,0,passwd,0,bypassMode);
+				SendCommand(CMD_Set_House_Mode);
+			}
+		}
+	}
+}
 //<-dceag-c870-b->
 
 	/** @brief COMMAND: #870 - Get Data */
