@@ -47,6 +47,7 @@ namespace DCE
 		bool m_bPollingEnabled; // Enable automatic polling of values
 		long m_dwPK_ClimateInterface;
 		long m_dwPK_SecurityInterface;
+		int m_iHouseMode;
 		map<string, int> m_mapLabels;
 		class AlarmManager *m_pAlarmManager;
 		list<string> m_listStatus;
@@ -92,6 +93,7 @@ public:
 		void SendBrightnessChangedEvent(unsigned int PK_Device, float value);
 		void SendRelativeHumidityChangedEvent(unsigned int PK_Device, float value);
 		void SendSetpointChangedEvent(unsigned int PK_Device, float value);
+		void HandleHouseModeChange(unsigned int PK_Device, string id);
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
