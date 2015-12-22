@@ -85,8 +85,10 @@ function advancedZWave($output,$dbADO){
 			    dt.id = "statusTab_"+node.id;
 			    tabSectionEl.appendChild(dt);
 			    dt.insert("<p>Status: "+(node.isFailed ? "FAILED" : "ok")+"</p>");
-			    if (node.isFailed)
+			    if (node.isFailed) {
 			    	    dt.insert("<p class=\"command\" onclick=\"replaceNode("+node.id+");\">Replace node</p>");
+			    	    dt.insert("<p class=\"command\" onclick=\"removeFailedNode("+node.id+");\">Remove node</p>");
+			    }
 
 			    dt.insert("<p>Awake: "+(node.isAwake ? "Yes" : "No")+"</p>");
 			    dt.insert("<p>OpenZWave query stage: "+node.queryStage+"</p>");
@@ -255,6 +257,10 @@ function advancedZWave($output,$dbADO){
 		function removeNode() {
 		    showStatus(true, true);
 		    performCommand({"removeNode":1});
+		}
+		function removeFailedNode(id) {
+		    showStatus(true, true);
+		    performCommand({"removeFailedNode":1, "node":id});
 		}
 		function cancelControllerCommand() {
 		    showStatus(true, true);
@@ -630,7 +636,7 @@ p.status {
 	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
 	    exit;
 	}
-	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation']) || isset($_POST['addNode']) || isset($_POST['removeNode']) || isset($_POST['cancelControllerCommand']) || isset($_POST['setPolling']) || isset($_POST['replaceNode'])) {
+	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation']) || isset($_POST['addNode']) || isset($_POST['removeNode']) || isset($_POST['cancelControllerCommand']) || isset($_POST['setPolling']) || isset($_POST['replaceNode']) || isset($_POST['removeFailedNode'])) {
 
 	    header('Content-type: application/json');
 
@@ -658,6 +664,9 @@ p.status {
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 48 5';
 	    } else if (isset($_POST['removeNode'])) {
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 968';
+	    } else if (isset($_POST['removeFailedNode'])) {
+	        $id = (int)$_POST['replaceNode'];
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 968 48 '.$id;
 	    } else if (isset($_POST['setPolling'])) {
 	        $pkDevice = $_POST['pkDevice'];
 		$label = $_POST['label'];
