@@ -19,11 +19,12 @@ ver_split="~"
 [[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j$NUM_CORES"
 
 cache_name=".cache"
-[[ -z "$cache_replacements" ]] && rm -f "${replacements_dir}/${cache_name}" || :
 
 function Changed_Since_Last_Build
 {
-	return $(/bin/true) #Zaerc HACK
+	# set cache_replacements=yes in /etc/lmce-build/builder.conf to enable caching replacements
+	# do not cache by default
+	[[ -z "$cache_replacements" ]] && return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
 	DisplayMessage "Checking build stamp on '$fs_path'"
