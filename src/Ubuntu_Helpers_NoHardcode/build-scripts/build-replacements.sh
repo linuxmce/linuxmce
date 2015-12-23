@@ -23,7 +23,9 @@ cache_name=".cache"
 function Changed_Since_Last_Build
 {
 	# set cache_replacements=yes in /etc/lmce-build/builder.conf to enable caching replacements
-	# do not cache by default
+	# cacheing is disabled by default, you must enable it for it to have any affect
+	# if you need to manually build while using the replacement cache, outside a build cycle
+	# delete the file: /var/lmce-build/replacements/.cache
 	[[ -z "$cache_replacements" ]] && return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
