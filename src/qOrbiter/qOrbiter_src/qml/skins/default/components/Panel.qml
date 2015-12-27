@@ -14,6 +14,7 @@ Item {
     property alias fillColor:bgfill.color
     property string headerFillColor:Style.appcolor_background_list
     property Component content
+    property Component buttonControls
     property alias buttonContent:control_row.children
 
     clip:true
@@ -54,14 +55,21 @@ Item {
 
     ScrollRow{
         height: panelHeader.height *.95
-        contentWidth: control_row.width
+        contentWidth:parent.width
         contentHeight: height
+
 
         anchors{
             right:panelHeader.right
             left:headerText.right
             leftMargin: 5
             verticalCenter: panelHeader.verticalCenter
+        }
+
+        Loader{
+            height: panelHeader.height
+            width: parent.width
+            sourceComponent:buttonControls
         }
 
         Row{
