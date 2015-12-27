@@ -1998,6 +1998,7 @@ public slots:
     void setPosition(int position);
     void showMenu();
     void CopyDisc();
+    void ejectDisc(long diskDriveDevice, int iSlotNo= 0);
     void ShowBookMarks();
 
 

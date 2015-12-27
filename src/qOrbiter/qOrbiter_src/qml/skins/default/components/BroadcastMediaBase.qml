@@ -176,7 +176,7 @@ Panel{
         MediaNumberPad{
             id:numbers
             anchors.left: playlistPanel.right
-            anchors.top: manager.playlistPanel.top
+            anchors.top: playlistPanel.top
             visible:true
         }
 

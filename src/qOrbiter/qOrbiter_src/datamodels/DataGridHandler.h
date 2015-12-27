@@ -29,6 +29,7 @@
 #include "ActiveMediaStreams.h"
 #include "DataModelItems/sleepingalarm.h"
 #include "playlists/epgitemclass.h"
+#include "diskmediaitem.h"
 #include "gridItem.h"
 
 using namespace DCE;
@@ -87,7 +88,10 @@ public:
         } else if (PK_DataGrid  == DATAGRID_EPG_All_Shows_CONST ||
                    PK_DataGrid  == DATAGRID_EPG_Grid_CONST){
          return new EPGItemClass(parent);
-        } else {
+        } else if(PK_DataGrid == DATAGRID_Discs_CONST){
+            return new DiskMediaItem(parent);
+        }
+        else {
             // uses generic model item
             GenericModelItem* pItem = new GenericModelItem(parent);
             pItem->setRoleNames(getRoleNames(PK_DataGrid));
@@ -206,11 +210,28 @@ public:
             DataGridCell *pCell2 = pTable->GetData(1, row);
             pItem->setData(ValueRole, pCell2->GetValue());
             pItem->setData(DescriptionRole, QString::fromUtf8(pCell2->GetText()));
-        } else {
+        } else if(PK_DataGrid==DATAGRID_Discs_CONST ) {
+            (static_cast<DiskMediaItem*>(pItem))->setDiscData(
+                        QString::fromStdString(pCell->GetValue()).toInt(),
+                        QString::fromStdString(pCell->m_mapAttributes["PK_File"]).toInt(),
+                        !pCell->m_mapAttributes_Find("EK_Device_Ripping").empty(),
+                        QString::fromStdString(pCell->m_mapAttributes["PK_Disc"]).toInt(),
+                        pCell->m_mapAttributes_Find("PK_File").empty() ? false : true ,
+                        QString::fromStdString(pCell->m_mapAttributes_Find("PK_Disc")).toInt(),
+                        QString::fromUtf8(pCell->GetText())
+                        );
+
+        qDebug()<< "Device is ripping ?" << !pCell->m_mapAttributes_Find("EK_Device_Ripping").empty();
+        qDebug() << "Disc ID " << QString::fromStdString(pCell->m_mapAttributes["PK_Disc"]);
+        qDebug() << "File " << QString::fromStdString(pCell->m_mapAttributes["PK_File"]);
+        qDebug() << "Description " << pCell->GetText();
+        }
+        else {
 
             // Default, get one cell use text and value
+
             pItem->setData(ValueRole, pCell->GetValue());
-            pItem->setData(DescriptionRole, QString::fromUtf8(pCell->GetText()));
+            pItem->setData(DescriptionRole, QString::fromUtf8(pCell->GetText()));          
         }
     }
 

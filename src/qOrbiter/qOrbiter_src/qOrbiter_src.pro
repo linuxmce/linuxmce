@@ -419,7 +419,8 @@ SOURCES += main.cpp \
         defineObjects/datagrids.cpp \
     contextobjects/screeninfo.cpp \
     contextobjects/settinginterface.cpp \
-    contextobjects/entertainareatimecode.cpp
+    contextobjects/entertainareatimecode.cpp \
+    datamodels/diskmediaitem.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -533,7 +534,8 @@ HEADERS += \
     contextobjects/screeninfo.h \
     contextobjects/settinginterface.h \
     contextobjects/entertainareatimecode.h \
-    DCECommand.h
+    DCECommand.h \
+    datamodels/diskmediaitem.h
 
 
 

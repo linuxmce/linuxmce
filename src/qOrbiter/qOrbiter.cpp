@@ -102,6 +102,8 @@ qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceDat
 {
     return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 
+
+
 }
 //<-dceag-createinst-e->
 
@@ -4195,6 +4197,13 @@ void DCE::qOrbiter::powerOff(QString deviceType)
 
 void DCE::qOrbiter::CopyDisc()
 {
+}
+
+void qOrbiter::ejectDisc(long diskDriveDevice, int iSlotNo)
+{
+    qDebug() << Q_FUNC_INFO;
+    CMD_Eject_Disk eject(m_dwPK_Device, diskDriveDevice, iSlotNo);
+    SendCommandNoResponse(eject);
 }
 
 void DCE::qOrbiter::ShowBookMarks()
