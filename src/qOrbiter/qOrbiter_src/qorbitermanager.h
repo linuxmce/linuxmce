@@ -1280,7 +1280,7 @@ public slots:
     /*! @name Media Control Slots*/
     //{@
     Q_INVOKABLE void playMedia(QString FK_Media);
-
+    void playMediaFromDrive(int device, int disc, int ea);
     void mythTvPlay();
     void playResume();
     void stopMedia();

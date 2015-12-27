@@ -225,6 +225,7 @@ public:
         qDebug() << "Disc ID " << QString::fromStdString(pCell->m_mapAttributes["PK_Disc"]);
         qDebug() << "File " << QString::fromStdString(pCell->m_mapAttributes["PK_File"]);
         qDebug() << "Description " << pCell->GetText();
+        qDebug() << pCell->m_Value;
         }
         else {
 
