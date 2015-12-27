@@ -9,53 +9,147 @@ Panel{
     id:generic_playback_panel
     headerTitle:MediaHelper.translateType(manager.i_current_mediaType)
 
-    buttonContent:[
+    Component{
+        id:standardButtons
+        Row{
+          width: children.length*Style.appButtonWidth
+          height:parent.height
+            StyledButton{
+                id:resend
+                height:Style.appNavigation_panelHeight
 
-        StyledButton{
-            id:resend
-             height:Style.appNavigation_panelHeight
-
-            buttonText: qsTr("Resend AV", "Resend AV Commands")
-            onActivated: manager.currentScreen="Screen_38.qml"
-        },
-
-        StyledButton{
-            id:power_btn
-            height:Style.appNavigation_panelHeight
-            buttonText: qsTr("Power Off", "Turn off Device")
-            onConfirm:{
-                manager.exitMediaMenu()
-                manager.stopMedia()
+                buttonText: qsTr("Resend AV", "Resend AV Commands")
+                onActivated: manager.currentScreen="Screen_38.qml"
             }
-        },
 
-        StyledButton{
-            id:options
-            height:Style.appNavigation_panelHeight
-            buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
-            onActivated: {
-                if(contentItem.state==="options"){
-                    contentItem.resetState()
-                } else {
-                    contentItem.state="options"
+            StyledButton{
+                id:power_btn
+                height:Style.appNavigation_panelHeight
+                buttonText: qsTr("Power Off", "Turn off Device")
+                onConfirm:{
+                    manager.exitMediaMenu()
+                    manager.stopMedia()
                 }
             }
-        },
 
-        StyledButton{
-            id:btns
+            StyledButton{
+                id:options
+                height:Style.appNavigation_panelHeight
+                buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
+                onActivated: {
+                    if(contentItem.state==="options"){
+                        contentItem.resetState()
+                    } else {
+                        contentItem.state="options"
+                    }
+                }
+            }
 
-            height:Style.appNavigation_panelHeight
-            buttonText: qsTr("Buttons", "Additional Media Buttons")
-            onActivated: {
-                if(contentItem.state=="buttongrid"){
-                    contentItem.resetState()
-                }else {
-                    contentItem.state="buttongrid"
+            StyledButton{
+                id:btns
+
+                height:Style.appNavigation_panelHeight
+                buttonText: qsTr("Buttons", "Additional Media Buttons")
+                onActivated: {
+                    if(contentItem.state=="buttongrid"){
+                        contentItem.resetState()
+                    }else {
+                        contentItem.state="buttongrid"
+                    }
                 }
             }
         }
-    ]
+    }
+
+    Component{
+        id:dvdMenuButtons
+        Row{
+        height: parent.height
+        width: 400
+            StyledButton{
+                id:resend
+                height:Style.appNavigation_panelHeight
+                buttonText: qsTr("Resend AV", "Resend AV Commands")
+                onActivated: manager.currentScreen="Screen_38.qml"
+            }
+
+            StyledButton{
+                id:options
+                height:Style.appNavigation_panelHeight
+                buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
+                onActivated: {
+                    if(contentItem.state==="options"){
+                        contentItem.resetState()
+                    } else {
+                        contentItem.state="options"
+                    }
+                }
+            }
+
+            StyledButton{
+                id:btns
+                height:Style.appNavigation_panelHeight
+                buttonText: qsTr("Buttons", "Additional Media Buttons")
+                onActivated: {
+                    if(contentItem.state=="buttongrid"){
+                        contentItem.resetState()
+                    }else {
+                        contentItem.state="buttongrid"
+                    }
+                }
+            }
+        }
+    }
+
+
+
+//    buttonContent:[
+
+//        StyledButton{
+//            id:resend
+//            height:Style.appNavigation_panelHeight
+
+//            buttonText: qsTr("Resend AV", "Resend AV Commands")
+//            onActivated: manager.currentScreen="Screen_38.qml"
+//        },
+
+//        StyledButton{
+//            id:power_btn
+//            height:Style.appNavigation_panelHeight
+//            buttonText: qsTr("Power Off", "Turn off Device")
+//            onConfirm:{
+//                manager.exitMediaMenu()
+//                manager.stopMedia()
+//            }
+//        },
+
+//        StyledButton{
+//            id:options
+//            height:Style.appNavigation_panelHeight
+//            buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
+//            onActivated: {
+//                if(contentItem.state==="options"){
+//                    contentItem.resetState()
+//                } else {
+//                    contentItem.state="options"
+//                }
+//            }
+//        },
+
+//        StyledButton{
+//            id:btns
+
+//            height:Style.appNavigation_panelHeight
+//            buttonText: qsTr("Buttons", "Additional Media Buttons")
+//            onActivated: {
+//                if(contentItem.state=="buttongrid"){
+//                    contentItem.resetState()
+//                }else {
+//                    contentItem.state="buttongrid"
+//                }
+//            }
+//        }
+//    ]
 
     content: Item {
         id:contentItem
@@ -64,6 +158,13 @@ Panel{
         Component.onCompleted: {manager.setBoundStatus(true); resetState()}
 
         function resetState(){
+
+            if(manager.currentScreen=="Screen_50.qml"){
+                generic_playback_panel.buttonControls = dvdMenuButtons
+            } else {
+                 generic_playback_panel.buttonControls = standardButtons
+            }
+
             switch(manager.i_current_mediaType){
 
             case MediaTypes.LMCE_StoredAudio:
@@ -72,7 +173,7 @@ Panel{
 
             case MediaTypes.LMCE_StreamedAudio:
             case MediaTypes.NP_InternetMedia:
-              state="streamingaudio"
+                state="streamingaudio"
                 break;
 
             case MediaTypes.LMCE_LiveRadio:
@@ -80,7 +181,7 @@ Panel{
                 break;
 
             case MediaTypes.NP_NetworkMedia:
-               state="networkmedia"
+                state="networkmedia"
                 break;
             case MediaTypes.NP_NetworkMedia:
             case 66:
@@ -88,18 +189,19 @@ Panel{
                 break;
 
             case MediaTypes.LMCE_DVD:
-        state="dvd"
+                state= manager.currentScreen=="Screen_50.qml" ? "dvdmenu" : "dvd"
                 break;
 
 
             default:
-               state="fallback"
+                state="fallback"
                 break;
             }
         }
 
         NowPlayingImage {
             id: npImage
+
             Connections{
                 target:manager
                 onIsProfileChanged:{
@@ -120,6 +222,36 @@ Panel{
 
         Image{
             id:dvdImage
+            Connections{
+                target:manager
+                onIsProfileChanged:{
+                    if(manager.isProfile){
+                        anchors.verticalCenter = undefined
+                        anchors.top = generic_playback.top
+                    } else {
+                        anchors.top = undefined
+                        anchors.verticalCenter = generic_playback.verticalCenter
+                    }
+                }
+            }
+
+            anchors{
+                left:playlistPanel.right
+            }
+            Connections{
+                target: manager
+                onMediaScreenShotReady: dvdImage.source="image://listprovider/screenshot/"+securityvideo.timestamp
+            }
+
+            Timer{
+                id:streamtimer
+                repeat: true
+                interval: 1000
+                triggeredOnStart: true
+                running: contentItem.state==="dvdmenu"
+                onTriggered: manager.grabStreamImage()
+            }
+
         }
 
         Item{
@@ -228,7 +360,7 @@ Panel{
 
                 }
             },
-            State {               
+            State {
                 name: "localaudio"
 
                 PropertyChanges {
@@ -263,6 +395,36 @@ Panel{
                 }
 
             },
+            State{
+                name:"dvdmenu"
+                PropertyChanges {
+                    target: transport_buttons
+                    visible:false
+                }
+                PropertyChanges {
+                    target: control_diamond
+                    visible:false
+                }
+                PropertyChanges {
+                    target:arrows
+                    visible:true
+                }
+                PropertyChanges{
+                    target: playlistPanel
+                    visible:false
+                }
+
+                PropertyChanges {
+                    target: npImage
+                    visible:false
+                }
+                PropertyChanges {
+                    target: dvdImage
+                    visible:true
+                }
+
+            },
+
             State{
 
                 name:"streamingaudio"
@@ -342,10 +504,10 @@ Panel{
                     target: npImage
                     visible:false
                 }
-//                PropertyChanges{
-//                    target: numbers
-//                    visible:false
-//                }
+                //                PropertyChanges{
+                //                    target: numbers
+                //                    visible:false
+                //                }
                 PropertyChanges{
                     target: mediaScrollerTarget
                     visible:false
