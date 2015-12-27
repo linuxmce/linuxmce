@@ -616,7 +616,7 @@ signals:
 
     /* Media Playback Controls */
 
-
+    void ejectDiscDrive(long drive, int slot);
     void extraButton(QString b);
     void changeTrack(QString track);
     void newChannel(QString channel);
@@ -642,9 +642,10 @@ signals:
     void tvRecord();
     void showRecordings();
 
-    /*Dvd Specific*/
+    /*Dvd  & disc Specific*/
     void show_dvdMenu();
     void show_linuxmce_menu();
+
 
     /*Metadata signals*/
     void objectUpdated();
@@ -1340,7 +1341,7 @@ public slots:
     void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, iMediaPluginID); sendDceCommand( cmd);}
     void mute(){DCE::CMD_Mute cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void doMoveMedia(QString eas, int streamID) {CMD_MH_Move_Media cmd(iPK_Device, iMediaPluginID, streamID, eas.toStdString()); sendDceCommand( cmd);}
-
+    void ejectDisc(int discDrive, int slot=0);
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/

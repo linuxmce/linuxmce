@@ -39,11 +39,20 @@ StyledScreen {
 
                     Row{
                         anchors.fill: parent
-                        StyledText{
-                            fontSize: 22
-                            anchors.verticalCenter: parent.verticalCenter
-                            text:description
+                        spacing: 2
+                        Column{
+                            height: parent.height
+                            width: parent.width *.25
+                            StyledText{
+                                fontSize: 22
+                                text:desc
+                            }
+                            StyledText{
+                                fontSize: 22
+                                text: isRipping ?  qsTr("Copy in progress") : qsTr("No Copy in Progress")
+                            }
                         }
+
                         Item{
                             width: parent.width*.35
                             height: parent.height
@@ -51,10 +60,12 @@ StyledScreen {
                         StyledButton{
                             fontSize: 22
                             buttonText:qsTr("Copy Disc", "Copy Disc to Linuxmce")
+
                         }
                         StyledButton{
                             fontSize: 22
                             buttonText:qsTr("Eject Disc", "Eject disc from drive    ")
+                            onActivated: manager.ejectDisc(drive)
                         }
                     }
                 }

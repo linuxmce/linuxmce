@@ -12,6 +12,7 @@ Image{
     signal readyToShow()
     signal badImageError()
     fillMode: Image.PreserveAspectCrop
+
     smooth: true
 
     onOpacityChanged:{

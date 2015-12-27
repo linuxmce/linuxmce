@@ -40,7 +40,7 @@ Panel {
             anchors.top:headerRect.bottom
             anchors.horizontalCenter: headerRect.horizontalCenter
             width:headerRect.width
-            height: pad.buttonHeight*3
+            height: numberPad.buttonHeight*3
 
             Repeater{
                 model: 9

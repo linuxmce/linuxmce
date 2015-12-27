@@ -2208,6 +2208,12 @@ int qorbiterManager::cancelRecording(QString sID, QString sProgramID) {
     return pCmd->getCallback();
 }
 
+void qorbiterManager::ejectDisc(int discDrive, int slot)
+{
+    qDebug() << Q_FUNC_INFO;
+    emit ejectDiscDrive((long)discDrive, slot);
+}
+
 void qorbiterManager::updatePlaylist(){
     qDebug() << "playlist updating;";
     GenericFlatListModel *pModel = getDataGridModel("Playlist", 18, "38");
@@ -3226,6 +3232,7 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     QObject::connect(ptr, SIGNAL(timecodeEvent(int,QMap<long,std::string>)), m_lRooms, SLOT(setEaTimeCode(int,QMap<long,std::string>)), Qt::QueuedConnection);
     QObject::connect(m_lRooms, &LocationModel::seekToTime, ptr, &qOrbiter::JogStream, Qt::QueuedConnection );
 
+    QObject::connect(this, SIGNAL(ejectDiscDrive(long,int)), ptr, SLOT(ejectDisc(long,int)), Qt::QueuedConnection);
     return true;
 
 }
