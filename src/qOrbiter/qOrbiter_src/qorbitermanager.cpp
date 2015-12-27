@@ -1743,8 +1743,43 @@ void qorbiterManager::playMedia(QString FK_Media) {
         FK_Media.append(QString::number(iPK_Device));
     }
     //changed to remove media type as that is decided on by the media plugin and passed back
-    CMD_MH_Play_Media cmd(iPK_Device, iMediaPluginID, 0 , FK_Media.toStdString(), 0, 0, sEntertainArea, false, false, false, false, false);
+    CMD_MH_Play_Media cmd(
+                          iPK_Device,
+                          iMediaPluginID,
+                          0 ,
+                          FK_Media.toStdString(),
+                          0,
+                          0,
+                          sEntertainArea,
+                          false,
+                          false,
+                          false,
+                          false,
+                          false
+                          );
     emit sendDceCommand(cmd);
+}
+
+void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
+{
+    QString fkFile = QString("!r" + QString::number(disc) + ":" + QString::number(device));
+
+  CMD_MH_Play_Media playDisc(
+                iPK_Device,
+                iMediaPluginID,
+                0,
+                fkFile.toStdString(), // see MediaAttributes_LowLevel::TransformFilenameToDeque
+                0,
+                0,
+                sEntertainArea,
+                false,
+                0,
+                0 /* bQueue */,
+                0 /* bBypass_Event */,
+                0 /* bDont_Setup_AV */
+                );
+
+     emit sendDceCommand(playDisc);
 }
 
 void qorbiterManager::mythTvPlay(){

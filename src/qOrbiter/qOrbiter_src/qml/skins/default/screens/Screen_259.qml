@@ -60,12 +60,16 @@ StyledScreen {
                         StyledButton{
                             fontSize: 22
                             buttonText:qsTr("Copy Disc", "Copy Disc to Linuxmce")
-
                         }
                         StyledButton{
                             fontSize: 22
                             buttonText:qsTr("Eject Disc", "Eject disc from drive    ")
                             onActivated: manager.ejectDisc(drive)
+                        }
+                        StyledButton{
+                            fontSize: 22
+                            buttonText:qsTr("Play Disc", "Play disc from drive    ")
+                            onActivated: manager.playMediaFromDrive(drive, discId, 0)
                         }
                     }
                 }

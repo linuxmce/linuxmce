@@ -8,13 +8,98 @@ import "../."
 Panel{
     id:generic_playback_panel
     headerTitle:MediaHelper.translateType(manager.i_current_mediaType)
+
+    buttonContent:[
+
+        StyledButton{
+            id:resend
+             height:Style.appNavigation_panelHeight
+
+            buttonText: qsTr("Resend AV", "Resend AV Commands")
+            onActivated: manager.currentScreen="Screen_38.qml"
+        },
+
+        StyledButton{
+            id:power_btn
+            height:Style.appNavigation_panelHeight
+            buttonText: qsTr("Power Off", "Turn off Device")
+            onConfirm:{
+                manager.exitMediaMenu()
+                manager.stopMedia()
+            }
+        },
+
+        StyledButton{
+            id:options
+            height:Style.appNavigation_panelHeight
+            buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
+            onActivated: {
+                if(contentItem.state==="options"){
+                    contentItem.resetState()
+                } else {
+                    contentItem.state="options"
+                }
+            }
+        },
+
+        StyledButton{
+            id:btns
+
+            height:Style.appNavigation_panelHeight
+            buttonText: qsTr("Buttons", "Additional Media Buttons")
+            onActivated: {
+                if(contentItem.state=="buttongrid"){
+                    contentItem.resetState()
+                }else {
+                    contentItem.state="buttongrid"
+                }
+            }
+        }
+    ]
+
     content: Item {
-        id:generic_playback
+        id:contentItem
         property bool showingPlaylist:false
         anchors.fill: parent
-        Component.onCompleted: manager.setBoundStatus(true)
+        Component.onCompleted: {manager.setBoundStatus(true); resetState()}
+
+        function resetState(){
+            switch(manager.i_current_mediaType){
+
+            case MediaTypes.LMCE_StoredAudio:
+                state="localaudio"
+                break;
+
+            case MediaTypes.LMCE_StreamedAudio:
+            case MediaTypes.NP_InternetMedia:
+              state="streamingaudio"
+                break;
+
+            case MediaTypes.LMCE_LiveRadio:
+                state="radio"
+                break;
+
+            case MediaTypes.NP_NetworkMedia:
+               state="networkmedia"
+                break;
+            case MediaTypes.NP_NetworkMedia:
+            case 66:
+                state="networkmedia"
+                break;
+
+            case MediaTypes.LMCE_DVD:
+        state="dvd"
+                break;
+
+
+            default:
+               state="fallback"
+                break;
+            }
+        }
+
         NowPlayingImage {
-            id: imgContainer
+            id: npImage
             Connections{
                 target:manager
                 onIsProfileChanged:{
@@ -32,6 +117,11 @@ Panel{
                 left:playlistPanel.right
             }
         }
+
+        Image{
+            id:dvdImage
+        }
+
         Item{
             id:directionDiamond
         }
@@ -51,87 +141,33 @@ Panel{
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        Item{
-            id:lightingAudioControls
-            anchors.right: parent.right
-            height:(manager.isProfile ? Style.scaleY(8) : Style.scaleY(10) ) *3
-            width:(manager.isProfile ? Style.scaleX(14) : Style.scaleX(10) ) *2
-            Item{
-                id:lightingControls
-                width:(parent.width/2)-5
-                height: parent.height
-                anchors.right: parent.right
-
-                Column{
-                    anchors.fill: parent
-                    StyledButton{
-                        state:"round"
-                        height: Style.scaleY(8)
-                        buttonText: "+"
-                        onActivated: manager.adjustLights("+10")
-                    }
-                    StyledButton{
-                        state:"round"
-                        height: Style.scaleY(8)
-                        buttonText: qsTr("Floorplan")
-                        onActivated: manager.currentScreen="Screen_2.qml"
-                    }
-                    StyledButton{
-                        state:"round"
-                        height: Style.scaleY(8)
-                        buttonText: "-"
-                        onActivated: manager.adjustLights("-10")
-
-                    }
-                }
-
+        LightingAudioControls{
+            id: lightingAudioControls
+            anchors{
+                top:parent.bottom
+                right:parent.right
             }
+        }
 
-            Item{
-                id:audioControls
-                width:parent.width/2
-                height: parent.height
-                anchors.left: parent.left
+        TvButtonPanel{
+            id:buttonPanel
+            anchors.fill: parent
+            visible:false
+        }
 
-                Column {
-                    id:leftCol
-                    height: childrenRect.height
-                    width: childrenRect.width
-                    anchors{
-                        left:parent.left
-                        top:parent.top.top
-                    }
-
-                    StyledButton {
-                        state:"round"
-                        id: btVolUp
-                        height: Style.scaleY(8)
-                        buttonText: qsTr("Vol. +", "Media Volume")
-                        onActivated: manager.adjustVolume(+1)
-                    }
-
-                    StyledButton {
-                        id: mute
-                        state:"round"
-                        buttonText: ""
-                        height: Style.scaleY(8)
-                        onActivated: manager.mute()
-                        Image{
-                            anchors.centerIn: parent
-                            source: "../images/mute_up.png"
-                            anchors.fill: parent
-                        }
-                    }
-                    StyledButton {
-                        id: btVolDown
-                        state:"round"
-                        buttonText: qsTr("Vol. -", "Media Volume")
-                        height: Style.scaleY(8)
-                        onActivated: manager.adjustVolume(-1)
-                    }
-                }
-
+        Loader{
+            id:mediaTypeMetaData
+            width: parent.width *.35
+            //source: metadataComponent
+            anchors{
+                left: npImage.left
+                top:npImage.bottom
+                bottom: mediaScrollerTarget.top
             }
+        }
+
+        AdvancedMediaOptions {
+            id: controlPanel
         }
 
         MediaTransport {
@@ -149,7 +185,7 @@ Panel{
             id:altTransport
             height: parent.height *.04
             width: parent.width *.75
-
+            visible:mediaScrollerTarget.visible
             updateValueWhileDragging: false
             tickmarksEnabled: true
 
@@ -192,8 +228,7 @@ Panel{
 
                 }
             },
-            State {
-                when:manager.i_current_mediaType == MediaTypes.LMCE_StoredAudio
+            State {               
                 name: "localaudio"
 
                 PropertyChanges {
@@ -211,10 +246,25 @@ Panel{
 
             },
             State{
+
                 name:"dvd"
+
+                PropertyChanges {
+                    target: transport_buttons
+                    visible:false
+                }
+                PropertyChanges {
+                    target: control_diamond
+                    visible:true
+                }
+                PropertyChanges {
+                    target:arrows
+                    visible:true
+                }
+
             },
             State{
-                when:manager.i_current_mediaType== MediaTypes.LMCE_StreamedAudio || manager.i_current_mediaType == MediaTypes.NP_InternetMedia
+
                 name:"streamingaudio"
                 extend: "networkmedia"
 
@@ -231,7 +281,7 @@ Panel{
                     visible:false
                 }
                 PropertyChanges {
-                    target: imgContainer
+                    target: npImage
                     visible:true
                 }
 
@@ -243,7 +293,7 @@ Panel{
                 name:"airplay"
             },
             State{
-                when:manager.i_current_mediaType == MediaTypes.NP_NetworkMedia
+
                 name:"networkmedia"
 
                 PropertyChanges{
@@ -252,7 +302,7 @@ Panel{
                 }
 
                 PropertyChanges {
-                    target: imgContainer
+                    target: npImage
                     visible:false
                 }
 
@@ -282,12 +332,72 @@ Panel{
             },
             State {
                 name: "internetmedia"
-                when: manager.i_current_mediaType==66
+
                 extend:"networkmedia"
 
             },
             State{
                 name:"options"
+                PropertyChanges{
+                    target: npImage
+                    visible:false
+                }
+//                PropertyChanges{
+//                    target: numbers
+//                    visible:false
+//                }
+                PropertyChanges{
+                    target: mediaScrollerTarget
+                    visible:false
+                }
+                PropertyChanges{
+                    target: dvdImage
+                    visible:false
+                }
+                PropertyChanges {
+                    target: transport_buttons
+                    visible:false
+                }
+                PropertyChanges{
+                    target:arrows
+                    visible:false
+                }
+                PropertyChanges {
+                    target: directionDiamond
+                    visible:false
+                }
+                PropertyChanges{
+                    target: lightingAudioControls
+                    visible:false
+                }
+                PropertyChanges {
+                    target: mediaTypeMetaData
+                    visible:false
+                }
+                PropertyChanges {
+                    target: mediaScrollerTarget
+                    visible:false
+                }
+                PropertyChanges {
+                    target: playlistPanel
+                    visible:false
+                }
+                PropertyChanges {
+                    target: controlPanel
+                    state:"loaded"
+                }
+            },
+            State {
+                name: "buttongrid"
+                extend:"options"
+                PropertyChanges {
+                    target: controlPanel
+                    state:"unloaded"
+                }
+                PropertyChanges {
+                    target: buttonPanel
+                    visible:true
+                }
             }
         ]
 
