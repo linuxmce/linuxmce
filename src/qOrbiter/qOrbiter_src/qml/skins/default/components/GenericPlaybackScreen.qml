@@ -259,7 +259,7 @@ Panel{
                 }
                 PropertyChanges {
                     target:arrows
-                    visible:true
+                    visible:false
                 }
 
             },
