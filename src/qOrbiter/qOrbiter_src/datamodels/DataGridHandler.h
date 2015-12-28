@@ -115,9 +115,13 @@ public:
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "LoadDataFromTable() pCell == NULL ! row = %d, col = %d", row, col);
             return;
         }
+        /*
+       qDebug() << "Cell Values-------------------------------------------";
         for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
             qDebug() << i->first.c_str() <<"::"<< i->second.c_str();
         }
+        qDebug() << "End Cell Values-------------------------------------------";
+ */
         if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
             const char *pPath = pCell->GetImagePath();
             QString fk_file;
@@ -211,6 +215,7 @@ public:
             pItem->setData(ValueRole, pCell2->GetValue());
             pItem->setData(DescriptionRole, QString::fromUtf8(pCell2->GetText()));
         } else if(PK_DataGrid==DATAGRID_Discs_CONST ) {
+
             (static_cast<DiskMediaItem*>(pItem))->setDiscData(
                         QString::fromStdString(pCell->GetValue()).toInt(),
                         QString::fromStdString(pCell->m_mapAttributes["PK_File"]).toInt(),
@@ -218,7 +223,8 @@ public:
                         QString::fromStdString(pCell->m_mapAttributes["PK_Disc"]).toInt(),
                         pCell->m_mapAttributes_Find("PK_File").empty() ? false : true ,
                         QString::fromStdString(pCell->m_mapAttributes_Find("PK_Disc")).toInt(),
-                        QString::fromUtf8(pCell->GetText())
+                        QString::fromUtf8(pCell->GetText()),
+                        QString::fromUtf8(pCell->m_mapAttributes_Find("Room").c_str())
                         );
 
         qDebug()<< "Device is ripping ?" << !pCell->m_mapAttributes_Find("EK_Device_Ripping").empty();
@@ -226,6 +232,7 @@ public:
         qDebug() << "File " << QString::fromStdString(pCell->m_mapAttributes["PK_File"]);
         qDebug() << "Description " << pCell->GetText();
         qDebug() << pCell->m_Value;
+
         }
         else {
 

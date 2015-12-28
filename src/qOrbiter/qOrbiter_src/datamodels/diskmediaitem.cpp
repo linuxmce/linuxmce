@@ -16,6 +16,7 @@ DiskMediaItem::DiskMediaItem(QObject *parent) : GenericModelItem(parent)
     names[IdRole] = "discId";
     names[NumberRole] = "discNumber";
     names[DiscInfoRole] = "discName";
+    names[LocationRole] = "displayLocation";
     setRoleNames(names);
 }
 
@@ -38,7 +39,7 @@ bool DiskMediaItem::setData(int role, const QVariant &value)
     return true;
 }
 
-void DiskMediaItem::setDiscData(int deviceId, int fileId, bool ripping, int discNumber, bool status, int discId, QString desc)
+void DiskMediaItem::setDiscData(int deviceId, int fileId, bool ripping, int discNumber, bool status, int discId, QString desc, QString displayLocation)
 {
     m_data.insert(DiscRole, deviceId);
     m_data.insert(FileRole, fileId);
@@ -47,5 +48,6 @@ void DiskMediaItem::setDiscData(int deviceId, int fileId, bool ripping, int disc
     m_data.insert(StatusRole, status);
     m_data.insert(IdRole, discId);
     m_data.insert(DescriptionRole, desc);
+    m_data.insert(LocationRole, displayLocation);
 }
 

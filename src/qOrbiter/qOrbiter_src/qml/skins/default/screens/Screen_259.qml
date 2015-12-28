@@ -45,7 +45,7 @@ StyledScreen {
                             width: parent.width *.25
                             StyledText{
                                 fontSize: 22
-                                text:desc
+                                text:qsTr("%1 in %2").arg(desc).arg(displayLocation)
                             }
                             StyledText{
                                 fontSize: 22
@@ -58,17 +58,21 @@ StyledScreen {
                             height: parent.height
                         }
                         StyledButton{
+                           width: parent.width  *.08
                             fontSize: 22
-                            buttonText:qsTr("Copy Disc", "Copy Disc to Linuxmce")
+                            buttonText:qsTr("Copy", "Copy Disc to Linuxmce")
+
                         }
                         StyledButton{
+                            width: parent.width  *.08
                             fontSize: 22
-                            buttonText:qsTr("Eject Disc", "Eject disc from drive    ")
+                            buttonText:qsTr("Eject", "Eject disc from drive    ")
                             onActivated: manager.ejectDisc(drive)
                         }
                         StyledButton{
+                            width: parent.width  *.08
                             fontSize: 22
-                            buttonText:qsTr("Play Disc", "Play disc from drive    ")
+                            buttonText:qsTr("Play", "Play disc from drive    ")
                             onActivated: manager.playMediaFromDrive(drive, discId, 0)
                         }
                     }
