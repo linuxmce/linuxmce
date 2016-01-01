@@ -20,12 +20,13 @@ sources = Main.cpp External_Media_Identifier.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS +=
+CPPFLAGS +=-std=c++11
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb
 
 Gen_Dev_Files +=
-sources +=
+sources += IdentifierBase.cpp \
+	IdentifierCDDB.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -45,7 +46,7 @@ External_Media_Identifier.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
-		
+
 External_Media_Identifier: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
