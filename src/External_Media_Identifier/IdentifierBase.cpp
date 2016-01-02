@@ -50,7 +50,13 @@ string IdentifierBase::GetIdentifiedData()
   return "";
 }
 
-IdentifierBase::eIdentityType IdentifierBase::GetIdentityType()
+//IdentifierBase::eIdentityType IdentifierBase::GetIdentityType()
+string IdentifierBase::GetIdentityType()
 {
-  return NONE;
+  return "NONE";
+}
+
+int IdentifierBase::GetMediaType()
+{
+  return 0; // unknown
 }

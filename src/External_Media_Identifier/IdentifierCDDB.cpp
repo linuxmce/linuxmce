@@ -13,6 +13,7 @@
 #include "IdentifierCDDB.h"
 #include "OutputMiscTab.h"
 #include "../pluto_media/Define_AttributeType.h"
+#include "../pluto_main/Define_MediaType.h"
 
 using namespace DCE;
 using namespace std;
@@ -30,22 +31,27 @@ cddb_disc_t *cd_create(int dlength, int tcount, int *foffset, int use_time);
 
 IdentifierCDDB::IdentifierCDDB(string sPath) : IdentifierBase(sPath)
 {
-    FREE_NOT_NULL(conn);
-    FREE_NOT_NULL(disc);
-    FREE_NOT_NULL(device);
-    FREE_NOT_NULL(category);
+    conn = NULL;   /* libcddb connection structure */
+    disc = NULL;   /* libcddb disc structure */
+    charset = NULL;
+    use_cd = 1;          /* use CD-ROM to retrieve disc data */
+    device = sPath.c_str();       /* device to use if use_cd == 1. NULL means
+                                     to find a suitable CD-ROM drive. */
+    category = NULL;     /* category command-line argument */
+    discid = 0;          /* disc ID command-line argument or calculated */
 }
 
 IdentifierCDDB::~IdentifierCDDB()
 {
-  conn = NULL;   /* libcddb connection structure */
-  disc = NULL;   /* libcddb disc structure */
-  charset = NULL;
-  use_cd = 1;          /* use CD-ROM to retrieve disc data */
-  device = NULL;       /* device to use if use_cd == 1. NULL means
-                                     to find a suitable CD-ROM drive. */
-  category = NULL;     /* category command-line argument */
-  discid = 0;          /* disc ID command-line argument or calculated */
+  if (disc)
+    cddb_disc_destroy(disc);
+  if (conn)
+    cddb_destroy(conn);
+
+  FREE_NOT_NULL(conn);
+  FREE_NOT_NULL(disc);
+
+  libcddb_shutdown();
 }
 
 bool IdentifierCDDB::Init()
@@ -143,6 +149,8 @@ string IdentifierCDDB::GetIdentifiedData()
     const char *s;
 
     OutputMiscTab DiscData(discid);
+    // cddb discid
+    DiscData.addAttribute(0, ATTRIBUTETYPE_CDDB_CONST, 0, std::to_string(discid));
 
     // for each found item Disc.addAttribute(track,attributetype,section,wholename);
 
@@ -163,16 +171,23 @@ string IdentifierCDDB::GetIdentifiedData()
     /* 1. The artist name, disc title and extended data. */
     printf("Artist:   %s\n", STR_OR_NULL(cddb_disc_get_artist(disc)));
     string sDiscArtist = cddb_disc_get_artist(disc);
+    // disc artist - album artist
+    DiscData.addAttribute(0, ATTRIBUTETYPE_Performer_CONST, 0, sDiscArtist);
 
     printf("Title:    %s\n", STR_OR_NULL(cddb_disc_get_title(disc)));
     string sDiscTitle = cddb_disc_get_title(disc);
+    // disc title - album name
+    DiscData.addAttribute(0, ATTRIBUTETYPE_Album_CONST, 0, sDiscTitle);
 
     // LMCE has no method of specifically storing this ext data at the moment
     // display it regardless for now
+    string sDiscExtData = cddb_disc_get_ext_data(disc);
     s = cddb_disc_get_ext_data(disc);
     if (s) {
         printf("Ext.data: %s\n", s);
     }
+    // for each found item DiscData.addAttribute(track,attributetype,section,wholename);
+    DiscData.addAttribute(0, ATTRIBUTETYPE_Synopsis_CONST, 0, sDiscExtData);
 
     /* 2. The music genre.  This field is similar to the category
        field initialized above.  It can be the same but it does not
@@ -180,10 +195,14 @@ string IdentifierCDDB::GetIdentifiedData()
        predefined categories.  The genre can be any string. */
     printf("Genre:    %s\n", STR_OR_NULL(cddb_disc_get_genre(disc)));
     string sDiscGenre = cddb_disc_get_genre(disc);
+    // genre
+    DiscData.addAttribute(0, ATTRIBUTETYPE_Genre_CONST, 0, sDiscGenre);
 
     /* 3. The disc year. */
     printf("Year:     %d\n", cddb_disc_get_year(disc));
     int iDiscYear = cddb_disc_get_year(disc);
+    // year
+    DiscData.addAttribute(0, ATTRIBUTETYPE_Year_CONST, 0, std::to_string(iDiscYear));
 
     /* 4. The disc length and the number of tracks.  The length field
        is given in seconds. */
@@ -249,13 +268,6 @@ string IdentifierCDDB::GetIdentifiedData()
         // for each found item DiscData.addAttribute(track,attributetype,section,wholename);
         DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Synopsis_CONST, 0, sTrackExtData);
 
-        // album
-        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Album_CONST, 0, sDiscTitle);
-        // genre
-        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Genre_CONST, 0, sDiscGenre);
-        // year
-        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Year_CONST, 0, std::to_string(iDiscYear));
-
     }
 // ***********************  track iteration done
 
@@ -264,12 +276,15 @@ string IdentifierCDDB::GetIdentifiedData()
 }
 
 // tells lmce what format the returned data will be in
-IdentifierBase::eIdentityType IdentifierCDDB::GetIdentityType()
+string IdentifierCDDB::GetIdentityType()
 {
-  return MISC_TAB;
+  return "MISC_TAB";
 }
 
-
+int IdentifierCDDB::GetMediaType()
+{
+  return MEDIATYPE_pluto_CD_CONST;
+}
 
 
 
