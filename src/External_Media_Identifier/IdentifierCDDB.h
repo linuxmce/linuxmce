@@ -22,13 +22,14 @@ namespace DCE
     virtual bool Init();
     virtual bool Identify();
     virtual string GetIdentifiedData();
-    virtual eIdentityType GetIdentityType();
+    virtual string GetIdentityType();
+    virtual int GetMediaType();
   private:
     cddb_conn_t *conn; // = NULL; /* libcddb connection structure */
     cddb_disc_t *disc; // = NULL; /* libcddb disc structure */
     char *charset; // = NULL;     /* requested character set encoding */
     int use_cd; // = 0;           /* use CD-ROM to retrieve disc data */
-    char *device; // = NULL;      /* device to use if use_cd == 1. NULL means to find a suitable CD-ROM drive. */
+    const char *device; // = NULL;      /* device to use if use_cd == 1. NULL means to find a suitable CD-ROM drive. */
     char *category; // = NULL;    /* category command-line argument */
     unsigned int discid; //  = 0; /* disc ID command-line argument or calculated */
 
