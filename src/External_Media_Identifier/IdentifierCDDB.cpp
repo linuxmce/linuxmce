@@ -48,8 +48,8 @@ IdentifierCDDB::~IdentifierCDDB()
   if (conn)
     cddb_destroy(conn);
 
-  FREE_NOT_NULL(conn);
-  FREE_NOT_NULL(disc);
+//  FREE_NOT_NULL(conn);
+//  FREE_NOT_NULL(disc);
 
   libcddb_shutdown();
 }
@@ -405,7 +405,7 @@ cddb_disc_t *cd_read(char *device)
     printf("CD contains %d track(s)\n", cnt);
 
     /* Reserve some memory for the frame offsets. */
-    foffset = calloc(cnt, sizeof(int));
+    foffset = (int *)calloc(cnt, sizeof(int));
 
     /* Now we go and fetch the track data. */
     for (t = 1; t <= cnt; t++) {
@@ -439,8 +439,12 @@ cddb_disc_t *cd_read(char *device)
     cdio_destroy(cdio);
 
     /* more clean up */
+//if (foffset)
+//  free(foffset);
+//if (device)
+//  free(device);
     FREE_NOT_NULL(foffset);
-    FREE_NOT_NULL(device);
+//    FREE_NOT_NULL(device);
 
 #endif
 
