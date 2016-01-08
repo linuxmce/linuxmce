@@ -1,7 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_CPPFLAGS ?= -DKDE_LMCE -D_DEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 SNR_LDFLAGS ?= 
 
 ROOT = ..
@@ -19,13 +19,13 @@ Gen_Dev_Files = $(GENDEV)/Advanced_IP_CameraBase.cpp
 sources = Main.cpp Advanced_IP_Camera.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS +=
-CPPFLAGS +=
+CXXFLAGS += -DWITH_OPENSSL
+CPPFLAGS += -Ionvif -I/usr/share/gsoap -I/usr/share/gsoap/plugin -I/usr/share/gsoap/import -Iopenssl
 LDFLAGS +=
-XTRALDLIBS = -lcurl -lmysqlclient_r
+XTRALDLIBS = -lcurl -lmysqlclient_r -lgsoap++ -lgsoapssl++
 
 Gen_Dev_Files +=
-sources += EventMethod.cpp
+sources += EventMethod.cpp CameraDevice.cpp OnvifDevice.cpp URLAccessDevice.cpp onvif/soapDeviceBindingProxy.cpp onvif/soapPTZBindingProxy.cpp onvif/soapMediaBindingProxy.cpp onvif/soapC.cpp gsoap/duration.cpp gsoap/wsseapi.cpp gsoap/mecevp.cpp gsoap/wsaapi.cpp gsoap/smdevp.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -44,7 +44,7 @@ Advanced_IP_Camera.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
-		
+
 Advanced_IP_Camera: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
@@ -63,3 +63,25 @@ ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 endif
 #<-dceag-mf-e->
 
+# needs gsoap 2.8.16
+onvif-get:
+	wsdl2h -P -x -I/usr/share/gsoap/WS -o onvif/onvif.h http://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl http://www.onvif.org/onvif/ver20/ptz/wsdl/ptz.wsdl http://www.onvif.org/onvif/ver10/media/wsdl/media.wsdl
+	# after onvig-get, insert '#import "wsse.h"' in the onvif.h file
+
+onvif-gen:
+	soapcpp2 -j -C -I/usr/share/gsoap -I/usr/share/gsoap/import -d onvif -i onvif/onvif.h
+
+gsoap/duration.cpp:
+	cp /usr/share/gsoap/custom/duration.c gsoap/duration.cpp
+
+gsoap/wsseapi.cpp:
+	cp /usr/share/gsoap/plugin/wsseapi.* gsoap/.
+
+gsoap/wsaapi.cpp:
+	cp /usr/share/gsoap/plugin/wsaapi.c gsoap/wsaapi.cpp
+
+gsoap/mecevp.cpp:
+	cp /usr/share/gsoap/plugin/mecevp.c gsoap/mecevp.cpp
+
+gsoap/smdevp.cpp:
+	cp /usr/share/gsoap/plugin/smdevp.c gsoap/smdevp.cpp
