@@ -1,6 +1,6 @@
 <?php 
 
-require_once 'DB.php';
+require_once 'MDB2.php';
 
 // select c.Name, t.Description, p.DialAs FROM Contact c, PhoneType t, PhoneNumber p WHERE c.Name LIKE '%' AND p.FK_Contact = c.PK_Contact AND p.FK_PhoneType = PK_PhoneType ORDER BY c.Name;
 
@@ -30,7 +30,7 @@ class Contacts {
 	 */
 	function numEntriesMatching($searchString) {
 	
-		return $this->db->getOne("SELECT COUNT(*) FROM Contacts WHERE Name LIKE '%$searchString'");
+		return $this->db->queryOne("SELECT COUNT(*) FROM Contacts WHERE Name LIKE '%$searchString'");
 	
 	}
 
@@ -43,7 +43,7 @@ class Contacts {
 	 */
 	function dialMatchingRange($range) {
 	
-		return $this->db->getAll("select c.Name, t.Description, p.DialAs FROM Contact c, PhoneType t, PhoneNumber p WHERE c.Name REGEXP '^[$range]' AND p.FK_Contact = c.PK_Contact AND p.FK_PhoneType = PK_PhoneType ORDER BY c.Name",array(),DB_FETCHMODE_OBJECT);	
+		return $this->db->queryAll("select c.Name, t.Description, p.DialAs FROM Contact c, PhoneType t, PhoneNumber p WHERE c.Name REGEXP '^[$range]' AND p.FK_Contact = c.PK_Contact AND p.FK_PhoneType = PK_PhoneType ORDER BY c.Name",array(),MDB2_FETCHMODE_OBJECT);	
 	
 	}
 
@@ -100,7 +100,7 @@ class Contacts {
 			'portability'	=> DB_PORTABILITY_ALL
 		);
 
-		return DB::connect($dsn,$options);
+		return MDB2::factory($dsn);
 
 	}
 }
