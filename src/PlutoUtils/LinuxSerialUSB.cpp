@@ -22,7 +22,7 @@ string TranslateSerialUSB(string sInput,string sIPAddress)
 {
 #ifndef WIN32
 	
-	if( sInput.size()<6 || ( sInput.substr(0,3)!="pci" && sInput.substr(0,8) != "platform" ) )
+	if( sInput.size()<6 || ( sInput.substr(0,3)!="pci" && sInput.substr(0,8) != "platform" && sInput.substr(0,3) != "usb") )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB %s isn't serial usb",sInput.c_str());
 		return sInput;

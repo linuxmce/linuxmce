@@ -1,0 +1,4 @@
+gsoap-libtool.patch
+gsoap-noextras.patch
+gsoap-private-lm.patch
+gsoap-pad.patch
