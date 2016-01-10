@@ -20,7 +20,7 @@ sources = Main.cpp Media_Identifier.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS +=-std=c++11
+CPPFLAGS +=
 LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb
 

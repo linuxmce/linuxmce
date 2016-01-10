@@ -18,8 +18,6 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
-#include "IdentifierCDDB.h"
-
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -217,29 +215,6 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
 	cout << "Parm #10 - ID=" << sID << endl;
 	cout << "Parm #13 - Filename=" << sFilename << endl;
 	cout << "Parm #201 - PK_Device_Related=" << iPK_Device_Related << endl;
-
-	// need to determine media type and call appropriate identifier?
-	IdentifierCDDB cIdentifier(sFilename);
-
-	if ( !cIdentifier.Init() )
-		return;
-
-	if ( !cIdentifier.Identify() )
-		return;
-
-	string sIdentifiedData = cIdentifier.GetIdentifiedData();
-
-	int iEK_Disc;
-	sCMD_Result = "OK";
-	char *Data = strdup( sIdentifiedData.c_str() );
-	DCE::CMD_Media_Identified CMD_Media_Identified( m_dwPK_Device, pMessage->m_dwPK_Device_From,
-		iPK_Device, sCMD_Result, sID,
-		Data, sizeof(*Data),
-		cIdentifier.GetIdentityType(), cIdentifier.GetMediaType(),
-		sFilename, "",
-		&iEK_Disc);
-	SendCommand(CMD_Media_Identified);
-	free(Data);
 }
 
 
