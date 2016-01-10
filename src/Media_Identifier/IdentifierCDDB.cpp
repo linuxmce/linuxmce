@@ -12,12 +12,16 @@
 
 #include "IdentifierCDDB.h"
 #include "OutputMiscTab.h"
+#include "../pluto_media/Define_AttributeType.h"
 
 using namespace DCE;
 using namespace std;
 
 /* free pointer when it's pointing at something */
 #define FREE_NOT_NULL(p) if (p) { free(p); p = NULL; }
+
+/* return string, or return null if string is blank */
+#define STR_OR_NULL(s) ((s) ? s : "(null)")
 
 // forward declarations
 cddb_disc_t *do_read(cddb_conn_t *conn, const char *category, int discid, int quiet);
@@ -136,10 +140,11 @@ string IdentifierCDDB::GetIdentifiedData()
 
     category = strdup(cddb_disc_get_category_str(disc));
     discid = cddb_disc_get_discid(disc);
+    const char *s;
 
-    OutputMiscTab DiscAttributes(discid);
+    OutputMiscTab DiscData(discid);
 
-// for each found item DiscAttribute.addAttribute(track,attributetype,section,wholename);
+    // for each found item Disc.addAttribute(track,attributetype,section,wholename);
 
     // MISC-TAB format?
         // The format is as follows.  Each line (\n terminated) contains the following:
@@ -151,6 +156,110 @@ string IdentifierCDDB::GetIdentifiedData()
     // CDDB-TAB format
 	// CDDBID Performer\tAlbum\tGenre\tTitle\t
 
+    cddb_track_t *track = NULL; /* libcddb track structure */
+
+// !!!! This is the 'Album Artist' which can often be different than the
+//  'Track Artist' which can vary due to guest artists. -phenigma
+    /* 1. The artist name, disc title and extended data. */
+    printf("Artist:   %s\n", STR_OR_NULL(cddb_disc_get_artist(disc)));
+    string sDiscArtist = cddb_disc_get_artist(disc);
+
+    printf("Title:    %s\n", STR_OR_NULL(cddb_disc_get_title(disc)));
+    string sDiscTitle = cddb_disc_get_title(disc);
+
+    // LMCE has no method of specifically storing this ext data at the moment
+    // display it regardless for now
+    s = cddb_disc_get_ext_data(disc);
+    if (s) {
+        printf("Ext.data: %s\n", s);
+    }
+
+    /* 2. The music genre.  This field is similar to the category
+       field initialized above.  It can be the same but it does not
+       have to be.  The category can only be come from a set of CDDB
+       predefined categories.  The genre can be any string. */
+    printf("Genre:    %s\n", STR_OR_NULL(cddb_disc_get_genre(disc)));
+    string sDiscGenre = cddb_disc_get_genre(disc);
+
+    /* 3. The disc year. */
+    printf("Year:     %d\n", cddb_disc_get_year(disc));
+    int iDiscYear = cddb_disc_get_year(disc);
+
+    /* 4. The disc length and the number of tracks.  The length field
+       is given in seconds. */
+    int iDiscLength = cddb_disc_get_length(disc);
+    //int iTracks = cddb_disc_get_track_count(disc);
+    printf("Length:   %d:%02d (%d seconds)\n", (iDiscLength / 60), (iDiscLength % 60), iDiscLength);
+    printf("%d tracks\n", cddb_disc_get_track_count(disc));
+
+
+
+// ***********************  track iteration here
+    /* 5. The tracks.  Track iteration can either be done by counting
+       from 0 to (track_count - 1) and using the cddb_disc_get_track
+       function.  Or by using the built-in iterator functions
+       cddb_disc_get_track_first and cddb_disc_get_track_next.  We'll
+       use the latter approach in this example. */
+
+
+    // lmce stores data per track, not per disc... per se.  both are possible but
+    // this needs a little more research to implement properly.
+    for (track = cddb_disc_get_track_first(disc);
+
+         track != NULL;
+         track = cddb_disc_get_track_next(disc)) {
+
+        /* 5.a. The track number on the disc.  This track number
+           starts counting at 1.  So this is not the same number as
+           the one used in cddb_disc_get_track. */
+	int iTrackNum = cddb_track_get_number(track);
+        printf("  [%02d]", cddb_track_get_number(track));
+
+        /* 5.b. The track artist name and title. */
+        string sTrackTitle = cddb_track_get_title(track);
+        printf(" '%s'", cddb_track_get_title(track));
+
+        // for each found item DiscData.addAttribute(track,attributetype,section,wholename);
+        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Title_CONST, 0, sTrackTitle);
+
+	string sTrackArtist = cddb_track_get_artist(track);
+        s = cddb_track_get_artist(track);
+        if (s) {
+            printf(" by %s", s);
+        }
+        // for each found item DiscData.addAttribute(track,attributetype,section,wholename);
+        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Performer_CONST, 0, sTrackArtist);
+
+        /* 5.c. The track length. */
+        int iTrackLength = cddb_track_get_length(track);
+        if (iTrackLength != -1) {
+            printf(" (%d:%02d)", (iTrackLength / 60), (iTrackLength % 60));
+        } else {
+            printf(" (unknown)");
+        }
+
+        /* 5.d. The extended track data. */
+        string sTrackExtData = cddb_track_get_ext_data(track);
+        s = cddb_track_get_ext_data(track);
+        if (s) {
+            printf(" [%s]\n", s);
+        } else {
+            printf("\n");
+        }
+        // for each found item DiscData.addAttribute(track,attributetype,section,wholename);
+        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Synopsis_CONST, 0, sTrackExtData);
+
+        // album
+        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Album_CONST, 0, sDiscTitle);
+        // genre
+        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Genre_CONST, 0, sDiscGenre);
+        // year
+        DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Year_CONST, 0, std::to_string(iDiscYear));
+
+    }
+// ***********************  track iteration done
+
+    sRet = DiscData.OutputAttributes();
     return sRet;
 }
 

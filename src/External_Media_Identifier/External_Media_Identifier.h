@@ -15,7 +15,7 @@
 #ifndef External_Media_Identifier_h
 #define External_Media_Identifier_h
 
-//	DCE Implemenation for #1701 External Media Identifier
+//	DCE Implemenation for #2311 Media Identifier
 
 #include "Gen_Devices/External_Media_IdentifierBase.h"
 //<-dceag-d-e->
