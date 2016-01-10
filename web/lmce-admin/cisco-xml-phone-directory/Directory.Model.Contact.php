@@ -95,11 +95,6 @@ class Contacts {
 			'database'	=> 'pluto_telecom'
 		);
 	
-		$options = array(
-			'debug'		=> 2,
-			'portability'	=> DB_PORTABILITY_ALL
-		);
-
 		return MDB2::factory($dsn);
 
 	}
