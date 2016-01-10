@@ -22,7 +22,7 @@ sources = Main.cpp Advanced_IP_Camera.cpp $(Gen_Dev_Files)
 CXXFLAGS += -DWITH_OPENSSL
 CPPFLAGS += -Ionvif -I/usr/share/gsoap -I/usr/share/gsoap/plugin -I/usr/share/gsoap/import -Iopenssl
 LDFLAGS +=
-XTRALDLIBS = -lcurl -lmysqlclient_r -lgsoap++ -lgsoapssl++
+XTRALDLIBS = -lcurl -lmysqlclient_r -lgsoap++ -lgsoapssl++ -lssl -lcrypto
 
 Gen_Dev_Files +=
 sources += EventMethod.cpp CameraDevice.cpp OnvifDevice.cpp URLAccessDevice.cpp onvif/soapDeviceBindingProxy.cpp onvif/soapPTZBindingProxy.cpp onvif/soapMediaBindingProxy.cpp onvif/soapC.cpp gsoap/duration.cpp gsoap/wsseapi.cpp gsoap/mecevp.cpp gsoap/wsaapi.cpp gsoap/smdevp.cpp
