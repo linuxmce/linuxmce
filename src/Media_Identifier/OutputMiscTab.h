@@ -4,7 +4,6 @@
  * around line 728.
  *
  * Author: Thomas Cherryhomes <thom.cherryhomes@gmail.com>
- * Author: phenigma <phenigma@hotmail.com>
  */
 
 #ifndef OUTPUTMISCTAB_H

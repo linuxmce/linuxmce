@@ -1,7 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -DHAVE_LIBCDIO
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 SNR_LDFLAGS ?= 
 
 ROOT = ..
@@ -20,13 +20,12 @@ sources = Main.cpp External_Media_Identifier.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS +=-std=c++0x
+CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb
+XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources += IdentifierBase.cpp \
-	IdentifierCDDB.cpp
+sources +=
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -46,7 +45,7 @@ External_Media_Identifier.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
-
+		
 External_Media_Identifier: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
