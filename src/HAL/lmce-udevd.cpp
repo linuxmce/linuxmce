@@ -77,10 +77,6 @@ void LmceUdevD::getPortIdentification(string portFromBus, string& portID)
 	{
 		startPos = portFromBus.find("platform");
 	}
-	if ( startPos == string::npos )
-	{
-		startPos = portFromBus.find("usb");
-	}
 
 	size_t usbPos = portFromBus.find("/usb");
 	size_t minus = portFromBus.rfind("-");
@@ -241,10 +237,6 @@ void LmceUdevD::getSerialParent(const char * sysfs, std::string & parentSysfs)
 	if ( iFind1 == string::npos )
 	{
 		iFind1 = parentPath.find("platform");
-	}
-	if ( iFind1 == string::npos )
-	{
-		iFind1 = parentPath.find("usb");
 	}
 
 	size_t iFind2 = parentPath.rfind(":");
