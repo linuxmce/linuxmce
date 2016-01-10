@@ -293,16 +293,16 @@ Setup_AsoundConf()
 								esac 
 						fi ;; 
 					nvidia) 
-						if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then 
+						if [[ $(wc -l <<< "$CardDevice") -gt "1" ]]; then 
 							ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card${SoundCard}/eld* | sort -u | head -1) 
 								case "$ELDDevice" in 
 								       *0.0) 
 									       CardDevice="3" ;; 
-									*1.0) 
+									*1.0|*0.1) 
 										CardDevice="7" ;; 
-									*2.0) 
+									*2.0|*0.2) 
 										CardDevice="8" ;; 
-									*3.0) 
+									*3.0|*0.3) 
 										CardDevice="9" ;; 
 									*) 
 										CardDevice="7" ;; 
