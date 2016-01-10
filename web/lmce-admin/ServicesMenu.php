@@ -10,6 +10,6 @@ echo "<?xml version='1.0'?>";
   <Prompt>Make Your Selection...</Prompt>
   <MenuItem>
     <Name>Orbiter</Name>
-    <URL>http://<?php=getCoreIP($dbADO)?>/lmce-admin/index.php?section=proxySocket&amp;command=XML</URL>
+    <URL>http://<?php getCoreIP($dbADO) ?>/lmce-admin/index.php?section=proxySocket&amp;command=XML</URL>
   </MenuItem>
 </CiscoIPPhoneMenu>
