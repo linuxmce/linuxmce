@@ -61,7 +61,7 @@ class DirectoryController {
 
 		$this->contact = new Contacts();
 
-		if (!$request["mode"]) {
+		if (!isset($request["mode"])) {
 
 			$this->totalEntries = $this->contact->numEntriesMatching("");
 
