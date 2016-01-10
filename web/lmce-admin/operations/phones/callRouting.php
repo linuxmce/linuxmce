@@ -50,7 +50,7 @@ function callRouting($output,$dbADO,$asteriskADO,$telecomADO) {
 		$telecomPlugin=getTelecomPlugin($installationID,$dbADO);
 
 		set_device_data($telecomPlugin,$GLOBALS['call_before_timeout'],$timeout,$dbADO);
-		$cmd='sudo -u root /usr/pluto/bin/create_pluto_dialplan.pl';
+		$cmd='sudo -u root /usr/pluto/bin/db_create_telecom_defaults.sh';
 		exec_batch_command($cmd);
 	
 		/*
