@@ -1,7 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -D_DEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 SNR_LDFLAGS ?= 
 
 ROOT = ..
@@ -20,12 +20,31 @@ sources = Main.cpp Advanced_IP_Camera.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS += -DWITH_OPENSSL
+CPPFLAGS_SOAP =  -Ionvif -I/usr/share/gsoap -I/usr/share/gsoap/plugin -I/usr/share/gsoap/import -Iopenssl
 CPPFLAGS += -Ionvif -I/usr/share/gsoap -I/usr/share/gsoap/plugin -I/usr/share/gsoap/import -Iopenssl
 LDFLAGS +=
 XTRALDLIBS = -lcurl -lmysqlclient_r -lgsoap++ -lgsoapssl++ -lssl -lcrypto
 
 Gen_Dev_Files +=
 sources += EventMethod.cpp CameraDevice.cpp OnvifDevice.cpp URLAccessDevice.cpp onvif/soapDeviceBindingProxy.cpp onvif/soapPTZBindingProxy.cpp onvif/soapMediaBindingProxy.cpp onvif/soapC.cpp gsoap/duration.cpp gsoap/wsseapi.cpp gsoap/mecevp.cpp gsoap/wsaapi.cpp gsoap/smdevp.cpp
+
+gsoap/duration.cpp:
+	cp /usr/share/gsoap/custom/duration.c gsoap/duration.cpp
+
+gsoap/wsseapi.cpp:
+	cp /usr/share/gsoap/plugin/wsseapi.* gsoap/.
+
+gsoap/wsaapi.cpp:
+	cp /usr/share/gsoap/plugin/wsaapi.c gsoap/wsaapi.cpp
+
+gsoap/mecevp.cpp:
+	cp /usr/share/gsoap/plugin/mecevp.c gsoap/mecevp.cpp
+
+gsoap/smdevp.cpp:
+	cp /usr/share/gsoap/plugin/smdevp.c gsoap/smdevp.cpp
+
+gsoap/%.o:
+	$(CXX) -c $(CPPFLAGS_SOAP) $(CXXFLAGS) $< -o $@ gsoap/$*.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -71,17 +90,3 @@ onvif-get:
 onvif-gen:
 	soapcpp2 -j -C -I/usr/share/gsoap -I/usr/share/gsoap/import -d onvif -i onvif/onvif.h
 
-gsoap/duration.cpp:
-	cp /usr/share/gsoap/custom/duration.c gsoap/duration.cpp
-
-gsoap/wsseapi.cpp:
-	cp /usr/share/gsoap/plugin/wsseapi.* gsoap/.
-
-gsoap/wsaapi.cpp:
-	cp /usr/share/gsoap/plugin/wsaapi.c gsoap/wsaapi.cpp
-
-gsoap/mecevp.cpp:
-	cp /usr/share/gsoap/plugin/mecevp.c gsoap/mecevp.cpp
-
-gsoap/smdevp.cpp:
-	cp /usr/share/gsoap/plugin/smdevp.c gsoap/smdevp.cpp
