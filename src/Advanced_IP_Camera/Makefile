@@ -89,7 +89,7 @@ onvif-get:
 	wsdl2h -P -x -I/usr/share/gsoap/WS -o onvif/onvif.h http://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl http://www.onvif.org/onvif/ver20/ptz/wsdl/ptz.wsdl http://www.onvif.org/onvif/ver10/media/wsdl/media.wsdl
 	sed -i '/#import "stlvector.h"/a#import "wsse.h"' onvif/onvif.h
 
-onvif-gen:
+onvif-gen: onvif-get
 	soapcpp2 -j -C -I/usr/share/gsoap -I/usr/share/gsoap/import -d onvif -i onvif/onvif.h
 
 onvif: onvif-get onvif-gen
