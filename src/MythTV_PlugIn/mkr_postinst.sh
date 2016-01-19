@@ -3,6 +3,8 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh
 
+DEVICECATEGORY_Core_CONST=7
+
 AddBookmark "http://dcerouter/mythweb/" "MythWeb"
 
 adduser mythtv public || :
@@ -31,12 +33,15 @@ Q="UPDATE settings SET data=1 where value='TruncateDeletesSlowly'"
 UseDB "mythconverg"
 RunSQL "$Q"
 
-## FIXME: TODO: DO NOT HARDCODE IP ADDRESS
-
-#Alter mythconverg.settings to force MasterServerIP to the core's internal NIC
-Q="UPDATE settings SET data='192.168.80.1' where value='MasterServerIP'"
-UseDB "mythconverg"
-RunSQL "$Q"
+Q="SELECT IPAddress FROM Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate where FK_DeviceCategory='${DEVICECATEGORY_Core_CONST}'"
+UseDB pluto_main
+R=$(RunSQL "$Q")
+if [ -n "$R" ] ; then
+	#Alter mythconverg.settings to force MasterServerIP to the core's internal NIC
+	Q="UPDATE settings SET data='${R}' where value='MasterServerIP'"
+	UseDB "mythconverg"
+	RunSQL "$Q"
+fi
 
 #Re-run SetupUsers_Homes PlutoStorageDevices to make sure that the mythtv user gets added to each user's group
 /usr/pluto/bin/SetupUsers_Homes.sh
