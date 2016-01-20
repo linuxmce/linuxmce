@@ -353,10 +353,10 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		{
 			getChildId(ctx, dev, "sound", NULL, NULL, child);
 		}
-		if (child.empty())
-		{
-			getChildId(ctx, dev, "usb-serial", NULL, NULL, child);
-		}
+//		if (child.empty())
+//		{
+//			getChildId(ctx, dev, "usb-serial", NULL, NULL, child);
+//		}
 		if (child.empty())
 		{
 			getChildId(ctx, dev, "video4linux", NULL, NULL, child);
@@ -373,10 +373,10 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		{
 			getChildId(ctx, dev, "input", "ID_INPUT_JOYSTICK", "1", child);
 		}
-		if (child.empty())
-		{
-			getChildId(ctx, dev, "tty", NULL, NULL, child);
-		}
+//		if (child.empty())
+//		{
+//			getChildId(ctx, dev, "tty", NULL, NULL, child);
+//		}
 		if (child.empty())
 		{
 			getChildId(ctx, dev, "dvb", NULL, NULL, child);
@@ -993,6 +993,7 @@ void* LmceUdevD::startUp(void *device)
 				const char *devtype = udev_device_get_devtype(dev);
 				const char *syspath = udev_device_get_syspath(dev);
 
+			if ( 0 != strcmp(subsystem) )
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "LmceUdevD::Monitor EVENT %s: %s, %s, %s", 
 					action,
 					subsystem,
