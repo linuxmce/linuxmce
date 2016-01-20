@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import "../."
+import org.linuxmce.enums 1.0
 Panel {
     useHeader: false
     content:
@@ -118,9 +119,15 @@ Panel {
                 id: btMenu
                 state:"round"
                 buttonText: "Menu"
-                onActivated: manager.extraButton("menu")
+                onActivated: {
+                    // AV devices seem to use 'showmenu' while VDR/Myth uses 'menu'
+                    if (manager.i_current_mediaType == MediaTypes.LMCE_LiveTV) {
+                        manager.extraButton("menu")
+                    } else {
+                        manager.extraButton("showmenu")
+                    }
+                }
             }
-
         }
 
 
