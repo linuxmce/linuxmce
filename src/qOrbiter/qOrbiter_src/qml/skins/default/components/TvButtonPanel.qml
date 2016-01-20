@@ -101,7 +101,12 @@ Panel {
                 buttonText: "Exit"
                 onActivated: manager.exitMediaMenu()
             }
-
+            StyledButton {
+                id: btBack
+                state:"round"
+                buttonText: "Back"
+                onActivated: manager.osdBack()
+            }
             StyledButton {
                 state:"round"
                 id: btGuide
@@ -127,6 +132,12 @@ Panel {
                         manager.extraButton("showmenu")
                     }
                 }
+            }
+            StyledButton {
+                id: btRecordings
+                state:"round"
+                buttonText: "Recordings"
+                onActivated: manager.extraButton("recordings")
             }
         }
 
