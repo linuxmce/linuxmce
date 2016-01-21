@@ -1,0 +1,31 @@
+Source: vdr-plugin-xmltv2vdr
+Section: video
+Priority: extra
+Maintainer: Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>
+Uploaders: Tobias Grimm <etobi@debian.org>, Thomas Günther <tom@toms-cafe.de>
+Build-Depends: debhelper (>= 8), vdr-dev (>= 2.2.0-1), gettext, libxml2-dev, pkg-config, libxslt1-dev, libcurl4-openssl-dev, libzip-dev, libpcre3-dev, libenca-dev, libsqlite3-dev
+Standards-Version: 3.9.4
+Homepage: http://projects.vdr-developer.org/projects/plg-xmltv2vdr
+
+Package: vdr-plugin-xmltv2vdr
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${vdr:Depends}
+Description: Plugin for VDR to add epg info from epg sources into vdr
+ This plugin for the Linux Video Disc Recorder VDR will add epg info 
+ from epg sources into vdr
+
+Package: vdr-plugin-xmltv2vdr-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: vdr-plugin-xmltv2vdr (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for vdr-plugin-xmltv2vdr
+ .
+ This package contains only the debugging symbols for vdr-plugin-xmltv2vdr 
+
+Package: vdr-plugin-xmltv2vdr-grabber-epgdata2xmltv
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, vdr-plugin-xmltv2vdr (= ${binary:Version})
+Description: Epgdata2xmltv Grabber
+ Epgdata2xmltv Grabber for vdr-plugin-xmltv2vdr
+
