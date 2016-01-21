@@ -993,7 +993,6 @@ void* LmceUdevD::startUp(void *device)
 				const char *devtype = udev_device_get_devtype(dev);
 				const char *syspath = udev_device_get_syspath(dev);
 
-			if ( 0 != strcmp(subsystem) )
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "LmceUdevD::Monitor EVENT %s: %s, %s, %s", 
 					action,
 					subsystem,
