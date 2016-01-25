@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+
+	if [ -e /var/lib/epgsources/epgdata2xmltv.dist ] ; then
+		mv /var/lib/epgsources/epgdata2xmltv.dist /var/lib/epgsources/epgdata2xmltv || true
+		chown -R vdr:vdr /var/lib/epgsources || true
+		chmod 0755 /var/lib/epgsources/epgdata2xmltv || true
+	fi
+    
+fi
+
+#DEBHELPER#

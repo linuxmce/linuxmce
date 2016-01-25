@@ -12,16 +12,35 @@ buildenv=/opt/pos/QtSDK.121/Desktop/Qt/4.8.1/gcc/bin
 spec=linux-g++
 #-64
 srcroot=~/lmce-src/1204/src
+config="CONFIG+=debug CONFIG+=for_desktop"
+CLEANBUILD="Y"
+
+# load custom build configuration if it exists
+scriptDir=`dirname $0`
+if [ -e "$scriptDir/build.conf" ] ; then
+	. "$scriptDir/build.conf"
+fi
 projectdir=$srcroot/qOrbiter/qOrbiterMaster
 buildoutput=$srcroot/qOrbiter/build-output
-config="CONFIG+=debug CONFIG+=for_desktop"
-qmake="$buildenv"+/qmake
+qmake="$buildenv/qmake"
 if [ ! -x $qmake ] ; then
 	qmake=`which qmake`
 fi
 echo Using $qmake
 # mkdir -p $buildoutput
 #/qOrbiter_src
+
+PCOUNT=1
+
+OPTIND=1 
+        while getopts "i:c:j:" opt; do 
+        case "$opt" in 
+                c)  CLEANBUILD="Y" 
+        ;;
+         	j)  PCOUNT=$OPTARG 
+        ;; 
+        esac 
+        done 
 
 echo "Starting the QMake process"
 pushd $buildenv
@@ -34,7 +53,12 @@ if  ! [ -f $buildoutput/Makefile ] ; then
 fi
 
 cd $buildoutput
+
+if [ "$CLEANBUILD" == "Y" ]; then
+  make clean 
+  echo "Cleaning up"
+fi
+
 echo "Starting the actual build process"
-make clean
-make -w
+make -w -j$PCOUNT
 popd

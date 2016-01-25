@@ -1,0 +1,2 @@
+gitpull:
+  script: "pushd /opt/local-git/ ; git pull ; popd"

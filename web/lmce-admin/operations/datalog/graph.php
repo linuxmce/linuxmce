@@ -182,12 +182,13 @@ $AxisX->setDataPreprocessor($ArrayData);
 
 // Create the Plot
 //$Plot =& $Plotarea->addNew('Image_Graph_Plot_Smoothed_Area', &$Dataset); 
-$Plot =& $Plotarea->addNew('area', &$Dataset); 
+$Plot =& $Plotarea->addNew('area', $Dataset); 
 $Plot->setFillColor($color); 
 
 // Add grid
 $Grid =& Image_Graph::factory('line_grid');
 $Plotarea->add($Grid);
+$Plotarea->setBackgroundColor('white');
 
 // Add marker
 /*$Marker =& Image_Graph::factory('Image_Graph_Marker_Box');

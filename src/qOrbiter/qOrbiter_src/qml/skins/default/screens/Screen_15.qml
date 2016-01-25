@@ -57,10 +57,21 @@ StyledScreen{
             width: Style.scaleX(15)
             anchors.top: securityimage.bottom
             anchors.bottom: securitycamrect.bottom
-
-            Text {
-                id: buttonplaceholder
-                text: qsTr("Camera label and controls go here")
+            StyledButton {
+                label: "Left"
+                onActivated: manager.moveLeft(camera)
+            }
+            StyledButton {
+                label: "Right"
+                onActivated: manager.moveRight(camera)
+            }
+            StyledButton {
+                label: "Up"
+                onActivated: manager.moveUp(camera)
+            }
+            StyledButton {
+                label: "Down"
+                onActivated: manager.moveDown(camera)
             }
         }
     }

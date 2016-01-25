@@ -32,7 +32,11 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
 
 	_tds__GetCapabilities capabilities;
 	_tds__GetCapabilitiesResponse response;
+#if GSOAP_VERSION >= 20822
+    if (m_pDeviceProxy->GetCapabilities(&capabilities, response) == SOAP_OK)
+#else
     if (m_pDeviceProxy->GetCapabilities(&capabilities, &response) == SOAP_OK)
+#endif
 	{
 		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Got capabilities");
 		tt__Capabilities* pCaps = response.Capabilities;
@@ -49,7 +53,11 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
                 m_sMediaProfileToken = "LinuxMCE";
                 _trt__GetProfiles getprofiles;
                 _trt__GetProfilesResponse getprofilesresp;
+#if GSOAP_VERSION >= 20822
+                if (m_pMediaProxy->GetProfiles(&getprofiles, getprofilesresp) == SOAP_OK) {
+#else
                 if (m_pMediaProxy->GetProfiles(&getprofiles, &getprofilesresp) == SOAP_OK) {
+#endif
                     for (size_t i = 0; i < getprofilesresp.Profiles.size(); i++) {
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Media profile: %s", getprofilesresp.Profiles[i]->Name.c_str());
                         if (getprofilesresp.Profiles[i]->token == m_sMediaProfileToken)
@@ -70,7 +78,11 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
                     cp.Token = &m_sMediaProfileToken;
                     _trt__CreateProfileResponse cpr;
                     soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+#if GSOAP_VERSION >= 20822
+                    if (m_pMediaProxy->CreateProfile(&cp, cpr) == SOAP_OK) {
+#else
                     if (m_pMediaProxy->CreateProfile(&cp, &cpr) == SOAP_OK) {
+#endif
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Profile %s created, token = %s", m_sMediaProfileToken.c_str(), cpr.Profile->token.c_str());
 
                     } else {
@@ -84,15 +96,23 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
                 _trt__GetVideoSourceConfigurations gvsc;
                 _trt__GetVideoSourceConfigurationsResponse gvscr;
                 soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+#if GSOAP_VERSION >= 20822
+                if (m_pMediaProxy->GetVideoSourceConfigurations(&gvsc, gvscr) == SOAP_OK) {
+#else
                 if (m_pMediaProxy->GetVideoSourceConfigurations(&gvsc, &gvscr) == SOAP_OK) {
-                    if (gvscr.Configurations.size() > 0) {
+#endif
+		  if (gvscr.Configurations.size() > 0) {
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Video Source %s", gvscr.Configurations[0]->token.c_str());
                         _trt__AddVideoSourceConfiguration avsc;
                         _trt__AddVideoSourceConfigurationResponse avscr;
                         avsc.ProfileToken = m_sMediaProfileToken;
                         avsc.ConfigurationToken = gvscr.Configurations[0]->token;
                         soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+#if GSOAP_VERSION >= 20822
+                        if (m_pMediaProxy->AddVideoSourceConfiguration(&avsc, avscr) == SOAP_OK) {
+#else
                         if (m_pMediaProxy->AddVideoSourceConfiguration(&avsc, &avscr) == SOAP_OK) {
+#endif
                             LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Video Source %s added to media profile", avsc.ConfigurationToken.c_str());
                         } else {
                             m_pMediaProxy->soap_stream_fault(std::cerr);
@@ -109,7 +129,11 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
                     _trt__GetSnapshotUriResponse gsur;
                     soap_wsse_add_Security(m_pMediaProxy);
                     soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, NULL, m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+#if GSOAP_VERSION >= 20822
+                    if (m_pMediaProxy->GetSnapshotUri(&gsu, gsur) == SOAP_OK) {
+#else
                     if (m_pMediaProxy->GetSnapshotUri(&gsu, &gsur) == SOAP_OK) {
+#endif
                         if (gsur.MediaUri)
                             m_sImageURI = gsur.MediaUri->Uri;
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Image URI: %s", m_sImageURI.c_str());
@@ -128,14 +152,22 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
                 soap_wsse_add_UsernameTokenDigest(m_pPTZProxy, NULL,  m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
                 _tptz__GetNodes getNodes;
                 _tptz__GetNodesResponse pGnresp;
+#if GSOAP_VERSION >= 20822
+                if (m_pPTZProxy->GetNodes(&getNodes, pGnresp) == SOAP_OK) {
+#else
                 if (m_pPTZProxy->GetNodes(&getNodes, &pGnresp) == SOAP_OK) {
+#endif
                     if (pGnresp.PTZNode.size() > 0) {
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): PTZNode: %s",
                                                               pGnresp.PTZNode[0]->Name != NULL ? pGnresp.PTZNode[0]->Name->c_str() : "NULL");
                         _tptz__GetNode getNode;
                         getNode.NodeToken = "pGnresp.PTZNode[0]->Name->c_str()";
                         _tptz__GetNodeResponse pGnoderesp;
+#if GSOAP_VERSION >= 20822
+                        if (m_pPTZProxy->GetNode(&getNode, pGnoderesp) == SOAP_OK) {
+#else
                         if (m_pPTZProxy->GetNode(&getNode, &pGnoderesp) == SOAP_OK) {
+#endif
                             //pGnoderesp.PTZNode->
                         }
                     }
@@ -149,7 +181,11 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
                 _tptz__GetConfigurationsResponse gptzr;
                 soap_wsse_add_UsernameTokenDigest(m_pPTZProxy, NULL, m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
                 string sPtzConfigToken;
+#if GSOAP_VERSION >= 20822
+                if (m_pPTZProxy->GetConfigurations(&gptzc, gptzr) == SOAP_OK) {
+#else
                 if (m_pPTZProxy->GetConfigurations(&gptzc, &gptzr) == SOAP_OK) {
+#endif
                     for (size_t i = 0; i < gptzr.PTZConfiguration.size(); i++) {
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): PTZConfiguration: %s", gptzr.PTZConfiguration[i]->token.c_str());
                     }
@@ -180,7 +216,11 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
                     apc.ConfigurationToken = sPtzConfigToken;
                     _trt__AddPTZConfigurationResponse apcr;
                     soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, NULL,  m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+#if GSOAP_VERSION >= 20822
+                    if (m_pMediaProxy->AddPTZConfiguration(&apc, apcr) == SOAP_OK) {
+#else
                     if (m_pMediaProxy->AddPTZConfiguration(&apc, &apcr) == SOAP_OK) {
+#endif
 
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Added PTZ config to media profile");
                     } else {
@@ -246,7 +286,11 @@ bool OnvifDevice::PTZ(float panx,float pany, float zoomx)
 		_tptz__RelativeMoveResponse response;
 		soap_wsse_add_Security(m_pPTZProxy);
         soap_wsse_add_UsernameTokenDigest(m_pPTZProxy, "Id", m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+#if GSOAP_VERSION >= 20822
+		if (m_pPTZProxy->RelativeMove(&relativeMove, response) != SOAP_OK)
+#else
 		if (m_pPTZProxy->RelativeMove(&relativeMove, &response) != SOAP_OK)
+#endif
 		{
 			LoggerWrapper::GetInstance ()->Write (LV_WARNING, "PTZ() Error");
 			m_pPTZProxy->soap_stream_fault(std::cerr);
