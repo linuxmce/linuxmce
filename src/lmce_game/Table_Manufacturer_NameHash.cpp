@@ -32,7 +32,6 @@ using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_Manufacturer_NameHash.h"
 #include "Table_Manufacturer.h"
-#include "Table_NameHash.h"
 
 
 
@@ -139,7 +138,7 @@ void Row_Manufacturer_NameHash::SetDefaultValues()
 is_null[0] = false;
 m_FK_Manufacturer = 0;
 is_null[1] = false;
-m_FK_NameHash = "";
+m_NameHash = "";
 is_null[2] = false;
 
 
@@ -154,9 +153,9 @@ return m_PK_Manufacturer_NameHash;}
 long int Row_Manufacturer_NameHash::FK_Manufacturer_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_FK_Manufacturer;}
-string Row_Manufacturer_NameHash::FK_NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+string Row_Manufacturer_NameHash::NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_FK_NameHash;}
+return m_NameHash;}
 
 		
 void Row_Manufacturer_NameHash::PK_Manufacturer_NameHash_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -165,9 +164,9 @@ m_PK_Manufacturer_NameHash = val; is_modified=true; is_null[0]=false;}
 void Row_Manufacturer_NameHash::FK_Manufacturer_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_FK_Manufacturer = val; is_modified=true; is_null[1]=false;}
-void Row_Manufacturer_NameHash::FK_NameHash_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Manufacturer_NameHash::NameHash_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_FK_NameHash = val; is_modified=true; is_null[2]=false;}
+m_NameHash = val; is_modified=true; is_null[2]=false;}
 
 		
 
@@ -200,7 +199,7 @@ sprintf(buf, "%li", m_FK_Manufacturer);
 return buf;
 }
 
-string Row_Manufacturer_NameHash::FK_NameHash_asSQL()
+string Row_Manufacturer_NameHash::NameHash_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
@@ -208,7 +207,7 @@ if (is_null[2])
 return "NULL";
 
 char *buf = new char[241];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FK_NameHash.c_str(), (unsigned long) min((size_t)120,m_FK_NameHash.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_NameHash.c_str(), (unsigned long) min((size_t)120,m_NameHash.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -253,10 +252,10 @@ bool Table_Manufacturer_NameHash::Commit(bool bDeleteFailedModifiedRow,bool bDel
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Manufacturer_NameHash_asSQL()+", "+pRow->FK_Manufacturer_asSQL()+", "+pRow->FK_NameHash_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Manufacturer_NameHash_asSQL()+", "+pRow->FK_Manufacturer_asSQL()+", "+pRow->NameHash_asSQL();
 
 	
-		string query = "insert into Manufacturer_NameHash (`PK_Manufacturer_NameHash`, `FK_Manufacturer`, `FK_NameHash`) values ("+
+		string query = "insert into Manufacturer_NameHash (`PK_Manufacturer_NameHash`, `FK_Manufacturer`, `NameHash`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -322,7 +321,7 @@ condition = condition + "`PK_Manufacturer_NameHash`=" + tmp_PK_Manufacturer_Name
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Manufacturer_NameHash`="+pRow->PK_Manufacturer_NameHash_asSQL()+", `FK_Manufacturer`="+pRow->FK_Manufacturer_asSQL()+", `FK_NameHash`="+pRow->FK_NameHash_asSQL();
+update_values_list = update_values_list + "`PK_Manufacturer_NameHash`="+pRow->PK_Manufacturer_NameHash_asSQL()+", `FK_Manufacturer`="+pRow->FK_Manufacturer_asSQL()+", `NameHash`="+pRow->NameHash_asSQL();
 
 	
 		string query = "update Manufacturer_NameHash set " + update_values_list + " where " + condition;
@@ -480,12 +479,12 @@ sscanf(row[1], "%li", &(pRow->m_FK_Manufacturer));
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_FK_NameHash = "";
+pRow->m_NameHash = "";
 }
 else
 {
 pRow->is_null[2]=false;
-pRow->m_FK_NameHash = string(row[2],lengths[2]);
+pRow->m_NameHash = string(row[2],lengths[2]);
 }
 
 
@@ -629,12 +628,12 @@ sscanf(row[1], "%li", &(pRow->m_FK_Manufacturer));
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_FK_NameHash = "";
+pRow->m_NameHash = "";
 }
 else
 {
 pRow->is_null[2]=false;
-pRow->m_FK_NameHash = string(row[2],lengths[2]);
+pRow->m_NameHash = string(row[2],lengths[2]);
 }
 
 
@@ -651,13 +650,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Manufacturer *pTable = table->database->Manufacturer_get();
 return pTable->GetRow(m_FK_Manufacturer);
-}
-class Row_NameHash* Row_Manufacturer_NameHash::FK_NameHash_getrow()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_NameHash *pTable = table->database->NameHash_get();
-return pTable->GetRow(m_FK_NameHash);
 }
 
 

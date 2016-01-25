@@ -5,7 +5,8 @@ CREATE DATABASE lmce_game;
 USE lmce_game;
 
 CREATE TABLE NameHash (
-       PK_NameHash CHAR(40) UNIQUE NOT NULL,
+       PK_NameHash INTEGER AUTO_INCREMENT NOT NULL,
+       NameHash CHAR(40) UNIQUE NOT NULL,
        Description VARCHAR(1024),
        PRIMARY KEY(PK_NameHash)
 );
@@ -20,7 +21,7 @@ CREATE TABLE Rom (
 CREATE TABLE Game (
        PK_Game INTEGER AUTO_INCREMENT NOT NULL,
        Define VARCHAR(128),
-       FK_NameHash CHAR(40) UNIQUE NOT NULL,
+       NameHash CHAR(40) UNIQUE NOT NULL,
        FK_Manufacturer INTEGER NOT NULL DEFAULT '-1',
        FK_Genre INTEGER NOT NULL DEFAULT '-1',
        FK_Year INTEGER,
@@ -36,10 +37,10 @@ CREATE TABLE Manufacturer (
 CREATE TABLE Manufacturer_NameHash (
        PK_Manufacturer_NameHash INTEGER AUTO_INCREMENT NOT NULL,
        FK_Manufacturer INTEGER NOT NULL,
-       FK_NameHash CHAR(40) UNIQUE NOT NULL,
+       NameHash CHAR(40) UNIQUE NOT NULL,
        PRIMARY KEY(PK_Manufacturer_NameHash),
        KEY(FK_Manufacturer),
-       KEY(FK_NameHash)
+       KEY(NameHash)
 );
 
 CREATE TABLE Genre (
@@ -52,10 +53,10 @@ CREATE TABLE Genre (
 CREATE TABLE Genre_NameHash (
        PK_Genre_NameHash INTEGER AUTO_INCREMENT NOT NULL,
        FK_Genre INTEGER NOT NULL,
-       FK_NameHash CHAR(40) UNIQUE NOT NULL,
+       NameHash CHAR(40) UNIQUE NOT NULL,
        PRIMARY KEY(PK_Genre_NameHash),
        KEY(FK_Genre),
-       KEY(FK_NameHash)
+       KEY(NameHash)
 );
 
 CREATE TABLE GameSystem (

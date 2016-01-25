@@ -31,7 +31,7 @@
 class DECLSPECIFIER TableRow;
 class DECLSPECIFIER SerializeClass;
 
-class DECLSPECIFIER Table_NameHash : public TableBase , SingleStringKeyBase
+class DECLSPECIFIER Table_NameHash : public TableBase , SingleLongKeyBase
 {
 private:
 	Database_lmce_game *database;
@@ -48,10 +48,10 @@ private:
 	struct Key
 	{
 		friend class Row_NameHash;
-		string pk_PK_NameHash;
+		long int pk_PK_NameHash;
 
 		
-		Key(string in_PK_NameHash);
+		Key(long int in_PK_NameHash);
 	
 		Key(class Row_NameHash *pRow);
 	};
@@ -75,13 +75,13 @@ public:
 	Database_lmce_game *Database_lmce_game_get() { return database; }
 	
 		
-	class Row_NameHash* GetRow(string in_PK_NameHash);
+	class Row_NameHash* GetRow(long int in_PK_NameHash);
 	
 
 private:	
 	
 		
-	class Row_NameHash* FetchRow(SingleStringKey &key);
+	class Row_NameHash* FetchRow(SingleLongKey &key);
 		
 			
 };
@@ -93,17 +93,20 @@ class DECLSPECIFIER Row_NameHash : public TableRow, public SerializeClass
 	private:
 		Table_NameHash *table;
 		
-		string m_PK_NameHash;
+		long int m_PK_NameHash;
+string m_NameHash;
 string m_Description;
 
-		bool is_null[2];
+		bool is_null[3];
 	
 	public:
-		string PK_NameHash_get();
+		long int PK_NameHash_get();
+string NameHash_get();
 string Description_get();
 
 		
-		void PK_NameHash_set(string val);
+		void PK_NameHash_set(long int val);
+void NameHash_set(string val);
 void Description_set(string val);
 
 		
@@ -126,19 +129,17 @@ void Description_set(string val);
 		
 
 		// Return the rows in other tables with foreign keys pointing here
-		void Game_FK_NameHash_getrows(vector <class Row_Game*> *rows);
-void Genre_NameHash_FK_NameHash_getrows(vector <class Row_Genre_NameHash*> *rows);
-void Manufacturer_NameHash_FK_NameHash_getrows(vector <class Row_Manufacturer_NameHash*> *rows);
-
+		
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_NameHash+ m_Description;
+			StartSerializeList() + m_PK_NameHash+ m_NameHash+ m_Description;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_NameHash_asSQL();
+string NameHash_asSQL();
 string Description_asSQL();
 
 	};

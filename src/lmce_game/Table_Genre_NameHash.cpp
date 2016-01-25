@@ -32,7 +32,6 @@ using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_Genre_NameHash.h"
 #include "Table_Genre.h"
-#include "Table_NameHash.h"
 
 
 
@@ -139,7 +138,7 @@ void Row_Genre_NameHash::SetDefaultValues()
 is_null[0] = false;
 m_FK_Genre = 0;
 is_null[1] = false;
-m_FK_NameHash = "";
+m_NameHash = "";
 is_null[2] = false;
 
 
@@ -154,9 +153,9 @@ return m_PK_Genre_NameHash;}
 long int Row_Genre_NameHash::FK_Genre_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_FK_Genre;}
-string Row_Genre_NameHash::FK_NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+string Row_Genre_NameHash::NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_FK_NameHash;}
+return m_NameHash;}
 
 		
 void Row_Genre_NameHash::PK_Genre_NameHash_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -165,9 +164,9 @@ m_PK_Genre_NameHash = val; is_modified=true; is_null[0]=false;}
 void Row_Genre_NameHash::FK_Genre_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_FK_Genre = val; is_modified=true; is_null[1]=false;}
-void Row_Genre_NameHash::FK_NameHash_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Genre_NameHash::NameHash_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_FK_NameHash = val; is_modified=true; is_null[2]=false;}
+m_NameHash = val; is_modified=true; is_null[2]=false;}
 
 		
 
@@ -200,7 +199,7 @@ sprintf(buf, "%li", m_FK_Genre);
 return buf;
 }
 
-string Row_Genre_NameHash::FK_NameHash_asSQL()
+string Row_Genre_NameHash::NameHash_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
@@ -208,7 +207,7 @@ if (is_null[2])
 return "NULL";
 
 char *buf = new char[241];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FK_NameHash.c_str(), (unsigned long) min((size_t)120,m_FK_NameHash.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_NameHash.c_str(), (unsigned long) min((size_t)120,m_NameHash.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -253,10 +252,10 @@ bool Table_Genre_NameHash::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFail
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Genre_NameHash_asSQL()+", "+pRow->FK_Genre_asSQL()+", "+pRow->FK_NameHash_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Genre_NameHash_asSQL()+", "+pRow->FK_Genre_asSQL()+", "+pRow->NameHash_asSQL();
 
 	
-		string query = "insert into Genre_NameHash (`PK_Genre_NameHash`, `FK_Genre`, `FK_NameHash`) values ("+
+		string query = "insert into Genre_NameHash (`PK_Genre_NameHash`, `FK_Genre`, `NameHash`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -322,7 +321,7 @@ condition = condition + "`PK_Genre_NameHash`=" + tmp_PK_Genre_NameHash;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Genre_NameHash`="+pRow->PK_Genre_NameHash_asSQL()+", `FK_Genre`="+pRow->FK_Genre_asSQL()+", `FK_NameHash`="+pRow->FK_NameHash_asSQL();
+update_values_list = update_values_list + "`PK_Genre_NameHash`="+pRow->PK_Genre_NameHash_asSQL()+", `FK_Genre`="+pRow->FK_Genre_asSQL()+", `NameHash`="+pRow->NameHash_asSQL();
 
 	
 		string query = "update Genre_NameHash set " + update_values_list + " where " + condition;
@@ -480,12 +479,12 @@ sscanf(row[1], "%li", &(pRow->m_FK_Genre));
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_FK_NameHash = "";
+pRow->m_NameHash = "";
 }
 else
 {
 pRow->is_null[2]=false;
-pRow->m_FK_NameHash = string(row[2],lengths[2]);
+pRow->m_NameHash = string(row[2],lengths[2]);
 }
 
 
@@ -629,12 +628,12 @@ sscanf(row[1], "%li", &(pRow->m_FK_Genre));
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_FK_NameHash = "";
+pRow->m_NameHash = "";
 }
 else
 {
 pRow->is_null[2]=false;
-pRow->m_FK_NameHash = string(row[2],lengths[2]);
+pRow->m_NameHash = string(row[2],lengths[2]);
 }
 
 
@@ -651,13 +650,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Genre *pTable = table->database->Genre_get();
 return pTable->GetRow(m_FK_Genre);
-}
-class Row_NameHash* Row_Genre_NameHash::FK_NameHash_getrow()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_NameHash *pTable = table->database->NameHash_get();
-return pTable->GetRow(m_FK_NameHash);
 }
 
 
