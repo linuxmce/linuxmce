@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+# Remove counters directory
+if [ "$1" = "purge" ]; then
+
+    rm -f /var/lib/epgsources/epgdata2xmltv
+fi
+
+#DEBHELPER#
