@@ -95,19 +95,19 @@ class DECLSPECIFIER Row_Genre_NameHash : public TableRow, public SerializeClass
 		
 		long int m_PK_Genre_NameHash;
 long int m_FK_Genre;
-string m_FK_NameHash;
+string m_NameHash;
 
 		bool is_null[3];
 	
 	public:
 		long int PK_Genre_NameHash_get();
 long int FK_Genre_get();
-string FK_NameHash_get();
+string NameHash_get();
 
 		
 		void PK_Genre_NameHash_set(long int val);
 void FK_Genre_set(long int val);
-void FK_NameHash_set(string val);
+void NameHash_set(string val);
 
 		
 		
@@ -125,7 +125,6 @@ void FK_NameHash_set(string val);
 
 		// Return the rows for foreign keys 
 		class Row_Genre* FK_Genre_getrow();
-class Row_NameHash* FK_NameHash_getrow();
 
 
 		// Return the rows in other tables with foreign keys pointing here
@@ -133,14 +132,14 @@ class Row_NameHash* FK_NameHash_getrow();
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Genre_NameHash+ m_FK_Genre+ m_FK_NameHash;
+			StartSerializeList() + m_PK_Genre_NameHash+ m_FK_Genre+ m_NameHash;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_Genre_NameHash_asSQL();
 string FK_Genre_asSQL();
-string FK_NameHash_asSQL();
+string NameHash_asSQL();
 
 	};
 

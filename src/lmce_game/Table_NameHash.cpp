@@ -32,9 +32,6 @@ using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_NameHash.h"
 
-#include "Table_Game.h"
-#include "Table_Genre_NameHash.h"
-#include "Table_Manufacturer_NameHash.h"
 
 
 void Database_lmce_game::CreateTable_NameHash()
@@ -55,7 +52,7 @@ bool Database_lmce_game::Commit_NameHash(bool bDeleteFailedModifiedRow,bool bDel
 
 Table_NameHash::~Table_NameHash()
 {
-	map<SingleStringKey, class TableRow*, SingleStringKey_Less>::iterator it;
+	map<SingleLongKey, class TableRow*, SingleLongKey_Less>::iterator it;
 	for(it=cachedRows.begin();it!=cachedRows.end();++it)
 	{
 		Row_NameHash *pRow = (Row_NameHash *) (*it).second;
@@ -96,8 +93,8 @@ void Row_NameHash::Delete()
 		}
 		else
 		{
-			SingleStringKey key(pRow->m_PK_NameHash);
-			map<SingleStringKey, TableRow*, SingleStringKey_Less>::iterator i = table->cachedRows.find(key);
+			SingleLongKey key(pRow->m_PK_NameHash);
+			map<SingleLongKey, TableRow*, SingleLongKey_Less>::iterator i = table->cachedRows.find(key);
 			if (i!=table->cachedRows.end())
 				table->cachedRows.erase(i);
 						
@@ -116,7 +113,7 @@ void Row_NameHash::Reload()
 	
 	if (!is_added)
 	{
-		SingleStringKey key(pRow->m_PK_NameHash);
+		SingleLongKey key(pRow->m_PK_NameHash);
 		Row_NameHash *pRow = table->FetchRow(key);
 		
 		if (pRow!=NULL)
@@ -136,9 +133,11 @@ Row_NameHash::Row_NameHash(Table_NameHash *pTable):table(pTable)
 
 void Row_NameHash::SetDefaultValues()
 {
-	m_PK_NameHash = "";
+	m_PK_NameHash = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_NameHash = "";
+is_null[1] = false;
+is_null[2] = true;
 
 
 	is_added=false;
@@ -146,29 +145,35 @@ is_null[1] = true;
 	is_modified=false;
 }
 
-string Row_NameHash::PK_NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+long int Row_NameHash::PK_NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_PK_NameHash;}
+string Row_NameHash::NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_NameHash;}
 string Row_NameHash::Description_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_Description;}
 
 		
-void Row_NameHash::PK_NameHash_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_NameHash::PK_NameHash_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_PK_NameHash = val; is_modified=true; is_null[0]=false;}
+void Row_NameHash::NameHash_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_NameHash = val; is_modified=true; is_null[1]=false;}
 void Row_NameHash::Description_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_Description = val; is_modified=true; is_null[1]=false;}
+m_Description = val; is_modified=true; is_null[2]=false;}
 
 		
 bool Row_NameHash::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[1];}
+return is_null[2];}
 
 			
 void Row_NameHash::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
+is_null[2]=val;
 is_modified=true;
 }
 	
@@ -180,8 +185,21 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[0])
 return "NULL";
 
+char buf[32];
+sprintf(buf, "%li", m_PK_NameHash);
+
+return buf;
+}
+
+string Row_NameHash::NameHash_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[1])
+return "NULL";
+
 char *buf = new char[241];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PK_NameHash.c_str(), (unsigned long) min((size_t)120,m_PK_NameHash.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_NameHash.c_str(), (unsigned long) min((size_t)120,m_NameHash.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -191,7 +209,7 @@ string Row_NameHash::Description_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[1])
+if (is_null[2])
 return "NULL";
 
 char *buf = new char[6145];
@@ -204,7 +222,7 @@ return s;
 
 
 
-Table_NameHash::Key::Key(string in_PK_NameHash)
+Table_NameHash::Key::Key(long int in_PK_NameHash)
 {
 			pk_PK_NameHash = in_PK_NameHash;
 	
@@ -240,10 +258,10 @@ bool Table_NameHash::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInse
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_NameHash_asSQL()+", "+pRow->Description_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_NameHash_asSQL()+", "+pRow->NameHash_asSQL()+", "+pRow->Description_asSQL();
 
 	
-		string query = "insert into NameHash (`PK_NameHash`, `Description`) values ("+
+		string query = "insert into NameHash (`PK_NameHash`, `NameHash`, `Description`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -273,10 +291,13 @@ values_list_comma_separated = values_list_comma_separated + pRow->PK_NameHash_as
 			
 			long int id = (long int) db_wrapper_insert_id(database->m_pDB);
 		
-				
+			if (id!=0)
+		pRow->m_PK_NameHash=id;
+else 
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PK_NameHash is auto increment but has no value %s",database->m_sLastDBError.c_str());	
 			
 			addedRows.erase(i);
-			SingleStringKey key(pRow->m_PK_NameHash);	
+			SingleLongKey key(pRow->m_PK_NameHash);	
 			cachedRows[key] = pRow;
 					
 			
@@ -290,23 +311,23 @@ values_list_comma_separated = values_list_comma_separated + pRow->PK_NameHash_as
 //update modified
 	
 
-	for (map<SingleStringKey, class TableRow*, SingleStringKey_Less>::iterator i = cachedRows.begin(); i!= cachedRows.end(); i++)
+	for (map<SingleLongKey, class TableRow*, SingleLongKey_Less>::iterator i = cachedRows.begin(); i!= cachedRows.end(); i++)
 		if	(((*i).second)->is_modified_get())
 	{
 		Row_NameHash* pRow = (Row_NameHash*) (*i).second;	
-		SingleStringKey key(pRow->m_PK_NameHash);
+		SingleLongKey key(pRow->m_PK_NameHash);
 
-		char tmp_PK_NameHash[241];
-db_wrapper_real_escape_string(database->m_pDB,tmp_PK_NameHash, key.pk.c_str(), (unsigned long) key.pk.size());
+		char tmp_PK_NameHash[32];
+sprintf(tmp_PK_NameHash, "%li", key.pk);
 
 
 string condition;
-condition = condition + "`PK_NameHash`=" + "\"" + tmp_PK_NameHash+ "\"";
+condition = condition + "`PK_NameHash`=" + tmp_PK_NameHash;
 	
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_NameHash`="+pRow->PK_NameHash_asSQL()+", `Description`="+pRow->Description_asSQL();
+update_values_list = update_values_list + "`PK_NameHash`="+pRow->PK_NameHash_asSQL()+", `NameHash`="+pRow->NameHash_asSQL()+", `Description`="+pRow->Description_asSQL();
 
 	
 		string query = "update NameHash set " + update_values_list + " where " + condition;
@@ -350,17 +371,17 @@ update_values_list = update_values_list + "`PK_NameHash`="+pRow->PK_NameHash_asS
 	
 	while (!deleted_cachedRows.empty())
 	{	
-		map<SingleStringKey, class TableRow*, SingleStringKey_Less>::iterator i = deleted_cachedRows.begin();
+		map<SingleLongKey, class TableRow*, SingleLongKey_Less>::iterator i = deleted_cachedRows.begin();
 	
-		SingleStringKey key = (*i).first;
+		SingleLongKey key = (*i).first;
 		Row_NameHash* pRow = (Row_NameHash*) (*i).second;	
 
-		char tmp_PK_NameHash[241];
-db_wrapper_real_escape_string(database->m_pDB,tmp_PK_NameHash, key.pk.c_str(), (unsigned long) key.pk.size());
+		char tmp_PK_NameHash[32];
+sprintf(tmp_PK_NameHash, "%li", key.pk);
 
 
 string condition;
-condition = condition + "`PK_NameHash`=" + "\"" + tmp_PK_NameHash+ "\"";
+condition = condition + "`PK_NameHash`=" + tmp_PK_NameHash;
 
 	
 		string query = "delete from NameHash where " + condition;
@@ -442,32 +463,43 @@ bool Table_NameHash::GetRows(string where_statement,vector<class Row_NameHash*> 
 		if (row[0] == NULL)
 {
 pRow->is_null[0]=true;
-pRow->m_PK_NameHash = "";
+pRow->m_PK_NameHash = 0;
 }
 else
 {
 pRow->is_null[0]=false;
-pRow->m_PK_NameHash = string(row[0],lengths[0]);
+sscanf(row[0], "%li", &(pRow->m_PK_NameHash));
 }
 
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_Description = "";
+pRow->m_NameHash = "";
 }
 else
 {
 pRow->is_null[1]=false;
-pRow->m_Description = string(row[1],lengths[1]);
+pRow->m_NameHash = string(row[1],lengths[1]);
+}
+
+if (row[2] == NULL)
+{
+pRow->is_null[2]=true;
+pRow->m_Description = "";
+}
+else
+{
+pRow->is_null[2]=false;
+pRow->m_Description = string(row[2],lengths[2]);
 }
 
 
 
 		//checking for duplicates
 
-		SingleStringKey key(pRow->m_PK_NameHash);
+		SingleLongKey key(pRow->m_PK_NameHash);
 		
-		map<SingleStringKey, class TableRow*, SingleStringKey_Less>::iterator i = cachedRows.find(key);
+		map<SingleLongKey, class TableRow*, SingleLongKey_Less>::iterator i = cachedRows.find(key);
 			
 		if (i!=cachedRows.end())
 		{
@@ -497,13 +529,13 @@ Row_NameHash* Table_NameHash::AddRow()
 
 
 
-Row_NameHash* Table_NameHash::GetRow(string in_PK_NameHash)
+Row_NameHash* Table_NameHash::GetRow(long int in_PK_NameHash)
 {
 	PLUTO_SAFETY_LOCK_ERRORSONLY(sl,database->m_DBMutex);
 
-	SingleStringKey row_key(in_PK_NameHash);
+	SingleLongKey row_key(in_PK_NameHash);
 
-	map<SingleStringKey, class TableRow*, SingleStringKey_Less>::iterator i;
+	map<SingleLongKey, class TableRow*, SingleLongKey_Less>::iterator i;
 	i = deleted_cachedRows.find(row_key);	
 		
 	//row was deleted	
@@ -525,17 +557,17 @@ Row_NameHash* Table_NameHash::GetRow(string in_PK_NameHash)
 
 
 
-Row_NameHash* Table_NameHash::FetchRow(SingleStringKey &key)
+Row_NameHash* Table_NameHash::FetchRow(SingleLongKey &key)
 {
 	PLUTO_SAFETY_LOCK_ERRORSONLY(sl,database->m_DBMutex);
 
 	//defines the string query for the value of key
-	char tmp_PK_NameHash[241];
-db_wrapper_real_escape_string(database->m_pDB,tmp_PK_NameHash, key.pk.c_str(), (unsigned long) key.pk.size());
+	char tmp_PK_NameHash[32];
+sprintf(tmp_PK_NameHash, "%li", key.pk);
 
 
 string condition;
-condition = condition + "`PK_NameHash`=" + "\"" + tmp_PK_NameHash+ "\"";
+condition = condition + "`PK_NameHash`=" + tmp_PK_NameHash;
 
 
 	string query = "select * from NameHash where " + condition;		
@@ -580,23 +612,34 @@ condition = condition + "`PK_NameHash`=" + "\"" + tmp_PK_NameHash+ "\"";
 	if (row[0] == NULL)
 {
 pRow->is_null[0]=true;
-pRow->m_PK_NameHash = "";
+pRow->m_PK_NameHash = 0;
 }
 else
 {
 pRow->is_null[0]=false;
-pRow->m_PK_NameHash = string(row[0],lengths[0]);
+sscanf(row[0], "%li", &(pRow->m_PK_NameHash));
 }
 
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_Description = "";
+pRow->m_NameHash = "";
 }
 else
 {
 pRow->is_null[1]=false;
-pRow->m_Description = string(row[1],lengths[1]);
+pRow->m_NameHash = string(row[1],lengths[1]);
+}
+
+if (row[2] == NULL)
+{
+pRow->is_null[2]=true;
+pRow->m_Description = "";
+}
+else
+{
+pRow->is_null[2]=false;
+pRow->m_Description = string(row[2],lengths[2]);
 }
 
 
@@ -609,27 +652,6 @@ pRow->m_Description = string(row[1],lengths[1]);
 
 
 
-void Row_NameHash::Game_FK_NameHash_getrows(vector <class Row_Game*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Game *pTable = table->database->Game_get();
-pTable->GetRows("`FK_NameHash`=" + StringUtils::itos(m_PK_NameHash),rows);
-}
-void Row_NameHash::Genre_NameHash_FK_NameHash_getrows(vector <class Row_Genre_NameHash*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Genre_NameHash *pTable = table->database->Genre_NameHash_get();
-pTable->GetRows("`FK_NameHash`=" + StringUtils::itos(m_PK_NameHash),rows);
-}
-void Row_NameHash::Manufacturer_NameHash_FK_NameHash_getrows(vector <class Row_Manufacturer_NameHash*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Manufacturer_NameHash *pTable = table->database->Manufacturer_NameHash_get();
-pTable->GetRows("`FK_NameHash`=" + StringUtils::itos(m_PK_NameHash),rows);
-}
 
 
 

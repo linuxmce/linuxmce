@@ -95,19 +95,19 @@ class DECLSPECIFIER Row_Manufacturer_NameHash : public TableRow, public Serializ
 		
 		long int m_PK_Manufacturer_NameHash;
 long int m_FK_Manufacturer;
-string m_FK_NameHash;
+string m_NameHash;
 
 		bool is_null[3];
 	
 	public:
 		long int PK_Manufacturer_NameHash_get();
 long int FK_Manufacturer_get();
-string FK_NameHash_get();
+string NameHash_get();
 
 		
 		void PK_Manufacturer_NameHash_set(long int val);
 void FK_Manufacturer_set(long int val);
-void FK_NameHash_set(string val);
+void NameHash_set(string val);
 
 		
 		
@@ -125,7 +125,6 @@ void FK_NameHash_set(string val);
 
 		// Return the rows for foreign keys 
 		class Row_Manufacturer* FK_Manufacturer_getrow();
-class Row_NameHash* FK_NameHash_getrow();
 
 
 		// Return the rows in other tables with foreign keys pointing here
@@ -133,14 +132,14 @@ class Row_NameHash* FK_NameHash_getrow();
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Manufacturer_NameHash+ m_FK_Manufacturer+ m_FK_NameHash;
+			StartSerializeList() + m_PK_Manufacturer_NameHash+ m_FK_Manufacturer+ m_NameHash;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_Manufacturer_NameHash_asSQL();
 string FK_Manufacturer_asSQL();
-string FK_NameHash_asSQL();
+string NameHash_asSQL();
 
 	};
 
