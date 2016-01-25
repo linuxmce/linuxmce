@@ -1346,6 +1346,10 @@ public slots:
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
     void updatePlaylist();
+    void moveUp(int PK_DeviceTo){CMD_Move_Up cmd(iPK_Device, PK_DeviceTo, 0); emit sendDceCommand(cmd);}
+    void moveDown(int PK_DeviceTo){CMD_Move_Down cmd(iPK_Device, PK_DeviceTo, 0); emit sendDceCommand(cmd);}
+    void moveLeft(int PK_DeviceTo){CMD_Move_Left cmd(iPK_Device, PK_DeviceTo, 0); emit sendDceCommand(cmd);}
+    void moveRight(int PK_DeviceTo){CMD_Move_Right cmd(iPK_Device, PK_DeviceTo, 0); emit sendDceCommand(cmd);}
     //@}
 
     /*! @name Screenshot & Images slots*/
