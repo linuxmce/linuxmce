@@ -1,0 +1,15 @@
+#ifndef __Define_Manufacturer_NameHash_H__
+#define __Define_Manufacturer_NameHash_H__
+
+
+#define MANUFACTURER_NAMEHASH_TABLE "Manufacturer_NameHash"
+#define MANUFACTURER_NAMEHASH_PK_MANUFACTURER_NAMEHASH_FIELD "PK_Manufacturer_NameHash"
+#define MANUFACTURER_NAMEHASH_PK_MANUFACTURER_NAMEHASH_TABLE_FIELD "Manufacturer_NameHash.PK_Manufacturer_NameHash"
+#define MANUFACTURER_NAMEHASH_FK_MANUFACTURER_FIELD "FK_Manufacturer"
+#define MANUFACTURER_NAMEHASH_FK_MANUFACTURER_TABLE_FIELD "Manufacturer_NameHash.FK_Manufacturer"
+#define MANUFACTURER_NAMEHASH_FK_NAMEHASH_FIELD "FK_NameHash"
+#define MANUFACTURER_NAMEHASH_FK_NAMEHASH_TABLE_FIELD "Manufacturer_NameHash.FK_NameHash"
+
+
+#endif
+

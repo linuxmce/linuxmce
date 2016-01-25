@@ -1,0 +1,17 @@
+#ifndef __Define_Game_GameSystem_Rom_H__
+#define __Define_Game_GameSystem_Rom_H__
+
+
+#define GAME_GAMESYSTEM_ROM_TABLE "Game_GameSystem_Rom"
+#define GAME_GAMESYSTEM_ROM_PK_GAME_ROM_FIELD "PK_Game_Rom"
+#define GAME_GAMESYSTEM_ROM_PK_GAME_ROM_TABLE_FIELD "Game_GameSystem_Rom.PK_Game_Rom"
+#define GAME_GAMESYSTEM_ROM_FK_GAME_FIELD "FK_Game"
+#define GAME_GAMESYSTEM_ROM_FK_GAME_TABLE_FIELD "Game_GameSystem_Rom.FK_Game"
+#define GAME_GAMESYSTEM_ROM_FK_GAMESYSTEM_FIELD "FK_GameSystem"
+#define GAME_GAMESYSTEM_ROM_FK_GAMESYSTEM_TABLE_FIELD "Game_GameSystem_Rom.FK_GameSystem"
+#define GAME_GAMESYSTEM_ROM_FK_ROM_FIELD "FK_Rom"
+#define GAME_GAMESYSTEM_ROM_FK_ROM_TABLE_FIELD "Game_GameSystem_Rom.FK_Rom"
+
+
+#endif
+

@@ -1,0 +1,15 @@
+#ifndef __Define_GameSystem_Picture_H__
+#define __Define_GameSystem_Picture_H__
+
+
+#define GAMESYSTEM_PICTURE_TABLE "GameSystem_Picture"
+#define GAMESYSTEM_PICTURE_PK_GAMESYSTEM_PICTURE_FIELD "PK_GameSystem_Picture"
+#define GAMESYSTEM_PICTURE_PK_GAMESYSTEM_PICTURE_TABLE_FIELD "GameSystem_Picture.PK_GameSystem_Picture"
+#define GAMESYSTEM_PICTURE_FK_GAMESYSTEM_FIELD "FK_GameSystem"
+#define GAMESYSTEM_PICTURE_FK_GAMESYSTEM_TABLE_FIELD "GameSystem_Picture.FK_GameSystem"
+#define GAMESYSTEM_PICTURE_FK_PICTURE_FIELD "FK_Picture"
+#define GAMESYSTEM_PICTURE_FK_PICTURE_TABLE_FIELD "GameSystem_Picture.FK_Picture"
+
+
+#endif
+
