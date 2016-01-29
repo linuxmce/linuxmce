@@ -413,7 +413,12 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		deviceData += portID;
 
 		devicesMap[ (std::string) syspath ] = (std::string) parent_udi;
-		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, "serial" /*category*/, HalDevice->m_sSignature_get());
+// comparasin to new capability added device detected event below
+//		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, 4        /*USB_COMM_METHOD*/, 0, info_udi,                        "37|" + portID,   ""       /*category*/, HalDevice->m_sSignature_get());
+// original line
+//		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, "serial" /*category*/, HalDevice->m_sSignature_get());
+// new test line line
+		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, ""       /*category*/, HalDevice->m_sSignature_get());
 
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s", buffer);
 	}
