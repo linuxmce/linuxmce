@@ -1545,7 +1545,14 @@ string Makefile = "none:\n"
 	}
 	fprintf(f, "%s", Makefile.c_str());
 	fclose(f);
-	system("echo | DEBFULLNAME='LinuxMCE Developers' dh_make -c gpl -s -n -e 'developers@linuxmce.org'");
+	if( g_iPK_Distro==DISTRO_Ubuntu_Precise_CONST )
+	{
+		system("echo | DEBFULLNAME='LinuxMCE Developers' dh_make -c gpl -s -n -e 'developers@linuxmce.org'");
+	}
+	else
+	{
+		system("DEBFULLNAME='LinuxMCE Developers' dh_make -y -c gpl -s -n -e 'developers@linuxmce.org'");
+	}
 #endif
 
 	list<FileInfo *>::iterator iFileInfo;
@@ -1802,7 +1809,14 @@ string Makefile = "none:\n"
 	}
 	fprintf(f, "%s", Makefile.c_str());
 	fclose(f);
-	system("echo | DEBFULLNAME='LinuxMCE Developers' dh_make -c gpl -s -n -e 'developers@linuxmce.org'");
+	if( g_iPK_Distro==DISTRO_Ubuntu_Precise_CONST )
+	{
+		system("echo | DEBFULLNAME='LinuxMCE Developers' dh_make -c gpl -s -n -e 'developers@linuxmce.org'");
+	}
+	else
+	{
+		system("DEBFULLNAME='LinuxMCE Developers' dh_make -y -c gpl -s -n -e 'developers@linuxmce.org'");
+	}
 //	mkdir("DEBIAN", 0666);
 #endif
 
