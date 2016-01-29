@@ -726,6 +726,18 @@ void LmceUdevD::myDeviceNewCapability(struct udev * ctx, const char * udi, const
 		return;
 	}
 
+// get serial port 'path'
+// get usb parent device
+// set info_udi == usb parent udi
+// get product_id && vendor_id from usb parent
+// log serial port capability detected on parent device X
+// check for template (existing device??) with this usb id???
+// if exists
+// set portID == getPortIdentification
+// log new serial port capability added
+// set buffer = concatenated usb device_id/product_id
+// fire Device_Detected event with serial port info
+
 	gchar *serial_port = libhal_device_get_property_string (ctx, udi, "linux.sysfs_path", NULL);
 	if(serial_port != NULL)
 	{
