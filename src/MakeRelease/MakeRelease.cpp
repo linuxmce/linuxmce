@@ -417,27 +417,27 @@ int main(int argc, char *argv[])
 		vector<Row_Package_Source *> vectRow_Package_Source_All;
 		string::size_type pos=0;
 		string sPK_RepositorySource;
-	cout << g_sPK_RepositorySource << endl;	
+		cout << g_sPK_RepositorySource << endl;	
 		while( (sPK_RepositorySource=StringUtils::Tokenize(g_sPK_RepositorySource,",",pos)).length() )
 		{
 			vector<Row_Package_Source *> vectRow_Package_Source;
 			g_pDatabase_pluto_main->Package_Source_get()->GetRows( 
 				"FK_Package=" + StringUtils::itos(pRow_Package->PK_Package_get()) + " AND " +
 				"FK_RepositorySource=" + sPK_RepositorySource,&vectRow_Package_Source);
-	cout << "sources: " << vectRow_Package_Source.size() << endl;	
+			cout << "sources: " << vectRow_Package_Source.size() << endl;	
 			for(size_t s=0;s<vectRow_Package_Source.size();++s)
 			{
 				Row_Package_Source *pRow_Package_Source = vectRow_Package_Source[s];
-		// Update the version record
-		cout << "Setting version for package " << pRow_Package_Source->FK_Package_get() << " " << pRow_Package_Source->FK_Package_getrow()->Description_get() << 
-			" Source " << pRow_Package_Source->PK_Package_Source_get() << " " << pRow_Package_Source->FK_RepositorySource_getrow()->Description_get() <<
-			": " << g_pRow_Version->VersionName_get() << endl;
+				// Update the version record
+				cout << "Setting version for package " << pRow_Package_Source->FK_Package_get() << " " << pRow_Package_Source->FK_Package_getrow()->Description_get() << 
+					" Source " << pRow_Package_Source->PK_Package_Source_get() << " " << pRow_Package_Source->FK_RepositorySource_getrow()->Description_get() <<
+					": " << g_pRow_Version->VersionName_get() << endl;
 
 				if( g_bSetVersion )
 				{
-					if( pRow_Package_Source->FK_RepositorySource_get()==REPOSITORYSOURCE_Pluto_CVS_CONST || pRow_Package_Source->FK_RepositorySource_get()==REPOSITORYSOURCE_Pluto_SVN_CONST )
-						pRow_Package_Source->Version_set(g_pRow_Version->VersionName_get());
-					else
+//					if( pRow_Package_Source->FK_RepositorySource_get()==REPOSITORYSOURCE_Pluto_CVS_CONST || pRow_Package_Source->FK_RepositorySource_get()==REPOSITORYSOURCE_Pluto_SVN_CONST )
+//						pRow_Package_Source->Version_set(g_pRow_Version->VersionName_get());
+//					else
 						pRow_Package_Source->Version_set(g_pRow_Version->VersionName_get());
 				}
 			}
@@ -1643,7 +1643,7 @@ string Makefile = "none:\n"
 			sPkgVerBase = iLastDot == string::npos ? "" : sPkgVersion.substr(0, iLastDot);
 		}
 		int iPkgManufacturer = pRow_Package_Source_Dependency->FK_Package_getrow()->FK_Manufacturer_get();
-		if (iPkgManufacturer == 1 || iPkgManufacturer == 1108) /* HARDCODED: 1 = Pluto, 1108 = Pluto Closed Source */
+		if (iPkgManufacturer == 1 || iPkgManufacturer == 1108 || iPkgManufacturer == 1176 ) /* HARDCODED: 1 = Pluto, 1108 = Pluto Closed Source, 1176 = LinuxMCE MakeRelease */
 		{
 			if( pRow_Package_Package->PreDependency_get()==1 )
 				sPreDepends += ", " + sPkgName;
@@ -2024,6 +2024,7 @@ string Makefile = "none:\n"
 //		sPreDepends = "pluto-kernel-upgrade ";
 //	}
 
+	// Interate through all of this package's dependencies for addition to the list
 	for (size_t s=0;s<vect_pRow_Package_Source_Dependencies.size();++s)
 	{
 		Row_Package_Source *pRow_Package_Source_Dependency = vect_pRow_Package_Source_Dependencies[s];
@@ -2044,7 +2045,7 @@ string Makefile = "none:\n"
 			sPkgVerBase = iLastDot == string::npos ? "" : sPkgVersion.substr(0, iLastDot);
 		}
 		int iPkgManufacturer = pRow_Package_Source_Dependency->FK_Package_getrow()->FK_Manufacturer_get();
-		if (iPkgManufacturer == 1 || iPkgManufacturer == 1108) /* HARDCODED: 1 = Pluto, 1108 = Pluto Closed Source */
+		if (iPkgManufacturer == 1 || iPkgManufacturer == 1108 || iPkgManufacturer == 1176 ) /* HARDCODED: 1 = Pluto, 1108 = Pluto Closed Source, 1176 = LinuxMCE MakeRelease */
 		{
 			if( pRow_Package_Package->PreDependency_get()==1 )
 				sPreDepends += ", " + sPkgName;
