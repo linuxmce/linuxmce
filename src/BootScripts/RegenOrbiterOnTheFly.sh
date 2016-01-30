@@ -39,7 +39,7 @@ fi
 Orbiters=$(RunSQL "$Q")
 
 if [[ -n "$Orbiters" ]] ; then
-	parallel -j "$Jobs" /usr/pluto/bin/RegenOrbiter.sh {1} "$2" ::: $Orbiters
+	parallel --arg-sep ,, -j "$Jobs" /usr/pluto/bin/RegenOrbiter.sh {1} "$2" ,, $Orbiters
 fi
 
 exit 0

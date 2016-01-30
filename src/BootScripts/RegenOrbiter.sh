@@ -24,7 +24,7 @@ RunSQL "$Q"
 /usr/pluto/bin/MessageSend "$DCERouter" 0 $OrbiterDev 7 1 163 "RegenOrbiterOnTheFly.sh"
 
 echo "on the fly regen of $OrbiterDev $2 $3" >> /var/log/pluto/orbitergen.log
-/usr/pluto/bin/OrbiterGen -d "$OrbiterDev" $3 -g "$SkinDir" -f "$FontDir" -o "$OutDir" $PLUTO_DB_CRED -D "$MySqlDBName"  >> /var/log/pluto/orbiterg$
+/usr/pluto/bin/OrbiterGen -d "$OrbiterDev" $3 -g "$SkinDir" -f "$FontDir" -o "$OutDir" $PLUTO_DB_CRED -D "$MySqlDBName"  >> /var/log/pluto/orbitergen.log
 
 # Notify the Orbiter Plugin that we finished
 /usr/pluto/bin/MessageSend "$DCERouter" 0 $2 1 267 2 $OrbiterDev
