@@ -413,7 +413,12 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		deviceData += portID;
 
 		devicesMap[ (std::string) syspath ] = (std::string) parent_udi;
-		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, "serial" /*category*/, HalDevice->m_sSignature_get());
+// comparasin to new capability added device detected event below
+//		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, 4        /*USB_COMM_METHOD*/, 0, info_udi,                        "37|" + portID,   ""       /*category*/, HalDevice->m_sSignature_get());
+// original line
+//		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, "serial" /*category*/, HalDevice->m_sSignature_get());
+// new test line line
+		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, ""       /*category*/, HalDevice->m_sSignature_get());
 
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s", buffer);
 	}
@@ -725,6 +730,18 @@ void LmceUdevD::myDeviceNewCapability(struct udev * ctx, const char * udi, const
 		// error
 		return;
 	}
+
+// get serial port 'path'
+// get usb parent device
+// set info_udi == usb parent udi
+// get product_id && vendor_id from usb parent
+// log serial port capability detected on parent device X
+// check for template (existing device??) with this usb id???
+// if exists
+// set portID == getPortIdentification
+// log new serial port capability added
+// set buffer = concatenated usb device_id/product_id
+// fire Device_Detected event with serial port info
 
 	gchar *serial_port = libhal_device_get_property_string (ctx, udi, "linux.sysfs_path", NULL);
 	if(serial_port != NULL)
