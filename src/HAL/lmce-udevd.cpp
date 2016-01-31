@@ -1,19 +1,9 @@
 /*
  Main
 
- Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+ Copyright (C) 2015 LinuxMCE
 
- www.plutohome.com
- 
-
- Phone: +1 (877) 758-8648
-
-
- This program is distributed according to the terms of the Pluto Public License, available at:
- http://plutohome.com/index.php?section=public_license
-
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
+ GPL Stuff Here
 
  */
 
@@ -76,6 +66,11 @@ void LmceUdevD::getPortIdentification(string portFromBus, string& portID)
 	if ( startPos == string::npos )
 	{
 		startPos = portFromBus.find("platform");
+	}
+
+	if ( startPos == string::npos )
+	{
+		startPos = portFromBus.find("usb");
 	}
 
 	size_t usbPos = portFromBus.find("/usb");
@@ -239,6 +234,11 @@ void LmceUdevD::getSerialParent(const char * sysfs, std::string & parentSysfs)
 		iFind1 = parentPath.find("platform");
 	}
 
+	if ( iFind1 == string::npos )
+	{
+		iFind1 = parentPath.find("usb");
+	}
+
 	size_t iFind2 = parentPath.rfind(":");
 
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ getSerialParent %s: parent=%s, iFind1=%d, iFind2=%d", sysfs, parentPath.c_str(), iFind1, iFind2);
@@ -339,9 +339,8 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 	if( 0 == strcmp(subsystem, "usb") && devtype != NULL && 0 == strcmp(devtype, "usb_device") && strlen(devtype) == strlen("usb_device")
 			&& parent_devtype != NULL && 0 == strcmp(parent_devtype, "usb_device") && strlen(parent_devtype) == strlen("usb_device") )
 	{
-		// We ignore devices with child subsystems usb-serial, block and bluetooth so they can be handled seperately with 'category' defined.
-		// We do need to add devices whose parent usb_device is not the same, to distinguish child device in a hub vs a hub
-		// Or if we have a USB device that has a usb_device as a child, ignore it as it's a hub
+		// TODO: ARE ANY DEVICES BEING IGNORED DUE TO THIS?  IF DEVICES ARE NOT DETECTED THIS COULD BE WHY
+		// We ignore devices with certain child subsystems so they can be handled based on child system or with 'category' defined.
 		string usbChild;
 		getChildId(ctx, dev, "usb", NULL, NULL, usbChild);
 
@@ -384,7 +383,8 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 
 		if (usbChild.empty() || (!usbChild.empty() && child.empty()))
 		{
-			// This is a usb device that we will not recoginize by any other subsystem
+			// This is a usb device.
+			// We will not recoginize by any other subsystem, or it will have a usb-serial device as a child, which will add a serial port to this device
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ USB device added %s = %s", buffer, udi);
 
 			devicesMap[ (std::string) syspath ] = (std::string) udi;
@@ -413,12 +413,7 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		deviceData += portID;
 
 		devicesMap[ (std::string) syspath ] = (std::string) parent_udi;
-// comparasin to new capability added device detected event below
-//		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, 4        /*USB_COMM_METHOD*/, 0, info_udi,                        "37|" + portID,   ""       /*category*/, HalDevice->m_sSignature_get());
-// original line
-//		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, "serial" /*category*/, HalDevice->m_sSignature_get());
-// new test line line
-		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, ""       /*category*/, HalDevice->m_sSignature_get());
+		HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType /*USB_COMM_METHOD*/, 0, parent_udi, deviceData.c_str() /*"37|" + portID*/, "serial" /*category*/, HalDevice->m_sSignature_get());
 
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s", buffer);
 	}
@@ -724,60 +719,7 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 
 void LmceUdevD::myDeviceNewCapability(struct udev * ctx, const char * udi, const char *capability)
 {
-/*
-	if( udi == NULL || ctx == NULL || capability == NULL )
-	{
-		// error
-		return;
-	}
-
-// get serial port 'path'
-// get usb parent device
-// set info_udi == usb parent udi
-// get product_id && vendor_id from usb parent
-// log serial port capability detected on parent device X
-// check for template (existing device??) with this usb id???
-// if exists
-// set portID == getPortIdentification
-// log new serial port capability added
-// set buffer = concatenated usb device_id/product_id
-// fire Device_Detected event with serial port info
-
-	gchar *serial_port = libhal_device_get_property_string (ctx, udi, "linux.sysfs_path", NULL);
-	if(serial_port != NULL)
-	{
-		gchar *parent = libhal_device_get_property_string (ctx, libhal_device_get_property_string(ctx, udi, "info.parent", NULL), "info.parent", NULL);
-		gchar *info_udi = libhal_device_get_property_string (ctx, parent, "info.udi", NULL);
-		int usb_device_product_id = libhal_device_get_property_int(ctx, parent, "usb_device.product_id", NULL);
-		int usb_device_vendor_id = libhal_device_get_property_int(ctx, parent, "usb_device.vendor_id", NULL);
-
-		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "udi = %s parent = %s capability = %s serial port = %s\n", udi, parent, capability, serial_port);
-
-		map<unsigned int, int>::iterator it;
-		it = templatesMap.find( (unsigned int) ((usb_device_vendor_id & 0xffff) << 16) | (usb_device_product_id & 0xffff) );
-		if( it != templatesMap.end() )
-		{
-			string portID;
-			getPortIdentification(string(serial_port), portID);
-
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "NewCapability udi = %s serial port = %s port id = \n", udi, serial_port, portID.c_str());
-			string responseCreate;
-
-			char buffer[64];
-			snprintf(buffer, sizeof(buffer), "%08x", (*it).first);
-			HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, 4, 0, info_udi, "37|" + portID, "", HalDevice->m_sSignature_get());
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s",buffer);
-		}
-
-		g_free (parent);
-		parent = NULL;
-		g_free (info_udi);
-		info_udi = NULL;
-	}
-
-	g_free (serial_port);
-	serial_port = NULL;
-*/
+	return;
 }
 
 void LmceUdevD::myDeviceRemoved(struct udev * ctx, struct udev_device * dev)
