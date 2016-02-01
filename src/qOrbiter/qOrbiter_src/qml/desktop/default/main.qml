@@ -42,7 +42,7 @@ Item {
 
     Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin";
         manager.setBoundStatus(true);
-        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
     }
 
     Style{
@@ -71,8 +71,8 @@ Item {
         interval:30000
         useAnimation: true
         onDebugInfoChanged: console.log(debugInfo)
-        active:manager.m_ipAddress==="192.168.80.1"
-        requestUrl:manager.m_ipAddress
+        active:manager.currentRouter==="192.168.80.1"
+        requestUrl:manager.currentRouter
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
         }
@@ -254,7 +254,7 @@ Item {
             onOrientationChanged:dceplayer.setorbiterWindowSize(manager.appHeight, manager.appWidth)
             onMediaPlayerIdChanged:{
                 console.log("initializing media player"+manager.mediaPlayerID)
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
             }
             onConnectedStateChanged:{
                 if(manager.connectedState){

@@ -142,7 +142,7 @@ Item{
                     id:imdbImg
                     fillMode: Image.PreserveAspectCrop
 
-                    source:path !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+                    source:path !=="" ? "http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
                     anchors.fill: parent
                     anchors.margins: 10
                     smooth: true

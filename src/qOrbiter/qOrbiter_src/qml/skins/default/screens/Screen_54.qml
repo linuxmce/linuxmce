@@ -11,4 +11,8 @@ StyledScreen {
         anchors.fill: parent
     }
 
+    StyledText{
+        text:dcenowplaying.qs_mainTitle
+        anchors.centerIn: parent
+    }
 }

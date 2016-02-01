@@ -21,6 +21,7 @@ SettingInterface::SettingInterface(QObject *parent) :
     m_lookup.insert(SettingsKeyType::Setting_Network_Device_ID, "device");
     m_lookup.insert(SettingsKeyType::Setting_Network_Hostname, "hostname");
     m_lookup.insert(SettingsKeyType::Setting_Network_ExternalHostname, "externalhostname");
+    m_lookup.insert(SettingsKeyType::Setting_Network_Last_Used, "lastnetworkused");
     m_lookup.insert(SettingsKeyType::Setting_Network_WebPort, "webaccess");
     m_lookup.insert(SettingsKeyType::Setting_Ui_Skin, "skin");
     m_lookup.insert(SettingsKeyType::Setting_Ui_NetworkLoading, "usenetwork");
@@ -85,6 +86,7 @@ void SettingInterface::initializeSettings()
         m_settings.beginGroup("network");
         m_settings.setValue("deviceName", m_persistentName.isEmpty() ? "QOrbiter Device" : m_persistentName);
         m_settings.setValue("router","192.168.80.1");
+        m_settings.setValue("lastnetworkused","192.168.80.1");
         m_settings.setValue("hostname", "dcerouter.linuxmce");
         m_settings.setValue("externalhostname", "");
         m_settings.setValue("webaccess", "80");

@@ -163,8 +163,8 @@ Item {
 
         Component.onCompleted: {
             if(manager.mediaPlayerID!==-1){
-                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                console.log("onCompleted::initializing qml media player::"+manager.mediaPlayerID+"::"+manager.m_ipAddress)
+                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
+                console.log("onCompleted::initializing qml media player::"+manager.mediaPlayerID+"::"+manager.currentRouter)
             }
         }
 
@@ -173,12 +173,12 @@ Item {
             onMediaPlayerIdChanged:{
                 if(manager.mediaPlayerID!==-1){
                     console.log("onIdChanged::initializing qml media player::"+manager.mediaPlayerID)
-                    lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                    lmceData.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
                 }
             }
             onConnectedStateChanged:{
                 if(manager.connectedState ){
-                    //lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                    //lmceData.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
                     dcePlayer.reInit();
                 }
             }

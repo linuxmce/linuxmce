@@ -9,7 +9,7 @@ Item{
     id:qmlPictureFrame
     anchors.fill: parent
     property variant pictureList:[]
-    property string pictureUrl:"http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="
+    property string pictureUrl:"http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=screensaver&val="
     property bool useList:true
     property bool random:true
     property int currentPic:0

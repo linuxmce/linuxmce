@@ -135,7 +135,7 @@ StyledScreen {
         GenericPopup {
             title:qsTr("Settings")
             content: GenericDialog{
-                title: qsTr("Appliction Settings")
+                title: qsTr("Application Settings")
                 dialogContent:
                     Component{
                     SettingsOptions {

@@ -20,7 +20,7 @@ Rectangle {
         anchors.centerIn: parent
         height: parent.height - 200
         width: parent.width - 100
-        url: "http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device
+        url: "http://"+manager.currentRouter+"/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device
     }
 
 }
