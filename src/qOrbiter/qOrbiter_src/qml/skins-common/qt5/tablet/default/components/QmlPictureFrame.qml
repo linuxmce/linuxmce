@@ -21,7 +21,7 @@ Item{
     function getBGimage(){
         var n =  manager.getNextScreenSaverImage(currentImg)
         currentImg=n
-        return "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+n
+        return "http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=screensaver&val="+n
     }
 
     function changeBGimage(){

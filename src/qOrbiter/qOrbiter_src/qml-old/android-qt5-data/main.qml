@@ -34,7 +34,7 @@ Item{
 
         interval:30000
 
-        requestUrl:manager.m_ipAddress
+        requestUrl:manager.currentRouter
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
         }

@@ -33,6 +33,7 @@ public:
     enum SettingKey{
         Setting_Network_Router,
         Setting_Network_Device_ID,
+        Setting_Network_Last_Used,
         Setting_Network_Hostname,
         Setting_Network_ExternalHostname,
         Setting_Network_WebPort,

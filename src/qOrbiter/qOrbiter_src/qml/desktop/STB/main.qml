@@ -46,8 +46,8 @@ Item {
 
         useAnimation: true
         onDebugInfoChanged: console.log(debugInfo)
-        active:true//manager.m_ipAddress==="192.168.80.1"
-        requestUrl:manager.m_ipAddress
+        active:true//manager.currentRouter==="192.168.80.1"
+        requestUrl:manager.currentRouter
 
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
@@ -76,7 +76,7 @@ Item {
     }
 
     //    Component.onCompleted: {
-    //        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+    //        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
     //    }
 
     Connections{

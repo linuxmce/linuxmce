@@ -1992,6 +1992,7 @@ bool qorbiterManager::writeConfig()
     /* old below this line and will be replaced */
     qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
+    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
     QDomDocument localConfig;
     QString xmlPath;
 
@@ -2763,13 +2764,18 @@ bool qorbiterManager::restoreSettings()
     int tId= settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     qDebug() << Q_FUNC_INFO << "Settings device id" << tId;
     QString trouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
+    QString extRouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_ExternalHostname).toString();
     mb_useNetworkSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
+    QString last =  settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used).toString();
+    qDebug() << "Current router " << m_currentRouter;
     /*Fix Me! */ currentSkin="default";
     qDebug() << "Using network skins?" << mb_useNetworkSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";
         setDeviceNumber(tId);
         setInternalIp(trouter);
+        setExternalHost(extRouter);
+        setCurrentRouter(!usingExternal ? trouter : extRouter);
     }
     return true;
 }

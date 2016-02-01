@@ -66,8 +66,8 @@ Item{
             PropAndValDisplay {
                 id:routerAddress
                 title:"Home Ip / Host"
-                value: manager.m_ipAddress
-                onSetVal: {manager.m_ipAddress = editedValue}
+                value: manager.currentRouter
+                onSetVal: {manager.currentRouter = editedValue}
 
             }
             PropAndValDisplay {

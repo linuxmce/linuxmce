@@ -190,7 +190,7 @@ Item {
 
         Component.onCompleted: {
             if(manager.mediaPlayerID !== -1){
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
                 androidSystem.startAudioService(dceplayer.callbackAddress);
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
 
@@ -201,7 +201,7 @@ Item {
             target:manager
             onMediaPlayerIdChanged:{
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
             }
             onConnectedStateChanged:{
                 if(manager.connectedState ){
@@ -382,7 +382,7 @@ Item {
         useAnimation: true
         onDebugInfoChanged: console.log(debugInfo)
         active:true
-        requestUrl:manager.m_ipAddress
+        requestUrl:manager.currentRouter
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
             console.log("Orbiter Consume Screensaver images")
