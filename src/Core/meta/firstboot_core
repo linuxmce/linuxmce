@@ -30,6 +30,7 @@ if ! grep ubiquity /proc/cmdline ; then
 	/usr/pluto/bin/Network_Setup.sh # setup all networking related services
 fi
 Configure_SSH_Server
+Configure_SSH_Client
 
 ###########################################################
 ###########################################################
