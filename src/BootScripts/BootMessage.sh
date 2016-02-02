@@ -7,8 +7,7 @@ OSD_Message()
 	if [ -x /usr/bin/osd_cat ] ; then
 		osd_cat --pos=middle --align=center --age=10 < "$*"
 		return
-	fi
-	if [ -x /usr/bin/gnome-osd-client ] ; then
+	else if [ -x /usr/bin/gnome-osd-client ] ; then
 		gnome-osd-client --full --dbus "<message id='bootmsg' osd_fake_translucent_bg='off' osd_vposition='center' hide_timeout='1000000' osd_halignment='center'><span foreground='white' font='Arial 72'>$*</span></message>"
 		return
 	fi
