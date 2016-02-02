@@ -214,6 +214,8 @@ $Graph->add(
 
 $Legend->setPlotArea($Plotarea);
 
+$Plotarea->setBackgroundColor('white');
+
 // y-axis Name
 $AxisY =& $Plotarea->getAxis(IMAGE_GRAPH_AXIS_Y);
 $AxisY->setTitle($AxisYName, "vertical");
@@ -236,7 +238,7 @@ $AxisX->setDataPreprocessor($ArrayData);
 
 // Create the Plot
 $i = 0;
-$Plot[$i] =& $Plotarea->addNew('line', &$Dataset);
+$Plot[$i] =& $Plotarea->addNew('line', $Dataset);
 $Plot[$i]->setLineColor('red');
 
 // Add grid
@@ -253,7 +255,7 @@ for ($i =  1; $i < count($startTime); $i++) {
         $endTime = date('Y-m-d H:i:s',strtotime($startTime[$i]) + $period);
         $Dataset2 =& createDataSet($device, $startTime[$i], $endTime, $points, $unit, $keepValue);
         if ($Dataset2 != null) {
-            $Plot[$i] =& $Plotarea->addNew('line', &$Dataset2); 
+            $Plot[$i] =& $Plotarea->addNew('line', $Dataset2); 
             $Plot[$i]->setLineColor($colorArray[$i-1]);
         }
     }

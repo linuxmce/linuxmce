@@ -1,0 +1,279 @@
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140902-0yavdr3~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Tue, 22 Dec 2015 18:55:59 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140902-0yavdr2~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Mon, 21 Dec 2015 20:33:21 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140902-0yavdr1~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Mon, 25 May 2015 17:54:28 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140902-0yavdr0~trusty) trusty; urgency=medium
+
+  * reworked debian dir 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sat, 23 May 2015 14:58:21 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140810-0yavdr6~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Fri, 03 Apr 2015 15:23:09 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140810-0yavdr5~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Fri, 20 Feb 2015 11:37:43 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140810-0yavdr4~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 12 Feb 2015 00:54:20 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140810-0yavdr3~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 08 Feb 2015 16:40:35 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140810-0yavdr2~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 01 Feb 2015 16:37:40 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140810-0yavdr1~trusty) trusty; urgency=medium
+
+  * automatic rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 18 Jan 2015 16:54:47 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140810-0yavdr0~trusty) trusty; urgency=medium
+
+  * rebuild for trusty 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 10 Aug 2014 23:01:03 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20140810-0yavdr0~precise) precise; urgency=medium
+
+  *  new upstream version
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 10 Aug 2014 22:58:34 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-3yavdr4~trusty) trusty; urgency=medium
+
+  * rebuild for trusty thar
+
+ -- Alexander Grothe <seahawk1986@hotmail.com>  Sat, 05 Apr 2014 14:44:02 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-3yavdr3~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Wed, 02 Apr 2014 22:25:37 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-3yavdr1~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Sun, 23 Mar 2014 16:20:54 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-3yavdr0~precise) precise; urgency=medium
+
+  * update epgdata sources
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Tue, 18 Mar 2014 20:21:44 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-2yavdr0~precise) precise; urgency=medium
+
+  * increase epgdata-grabber curl download timeout to 40 minutes
+    otherwise the data can not be downloaded on slow internet connections
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Tue, 18 Mar 2014 19:37:46 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-1yavdr1~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Thu, 19 Dec 2013 02:35:50 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-1yavdr0~precise) precise; urgency=medium
+
+  * add vdr 2.1.x compat patch
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 19 Dec 2013 01:08:56 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-0yavdr0~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Sun, 15 Dec 2013 16:13:38 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20131203-0yavdr0~precise) precise; urgency=medium
+
+  * new upstream version 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Tue, 03 Dec 2013 18:17:29 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130911-0yavdr2~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Sun, 27 Oct 2013 09:17:51 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130911-0yavdr2~precise) precise; urgency=medium
+
+  * automatic rebuild
+
+ -- yavdr package builder <release@yavdr.org>  Sat, 26 Oct 2013 10:50:06 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130911-0yavdr1~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 12 Sep 2013 13:17:05 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130911-0yavdr0~precise) precise; urgency=medium
+
+  * new upstream snapshot (eplist)
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 11 Sep 2013 18:06:18 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130721-0yavdr0~precise) precise; urgency=medium
+
+  * new upstram snapshot 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 21 Jul 2013 11:31:04 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130421-0yavdr2~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Fri, 12 Jul 2013 01:10:53 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130421-0yavdr1~precise) precise; urgency=medium
+
+  * rebuild
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sun, 23 Jun 2013 10:35:34 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130421-0yavdr0~precise) precise; urgency=medium
+
+  * new upstream snapshot
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 24 Apr 2013 20:21:38 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130420-0yavdr0~precise) precise; urgency=medium
+
+  * new upstream snapshot
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sat, 20 Apr 2013 15:21:55 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130404-1yavdr0~precise) precise; urgency=high
+
+  * add debug symbols
+
+ -- Frank Neumann <fnu@yavdr.org>  Mon, 15 Apr 2013 13:34:29 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130404-0yavdr1~lucid) lucid; urgency=high
+
+  * Rebuild for yaVDR 0.3.4
+
+ -- Frank Neumann <fnu@yavdr.org>  Tue, 09 Apr 2013 11:01:59 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130404-0yavdr0~lucid) lucid; urgency=high
+
+  * New upstream snapshot 
+
+ -- Frank Neumann <fnu@yavdr.org>  Mon, 08 Apr 2013 08:05:04 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20130318-0yavdr0~lucid) lucid; urgency=high
+
+  * New upstream version
+  * add makefile patch for subplugins 
+  * add vdr command hook to rebuild db from osd
+
+ -- Frank Neumann <fnu@yavdr.org>  Tue, 19 Mar 2013 11:26:23 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20121006-0yavdr0~lucid) lucid; urgency=high
+
+  * New upstream release 
+
+ -- Frank Neumann <fnu@yavdr.org>  Mon, 10 Dec 2012 22:39:48 +0100
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20120914-0yavdr0~precise) precise; urgency=high
+
+  * Fixed 'soundex failed' error
+
+ -- Frank Neumann <fnu@yavdr.org>  Sun, 16 Sep 2012 13:02:48 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20120827-0yavdr0~precise) precise; urgency=high
+
+  * New upsteram release
+
+ -- Frank Neumann <fnu@yavdr.org>  Fri, 31 Aug 2012 00:15:06 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20120612-0yavdr0~precise) precise; urgency=high
+
+  * New upstream release 
+
+ -- Frank Neumann <fnu@yavdr.org>  Wed, 13 Jun 2012 11:10:57 +0200
+
+vdr-plugin-xmltv2vdr (0.2.0pre.git20120531-0yavdr0~precise) precise; urgency=high
+
+  * New upstream release 
+
+ -- Frank Neumann <fnu@yavdr.org>  Sat, 02 Jun 2012 22:07:07 +0200
+
+vdr-plugin-xmltv2vdr (0.1.1pre.git20120425-0yavdr0~precise) precise; urgency=high
+
+  * New upstream release 
+
+ -- Frank Neumann <fnu@yavdr.org>  Wed, 25 Apr 2012 00:09:15 +0200
+
+vdr-plugin-xmltv2vdr (0.1.1pre.git20120416-0yavdr0~precise) precise; urgency=high
+
+  * New upstream release 
+
+ -- Frank Neumann <fnu@yavdr.org>  Tue, 17 Apr 2012 08:45:54 +0200
+
+vdr-plugin-xmltv2vdr (0.1.1pre.git20120415-0yavdr0~precise) precise; urgency=high
+
+  * New upstream release
+
+ -- Frank Neumann <fnu@yavdr.org>  Fri, 13 Apr 2012 20:10:46 +0200
+
+vdr-plugin-xmltv2vdr (0.1.0.git20120412-0yavdr0~precise) precise; urgency=high
+
+  * New upstream release 
+
+ -- Frank Neumann <fnu@yavdr.org>  Thu, 12 Apr 2012 16:43:51 +0200
+
+vdr-plugin-xmltv2vdr (0.1.0.git20120411-0yavdr0~precise) precise; urgency=high
+
+  * New upstream release 
+
+ -- Frank Neumann <fnu@yavdr.org>  Wed, 11 Apr 2012 18:37:09 +0200
+
+vdr-plugin-xmltv2vdr (0.1.0+git20120409-0yavdr0~precise) precise; urgency=high
+
+  * New Upstream Release
+
+ -- Frank Neumann <fnu@yavdr.org>  Mon, 09 Apr 2012 15:03:55 +0200
+
+vdr-plugin-xmltv2vdr (0.1.0-0yavdr0~precise) precise; urgency=medium
+
+  * New Upstream Release
+  * Added Build-deps libsqlite3-dev
+  
+ -- Holger Schvestka <hotzenplotz5@gmx.de>  Sun, 25 Mar 2012 22:32:14 +0200

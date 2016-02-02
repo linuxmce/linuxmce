@@ -97,6 +97,7 @@ export DEBIAN_FRONTEND=noninteractive
 case "$URL_TYPE" in
 	apt)
 		## Display a bootsplash message
+		echo "Installing: $PKG_NAME"
 		/usr/pluto/bin/BootMessage.sh "Installing: $PKG_NAME" 2>/dev/null || /bin/true
 		if PackageIsInstalled "$PKG_NAME"; then
 			AddPackageDevice "$PK_Device" "$PK_PACKAGE"

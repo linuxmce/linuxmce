@@ -289,6 +289,13 @@ Configure_SSH_Server() {
 	dpkg-reconfigure -pcritical openssh-server
 }
 
+Configure_SSH_Client() {
+	# add additional ciphers to ssh client to permit connections to jessie from trusty.
+	if ! grep -q aes128-ctr /etc/ssh/ssh_config ; then
+		sed -i 's/Ciphers.*/&,aes128-ctr,aes192-ctr,aes256-ctr/' /etc/ssh/ssh_config
+	fi
+}
+
 #######################################################
 ### Other Setup Functions
 #######################################################

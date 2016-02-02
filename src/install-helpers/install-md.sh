@@ -152,6 +152,11 @@ MD_Cleanup () {
 	#COLUMNS=1024 dpkg -l | awk '/^ii/ {print $2}' >/tmp/pkglist-diskless.txt # used for deb-cache cleanup in the builder
 }
 
+MD_ClearInstalledPackages () {
+	StatsMessage "Clearing DB of installed packages..."
+	Q="DELETE FROM Package_Device WHERE FK_Device='${PK_Device}';
+	R=$(RunSQL "$Q")
+}
 
 return 0
 
