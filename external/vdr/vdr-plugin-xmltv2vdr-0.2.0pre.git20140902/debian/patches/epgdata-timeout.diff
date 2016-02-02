@@ -1,0 +1,170 @@
+--- a/dist/epgdata2xmltv/epgdata2xmltv.cpp
++++ b/dist/epgdata2xmltv/epgdata2xmltv.cpp
+@@ -118,7 +118,7 @@
+     curl_easy_setopt(curl_handle, CURLOPT_MAXFILESIZE, 85971520);  // Set maximum file size to get (bytes)
+     curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1);  // No progress meter
+     curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);  // No signaling
+-    curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 240);  // Set timeout to 240 seconds
++    curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 2400);  // Set timeout to 2400 seconds
+     curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, EPGDATA2XMLTV_USERAGENT);  // Some servers don't like requests that are made without a user-agent field
+ 
+     ret=curl_easy_perform(curl_handle);
+--- a/dist/epgdata2xmltv/epgdata2xmltv.dist
++++ b/dist/epgdata2xmltv/epgdata2xmltv.dist
+@@ -8,8 +8,8 @@
+ anixe.de;537
+ ard.de;71
+ arte.de;58
+-atv2.de;761
+-atvplus.at;115
++atv2.at;761
++atv.at;115
+ axntv.de;468
+ bayern3.de;51
+ bbc-world-news.uk;67
+@@ -29,23 +29,22 @@
+ disney-channel.de;139
+ disney-cinemagic.de;630
+ disney-cinemagic-hd.de;631
++disney-junior.de;460
+ disney-xd.de;657
+ dmax.de;507
+-dsf.de;64
+ e-entertainment.de;758
+-einsextra.de;100
+ einsfestival.de;146
+-einsmuxx.de;475
++einsplus.de;475
+ espn-america.eu;591
+ espn-classic-sport.com;473
+ euronews.de;68
+-eurosport.de;65
+ eurosport-2.de;504
++eurosport.de;65
+ extreme-sports-channel.de;469
+ fashiontv.fr;455
+ fox-channel.de;565
+-france-2.fr;149
+ france-24.fr;542
++france-2.fr;149
+ france-3.fr;150
+ franken-fernsehen.de;151
+ goldstar-tv.de;152
+@@ -68,15 +67,15 @@
+ mdr.de;48
+ mgm.de;1196
+ motorvision-tv.de;627
+-mtv.de;70
+ mtv-brand-new.de;738
+ mtv-dance.uk;465
++mtv.de;70
+ mtv-hits.uk;466
+-mtv-live-hd.pl;601
++mtv-live-hd.de;601
+ n24.de;175
+-national-geographic.de;453
+-national-geographic-hd.de;624
+-national-geographic-wild.de;626
++natgeo.de;453
++natgeo-hd.de;624
++natgeo-wild.de;626
+ ndr.de;47
+ nickcomedy.de;589
+ ntv.de;66
+@@ -84,11 +83,13 @@
+ orf1.at;54
+ orf2.at;55
+ orf3.at;757
+-orf-sport-plus.de;759
++orf-sport-plus.at;759
+ phoenix.de;194
+ planet.de;195
+-playhouse-disney.de;460
++pro7-fun.de;765
++pro7-maxx.de;783
+ prosieben.de;40
++puls4tv.at;402
+ qvc.de;208
+ rai-1.it;209
+ rai-2.it;210
+@@ -99,35 +100,36 @@
+ romance-tv.de;552
+ rsi-la1.it;255
+ rsi-la2.it;256
+-rtl.de;38
+ rtl2.de;41
+ rtl-crime.de;527
++rtl.de;38
+ rtl-living.de;528
+ rtl-nitro.de;763
+ rtl-passion.de;529
+ rts-deux.fr;258
+ rts-un.fr;257
+-sat.1-emotions.de;766
+-sat1.de;39
+ sat1-comedy.de;491
+-schweiz-5.de;299
+-sci-fi.de;472
+-servus-tv.de;660
++sat1.de;39
++sat1-emotions.de;766
++sat1-gold.de;774
++schweiz-5.ch;299
++servus-tv.at;660
+ sf1.ch;59
+ sf2.ch;60
+-sf-info.de;231
++sf-info.ch;231
+ silverline-tv.de;451
+ sixx.de;694
+ sky-3d.de;701
+ sky-action.de;613
+-sky-atlantic-hd.de;767
+-sky-cinema.de;610
++sky-atlantic.de;767
++sky-bundesliga.de;623
+ sky-cinema-1.de;611
+ sky-cinema-24.de;612
++sky-cinema.de;610
+ sky-cinema-hits.de;618
++sky-cinema-hits-hd.de;10059
+ sky-comedy.de;617
+ sky-emotion.de;616
+-sky-fussball-bundesliga.de;623
+ sky-krimi.de;615
+ sky-nostalgie.de;614
+ sky-select.de;628
+@@ -137,15 +139,19 @@
+ sky-sport-hd-1.de;621
+ sky-sport-hd-2.de;697
+ sky-sport-hd-extra.de;743
+-sky-sport-news-hd.de;762
++sky-sport-news.de;762
+ spiegel-geschichte.de;625
+ spiegel-tv-wissen.de;756
++sport1.de;64
+ sport1plus.de;698
++sport1-us-hd.de;784
+ sportdigitaltv.de;564
+ spreekanal.de;236
+ star-tv.de;232
+ superrtl.de;43
+ swr.de;50
++syfy.de;472
++tagesschau24.de;100
+ tele5.de;277
+ telebielingue.ch;248
+ tf1.fr;252
+@@ -158,6 +164,7 @@
+ tv-berlin.de;1192
+ tv-muenchen.de;262
+ tw-1.de;265
++universaltv.de;10139
+ vh1-classic.eu;296
+ viva.de;266
+ vox.de;42
+@@ -166,4 +173,3 @@
+ zdfinfo.de;276
+ zdfkultur.de;275
+ zdfneo.de;659
+-zdf-theaterkanal.de;275

@@ -19,8 +19,5 @@ fi
 
 LastVersion="$2"
 
-# TODO: check if ver <= 20.0.0.45 (1004), only run this if it's that old
-if [[ -n "$LastVersion" ]] ; then
-	/usr/pluto/bin/UpdateDebCache.sh
-fi
+[[ -x "/usr/pluto/bin/UpdateDebCache.sh" ]] && /usr/pluto/bin/UpdateDebCache.sh
 

@@ -50,6 +50,7 @@ fi
 AptDistUpgrade
 MD_Populate_Debcache
 MD_Cleanup
+MD_ClearInstalledPackages
 ##########################################################################################################
 ##########################################################################################################
 # run any device specific firstboot add-on scripts

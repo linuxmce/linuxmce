@@ -4361,9 +4361,12 @@ void DCE::qOrbiter::extraButtons(QString button){
     } else if(button.toLower() == "guide"){
         DCE::CMD_Guide showGuide(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(showGuide);
-    } else if(button.toLower() == "menu"){
+    } else if(button.toLower() == "showmenu"){
         CMD_Menu_Show_Menu showMenu(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(showMenu);
+    } else if(button.toLower() == "menu"){
+        DCE::CMD_Menu menu(m_dwPK_Device, m_dwPK_Device_NowPlaying, "", internal_streamID);
+        SendCommand(menu);
     } if(button.toLower() == "info"){
         CMD_Info showInfo(m_dwPK_Device, m_dwPK_Device_NowPlaying, "" );
         SendCommand(showInfo);
