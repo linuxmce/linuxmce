@@ -383,11 +383,6 @@ int main(int argc, char* argv[])
 
         QThread dceThread;
 
-
-        QString name = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
-        qOrbiter pqOrbiter(name, PK_Device, sRouter_IP,true,bLocalMode );
-
-
         QString badMatch = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
         int f = badMatch.lastIndexOf(".");
         qDebug() << badMatch.length() - f ;
@@ -400,7 +395,6 @@ int main(int argc, char* argv[])
             qDebug() << QString("Interface : %1").arg(iface.humanReadableName());
             qDebug() << QString("Ip address:: %1").arg(iface.addressEntries().size() > 0 ? iface.addressEntries().at(0).ip().toString() : "<none>");
 
-
             qDebug() << QString("Mac Address:: %1").arg(iface.hardwareAddress());
             //pqOrbiter.m_localMac= t.hardwareAddress();
             //                     qDebug() << "My Mac is:: " << t.hardwareAddress();
@@ -411,8 +405,14 @@ int main(int argc, char* argv[])
                // qDebug() << QString("Mac Address Set to %1").arg(iface.hardwareAddress());
                 break;
             }
+
         }
 
+        if(!isHomeNetwork)
+            sRouter_IP = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_ExternalHostname).toString().toStdString();
+
+        QString name = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
+        qOrbiter pqOrbiter(name, PK_Device, sRouter_IP,true,bLocalMode );
 
         qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");

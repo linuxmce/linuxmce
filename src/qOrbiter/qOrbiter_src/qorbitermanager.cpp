@@ -105,6 +105,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_window(NULL),
     m_dceRequestNo(1)
 {
+
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -359,8 +360,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id){
     setDceResponse("Starting Manager with connection to :"+QString::fromStdString(sRouterIP));
 
     if(sRouterIP.length() < 7){
-        setDceResponse("Ip is empty, using alternate :"+this->m_ipAddress);
-        sRouterIP = m_ipAddress.toStdString();
+        setDceResponse("Ip is empty, using alternate :"+this->m_currentRouter);
+        sRouterIP = m_currentRouter.toStdString();
     }
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
     if(mb_useNetworkSkins){
@@ -825,7 +826,7 @@ void qorbiterManager::getConfiguration()
 {
     QNetworkRequest updateDevice;
     QNetworkAccessManager *ud= new QNetworkAccessManager();
-    updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
+    updateDevice.setUrl("http://"+m_currentRouter+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfig(QNetworkReply*)));
     ud->get(updateDevice);
     // DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
@@ -1362,7 +1363,7 @@ void qorbiterManager::regenOrbiter()
 
     QNetworkRequest updateDevice;
     QNetworkAccessManager *ud= new QNetworkAccessManager();
-    updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
+    updateDevice.setUrl("http://"+m_currentRouter+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(regenComplete(QNetworkReply*)));
     ud->get(updateDevice);
 
@@ -1725,7 +1726,7 @@ void qorbiterManager::getMediaDevices()
 
     QNetworkAccessManager * m = new QNetworkAccessManager();
     QNetworkRequest req;
-    req.setUrl(QUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?m"));
+    req.setUrl(QUrl("http://"+m_currentRouter+"/lmce-admin/qOrbiterGenerator.php?m"));
     m->get(req);
     QObject::connect(m, SIGNAL(finished(QNetworkReply*)), this, SLOT(setMediaDevices(QNetworkReply*)));
 }
@@ -1985,14 +1986,14 @@ bool qorbiterManager::readLocalConfig(){
 
 bool qorbiterManager::writeConfig()
 {
-    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router, m_ipAddress);
-    qDebug() <<  Q_FUNC_INFO << "Router IP: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router);
-    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
-    qDebug() <<  Q_FUNC_INFO << "Device ID: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
+   // settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router, m_ipAddress);
+   // qDebug() <<  Q_FUNC_INFO << "Router IP: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router);
+   // settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
+   // qDebug() <<  Q_FUNC_INFO << "Device ID: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     /* old below this line and will be replaced */
-    qDebug() << Q_FUNC_INFO;
+   // qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
-    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
+   // settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
     QDomDocument localConfig;
     QString xmlPath;
 
@@ -2563,7 +2564,7 @@ void qorbiterManager::setupUiSelectors(){
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType.remove("/qml"));
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
+    remoteDirectoryPath = "http://"+m_currentRouter+"/lmce-admin/skins"+buildType.remove("/qml");
     m_remoteQmlPath = remoteDirectoryPath;
 
 
