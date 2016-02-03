@@ -107,6 +107,7 @@ else
 	ConfDep_Distro=
 fi
 
+/usr/pluto/bin/BootMessage.sh "Building package install list"
 echo /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert install
 # Give feedback on the main console.
 echo ConfirmDependencies INSTALL is running >>/dev/tty1
@@ -122,6 +123,7 @@ chmod +x "$CUsh"
 echo InstallNewDevice is running >>/dev/tty1
 
 WaitLock "InstallNewDevice" "Config_Device_Changes" # don't step on InstallNewDevices scripts that may be running in the background
+/usr/pluto/bin/BootMessage.sh "Installing packages"
 date -R
 if bash -x "$CUsh"; then
 	Unset_NeedConfigure_Children "$PK_Device"
