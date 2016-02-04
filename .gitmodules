@@ -1,3 +1,4 @@
 [submodule "external/logitechmediaserver-deb"]
 	path = external/logitechmediaserver-deb
-	url = git@git.linuxmce.org:linuxmce/logitechmediaserver-deb.git
+	url = https://git.linuxmce.org/linuxmce/logitechmediaserver-deb.git
+	branch = public/7.9
