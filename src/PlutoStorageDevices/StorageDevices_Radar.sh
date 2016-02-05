@@ -23,12 +23,13 @@ diff_Funk(){
 Detect() {
 
 ## Available Device Paths
-blkid |
-while read -r id; do
-	Drive=$(echo ${id} | cut -d: -f1)
-	Hdds=$(echo "$Hdds $Drive" | sed -e 's/^[ \t]*//')
-done
-availPath="$Hdds"
+#blkid |
+#while read -r id; do
+#	Drive=$(echo ${id} | cut -d: -f1)
+#	Hdds=$(echo "$Hdds $Drive" | sed -e 's/^[ \t]*//')
+#done
+#availPath="$Hdds"
+availPath=$(blkid -o device)
 ## OLD
 #	## Available Paths
 #	availPath=$(find /dev/disk/by-path -name '*:*' -exec basename {} \;)
