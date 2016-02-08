@@ -219,7 +219,7 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
 	cout << "Parm #201 - PK_Device_Related=" << iPK_Device_Related << endl;
 
 	// need to determine media type and call appropriate identifier?
-	IdentifierCDDB cIdentifier(sFilename);
+	IdentifierCDDB cIdentifier(sFilename, sID);
 
 	if ( !cIdentifier.Init() )
 		return;
