@@ -149,8 +149,8 @@ string IdentifierCDDB::GetIdentifiedData()
     const char *s;
 
     // m_sDiskId is the LMCE internal value to associate this unidentified disk with the database
-    OutputMiscTab DiscData(m_sDiskId);
-    DiscData.addAttribute(0, ATTRIBUTETYPE_CDDB_CONST, 0, m_sDiskId);
+    OutputMiscTab DiscData(to_string(discid));
+    DiscData.addAttribute(0, ATTRIBUTETYPE_CDDB_CONST, 0, to_string(discid));
 
     // for each found item Disc.addAttribute(track,attributetype,section,wholename);
 
@@ -286,14 +286,14 @@ string IdentifierCDDB::GetIdentifiedData()
 // ***********************  track iteration done
 
     sRet = DiscData.OutputAttributes();
-printf ("RETURN:\n%s\n", sRet.c_str());
+//printf ("RETURN:\n%s\n", sRet.c_str());
     return sRet;
 }
 
 // tells lmce what format the returned data will be in
 string IdentifierCDDB::GetIdentityType()
 {
-  return "MISC_TAB";
+  return "MISC-TAB";
 }
 
 int IdentifierCDDB::GetMediaType()
