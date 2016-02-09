@@ -229,8 +229,8 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
 
 	string sIdentifiedData = cIdentifier.GetIdentifiedData();
 
-	int iEK_Disc;
-	sCMD_Result = "OK";
+	int iEK_Disc = 0;
+	sCMD_Result = sIdentifiedData;
 	char *Data = strdup( sIdentifiedData.c_str() );
 	DCE::CMD_Media_Identified CMD_Media_Identified( m_dwPK_Device, pMessage->m_dwPK_Device_From,
 		iPK_Device, sCMD_Result, sID,
@@ -239,7 +239,10 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
 		sFilename, "",
 		&iEK_Disc);
 	SendCommand(CMD_Media_Identified);
-	free(Data);
+	if (Data)
+	{
+		free(Data);
+	}
 }
 
 
