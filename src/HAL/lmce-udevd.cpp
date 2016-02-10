@@ -70,10 +70,10 @@ void LmceUdevD::getPortIdentification(string portFromBus, string& portID)
 
 	if ( startPos == string::npos )
 	{
-		startPos = portFromBus.find("usb");
+		startPos = portFromBus.find("usb.");
 	}
 
-	size_t usbPos = portFromBus.find("/usb");
+	size_t usbPos = portFromBus.find("usb", startPos+3);
 	size_t minus = portFromBus.rfind("-");
 	size_t colon = portFromBus.rfind(":");
 
@@ -81,8 +81,14 @@ void LmceUdevD::getPortIdentification(string portFromBus, string& portID)
 		minus    != string::npos && colon  != string::npos && colon > minus )
 	{
 		// Razvan G.
+		// /sys/devices/usb.1/12000000.dwc3/xhci-hcd.2.auto/usb3/3-1/3-1.2/3-1.2:1.0/ttyUSB0
 		// /sys/devices/pci0000:00/0000:00:02.0/usb1/1-4/1-4.5/1-4.5:1.0 => pci0000:00/0000:00:02.0+4.5
 		portID = portFromBus.substr(startPos, usbPos - startPos);
+		// remove any trailing /'s
+		if ( portID.rfind("/") == portID.size() - 1 )
+		{
+			portID = portID.substr( 0, portID.size() - 1 ); // remove 1 char from end
+		}
 		portID += "+";
 		portID += portFromBus.substr(minus + 1, colon - minus - 1);
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "))))))) port ID = %s", portID.c_str());
@@ -236,7 +242,7 @@ void LmceUdevD::getSerialParent(const char * sysfs, std::string & parentSysfs)
 
 	if ( iFind1 == string::npos )
 	{
-		iFind1 = parentPath.find("usb");
+		iFind1 = parentPath.find("usb.");
 	}
 
 	size_t iFind2 = parentPath.rfind(":");
@@ -352,10 +358,10 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		{
 			getChildId(ctx, dev, "sound", NULL, NULL, child);
 		}
-//		if (child.empty())
-//		{
-//			getChildId(ctx, dev, "usb-serial", NULL, NULL, child);
-//		}
+		if (child.empty())
+		{
+			getChildId(ctx, dev, "usb-serial", NULL, NULL, child);
+		}
 		if (child.empty())
 		{
 			getChildId(ctx, dev, "video4linux", NULL, NULL, child);
@@ -372,16 +378,16 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		{
 			getChildId(ctx, dev, "input", "ID_INPUT_JOYSTICK", "1", child);
 		}
-//		if (child.empty())
-//		{
-//			getChildId(ctx, dev, "tty", NULL, NULL, child);
-//		}
+		if (child.empty())
+		{
+			getChildId(ctx, dev, "tty", NULL, NULL, child);
+		}
 		if (child.empty())
 		{
 			getChildId(ctx, dev, "dvb", NULL, NULL, child);
 		}
 
-		if (usbChild.empty() || (!usbChild.empty() && child.empty()))
+		if ( usbChild.empty() || ( !usbChild.empty() && child.empty() ))
 		{
 			// This is a usb device.
 			// We will not recoginize by any other subsystem, or it will have a usb-serial device as a child, which will add a serial port to this device
@@ -395,8 +401,14 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		child.clear();
 	}
 
-	else if( 0 == strcmp(subsystem, "usb-serial") && strlen(subsystem) == strlen("usb-serial") ) // category == serial
+	else if( 0 == strcmp(subsystem, "usb-serial") && strlen(subsystem) == strlen("usb-serial") && iBusType == USB_COMM_METHOD ) // category == serial
 	{
+		struct udev_device *parent_dev = udev_device_get_parent_with_subsystem_devtype(
+	                       dev,
+	                       "usb",
+	                       "usb_device");
+		const char *parent_udi = udi_helper_compute_udi(parent_dev);
+
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ SRL device added %s = %s", buffer, parent_udi);
 
 		const char *serial_port = udev_device_get_syspath(dev);
@@ -624,7 +636,7 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		}
 	}
 
-	else if ( strcmp(subsystem, "tty") == 0 && strlen(subsystem) == strlen("tty") )
+/*	else if ( strcmp(subsystem, "tty") == 0 && strlen(subsystem) == strlen("tty") )
 	{
 		if ( udev_device_get_parent_with_subsystem_devtype(dev, "usb-serial", NULL ) == NULL
 				 && udev_device_get_parent_with_subsystem_devtype(dev, "usb", NULL) != NULL )
@@ -645,12 +657,12 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 			deviceData += portID;
 
 			devicesMap[ (std::string) syspath ] = (std::string) udi;
-			HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, USB_COMM_METHOD /*iBusType*/, 0, udi, deviceData.c_str(), "serial" /*category*/, HalDevice->m_sSignature_get());
+			HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, USB_COMM_METHOD , 0, udi, deviceData.c_str(), "serial" , HalDevice->m_sSignature_get());
 
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s",buffer);
 		}
 	}
-
+*/
 	else if ( strcmp(subsystem, "usb") == 0 && strlen(subsystem) == strlen("usb") )
 	{
 		if ( udi != NULL && devtype == NULL )
@@ -702,6 +714,8 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 				&& 0 != strcmp(subsystem, "scsi_generic")
 				&& 0 != strcmp(subsystem, "serio")
 				&& 0 != strcmp(subsystem, "tty")
+				&& 0 != strcmp(subsystem, "usb")
+				&& iBusType != 2
 				)
 		{
 			const char *category = udev_device_get_subsystem(dev);
