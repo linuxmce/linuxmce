@@ -11,6 +11,7 @@
 */
 
 #include "Advanced_IP_Camera.h"
+#include "CameraDevice.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -21,9 +22,10 @@ using namespace std;
 using namespace DCE;
 
 
-EventMethod::EventMethod(Advanced_IP_Camera* pCamera)
+EventMethod::EventMethod(Advanced_IP_Camera* pCamera, CameraDevice* pCameraDevice)
 {
-        m_pCamera = pCamera;
+    m_pCamera = pCamera;
+    m_pCameraDevice = pCameraDevice;
 	m_eventThread = NULL;
 	m_iInterval = 10; //10 seconds as a sensible default
 }
@@ -131,24 +133,23 @@ void EventMethod::MethodURL()
 	while (m_bRunning)
 	{
 		// Set up connection
-		string data;
-		string sUrl = m_pCamera->GetBaseURL() + m_sURL;
+        string sUrl = m_pCameraDevice->getBaseURL() + m_sURL;
 
 		CURLM* eventCurl = curl_easy_init();
 
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodURL(): sUrl: %s", sUrl.c_str ());
+        LoggerWrapper::GetInstance ()->Write (LV_STATUS, "EventMethod::MethodURL(): sUrl: %s", sUrl.c_str ());
 		curl_easy_setopt(eventCurl, CURLOPT_URL, sUrl.c_str());
 
 		/* send all data to this function  */ 
 		curl_easy_setopt(eventCurl, CURLOPT_WRITEFUNCTION, StaticEventWriteCallback);
 		curl_easy_setopt(eventCurl, CURLOPT_WRITEDATA, (void *)this);
 		curl_easy_setopt(eventCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-		if (!m_pCamera->GetUser().empty())
+        if (!m_pCameraDevice->getUser().empty())
 		{
 			curl_easy_setopt(eventCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-			curl_easy_setopt(eventCurl, CURLOPT_USERNAME, m_pCamera->GetUser().c_str());
-			if (!m_pCamera->GetPassword().empty()) {
-				curl_easy_setopt(eventCurl, CURLOPT_PASSWORD, m_pCamera->GetPassword().c_str());
+            curl_easy_setopt(eventCurl, CURLOPT_USERNAME, m_pCameraDevice->getUser().c_str());
+            if (!m_pCameraDevice->getPasswd().empty()) {
+                curl_easy_setopt(eventCurl, CURLOPT_PASSWORD, m_pCameraDevice->getPasswd().c_str());
 			}
 		}
 		CURLcode res = curl_easy_perform(eventCurl);
