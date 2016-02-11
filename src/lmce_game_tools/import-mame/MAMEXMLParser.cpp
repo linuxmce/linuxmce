@@ -93,17 +93,38 @@ bool MAMEXMLParser::getMAMEOutput()
 
 bool MAMEXMLParser::parseMAMEOutput()
 {
+  pugi::xml_document doc;
+  pugi::xml_parse_result result; 
+  int i=0;
+
   if (!mameOutputIsSane())
     return false;
+
+  cout << "Parsing MAME output. Please wait..." << flush;
+  result = doc.load_file("/tmp/mame.tmp"); 
+
+  if (!result)
+    {
+      cout << "Could not parse MAME output. Error description: " << result.description() << " at offset: " << result.offset << endl;
+      return false;
+    }
+
+  pugi::xpath_node_set machines = doc.select_nodes("/mame/machine[not(@runnable)]");
+
+  for (pugi::xpath_node_set::const_iterator it = machines.begin(); it != machines.end(); ++it)
+    {
+      pugi::xpath_node node = *it;
+      cout << node.node().attribute("name").value() << "\n";
+      i++;
+    }
+  
+  cout << i << endl;
 
   return true;
 }
 
 bool MAMEXMLParser::run()
 {
-  pugi::xml_document doc;
-  pugi::xml_parse_result result;
-
   if (!getMAMEOutput())
     return false;
 
