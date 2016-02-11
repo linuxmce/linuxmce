@@ -10,9 +10,9 @@
 #ifndef CATEGORY_H
 #define CATEGORY_H
 
-#import <string>
-#import <vector>
-#import <map>
+#include <string>
+#include <vector>
+#include <map>
 
 using namespace std;
 
