@@ -136,6 +136,7 @@ Site="
 		AllowOverride All
 		Order allow,deny
 		allow from all
+		RedirectMatch ^/mythweb /html/mythweb
 		RedirectMatch ^/$ /lmce-admin/
 	</Directory>
 
