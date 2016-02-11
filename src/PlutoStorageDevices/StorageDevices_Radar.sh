@@ -4,6 +4,8 @@
 # Make sure we run with US numbers and stuff.
 LC_ALL=C
 
+#DEBUG="yes"
+
 export PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin"
 availPath=""
 mountedDevPath=""
@@ -23,21 +25,42 @@ diff_Funk(){
 Detect() {
 
 	## Available Device Paths
-	for id in $(blkid -o device) ; do
-		Drive=$(echo "${id}")
-		Hdds=$(echo "$Hdds $Drive" | sed -e 's/^[ \t]*//')
+	for id in $(blkid -o device ) ; do
+		Drive=$(readlink -f "${id}")
+		# Add Drive if it is not null and not already in Hdds
+		if [[ -n "$Drive" ]] && [[ "$Hdds" != *"$Drive"* ]] ; then
+			Hdds=$(echo "$Hdds $Drive" | sed -e 's/^[ \t]*//')
+		elif [[ -z "$Drive" ]] ; then
+			Hdds=$(echo "$Hdds $id" | sed -e 's/^[ \t]*//')
+		fi
 	done
 	availPath="$Hdds"
-#echo "availPath: $availPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "availPath: $availPath" # DEBUG
 
 	## Looks for standard device names mounted in mtab and learns path. Note some mounted drives show only UUID
 	mountedDevName=$(cat /etc/mtab | awk '/dev\/(sd|hd|md|xd|vd|mmc)./ {print $1}')
 	for Drive in $mountedDevName ; do
-		mountedDevGrep=$(blkid | grep ${Drive} | cut -d: -f1)
+		mountedDevGrep=$(blkid ${Drive} | cut -d: -f1)
 		mountedDevPath=$(echo "$mountedDevPath $mountedDevGrep" | sed -e 's/^[ \t]*//')
 	done
+	[[ -n "$DEBUG" ]] && echo "mountedDevPath: $mountedDevPath" # DEBUG
 
-	## Looks for standard device names mounted on /proc/cmdline like Raspberry Pi has.
+	## Grabs UUID of mounted devices in mtab and learns path. Note some mounted drives only show device names.
+	mountedUuid=$(cat /etc/mtab | awk '/uuid/ { print $1 }' | sort -u)
+	for id in $mountedUuid ; do
+		Drive=$(readlink -f "${id}")
+		# Add dev link name if it is not null and not already in mounted path
+		# Add the full uuid path if no link is found
+		if [[ -n "$Drive" ]] && [[ "$mountedPath" != *"$Drive"* ]] ; then
+			mountedPath=$(echo "$mountedPath $Drive" | sed -e 's/^[ \t]*//')
+		elif [[ -z "$Drive" ]] ; then
+			mountedPathFind=$(blkid $(basename ${id}) | cut -d: -f1)
+			mountedPath=$(echo "$mountedPath $mountedPathFind" | sed -e 's/^[ \t]*//')
+		fi
+	done
+	[[ -n "$DEBUG" ]] && echo "mountedPath: $mountedPath" # DEBUG
+
+	## Find root entry on command line
 	cmdlineDevName=""
 	set -- $(cat /proc/cmdline)
 	for x in "$@"; do
@@ -47,20 +70,22 @@ Detect() {
 	        ;;
 	    esac
 	done
-	cmdlineDevName=$(echo "$cmdlineDevName" | awk '/dev\/(sd|hd|md|xd|vd|mmc)./ {print $1}')
-	for Drive in $cmdlineDevName ; do
-		mountedDevGrep=$(blkid | grep ${Drive} | cut -d: -f1)
+
+	## Looks for standard device names mounted on /proc/cmdline like Raspberry Pi has.
+	cmdlineDevAwk=$(echo "$cmdlineDevName" | awk '/dev\/(sd|hd|md|xd|vd|mmc)./ {print $1}')
+	for Drive in $cmdlineDevAwk ; do
+		mountedDevGrep=$(blkid ${Drive} | cut -d: -f1)
 		mountedDevPath=$(echo "$mountedDevPath $mountedDevGrep" | sed -e 's/^[ \t]*//')
 	done
-#echo "mountedDevPath: $mountedDevPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "mountedDevPath: $mountedDevPath" # DEBUG
 
 	## Grabs UUID of mounted devices in mtab and learns path. Note some mounted drives only show device names.
-	mountedUuid=$(cat /etc/mtab | awk '/uuid/ { print $1 }' | sort -u)
-	for Drive in $mountedUuid ; do
-		mountedPathFind=$(blkid | grep $(basename ${Drive}) | cut -d: -f1)
+	cmdlineUuid=$(echo "$cmdlineDevName" | awk '/UUID/ { print $1 }' | cut -d'=' -f2)
+	for Drive in $cmdlineUuid ; do
+		mountedPathFind=$(blkid ${Drive} | cut -d: -f1)
 		mountedPath=$(echo "$mountedPath $mountedPathFind" | sed -e 's/^[ \t]*//')
 	done
-#echo "mountedPath: $mountedPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "mountedPath: $mountedPath" # DEBUG
 
 	## Finds UUID of devices that have been told to be ignored.
 	Q="
@@ -73,18 +98,18 @@ Detect() {
 	"
 	uDrives=$(RunSQL "$Q")
 	for Drive in $uDrives ; do
-		unknownPathFind=$(blkid | grep ${Drive} | cut -d: -f1)
+		unknownPathFind=$(blkid ${Drive} | cut -d: -f1)
 		unknownPath=$(echo "$unknownPath $unknownPathFind" | sed -e 's/^[ \t]*//')
 	done
-# echo "unknownPath: $unknownPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "unknownPath: $unknownPath" # DEBUG
 
 	## Remove the mounted paths or unavailable paths
 	subtractPath=$(echo "$unknownPath $mountedPath $mountedDevPath")
-#echo "subtractPath: $subtractPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "subtractPath: $subtractPath" # DEBUG
 	availPath=($(diff_Funk availPath[@] subtractPath[@]))
-#echo "diff_Funk: $availPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "diff_Funk: $availPath" # DEBUG
 	availPath=$(echo "${availPath[@]}")
-#echo "availPath: $availPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "availPath: $availPath" # DEBUG
 
 ## TODO: reimplement this?  is this necessary with blkid?
 #	# check for aliases to see if this is already mounted under another path/name
@@ -120,7 +145,7 @@ Detect() {
 		auxPath=$(echo "$auxPath $Path" | sed -e 's/^[ \t]*//')
 	done
 	availPath=$auxPath
-#echo "auxPath: $auxPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "auxPath: $auxPath" # DEBUG
 
 	## Remove paths that belong to a mounted RAID
 	if [[ -x /sbin/mdadm ]]; then
@@ -132,7 +157,7 @@ Detect() {
 		done
 		availPath="$auxPath"
 	fi
-#echo "availPath: $availPath" # DEBUG
+	[[ -n "$DEBUG" ]] && echo "availPath: $availPath" # DEBUG
 
 	## Test to see if we found any available paths
 	if [[ "$availPath" != "" ]]; then
