@@ -182,9 +182,9 @@ start() {
 	log_daemon_msg "Starting up LinuxMCE" "linuxmce"
 	err=0
 
-	service kdm stop || :
-	service sddm stop || :
-	service lightdm stop || :
+	service kdm stop >/dev/null 2>&1 || :
+	service sddm stop >/dev/null 2>&1 || :
+	service lightdm stop >/dev/null 2>&1 || :
 
 	# Disable display manager
 	mkdir -p "/etc/X11"
