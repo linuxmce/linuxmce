@@ -14,7 +14,7 @@ expect -re "Enter pass phrase for key.pem:"
 send "$password\n"
 expect -re "Verifying - Enter pass phrase for key.pem:"
 send "$password\n"
-send_error "\nCONFIG: initial key.pem created\n"
+expect -re "writing RSA key"
 
 spawn openssl req -new -key key.pem -out req.pem
 expect -re "Enter pass phrase for key.pem:"
@@ -24,33 +24,29 @@ send "$country\r"
 expect -re "State or Province Name (full name)"
 send "$state\r"
 expect -re "Locality Name (eg, city)"
-send "City\r"
+send ".\r"
 expect -re "Organization Name (eg, company)"
 send "$org\r"
 expect -re "Organizational Unit Name"
-send "\r"
+send ".\r"
 expect -re "Common Name (eg, your name or your server's hostname)"
-send "dcerouter\r"
-expect -re "Please enter the following 'extra' attributes\nto be sent with your certificate request\nA challenge password"
+send "$name\r"
+expect -re "Email Address "
+send "$email\r"
+expect -re "A challenge password"
 send "\r"
-#expect -re "An optional company name"
+expect -re "An optional company name"
 send "\r"
-send "\r"
-send_error "\nCONFIG: RSA request req.pem created\n"
 
-spawn cp key.pem key.pem.orig
+spawn mv key.pem key.pem.orig
 
 spawn openssl rsa -in key.pem.orig -out key.pem
-expect -re "Enter pass phrase for key.pem.orig:"
+expect "Enter pass phrase for key.pem.orig:"
 send "$password\r"
-expect -re "writing RSA key"
-send_error "\nCONFIG: RSA key.pem created\n"
+expect "writing RSA key"
 
 spawn openssl x509 -req -days 365 -in req.pem -signkey key.pem -out cert.pem
-#expect -re "Enter pass phrase for key.pem:"
-#send "$password\r"
-expect -re "Signature ok"
+expect -re "Getting Private key"
 
-send_error "\nCONFIG: RSA key.pem signed\n"
-
-exit 0
+interact
+sleep 1
