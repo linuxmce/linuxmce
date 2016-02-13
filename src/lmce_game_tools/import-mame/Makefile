@@ -6,7 +6,7 @@ SNR_LDFLAGS ?=
 
 ROOT = ../..
 CXX = g++
-CXXFLAGS = -Wall -fPIC -ggdb3
+CXXFLAGS = -Wall -fPIC -ggdb3 -std=c++11
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
@@ -15,6 +15,7 @@ MYNAME = import-mame
 VERSION = 2.0.0
 
 sources = ImportMame.cpp \
+	Category.cpp \
         MAMEXMLParser.cpp \
 	pugixml.cpp \
 	main.cpp

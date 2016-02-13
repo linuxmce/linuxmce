@@ -14,26 +14,7 @@
 #include "PlutoUtils/StringUtils.h"
 #include "DCE/Logger.h"
 
-MAMERom::MAMERom(string sRomTitle,
-		 string sTitleHash,
-		 string sRomSubtitle,
-		 string sRomManufacturer,
-		 string sRomYear,
-		 string sRomStatus,
-		 string sRomCloneOf)
-{
-  m_sRomTitle=sRomTitle;
-  m_sTitleHash=sTitleHash;
-  m_sRomSubtitle=sRomSubtitle;
-  m_sRomManufacturer=sRomManufacturer;
-  m_sRomYear=sRomYear;
-  m_sRomStatus=sRomStatus;
-  m_sRomCloneOf=sRomCloneOf;
-}
-
-MAMERom::~MAMERom()
-{
-}
+// NOTE TO SELF: KEEP IT ENCAPSULATED, DUMMY!
 
 MAMEXMLParser::MAMEXMLParser(string sMAMEPath)
 {
@@ -83,8 +64,8 @@ bool MAMEXMLParser::getMAMEOutput()
   ProcessUtils::GetCommandOutput(args[0],args,sMameOutput,sErr);
   FileUtils::WriteTextFile("/tmp/mame.tmp",sMameOutput);
 
-  if (!mameOutputIsSane())
-    return false;
+  // if (!mameOutputIsSane())
+  //   return false;
 
   cout << "Done!";
   cout << endl;
@@ -97,8 +78,8 @@ bool MAMEXMLParser::parseMAMEOutput()
   pugi::xml_parse_result result; 
   int i=0;
 
-  if (!mameOutputIsSane())
-    return false;
+  // if (!mameOutputIsSane())
+  //   return false;
 
   cout << "Parsing MAME output. Please wait..." << flush;
   result = doc.load_file("/tmp/mame.tmp"); 
@@ -109,15 +90,24 @@ bool MAMEXMLParser::parseMAMEOutput()
       return false;
     }
 
-  pugi::xpath_node_set machines = doc.select_nodes("/mame/machine[not(@runnable)]");
+  cout << endl << endl;
 
-  for (pugi::xpath_node_set::const_iterator it = machines.begin(); it != machines.end(); ++it)
+  pugi::xml_node xnMAME = doc.child("mame");
+
+  for (pugi::xml_node xnMACHINE: xnMAME.children("machine"))
     {
-      pugi::xpath_node node = *it;
-      cout << node.node().attribute("name").value() << "\n";
+      pugi::xml_attribute xaNAME=xnMACHINE.attribute("name");
+      pugi::xml_node xnDESCRIPTION=xnMACHINE;
+      pugi::xml_node xnMANUFACTURER=xnMACHINE;
+      pugi::xml_node xnYEAR=xnMACHINE;
+
+      cout << xaNAME.value() << endl;
+      cout << xnDESCRIPTION.child_value("description") << endl;
+      cout << xnMANUFACTURER.child_value("manufacturer") << endl;
+      cout << xnYEAR.child_value("year") << endl;
+      
       i++;
     }
-  
   cout << i << endl;
 
   return true;
