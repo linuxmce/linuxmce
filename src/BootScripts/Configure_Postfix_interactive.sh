@@ -101,7 +101,8 @@ cat <<-EOF >>main.cf
 
 # if [ "$emailservice" == "gmail" ]; then
 if [ "$tls" == "yes" ]; then
-	cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem
+	#cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem  # ??
+	cat /etc/ssl/certs/GlobalSign_Root_CA.pem >> /etc/postfix/cacert.pem  # hotmail
 fi
 
 # reload new config
