@@ -99,10 +99,12 @@ cat <<-EOF >>main.cf
 	smtpd_sasl_local_domain = $myhostname
 	EOF
 
-# if [ "$emailservice" == "gmail" ]; then
 if [ "$tls" == "yes" ]; then
-	#cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem  # ??
-	cat /etc/ssl/certs/GlobalSign_Root_CA.pem >> /etc/postfix/cacert.pem  # hotmail
+	if [ "$emailservice" == "gmail" ]; then
+		cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem  # gmail
+	elif [ "$emailservice" == "gmail" ] ; then
+		cat /etc/ssl/certs/GlobalSign_Root_CA.pem >> /etc/postfix/cacert.pem  # hotmail
+	fi
 fi
 
 # reload new config
