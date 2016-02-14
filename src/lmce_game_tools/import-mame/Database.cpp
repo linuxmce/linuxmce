@@ -71,9 +71,18 @@ bool Database::NameHashExists(MAMEMachine* m)
     }
 }
 
-bool Database::AddNameHash(MAMEMachine *m)
+long int Database::AddNameHash(MAMEMachine *m)
 {
-  return false;
+  Row_NameHash *pRow_NameHash = m_pDatabase->NameHash_get()->AddRow();
+  if (pRow_NameHash)
+    {
+      pRow_NameHash->NameHash_set(NameHash::FromString(m->MachineDescription_get()));
+      pRow_NameHash->Original_set(m->MachineDescription_get());
+      pRow_NameHash->Normalized_set(NameHash::NormalizeString(m->MachineDescription_get()));
+      pRow_NameHash->Table_NameHash_get()->Commit();
+      return pRow_NameHash->PK_NameHash_get();
+    }
+  return 0;
 }
 
 bool Database::ProcessMachine(MAMEMachine* m)

@@ -57,7 +57,7 @@ class Database
  private:
   Database_lmce_game *m_pDatabase;
   bool NameHashExists(MAMEMachine* m);
-  bool AddNameHash(MAMEMachine* m);
+  long int AddNameHash(MAMEMachine* m);
 };
 
 #endif
