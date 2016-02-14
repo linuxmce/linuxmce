@@ -58,7 +58,7 @@ void Category::ParseLine(string sLine)
     }
   else
     {
-      ParseRomLine(sLine);
+      ParseMachineLine(sLine);
     }
 }
 
@@ -82,9 +82,9 @@ void Category::ParseCategoryLine(string sLine)
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"Category changed to %s",m_sCurrentCategory.c_str());
 }
 
-void Category::ParseRomLine(string sLine)
+void Category::ParseMachineLine(string sLine)
 {
   LoggerWrapper::GetInstance()->Write(LV_STATUS, "Adding ROM %s to category %s",sLine.c_str(), m_sCurrentCategory.c_str());
   sLine = StringUtils::TrimSpaces(sLine);
-  m_mapRomToCategory[sLine] = m_sCurrentCategory;
+  m_mapMachineToCategory[sLine] = m_sCurrentCategory;
 }

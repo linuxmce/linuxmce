@@ -20,12 +20,12 @@ class Category
 {
  private:
   vector<string> m_vectCategoryLines;
-  map<string, string> m_mapRomToCategory;
+  map<string, string> m_mapMachineToCategory;
   string m_sCategoryPath;
   string m_sCurrentCategory;
   void ParseLine(string sLine);
   void ParseCategoryLine(string sLine);
-  void ParseRomLine(string sLine);
+  void ParseMachineLine(string sLine);
   void ParseBlankLine(string sLine);
 
  public:
@@ -33,10 +33,10 @@ class Category
   virtual ~Category();
   bool Parse();
   
-  string m_mapRomToCategory_Find(string sRom)
+  string m_mapMachineToCategory_Find(string sMachine)
   {
-    map<string, string>::iterator it = m_mapRomToCategory.find(sRom);
-    return it == m_mapRomToCategory.end() ? "" : it->second;
+    map<string, string>::iterator it = m_mapMachineToCategory.find(sMachine);
+    return it == m_mapMachineToCategory.end() ? "" : it->second;
   }
 
 };
