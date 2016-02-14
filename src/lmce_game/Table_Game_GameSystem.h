@@ -96,23 +96,34 @@ class DECLSPECIFIER Row_Game_GameSystem : public TableRow, public SerializeClass
 		long int m_PK_Game_GameSystem;
 long int m_FK_Game;
 long int m_FK_GameSystem;
+long int m_FK_Manufacturer;
+long int m_FK_Genre;
+long int m_FK_Year;
 
-		bool is_null[3];
+		bool is_null[6];
 	
 	public:
 		long int PK_Game_GameSystem_get();
 long int FK_Game_get();
 long int FK_GameSystem_get();
+long int FK_Manufacturer_get();
+long int FK_Genre_get();
+long int FK_Year_get();
 
 		
 		void PK_Game_GameSystem_set(long int val);
 void FK_Game_set(long int val);
 void FK_GameSystem_set(long int val);
+void FK_Manufacturer_set(long int val);
+void FK_Genre_set(long int val);
+void FK_Year_set(long int val);
 
 		
-		
+		bool FK_Year_isNull();
+
 			
-			
+		void FK_Year_setNull(bool val);
+	
 	
 		void Delete();
 		void Reload();		
@@ -126,6 +137,8 @@ void FK_GameSystem_set(long int val);
 		// Return the rows for foreign keys 
 		class Row_Game* FK_Game_getrow();
 class Row_GameSystem* FK_GameSystem_getrow();
+class Row_Manufacturer* FK_Manufacturer_getrow();
+class Row_Genre* FK_Genre_getrow();
 
 
 		// Return the rows in other tables with foreign keys pointing here
@@ -133,7 +146,7 @@ class Row_GameSystem* FK_GameSystem_getrow();
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Game_GameSystem+ m_FK_Game+ m_FK_GameSystem;
+			StartSerializeList() + m_PK_Game_GameSystem+ m_FK_Game+ m_FK_GameSystem+ m_FK_Manufacturer+ m_FK_Genre+ m_FK_Year;
 		}
 	private:
 		void SetDefaultValues();
@@ -141,6 +154,9 @@ class Row_GameSystem* FK_GameSystem_getrow();
 		string PK_Game_GameSystem_asSQL();
 string FK_Game_asSQL();
 string FK_GameSystem_asSQL();
+string FK_Manufacturer_asSQL();
+string FK_Genre_asSQL();
+string FK_Year_asSQL();
 
 	};
 

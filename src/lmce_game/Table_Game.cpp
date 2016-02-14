@@ -31,8 +31,6 @@
 using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_Game.h"
-#include "Table_Manufacturer.h"
-#include "Table_Genre.h"
 
 #include "Table_Game_GameSystem.h"
 #include "Table_Game_GameSystem_Configuration.h"
@@ -145,12 +143,7 @@ is_null[0] = false;
 is_null[1] = true;
 m_NameHash = "";
 is_null[2] = false;
-m_FK_Manufacturer = -1;
-is_null[3] = false;
-m_FK_Genre = -1;
-is_null[4] = false;
-is_null[5] = true;
-m_FK_Year = 0;
+is_null[3] = true;
 
 
 	is_added=false;
@@ -167,15 +160,9 @@ return m_Define;}
 string Row_Game::NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_NameHash;}
-long int Row_Game::FK_Manufacturer_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+string Row_Game::Subtitle_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_FK_Manufacturer;}
-long int Row_Game::FK_Genre_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return m_FK_Genre;}
-long int Row_Game::FK_Year_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return m_FK_Year;}
+return m_Subtitle;}
 
 		
 void Row_Game::PK_Game_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -187,31 +174,25 @@ m_Define = val; is_modified=true; is_null[1]=false;}
 void Row_Game::NameHash_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_NameHash = val; is_modified=true; is_null[2]=false;}
-void Row_Game::FK_Manufacturer_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Game::Subtitle_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_FK_Manufacturer = val; is_modified=true; is_null[3]=false;}
-void Row_Game::FK_Genre_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-m_FK_Genre = val; is_modified=true; is_null[4]=false;}
-void Row_Game::FK_Year_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-m_FK_Year = val; is_modified=true; is_null[5]=false;}
+m_Subtitle = val; is_modified=true; is_null[3]=false;}
 
 		
 bool Row_Game::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
-bool Row_Game::FK_Year_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_Game::Subtitle_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[5];}
+return is_null[3];}
 
 			
 void Row_Game::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
 is_modified=true;
 }
-void Row_Game::FK_Year_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[5]=val;
+void Row_Game::Subtitle_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
 is_modified=true;
 }
 	
@@ -257,43 +238,18 @@ delete[] buf;
 return s;
 }
 
-string Row_Game::FK_Manufacturer_asSQL()
+string Row_Game::Subtitle_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 if (is_null[3])
 return "NULL";
 
-char buf[32];
-sprintf(buf, "%li", m_FK_Manufacturer);
-
-return buf;
-}
-
-string Row_Game::FK_Genre_asSQL()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-if (is_null[4])
-return "NULL";
-
-char buf[32];
-sprintf(buf, "%li", m_FK_Genre);
-
-return buf;
-}
-
-string Row_Game::FK_Year_asSQL()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-if (is_null[5])
-return "NULL";
-
-char buf[32];
-sprintf(buf, "%li", m_FK_Year);
-
-return buf;
+char *buf = new char[769];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Subtitle.c_str(), (unsigned long) min((size_t)384,m_Subtitle.size()));
+string s=string()+"\""+buf+"\"";
+delete[] buf;
+return s;
 }
 
 
@@ -335,10 +291,10 @@ bool Table_Game::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRo
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_asSQL()+", "+pRow->Define_asSQL()+", "+pRow->NameHash_asSQL()+", "+pRow->FK_Manufacturer_asSQL()+", "+pRow->FK_Genre_asSQL()+", "+pRow->FK_Year_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_asSQL()+", "+pRow->Define_asSQL()+", "+pRow->NameHash_asSQL()+", "+pRow->Subtitle_asSQL();
 
 	
-		string query = "insert into Game (`PK_Game`, `Define`, `NameHash`, `FK_Manufacturer`, `FK_Genre`, `FK_Year`) values ("+
+		string query = "insert into Game (`PK_Game`, `Define`, `NameHash`, `Subtitle`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -404,7 +360,7 @@ condition = condition + "`PK_Game`=" + tmp_PK_Game;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Game`="+pRow->PK_Game_asSQL()+", `Define`="+pRow->Define_asSQL()+", `NameHash`="+pRow->NameHash_asSQL()+", `FK_Manufacturer`="+pRow->FK_Manufacturer_asSQL()+", `FK_Genre`="+pRow->FK_Genre_asSQL()+", `FK_Year`="+pRow->FK_Year_asSQL();
+update_values_list = update_values_list + "`PK_Game`="+pRow->PK_Game_asSQL()+", `Define`="+pRow->Define_asSQL()+", `NameHash`="+pRow->NameHash_asSQL()+", `Subtitle`="+pRow->Subtitle_asSQL();
 
 	
 		string query = "update Game set " + update_values_list + " where " + condition;
@@ -573,34 +529,12 @@ pRow->m_NameHash = string(row[2],lengths[2]);
 if (row[3] == NULL)
 {
 pRow->is_null[3]=true;
-pRow->m_FK_Manufacturer = 0;
+pRow->m_Subtitle = "";
 }
 else
 {
 pRow->is_null[3]=false;
-sscanf(row[3], "%li", &(pRow->m_FK_Manufacturer));
-}
-
-if (row[4] == NULL)
-{
-pRow->is_null[4]=true;
-pRow->m_FK_Genre = 0;
-}
-else
-{
-pRow->is_null[4]=false;
-sscanf(row[4], "%li", &(pRow->m_FK_Genre));
-}
-
-if (row[5] == NULL)
-{
-pRow->is_null[5]=true;
-pRow->m_FK_Year = 0;
-}
-else
-{
-pRow->is_null[5]=false;
-sscanf(row[5], "%li", &(pRow->m_FK_Year));
+pRow->m_Subtitle = string(row[3],lengths[3]);
 }
 
 
@@ -755,34 +689,12 @@ pRow->m_NameHash = string(row[2],lengths[2]);
 if (row[3] == NULL)
 {
 pRow->is_null[3]=true;
-pRow->m_FK_Manufacturer = 0;
+pRow->m_Subtitle = "";
 }
 else
 {
 pRow->is_null[3]=false;
-sscanf(row[3], "%li", &(pRow->m_FK_Manufacturer));
-}
-
-if (row[4] == NULL)
-{
-pRow->is_null[4]=true;
-pRow->m_FK_Genre = 0;
-}
-else
-{
-pRow->is_null[4]=false;
-sscanf(row[4], "%li", &(pRow->m_FK_Genre));
-}
-
-if (row[5] == NULL)
-{
-pRow->is_null[5]=true;
-pRow->m_FK_Year = 0;
-}
-else
-{
-pRow->is_null[5]=false;
-sscanf(row[5], "%li", &(pRow->m_FK_Year));
+pRow->m_Subtitle = string(row[3],lengths[3]);
 }
 
 
@@ -793,20 +705,6 @@ sscanf(row[5], "%li", &(pRow->m_FK_Year));
 }
 
 
-class Row_Manufacturer* Row_Game::FK_Manufacturer_getrow()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Manufacturer *pTable = table->database->Manufacturer_get();
-return pTable->GetRow(m_FK_Manufacturer);
-}
-class Row_Genre* Row_Game::FK_Genre_getrow()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Genre *pTable = table->database->Genre_get();
-return pTable->GetRow(m_FK_Genre);
-}
 
 
 void Row_Game::Game_GameSystem_FK_Game_getrows(vector <class Row_Game_GameSystem*> *rows)

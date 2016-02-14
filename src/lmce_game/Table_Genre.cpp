@@ -33,7 +33,7 @@ using namespace std;
 #include "Table_Genre.h"
 #include "Table_Genre.h"
 
-#include "Table_Game.h"
+#include "Table_Game_GameSystem.h"
 #include "Table_Genre.h"
 #include "Table_Genre_NameHash.h"
 
@@ -669,11 +669,11 @@ return pTable->GetRow(m_FK_Genre_Parent);
 }
 
 
-void Row_Genre::Game_FK_Genre_getrows(vector <class Row_Game*> *rows)
+void Row_Genre::Game_GameSystem_FK_Genre_getrows(vector <class Row_Game_GameSystem*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-class Table_Game *pTable = table->database->Game_get();
+class Table_Game_GameSystem *pTable = table->database->Game_GameSystem_get();
 pTable->GetRows("`FK_Genre`=" + StringUtils::itos(m_PK_Genre),rows);
 }
 void Row_Genre::Genre_FK_Genre_Parent_getrows(vector <class Row_Genre*> *rows)

@@ -132,7 +132,7 @@ void Description_setNull(bool val);
 
 
 		// Return the rows in other tables with foreign keys pointing here
-		void Game_FK_Genre_getrows(vector <class Row_Game*> *rows);
+		void Game_GameSystem_FK_Genre_getrows(vector <class Row_Game_GameSystem*> *rows);
 void Genre_FK_Genre_Parent_getrows(vector <class Row_Genre*> *rows);
 void Genre_NameHash_FK_Genre_getrows(vector <class Row_Genre_NameHash*> *rows);
 

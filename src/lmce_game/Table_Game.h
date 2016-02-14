@@ -96,35 +96,29 @@ class DECLSPECIFIER Row_Game : public TableRow, public SerializeClass
 		long int m_PK_Game;
 string m_Define;
 string m_NameHash;
-long int m_FK_Manufacturer;
-long int m_FK_Genre;
-long int m_FK_Year;
+string m_Subtitle;
 
-		bool is_null[6];
+		bool is_null[4];
 	
 	public:
 		long int PK_Game_get();
 string Define_get();
 string NameHash_get();
-long int FK_Manufacturer_get();
-long int FK_Genre_get();
-long int FK_Year_get();
+string Subtitle_get();
 
 		
 		void PK_Game_set(long int val);
 void Define_set(string val);
 void NameHash_set(string val);
-void FK_Manufacturer_set(long int val);
-void FK_Genre_set(long int val);
-void FK_Year_set(long int val);
+void Subtitle_set(string val);
 
 		
 		bool Define_isNull();
-bool FK_Year_isNull();
+bool Subtitle_isNull();
 
 			
 		void Define_setNull(bool val);
-void FK_Year_setNull(bool val);
+void Subtitle_setNull(bool val);
 	
 	
 		void Delete();
@@ -137,9 +131,7 @@ void FK_Year_setNull(bool val);
 		class Table_Game *Table_Game_get() { return table; };
 
 		// Return the rows for foreign keys 
-		class Row_Manufacturer* FK_Manufacturer_getrow();
-class Row_Genre* FK_Genre_getrow();
-
+		
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Game_GameSystem_FK_Game_getrows(vector <class Row_Game_GameSystem*> *rows);
@@ -151,7 +143,7 @@ void Game_GameSystem_Rom_Configuration_FK_Game_getrows(vector <class Row_Game_Ga
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Game+ m_Define+ m_NameHash+ m_FK_Manufacturer+ m_FK_Genre+ m_FK_Year;
+			StartSerializeList() + m_PK_Game+ m_Define+ m_NameHash+ m_Subtitle;
 		}
 	private:
 		void SetDefaultValues();
@@ -159,9 +151,7 @@ void Game_GameSystem_Rom_Configuration_FK_Game_getrows(vector <class Row_Game_Ga
 		string PK_Game_asSQL();
 string Define_asSQL();
 string NameHash_asSQL();
-string FK_Manufacturer_asSQL();
-string FK_Genre_asSQL();
-string FK_Year_asSQL();
+string Subtitle_asSQL();
 
 	};
 

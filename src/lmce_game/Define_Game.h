@@ -9,12 +9,8 @@
 #define GAME_DEFINE_TABLE_FIELD "Game.Define"
 #define GAME_NAMEHASH_FIELD "NameHash"
 #define GAME_NAMEHASH_TABLE_FIELD "Game.NameHash"
-#define GAME_FK_MANUFACTURER_FIELD "FK_Manufacturer"
-#define GAME_FK_MANUFACTURER_TABLE_FIELD "Game.FK_Manufacturer"
-#define GAME_FK_GENRE_FIELD "FK_Genre"
-#define GAME_FK_GENRE_TABLE_FIELD "Game.FK_Genre"
-#define GAME_FK_YEAR_FIELD "FK_Year"
-#define GAME_FK_YEAR_TABLE_FIELD "Game.FK_Year"
+#define GAME_SUBTITLE_FIELD "Subtitle"
+#define GAME_SUBTITLE_TABLE_FIELD "Game.Subtitle"
 
 
 #endif
