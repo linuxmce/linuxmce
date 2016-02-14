@@ -49,9 +49,11 @@ class Database
   Database();
   virtual ~Database();
   bool Init();
+  bool ProcessMachine(MAMEMachine* m);
 
  private:
   Database_lmce_game *m_pDatabase;
+  bool GameExists(MAMEMachine* m);
 };
 
 #endif

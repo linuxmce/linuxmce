@@ -13,6 +13,7 @@
 #include <map>
 
 #include "pugixml.hpp"
+#include "ImportMame.h"
 #include "MAMEMachine.h"
 
 using namespace std;
@@ -21,15 +22,8 @@ class MAMEXMLParser
 {
 
  public:
-  MAMEXMLParser(string sMAMEPath);
+  MAMEXMLParser(string sMAMEPath, class ImportMAME* pImportMAME);
   virtual ~MAMEXMLParser();
-
-  map<string, MAMEMachine *> m_mapMachineToMAMEMachine;
-  MAMEMachine * m_mapMachineToMAMEMachine_Find(string sRomName)
-  {
-    map<string, MAMEMachine *>::iterator it=m_mapMachineToMAMEMachine.find(sRomName);
-    return it == m_mapMachineToMAMEMachine.end() ? NULL : it->second;
-  }
 
   bool run();
 
@@ -37,6 +31,7 @@ class MAMEXMLParser
   string m_sMAMEPath;
   string m_sROMPath;
   MAMEMachine *m_pMAMEMachine;
+  ImportMAME* m_pImportMAME;
   string m_sRomName, m_sDescription, m_sTitleHash, m_sRomTitle, m_sRomSubtitle, m_sRomManufacturer,m_sRomYear,m_sRomStatus,m_sRomCloneOf;
 
   bool getMAMEOutput();

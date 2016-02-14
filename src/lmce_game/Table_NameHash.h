@@ -95,25 +95,30 @@ class DECLSPECIFIER Row_NameHash : public TableRow, public SerializeClass
 		
 		long int m_PK_NameHash;
 string m_NameHash;
-string m_Description;
+string m_Original;
+string m_Normalized;
 
-		bool is_null[3];
+		bool is_null[4];
 	
 	public:
 		long int PK_NameHash_get();
 string NameHash_get();
-string Description_get();
+string Original_get();
+string Normalized_get();
 
 		
 		void PK_NameHash_set(long int val);
 void NameHash_set(string val);
-void Description_set(string val);
+void Original_set(string val);
+void Normalized_set(string val);
 
 		
-		bool Description_isNull();
+		bool Original_isNull();
+bool Normalized_isNull();
 
 			
-		void Description_setNull(bool val);
+		void Original_setNull(bool val);
+void Normalized_setNull(bool val);
 	
 	
 		void Delete();
@@ -129,18 +134,20 @@ void Description_set(string val);
 		
 
 		// Return the rows in other tables with foreign keys pointing here
-		
+		void Game_FK_NameHash_getrows(vector <class Row_Game*> *rows);
+
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_NameHash+ m_NameHash+ m_Description;
+			StartSerializeList() + m_PK_NameHash+ m_NameHash+ m_Original+ m_Normalized;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_NameHash_asSQL();
 string NameHash_asSQL();
-string Description_asSQL();
+string Original_asSQL();
+string Normalized_asSQL();
 
 	};
 

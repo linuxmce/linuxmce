@@ -45,7 +45,6 @@ bool Category::Parse()
   m_vectCategoryLines.clear();
   
   cout << endl;
-  
   return true;
 
 }

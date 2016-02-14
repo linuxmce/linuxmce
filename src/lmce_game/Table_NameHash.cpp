@@ -32,6 +32,7 @@ using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_NameHash.h"
 
+#include "Table_Game.h"
 
 
 void Database_lmce_game::CreateTable_NameHash()
@@ -138,6 +139,7 @@ is_null[0] = false;
 m_NameHash = "";
 is_null[1] = false;
 is_null[2] = true;
+is_null[3] = true;
 
 
 	is_added=false;
@@ -151,9 +153,12 @@ return m_PK_NameHash;}
 string Row_NameHash::NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_NameHash;}
-string Row_NameHash::Description_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+string Row_NameHash::Original_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_Description;}
+return m_Original;}
+string Row_NameHash::Normalized_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_Normalized;}
 
 		
 void Row_NameHash::PK_NameHash_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -162,18 +167,28 @@ m_PK_NameHash = val; is_modified=true; is_null[0]=false;}
 void Row_NameHash::NameHash_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_NameHash = val; is_modified=true; is_null[1]=false;}
-void Row_NameHash::Description_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_NameHash::Original_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_Description = val; is_modified=true; is_null[2]=false;}
+m_Original = val; is_modified=true; is_null[2]=false;}
+void Row_NameHash::Normalized_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_Normalized = val; is_modified=true; is_null[3]=false;}
 
 		
-bool Row_NameHash::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_NameHash::Original_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
+bool Row_NameHash::Normalized_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 
 			
-void Row_NameHash::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_NameHash::Original_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
+is_modified=true;
+}
+void Row_NameHash::Normalized_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
 is_modified=true;
 }
 	
@@ -205,7 +220,7 @@ delete[] buf;
 return s;
 }
 
-string Row_NameHash::Description_asSQL()
+string Row_NameHash::Original_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
@@ -213,7 +228,21 @@ if (is_null[2])
 return "NULL";
 
 char *buf = new char[6145];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)3072,m_Description.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Original.c_str(), (unsigned long) min((size_t)3072,m_Original.size()));
+string s=string()+"\""+buf+"\"";
+delete[] buf;
+return s;
+}
+
+string Row_NameHash::Normalized_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[3])
+return "NULL";
+
+char *buf = new char[6145];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Normalized.c_str(), (unsigned long) min((size_t)3072,m_Normalized.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -258,10 +287,10 @@ bool Table_NameHash::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInse
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_NameHash_asSQL()+", "+pRow->NameHash_asSQL()+", "+pRow->Description_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_NameHash_asSQL()+", "+pRow->NameHash_asSQL()+", "+pRow->Original_asSQL()+", "+pRow->Normalized_asSQL();
 
 	
-		string query = "insert into NameHash (`PK_NameHash`, `NameHash`, `Description`) values ("+
+		string query = "insert into NameHash (`PK_NameHash`, `NameHash`, `Original`, `Normalized`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -327,7 +356,7 @@ condition = condition + "`PK_NameHash`=" + tmp_PK_NameHash;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_NameHash`="+pRow->PK_NameHash_asSQL()+", `NameHash`="+pRow->NameHash_asSQL()+", `Description`="+pRow->Description_asSQL();
+update_values_list = update_values_list + "`PK_NameHash`="+pRow->PK_NameHash_asSQL()+", `NameHash`="+pRow->NameHash_asSQL()+", `Original`="+pRow->Original_asSQL()+", `Normalized`="+pRow->Normalized_asSQL();
 
 	
 		string query = "update NameHash set " + update_values_list + " where " + condition;
@@ -485,12 +514,23 @@ pRow->m_NameHash = string(row[1],lengths[1]);
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_Description = "";
+pRow->m_Original = "";
 }
 else
 {
 pRow->is_null[2]=false;
-pRow->m_Description = string(row[2],lengths[2]);
+pRow->m_Original = string(row[2],lengths[2]);
+}
+
+if (row[3] == NULL)
+{
+pRow->is_null[3]=true;
+pRow->m_Normalized = "";
+}
+else
+{
+pRow->is_null[3]=false;
+pRow->m_Normalized = string(row[3],lengths[3]);
 }
 
 
@@ -634,12 +674,23 @@ pRow->m_NameHash = string(row[1],lengths[1]);
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_Description = "";
+pRow->m_Original = "";
 }
 else
 {
 pRow->is_null[2]=false;
-pRow->m_Description = string(row[2],lengths[2]);
+pRow->m_Original = string(row[2],lengths[2]);
+}
+
+if (row[3] == NULL)
+{
+pRow->is_null[3]=true;
+pRow->m_Normalized = "";
+}
+else
+{
+pRow->is_null[3]=false;
+pRow->m_Normalized = string(row[3],lengths[3]);
 }
 
 
@@ -652,6 +703,13 @@ pRow->m_Description = string(row[2],lengths[2]);
 
 
 
+void Row_NameHash::Game_FK_NameHash_getrows(vector <class Row_Game*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Game *pTable = table->database->Game_get();
+pTable->GetRows("`FK_NameHash`=" + StringUtils::itos(m_PK_NameHash),rows);
+}
 
 
 
