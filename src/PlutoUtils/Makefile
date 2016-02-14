@@ -28,7 +28,7 @@ LDFLAGS += -lmysqlclient_r
 
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-sources = CommonIncludes.cpp FileUtils.cpp MultiThreadIncludes.cpp Other.cpp ProcessUtils.cpp StringUtils.cpp DatabaseUtils.cpp getch.cpp sha1.cpp md5c.cpp minilzo.cpp uuencode.cpp LinuxSoundcard.cpp LinuxSerialUSB.cpp ThreadedClass.cpp \
+sources = CommonIncludes.cpp FileUtils.cpp MultiThreadIncludes.cpp Other.cpp ProcessUtils.cpp StringUtils.cpp DatabaseUtils.cpp getch.cpp sha1.c md5c.cpp minilzo.cpp uuencode.cpp LinuxSoundcard.cpp LinuxSerialUSB.cpp ThreadedClass.cpp \
 	  ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp
 
 all: libPlutoUtils.so all-recursive
