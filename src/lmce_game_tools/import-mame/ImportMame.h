@@ -9,6 +9,7 @@
 #define IMPORTMAME_H
 
 #include "MAMEXMLParser.h"
+#include "Category.h"
 
 #include <string>
 #include <map>
@@ -25,6 +26,7 @@ class ImportMAME
   std::string m_sCategoryPath;
   std::string m_sROMPath;
   MAMEXMLParser* m_pMAMEXMLParser;
+  Category* m_pCategory;
 };
 
 #endif
