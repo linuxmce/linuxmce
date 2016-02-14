@@ -43,17 +43,21 @@
 #include "DCE/Logger.h"
 #include "PlutoUtils/DBHelper.h"
 
+#include "MAMEMachine.h"
+
 class Database
 {
  public:
   Database();
   virtual ~Database();
+  bool m_bInitialized;
   bool Init();
   bool ProcessMachine(MAMEMachine* m);
 
  private:
   Database_lmce_game *m_pDatabase;
-  bool GameExists(MAMEMachine* m);
+  bool NameHashExists(MAMEMachine* m);
+  bool AddNameHash(MAMEMachine* m);
 };
 
 #endif
