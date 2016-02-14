@@ -6,11 +6,13 @@
  */
 
 #include "Database.h"
+#include "NameHash.h"
 #include <vector>
 
 Database::Database()
 {
   m_pDatabase=NULL;
+  m_bInitialized=false;
 }
 
 Database::~Database()
@@ -31,23 +33,56 @@ bool Database::Init()
     }
   else
     {
+      m_bInitialized=true;
       return true;
     }
 }
 
-bool Database::GameExists(MAMEMachine* m)
+bool Database::NameHashExists(MAMEMachine* m)
 {
-  vector<class Row_Game *> v_RowGame;
-  string sWhereQuery = "WHERE ";
-  if (m_pDatabase->Game_get()->GetRows(sWhereQuery,&v_RowGame))
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::NameHashExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::NameHashExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_NameHash *> v_RowNameHash;
+  string sWhereQuery = "WHERE NameHash = '"+NameHash::FromString(m->MachineDescription_get())+"'";
+  if (!m_pDatabase->NameHash_get()->GetRows(sWhereQuery,&v_RowNameHash))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowNameHash.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  return true;   // does exist.
+	}
+    }
+}
+
+bool Database::AddNameHash(MAMEMachine *m)
+{
+  return false;
 }
 
 bool Database::ProcessMachine(MAMEMachine* m)
 {
-  if (!MAMEMachine)
+  if (!m)
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
       return false;
     }
 
+  return false;
 }

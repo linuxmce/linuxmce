@@ -18,6 +18,7 @@ sources = ImportMame.cpp \
 	Category.cpp \
 	Database.cpp \
         MAMEXMLParser.cpp \
+	NameHash.cpp \
 	pugixml.cpp \
 	main.cpp
 #<-dceag-mh-e->

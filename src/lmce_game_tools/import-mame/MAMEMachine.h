@@ -52,9 +52,36 @@ class MAMEMachine
       
     }
 
+  // Special functions for accessors
+  string subDescriptionFor(string sMachineDescription)
+  {
+    size_t pos=0;
+    for (size_t i=0;i<sMachineDescription.size();++i)
+      {
+	if ((sMachineDescription[i]>='0' && sMachineDescription[i]<='9') || (sMachineDescription[i]>='A' && sMachineDescription[i]<='Z'))
+	  {
+	    continue;
+	  }
+	else if ((sMachineDescription[i]>='a' && sMachineDescription[i]<='z'))
+	  {
+	    continue;
+	  }
+	else
+	  {
+	    pos=i;
+	  }
+      }
+
+    if (pos>0)
+      return sMachineDescription.substr(pos,sMachineDescription.size());
+
+    return "";
+  }
+
   // Get accessors
   string MachineName_get() {return m_sMachineName;}
   string MachineDescription_get() {return m_sMachineDescription;}
+  string MachineSubDescription_get() {return subDescriptionFor(m_sMachineDescription);}
   string MachineManufacturer_get() {return m_sMachineManufacturer;}
   string MachineYear_get() {return m_sMachineYear;}
   string MachineCloneOf_get() {return m_sMachineCloneOf;}
