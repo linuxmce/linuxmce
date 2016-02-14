@@ -24,6 +24,17 @@ ImportMAME::~ImportMAME()
     delete m_pCategory;
 }
 
+void ImportMAME::MergeGenresIntoMachines()
+{
+  cout << "Merging Genres into Machine entries...Please wait...";
+  for (map<string, MAMEMachine*>::iterator it=m_pMAMEXMLParser->m_mapMachineToMAMEMachine.begin(); it!=m_pMAMEXMLParser->m_mapMachineToMAMEMachine.end(); ++it)
+    {
+      MAMEMachine* m = it->second;
+      m->MachineGenre_set(m_pCategory->m_mapMachineToCategory_Find(m->MachineName_get()));
+    }
+  cout << endl;
+}
+
 int ImportMAME::Run()
 {
   if (!m_pMAMEXMLParser || !m_pCategory)
@@ -31,8 +42,7 @@ int ImportMAME::Run()
 
   m_pCategory->Parse();
   m_pMAMEXMLParser->run();
-
-  cout << m_pCategory->m_mapMachineToCategory_Find("puckman");
+  MergeGenresIntoMachines();
 
   return 0;
 }

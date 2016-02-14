@@ -27,6 +27,7 @@ class ImportMAME
   std::string m_sROMPath;
   MAMEXMLParser* m_pMAMEXMLParser;
   Category* m_pCategory;
+  void MergeGenresIntoMachines();
 };
 
 #endif
