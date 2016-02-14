@@ -34,6 +34,7 @@ class MAMEMachine
   string m_sMachineDriverSoundStatus;
   string m_sMachineDriverGraphicStatus;
   string m_sMachineDriverSaveStateStatus;
+  string m_sMachineGenre;
 
  public:
   MAMEMachine() 
@@ -50,6 +51,7 @@ class MAMEMachine
       m_sMachineDriverSoundStatus="";
       m_sMachineDriverGraphicStatus="";
       m_sMachineDriverSaveStateStatus="";
+      m_sMachineGenre="";
     }
 
   virtual ~MAMEMachine()
@@ -70,6 +72,7 @@ class MAMEMachine
   string MachineDriverSoundStatus_get() {return m_sMachineDriverSoundStatus;}
   string MachineDriverGraphicStatus_get() {return m_sMachineDriverGraphicStatus;}
   string MachineDriverSaveStateStatus_get() {return m_sMachineDriverSaveStateStatus;}
+  string MachineGenre_get() {return m_sMachineGenre;}
 
   // Set accessors
   void MachineName_set(string sMachineName) {m_sMachineName=sMachineName;}
@@ -84,7 +87,7 @@ class MAMEMachine
   void MachineDriverSoundStatus_set(string sMachineDriverSoundStatus) {m_sMachineDriverSoundStatus=sMachineDriverSoundStatus;}
   void MachineDriverGraphicStatus_set(string sMachineDriverGraphicStatus) {m_sMachineDriverGraphicStatus=sMachineDriverGraphicStatus;}
   void MachineDriverSaveStateStatus_set(string sMachineDriverSaveStateStatus) {m_sMachineDriverSaveStateStatus=sMachineDriverSaveStateStatus;}
-
+  void MachineGenre_set(string sMachineGenre) {m_sMachineGenre=sMachineGenre;}
 };
 
 class MAMEXMLParser

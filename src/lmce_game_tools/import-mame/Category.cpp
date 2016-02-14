@@ -25,6 +25,8 @@ Category::~Category()
 
 bool Category::Parse()
 {
+
+  cout << "Parsing Category file...Please wait..." << flush;
   if (!FileUtils::FileExists(m_sCategoryPath))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find category file named %s",m_sCategoryPath.c_str());
@@ -41,6 +43,8 @@ bool Category::Parse()
   
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"Done reading category file.");
   m_vectCategoryLines.clear();
+  
+  cout << endl;
   
   return true;
 
