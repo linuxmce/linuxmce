@@ -104,6 +104,8 @@ namespace FileUtils
 	string GetLastModifiedDateStr(string sFile); /**< returns last modified date for a file as a string */
 	time_t GetLastModifiedDate(string sFile); /**< returns last modified date for a file as time_t */
 	long long FileSize64(string sFileName); /**< returns the file size or zero if error, works for files larger than 2Gb */
+	string FileSHA1(string sFileName); /** Returns SHA-1 of file */
+	string FileSHA1(char* pdata, size_t iSize); /** Returns SHA-1 of open buffer */
 #endif
 
 #endif //#ifndef SYMBIAN
