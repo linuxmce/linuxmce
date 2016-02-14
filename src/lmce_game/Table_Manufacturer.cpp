@@ -32,7 +32,7 @@ using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_Manufacturer.h"
 
-#include "Table_Game.h"
+#include "Table_Game_GameSystem.h"
 #include "Table_Manufacturer_NameHash.h"
 
 
@@ -610,11 +610,11 @@ pRow->m_Description = string(row[1],lengths[1]);
 
 
 
-void Row_Manufacturer::Game_FK_Manufacturer_getrows(vector <class Row_Game*> *rows)
+void Row_Manufacturer::Game_GameSystem_FK_Manufacturer_getrows(vector <class Row_Game_GameSystem*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-class Table_Game *pTable = table->database->Game_get();
+class Table_Game_GameSystem *pTable = table->database->Game_GameSystem_get();
 pTable->GetRows("`FK_Manufacturer`=" + StringUtils::itos(m_PK_Manufacturer),rows);
 }
 void Row_Manufacturer::Manufacturer_NameHash_FK_Manufacturer_getrows(vector <class Row_Manufacturer_NameHash*> *rows)

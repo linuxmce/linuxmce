@@ -22,10 +22,20 @@ CREATE TABLE Game (
        PK_Game INTEGER AUTO_INCREMENT NOT NULL,
        Define VARCHAR(128),
        NameHash CHAR(40) UNIQUE NOT NULL,
+       Subtitle VARCHAR(128),
+       PRIMARY KEY (PK_Game)
+);
+
+CREATE TABLE Game_GameSystem (
+       PK_Game_GameSystem INTEGER AUTO_INCREMENT NOT NULL,
+       FK_Game INTEGER NOT NULL,
+       FK_GameSystem INTEGER NOT NULL,
        FK_Manufacturer INTEGER NOT NULL DEFAULT '-1',
        FK_Genre INTEGER NOT NULL DEFAULT '-1',
        FK_Year INTEGER,
-       PRIMARY KEY (PK_Game)
+       PRIMARY KEY (PK_Game_GameSystem),
+       KEY(FK_Game),
+       KEY(FK_GameSystem)
 );
 
 CREATE TABLE Manufacturer (
@@ -64,15 +74,6 @@ CREATE TABLE GameSystem (
        Define VARCHAR(64),
        Description VARCHAR(128),
        PRIMARY KEY (PK_GameSystem)
-);
-
-CREATE TABLE Game_GameSystem (
-       PK_Game_GameSystem INTEGER AUTO_INCREMENT NOT NULL,
-       FK_Game INTEGER NOT NULL,
-       FK_GameSystem INTEGER NOT NULL,
-       PRIMARY KEY(PK_Game_GameSystem),
-       KEY(FK_Game),
-       KEY(FK_GameSystem)
 );
 
 CREATE TABLE Game_GameSystem_Rom (

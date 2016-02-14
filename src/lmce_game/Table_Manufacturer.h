@@ -126,7 +126,7 @@ void Description_set(string val);
 		
 
 		// Return the rows in other tables with foreign keys pointing here
-		void Game_FK_Manufacturer_getrows(vector <class Row_Game*> *rows);
+		void Game_GameSystem_FK_Manufacturer_getrows(vector <class Row_Game_GameSystem*> *rows);
 void Manufacturer_NameHash_FK_Manufacturer_getrows(vector <class Row_Manufacturer_NameHash*> *rows);
 
 
