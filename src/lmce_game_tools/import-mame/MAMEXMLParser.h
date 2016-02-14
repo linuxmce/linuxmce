@@ -105,6 +105,7 @@ class MAMEXMLParser
 
  private:
   string m_sMAMEPath;
+  string m_sROMPath;
   MAMEMachine *m_pMAMEMachine;
   string m_sRomName, m_sDescription, m_sTitleHash, m_sRomTitle, m_sRomSubtitle, m_sRomManufacturer,m_sRomYear,m_sRomStatus,m_sRomCloneOf;
 

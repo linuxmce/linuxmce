@@ -23,7 +23,10 @@ MAMEXMLParser::MAMEXMLParser(string sMAMEPath)
 
 MAMEXMLParser::~MAMEXMLParser()
 {
-
+  for (map<string, MAMEMachine*>::iterator it=m_mapMachineToMAMEMachine.begin(); it!=m_mapMachineToMAMEMachine.end(); ++it)
+    {
+      delete(it->second);
+    }
 }
 
 bool MAMEXMLParser::mameOutputIsSane()
@@ -95,7 +98,8 @@ bool MAMEXMLParser::parseMAMEOutput()
 
   for (pugi::xml_node xnMACHINE: xnMAME.children("machine"))
     {
-      MAMEMachine m;
+      MAMEMachine* m=new MAMEMachine();
+      string sChecksum;
       pugi::xml_attribute xaNAME=xnMACHINE.attribute("name");
       pugi::xml_node xnDESCRIPTION=xnMACHINE;
       pugi::xml_node xnMANUFACTURER=xnMACHINE;
@@ -109,20 +113,20 @@ bool MAMEXMLParser::parseMAMEOutput()
       pugi::xml_attribute xaDRIVERGRAPHICSTATUS=xnMACHINE.child("driver").attribute("graphic");
       pugi::xml_attribute xaDRIVERSAVESTATESTATUS=xnMACHINE.child("driver").attribute("savestate");
 
-      m.MachineName_set(xaNAME.value());
-      m.MachineDescription_set(xnDESCRIPTION.child_value("description"));
-      m.MachineManufacturer_set(xnMANUFACTURER.child_value("manufacturer"));
-      m.MachineYear_set(xnYEAR.child_value("year"));
-      m.MachineCloneOf_set(xaCLONEOF.value());
-      m.MachineRomOf_set(xaROMOF.value());
-      m.MachineDriverStatus_set(xaDRIVERSTATUS.value());
-      m.MachineDriverEmulationStatus_set(xaDRIVEREMULATIONSTATUS.value());
-      m.MachineDriverColorStatus_set(xaDRIVERCOLORSTATUS.value());
-      m.MachineDriverSoundStatus_set(xaDRIVERSOUNDSTATUS.value());
-      m.MachineDriverGraphicStatus_set(xaDRIVERGRAPHICSTATUS.value());
-      m.MachineDriverSaveStateStatus_set(xaDRIVERSAVESTATESTATUS.value());
+      m->MachineName_set(xaNAME.value());
+      m->MachineDescription_set(xnDESCRIPTION.child_value("description"));
+      m->MachineManufacturer_set(xnMANUFACTURER.child_value("manufacturer"));
+      m->MachineYear_set(xnYEAR.child_value("year"));
+      m->MachineCloneOf_set(xaCLONEOF.value());
+      m->MachineRomOf_set(xaROMOF.value());
+      m->MachineDriverStatus_set(xaDRIVERSTATUS.value());
+      m->MachineDriverEmulationStatus_set(xaDRIVEREMULATIONSTATUS.value());
+      m->MachineDriverColorStatus_set(xaDRIVERCOLORSTATUS.value());
+      m->MachineDriverSoundStatus_set(xaDRIVERSOUNDSTATUS.value());
+      m->MachineDriverGraphicStatus_set(xaDRIVERGRAPHICSTATUS.value());
+      m->MachineDriverSaveStateStatus_set(xaDRIVERSAVESTATESTATUS.value());
 
-      // TODO push in map. but change map to be a pair of md5 and name
+      m_mapMachineToMAMEMachine[m->MachineName_get()]=m;
 
     }
 

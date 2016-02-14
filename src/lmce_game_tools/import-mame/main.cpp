@@ -27,6 +27,7 @@ int main(int argc, char* argv[])
   bool bError = true;  // Set when there was an error parsing command line.
   string sMamePath;    // Path to MAME binary.
   string sCategoryPath; // Path to Category.ini file.
+  string sROMPath;     // Path to ROMs for checksum.
   char c;              // Current Option.
   int iRetCode;        // Return code
 
@@ -56,6 +57,7 @@ int main(int argc, char* argv[])
 	      sCategoryPath = argv[++optnum];
 	      bError=false;
 	    }
+	  break;
 	}
     }
 
@@ -72,6 +74,8 @@ int main(int argc, char* argv[])
 
   ImportMAME *pImportMAME = new ImportMAME(sMamePath,sCategoryPath);
   iRetCode = pImportMAME->Run();
+
+  delete pImportMAME;
 
   return iRetCode;
   
