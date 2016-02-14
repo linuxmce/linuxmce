@@ -264,6 +264,8 @@ namespace StringUtils
 
 	string TitleHash(string sTitle); /** Calculate a title hash */
 
+	string StringSHA1(string sData); /** Calculate a SHA1 from a string. */
+
 #endif //#ifndef SYMBIAN
 };
 

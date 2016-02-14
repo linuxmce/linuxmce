@@ -66,6 +66,8 @@ extern "C"
 #endif
 #endif //#ifndef SYMBIAN
 
+#include "sha1.h"
+
 char *FileUtils::ReadFileIntoBuffer( string sFileName, size_t &Size )
 {
     Size=0;
@@ -1285,6 +1287,45 @@ long long FileUtils::FileSize64(string sFile)
         return sb.st_size;
     }
 #endif
+}
+
+string FileUtils::FileSHA1(string sFileName)
+{
+  size_t iSize=0;
+  char *pData = ReadFileIntoBuffer(sFileName,iSize);
+
+  if (pData == NULL)
+    return "";
+
+  string sSHA1 = FileSHA1(pData,iSize);
+  delete[] pData;
+
+  return sSHA1;
+}
+
+string FileUtils::FileSHA1(char* pData, size_t iSize)
+{
+  sha1nfo s;
+  char buf[40];
+  uint8_t* hash_result;
+
+  if (!pData || iSize<1)
+    {
+      return "";
+    }
+
+  /* calculate sha1 */
+  sha1_init(&s);
+  sha1_write(&s,pData,iSize);
+  hash_result = sha1_result(&s);
+  snprintf(buf, sizeof(buf), 
+	   "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+	  hash_result[0], hash_result[1], hash_result[2], hash_result[3], hash_result[4],
+	  hash_result[5], hash_result[6], hash_result[7], hash_result[8], hash_result[9],
+	  hash_result[10], hash_result[11], hash_result[12], hash_result[13], hash_result[14],
+	  hash_result[15], hash_result[16], hash_result[17], hash_result[18], hash_result[19]);
+
+  return string(buf,sizeof(buf));
 }
 
 #endif //not WINCE
