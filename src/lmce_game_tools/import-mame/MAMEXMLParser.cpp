@@ -76,7 +76,6 @@ bool MAMEXMLParser::parseMAMEOutput()
 {
   pugi::xml_document doc;
   pugi::xml_parse_result result; 
-  int i=0;
 
   // if (!mameOutputIsSane())
   //   return false;
@@ -96,19 +95,36 @@ bool MAMEXMLParser::parseMAMEOutput()
 
   for (pugi::xml_node xnMACHINE: xnMAME.children("machine"))
     {
+      MAMEMachine m;
       pugi::xml_attribute xaNAME=xnMACHINE.attribute("name");
       pugi::xml_node xnDESCRIPTION=xnMACHINE;
       pugi::xml_node xnMANUFACTURER=xnMACHINE;
       pugi::xml_node xnYEAR=xnMACHINE;
+      pugi::xml_attribute xaCLONEOF=xnMACHINE.attribute("cloneof");
+      pugi::xml_attribute xaROMOF=xnMACHINE.attribute("romof");
+      pugi::xml_attribute xaDRIVERSTATUS=xnMACHINE.child("driver").attribute("status");
+      pugi::xml_attribute xaDRIVEREMULATIONSTATUS=xnMACHINE.child("driver").attribute("emulation");
+      pugi::xml_attribute xaDRIVERCOLORSTATUS=xnMACHINE.child("driver").attribute("color");
+      pugi::xml_attribute xaDRIVERSOUNDSTATUS=xnMACHINE.child("driver").attribute("sound");
+      pugi::xml_attribute xaDRIVERGRAPHICSTATUS=xnMACHINE.child("driver").attribute("graphic");
+      pugi::xml_attribute xaDRIVERSAVESTATESTATUS=xnMACHINE.child("driver").attribute("savestate");
 
-      cout << xaNAME.value() << endl;
-      cout << xnDESCRIPTION.child_value("description") << endl;
-      cout << xnMANUFACTURER.child_value("manufacturer") << endl;
-      cout << xnYEAR.child_value("year") << endl;
-      
-      i++;
+      m.MachineName_set(xaNAME.value());
+      m.MachineDescription_set(xnDESCRIPTION.child_value("description"));
+      m.MachineManufacturer_set(xnMANUFACTURER.child_value("manufacturer"));
+      m.MachineYear_set(xnYEAR.child_value("year"));
+      m.MachineCloneOf_set(xaCLONEOF.value());
+      m.MachineRomOf_set(xaROMOF.value());
+      m.MachineDriverStatus_set(xaDRIVERSTATUS.value());
+      m.MachineDriverEmulationStatus_set(xaDRIVEREMULATIONSTATUS.value());
+      m.MachineDriverColorStatus_set(xaDRIVERCOLORSTATUS.value());
+      m.MachineDriverSoundStatus_set(xaDRIVERSOUNDSTATUS.value());
+      m.MachineDriverGraphicStatus_set(xaDRIVERGRAPHICSTATUS.value());
+      m.MachineDriverSaveStateStatus_set(xaDRIVERSAVESTATESTATUS.value());
+
+      // TODO push in map. but change map to be a pair of md5 and name
+
     }
-  cout << i << endl;
 
   return true;
 }

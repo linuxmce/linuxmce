@@ -27,6 +27,7 @@ class MAMEMachine
   string m_sMachineManufacturer;
   string m_sMachineYear;
   string m_sMachineCloneOf;
+  string m_sMachineRomOf;
   string m_sMachineDriverStatus;
   string m_sMachineDriverEmulationStatus;
   string m_sMachineDriverColorStatus;
@@ -42,6 +43,7 @@ class MAMEMachine
       m_sMachineManufacturer="";
       m_sMachineYear="";
       m_sMachineCloneOf="";
+      m_sMachineRomOf="";
       m_sMachineDriverStatus="";
       m_sMachineDriverEmulationStatus="";
       m_sMachineDriverColorStatus="";
@@ -61,6 +63,7 @@ class MAMEMachine
   string MachineManufacturer_get() {return m_sMachineManufacturer;}
   string MachineYear_get() {return m_sMachineYear;}
   string MachineCloneOf_get() {return m_sMachineCloneOf;}
+  string MachineRomOf_get() {return m_sMachineRomOf;}
   string MachineDriverStatus_get() {return m_sMachineDriverStatus;}
   string MachineDriverEmulationStatus_get() {return m_sMachineDriverEmulationStatus;}
   string MachineDriverColorStatus_get() {return m_sMachineDriverColorStatus;}
@@ -74,6 +77,7 @@ class MAMEMachine
   void MachineManufacturer_set(string sMachineManufacturer) {m_sMachineManufacturer=sMachineManufacturer;}
   void MachineYear_set(string sMachineYear) {m_sMachineYear=sMachineYear;}
   void MachineCloneOf_set(string sMachineCloneOf) {m_sMachineCloneOf=sMachineCloneOf;}
+  void MachineRomOf_set(string sMachineRomOf) {m_sMachineRomOf=sMachineRomOf;}
   void MachineDriverStatus_set(string sMachineDriverStatus) {m_sMachineDriverStatus=sMachineDriverStatus;}
   void MachineDriverEmulationStatus_set(string sMachineDriverEmulationStatus) {m_sMachineDriverEmulationStatus=sMachineDriverEmulationStatus;}
   void MachineDriverColorStatus_set(string sMachineDriverColorStatus) {m_sMachineDriverColorStatus=sMachineDriverColorStatus;}
@@ -90,11 +94,11 @@ class MAMEXMLParser
   MAMEXMLParser(string sMAMEPath);
   virtual ~MAMEXMLParser();
 
-  map<string, MAMEMachine *> m_mapRomToMAMEMachine;
-  MAMEMachine * m_mapRomToMAMEMachine_Find(string sRomName)
+  map<string, MAMEMachine *> m_mapMachineToMAMEMachine;
+  MAMEMachine * m_mapMachineToMAMEMachine_Find(string sRomName)
   {
-    map<string, MAMEMachine *>::iterator it=m_mapRomToMAMEMachine.find(sRomName);
-    return it == m_mapRomToMAMEMachine.end() ? NULL : it->second;
+    map<string, MAMEMachine *>::iterator it=m_mapMachineToMAMEMachine.find(sRomName);
+    return it == m_mapMachineToMAMEMachine.end() ? NULL : it->second;
   }
 
   bool run();
