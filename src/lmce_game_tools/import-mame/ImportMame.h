@@ -23,6 +23,7 @@ class ImportMAME
  private:
   std::string m_sMAMEPath;
   std::string m_sCategoryPath;
+  std::string m_sROMPath;
   MAMEXMLParser* m_pMAMEXMLParser;
 };
 
