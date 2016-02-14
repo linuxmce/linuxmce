@@ -10,6 +10,7 @@
 
 #include "MAMEXMLParser.h"
 #include "Category.h"
+#include "MAMEMachine.h"
 
 #include <string>
 #include <map>
@@ -21,12 +22,20 @@ class ImportMAME
   ImportMAME(std::string sMamePath, std::string sCategoryPath);
   virtual ~ImportMAME();
   int Run();
+
+  map<string, MAMEMachine *> m_mapMachineToMAMEMachine;
+  MAMEMachine * m_mapMachineToMAMEMachine_Find(string sRomName)
+  {
+    map<string, MAMEMachine *>::iterator it=m_mapMachineToMAMEMachine.find(sRomName);
+    return it == m_mapMachineToMAMEMachine.end() ? NULL : it->second;
+  }
+
  private:
   std::string m_sMAMEPath;
   std::string m_sCategoryPath;
   std::string m_sROMPath;
-  MAMEXMLParser* m_pMAMEXMLParser;
-  Category* m_pCategory;
+  class MAMEXMLParser* m_pMAMEXMLParser;
+  class Category* m_pCategory;
   void MergeGenresIntoMachines();
 };
 

@@ -7,8 +7,10 @@ USE lmce_game;
 CREATE TABLE NameHash (
        PK_NameHash INTEGER AUTO_INCREMENT NOT NULL,
        NameHash CHAR(40) UNIQUE NOT NULL,
-       Description VARCHAR(1024),
-       PRIMARY KEY(PK_NameHash)
+       Original VARCHAR(1024),
+       Normalized VARCHAR(1024),
+       PRIMARY KEY(PK_NameHash),
+       KEY(NameHash)
 );
 
 CREATE TABLE Rom (
@@ -21,7 +23,7 @@ CREATE TABLE Rom (
 CREATE TABLE Game (
        PK_Game INTEGER AUTO_INCREMENT NOT NULL,
        Define VARCHAR(128),
-       NameHash CHAR(40) UNIQUE NOT NULL,
+       FK_NameHash INTEGER NOT NULL,
        Subtitle VARCHAR(128),
        PRIMARY KEY (PK_Game)
 );

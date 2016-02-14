@@ -16,17 +16,14 @@
 
 // NOTE TO SELF: KEEP IT ENCAPSULATED, DUMMY!
 
-MAMEXMLParser::MAMEXMLParser(string sMAMEPath)
+MAMEXMLParser::MAMEXMLParser(string sMAMEPath, ImportMAME* pImportMAME)
 {
   m_sMAMEPath = sMAMEPath;
+  m_pImportMAME = pImportMAME;
 }
 
 MAMEXMLParser::~MAMEXMLParser()
 {
-  for (map<string, MAMEMachine*>::iterator it=m_mapMachineToMAMEMachine.begin(); it!=m_mapMachineToMAMEMachine.end(); ++it)
-    {
-      delete(it->second);
-    }
 }
 
 bool MAMEXMLParser::mameOutputIsSane()
@@ -126,7 +123,7 @@ bool MAMEXMLParser::parseMAMEOutput()
       m->MachineDriverGraphicStatus_set(xaDRIVERGRAPHICSTATUS.value());
       m->MachineDriverSaveStateStatus_set(xaDRIVERSAVESTATESTATUS.value());
 
-      m_mapMachineToMAMEMachine[m->MachineName_get()]=m;
+      m_pImportMAME->m_mapMachineToMAMEMachine[m->MachineName_get()]=m;
 
     }
 

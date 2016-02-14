@@ -6,6 +6,7 @@
  */
 
 #include "Database.h"
+#include <vector>
 
 Database::Database()
 {
@@ -34,3 +35,19 @@ bool Database::Init()
     }
 }
 
+bool Database::GameExists(MAMEMachine* m)
+{
+  vector<class Row_Game *> v_RowGame;
+  string sWhereQuery = "WHERE ";
+  if (m_pDatabase->Game_get()->GetRows(sWhereQuery,&v_RowGame))
+}
+
+bool Database::ProcessMachine(MAMEMachine* m)
+{
+  if (!MAMEMachine)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+}

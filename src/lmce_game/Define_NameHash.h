@@ -7,8 +7,10 @@
 #define NAMEHASH_PK_NAMEHASH_TABLE_FIELD "NameHash.PK_NameHash"
 #define NAMEHASH_NAMEHASH_FIELD "NameHash"
 #define NAMEHASH_NAMEHASH_TABLE_FIELD "NameHash.NameHash"
-#define NAMEHASH_DESCRIPTION_FIELD "Description"
-#define NAMEHASH_DESCRIPTION_TABLE_FIELD "NameHash.Description"
+#define NAMEHASH_ORIGINAL_FIELD "Original"
+#define NAMEHASH_ORIGINAL_TABLE_FIELD "NameHash.Original"
+#define NAMEHASH_NORMALIZED_FIELD "Normalized"
+#define NAMEHASH_NORMALIZED_TABLE_FIELD "NameHash.Normalized"
 
 
 #endif
