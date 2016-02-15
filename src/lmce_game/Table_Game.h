@@ -94,31 +94,26 @@ class DECLSPECIFIER Row_Game : public TableRow, public SerializeClass
 		Table_Game *table;
 		
 		long int m_PK_Game;
-string m_Define;
 long int m_FK_NameHash;
 string m_Subtitle;
 
-		bool is_null[4];
+		bool is_null[3];
 	
 	public:
 		long int PK_Game_get();
-string Define_get();
 long int FK_NameHash_get();
 string Subtitle_get();
 
 		
 		void PK_Game_set(long int val);
-void Define_set(string val);
 void FK_NameHash_set(long int val);
 void Subtitle_set(string val);
 
 		
-		bool Define_isNull();
-bool Subtitle_isNull();
+		bool Subtitle_isNull();
 
 			
-		void Define_setNull(bool val);
-void Subtitle_setNull(bool val);
+		void Subtitle_setNull(bool val);
 	
 	
 		void Delete();
@@ -144,13 +139,12 @@ void Game_GameSystem_Rom_Configuration_FK_Game_getrows(vector <class Row_Game_Ga
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Game+ m_Define+ m_FK_NameHash+ m_Subtitle;
+			StartSerializeList() + m_PK_Game+ m_FK_NameHash+ m_Subtitle;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_Game_asSQL();
-string Define_asSQL();
 string FK_NameHash_asSQL();
 string Subtitle_asSQL();
 
