@@ -22,7 +22,6 @@ CREATE TABLE Rom (
 
 CREATE TABLE Game (
        PK_Game INTEGER AUTO_INCREMENT NOT NULL,
-       Define VARCHAR(128),
        FK_NameHash INTEGER NOT NULL,
        Subtitle VARCHAR(128),
        PRIMARY KEY (PK_Game)
