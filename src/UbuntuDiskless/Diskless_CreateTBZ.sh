@@ -630,8 +630,7 @@ MD_Install_Packages () {
 			## If libdvdcss2 is installed on the hybrid/core
 			if [[ -d /usr/share/doc/libdvdcss2 ]] ;then
 				pushd $TEMP_DIR >/dev/null
-				LC_ALL=C chroot $TEMP_DIR apt-get -y install libdvdcss2
-				VerifyExitCode "Installation of libdvdcss2 failed"
+				LC_ALL=C chroot $TEMP_DIR apt-get -y install libdvdcss2 || :
 				popd >/dev/null
 			fi
 
