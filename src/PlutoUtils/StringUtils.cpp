@@ -1326,20 +1326,20 @@ string StringUtils::TitleHash(string sTitle)
 string StringUtils::StringSHA1(string sData)
 {
   sha1nfo s;
-  char buf[40];
+  char tmp[3];
+  string sha1;
   uint8_t* hash_result;
 
   sha1_init(&s);
   sha1_write(&s,sData.data(),sData.size());
   hash_result = sha1_result(&s);
-  snprintf(buf, sizeof(buf), 
-	   "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-	  hash_result[0], hash_result[1], hash_result[2], hash_result[3], hash_result[4],
-	  hash_result[5], hash_result[6], hash_result[7], hash_result[8], hash_result[9],
-	  hash_result[10], hash_result[11], hash_result[12], hash_result[13], hash_result[14],
-	  hash_result[15], hash_result[16], hash_result[17], hash_result[18], hash_result[19]);
+  for (int i=0; i<20; i++)
+    {
+      sprintf(tmp,"%02x",hash_result[i]);
+      sha1 += tmp;
+    }
 
-  return string(buf,sizeof(buf));
+  return sha1;
 }
 
 #endif //#ifndef SYMBIAN
