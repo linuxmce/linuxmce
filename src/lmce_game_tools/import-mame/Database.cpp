@@ -214,6 +214,442 @@ long int Database::GetPKGame(MAMEMachine* m)
   return 0;
 }
 
+bool Database::ManufacturerNameHashExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ManufacturerNameHashExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ManufacturerNameHashExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_NameHash *> v_RowNameHash;
+  string sNameHash = NameHash::FromString(m->MachineManufacturer_get());
+  if (!m_pDatabase->NameHash_get()->GetRows("where NameHash=\""+sNameHash+"\"",&v_RowNameHash))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowNameHash.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+}
+
+long int Database::AddManufacturerNameHash(MAMEMachine *m)
+{
+  Row_NameHash *pRow_NameHash = m_pDatabase->NameHash_get()->AddRow();
+  long int PK_NameHash=0;
+  if (pRow_NameHash)
+    {
+      pRow_NameHash->NameHash_set(NameHash::FromString(m->MachineManufacturer_get()));
+      pRow_NameHash->Original_set(m->MachineManufacturer_get());
+      pRow_NameHash->Normalized_set(NameHash::NormalizeString(m->MachineManufacturer_get()));
+      pRow_NameHash->Table_NameHash_get()->Commit();
+      PK_NameHash=pRow_NameHash->PK_NameHash_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_NameHash;
+    }
+  return 0;
+}
+
+long int Database::GetManufacturerPKNameHash(MAMEMachine *m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "NameHash = '"+NameHash::FromString(m->MachineManufacturer_get())+"'";
+  vector<class Row_NameHash *> v_RowNameHash;
+  if (!m_pDatabase->NameHash_get()->GetRows(sWhereQuery,&v_RowNameHash))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetManufacturerPKNameHash() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowNameHash.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_NameHash* pRow_NameHash = v_RowNameHash[0];
+      if (!pRow_NameHash)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetManufacturerPKNameHash() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_NameHash->PK_NameHash_get();
+	}
+    }
+  return 0;
+}
+
+bool Database::ManufacturerExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ManufacturerExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ManufacturerExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_Manufacturer *> v_RowManufacturer;
+  if (!m_pDatabase->Manufacturer_get()->GetRows("FK_NameHash="+StringUtils::itos(m->liPK_Manufacturer_NameHash_get()),&v_RowManufacturer))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowManufacturer.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+}
+
+long int Database::AddManufacturer(MAMEMachine* m)
+{
+  Row_Manufacturer *pRow_Manufacturer = m_pDatabase->Manufacturer_get()->AddRow();
+  long int PK_Manufacturer=0;
+  if (pRow_Manufacturer)
+    {
+      pRow_Manufacturer->FK_NameHash_set(m->liPK_Manufacturer_NameHash_get());
+      pRow_Manufacturer->Table_Manufacturer_get()->Commit();
+      PK_Manufacturer=pRow_Manufacturer->PK_Manufacturer_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_Manufacturer;
+    }
+  return 0;
+}
+
+long int Database::GetPKManufacturer(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "FK_NameHash = "+StringUtils::itos(m->liPK_Manufacturer_NameHash_get());
+  vector<class Row_Manufacturer *> v_RowManufacturer;
+  if (!m_pDatabase->Manufacturer_get()->GetRows(sWhereQuery,&v_RowManufacturer))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKManufacturer() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowManufacturer.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Manufacturer* pRow_Manufacturer = v_RowManufacturer[0];
+      if (!pRow_Manufacturer)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKManufacturer() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_Manufacturer->PK_Manufacturer_get();
+	}
+    }
+  return 0;
+}
+
+bool Database::GenreNameHashExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GenreNameHashExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GenreNameHashExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_NameHash *> v_RowNameHash;
+  string sNameHash = NameHash::FromString(m->MachineGenre_get());
+  if (!m_pDatabase->NameHash_get()->GetRows("where NameHash=\""+sNameHash+"\"",&v_RowNameHash))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowNameHash.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+}
+
+long int Database::AddGenreNameHash(MAMEMachine *m)
+{
+  Row_NameHash *pRow_NameHash = m_pDatabase->NameHash_get()->AddRow();
+  long int PK_NameHash=0;
+  if (pRow_NameHash)
+    {
+      pRow_NameHash->NameHash_set(NameHash::FromString(m->MachineGenre_get()));
+      pRow_NameHash->Original_set(m->MachineGenre_get());
+      pRow_NameHash->Normalized_set(NameHash::NormalizeString(m->MachineGenre_get()));
+      pRow_NameHash->Table_NameHash_get()->Commit();
+      PK_NameHash=pRow_NameHash->PK_NameHash_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_NameHash;
+    }
+  return 0;
+}
+
+long int Database::GetGenrePKNameHash(MAMEMachine *m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "NameHash = '"+NameHash::FromString(m->MachineGenre_get())+"'";
+  vector<class Row_NameHash *> v_RowNameHash;
+  if (!m_pDatabase->NameHash_get()->GetRows(sWhereQuery,&v_RowNameHash))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetGenrePKNameHash() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowNameHash.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_NameHash* pRow_NameHash = v_RowNameHash[0];
+      if (!pRow_NameHash)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetGenrePKNameHash() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_NameHash->PK_NameHash_get();
+	}
+    }
+  return 0;
+}
+
+bool Database::GenreExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GenreExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GenreExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_Genre *> v_RowGenre;
+  if (!m_pDatabase->Genre_get()->GetRows("FK_NameHash="+StringUtils::itos(m->liPK_Genre_NameHash_get()),&v_RowGenre))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowGenre.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+}
+
+long int Database::AddGenre(MAMEMachine* m)
+{
+  Row_Genre *pRow_Genre = m_pDatabase->Genre_get()->AddRow();
+  long int PK_Genre=0;
+  if (pRow_Genre)
+    {
+      pRow_Genre->FK_NameHash_set(m->liPK_Genre_NameHash_get());
+      pRow_Genre->Table_Genre_get()->Commit();
+      PK_Genre=pRow_Genre->PK_Genre_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_Genre;
+    }
+  return 0;
+}
+
+long int Database::GetPKGenre(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "FK_NameHash = "+StringUtils::itos(m->liPK_Genre_NameHash_get());
+  vector<class Row_Genre *> v_RowGenre;
+  if (!m_pDatabase->Genre_get()->GetRows(sWhereQuery,&v_RowGenre))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGenre() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowGenre.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Genre* pRow_Genre = v_RowGenre[0];
+      if (!pRow_Genre)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGenre() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_Genre->PK_Genre_get();
+	}
+    }
+  return 0;
+}
+
+bool Database::GameGameSystemExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GameGameSystemExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GameGameSystemExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_Game_GameSystem *> v_RowGameGameSystem;
+  if (!m_pDatabase->Game_GameSystem_get()->GetRows("FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Manufacturer="+StringUtils::itos(m->liPK_Manufacturer_get())+" AND FK_Genre="+StringUtils::itos(m->liPK_Genre_get()),&v_RowGameGameSystem))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowGameGameSystem.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+  
+}
+
+long int Database::AddGameGameSystem(MAMEMachine* m)
+{
+  Row_Game_GameSystem *pRow_Game_GameSystem = m_pDatabase->Game_GameSystem_get()->AddRow();
+  long int PK_Game_GameSystem=0;
+  if (pRow_Game_GameSystem)
+    {
+      pRow_Game_GameSystem->FK_Game_set(m->liPK_Game_get());
+      pRow_Game_GameSystem->FK_GameSystem_set(GAMESYSTEM_MAME_CONST);
+      pRow_Game_GameSystem->FK_Manufacturer_set(m->liPK_Manufacturer_get());
+      pRow_Game_GameSystem->FK_Genre_set(m->liPK_Genre_get());
+      pRow_Game_GameSystem->Year_set(atoi(m->MachineYear_get().c_str()));
+      pRow_Game_GameSystem->Table_Game_GameSystem_get()->Commit();
+      PK_Game_GameSystem=pRow_Game_GameSystem->PK_Game_GameSystem_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_Game_GameSystem;
+    }
+  return 0;
+}
+
+long int Database::GetPKGameGameSystem(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Manufacturer="+StringUtils::itos(m->liPK_Manufacturer_get())+" AND FK_Genre="+StringUtils::itos(m->liPK_Genre_get());
+  vector<class Row_Game_GameSystem *> v_RowGame_GameSystem;
+  if (!m_pDatabase->Game_GameSystem_get()->GetRows(sWhereQuery,&v_RowGame_GameSystem))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGame_GameSystem() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowGame_GameSystem.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Game_GameSystem* pRow_Game_GameSystem = v_RowGame_GameSystem[0];
+      if (!pRow_Game_GameSystem)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGame_GameSystem() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_Game_GameSystem->PK_Game_GameSystem_get();
+	}
+    }
+  return 0;
+}
+
 bool Database::ProcessMachine(MAMEMachine* m)
 {
   if (!m)
@@ -253,6 +689,19 @@ bool Database::ProcessMachine(MAMEMachine* m)
   m->liPK_Game_set(liPK_Game);
 
   // Add Manufacturer entry if needed, otherwise query, come out with a PK_Manufacturer
+  // first, a manufacturer namehash, if needed.
+  long int liPK_Manufacturer_NameHash;
+  if (!ManufacturerNameHashExists(m))
+    {
+      // Add Entry
+      liPK_Manufacturer_NameHash=AddManufacturerNameHash(m);
+    }
+  else
+    {
+      liPK_Manufacturer_NameHash=GetManufacturerPKNameHash(m);
+    }
+
+  m->liPK_Manufacturer_NameHash_set(liPK_Manufacturer_NameHash);
 
   long int liPK_Manufacturer;
   if (!ManufacturerExists(m))
@@ -267,5 +716,50 @@ bool Database::ProcessMachine(MAMEMachine* m)
 
   m->liPK_Manufacturer_set(liPK_Manufacturer);
 
+ // Add Genre entry if needed, otherwise query, come out with a PK_Genre
+  // first, a manufacturer namehash, if needed.
+  long int liPK_Genre_NameHash;
+  if (!GenreNameHashExists(m))
+    {
+      // Add Entry
+      liPK_Genre_NameHash=AddGenreNameHash(m);
+    }
+  else
+    {
+      liPK_Genre_NameHash=GetGenrePKNameHash(m);
+    }
+
+  m->liPK_Genre_NameHash_set(liPK_Genre_NameHash);
+
+  long int liPK_Genre;
+  if (!GenreExists(m))
+    {
+      // Add Game Entry
+      liPK_Genre=AddGenre(m);
+    }
+  else
+    {
+      liPK_Genre=GetPKGenre(m);
+    }
+
+  m->liPK_Genre_set(liPK_Genre);
+
+  // Add GameGameSystem entry if needed, otherwise query, come out with a PK_GameGameSystem
+
+  long int liPK_GameGameSystem;
+  if (!GameGameSystemExists(m))
+    {
+      // Add GameGameSystem Entry
+      liPK_GameGameSystem=AddGameGameSystem(m);
+    }
+  else
+    {
+      liPK_GameGameSystem=GetPKGameGameSystem(m);
+    }
+
+  m->liPK_Game_GameSystem_set(liPK_GameGameSystem);
+
+  cout << "." << flush;
+  
   return false;
 }
