@@ -30,6 +30,11 @@ class MAMEMachine
   string m_sMachineGenre;
   long int m_liPK_NameHash;
   long int m_liPK_Game;
+  long int m_liPK_Manufacturer_NameHash;
+  long int m_liPK_Manufacturer;
+  long int m_liPK_Genre_NameHash;
+  long int m_liPK_Genre;
+  long int m_liPK_Game_GameSystem;
 
  public:
   MAMEMachine() 
@@ -49,7 +54,11 @@ class MAMEMachine
       m_sMachineGenre="";
       m_liPK_NameHash=0;
       m_liPK_Game=0;
+      m_liPK_Manufacturer_NameHash=0;
       m_liPK_Manufacturer=0;
+      m_liPK_Genre_NameHash=0;
+      m_liPK_Genre=0;
+      m_liPK_Game_GameSystem=0;
     }
 
   virtual ~MAMEMachine()
@@ -87,7 +96,11 @@ class MAMEMachine
   string MachineGenre_get() {return m_sMachineGenre;}
   long int liPK_NameHash_get() {return m_liPK_NameHash;}
   long int liPK_Game_get() {return m_liPK_Game;}
+  long int liPK_Manufacturer_NameHash_get() {return m_liPK_Manufacturer_NameHash;}
   long int liPK_Manufacturer_get() {return m_liPK_Manufacturer;}
+  long int liPK_Genre_NameHash_get() {return m_liPK_Genre_NameHash;}
+  long int liPK_Genre_get() {return m_liPK_Genre;}
+  long int liPK_Game_GameSystem_get() {return m_liPK_Game_GameSystem;}
 
   // Set accessors
   void MachineName_set(string sMachineName) {m_sMachineName=sMachineName;}
@@ -105,7 +118,12 @@ class MAMEMachine
   void MachineGenre_set(string sMachineGenre) {m_sMachineGenre=sMachineGenre;}
   void liPK_NameHash_set(long int liPK_NameHash) {m_liPK_NameHash=liPK_NameHash;}
   void liPK_Game_set(long int liPK_Game) {m_liPK_Game=liPK_Game;}
+  void liPK_Manufacturer_NameHash_set(long int liPK_Manufacturer_NameHash) {m_liPK_Manufacturer_NameHash=liPK_Manufacturer_NameHash;}
   void liPK_Manufacturer_set(long int liPK_Manufacturer) {m_liPK_Manufacturer=liPK_Manufacturer;}
+  void liPK_Genre_NameHash_set(long int liPK_Genre_NameHash) {m_liPK_Genre_NameHash=liPK_Genre_NameHash;}
+  void liPK_Genre_set(long int liPK_Genre) {m_liPK_Genre=liPK_Genre;}
+  void liPK_Game_GameSystem_set(long int liPK_Game_GameSystem) {m_liPK_Game_GameSystem=liPK_Game_GameSystem;}
+
 };
 
 #endif /** MAMEMACHINE_H */

@@ -33,7 +33,7 @@ CREATE TABLE Game_GameSystem (
        FK_GameSystem INTEGER NOT NULL,
        FK_Manufacturer INTEGER NOT NULL DEFAULT '-1',
        FK_Genre INTEGER NOT NULL DEFAULT '-1',
-       FK_Year INTEGER,
+       Year INTEGER,
        PRIMARY KEY (PK_Game_GameSystem),
        KEY(FK_Game),
        KEY(FK_GameSystem)
@@ -131,3 +131,4 @@ CREATE TABLE Game_GameSystem_Rom_Configuration (
        KEY(FK_Rom),
        KEY(FK_Configuration)
 );
+
