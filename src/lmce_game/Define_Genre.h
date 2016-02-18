@@ -7,8 +7,8 @@
 #define GENRE_PK_GENRE_TABLE_FIELD "Genre.PK_Genre"
 #define GENRE_FK_GENRE_PARENT_FIELD "FK_Genre_Parent"
 #define GENRE_FK_GENRE_PARENT_TABLE_FIELD "Genre.FK_Genre_Parent"
-#define GENRE_DESCRIPTION_FIELD "Description"
-#define GENRE_DESCRIPTION_TABLE_FIELD "Genre.Description"
+#define GENRE_FK_NAMEHASH_FIELD "FK_NameHash"
+#define GENRE_FK_NAMEHASH_TABLE_FIELD "Genre.FK_NameHash"
 
 
 #endif

@@ -31,9 +31,9 @@
 using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_Manufacturer.h"
+#include "Table_NameHash.h"
 
 #include "Table_Game_GameSystem.h"
-#include "Table_Manufacturer_NameHash.h"
 
 
 void Database_lmce_game::CreateTable_Manufacturer()
@@ -137,7 +137,8 @@ void Row_Manufacturer::SetDefaultValues()
 {
 	m_PK_Manufacturer = 0;
 is_null[0] = false;
-is_null[1] = true;
+m_FK_NameHash = 0;
+is_null[1] = false;
 
 
 	is_added=false;
@@ -148,28 +149,21 @@ is_null[1] = true;
 long int Row_Manufacturer::PK_Manufacturer_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_PK_Manufacturer;}
-string Row_Manufacturer::Description_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+long int Row_Manufacturer::FK_NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_Description;}
+return m_FK_NameHash;}
 
 		
 void Row_Manufacturer::PK_Manufacturer_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_PK_Manufacturer = val; is_modified=true; is_null[0]=false;}
-void Row_Manufacturer::Description_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Manufacturer::FK_NameHash_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_Description = val; is_modified=true; is_null[1]=false;}
+m_FK_NameHash = val; is_modified=true; is_null[1]=false;}
 
 		
-bool Row_Manufacturer::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
 
 			
-void Row_Manufacturer::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
 	
 
 string Row_Manufacturer::PK_Manufacturer_asSQL()
@@ -185,18 +179,17 @@ sprintf(buf, "%li", m_PK_Manufacturer);
 return buf;
 }
 
-string Row_Manufacturer::Description_asSQL()
+string Row_Manufacturer::FK_NameHash_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[1537];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)768,m_Description.size()));
-string s=string()+"\""+buf+"\"";
-delete[] buf;
-return s;
+char buf[32];
+sprintf(buf, "%li", m_FK_NameHash);
+
+return buf;
 }
 
 
@@ -238,10 +231,10 @@ bool Table_Manufacturer::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailed
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Manufacturer_asSQL()+", "+pRow->Description_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Manufacturer_asSQL()+", "+pRow->FK_NameHash_asSQL();
 
 	
-		string query = "insert into Manufacturer (`PK_Manufacturer`, `Description`) values ("+
+		string query = "insert into Manufacturer (`PK_Manufacturer`, `FK_NameHash`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -307,7 +300,7 @@ condition = condition + "`PK_Manufacturer`=" + tmp_PK_Manufacturer;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Manufacturer`="+pRow->PK_Manufacturer_asSQL()+", `Description`="+pRow->Description_asSQL();
+update_values_list = update_values_list + "`PK_Manufacturer`="+pRow->PK_Manufacturer_asSQL()+", `FK_NameHash`="+pRow->FK_NameHash_asSQL();
 
 	
 		string query = "update Manufacturer set " + update_values_list + " where " + condition;
@@ -454,12 +447,12 @@ sscanf(row[0], "%li", &(pRow->m_PK_Manufacturer));
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_Description = "";
+pRow->m_FK_NameHash = 0;
 }
 else
 {
 pRow->is_null[1]=false;
-pRow->m_Description = string(row[1],lengths[1]);
+sscanf(row[1], "%li", &(pRow->m_FK_NameHash));
 }
 
 
@@ -592,12 +585,12 @@ sscanf(row[0], "%li", &(pRow->m_PK_Manufacturer));
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_Description = "";
+pRow->m_FK_NameHash = 0;
 }
 else
 {
 pRow->is_null[1]=false;
-pRow->m_Description = string(row[1],lengths[1]);
+sscanf(row[1], "%li", &(pRow->m_FK_NameHash));
 }
 
 
@@ -608,6 +601,13 @@ pRow->m_Description = string(row[1],lengths[1]);
 }
 
 
+class Row_NameHash* Row_Manufacturer::FK_NameHash_getrow()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_NameHash *pTable = table->database->NameHash_get();
+return pTable->GetRow(m_FK_NameHash);
+}
 
 
 void Row_Manufacturer::Game_GameSystem_FK_Manufacturer_getrows(vector <class Row_Game_GameSystem*> *rows)
@@ -615,13 +615,6 @@ void Row_Manufacturer::Game_GameSystem_FK_Manufacturer_getrows(vector <class Row
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Game_GameSystem *pTable = table->database->Game_GameSystem_get();
-pTable->GetRows("`FK_Manufacturer`=" + StringUtils::itos(m_PK_Manufacturer),rows);
-}
-void Row_Manufacturer::Manufacturer_NameHash_FK_Manufacturer_getrows(vector <class Row_Manufacturer_NameHash*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Manufacturer_NameHash *pTable = table->database->Manufacturer_NameHash_get();
 pTable->GetRows("`FK_Manufacturer`=" + StringUtils::itos(m_PK_Manufacturer),rows);
 }
 

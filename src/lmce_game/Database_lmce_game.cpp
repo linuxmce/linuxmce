@@ -30,9 +30,7 @@ tblGame_GameSystem_Picture=NULL;
 tblGame_GameSystem_Rom=NULL;
 tblGame_GameSystem_Rom_Configuration=NULL;
 tblGenre=NULL;
-tblGenre_NameHash=NULL;
 tblManufacturer=NULL;
-tblManufacturer_NameHash=NULL;
 tblNameHash=NULL;
 tblPicture=NULL;
 tblRom=NULL;
@@ -76,14 +74,8 @@ if( tblGame_GameSystem_Rom_Configuration!=NULL )
 if( tblGenre!=NULL )
 	if( !Commit_Genre(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
-if( tblGenre_NameHash!=NULL )
-	if( !Commit_Genre_NameHash(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
-		bResult=false;
 if( tblManufacturer!=NULL )
 	if( !Commit_Manufacturer(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
-		bResult=false;
-if( tblManufacturer_NameHash!=NULL )
-	if( !Commit_Manufacturer_NameHash(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
 if( tblNameHash!=NULL )
 	if( !Commit_NameHash(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
@@ -110,9 +102,7 @@ DeleteTable_Game_GameSystem_Picture();
 DeleteTable_Game_GameSystem_Rom();
 DeleteTable_Game_GameSystem_Rom_Configuration();
 DeleteTable_Genre();
-DeleteTable_Genre_NameHash();
 DeleteTable_Manufacturer();
-DeleteTable_Manufacturer_NameHash();
 DeleteTable_NameHash();
 DeleteTable_Picture();
 DeleteTable_Rom();

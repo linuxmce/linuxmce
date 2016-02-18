@@ -11,6 +11,7 @@
 #include "MAMEXMLParser.h"
 #include "Category.h"
 #include "MAMEMachine.h"
+#include "Database.h"
 
 #include <string>
 #include <map>
@@ -36,6 +37,7 @@ class ImportMAME
   std::string m_sROMPath;
   class MAMEXMLParser* m_pMAMEXMLParser;
   class Category* m_pCategory;
+  class Database* m_pDatabase;
   void MergeGenresIntoMachines();
 };
 

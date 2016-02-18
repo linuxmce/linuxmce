@@ -32,10 +32,10 @@ using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_Genre.h"
 #include "Table_Genre.h"
+#include "Table_NameHash.h"
 
 #include "Table_Game_GameSystem.h"
 #include "Table_Genre.h"
-#include "Table_Genre_NameHash.h"
 
 
 void Database_lmce_game::CreateTable_Genre()
@@ -141,7 +141,8 @@ void Row_Genre::SetDefaultValues()
 is_null[0] = false;
 is_null[1] = true;
 m_FK_Genre_Parent = 0;
-is_null[2] = true;
+m_FK_NameHash = 0;
+is_null[2] = false;
 
 
 	is_added=false;
@@ -155,9 +156,9 @@ return m_PK_Genre;}
 long int Row_Genre::FK_Genre_Parent_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_FK_Genre_Parent;}
-string Row_Genre::Description_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+long int Row_Genre::FK_NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_Description;}
+return m_FK_NameHash;}
 
 		
 void Row_Genre::PK_Genre_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -166,25 +167,18 @@ m_PK_Genre = val; is_modified=true; is_null[0]=false;}
 void Row_Genre::FK_Genre_Parent_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_FK_Genre_Parent = val; is_modified=true; is_null[1]=false;}
-void Row_Genre::Description_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Genre::FK_NameHash_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_Description = val; is_modified=true; is_null[2]=false;}
+m_FK_NameHash = val; is_modified=true; is_null[2]=false;}
 
 		
 bool Row_Genre::FK_Genre_Parent_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
-bool Row_Genre::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
 
 			
 void Row_Genre::FK_Genre_Parent_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
-is_modified=true;
-}
-void Row_Genre::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
 is_modified=true;
 }
 	
@@ -215,18 +209,17 @@ sprintf(buf, "%li", m_FK_Genre_Parent);
 return buf;
 }
 
-string Row_Genre::Description_asSQL()
+string Row_Genre::FK_NameHash_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[1537];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)768,m_Description.size()));
-string s=string()+"\""+buf+"\"";
-delete[] buf;
-return s;
+char buf[32];
+sprintf(buf, "%li", m_FK_NameHash);
+
+return buf;
 }
 
 
@@ -268,10 +261,10 @@ bool Table_Genre::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertR
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Genre_asSQL()+", "+pRow->FK_Genre_Parent_asSQL()+", "+pRow->Description_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Genre_asSQL()+", "+pRow->FK_Genre_Parent_asSQL()+", "+pRow->FK_NameHash_asSQL();
 
 	
-		string query = "insert into Genre (`PK_Genre`, `FK_Genre_Parent`, `Description`) values ("+
+		string query = "insert into Genre (`PK_Genre`, `FK_Genre_Parent`, `FK_NameHash`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -337,7 +330,7 @@ condition = condition + "`PK_Genre`=" + tmp_PK_Genre;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Genre`="+pRow->PK_Genre_asSQL()+", `FK_Genre_Parent`="+pRow->FK_Genre_Parent_asSQL()+", `Description`="+pRow->Description_asSQL();
+update_values_list = update_values_list + "`PK_Genre`="+pRow->PK_Genre_asSQL()+", `FK_Genre_Parent`="+pRow->FK_Genre_Parent_asSQL()+", `FK_NameHash`="+pRow->FK_NameHash_asSQL();
 
 	
 		string query = "update Genre set " + update_values_list + " where " + condition;
@@ -495,12 +488,12 @@ sscanf(row[1], "%li", &(pRow->m_FK_Genre_Parent));
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_Description = "";
+pRow->m_FK_NameHash = 0;
 }
 else
 {
 pRow->is_null[2]=false;
-pRow->m_Description = string(row[2],lengths[2]);
+sscanf(row[2], "%li", &(pRow->m_FK_NameHash));
 }
 
 
@@ -644,12 +637,12 @@ sscanf(row[1], "%li", &(pRow->m_FK_Genre_Parent));
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_Description = "";
+pRow->m_FK_NameHash = 0;
 }
 else
 {
 pRow->is_null[2]=false;
-pRow->m_Description = string(row[2],lengths[2]);
+sscanf(row[2], "%li", &(pRow->m_FK_NameHash));
 }
 
 
@@ -667,6 +660,13 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Genre *pTable = table->database->Genre_get();
 return pTable->GetRow(m_FK_Genre_Parent);
 }
+class Row_NameHash* Row_Genre::FK_NameHash_getrow()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_NameHash *pTable = table->database->NameHash_get();
+return pTable->GetRow(m_FK_NameHash);
+}
 
 
 void Row_Genre::Game_GameSystem_FK_Genre_getrows(vector <class Row_Game_GameSystem*> *rows)
@@ -682,13 +682,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Genre *pTable = table->database->Genre_get();
 pTable->GetRows("`FK_Genre_Parent`=" + StringUtils::itos(m_PK_Genre),rows);
-}
-void Row_Genre::Genre_NameHash_FK_Genre_getrows(vector <class Row_Genre_NameHash*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Genre_NameHash *pTable = table->database->Genre_NameHash_get();
-pTable->GetRows("`FK_Genre`=" + StringUtils::itos(m_PK_Genre),rows);
 }
 
 

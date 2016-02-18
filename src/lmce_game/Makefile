@@ -22,9 +22,7 @@ Table_Game_GameSystem_Picture.cpp \
 Table_Game_GameSystem_Rom.cpp \
 Table_Game_GameSystem_Rom_Configuration.cpp \
 Table_Genre.cpp \
-Table_Genre_NameHash.cpp \
 Table_Manufacturer.cpp \
-Table_Manufacturer_NameHash.cpp \
 Table_NameHash.cpp \
 Table_Picture.cpp \
 Table_Rom.cpp

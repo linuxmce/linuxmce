@@ -94,24 +94,22 @@ class DECLSPECIFIER Row_Manufacturer : public TableRow, public SerializeClass
 		Table_Manufacturer *table;
 		
 		long int m_PK_Manufacturer;
-string m_Description;
+long int m_FK_NameHash;
 
 		bool is_null[2];
 	
 	public:
 		long int PK_Manufacturer_get();
-string Description_get();
+long int FK_NameHash_get();
 
 		
 		void PK_Manufacturer_set(long int val);
-void Description_set(string val);
+void FK_NameHash_set(long int val);
 
 		
-		bool Description_isNull();
-
+		
 			
-		void Description_setNull(bool val);
-	
+			
 	
 		void Delete();
 		void Reload();		
@@ -123,22 +121,22 @@ void Description_set(string val);
 		class Table_Manufacturer *Table_Manufacturer_get() { return table; };
 
 		// Return the rows for foreign keys 
-		
+		class Row_NameHash* FK_NameHash_getrow();
+
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Game_GameSystem_FK_Manufacturer_getrows(vector <class Row_Game_GameSystem*> *rows);
-void Manufacturer_NameHash_FK_Manufacturer_getrows(vector <class Row_Manufacturer_NameHash*> *rows);
 
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Manufacturer+ m_Description;
+			StartSerializeList() + m_PK_Manufacturer+ m_FK_NameHash;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_Manufacturer_asSQL();
-string Description_asSQL();
+string FK_NameHash_asSQL();
 
 	};
 

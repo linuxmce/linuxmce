@@ -148,13 +148,7 @@
 				RelativePath=".\Table_Genre.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Genre_NameHash.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Manufacturer.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Manufacturer_NameHash.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_NameHash.cpp">

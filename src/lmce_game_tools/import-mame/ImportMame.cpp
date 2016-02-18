@@ -13,6 +13,7 @@ ImportMAME::ImportMAME(std::string sMAMEPath, std::string sCategoryPath)
   m_sCategoryPath=sCategoryPath;
   m_pCategory = new Category(sCategoryPath);
   m_pMAMEXMLParser = new MAMEXMLParser(sMAMEPath, this);
+  m_pDatabase = new Database();
 }
 
 ImportMAME::~ImportMAME()
@@ -42,12 +43,19 @@ void ImportMAME::MergeGenresIntoMachines()
 
 int ImportMAME::Run()
 {
-  if (!m_pMAMEXMLParser || !m_pCategory)
+  if (!m_pMAMEXMLParser || !m_pCategory || !m_pDatabase)
     return false;
 
+  m_pDatabase->Init();
   m_pCategory->Parse();
   m_pMAMEXMLParser->run();
   MergeGenresIntoMachines();
+
+  for (map<string, MAMEMachine*>::iterator it=m_mapMachineToMAMEMachine.begin(); it!=m_mapMachineToMAMEMachine.end(); ++it)
+    {
+      MAMEMachine* m = it->second;
+      m_pDatabase->ProcessMachine(m);
+    }
 
   return 0;
 }

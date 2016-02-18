@@ -28,6 +28,8 @@ class MAMEMachine
   string m_sMachineDriverGraphicStatus;
   string m_sMachineDriverSaveStateStatus;
   string m_sMachineGenre;
+  long int m_liPK_NameHash;
+  long int m_liPK_Game;
 
  public:
   MAMEMachine() 
@@ -45,6 +47,9 @@ class MAMEMachine
       m_sMachineDriverGraphicStatus="";
       m_sMachineDriverSaveStateStatus="";
       m_sMachineGenre="";
+      m_liPK_NameHash=0;
+      m_liPK_Game=0;
+      m_liPK_Manufacturer=0;
     }
 
   virtual ~MAMEMachine()
@@ -55,27 +60,14 @@ class MAMEMachine
   // Special functions for accessors
   string subDescriptionFor(string sMachineDescription)
   {
-    size_t pos=0;
-    for (size_t i=0;i<sMachineDescription.size();++i)
+    size_t found = sMachineDescription.find_first_of("([{");
+
+    if (found==string::npos)
       {
-	if ((sMachineDescription[i]>='0' && sMachineDescription[i]<='9') || (sMachineDescription[i]>='A' && sMachineDescription[i]<='Z'))
-	  {
-	    continue;
-	  }
-	else if ((sMachineDescription[i]>='a' && sMachineDescription[i]<='z'))
-	  {
-	    continue;
-	  }
-	else
-	  {
-	    pos=i;
-	  }
+	return "";
       }
-
-    if (pos>0)
-      return sMachineDescription.substr(pos,sMachineDescription.size());
-
-    return "";
+    
+    return sMachineDescription.substr(found);
   }
 
   // Get accessors
@@ -93,6 +85,9 @@ class MAMEMachine
   string MachineDriverGraphicStatus_get() {return m_sMachineDriverGraphicStatus;}
   string MachineDriverSaveStateStatus_get() {return m_sMachineDriverSaveStateStatus;}
   string MachineGenre_get() {return m_sMachineGenre;}
+  long int liPK_NameHash_get() {return m_liPK_NameHash;}
+  long int liPK_Game_get() {return m_liPK_Game;}
+  long int liPK_Manufacturer_get() {return m_liPK_Manufacturer;}
 
   // Set accessors
   void MachineName_set(string sMachineName) {m_sMachineName=sMachineName;}
@@ -108,6 +103,9 @@ class MAMEMachine
   void MachineDriverGraphicStatus_set(string sMachineDriverGraphicStatus) {m_sMachineDriverGraphicStatus=sMachineDriverGraphicStatus;}
   void MachineDriverSaveStateStatus_set(string sMachineDriverSaveStateStatus) {m_sMachineDriverSaveStateStatus=sMachineDriverSaveStateStatus;}
   void MachineGenre_set(string sMachineGenre) {m_sMachineGenre=sMachineGenre;}
+  void liPK_NameHash_set(long int liPK_NameHash) {m_liPK_NameHash=liPK_NameHash;}
+  void liPK_Game_set(long int liPK_Game) {m_liPK_Game=liPK_Game;}
+  void liPK_Manufacturer_set(long int liPK_Manufacturer) {m_liPK_Manufacturer=liPK_Manufacturer;}
 };
 
 #endif /** MAMEMACHINE_H */

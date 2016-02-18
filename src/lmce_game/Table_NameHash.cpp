@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_NameHash.h"
 
 #include "Table_Game.h"
+#include "Table_Genre.h"
+#include "Table_Manufacturer.h"
 
 
 void Database_lmce_game::CreateTable_NameHash()
@@ -708,6 +710,20 @@ void Row_NameHash::Game_FK_NameHash_getrows(vector <class Row_Game*> *rows)
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Game *pTable = table->database->Game_get();
+pTable->GetRows("`FK_NameHash`=" + StringUtils::itos(m_PK_NameHash),rows);
+}
+void Row_NameHash::Genre_FK_NameHash_getrows(vector <class Row_Genre*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Genre *pTable = table->database->Genre_get();
+pTable->GetRows("`FK_NameHash`=" + StringUtils::itos(m_PK_NameHash),rows);
+}
+void Row_NameHash::Manufacturer_FK_NameHash_getrows(vector <class Row_Manufacturer*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Manufacturer *pTable = table->database->Manufacturer_get();
 pTable->GetRows("`FK_NameHash`=" + StringUtils::itos(m_PK_NameHash),rows);
 }
 

@@ -95,27 +95,25 @@ class DECLSPECIFIER Row_Genre : public TableRow, public SerializeClass
 		
 		long int m_PK_Genre;
 long int m_FK_Genre_Parent;
-string m_Description;
+long int m_FK_NameHash;
 
 		bool is_null[3];
 	
 	public:
 		long int PK_Genre_get();
 long int FK_Genre_Parent_get();
-string Description_get();
+long int FK_NameHash_get();
 
 		
 		void PK_Genre_set(long int val);
 void FK_Genre_Parent_set(long int val);
-void Description_set(string val);
+void FK_NameHash_set(long int val);
 
 		
 		bool FK_Genre_Parent_isNull();
-bool Description_isNull();
 
 			
 		void FK_Genre_Parent_setNull(bool val);
-void Description_setNull(bool val);
 	
 	
 		void Delete();
@@ -129,24 +127,24 @@ void Description_setNull(bool val);
 
 		// Return the rows for foreign keys 
 		class Row_Genre* FK_Genre_Parent_getrow();
+class Row_NameHash* FK_NameHash_getrow();
 
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Game_GameSystem_FK_Genre_getrows(vector <class Row_Game_GameSystem*> *rows);
 void Genre_FK_Genre_Parent_getrows(vector <class Row_Genre*> *rows);
-void Genre_NameHash_FK_Genre_getrows(vector <class Row_Genre_NameHash*> *rows);
 
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Genre+ m_FK_Genre_Parent+ m_Description;
+			StartSerializeList() + m_PK_Genre+ m_FK_Genre_Parent+ m_FK_NameHash;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_Genre_asSQL();
 string FK_Genre_Parent_asSQL();
-string Description_asSQL();
+string FK_NameHash_asSQL();
 
 	};
 
