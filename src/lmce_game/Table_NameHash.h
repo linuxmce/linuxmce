@@ -135,6 +135,8 @@ void Normalized_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Game_FK_NameHash_getrows(vector <class Row_Game*> *rows);
+void Genre_FK_NameHash_getrows(vector <class Row_Genre*> *rows);
+void Manufacturer_FK_NameHash_getrows(vector <class Row_Manufacturer*> *rows);
 
 
 		// Setup binary serialization

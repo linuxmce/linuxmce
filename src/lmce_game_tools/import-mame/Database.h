@@ -58,6 +58,14 @@ class Database
   Database_lmce_game *m_pDatabase;
   bool NameHashExists(MAMEMachine* m);
   long int AddNameHash(MAMEMachine* m);
+  long int GetPKNameHash(MAMEMachine *m);
+  bool GameExists(MAMEMachine* m);
+  long int AddGame(MAMEMachine *m);
+  long int GetPKGame(MAMEMachine *m);
+  bool ManufacturerExists(MAMEMachine* m);
+  long int AddManufacturer(MAMEMachine *m);
+  long int GetPKManufacturer(MAMEMachine *m);
+
 };
 
 #endif

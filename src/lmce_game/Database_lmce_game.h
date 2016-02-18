@@ -45,12 +45,8 @@ class Table_Game_GameSystem_Rom_Configuration* tblGame_GameSystem_Rom_Configurat
 bool Commit_Game_GameSystem_Rom_Configuration(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Genre* tblGenre;
 bool Commit_Genre(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
-class Table_Genre_NameHash* tblGenre_NameHash;
-bool Commit_Genre_NameHash(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Manufacturer* tblManufacturer;
 bool Commit_Manufacturer(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
-class Table_Manufacturer_NameHash* tblManufacturer_NameHash;
-bool Commit_Manufacturer_NameHash(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_NameHash* tblNameHash;
 bool Commit_NameHash(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Picture* tblPicture;
@@ -68,9 +64,7 @@ class Table_Game_GameSystem_Picture* Game_GameSystem_Picture_get() { if( !tblGam
 class Table_Game_GameSystem_Rom* Game_GameSystem_Rom_get() { if( !tblGame_GameSystem_Rom ) CreateTable_Game_GameSystem_Rom(); return tblGame_GameSystem_Rom; }
 class Table_Game_GameSystem_Rom_Configuration* Game_GameSystem_Rom_Configuration_get() { if( !tblGame_GameSystem_Rom_Configuration ) CreateTable_Game_GameSystem_Rom_Configuration(); return tblGame_GameSystem_Rom_Configuration; }
 class Table_Genre* Genre_get() { if( !tblGenre ) CreateTable_Genre(); return tblGenre; }
-class Table_Genre_NameHash* Genre_NameHash_get() { if( !tblGenre_NameHash ) CreateTable_Genre_NameHash(); return tblGenre_NameHash; }
 class Table_Manufacturer* Manufacturer_get() { if( !tblManufacturer ) CreateTable_Manufacturer(); return tblManufacturer; }
-class Table_Manufacturer_NameHash* Manufacturer_NameHash_get() { if( !tblManufacturer_NameHash ) CreateTable_Manufacturer_NameHash(); return tblManufacturer_NameHash; }
 class Table_NameHash* NameHash_get() { if( !tblNameHash ) CreateTable_NameHash(); return tblNameHash; }
 class Table_Picture* Picture_get() { if( !tblPicture ) CreateTable_Picture(); return tblPicture; }
 class Table_Rom* Rom_get() { if( !tblRom ) CreateTable_Rom(); return tblRom; }
@@ -90,9 +84,7 @@ void CreateTable_Game_GameSystem_Picture();
 void CreateTable_Game_GameSystem_Rom();
 void CreateTable_Game_GameSystem_Rom_Configuration();
 void CreateTable_Genre();
-void CreateTable_Genre_NameHash();
 void CreateTable_Manufacturer();
-void CreateTable_Manufacturer_NameHash();
 void CreateTable_NameHash();
 void CreateTable_Picture();
 void CreateTable_Rom();
@@ -106,9 +98,7 @@ void DeleteTable_Game_GameSystem_Picture();
 void DeleteTable_Game_GameSystem_Rom();
 void DeleteTable_Game_GameSystem_Rom_Configuration();
 void DeleteTable_Genre();
-void DeleteTable_Genre_NameHash();
 void DeleteTable_Manufacturer();
-void DeleteTable_Manufacturer_NameHash();
 void DeleteTable_NameHash();
 void DeleteTable_Picture();
 void DeleteTable_Rom();

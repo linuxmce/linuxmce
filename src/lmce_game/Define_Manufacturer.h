@@ -5,8 +5,8 @@
 #define MANUFACTURER_TABLE "Manufacturer"
 #define MANUFACTURER_PK_MANUFACTURER_FIELD "PK_Manufacturer"
 #define MANUFACTURER_PK_MANUFACTURER_TABLE_FIELD "Manufacturer.PK_Manufacturer"
-#define MANUFACTURER_DESCRIPTION_FIELD "Description"
-#define MANUFACTURER_DESCRIPTION_TABLE_FIELD "Manufacturer.Description"
+#define MANUFACTURER_FK_NAMEHASH_FIELD "FK_NameHash"
+#define MANUFACTURER_FK_NAMEHASH_TABLE_FIELD "Manufacturer.FK_NameHash"
 
 
 #endif
