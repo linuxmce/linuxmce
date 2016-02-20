@@ -7,13 +7,15 @@
 
 #include "ImportMame.h"
 
-ImportMAME::ImportMAME(std::string sMAMEPath, std::string sCategoryPath)
+ImportMAME::ImportMAME(std::string sMAMEPath, std::string sCategoryPath, std::string sROMPath)
 {
   m_sMAMEPath=sMAMEPath;
   m_sCategoryPath=sCategoryPath;
+  m_sROMPath=sROMPath;
   m_pCategory = new Category(sCategoryPath);
   m_pMAMEXMLParser = new MAMEXMLParser(sMAMEPath, this);
   m_pDatabase = new Database();
+  m_pROMScraper = new ROMScraper(sROMPath);
 }
 
 ImportMAME::~ImportMAME()
@@ -28,6 +30,10 @@ ImportMAME::~ImportMAME()
     {
       delete(it->second);
     }
+
+  if (m_pROMScraper)
+    delete m_pROMScraper;
+
 }
 
 void ImportMAME::MergeGenresIntoMachines()
@@ -54,6 +60,7 @@ int ImportMAME::Run()
   for (map<string, MAMEMachine*>::iterator it=m_mapMachineToMAMEMachine.begin(); it!=m_mapMachineToMAMEMachine.end(); ++it)
     {
       MAMEMachine* m = it->second;
+      m_pROMScraper->processROM(m);
       m_pDatabase->ProcessMachine(m);
     }
 
