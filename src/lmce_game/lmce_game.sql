@@ -64,11 +64,11 @@ CREATE TABLE GameSystem (
 INSERT INTO GameSystem (Description) VALUES ('MAME');
 
 CREATE TABLE Game_GameSystem_Rom (
-       PK_Game_Rom INTEGER AUTO_INCREMENT NOT NULL,
+       PK_Game_GameSystem_Rom INTEGER AUTO_INCREMENT NOT NULL,
        FK_Game INTEGER NOT NULL,
        FK_GameSystem INTEGER NOT NULL,
        FK_Rom INTEGER NOT NULL,
-       PRIMARY KEY(PK_Game_Rom),
+       PRIMARY KEY(PK_Game_GameSystem_Rom),
        KEY(FK_Game),
        KEY(FK_GameSystem),
        KEY(FK_Rom)

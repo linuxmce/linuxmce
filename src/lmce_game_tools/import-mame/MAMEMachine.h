@@ -36,6 +36,8 @@ class MAMEMachine
   long int m_liPK_Genre_NameHash;
   long int m_liPK_Genre;
   long int m_liPK_Game_GameSystem;
+  long int m_liPK_Rom;
+  long int m_liPK_Game_GameSystem_Rom;
 
  public:
   MAMEMachine() 
@@ -61,6 +63,8 @@ class MAMEMachine
       m_liPK_Genre_NameHash=0;
       m_liPK_Genre=0;
       m_liPK_Game_GameSystem=0;
+      m_liPK_Rom=0;
+      m_liPK_Game_GameSystem_Rom=0;
     }
 
   virtual ~MAMEMachine()
@@ -104,6 +108,8 @@ class MAMEMachine
   long int liPK_Genre_NameHash_get() {return m_liPK_Genre_NameHash;}
   long int liPK_Genre_get() {return m_liPK_Genre;}
   long int liPK_Game_GameSystem_get() {return m_liPK_Game_GameSystem;}
+  long int liPK_Rom_get() {return m_liPK_Rom;}
+  long int liPK_Game_GameSystem_Rom_get() {return m_liPK_Game_GameSystem_Rom;}
 
   // Set accessors
   void MachineName_set(string sMachineName) {m_sMachineName=sMachineName;}
@@ -127,7 +133,8 @@ class MAMEMachine
   void liPK_Genre_NameHash_set(long int liPK_Genre_NameHash) {m_liPK_Genre_NameHash=liPK_Genre_NameHash;}
   void liPK_Genre_set(long int liPK_Genre) {m_liPK_Genre=liPK_Genre;}
   void liPK_Game_GameSystem_set(long int liPK_Game_GameSystem) {m_liPK_Game_GameSystem=liPK_Game_GameSystem;}
-
+  void liPK_Rom_set(long int liPK_Rom) {m_liPK_Rom=liPK_Rom;}
+  void liPK_Game_GameSystem_Rom_set(long int liPK_Game_GameSystem_Rom) {m_liPK_Game_GameSystem_Rom=liPK_Game_GameSystem_Rom;}
 };
 
 #endif /** MAMEMACHINE_H */
