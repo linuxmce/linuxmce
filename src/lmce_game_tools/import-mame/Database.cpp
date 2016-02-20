@@ -650,6 +650,198 @@ long int Database::GetPKGameGameSystem(MAMEMachine* m)
   return 0;
 }
 
+bool Database::RomExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::RomExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::RomExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  if (m->MachineRomSHA1_get().empty())
+    return true; // Pretend rom exists, if there is no hash, as it is not needed.
+
+  vector<class Row_Rom *> v_RowRom;
+  if (!m_pDatabase->Rom_get()->GetRows("where IK_Hash=\""+m->MachineRomSHA1_get()+"\"",&v_RowRom))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowRom.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+  
+}
+
+long int Database::AddRom(MAMEMachine* m)
+{
+  if (m->MachineRomSHA1_get().empty())
+    return 0;
+
+  Row_Rom *pRow_Rom = m_pDatabase->Rom_get()->AddRow();
+  long int PK_Rom=0;
+  if (pRow_Rom)
+    {
+      pRow_Rom->IK_Hash_set(m->MachineRomSHA1_get());
+      pRow_Rom->Table_Rom_get()->Commit();
+      PK_Rom=pRow_Rom->PK_Rom_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_Rom;
+    }
+  return 0;
+}
+
+long int Database::GetPKRom(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  if (m->MachineRomSHA1_get().empty())
+    return 0;
+
+  string sWhereQuery = "IK_Hash=\""+m->MachineRomSHA1_get()+"\"";
+  vector<class Row_Rom *> v_RowRom;
+  if (!m_pDatabase->Rom_get()->GetRows(sWhereQuery,&v_RowRom))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKRom() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowRom.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Rom* pRow_Rom = v_RowRom[0];
+      if (!pRow_Rom)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKRom() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_Rom->PK_Rom_get();
+	}
+    }
+  return 0;
+}
+
+bool Database::GameGameSystemRomExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GameGameSystemRomExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GameGameSystemRomExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  if (m->MachineRomSHA1_get().empty())
+    return true; // Pretend rom exists, if there is no hash, as it is not needed.
+
+  vector<class Row_Game_GameSystem_Rom *> v_RowGameGameSystemRom;
+  if (!m_pDatabase->Game_GameSystem_Rom_get()->GetRows("FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Rom="+StringUtils::itos(m->liPK_Rom_get()),&v_RowGameGameSystemRom))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowGameGameSystemRom.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+  
+}
+
+long int Database::AddGameGameSystemRom(MAMEMachine* m)
+{
+  if (m->MachineRomSHA1_get().empty())
+    return 0;
+
+  Row_Game_GameSystem_Rom *pRow_GameGameSystemRom = m_pDatabase->Game_GameSystem_Rom_get()->AddRow();
+  long int PK_GameGameSystemRom=0;
+  if (pRow_GameGameSystemRom)
+    {
+      pRow_GameGameSystemRom->FK_Game_set(m->liPK_Game_get());
+      pRow_GameGameSystemRom->FK_GameSystem_set(GAMESYSTEM_MAME_CONST);
+      pRow_GameGameSystemRom->FK_Rom_set(m->liPK_Rom_get());
+      pRow_GameGameSystemRom->Table_Game_GameSystem_Rom_get()->Commit();
+      PK_GameGameSystemRom=pRow_GameGameSystemRom->PK_Game_GameSystem_Rom_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_GameGameSystemRom;
+    }
+  return 0;
+}
+
+long int Database::GetPKGameGameSystemRom(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  if (m->MachineRomSHA1_get().empty())
+    return 0;
+
+  string sWhereQuery = "FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Rom="+StringUtils::itos(m->liPK_Rom_get());
+  vector<class Row_Game_GameSystem_Rom *> v_RowGameGameSystemRom;
+  if (!m_pDatabase->Game_GameSystem_Rom_get()->GetRows(sWhereQuery,&v_RowGameGameSystemRom))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGameGameSystemRom() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowGameGameSystemRom.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Game_GameSystem_Rom* pRow_GameGameSystemRom = v_RowGameGameSystemRom[0];
+      if (!pRow_GameGameSystemRom)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGameGameSystemRom() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_GameGameSystemRom->PK_Game_GameSystem_Rom_get();
+	}
+    }
+  return 0;
+}
+
 bool Database::ProcessMachine(MAMEMachine* m)
 {
   if (!m)
@@ -759,7 +951,33 @@ bool Database::ProcessMachine(MAMEMachine* m)
 
   m->liPK_Game_GameSystem_set(liPK_GameGameSystem);
 
-  cout << "." << flush;
+  // Add Rom entry, if needed, otherwise query, come out with a PK_Rom
+  long int liPK_Rom;
+  if (!RomExists(m))
+    {
+      // Add Rom Entry
+      liPK_Rom=AddRom(m);
+    }
+  else
+    {
+      liPK_Rom=GetPKRom(m);
+    }  
+
+  m->liPK_Rom_set(liPK_Rom);
   
+  // Add Game_GameSystem_Rom entry, if needed, otherwise query, come out with PK_Game_GameSystem_Rom
+  long int liPK_Game_GameSystem_Rom;
+  if (!GameGameSystemRomExists(m))
+    {
+      // Add Game_GameSystem_Rom Entry
+      liPK_Game_GameSystem_Rom=AddGameGameSystemRom(m);
+    }
+  else
+    {
+      liPK_Game_GameSystem_Rom=GetPKGameGameSystemRom(m);
+    }  
+
+  m->liPK_Game_GameSystem_Rom_set(liPK_Game_GameSystem_Rom);
+
   return false;
 }

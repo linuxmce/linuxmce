@@ -96,7 +96,7 @@ void Row_Game_GameSystem_Rom::Delete()
 		}
 		else
 		{
-			SingleLongKey key(pRow->m_PK_Game_Rom);
+			SingleLongKey key(pRow->m_PK_Game_GameSystem_Rom);
 			map<SingleLongKey, TableRow*, SingleLongKey_Less>::iterator i = table->cachedRows.find(key);
 			if (i!=table->cachedRows.end())
 				table->cachedRows.erase(i);
@@ -116,7 +116,7 @@ void Row_Game_GameSystem_Rom::Reload()
 	
 	if (!is_added)
 	{
-		SingleLongKey key(pRow->m_PK_Game_Rom);
+		SingleLongKey key(pRow->m_PK_Game_GameSystem_Rom);
 		Row_Game_GameSystem_Rom *pRow = table->FetchRow(key);
 		
 		if (pRow!=NULL)
@@ -136,7 +136,7 @@ Row_Game_GameSystem_Rom::Row_Game_GameSystem_Rom(Table_Game_GameSystem_Rom *pTab
 
 void Row_Game_GameSystem_Rom::SetDefaultValues()
 {
-	m_PK_Game_Rom = 0;
+	m_PK_Game_GameSystem_Rom = 0;
 is_null[0] = false;
 m_FK_Game = 0;
 is_null[1] = false;
@@ -151,9 +151,9 @@ is_null[3] = false;
 	is_modified=false;
 }
 
-long int Row_Game_GameSystem_Rom::PK_Game_Rom_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+long int Row_Game_GameSystem_Rom::PK_Game_GameSystem_Rom_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_PK_Game_Rom;}
+return m_PK_Game_GameSystem_Rom;}
 long int Row_Game_GameSystem_Rom::FK_Game_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_FK_Game;}
@@ -165,9 +165,9 @@ long int Row_Game_GameSystem_Rom::FK_Rom_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 return m_FK_Rom;}
 
 		
-void Row_Game_GameSystem_Rom::PK_Game_Rom_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Game_GameSystem_Rom::PK_Game_GameSystem_Rom_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_PK_Game_Rom = val; is_modified=true; is_null[0]=false;}
+m_PK_Game_GameSystem_Rom = val; is_modified=true; is_null[0]=false;}
 void Row_Game_GameSystem_Rom::FK_Game_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_FK_Game = val; is_modified=true; is_null[1]=false;}
@@ -183,7 +183,7 @@ m_FK_Rom = val; is_modified=true; is_null[3]=false;}
 			
 	
 
-string Row_Game_GameSystem_Rom::PK_Game_Rom_asSQL()
+string Row_Game_GameSystem_Rom::PK_Game_GameSystem_Rom_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
@@ -191,7 +191,7 @@ if (is_null[0])
 return "NULL";
 
 char buf[32];
-sprintf(buf, "%li", m_PK_Game_Rom);
+sprintf(buf, "%li", m_PK_Game_GameSystem_Rom);
 
 return buf;
 }
@@ -238,9 +238,9 @@ return buf;
 
 
 
-Table_Game_GameSystem_Rom::Key::Key(long int in_PK_Game_Rom)
+Table_Game_GameSystem_Rom::Key::Key(long int in_PK_Game_GameSystem_Rom)
 {
-			pk_PK_Game_Rom = in_PK_Game_Rom;
+			pk_PK_Game_GameSystem_Rom = in_PK_Game_GameSystem_Rom;
 	
 }
 
@@ -248,14 +248,14 @@ Table_Game_GameSystem_Rom::Key::Key(Row_Game_GameSystem_Rom *pRow)
 {
 			PLUTO_SAFETY_LOCK_ERRORSONLY(sl,pRow->table->database->m_DBMutex);
 
-			pk_PK_Game_Rom = pRow->m_PK_Game_Rom;
+			pk_PK_Game_GameSystem_Rom = pRow->m_PK_Game_GameSystem_Rom;
 	
 }		
 
 bool Table_Game_GameSystem_Rom::Key_Less::operator()(const Table_Game_GameSystem_Rom::Key &key1, const Table_Game_GameSystem_Rom::Key &key2) const
 {
-			if (key1.pk_PK_Game_Rom!=key2.pk_PK_Game_Rom)
-return key1.pk_PK_Game_Rom<key2.pk_PK_Game_Rom;
+			if (key1.pk_PK_Game_GameSystem_Rom!=key2.pk_PK_Game_GameSystem_Rom)
+return key1.pk_PK_Game_GameSystem_Rom<key2.pk_PK_Game_GameSystem_Rom;
 else
 return false;	
 }	
@@ -274,10 +274,10 @@ bool Table_Game_GameSystem_Rom::Commit(bool bDeleteFailedModifiedRow,bool bDelet
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_Rom_asSQL()+", "+pRow->FK_Game_asSQL()+", "+pRow->FK_GameSystem_asSQL()+", "+pRow->FK_Rom_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_GameSystem_Rom_asSQL()+", "+pRow->FK_Game_asSQL()+", "+pRow->FK_GameSystem_asSQL()+", "+pRow->FK_Rom_asSQL();
 
 	
-		string query = "insert into Game_GameSystem_Rom (`PK_Game_Rom`, `FK_Game`, `FK_GameSystem`, `FK_Rom`) values ("+
+		string query = "insert into Game_GameSystem_Rom (`PK_Game_GameSystem_Rom`, `FK_Game`, `FK_GameSystem`, `FK_Rom`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -308,12 +308,12 @@ values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_Rom_as
 			long int id = (long int) db_wrapper_insert_id(database->m_pDB);
 		
 			if (id!=0)
-		pRow->m_PK_Game_Rom=id;
+		pRow->m_PK_Game_GameSystem_Rom=id;
 else 
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PK_Game_Rom is auto increment but has no value %s",database->m_sLastDBError.c_str());	
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PK_Game_GameSystem_Rom is auto increment but has no value %s",database->m_sLastDBError.c_str());	
 			
 			addedRows.erase(i);
-			SingleLongKey key(pRow->m_PK_Game_Rom);	
+			SingleLongKey key(pRow->m_PK_Game_GameSystem_Rom);	
 			cachedRows[key] = pRow;
 					
 			
@@ -331,19 +331,19 @@ else
 		if	(((*i).second)->is_modified_get())
 	{
 		Row_Game_GameSystem_Rom* pRow = (Row_Game_GameSystem_Rom*) (*i).second;	
-		SingleLongKey key(pRow->m_PK_Game_Rom);
+		SingleLongKey key(pRow->m_PK_Game_GameSystem_Rom);
 
-		char tmp_PK_Game_Rom[32];
-sprintf(tmp_PK_Game_Rom, "%li", key.pk);
+		char tmp_PK_Game_GameSystem_Rom[32];
+sprintf(tmp_PK_Game_GameSystem_Rom, "%li", key.pk);
 
 
 string condition;
-condition = condition + "`PK_Game_Rom`=" + tmp_PK_Game_Rom;
+condition = condition + "`PK_Game_GameSystem_Rom`=" + tmp_PK_Game_GameSystem_Rom;
 	
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Game_Rom`="+pRow->PK_Game_Rom_asSQL()+", `FK_Game`="+pRow->FK_Game_asSQL()+", `FK_GameSystem`="+pRow->FK_GameSystem_asSQL()+", `FK_Rom`="+pRow->FK_Rom_asSQL();
+update_values_list = update_values_list + "`PK_Game_GameSystem_Rom`="+pRow->PK_Game_GameSystem_Rom_asSQL()+", `FK_Game`="+pRow->FK_Game_asSQL()+", `FK_GameSystem`="+pRow->FK_GameSystem_asSQL()+", `FK_Rom`="+pRow->FK_Rom_asSQL();
 
 	
 		string query = "update Game_GameSystem_Rom set " + update_values_list + " where " + condition;
@@ -392,12 +392,12 @@ update_values_list = update_values_list + "`PK_Game_Rom`="+pRow->PK_Game_Rom_asS
 		SingleLongKey key = (*i).first;
 		Row_Game_GameSystem_Rom* pRow = (Row_Game_GameSystem_Rom*) (*i).second;	
 
-		char tmp_PK_Game_Rom[32];
-sprintf(tmp_PK_Game_Rom, "%li", key.pk);
+		char tmp_PK_Game_GameSystem_Rom[32];
+sprintf(tmp_PK_Game_GameSystem_Rom, "%li", key.pk);
 
 
 string condition;
-condition = condition + "`PK_Game_Rom`=" + tmp_PK_Game_Rom;
+condition = condition + "`PK_Game_GameSystem_Rom`=" + tmp_PK_Game_GameSystem_Rom;
 
 	
 		string query = "delete from Game_GameSystem_Rom where " + condition;
@@ -479,12 +479,12 @@ bool Table_Game_GameSystem_Rom::GetRows(string where_statement,vector<class Row_
 		if (row[0] == NULL)
 {
 pRow->is_null[0]=true;
-pRow->m_PK_Game_Rom = 0;
+pRow->m_PK_Game_GameSystem_Rom = 0;
 }
 else
 {
 pRow->is_null[0]=false;
-sscanf(row[0], "%li", &(pRow->m_PK_Game_Rom));
+sscanf(row[0], "%li", &(pRow->m_PK_Game_GameSystem_Rom));
 }
 
 if (row[1] == NULL)
@@ -524,7 +524,7 @@ sscanf(row[3], "%li", &(pRow->m_FK_Rom));
 
 		//checking for duplicates
 
-		SingleLongKey key(pRow->m_PK_Game_Rom);
+		SingleLongKey key(pRow->m_PK_Game_GameSystem_Rom);
 		
 		map<SingleLongKey, class TableRow*, SingleLongKey_Less>::iterator i = cachedRows.find(key);
 			
@@ -556,11 +556,11 @@ Row_Game_GameSystem_Rom* Table_Game_GameSystem_Rom::AddRow()
 
 
 
-Row_Game_GameSystem_Rom* Table_Game_GameSystem_Rom::GetRow(long int in_PK_Game_Rom)
+Row_Game_GameSystem_Rom* Table_Game_GameSystem_Rom::GetRow(long int in_PK_Game_GameSystem_Rom)
 {
 	PLUTO_SAFETY_LOCK_ERRORSONLY(sl,database->m_DBMutex);
 
-	SingleLongKey row_key(in_PK_Game_Rom);
+	SingleLongKey row_key(in_PK_Game_GameSystem_Rom);
 
 	map<SingleLongKey, class TableRow*, SingleLongKey_Less>::iterator i;
 	i = deleted_cachedRows.find(row_key);	
@@ -589,12 +589,12 @@ Row_Game_GameSystem_Rom* Table_Game_GameSystem_Rom::FetchRow(SingleLongKey &key)
 	PLUTO_SAFETY_LOCK_ERRORSONLY(sl,database->m_DBMutex);
 
 	//defines the string query for the value of key
-	char tmp_PK_Game_Rom[32];
-sprintf(tmp_PK_Game_Rom, "%li", key.pk);
+	char tmp_PK_Game_GameSystem_Rom[32];
+sprintf(tmp_PK_Game_GameSystem_Rom, "%li", key.pk);
 
 
 string condition;
-condition = condition + "`PK_Game_Rom`=" + tmp_PK_Game_Rom;
+condition = condition + "`PK_Game_GameSystem_Rom`=" + tmp_PK_Game_GameSystem_Rom;
 
 
 	string query = "select * from Game_GameSystem_Rom where " + condition;		
@@ -639,12 +639,12 @@ condition = condition + "`PK_Game_Rom`=" + tmp_PK_Game_Rom;
 	if (row[0] == NULL)
 {
 pRow->is_null[0]=true;
-pRow->m_PK_Game_Rom = 0;
+pRow->m_PK_Game_GameSystem_Rom = 0;
 }
 else
 {
 pRow->is_null[0]=false;
-sscanf(row[0], "%li", &(pRow->m_PK_Game_Rom));
+sscanf(row[0], "%li", &(pRow->m_PK_Game_GameSystem_Rom));
 }
 
 if (row[1] == NULL)
