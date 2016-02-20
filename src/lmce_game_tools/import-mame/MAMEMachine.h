@@ -28,6 +28,7 @@ class MAMEMachine
   string m_sMachineDriverGraphicStatus;
   string m_sMachineDriverSaveStateStatus;
   string m_sMachineGenre;
+  string m_sMachineRomSHA1;
   long int m_liPK_NameHash;
   long int m_liPK_Game;
   long int m_liPK_Manufacturer_NameHash;
@@ -52,6 +53,7 @@ class MAMEMachine
       m_sMachineDriverGraphicStatus="";
       m_sMachineDriverSaveStateStatus="";
       m_sMachineGenre="";
+      m_sMachineRomSHA1="";
       m_liPK_NameHash=0;
       m_liPK_Game=0;
       m_liPK_Manufacturer_NameHash=0;
@@ -94,6 +96,7 @@ class MAMEMachine
   string MachineDriverGraphicStatus_get() {return m_sMachineDriverGraphicStatus;}
   string MachineDriverSaveStateStatus_get() {return m_sMachineDriverSaveStateStatus;}
   string MachineGenre_get() {return m_sMachineGenre;}
+  string MachineRomSHA1_get() {return m_sMachineRomSHA1;}
   long int liPK_NameHash_get() {return m_liPK_NameHash;}
   long int liPK_Game_get() {return m_liPK_Game;}
   long int liPK_Manufacturer_NameHash_get() {return m_liPK_Manufacturer_NameHash;}
@@ -116,6 +119,7 @@ class MAMEMachine
   void MachineDriverGraphicStatus_set(string sMachineDriverGraphicStatus) {m_sMachineDriverGraphicStatus=sMachineDriverGraphicStatus;}
   void MachineDriverSaveStateStatus_set(string sMachineDriverSaveStateStatus) {m_sMachineDriverSaveStateStatus=sMachineDriverSaveStateStatus;}
   void MachineGenre_set(string sMachineGenre) {m_sMachineGenre=sMachineGenre;}
+  void MachineRomSHA1_set(string sMachineRomSHA1) {m_sMachineRomSHA1=sMachineRomSHA1;}
   void liPK_NameHash_set(long int liPK_NameHash) {m_liPK_NameHash=liPK_NameHash;}
   void liPK_Game_set(long int liPK_Game) {m_liPK_Game=liPK_Game;}
   void liPK_Manufacturer_NameHash_set(long int liPK_Manufacturer_NameHash) {m_liPK_Manufacturer_NameHash=liPK_Manufacturer_NameHash;}

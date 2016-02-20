@@ -45,19 +45,25 @@ int main(int argc, char* argv[])
       switch (c)
 	{
 	case 'p':
-	  if (argc > 4)
+	  if (argc > 6)
 	    {
 	      sMamePath = argv[++optnum];
 	      bError=false;
 	    }
 	  break;
 	case 'c':
-	  if (argc > 4)
+	  if (argc > 6)
 	    {
 	      sCategoryPath = argv[++optnum];
 	      bError=false;
 	    }
 	  break;
+	case 'r':
+	  if (argc > 6)
+	    {
+	      sROMPath = argv[++optnum];
+	      bError=false;
+	    }
 	}
     }
 
@@ -68,11 +74,12 @@ int main(int argc, char* argv[])
 	   << "Usage: import-mame -p /path/to/mame" << endl
 	   << endl
 	   << "\t -p -- The Path to the MAME binary. (Required)" << endl
-	   << "\t -c -- The Path to the Category.ini file." << endl;
+	   << "\t -c -- The Path to the Category.ini file." << endl
+	   << "\t -r -- The Path to the ROMs. " << endl;
       exit(1);
     }
 
-  ImportMAME *pImportMAME = new ImportMAME(sMamePath,sCategoryPath);
+  ImportMAME *pImportMAME = new ImportMAME(sMamePath,sCategoryPath,sROMPath);
   iRetCode = pImportMAME->Run();
 
   delete pImportMAME;
