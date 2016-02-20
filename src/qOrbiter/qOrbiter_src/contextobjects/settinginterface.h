@@ -40,6 +40,7 @@ public:
         Setting_Ui_Skin,
         Setting_Ui_NetworkLoading,
         Setting_Ui_PrefSize,
+        Setting_Ui_ScreenSaver,
         Setting_Text_sizemod,
         Setting_Text_font,
         Setting_Text_language,
@@ -95,6 +96,9 @@ public slots:
         setSimpleOption(SettingsKeyType::Setting_Text_sizemod, m);
         m_fontSizeMod = m;
         emit fontSizeModChanged();
+    }
+    Q_INVOKABLE bool isScreenSaverEnabled() {
+        return getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_ScreenSaver).toBool();
     }
 
 private slots:

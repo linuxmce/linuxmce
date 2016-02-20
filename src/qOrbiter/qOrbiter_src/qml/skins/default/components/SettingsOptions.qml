@@ -36,6 +36,14 @@ Item{
 
             }
             SettingsOption {
+                id: screensaver_option
+                cat:SettingsType.Settings_UI
+                val:SettingsKey.Setting_Ui_ScreenSaver
+                useSwitch: true
+                settingName: qsTr("Enable Screen Saver")
+
+            }
+            SettingsOption {
                 id: skin_option
                 cat:SettingsType.Settings_UI
                 val:SettingsKey.Setting_Ui_Skin
