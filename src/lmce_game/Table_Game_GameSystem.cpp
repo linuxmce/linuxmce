@@ -148,6 +148,8 @@ is_null[3] = false;
 m_FK_Genre = -1;
 is_null[4] = false;
 is_null[5] = true;
+is_null[6] = true;
+is_null[7] = true;
 m_Year = 0;
 
 
@@ -171,6 +173,12 @@ return m_FK_Manufacturer;}
 long int Row_Game_GameSystem::FK_Genre_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_FK_Genre;}
+string Row_Game_GameSystem::Name_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_Name;}
+string Row_Game_GameSystem::Subtitle_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_Subtitle;}
 long int Row_Game_GameSystem::Year_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_Year;}
@@ -191,18 +199,38 @@ m_FK_Manufacturer = val; is_modified=true; is_null[3]=false;}
 void Row_Game_GameSystem::FK_Genre_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_FK_Genre = val; is_modified=true; is_null[4]=false;}
+void Row_Game_GameSystem::Name_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_Name = val; is_modified=true; is_null[5]=false;}
+void Row_Game_GameSystem::Subtitle_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_Subtitle = val; is_modified=true; is_null[6]=false;}
 void Row_Game_GameSystem::Year_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_Year = val; is_modified=true; is_null[5]=false;}
+m_Year = val; is_modified=true; is_null[7]=false;}
 
 		
-bool Row_Game_GameSystem::Year_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_Game_GameSystem::Name_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
+bool Row_Game_GameSystem::Subtitle_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[6];}
+bool Row_Game_GameSystem::Year_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[7];}
 
 			
-void Row_Game_GameSystem::Year_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Game_GameSystem::Name_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
+is_modified=true;
+}
+void Row_Game_GameSystem::Subtitle_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[6]=val;
+is_modified=true;
+}
+void Row_Game_GameSystem::Year_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[7]=val;
 is_modified=true;
 }
 	
@@ -272,11 +300,39 @@ sprintf(buf, "%li", m_FK_Genre);
 return buf;
 }
 
-string Row_Game_GameSystem::Year_asSQL()
+string Row_Game_GameSystem::Name_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 if (is_null[5])
+return "NULL";
+
+char *buf = new char[769];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Name.c_str(), (unsigned long) min((size_t)384,m_Name.size()));
+string s=string()+"\""+buf+"\"";
+delete[] buf;
+return s;
+}
+
+string Row_Game_GameSystem::Subtitle_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[6])
+return "NULL";
+
+char *buf = new char[769];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Subtitle.c_str(), (unsigned long) min((size_t)384,m_Subtitle.size()));
+string s=string()+"\""+buf+"\"";
+delete[] buf;
+return s;
+}
+
+string Row_Game_GameSystem::Year_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[7])
 return "NULL";
 
 char buf[32];
@@ -324,10 +380,10 @@ bool Table_Game_GameSystem::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFai
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_GameSystem_asSQL()+", "+pRow->FK_Game_asSQL()+", "+pRow->FK_GameSystem_asSQL()+", "+pRow->FK_Manufacturer_asSQL()+", "+pRow->FK_Genre_asSQL()+", "+pRow->Year_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_GameSystem_asSQL()+", "+pRow->FK_Game_asSQL()+", "+pRow->FK_GameSystem_asSQL()+", "+pRow->FK_Manufacturer_asSQL()+", "+pRow->FK_Genre_asSQL()+", "+pRow->Name_asSQL()+", "+pRow->Subtitle_asSQL()+", "+pRow->Year_asSQL();
 
 	
-		string query = "insert into Game_GameSystem (`PK_Game_GameSystem`, `FK_Game`, `FK_GameSystem`, `FK_Manufacturer`, `FK_Genre`, `Year`) values ("+
+		string query = "insert into Game_GameSystem (`PK_Game_GameSystem`, `FK_Game`, `FK_GameSystem`, `FK_Manufacturer`, `FK_Genre`, `Name`, `Subtitle`, `Year`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -393,7 +449,7 @@ condition = condition + "`PK_Game_GameSystem`=" + tmp_PK_Game_GameSystem;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Game_GameSystem`="+pRow->PK_Game_GameSystem_asSQL()+", `FK_Game`="+pRow->FK_Game_asSQL()+", `FK_GameSystem`="+pRow->FK_GameSystem_asSQL()+", `FK_Manufacturer`="+pRow->FK_Manufacturer_asSQL()+", `FK_Genre`="+pRow->FK_Genre_asSQL()+", `Year`="+pRow->Year_asSQL();
+update_values_list = update_values_list + "`PK_Game_GameSystem`="+pRow->PK_Game_GameSystem_asSQL()+", `FK_Game`="+pRow->FK_Game_asSQL()+", `FK_GameSystem`="+pRow->FK_GameSystem_asSQL()+", `FK_Manufacturer`="+pRow->FK_Manufacturer_asSQL()+", `FK_Genre`="+pRow->FK_Genre_asSQL()+", `Name`="+pRow->Name_asSQL()+", `Subtitle`="+pRow->Subtitle_asSQL()+", `Year`="+pRow->Year_asSQL();
 
 	
 		string query = "update Game_GameSystem set " + update_values_list + " where " + condition;
@@ -584,12 +640,34 @@ sscanf(row[4], "%li", &(pRow->m_FK_Genre));
 if (row[5] == NULL)
 {
 pRow->is_null[5]=true;
-pRow->m_Year = 0;
+pRow->m_Name = "";
 }
 else
 {
 pRow->is_null[5]=false;
-sscanf(row[5], "%li", &(pRow->m_Year));
+pRow->m_Name = string(row[5],lengths[5]);
+}
+
+if (row[6] == NULL)
+{
+pRow->is_null[6]=true;
+pRow->m_Subtitle = "";
+}
+else
+{
+pRow->is_null[6]=false;
+pRow->m_Subtitle = string(row[6],lengths[6]);
+}
+
+if (row[7] == NULL)
+{
+pRow->is_null[7]=true;
+pRow->m_Year = 0;
+}
+else
+{
+pRow->is_null[7]=false;
+sscanf(row[7], "%li", &(pRow->m_Year));
 }
 
 
@@ -766,12 +844,34 @@ sscanf(row[4], "%li", &(pRow->m_FK_Genre));
 if (row[5] == NULL)
 {
 pRow->is_null[5]=true;
-pRow->m_Year = 0;
+pRow->m_Name = "";
 }
 else
 {
 pRow->is_null[5]=false;
-sscanf(row[5], "%li", &(pRow->m_Year));
+pRow->m_Name = string(row[5],lengths[5]);
+}
+
+if (row[6] == NULL)
+{
+pRow->is_null[6]=true;
+pRow->m_Subtitle = "";
+}
+else
+{
+pRow->is_null[6]=false;
+pRow->m_Subtitle = string(row[6],lengths[6]);
+}
+
+if (row[7] == NULL)
+{
+pRow->is_null[7]=true;
+pRow->m_Year = 0;
+}
+else
+{
+pRow->is_null[7]=false;
+sscanf(row[7], "%li", &(pRow->m_Year));
 }
 
 
