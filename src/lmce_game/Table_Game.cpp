@@ -143,7 +143,6 @@ void Row_Game::SetDefaultValues()
 is_null[0] = false;
 m_FK_NameHash = 0;
 is_null[1] = false;
-is_null[2] = true;
 
 
 	is_added=false;
@@ -157,9 +156,6 @@ return m_PK_Game;}
 long int Row_Game::FK_NameHash_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_FK_NameHash;}
-string Row_Game::Subtitle_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return m_Subtitle;}
 
 		
 void Row_Game::PK_Game_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -168,20 +164,10 @@ m_PK_Game = val; is_modified=true; is_null[0]=false;}
 void Row_Game::FK_NameHash_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_FK_NameHash = val; is_modified=true; is_null[1]=false;}
-void Row_Game::Subtitle_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-m_Subtitle = val; is_modified=true; is_null[2]=false;}
 
 		
-bool Row_Game::Subtitle_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
 
 			
-void Row_Game::Subtitle_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
-is_modified=true;
-}
 	
 
 string Row_Game::PK_Game_asSQL()
@@ -208,20 +194,6 @@ char buf[32];
 sprintf(buf, "%li", m_FK_NameHash);
 
 return buf;
-}
-
-string Row_Game::Subtitle_asSQL()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-if (is_null[2])
-return "NULL";
-
-char *buf = new char[769];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Subtitle.c_str(), (unsigned long) min((size_t)384,m_Subtitle.size()));
-string s=string()+"\""+buf+"\"";
-delete[] buf;
-return s;
 }
 
 
@@ -263,10 +235,10 @@ bool Table_Game::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRo
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_asSQL()+", "+pRow->FK_NameHash_asSQL()+", "+pRow->Subtitle_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_asSQL()+", "+pRow->FK_NameHash_asSQL();
 
 	
-		string query = "insert into Game (`PK_Game`, `FK_NameHash`, `Subtitle`) values ("+
+		string query = "insert into Game (`PK_Game`, `FK_NameHash`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -332,7 +304,7 @@ condition = condition + "`PK_Game`=" + tmp_PK_Game;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Game`="+pRow->PK_Game_asSQL()+", `FK_NameHash`="+pRow->FK_NameHash_asSQL()+", `Subtitle`="+pRow->Subtitle_asSQL();
+update_values_list = update_values_list + "`PK_Game`="+pRow->PK_Game_asSQL()+", `FK_NameHash`="+pRow->FK_NameHash_asSQL();
 
 	
 		string query = "update Game set " + update_values_list + " where " + condition;
@@ -487,17 +459,6 @@ pRow->is_null[1]=false;
 sscanf(row[1], "%li", &(pRow->m_FK_NameHash));
 }
 
-if (row[2] == NULL)
-{
-pRow->is_null[2]=true;
-pRow->m_Subtitle = "";
-}
-else
-{
-pRow->is_null[2]=false;
-pRow->m_Subtitle = string(row[2],lengths[2]);
-}
-
 
 
 		//checking for duplicates
@@ -634,17 +595,6 @@ else
 {
 pRow->is_null[1]=false;
 sscanf(row[1], "%li", &(pRow->m_FK_NameHash));
-}
-
-if (row[2] == NULL)
-{
-pRow->is_null[2]=true;
-pRow->m_Subtitle = "";
-}
-else
-{
-pRow->is_null[2]=false;
-pRow->m_Subtitle = string(row[2],lengths[2]);
 }
 
 

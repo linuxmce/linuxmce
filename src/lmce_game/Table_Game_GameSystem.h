@@ -98,9 +98,11 @@ long int m_FK_Game;
 long int m_FK_GameSystem;
 long int m_FK_Manufacturer;
 long int m_FK_Genre;
+string m_Name;
+string m_Subtitle;
 long int m_Year;
 
-		bool is_null[6];
+		bool is_null[8];
 	
 	public:
 		long int PK_Game_GameSystem_get();
@@ -108,6 +110,8 @@ long int FK_Game_get();
 long int FK_GameSystem_get();
 long int FK_Manufacturer_get();
 long int FK_Genre_get();
+string Name_get();
+string Subtitle_get();
 long int Year_get();
 
 		
@@ -116,13 +120,19 @@ void FK_Game_set(long int val);
 void FK_GameSystem_set(long int val);
 void FK_Manufacturer_set(long int val);
 void FK_Genre_set(long int val);
+void Name_set(string val);
+void Subtitle_set(string val);
 void Year_set(long int val);
 
 		
-		bool Year_isNull();
+		bool Name_isNull();
+bool Subtitle_isNull();
+bool Year_isNull();
 
 			
-		void Year_setNull(bool val);
+		void Name_setNull(bool val);
+void Subtitle_setNull(bool val);
+void Year_setNull(bool val);
 	
 	
 		void Delete();
@@ -146,7 +156,7 @@ class Row_Genre* FK_Genre_getrow();
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Game_GameSystem+ m_FK_Game+ m_FK_GameSystem+ m_FK_Manufacturer+ m_FK_Genre+ m_Year;
+			StartSerializeList() + m_PK_Game_GameSystem+ m_FK_Game+ m_FK_GameSystem+ m_FK_Manufacturer+ m_FK_Genre+ m_Name+ m_Subtitle+ m_Year;
 		}
 	private:
 		void SetDefaultValues();
@@ -156,6 +166,8 @@ string FK_Game_asSQL();
 string FK_GameSystem_asSQL();
 string FK_Manufacturer_asSQL();
 string FK_Genre_asSQL();
+string Name_asSQL();
+string Subtitle_asSQL();
 string Year_asSQL();
 
 	};
