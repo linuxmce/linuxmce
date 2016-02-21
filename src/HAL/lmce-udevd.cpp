@@ -403,11 +403,13 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 
 	else if( 0 == strcmp(subsystem, "usb-serial") && strlen(subsystem) == strlen("usb-serial") && iBusType == USB_COMM_METHOD ) // category == serial
 	{
+		/*
 		struct udev_device *parent_dev = udev_device_get_parent_with_subsystem_devtype(
 	                       dev,
 	                       "usb",
 	                       "usb_device");
 		const char *parent_udi = udi_helper_compute_udi(parent_dev);
+		*/
 
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ SRL device added %s = %s", buffer, parent_udi);
 
@@ -636,7 +638,7 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 		}
 	}
 
-/*	else if ( strcmp(subsystem, "tty") == 0 && strlen(subsystem) == strlen("tty") )
+	else if ( strcmp(subsystem, "tty") == 0 && strlen(subsystem) == strlen("tty") )
 	{
 		if ( udev_device_get_parent_with_subsystem_devtype(dev, "usb-serial", NULL ) == NULL
 				 && udev_device_get_parent_with_subsystem_devtype(dev, "usb", NULL) != NULL )
@@ -662,7 +664,7 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s",buffer);
 		}
 	}
-*/
+
 	else if ( strcmp(subsystem, "usb") == 0 && strlen(subsystem) == strlen("usb") )
 	{
 		if ( udi != NULL && devtype == NULL )
