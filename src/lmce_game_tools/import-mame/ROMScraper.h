@@ -9,15 +9,17 @@
 #define ROMSCRAPER_H
 
 #include "MAMEMachine.h"
+#include "ImportMame.h"
 
 class ROMScraper
 {
  private:
   std::string m_sRomPath;
+  class ImportMAME* m_pImportMAME;
 
  public:
 
-  ROMScraper(string sRomPath);
+  ROMScraper(class ImportMAME* pImportMAME, string sRomPath);
   virtual ~ROMScraper();
 
   void processROM(MAMEMachine* m);

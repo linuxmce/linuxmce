@@ -23,7 +23,6 @@ CREATE TABLE Rom (
 CREATE TABLE Game (
        PK_Game INTEGER AUTO_INCREMENT NOT NULL,
        FK_NameHash INTEGER NOT NULL,
-       Subtitle VARCHAR(128),
        PRIMARY KEY (PK_Game)
 );
 
@@ -33,6 +32,8 @@ CREATE TABLE Game_GameSystem (
        FK_GameSystem INTEGER NOT NULL,
        FK_Manufacturer INTEGER NOT NULL DEFAULT '-1',
        FK_Genre INTEGER NOT NULL DEFAULT '-1',
+       Name VARCHAR(128),
+       Subtitle VARCHAR(128),
        Year INTEGER,
        PRIMARY KEY (PK_Game_GameSystem),
        KEY(FK_Game),

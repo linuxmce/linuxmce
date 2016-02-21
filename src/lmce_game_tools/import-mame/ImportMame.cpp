@@ -16,7 +16,7 @@ ImportMAME::ImportMAME(std::string sMAMEPath, std::string sCategoryPath, std::st
   m_pCategory = new Category(sCategoryPath);
   m_pMAMEXMLParser = new MAMEXMLParser(sMAMEPath, this);
   m_pDatabase = new Database();
-  m_pROMScraper = new ROMScraper(sROMPath);
+  m_pROMScraper = new ROMScraper(this,sROMPath);
   m_pPictureScraper = new PictureScraper(sPicturePath);
 }
 
