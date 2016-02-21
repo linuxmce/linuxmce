@@ -29,6 +29,7 @@ class MAMEMachine
   string m_sMachineDriverSaveStateStatus;
   string m_sMachineGenre;
   string m_sMachineRomSHA1;
+  string m_sMachinePicturePath;
   long int m_liPK_NameHash;
   long int m_liPK_Game;
   long int m_liPK_Manufacturer_NameHash;
@@ -38,6 +39,8 @@ class MAMEMachine
   long int m_liPK_Game_GameSystem;
   long int m_liPK_Rom;
   long int m_liPK_Game_GameSystem_Rom;
+  long int m_liPK_Picture;
+  long int m_liPK_Game_GameSystem_Picture;
 
  public:
   MAMEMachine() 
@@ -56,6 +59,7 @@ class MAMEMachine
       m_sMachineDriverSaveStateStatus="";
       m_sMachineGenre="";
       m_sMachineRomSHA1="";
+      m_sMachinePicturePath="";
       m_liPK_NameHash=0;
       m_liPK_Game=0;
       m_liPK_Manufacturer_NameHash=0;
@@ -65,6 +69,8 @@ class MAMEMachine
       m_liPK_Game_GameSystem=0;
       m_liPK_Rom=0;
       m_liPK_Game_GameSystem_Rom=0;
+      m_liPK_Picture=0;
+      m_liPK_Game_GameSystem_Picture=0;
     }
 
   virtual ~MAMEMachine()
@@ -101,6 +107,7 @@ class MAMEMachine
   string MachineDriverSaveStateStatus_get() {return m_sMachineDriverSaveStateStatus;}
   string MachineGenre_get() {return m_sMachineGenre;}
   string MachineRomSHA1_get() {return m_sMachineRomSHA1;}
+  string MachinePicturePath_get() {return m_sMachinePicturePath;}
   long int liPK_NameHash_get() {return m_liPK_NameHash;}
   long int liPK_Game_get() {return m_liPK_Game;}
   long int liPK_Manufacturer_NameHash_get() {return m_liPK_Manufacturer_NameHash;}
@@ -110,6 +117,8 @@ class MAMEMachine
   long int liPK_Game_GameSystem_get() {return m_liPK_Game_GameSystem;}
   long int liPK_Rom_get() {return m_liPK_Rom;}
   long int liPK_Game_GameSystem_Rom_get() {return m_liPK_Game_GameSystem_Rom;}
+  long int liPK_Picture_get() {return m_liPK_Picture;}
+  long int liPK_Game_GameSystem_Picture() {return m_liPK_Game_GameSystem_Picture;}
 
   // Set accessors
   void MachineName_set(string sMachineName) {m_sMachineName=sMachineName;}
@@ -126,6 +135,7 @@ class MAMEMachine
   void MachineDriverSaveStateStatus_set(string sMachineDriverSaveStateStatus) {m_sMachineDriverSaveStateStatus=sMachineDriverSaveStateStatus;}
   void MachineGenre_set(string sMachineGenre) {m_sMachineGenre=sMachineGenre;}
   void MachineRomSHA1_set(string sMachineRomSHA1) {m_sMachineRomSHA1=sMachineRomSHA1;}
+  void MachinePicturePath_set(string sMachinePicturePath) {m_sMachinePicturePath=sMachinePicturePath;}
   void liPK_NameHash_set(long int liPK_NameHash) {m_liPK_NameHash=liPK_NameHash;}
   void liPK_Game_set(long int liPK_Game) {m_liPK_Game=liPK_Game;}
   void liPK_Manufacturer_NameHash_set(long int liPK_Manufacturer_NameHash) {m_liPK_Manufacturer_NameHash=liPK_Manufacturer_NameHash;}
@@ -135,6 +145,7 @@ class MAMEMachine
   void liPK_Game_GameSystem_set(long int liPK_Game_GameSystem) {m_liPK_Game_GameSystem=liPK_Game_GameSystem;}
   void liPK_Rom_set(long int liPK_Rom) {m_liPK_Rom=liPK_Rom;}
   void liPK_Game_GameSystem_Rom_set(long int liPK_Game_GameSystem_Rom) {m_liPK_Game_GameSystem_Rom=liPK_Game_GameSystem_Rom;}
+  void liPK_Picture_set(long int liPK_Picture) {m_liPK_Picture=liPK_Picture;}
+  void liPK_Game_GameSystem_Picture_set(long int liPK_Game_GameSystem_Picture) {m_liPK_Game_GameSystem_Picture=liPK_Game_GameSystem_Picture;}
 };
-
 #endif /** MAMEMACHINE_H */

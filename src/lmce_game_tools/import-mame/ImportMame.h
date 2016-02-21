@@ -13,6 +13,7 @@
 #include "MAMEMachine.h"
 #include "Database.h"
 #include "ROMScraper.h"
+#include "PictureScraper.h"
 
 #include <string>
 #include <map>
@@ -21,7 +22,7 @@
 class ImportMAME
 {
  public:
-  ImportMAME(std::string sMamePath, std::string sCategoryPath, std::string sROMPath);
+  ImportMAME(std::string sMamePath, std::string sCategoryPath, std::string sROMPath, std::string sPicturePath);
   virtual ~ImportMAME();
   int Run();
 
@@ -36,10 +37,12 @@ class ImportMAME
   std::string m_sMAMEPath;
   std::string m_sCategoryPath;
   std::string m_sROMPath;
+  std::string m_sPicturePath;
   class MAMEXMLParser* m_pMAMEXMLParser;
   class Category* m_pCategory;
   class Database* m_pDatabase;
   class ROMScraper* m_pROMScraper;
+  class PictureScraper* m_pPictureScraper;
   void MergeGenresIntoMachines();
 };
 

@@ -20,6 +20,7 @@ sources = ImportMame.cpp \
         MAMEXMLParser.cpp \
 	NameHash.cpp \
 	ROMScraper.cpp \
+	PictureScraper.cpp \
 	pugixml.cpp \
 	main.cpp
 #<-dceag-mh-e->

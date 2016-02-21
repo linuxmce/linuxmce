@@ -842,6 +842,180 @@ long int Database::GetPKGameGameSystemRom(MAMEMachine* m)
   return 0;
 }
 
+bool Database::PictureExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::PictureExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::PictureExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_Picture *> v_RowPicture;
+  if (!m_pDatabase->Picture_get()->GetRows("OriginalFilename=\""+m->MachineName_get()+".png\"",&v_RowPicture))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowPicture.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+  
+}
+
+long int Database::AddPicture(MAMEMachine* m)
+{
+  Row_Picture *pRow_Picture = m_pDatabase->Picture_get()->AddRow();
+  long int PK_Picture=0;
+  if (pRow_Picture)
+    {
+      pRow_Picture->OriginalFilename_set(m->MachineName_get()+".png");
+      pRow_Picture->Table_Picture_get()->Commit();
+      PK_Picture=pRow_Picture->PK_Picture_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_Picture;
+    }
+  return 0;
+}
+
+long int Database::GetPKPicture(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "OriginalFilename=\""+m->MachineName_get()+".png\"";
+  vector<class Row_Picture *> v_RowPicture;
+  if (!m_pDatabase->Picture_get()->GetRows(sWhereQuery,&v_RowPicture))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKPicture() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowPicture.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Picture* pRow_Picture = v_RowPicture[0];
+      if (!pRow_Picture)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKPicture() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_Picture->PK_Picture_get();
+	}
+    }
+  return 0;
+}
+
+bool Database::GameGameSystemPictureExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::Game_GameSystem_PictureExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::Game_GameSystem_PictureExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_Game_GameSystem_Picture *> v_RowGame_GameSystem_Picture;
+  if (!m_pDatabase->Game_GameSystem_Picture_get()->GetRows("FK_Game=\""+StringUtils::itos(m->liPK_Game_get())+"\" AND FK_GameSystem=\""+StringUtils::itos(GAMESYSTEM_MAME_CONST)+"\" AND FK_Picture=\""+StringUtils::itos(m->liPK_Picture_get())+"\"",&v_RowGame_GameSystem_Picture))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowGame_GameSystem_Picture.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+  
+}
+
+long int Database::AddGameGameSystemPicture(MAMEMachine* m)
+{
+  Row_Game_GameSystem_Picture *pRow_Game_GameSystem_Picture = m_pDatabase->Game_GameSystem_Picture_get()->AddRow();
+  long int PK_Game_GameSystem_Picture=0;
+  if (pRow_Game_GameSystem_Picture)
+    {
+      pRow_Game_GameSystem_Picture->FK_Game_set(m->liPK_Game_get());
+      pRow_Game_GameSystem_Picture->FK_GameSystem_set(GAMESYSTEM_MAME_CONST);
+      pRow_Game_GameSystem_Picture->FK_Picture_set(m->liPK_Picture_get());
+      pRow_Game_GameSystem_Picture->Table_Game_GameSystem_Picture_get()->Commit();
+      PK_Game_GameSystem_Picture=pRow_Game_GameSystem_Picture->PK_Game_GameSystem_Picture_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_Game_GameSystem_Picture;
+    }
+  return 0;
+}
+
+long int Database::GetPKGameGameSystemPicture(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "FK_Game=\""+StringUtils::itos(m->liPK_Game_get())+"\" AND FK_GameSystem=\""+StringUtils::itos(GAMESYSTEM_MAME_CONST)+"\" AND FK_Picture=\""+StringUtils::itos(m->liPK_Picture_get())+"\"";
+  vector<class Row_Game_GameSystem_Picture *> v_RowGame_GameSystem_Picture;
+  if (!m_pDatabase->Game_GameSystem_Picture_get()->GetRows(sWhereQuery,&v_RowGame_GameSystem_Picture))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGame_GameSystem_Picture() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowGame_GameSystem_Picture.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Game_GameSystem_Picture* pRow_Game_GameSystem_Picture = v_RowGame_GameSystem_Picture[0];
+      if (!pRow_Game_GameSystem_Picture)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGame_GameSystem_Picture() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_Game_GameSystem_Picture->PK_Game_GameSystem_Picture_get();
+	}
+    }
+  return 0;
+}
+
 bool Database::ProcessMachine(MAMEMachine* m)
 {
   if (!m)
@@ -978,6 +1152,36 @@ bool Database::ProcessMachine(MAMEMachine* m)
     }  
 
   m->liPK_Game_GameSystem_Rom_set(liPK_Game_GameSystem_Rom);
+  
+  // Add Picture entry if needed, otherwise query, come out with a PK_Picture
+  
+  long int liPK_Picture;
+  if (!PictureExists(m))
+    {
+      // Add Picture Entry
+      liPK_Picture=AddPicture(m);
+    }
+  else
+    {
+      liPK_Picture=GetPKPicture(m);
+    }
+  
+  m->liPK_Picture_set(liPK_Picture);
+
+  // Add Game_GameSystem_Picture entry if needed, otherwise query, come out with a PK_Picture
+  
+  long int liPK_Game_GameSystem_Picture;
+  if (!GameGameSystemPictureExists(m))
+    {
+      // Add Picture Entry
+      liPK_Game_GameSystem_Picture=AddGameGameSystemPicture(m);
+    }
+  else
+    {
+      liPK_Game_GameSystem_Picture=GetPKGameGameSystemPicture(m);
+    }
+  
+  m->liPK_Game_GameSystem_Picture_set(liPK_Game_GameSystem_Picture);
 
   return false;
 }

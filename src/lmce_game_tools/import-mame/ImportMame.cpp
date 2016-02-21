@@ -7,15 +7,17 @@
 
 #include "ImportMame.h"
 
-ImportMAME::ImportMAME(std::string sMAMEPath, std::string sCategoryPath, std::string sROMPath)
+ImportMAME::ImportMAME(std::string sMAMEPath, std::string sCategoryPath, std::string sROMPath, std::string sPicturePath)
 {
   m_sMAMEPath=sMAMEPath;
   m_sCategoryPath=sCategoryPath;
   m_sROMPath=sROMPath;
+  m_sPicturePath=sPicturePath;
   m_pCategory = new Category(sCategoryPath);
   m_pMAMEXMLParser = new MAMEXMLParser(sMAMEPath, this);
   m_pDatabase = new Database();
   m_pROMScraper = new ROMScraper(sROMPath);
+  m_pPictureScraper = new PictureScraper(sPicturePath);
 }
 
 ImportMAME::~ImportMAME()
@@ -33,6 +35,9 @@ ImportMAME::~ImportMAME()
 
   if (m_pROMScraper)
     delete m_pROMScraper;
+
+  if (m_pPictureScraper)
+    delete m_pPictureScraper;
 
 }
 
@@ -57,11 +62,16 @@ int ImportMAME::Run()
   m_pMAMEXMLParser->run();
   MergeGenresIntoMachines();
 
+  cout << "Processing each machine...Please wait..." << endl << endl;
+
   for (map<string, MAMEMachine*>::iterator it=m_mapMachineToMAMEMachine.begin(); it!=m_mapMachineToMAMEMachine.end(); ++it)
     {
       MAMEMachine* m = it->second;
       m_pROMScraper->processROM(m);
+      m_pPictureScraper->processPicture(m);
       m_pDatabase->ProcessMachine(m);
+      m_pPictureScraper->exportPicture(m);
+      cout << "." << flush;
     }
 
   return 0;

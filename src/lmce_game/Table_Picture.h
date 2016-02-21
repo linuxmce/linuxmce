@@ -94,23 +94,28 @@ class DECLSPECIFIER Row_Picture : public TableRow, public SerializeClass
 		Table_Picture *table;
 		
 		long int m_PK_Picture;
+string m_OriginalFilename;
 string m_URL;
 
-		bool is_null[2];
+		bool is_null[3];
 	
 	public:
 		long int PK_Picture_get();
+string OriginalFilename_get();
 string URL_get();
 
 		
 		void PK_Picture_set(long int val);
+void OriginalFilename_set(string val);
 void URL_set(string val);
 
 		
-		bool URL_isNull();
+		bool OriginalFilename_isNull();
+bool URL_isNull();
 
 			
-		void URL_setNull(bool val);
+		void OriginalFilename_setNull(bool val);
+void URL_setNull(bool val);
 	
 	
 		void Delete();
@@ -132,12 +137,13 @@ void Game_GameSystem_Picture_FK_Picture_getrows(vector <class Row_Game_GameSyste
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Picture+ m_URL;
+			StartSerializeList() + m_PK_Picture+ m_OriginalFilename+ m_URL;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_Picture_asSQL();
+string OriginalFilename_asSQL();
 string URL_asSQL();
 
 	};

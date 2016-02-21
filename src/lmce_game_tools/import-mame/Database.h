@@ -80,6 +80,12 @@ class Database
   bool GameGameSystemRomExists(MAMEMachine* m);
   long int AddGameGameSystemRom(MAMEMachine *m);
   long int GetPKGameGameSystemRom(MAMEMachine *m);
+  bool PictureExists(MAMEMachine* m);
+  long int AddPicture(MAMEMachine *m);
+  long int GetPKPicture(MAMEMachine *m);
+  bool GameGameSystemPictureExists(MAMEMachine* m);
+  long int AddGameGameSystemPicture(MAMEMachine *m);
+  long int GetPKGameGameSystemPicture(MAMEMachine *m);
 
 
 };
