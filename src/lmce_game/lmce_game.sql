@@ -76,6 +76,7 @@ CREATE TABLE Game_GameSystem_Rom (
 
 CREATE TABLE Picture (
        PK_Picture INTEGER AUTO_INCREMENT NOT NULL,
+       OriginalFilename VARCHAR(256),
        URL VARCHAR(4096),
        PRIMARY KEY(PK_Picture)
 );

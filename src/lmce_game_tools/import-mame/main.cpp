@@ -28,6 +28,7 @@ int main(int argc, char* argv[])
   string sMamePath;    // Path to MAME binary.
   string sCategoryPath; // Path to Category.ini file.
   string sROMPath;     // Path to ROMs for checksum.
+  string sPicturePath; // Path to Pictures
   char c;              // Current Option.
   int iRetCode;        // Return code
 
@@ -45,25 +46,33 @@ int main(int argc, char* argv[])
       switch (c)
 	{
 	case 'p':
-	  if (argc > 6)
+	  if (argc > 8)
 	    {
 	      sMamePath = argv[++optnum];
 	      bError=false;
 	    }
 	  break;
 	case 'c':
-	  if (argc > 6)
+	  if (argc > 8)
 	    {
 	      sCategoryPath = argv[++optnum];
 	      bError=false;
 	    }
 	  break;
 	case 'r':
-	  if (argc > 6)
+	  if (argc > 8)
 	    {
 	      sROMPath = argv[++optnum];
 	      bError=false;
 	    }
+	  break;
+	case 't':
+	  if (argc > 8)
+	    {
+	      sPicturePath = argv[++optnum];
+	      bError=false;
+	    }
+	  break;
 	}
     }
 
@@ -75,11 +84,12 @@ int main(int argc, char* argv[])
 	   << endl
 	   << "\t -p -- The Path to the MAME binary. (Required)" << endl
 	   << "\t -c -- The Path to the Category.ini file." << endl
-	   << "\t -r -- The Path to the ROMs. " << endl;
+	   << "\t -r -- The Path to the ROMs. " << endl
+	   << "\t -t -- The Path to the Snaps." << endl;
       exit(1);
     }
 
-  ImportMAME *pImportMAME = new ImportMAME(sMamePath,sCategoryPath,sROMPath);
+  ImportMAME *pImportMAME = new ImportMAME(sMamePath,sCategoryPath,sROMPath,sPicturePath);
   iRetCode = pImportMAME->Run();
 
   delete pImportMAME;

@@ -138,6 +138,7 @@ void Row_Picture::SetDefaultValues()
 	m_PK_Picture = 0;
 is_null[0] = false;
 is_null[1] = true;
+is_null[2] = true;
 
 
 	is_added=false;
@@ -148,6 +149,9 @@ is_null[1] = true;
 long int Row_Picture::PK_Picture_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_PK_Picture;}
+string Row_Picture::OriginalFilename_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_OriginalFilename;}
 string Row_Picture::URL_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_URL;}
@@ -156,18 +160,28 @@ return m_URL;}
 void Row_Picture::PK_Picture_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_PK_Picture = val; is_modified=true; is_null[0]=false;}
+void Row_Picture::OriginalFilename_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_OriginalFilename = val; is_modified=true; is_null[1]=false;}
 void Row_Picture::URL_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_URL = val; is_modified=true; is_null[1]=false;}
+m_URL = val; is_modified=true; is_null[2]=false;}
 
 		
-bool Row_Picture::URL_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+bool Row_Picture::OriginalFilename_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
+bool Row_Picture::URL_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 
 			
-void Row_Picture::URL_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Picture::OriginalFilename_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
+is_modified=true;
+}
+void Row_Picture::URL_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
 is_modified=true;
 }
 	
@@ -185,11 +199,25 @@ sprintf(buf, "%li", m_PK_Picture);
 return buf;
 }
 
-string Row_Picture::URL_asSQL()
+string Row_Picture::OriginalFilename_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 if (is_null[1])
+return "NULL";
+
+char *buf = new char[1537];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_OriginalFilename.c_str(), (unsigned long) min((size_t)768,m_OriginalFilename.size()));
+string s=string()+"\""+buf+"\"";
+delete[] buf;
+return s;
+}
+
+string Row_Picture::URL_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[2])
 return "NULL";
 
 char *buf = new char[24577];
@@ -238,10 +266,10 @@ bool Table_Picture::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInser
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Picture_asSQL()+", "+pRow->URL_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Picture_asSQL()+", "+pRow->OriginalFilename_asSQL()+", "+pRow->URL_asSQL();
 
 	
-		string query = "insert into Picture (`PK_Picture`, `URL`) values ("+
+		string query = "insert into Picture (`PK_Picture`, `OriginalFilename`, `URL`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -307,7 +335,7 @@ condition = condition + "`PK_Picture`=" + tmp_PK_Picture;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Picture`="+pRow->PK_Picture_asSQL()+", `URL`="+pRow->URL_asSQL();
+update_values_list = update_values_list + "`PK_Picture`="+pRow->PK_Picture_asSQL()+", `OriginalFilename`="+pRow->OriginalFilename_asSQL()+", `URL`="+pRow->URL_asSQL();
 
 	
 		string query = "update Picture set " + update_values_list + " where " + condition;
@@ -454,12 +482,23 @@ sscanf(row[0], "%li", &(pRow->m_PK_Picture));
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_URL = "";
+pRow->m_OriginalFilename = "";
 }
 else
 {
 pRow->is_null[1]=false;
-pRow->m_URL = string(row[1],lengths[1]);
+pRow->m_OriginalFilename = string(row[1],lengths[1]);
+}
+
+if (row[2] == NULL)
+{
+pRow->is_null[2]=true;
+pRow->m_URL = "";
+}
+else
+{
+pRow->is_null[2]=false;
+pRow->m_URL = string(row[2],lengths[2]);
 }
 
 
@@ -592,12 +631,23 @@ sscanf(row[0], "%li", &(pRow->m_PK_Picture));
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_URL = "";
+pRow->m_OriginalFilename = "";
 }
 else
 {
 pRow->is_null[1]=false;
-pRow->m_URL = string(row[1],lengths[1]);
+pRow->m_OriginalFilename = string(row[1],lengths[1]);
+}
+
+if (row[2] == NULL)
+{
+pRow->is_null[2]=true;
+pRow->m_URL = "";
+}
+else
+{
+pRow->is_null[2]=false;
+pRow->m_URL = string(row[2],lengths[2]);
 }
 
 

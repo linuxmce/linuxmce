@@ -17,7 +17,7 @@ class ROMScraper
 
  public:
 
-  ROMScraper(string sRombPath);
+  ROMScraper(string sRomPath);
   virtual ~ROMScraper();
 
   void processROM(MAMEMachine* m);
