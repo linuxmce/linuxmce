@@ -63,7 +63,7 @@ using namespace DCE;
 
 namespace UpdateMediaVars
 {
-	bool bError, bUpdateThumbnails, bUpdateSearchTokens, bRunAsDaemon, bSyncAttributes;
+  bool bError, bUpdateThumbnails, bUpdateSearchTokens, bRunAsDaemon, bSyncAttributes, bRemoveDuplicateAttr;
     string sDirectory;
     string sUPnPMountPoint;
     string sLocalUPnPServerName;
@@ -221,31 +221,37 @@ void SyncAttributes()
 }
 
 void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Found duplicated attribute %s, pk %d, type %d. Won't touch it.",
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Combining all attributes of: %s, pk %d, type %d.",
 					    Name.c_str(), PK_Attribute, PK_AttributeType);
-
-	//char *AffectedTables[] =
-	//{
-	//	"File_Attribute", 
-	//	"Attribute_Settings", 
-	//	"CoverArtScan", 
-	//	"Disc_Attribute", 
-	//	"Download_Attribute", 
-	//	"LongAttribute", 
-	//	"Picture_Attribute", 
-	//	"SearchToken_Attribute"
-	//};
+	string AffectedTables[] =
+	{
+		"File_Attribute", 
+		"Attribute_Settings", 
+		"CoverArtScan", 
+		"Disc_Attribute", 
+		"Download_Attribute", 
+		"LongAttribute", 
+		"Picture_Attribute", 
+		"SearchToken_Attribute"
+	};
 	
-	//for(int i = 0; i < sizeof(AffectedTables) / sizeof(char *); ++i)
-	//{
-	//	string sSqlMoveRowsFromDuplicates = 
-	//		"UPDATE Attribute JOIN File_Attribute ON FK_Attribute = PK_Attribute\n"
-	//		"SET FK_Attribute = " + string(row[dafAttribute]) + "\n"
-	//		"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
-	//		"AND Name = '" + StringUtils::SQLEscape(row[dafName]) + "'\n"
-	//		"AND PK_Attribute <> " + row[dafAttribute];
-	//	g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlMoveRowsFromDuplicates);
-	//}
+//	for(int i = 0; i < sizeof(AffectedTables) / sizeof(AffectedTables[0]); ++i)
+//	{
+		string sSqlMoveRowsFromDuplicates = 
+			"UPDATE Attribute JOIN File_Attribute ON FK_Attribute = PK_Attribute\n" 
+			"SET FK_Attribute = " + StringUtils::itos(PK_Attribute) + "\n" 
+			"WHERE FK_AttributeType = " + StringUtils::itos(PK_AttributeType) +
+			" AND Name = '" + StringUtils::SQLEscape(Name) + "'"
+			" AND PK_Attribute <> " + StringUtils::itos(PK_Attribute);
+        if (bDryRun)
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "DRY RUN! Would have executed:");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sql:\n%s",
+						    sSqlMoveRowsFromDuplicates.c_str());
+		if (!bDryRun)
+		{
+			g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlMoveRowsFromDuplicates);
+		}
+//	}
 	
 	//string sSqlDeleteDuplicates = 
 	//	"DELETE FROM Attribute\n"
@@ -264,7 +270,6 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 	//	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Removed %d duplicated attributes for '%s'", 
 	//		nAffectedRecords, row[dafName]); 
 	//}
-
 }
 void RemoveDuplicatedAttributes()
 {
@@ -277,10 +282,10 @@ void RemoveDuplicatedAttributes()
 	{
 		dafName,
 		dafAttributerType,
-		dafAttribute
-	};
+        dafAttribute
+    };
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Removing duplicated attributes..."); 
+    LoggerWrapper::GetInstance()->Write(LV_WARNING, "Removing duplicated attributes...");
 
 	PlutoSqlResult result;
 	DB_ROW row;
@@ -290,7 +295,23 @@ void RemoveDuplicatedAttributes()
 		{
 			if(NULL != row[dafName] && NULL != row[dafAttributerType] && NULL != row[dafAttribute])
 			{
-				CombineAttributes(atoi(row[dafAttribute]), atoi(row[dafAttributerType]), row[dafName]);
+				int attrType = atoi(row[dafAttributerType]);
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Found duplicate attribute: %s, pk %d, type = %d.", row[dafName], atoi(row[dafAttribute]), attrType);
+				// We only allow a few types to be combined by default, to not cause too many unforseen problems
+				// for the album attribute (specifically when related to audio) we need to make extra checks
+				// to now combine albums with the same title ("Greatest Hits") from different performers
+				if ( attrType == ATTRIBUTETYPE_Genre_CONST )
+//|| 
+//				     attrType == ATTRIBUTETYPE_Performer_CONST || attrType == ATTRIBUTETYPE_Title_CONST ||
+//				     attrType == ATTRIBUTETYPE_Genre_CONST )
+				{
+					CombineAttributes(atoi(row[dafAttribute]), attrType, row[dafName]);
+				} else if (attrType == ATTRIBUTETYPE_Album_CONST) {
+					// check if this attribute is used for different performers, in that case, do not combine
+
+					// multiple performers, combine album attributes per performer
+					
+				}
 			}
 		}
 	}
@@ -500,6 +521,7 @@ int main(int argc, char *argv[])
 	bSyncFilesOnly=false;
 	bDryRun=false;
 	bSyncAttributes=false;
+	bRemoveDuplicateAttr = false;
 	sDirectory="/home/";
 
         string sPlutoMediaDbName = "pluto_media";
@@ -581,6 +603,9 @@ int main(int argc, char *argv[])
 		case 'a':
 			bSyncAttributes = true;
 			break;
+		case 'R':
+			bRemoveDuplicateAttr = true;
+			break;
 		default:
 			cout << "Unknown: " << argv[optnum] << endl;
 			bError=true;
@@ -605,6 +630,7 @@ int main(int argc, char *argv[])
 			<< "-B             -- Run as daemon" << endl
 			<< "-r             -- dRy run, don't change anything(applies to sync attributes only)" << endl
 			<< "-a             -- sync Attributes" << endl
+			<< "-R             -- remove duplicate attributes" << endl
 			<< "Directory defaults to /home" << endl;
 
 		exit(1);
@@ -625,7 +651,7 @@ int main(int argc, char *argv[])
 	{
 		vector<string> vectFolders;
 		StringUtils::Tokenize(sDirectory, "|", vectFolders);
-		if (!bDryRun)
+		if (!bDryRun && !bRemoveDuplicateAttr)
 		{
 			// TODO: make updatemedia support dry run
 			for(vector<string>::iterator it = vectFolders.begin(); it != vectFolders.end(); ++it)
@@ -644,14 +670,18 @@ int main(int argc, char *argv[])
 			}
 		}
 		
-		if (bSyncAttributes) {
+		if (bSyncAttributes || bRemoveDuplicateAttr) {
 
 			int res = connectToDataBase(sDBHost,sDBUser,sDBPassword,sPlutoMediaDbName, sPlutoMainDbName, iDBPort);
 			if (res) {
 				return res;
 			}
 
-			SyncAttributes();
+			if (bSyncAttributes)
+				SyncAttributes();
+
+			if (bRemoveDuplicateAttr)
+				RemoveDuplicatedAttributes();
 
 			closeDatabase();
 		}
