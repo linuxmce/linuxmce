@@ -1163,10 +1163,14 @@ void LM::updateScripts()
 	string sCmd2="/usr/pluto/bin/UpdateAvailableSoundCards.sh";
 	exec_system(sCmd2,true);
 
-	writeOSD("Detecting Soft Squeeze Devices");
-	writeLog("Running UpdateSqueezeDevices.sh", true, LV_STATUS);
-	string sCmd3="/usr/pluto/bin/UpdateSqueezeDevices.sh";
-	exec_system(sCmd3,true);
+	// only run on the core
+	if (m_bCoreRunning)
+	{
+		writeOSD("Detecting Soft Squeeze Devices");
+		writeLog("Running UpdateSqueezeDevices.sh", true, LV_STATUS);
+		string sCmd3="/usr/pluto/bin/UpdateSqueezeDevices.sh";
+		exec_system(sCmd3,true);
+	}
 
 	writeLog("Process completed.");
 }
