@@ -66,12 +66,10 @@ INSERT INTO GameSystem (Description) VALUES ('MAME');
 
 CREATE TABLE Game_GameSystem_Rom (
        PK_Game_GameSystem_Rom INTEGER AUTO_INCREMENT NOT NULL,
-       FK_Game INTEGER NOT NULL,
-       FK_GameSystem INTEGER NOT NULL,
+       FK_Game_GameSystem INTEGER NOT NULL,
        FK_Rom INTEGER NOT NULL,
        PRIMARY KEY(PK_Game_GameSystem_Rom),
-       KEY(FK_Game),
-       KEY(FK_GameSystem),
+       KEY(FK_Game_GameSystem),
        KEY(FK_Rom)
 );
 
@@ -93,12 +91,10 @@ CREATE TABLE GameSystem_Picture (
 
 CREATE TABLE Game_GameSystem_Picture (
        PK_Game_GameSystem_Picture INTEGER AUTO_INCREMENT NOT NULL,
-       FK_Game INTEGER NOT NULL,
-       FK_GameSystem INTEGER NOT NULL,
+       FK_Game_GameSystem INTEGER NOT NULL,
        FK_Picture INTEGER NOT NULL,
        PRIMARY KEY(PK_Game_GameSystem_Picture),
-       KEY(FK_Game),
-       KEY(FK_GameSystem),
+       KEY(FK_Game_GameSystem),
        KEY(FK_Picture)
 );
 
@@ -112,25 +108,19 @@ CREATE TABLE Configuration (
 
 CREATE TABLE Game_GameSystem_Configuration (
        PK_Game_GameSystem_Configuration INTEGER AUTO_INCREMENT NOT NULL,
-       FK_Game INTEGER NOT NULL,
-       FK_GameSystem INTEGER NOT NULL,
+       FK_Game_GameSystem INTEGER NOT NULL,
        FK_Configuration INTEGER NOT NULL,
        PRIMARY KEY(PK_Game_GameSystem_Configuration),
-       KEY(FK_Game),
-       KEY(FK_GameSystem),
+       KEY(FK_Game_GameSystem),
        KEY(FK_Configuration)
 );
 
 CREATE TABLE Game_GameSystem_Rom_Configuration (
        PK_Game_GameSystem_Rom_Configuration INTEGER AUTO_INCREMENT NOT NULL,
-       FK_Game INTEGER NOT NULL,
-       FK_GameSystem INTEGER NOT NULL,
-       FK_Rom INTEGER NOT NULL,
+       FK_Game_GameSystem_Rom INTEGER NOT NULL,
        FK_Configuration INTEGER NOT NULL,
        PRIMARY KEY(PK_Game_GameSYstem_Rom_Configuration),
-       KEY(FK_Game),
-       KEY(FK_GameSystem),
-       KEY(FK_Rom),
+       KEY(FK_Game_GameSystem_Rom),
        KEY(FK_Configuration)
 );
 

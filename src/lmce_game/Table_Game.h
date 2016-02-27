@@ -126,10 +126,6 @@ void FK_NameHash_set(long int val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Game_GameSystem_FK_Game_getrows(vector <class Row_Game_GameSystem*> *rows);
-void Game_GameSystem_Configuration_FK_Game_getrows(vector <class Row_Game_GameSystem_Configuration*> *rows);
-void Game_GameSystem_Picture_FK_Game_getrows(vector <class Row_Game_GameSystem_Picture*> *rows);
-void Game_GameSystem_Rom_FK_Game_getrows(vector <class Row_Game_GameSystem_Rom*> *rows);
-void Game_GameSystem_Rom_Configuration_FK_Game_getrows(vector <class Row_Game_GameSystem_Rom_Configuration*> *rows);
 
 
 		// Setup binary serialization

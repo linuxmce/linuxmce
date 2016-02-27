@@ -36,6 +36,9 @@ using namespace std;
 #include "Table_Manufacturer.h"
 #include "Table_Genre.h"
 
+#include "Table_Game_GameSystem_Configuration.h"
+#include "Table_Game_GameSystem_Picture.h"
+#include "Table_Game_GameSystem_Rom.h"
 
 
 void Database_lmce_game::CreateTable_Game_GameSystem()
@@ -912,6 +915,27 @@ return pTable->GetRow(m_FK_Genre);
 }
 
 
+void Row_Game_GameSystem::Game_GameSystem_Configuration_FK_Game_GameSystem_getrows(vector <class Row_Game_GameSystem_Configuration*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Game_GameSystem_Configuration *pTable = table->database->Game_GameSystem_Configuration_get();
+pTable->GetRows("`FK_Game_GameSystem`=" + StringUtils::itos(m_PK_Game_GameSystem),rows);
+}
+void Row_Game_GameSystem::Game_GameSystem_Picture_FK_Game_GameSystem_getrows(vector <class Row_Game_GameSystem_Picture*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Game_GameSystem_Picture *pTable = table->database->Game_GameSystem_Picture_get();
+pTable->GetRows("`FK_Game_GameSystem`=" + StringUtils::itos(m_PK_Game_GameSystem),rows);
+}
+void Row_Game_GameSystem::Game_GameSystem_Rom_FK_Game_GameSystem_getrows(vector <class Row_Game_GameSystem_Rom*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Game_GameSystem_Rom *pTable = table->database->Game_GameSystem_Rom_get();
+pTable->GetRows("`FK_Game_GameSystem`=" + StringUtils::itos(m_PK_Game_GameSystem),rows);
+}
 
 
 

@@ -63,7 +63,6 @@ void PictureScraper::exportPicture(MAMEMachine* m)
 
   if (m->MachinePicturePath_get().empty())
     {
-      cout << endl << "No picture for: " << m->MachineName_get() << endl;
       return;
     }
 

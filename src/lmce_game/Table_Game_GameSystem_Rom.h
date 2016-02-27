@@ -94,22 +94,19 @@ class DECLSPECIFIER Row_Game_GameSystem_Rom : public TableRow, public SerializeC
 		Table_Game_GameSystem_Rom *table;
 		
 		long int m_PK_Game_GameSystem_Rom;
-long int m_FK_Game;
-long int m_FK_GameSystem;
+long int m_FK_Game_GameSystem;
 long int m_FK_Rom;
 
-		bool is_null[4];
+		bool is_null[3];
 	
 	public:
 		long int PK_Game_GameSystem_Rom_get();
-long int FK_Game_get();
-long int FK_GameSystem_get();
+long int FK_Game_GameSystem_get();
 long int FK_Rom_get();
 
 		
 		void PK_Game_GameSystem_Rom_set(long int val);
-void FK_Game_set(long int val);
-void FK_GameSystem_set(long int val);
+void FK_Game_GameSystem_set(long int val);
 void FK_Rom_set(long int val);
 
 		
@@ -127,24 +124,23 @@ void FK_Rom_set(long int val);
 		class Table_Game_GameSystem_Rom *Table_Game_GameSystem_Rom_get() { return table; };
 
 		// Return the rows for foreign keys 
-		class Row_Game* FK_Game_getrow();
-class Row_GameSystem* FK_GameSystem_getrow();
+		class Row_Game_GameSystem* FK_Game_GameSystem_getrow();
 class Row_Rom* FK_Rom_getrow();
 
 
 		// Return the rows in other tables with foreign keys pointing here
-		
+		void Game_GameSystem_Rom_Configuration_FK_Game_GameSystem_Rom_getrows(vector <class Row_Game_GameSystem_Rom_Configuration*> *rows);
+
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Game_GameSystem_Rom+ m_FK_Game+ m_FK_GameSystem+ m_FK_Rom;
+			StartSerializeList() + m_PK_Game_GameSystem_Rom+ m_FK_Game_GameSystem+ m_FK_Rom;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_Game_GameSystem_Rom_asSQL();
-string FK_Game_asSQL();
-string FK_GameSystem_asSQL();
+string FK_Game_GameSystem_asSQL();
 string FK_Rom_asSQL();
 
 	};

@@ -9,8 +9,30 @@
 #define MAMEMACHINE_H
 
 #include <string>
+#include <algorithm> 
+#include <functional> 
+#include <cctype>
+#include <locale>
 
 using namespace std; 
+
+// String trimming functions.
+// trim from start
+static inline std::string &ltrim(std::string &s) {
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+  return s;
+}
+
+// trim from end
+static inline std::string &rtrim(std::string &s) {
+  s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+  return s;
+}
+
+// trim from both ends
+static inline std::string &trim(std::string &s) {
+  return ltrim(rtrim(s));
+}
 
 class MAMEMachine
 {
@@ -79,6 +101,21 @@ class MAMEMachine
     }
 
   // Special functions for accessors
+
+  string descriptionFor(string sMachineDescription)
+  {
+    size_t found = sMachineDescription.find_first_of("([{");
+
+    if (found==string::npos)
+      {
+	return sMachineDescription;
+      }
+    
+    string ret = sMachineDescription.substr(0,found);
+    ret = trim(ret);
+    return ret;
+  }
+
   string subDescriptionFor(string sMachineDescription)
   {
     size_t found = sMachineDescription.find_first_of("([{");
@@ -93,7 +130,7 @@ class MAMEMachine
 
   // Get accessors
   string MachineName_get() {return m_sMachineName;}
-  string MachineDescription_get() {return m_sMachineDescription;}
+  string MachineDescription_get() {return descriptionFor(m_sMachineDescription);}
   string MachineSubDescription_get() {return subDescriptionFor(m_sMachineDescription);}
   string MachineManufacturer_get() {return m_sMachineManufacturer;}
   string MachineYear_get() {return m_sMachineYear;}

@@ -34,10 +34,6 @@ using namespace std;
 #include "Table_NameHash.h"
 
 #include "Table_Game_GameSystem.h"
-#include "Table_Game_GameSystem_Configuration.h"
-#include "Table_Game_GameSystem_Picture.h"
-#include "Table_Game_GameSystem_Rom.h"
-#include "Table_Game_GameSystem_Rom_Configuration.h"
 
 
 void Database_lmce_game::CreateTable_Game()
@@ -619,34 +615,6 @@ void Row_Game::Game_GameSystem_FK_Game_getrows(vector <class Row_Game_GameSystem
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Game_GameSystem *pTable = table->database->Game_GameSystem_get();
-pTable->GetRows("`FK_Game`=" + StringUtils::itos(m_PK_Game),rows);
-}
-void Row_Game::Game_GameSystem_Configuration_FK_Game_getrows(vector <class Row_Game_GameSystem_Configuration*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Game_GameSystem_Configuration *pTable = table->database->Game_GameSystem_Configuration_get();
-pTable->GetRows("`FK_Game`=" + StringUtils::itos(m_PK_Game),rows);
-}
-void Row_Game::Game_GameSystem_Picture_FK_Game_getrows(vector <class Row_Game_GameSystem_Picture*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Game_GameSystem_Picture *pTable = table->database->Game_GameSystem_Picture_get();
-pTable->GetRows("`FK_Game`=" + StringUtils::itos(m_PK_Game),rows);
-}
-void Row_Game::Game_GameSystem_Rom_FK_Game_getrows(vector <class Row_Game_GameSystem_Rom*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Game_GameSystem_Rom *pTable = table->database->Game_GameSystem_Rom_get();
-pTable->GetRows("`FK_Game`=" + StringUtils::itos(m_PK_Game),rows);
-}
-void Row_Game::Game_GameSystem_Rom_Configuration_FK_Game_getrows(vector <class Row_Game_GameSystem_Rom_Configuration*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Game_GameSystem_Rom_Configuration *pTable = table->database->Game_GameSystem_Rom_Configuration_get();
 pTable->GetRows("`FK_Game`=" + StringUtils::itos(m_PK_Game),rows);
 }
 
