@@ -1383,7 +1383,7 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
 			// TODO: maybe this is a motion sensor. Check product id??
 			devicetemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
 			PK_Device_Parent = m_dwPK_SecurityInterface;
-		}
+        }
 		if (devicetemplate > 0)
 			return devicetemplate;
 	}
@@ -1430,7 +1430,7 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
 
 			devicetemplate = DEVICETEMPLATE_Multilevel_Sensor_CONST;
 			break;
-		case GENERIC_TYPE_SENSOR_ALARM:
+        case GENERIC_TYPE_SENSOR_ALARM:
 			// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "alarm sensor found, specific: %i",specific);
 			switch(node->m_specific) {
 				case SPECIFIC_TYPE_BASIC_ROUTING_SMOKE_SENSOR:
@@ -1505,7 +1505,9 @@ string ZWave::DTToName(unsigned long PK_DeviceTemplate)
 	case DEVICETEMPLATE_Siren_CONST:
 		name = "Siren";
 		break;
-
+    case DEVICETEMPLATE_Generic_Access_Control_Panel_CONST:
+        name = "Access Control Panel";
+        break;
 	}
 	return name;
 }
