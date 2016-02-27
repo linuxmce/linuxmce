@@ -764,7 +764,7 @@ bool Database::GameGameSystemRomExists(MAMEMachine* m)
     return true; // Pretend rom exists, if there is no hash, as it is not needed.
 
   vector<class Row_Game_GameSystem_Rom *> v_RowGameGameSystemRom;
-  if (!m_pDatabase->Game_GameSystem_Rom_get()->GetRows("FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Rom="+StringUtils::itos(m->liPK_Rom_get()),&v_RowGameGameSystemRom))
+  if (!m_pDatabase->Game_GameSystem_Rom_get()->GetRows("FK_Game_GameSystem="+StringUtils::itos(m->liPK_Game_GameSystem_get())+" AND FK_Rom="+StringUtils::itos(m->liPK_Rom_get()),&v_RowGameGameSystemRom))
     {
       return false;
     }
@@ -794,8 +794,7 @@ long int Database::AddGameGameSystemRom(MAMEMachine* m)
   long int PK_GameGameSystemRom=0;
   if (pRow_GameGameSystemRom)
     {
-      pRow_GameGameSystemRom->FK_Game_set(m->liPK_Game_get());
-      pRow_GameGameSystemRom->FK_GameSystem_set(GAMESYSTEM_MAME_CONST);
+      pRow_GameGameSystemRom->FK_Game_GameSystem_set(m->liPK_Game_GameSystem_get());
       pRow_GameGameSystemRom->FK_Rom_set(m->liPK_Rom_get());
       pRow_GameGameSystemRom->Table_Game_GameSystem_Rom_get()->Commit();
       PK_GameGameSystemRom=pRow_GameGameSystemRom->PK_Game_GameSystem_Rom_get();
@@ -816,7 +815,7 @@ long int Database::GetPKGameGameSystemRom(MAMEMachine* m)
   if (m->MachineRomSHA1_get().empty())
     return 0;
 
-  string sWhereQuery = "FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Rom="+StringUtils::itos(m->liPK_Rom_get());
+  string sWhereQuery = "FK_Game_GameSystem="+StringUtils::itos(m->liPK_Game_GameSystem_get())+" AND FK_Rom="+StringUtils::itos(m->liPK_Rom_get());
   vector<class Row_Game_GameSystem_Rom *> v_RowGameGameSystemRom;
   if (!m_pDatabase->Game_GameSystem_Rom_get()->GetRows(sWhereQuery,&v_RowGameGameSystemRom))
     {
@@ -944,7 +943,7 @@ bool Database::GameGameSystemPictureExists(MAMEMachine* m)
     }
 
   vector<class Row_Game_GameSystem_Picture *> v_RowGame_GameSystem_Picture;
-  if (!m_pDatabase->Game_GameSystem_Picture_get()->GetRows("FK_Game=\""+StringUtils::itos(m->liPK_Game_get())+"\" AND FK_GameSystem=\""+StringUtils::itos(GAMESYSTEM_MAME_CONST)+"\" AND FK_Picture=\""+StringUtils::itos(m->liPK_Picture_get())+"\"",&v_RowGame_GameSystem_Picture))
+  if (!m_pDatabase->Game_GameSystem_Picture_get()->GetRows("FK_Game_GameSystem="+StringUtils::itos(m->liPK_Game_GameSystem_get())+" AND FK_Picture="+StringUtils::itos(m->liPK_Game_GameSystem_get()),&v_RowGame_GameSystem_Picture))
     {
       return false;
     }
@@ -971,8 +970,7 @@ long int Database::AddGameGameSystemPicture(MAMEMachine* m)
   long int PK_Game_GameSystem_Picture=0;
   if (pRow_Game_GameSystem_Picture)
     {
-      pRow_Game_GameSystem_Picture->FK_Game_set(m->liPK_Game_get());
-      pRow_Game_GameSystem_Picture->FK_GameSystem_set(GAMESYSTEM_MAME_CONST);
+      pRow_Game_GameSystem_Picture->FK_Game_GameSystem_set(m->liPK_Game_GameSystem_get());
       pRow_Game_GameSystem_Picture->FK_Picture_set(m->liPK_Picture_get());
       pRow_Game_GameSystem_Picture->Table_Game_GameSystem_Picture_get()->Commit();
       PK_Game_GameSystem_Picture=pRow_Game_GameSystem_Picture->PK_Game_GameSystem_Picture_get();
@@ -990,7 +988,7 @@ long int Database::GetPKGameGameSystemPicture(MAMEMachine* m)
       return false;
     }
 
-  string sWhereQuery = "FK_Game=\""+StringUtils::itos(m->liPK_Game_get())+"\" AND FK_GameSystem=\""+StringUtils::itos(GAMESYSTEM_MAME_CONST)+"\" AND FK_Picture=\""+StringUtils::itos(m->liPK_Picture_get())+"\"";
+  string sWhereQuery = "FK_Game_GameSystem="+StringUtils::itos(m->liPK_Game_GameSystem_get())+" AND FK_Picture="+StringUtils::itos(m->liPK_Picture_get());
   vector<class Row_Game_GameSystem_Picture *> v_RowGame_GameSystem_Picture;
   if (!m_pDatabase->Game_GameSystem_Picture_get()->GetRows(sWhereQuery,&v_RowGame_GameSystem_Picture))
     {
