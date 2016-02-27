@@ -133,10 +133,6 @@ void Description_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void GameSystem_Picture_FK_GameSystem_getrows(vector <class Row_GameSystem_Picture*> *rows);
 void Game_GameSystem_FK_GameSystem_getrows(vector <class Row_Game_GameSystem*> *rows);
-void Game_GameSystem_Configuration_FK_GameSystem_getrows(vector <class Row_Game_GameSystem_Configuration*> *rows);
-void Game_GameSystem_Picture_FK_GameSystem_getrows(vector <class Row_Game_GameSystem_Picture*> *rows);
-void Game_GameSystem_Rom_FK_GameSystem_getrows(vector <class Row_Game_GameSystem_Rom*> *rows);
-void Game_GameSystem_Rom_Configuration_FK_GameSystem_getrows(vector <class Row_Game_GameSystem_Rom_Configuration*> *rows);
 
 
 		// Setup binary serialization

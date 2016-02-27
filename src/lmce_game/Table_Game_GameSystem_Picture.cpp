@@ -31,8 +31,7 @@
 using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_Game_GameSystem_Picture.h"
-#include "Table_Game.h"
-#include "Table_GameSystem.h"
+#include "Table_Game_GameSystem.h"
 #include "Table_Picture.h"
 
 
@@ -138,12 +137,10 @@ void Row_Game_GameSystem_Picture::SetDefaultValues()
 {
 	m_PK_Game_GameSystem_Picture = 0;
 is_null[0] = false;
-m_FK_Game = 0;
+m_FK_Game_GameSystem = 0;
 is_null[1] = false;
-m_FK_GameSystem = 0;
-is_null[2] = false;
 m_FK_Picture = 0;
-is_null[3] = false;
+is_null[2] = false;
 
 
 	is_added=false;
@@ -154,12 +151,9 @@ is_null[3] = false;
 long int Row_Game_GameSystem_Picture::PK_Game_GameSystem_Picture_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_PK_Game_GameSystem_Picture;}
-long int Row_Game_GameSystem_Picture::FK_Game_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+long int Row_Game_GameSystem_Picture::FK_Game_GameSystem_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_FK_Game;}
-long int Row_Game_GameSystem_Picture::FK_GameSystem_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return m_FK_GameSystem;}
+return m_FK_Game_GameSystem;}
 long int Row_Game_GameSystem_Picture::FK_Picture_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_FK_Picture;}
@@ -168,15 +162,12 @@ return m_FK_Picture;}
 void Row_Game_GameSystem_Picture::PK_Game_GameSystem_Picture_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_PK_Game_GameSystem_Picture = val; is_modified=true; is_null[0]=false;}
-void Row_Game_GameSystem_Picture::FK_Game_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Game_GameSystem_Picture::FK_Game_GameSystem_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_FK_Game = val; is_modified=true; is_null[1]=false;}
-void Row_Game_GameSystem_Picture::FK_GameSystem_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-m_FK_GameSystem = val; is_modified=true; is_null[2]=false;}
+m_FK_Game_GameSystem = val; is_modified=true; is_null[1]=false;}
 void Row_Game_GameSystem_Picture::FK_Picture_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_FK_Picture = val; is_modified=true; is_null[3]=false;}
+m_FK_Picture = val; is_modified=true; is_null[2]=false;}
 
 		
 
@@ -196,7 +187,7 @@ sprintf(buf, "%li", m_PK_Game_GameSystem_Picture);
 return buf;
 }
 
-string Row_Game_GameSystem_Picture::FK_Game_asSQL()
+string Row_Game_GameSystem_Picture::FK_Game_GameSystem_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
@@ -204,20 +195,7 @@ if (is_null[1])
 return "NULL";
 
 char buf[32];
-sprintf(buf, "%li", m_FK_Game);
-
-return buf;
-}
-
-string Row_Game_GameSystem_Picture::FK_GameSystem_asSQL()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-if (is_null[2])
-return "NULL";
-
-char buf[32];
-sprintf(buf, "%li", m_FK_GameSystem);
+sprintf(buf, "%li", m_FK_Game_GameSystem);
 
 return buf;
 }
@@ -226,7 +204,7 @@ string Row_Game_GameSystem_Picture::FK_Picture_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[3])
+if (is_null[2])
 return "NULL";
 
 char buf[32];
@@ -274,10 +252,10 @@ bool Table_Game_GameSystem_Picture::Commit(bool bDeleteFailedModifiedRow,bool bD
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_GameSystem_Picture_asSQL()+", "+pRow->FK_Game_asSQL()+", "+pRow->FK_GameSystem_asSQL()+", "+pRow->FK_Picture_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_GameSystem_Picture_asSQL()+", "+pRow->FK_Game_GameSystem_asSQL()+", "+pRow->FK_Picture_asSQL();
 
 	
-		string query = "insert into Game_GameSystem_Picture (`PK_Game_GameSystem_Picture`, `FK_Game`, `FK_GameSystem`, `FK_Picture`) values ("+
+		string query = "insert into Game_GameSystem_Picture (`PK_Game_GameSystem_Picture`, `FK_Game_GameSystem`, `FK_Picture`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -343,7 +321,7 @@ condition = condition + "`PK_Game_GameSystem_Picture`=" + tmp_PK_Game_GameSystem
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Game_GameSystem_Picture`="+pRow->PK_Game_GameSystem_Picture_asSQL()+", `FK_Game`="+pRow->FK_Game_asSQL()+", `FK_GameSystem`="+pRow->FK_GameSystem_asSQL()+", `FK_Picture`="+pRow->FK_Picture_asSQL();
+update_values_list = update_values_list + "`PK_Game_GameSystem_Picture`="+pRow->PK_Game_GameSystem_Picture_asSQL()+", `FK_Game_GameSystem`="+pRow->FK_Game_GameSystem_asSQL()+", `FK_Picture`="+pRow->FK_Picture_asSQL();
 
 	
 		string query = "update Game_GameSystem_Picture set " + update_values_list + " where " + condition;
@@ -490,34 +468,23 @@ sscanf(row[0], "%li", &(pRow->m_PK_Game_GameSystem_Picture));
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_FK_Game = 0;
+pRow->m_FK_Game_GameSystem = 0;
 }
 else
 {
 pRow->is_null[1]=false;
-sscanf(row[1], "%li", &(pRow->m_FK_Game));
+sscanf(row[1], "%li", &(pRow->m_FK_Game_GameSystem));
 }
 
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_FK_GameSystem = 0;
-}
-else
-{
-pRow->is_null[2]=false;
-sscanf(row[2], "%li", &(pRow->m_FK_GameSystem));
-}
-
-if (row[3] == NULL)
-{
-pRow->is_null[3]=true;
 pRow->m_FK_Picture = 0;
 }
 else
 {
-pRow->is_null[3]=false;
-sscanf(row[3], "%li", &(pRow->m_FK_Picture));
+pRow->is_null[2]=false;
+sscanf(row[2], "%li", &(pRow->m_FK_Picture));
 }
 
 
@@ -650,34 +617,23 @@ sscanf(row[0], "%li", &(pRow->m_PK_Game_GameSystem_Picture));
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_FK_Game = 0;
+pRow->m_FK_Game_GameSystem = 0;
 }
 else
 {
 pRow->is_null[1]=false;
-sscanf(row[1], "%li", &(pRow->m_FK_Game));
+sscanf(row[1], "%li", &(pRow->m_FK_Game_GameSystem));
 }
 
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_FK_GameSystem = 0;
-}
-else
-{
-pRow->is_null[2]=false;
-sscanf(row[2], "%li", &(pRow->m_FK_GameSystem));
-}
-
-if (row[3] == NULL)
-{
-pRow->is_null[3]=true;
 pRow->m_FK_Picture = 0;
 }
 else
 {
-pRow->is_null[3]=false;
-sscanf(row[3], "%li", &(pRow->m_FK_Picture));
+pRow->is_null[2]=false;
+sscanf(row[2], "%li", &(pRow->m_FK_Picture));
 }
 
 
@@ -688,19 +644,12 @@ sscanf(row[3], "%li", &(pRow->m_FK_Picture));
 }
 
 
-class Row_Game* Row_Game_GameSystem_Picture::FK_Game_getrow()
+class Row_Game_GameSystem* Row_Game_GameSystem_Picture::FK_Game_GameSystem_getrow()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-class Table_Game *pTable = table->database->Game_get();
-return pTable->GetRow(m_FK_Game);
-}
-class Row_GameSystem* Row_Game_GameSystem_Picture::FK_GameSystem_getrow()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_GameSystem *pTable = table->database->GameSystem_get();
-return pTable->GetRow(m_FK_GameSystem);
+class Table_Game_GameSystem *pTable = table->database->Game_GameSystem_get();
+return pTable->GetRow(m_FK_Game_GameSystem);
 }
 class Row_Picture* Row_Game_GameSystem_Picture::FK_Picture_getrow()
 {

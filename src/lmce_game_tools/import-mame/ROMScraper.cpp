@@ -54,7 +54,7 @@ void ROMScraper::processROM(MAMEMachine* m)
 	}
       else
 	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ROMScraper::processROM - Could not find file for Rom %s or RomOf %s, no checksum calculated.");	
+	  // Nothing found.
 	}
     }
 

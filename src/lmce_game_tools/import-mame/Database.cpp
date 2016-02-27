@@ -142,7 +142,7 @@ bool Database::GameExists(MAMEMachine* m)
     }
 
   vector<class Row_Game *> v_RowGame;
-  if (!m_pDatabase->Game_get()->GetRows("where FK_NameHash=\""+StringUtils::itos(m->liPK_NameHash_get())+"\" AND Subtitle=\""+m->MachineSubDescription_get()+"\"",&v_RowGame))
+  if (!m_pDatabase->Game_get()->GetRows("where FK_NameHash=\""+StringUtils::itos(m->liPK_NameHash_get())+"\"",&v_RowGame))
     {
       return false;
     }
@@ -170,7 +170,6 @@ long int Database::AddGame(MAMEMachine* m)
   if (pRow_Game)
     {
       pRow_Game->FK_NameHash_set(m->liPK_NameHash_get());
-      pRow_Game->Subtitle_set(m->MachineSubDescription_get());
       pRow_Game->Table_Game_get()->Commit();
       PK_Game=pRow_Game->PK_Game_get();
       // FIXME: ANOTHER POSSIBLE LEAK!!!
@@ -187,7 +186,7 @@ long int Database::GetPKGame(MAMEMachine* m)
       return false;
     }
 
-  string sWhereQuery = "FK_NameHash = '"+StringUtils::itos(m->liPK_NameHash_get())+"' AND Subtitle=\""+m->MachineSubDescription_get()+"\"";
+  string sWhereQuery = "FK_NameHash = '"+StringUtils::itos(m->liPK_NameHash_get())+"'";
   vector<class Row_Game *> v_RowGame;
   if (!m_pDatabase->Game_get()->GetRows(sWhereQuery,&v_RowGame))
     {
@@ -575,7 +574,7 @@ bool Database::GameGameSystemExists(MAMEMachine* m)
     }
 
   vector<class Row_Game_GameSystem *> v_RowGameGameSystem;
-  if (!m_pDatabase->Game_GameSystem_get()->GetRows("FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Manufacturer="+StringUtils::itos(m->liPK_Manufacturer_get())+" AND FK_Genre="+StringUtils::itos(m->liPK_Genre_get()),&v_RowGameGameSystem))
+  if (!m_pDatabase->Game_GameSystem_get()->GetRows("FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Manufacturer="+StringUtils::itos(m->liPK_Manufacturer_get())+" AND FK_Genre="+StringUtils::itos(m->liPK_Genre_get())+" AND Name = \""+m->MachineName_get()+"\" AND Subtitle=\""+m->MachineSubDescription_get()+"\"",&v_RowGameGameSystem))
     {
       return false;
     }
@@ -607,6 +606,8 @@ long int Database::AddGameGameSystem(MAMEMachine* m)
       pRow_Game_GameSystem->FK_Manufacturer_set(m->liPK_Manufacturer_get());
       pRow_Game_GameSystem->FK_Genre_set(m->liPK_Genre_get());
       pRow_Game_GameSystem->Year_set(atoi(m->MachineYear_get().c_str()));
+      pRow_Game_GameSystem->Name_set(m->MachineName_get());
+      pRow_Game_GameSystem->Subtitle_set(m->MachineSubDescription_get());
       pRow_Game_GameSystem->Table_Game_GameSystem_get()->Commit();
       PK_Game_GameSystem=pRow_Game_GameSystem->PK_Game_GameSystem_get();
       // FIXME: ANOTHER POSSIBLE LEAK!!!
@@ -623,7 +624,7 @@ long int Database::GetPKGameGameSystem(MAMEMachine* m)
       return false;
     }
 
-  string sWhereQuery = "FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Manufacturer="+StringUtils::itos(m->liPK_Manufacturer_get())+" AND FK_Genre="+StringUtils::itos(m->liPK_Genre_get());
+  string sWhereQuery = "FK_Game="+StringUtils::itos(m->liPK_Game_get())+" AND FK_GameSystem="+StringUtils::itos(GAMESYSTEM_MAME_CONST)+" AND FK_Manufacturer="+StringUtils::itos(m->liPK_Manufacturer_get())+" AND FK_Genre="+StringUtils::itos(m->liPK_Genre_get())+" AND Name=\""+m->MachineName_get()+"\" AND Subtitle=\""+m->MachineSubDescription_get()+"\"";
   vector<class Row_Game_GameSystem *> v_RowGame_GameSystem;
   if (!m_pDatabase->Game_GameSystem_get()->GetRows(sWhereQuery,&v_RowGame_GameSystem))
     {

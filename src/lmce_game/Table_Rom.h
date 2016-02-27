@@ -125,7 +125,6 @@ void IK_Hash_set(string val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Game_GameSystem_Rom_FK_Rom_getrows(vector <class Row_Game_GameSystem_Rom*> *rows);
-void Game_GameSystem_Rom_Configuration_FK_Rom_getrows(vector <class Row_Game_GameSystem_Rom_Configuration*> *rows);
 
 
 		// Setup binary serialization

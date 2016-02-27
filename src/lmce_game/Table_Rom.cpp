@@ -33,7 +33,6 @@ using namespace std;
 #include "Table_Rom.h"
 
 #include "Table_Game_GameSystem_Rom.h"
-#include "Table_Game_GameSystem_Rom_Configuration.h"
 
 
 void Database_lmce_game::CreateTable_Rom()
@@ -609,13 +608,6 @@ void Row_Rom::Game_GameSystem_Rom_FK_Rom_getrows(vector <class Row_Game_GameSyst
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Game_GameSystem_Rom *pTable = table->database->Game_GameSystem_Rom_get();
-pTable->GetRows("`FK_Rom`=" + StringUtils::itos(m_PK_Rom),rows);
-}
-void Row_Rom::Game_GameSystem_Rom_Configuration_FK_Rom_getrows(vector <class Row_Game_GameSystem_Rom_Configuration*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Game_GameSystem_Rom_Configuration *pTable = table->database->Game_GameSystem_Rom_Configuration_get();
 pTable->GetRows("`FK_Rom`=" + StringUtils::itos(m_PK_Rom),rows);
 }
 

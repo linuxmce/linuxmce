@@ -31,9 +31,7 @@
 using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_Game_GameSystem_Rom_Configuration.h"
-#include "Table_Game.h"
-#include "Table_GameSystem.h"
-#include "Table_Rom.h"
+#include "Table_Game_GameSystem_Rom.h"
 #include "Table_Configuration.h"
 
 
@@ -139,14 +137,10 @@ void Row_Game_GameSystem_Rom_Configuration::SetDefaultValues()
 {
 	m_PK_Game_GameSystem_Rom_Configuration = 0;
 is_null[0] = false;
-m_FK_Game = 0;
+m_FK_Game_GameSystem_Rom = 0;
 is_null[1] = false;
-m_FK_GameSystem = 0;
-is_null[2] = false;
-m_FK_Rom = 0;
-is_null[3] = false;
 m_FK_Configuration = 0;
-is_null[4] = false;
+is_null[2] = false;
 
 
 	is_added=false;
@@ -157,15 +151,9 @@ is_null[4] = false;
 long int Row_Game_GameSystem_Rom_Configuration::PK_Game_GameSystem_Rom_Configuration_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_PK_Game_GameSystem_Rom_Configuration;}
-long int Row_Game_GameSystem_Rom_Configuration::FK_Game_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+long int Row_Game_GameSystem_Rom_Configuration::FK_Game_GameSystem_Rom_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return m_FK_Game;}
-long int Row_Game_GameSystem_Rom_Configuration::FK_GameSystem_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return m_FK_GameSystem;}
-long int Row_Game_GameSystem_Rom_Configuration::FK_Rom_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return m_FK_Rom;}
+return m_FK_Game_GameSystem_Rom;}
 long int Row_Game_GameSystem_Rom_Configuration::FK_Configuration_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_FK_Configuration;}
@@ -174,18 +162,12 @@ return m_FK_Configuration;}
 void Row_Game_GameSystem_Rom_Configuration::PK_Game_GameSystem_Rom_Configuration_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_PK_Game_GameSystem_Rom_Configuration = val; is_modified=true; is_null[0]=false;}
-void Row_Game_GameSystem_Rom_Configuration::FK_Game_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Game_GameSystem_Rom_Configuration::FK_Game_GameSystem_Rom_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_FK_Game = val; is_modified=true; is_null[1]=false;}
-void Row_Game_GameSystem_Rom_Configuration::FK_GameSystem_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-m_FK_GameSystem = val; is_modified=true; is_null[2]=false;}
-void Row_Game_GameSystem_Rom_Configuration::FK_Rom_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-m_FK_Rom = val; is_modified=true; is_null[3]=false;}
+m_FK_Game_GameSystem_Rom = val; is_modified=true; is_null[1]=false;}
 void Row_Game_GameSystem_Rom_Configuration::FK_Configuration_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_FK_Configuration = val; is_modified=true; is_null[4]=false;}
+m_FK_Configuration = val; is_modified=true; is_null[2]=false;}
 
 		
 
@@ -205,7 +187,7 @@ sprintf(buf, "%li", m_PK_Game_GameSystem_Rom_Configuration);
 return buf;
 }
 
-string Row_Game_GameSystem_Rom_Configuration::FK_Game_asSQL()
+string Row_Game_GameSystem_Rom_Configuration::FK_Game_GameSystem_Rom_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
@@ -213,33 +195,7 @@ if (is_null[1])
 return "NULL";
 
 char buf[32];
-sprintf(buf, "%li", m_FK_Game);
-
-return buf;
-}
-
-string Row_Game_GameSystem_Rom_Configuration::FK_GameSystem_asSQL()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-if (is_null[2])
-return "NULL";
-
-char buf[32];
-sprintf(buf, "%li", m_FK_GameSystem);
-
-return buf;
-}
-
-string Row_Game_GameSystem_Rom_Configuration::FK_Rom_asSQL()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-if (is_null[3])
-return "NULL";
-
-char buf[32];
-sprintf(buf, "%li", m_FK_Rom);
+sprintf(buf, "%li", m_FK_Game_GameSystem_Rom);
 
 return buf;
 }
@@ -248,7 +204,7 @@ string Row_Game_GameSystem_Rom_Configuration::FK_Configuration_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[4])
+if (is_null[2])
 return "NULL";
 
 char buf[32];
@@ -296,10 +252,10 @@ bool Table_Game_GameSystem_Rom_Configuration::Commit(bool bDeleteFailedModifiedR
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_GameSystem_Rom_Configuration_asSQL()+", "+pRow->FK_Game_asSQL()+", "+pRow->FK_GameSystem_asSQL()+", "+pRow->FK_Rom_asSQL()+", "+pRow->FK_Configuration_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Game_GameSystem_Rom_Configuration_asSQL()+", "+pRow->FK_Game_GameSystem_Rom_asSQL()+", "+pRow->FK_Configuration_asSQL();
 
 	
-		string query = "insert into Game_GameSystem_Rom_Configuration (`PK_Game_GameSystem_Rom_Configuration`, `FK_Game`, `FK_GameSystem`, `FK_Rom`, `FK_Configuration`) values ("+
+		string query = "insert into Game_GameSystem_Rom_Configuration (`PK_Game_GameSystem_Rom_Configuration`, `FK_Game_GameSystem_Rom`, `FK_Configuration`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -365,7 +321,7 @@ condition = condition + "`PK_Game_GameSystem_Rom_Configuration`=" + tmp_PK_Game_
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Game_GameSystem_Rom_Configuration`="+pRow->PK_Game_GameSystem_Rom_Configuration_asSQL()+", `FK_Game`="+pRow->FK_Game_asSQL()+", `FK_GameSystem`="+pRow->FK_GameSystem_asSQL()+", `FK_Rom`="+pRow->FK_Rom_asSQL()+", `FK_Configuration`="+pRow->FK_Configuration_asSQL();
+update_values_list = update_values_list + "`PK_Game_GameSystem_Rom_Configuration`="+pRow->PK_Game_GameSystem_Rom_Configuration_asSQL()+", `FK_Game_GameSystem_Rom`="+pRow->FK_Game_GameSystem_Rom_asSQL()+", `FK_Configuration`="+pRow->FK_Configuration_asSQL();
 
 	
 		string query = "update Game_GameSystem_Rom_Configuration set " + update_values_list + " where " + condition;
@@ -512,45 +468,23 @@ sscanf(row[0], "%li", &(pRow->m_PK_Game_GameSystem_Rom_Configuration));
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_FK_Game = 0;
+pRow->m_FK_Game_GameSystem_Rom = 0;
 }
 else
 {
 pRow->is_null[1]=false;
-sscanf(row[1], "%li", &(pRow->m_FK_Game));
+sscanf(row[1], "%li", &(pRow->m_FK_Game_GameSystem_Rom));
 }
 
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_FK_GameSystem = 0;
-}
-else
-{
-pRow->is_null[2]=false;
-sscanf(row[2], "%li", &(pRow->m_FK_GameSystem));
-}
-
-if (row[3] == NULL)
-{
-pRow->is_null[3]=true;
-pRow->m_FK_Rom = 0;
-}
-else
-{
-pRow->is_null[3]=false;
-sscanf(row[3], "%li", &(pRow->m_FK_Rom));
-}
-
-if (row[4] == NULL)
-{
-pRow->is_null[4]=true;
 pRow->m_FK_Configuration = 0;
 }
 else
 {
-pRow->is_null[4]=false;
-sscanf(row[4], "%li", &(pRow->m_FK_Configuration));
+pRow->is_null[2]=false;
+sscanf(row[2], "%li", &(pRow->m_FK_Configuration));
 }
 
 
@@ -683,45 +617,23 @@ sscanf(row[0], "%li", &(pRow->m_PK_Game_GameSystem_Rom_Configuration));
 if (row[1] == NULL)
 {
 pRow->is_null[1]=true;
-pRow->m_FK_Game = 0;
+pRow->m_FK_Game_GameSystem_Rom = 0;
 }
 else
 {
 pRow->is_null[1]=false;
-sscanf(row[1], "%li", &(pRow->m_FK_Game));
+sscanf(row[1], "%li", &(pRow->m_FK_Game_GameSystem_Rom));
 }
 
 if (row[2] == NULL)
 {
 pRow->is_null[2]=true;
-pRow->m_FK_GameSystem = 0;
-}
-else
-{
-pRow->is_null[2]=false;
-sscanf(row[2], "%li", &(pRow->m_FK_GameSystem));
-}
-
-if (row[3] == NULL)
-{
-pRow->is_null[3]=true;
-pRow->m_FK_Rom = 0;
-}
-else
-{
-pRow->is_null[3]=false;
-sscanf(row[3], "%li", &(pRow->m_FK_Rom));
-}
-
-if (row[4] == NULL)
-{
-pRow->is_null[4]=true;
 pRow->m_FK_Configuration = 0;
 }
 else
 {
-pRow->is_null[4]=false;
-sscanf(row[4], "%li", &(pRow->m_FK_Configuration));
+pRow->is_null[2]=false;
+sscanf(row[2], "%li", &(pRow->m_FK_Configuration));
 }
 
 
@@ -732,26 +644,12 @@ sscanf(row[4], "%li", &(pRow->m_FK_Configuration));
 }
 
 
-class Row_Game* Row_Game_GameSystem_Rom_Configuration::FK_Game_getrow()
+class Row_Game_GameSystem_Rom* Row_Game_GameSystem_Rom_Configuration::FK_Game_GameSystem_Rom_getrow()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-class Table_Game *pTable = table->database->Game_get();
-return pTable->GetRow(m_FK_Game);
-}
-class Row_GameSystem* Row_Game_GameSystem_Rom_Configuration::FK_GameSystem_getrow()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_GameSystem *pTable = table->database->GameSystem_get();
-return pTable->GetRow(m_FK_GameSystem);
-}
-class Row_Rom* Row_Game_GameSystem_Rom_Configuration::FK_Rom_getrow()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Rom *pTable = table->database->Rom_get();
-return pTable->GetRow(m_FK_Rom);
+class Table_Game_GameSystem_Rom *pTable = table->database->Game_GameSystem_Rom_get();
+return pTable->GetRow(m_FK_Game_GameSystem_Rom);
 }
 class Row_Configuration* Row_Game_GameSystem_Rom_Configuration::FK_Configuration_getrow()
 {
