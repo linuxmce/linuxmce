@@ -608,6 +608,7 @@ long int Database::AddGameGameSystem(MAMEMachine* m)
       pRow_Game_GameSystem->Year_set(atoi(m->MachineYear_get().c_str()));
       pRow_Game_GameSystem->Name_set(m->MachineName_get());
       pRow_Game_GameSystem->Subtitle_set(m->MachineSubDescription_get());
+      pRow_Game_GameSystem->History_set(m->MachineHistory_get());
       pRow_Game_GameSystem->Table_Game_GameSystem_get()->Commit();
       PK_Game_GameSystem=pRow_Game_GameSystem->PK_Game_GameSystem_get();
       // FIXME: ANOTHER POSSIBLE LEAK!!!
@@ -1015,6 +1016,179 @@ long int Database::GetPKGameGameSystemPicture(MAMEMachine* m)
   return 0;
 }
 
+bool Database::ConfigurationExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ConfigurationExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ConfigurationExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_Configuration *> v_RowConfiguration;
+  if (!m_pDatabase->Configuration_get()->GetRows("Configuration=\""+m->MachineConfiguration_get()+"\"",&v_RowConfiguration))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowConfiguration.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+  
+}
+
+long int Database::AddConfiguration(MAMEMachine* m)
+{
+  Row_Configuration *pRow_Configuration = m_pDatabase->Configuration_get()->AddRow();
+  long int PK_Configuration=0;
+  if (pRow_Configuration)
+    {
+      pRow_Configuration->Configuration_set(m->MachineConfiguration_get());
+      pRow_Configuration->Table_Configuration_get()->Commit();
+      PK_Configuration=pRow_Configuration->PK_Configuration_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_Configuration;
+    }
+  return 0;
+}
+
+long int Database::GetPKConfiguration(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "Configuration=\""+m->MachineConfiguration_get()+"\"";
+  vector<class Row_Configuration *> v_RowConfiguration;
+  if (!m_pDatabase->Configuration_get()->GetRows(sWhereQuery,&v_RowConfiguration))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKConfiguration() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowConfiguration.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Configuration* pRow_Configuration = v_RowConfiguration[0];
+      if (!pRow_Configuration)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKConfiguration() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_Configuration->PK_Configuration_get();
+	}
+    }
+  return 0;
+}
+
+bool Database::GameGameSystemConfigurationExists(MAMEMachine* m)
+{
+  if (!m_bInitialized)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::Game_GameSystem_ConfigurationExists() - Database not initialized, aborting.");
+      return false;
+    }
+
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::Game_GameSystem_ConfigurationExists() - m is NULL. Aborting.");
+      return false;
+    }
+
+  vector<class Row_Game_GameSystem_Configuration *> v_RowGame_GameSystem_Configuration;
+  if (!m_pDatabase->Game_GameSystem_Configuration_get()->GetRows("FK_Game_GameSystem="+StringUtils::itos(m->liPK_Game_GameSystem_get())+" AND FK_Configuration="+StringUtils::itos(m->liPK_Game_GameSystem_get()),&v_RowGame_GameSystem_Configuration))
+    {
+      return false;
+    }
+  else
+    {
+      if (v_RowGame_GameSystem_Configuration.empty())
+	{
+	  return false;  // does not exist.
+	}
+      else
+	{
+	  // FIXME: POSSIBLE LEAK!!!
+	  return true;   // does exist.
+	}
+    }
+  
+  return false;
+  
+}
+
+long int Database::AddGameGameSystemConfiguration(MAMEMachine* m)
+{
+  Row_Game_GameSystem_Configuration *pRow_Game_GameSystem_Configuration = m_pDatabase->Game_GameSystem_Configuration_get()->AddRow();
+  long int PK_Game_GameSystem_Configuration=0;
+  if (pRow_Game_GameSystem_Configuration)
+    {
+      pRow_Game_GameSystem_Configuration->FK_Game_GameSystem_set(m->liPK_Game_GameSystem_get());
+      pRow_Game_GameSystem_Configuration->FK_Configuration_set(m->liPK_Configuration_get());
+      pRow_Game_GameSystem_Configuration->Table_Game_GameSystem_Configuration_get()->Commit();
+      PK_Game_GameSystem_Configuration=pRow_Game_GameSystem_Configuration->PK_Game_GameSystem_Configuration_get();
+      // FIXME: ANOTHER POSSIBLE LEAK!!!
+      return PK_Game_GameSystem_Configuration;
+    }
+  return 0;
+}
+
+long int Database::GetPKGameGameSystemConfiguration(MAMEMachine* m)
+{
+  if (!m)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::ProcessMachine(m) - m is NULL. Aborting.");
+      return false;
+    }
+
+  string sWhereQuery = "FK_Game_GameSystem="+StringUtils::itos(m->liPK_Game_GameSystem_get())+" AND FK_Configuration="+StringUtils::itos(m->liPK_Configuration_get());
+  vector<class Row_Game_GameSystem_Configuration *> v_RowGame_GameSystem_Configuration;
+  if (!m_pDatabase->Game_GameSystem_Configuration_get()->GetRows(sWhereQuery,&v_RowGame_GameSystem_Configuration))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGame_GameSystem_Configuration() - could not fetch rows. Aborting.");
+      return 0;
+    }
+  if (v_RowGame_GameSystem_Configuration.size()==0)
+    {
+      return 0;
+    }
+  else
+    {
+      Row_Game_GameSystem_Configuration* pRow_Game_GameSystem_Configuration = v_RowGame_GameSystem_Configuration[0];
+      if (!pRow_Game_GameSystem_Configuration)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database::GetPKGame_GameSystem_Configuration() - How in the hell did we get a NULL?");
+	  return 0;
+	}
+      else
+	{
+	  return pRow_Game_GameSystem_Configuration->PK_Game_GameSystem_Configuration_get();
+	}
+    }
+  return 0;
+}
+
 bool Database::ProcessMachine(MAMEMachine* m)
 {
   if (!m)
@@ -1182,5 +1356,35 @@ bool Database::ProcessMachine(MAMEMachine* m)
   
   m->liPK_Game_GameSystem_Picture_set(liPK_Game_GameSystem_Picture);
 
-  return false;
+  // Add Configuration entry if needed, otherwise query, come out with a PK_Configuration
+  
+  long int liPK_Configuration;
+  if (!ConfigurationExists(m))
+    {
+      // Add Configuration Entry
+      liPK_Configuration=AddConfiguration(m);
+    }
+  else
+    {
+      liPK_Configuration=GetPKConfiguration(m);
+    }
+  
+  m->liPK_Configuration_set(liPK_Configuration);
+
+  // Add Game_GameSystem_Configuration entry if needed, otherwise query, come out with a PK_Configuration
+  
+  long int liPK_Game_GameSystem_Configuration;
+  if (!GameGameSystemConfigurationExists(m))
+    {
+      // Add Configuration Entry
+      liPK_Game_GameSystem_Configuration=AddGameGameSystemConfiguration(m);
+    }
+  else
+    {
+      liPK_Game_GameSystem_Configuration=GetPKGameGameSystemConfiguration(m);
+    }
+  
+  m->liPK_Game_GameSystem_Configuration_set(liPK_Game_GameSystem_Configuration);
+
+  return true;
 }

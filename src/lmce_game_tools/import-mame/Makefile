@@ -16,6 +16,7 @@ VERSION = 2.0.0
 
 sources = ImportMame.cpp \
 	Category.cpp \
+	History.cpp \
 	Database.cpp \
         MAMEXMLParser.cpp \
 	NameHash.cpp \

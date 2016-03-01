@@ -86,6 +86,12 @@ class Database
   bool GameGameSystemPictureExists(MAMEMachine* m);
   long int AddGameGameSystemPicture(MAMEMachine *m);
   long int GetPKGameGameSystemPicture(MAMEMachine *m);
+  bool ConfigurationExists(MAMEMachine* m);
+  long int AddConfiguration(MAMEMachine *m);
+  long int GetPKConfiguration(MAMEMachine *m);
+  bool GameGameSystemConfigurationExists(MAMEMachine* m);
+  long int AddGameGameSystemConfiguration(MAMEMachine *m);
+  long int GetPKGameGameSystemConfiguration(MAMEMachine *m);
 
 
 };

@@ -101,6 +101,10 @@ bool MAMEXMLParser::parseMAMEOutput()
       pugi::xml_node xnDESCRIPTION=xnMACHINE;
       pugi::xml_node xnMANUFACTURER=xnMACHINE;
       pugi::xml_node xnYEAR=xnMACHINE;
+      pugi::xml_node xnDISPLAYS=xnMACHINE;
+      pugi::xml_node xnINPUT=xnMACHINE;
+      pugi::xml_node xnDIPSWITCHES=xnMACHINE;
+
       pugi::xml_attribute xaCLONEOF=xnMACHINE.attribute("cloneof");
       pugi::xml_attribute xaROMOF=xnMACHINE.attribute("romof");
       pugi::xml_attribute xaDRIVERSTATUS=xnMACHINE.child("driver").attribute("status");
@@ -123,6 +127,45 @@ bool MAMEXMLParser::parseMAMEOutput()
       m->MachineDriverGraphicStatus_set(xaDRIVERGRAPHICSTATUS.value());
       m->MachineDriverSaveStateStatus_set(xaDRIVERSAVESTATESTATUS.value());
 
+      m->MachineInput_set(new MAMEInput(xnINPUT.child("input").attribute("service").value(),
+					xnINPUT.child("input").attribute("tilt").value(),
+					xnINPUT.child("input").attribute("players").value(),
+					xnINPUT.child("input").attribute("buttons").value(),
+					xnINPUT.child("input").attribute("coins").value()));
+
+      for (pugi::xml_node xnDISPLAY: xnDISPLAYS.children("display"))
+	{
+	  m->MachineDriverDisplayAdd(new MAMEDisplay(xnDISPLAY.attribute("tag").value(),
+						     xnDISPLAY.attribute("type").value(),
+						     xnDISPLAY.attribute("rotate").value(),
+						     xnDISPLAY.attribute("flipx").value(),
+						     xnDISPLAY.attribute("width").value(),
+						     xnDISPLAY.attribute("height").value(),
+						     xnDISPLAY.attribute("refresh").value(),
+						     xnDISPLAY.attribute("pixclock").value(),
+						     xnDISPLAY.attribute("htotal").value(),
+						     xnDISPLAY.attribute("hbend").value(),
+						     xnDISPLAY.attribute("hbstart").value(),
+						     xnDISPLAY.attribute("vtotal").value(),
+						     xnDISPLAY.attribute("vbend").value(),
+						     xnDISPLAY.attribute("vbstart").value()));
+	}
+
+      for (pugi::xml_node xnDIPSWITCH: xnDIPSWITCHES.children("dipswitch"))
+	{
+	  MAMEDipSwitch* dipswitch = new MAMEDipSwitch(xnDIPSWITCH.attribute("name").value(),
+						       xnDIPSWITCH.attribute("tag").value(),
+						       xnDIPSWITCH.attribute("mask").value());
+	  for (pugi::xml_node xnDIPVALUE: xnDIPSWITCH.children("dipvalue"))
+	    {
+	      dipswitch->AddDipValue(new MAMEDipValue(xnDIPVALUE.attribute("name").value(),
+						      xnDIPVALUE.attribute("value").value(),
+						      xnDIPVALUE.attribute("default").value()));
+	    }
+	  m->MachineDriverDipswitchAdd(dipswitch);
+	}
+      
+      // Commit the changes to the map
       m_pImportMAME->m_mapMachineToMAMEMachine[m->MachineName_get()]=m;
 
     }
