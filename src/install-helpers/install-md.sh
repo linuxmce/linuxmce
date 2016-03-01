@@ -158,6 +158,16 @@ MD_ClearInstalledPackages () {
 	R=$(RunSQL "$Q")
 }
 
+MD_Config_NTP_Client()
+{
+	. ${BASE_DIR}/bin/Config_Ops.sh
+	if [[ "$AutostartCore" != "1" ]] && [[ "$DCERouter" != "localhost" ]] ; then
+	        sed -i 's/^#disable auth/disable auth/' /etc/ntp.conf
+	        sed -i 's/^#broadcastclient/broadcastclient/' /etc/ntp.conf
+		service ntp restart || :
+	fi
+}
+
 return 0
 
 
