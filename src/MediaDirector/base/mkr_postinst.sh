@@ -14,6 +14,8 @@ StatsMessage () {
 	printf "$(date) - $* \n"
 }
 
+. /usr/pluto/install/install-md.sh
+
 ###########################################################
 ### Main execution area
 ###########################################################
@@ -43,5 +45,6 @@ case "$TARGET_DISTRO" in
 		;;
 esac
 
-#Exit successfully
+MD_Config_NTP_Client
+
 exit 0
