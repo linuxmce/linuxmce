@@ -1241,6 +1241,9 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 		list<OpenZWave::ValueID>::iterator valIt;
 		for ( valIt = node->m_values.begin(); valIt != node->m_values.end(); valIt++)
 		{
+            // TODO: It *might* make sense to already at this point decide what the main device DT should be, and
+            // use that when deciding wheter other values need a separate device
+
 			OpenZWave::ValueID value = *valIt;
 			string label = OpenZWave::Manager::Get()->GetValueLabel(value);
 			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, index=%d, label=%s, type=%s", value.GetInstance(), value.GetCommandClassId(), value.GetIndex(), label.c_str(), OpenZWave::Value::GetTypeNameFromEnum(value.GetType()));
@@ -1330,26 +1333,37 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 
 }
 
+/**
+ * @brief ZWave::SetDeviceTemplate set device template for one LMCEDevice
+  * @param pLmceDevice
+ */
 void ZWave::SetDeviceTemplate(LMCEDevice* pLmceDevice)
 {
-	// Find the value that fits most nicely with the node type and use that as main value
+    // At this point we already have divided the values into devices!
+
+    // Find the value that fits most nicely with the node type and use that as main value
 	int i = 0;
-	for (vector<OpenZWave::ValueID>::iterator it = pLmceDevice->m_vectValues.begin(); it != pLmceDevice->m_vectValues.end(); ++it)
+    for (vector<OpenZWave::ValueID>::iterator it = pLmceDevice->m_vectValues.begin();
+         it != pLmceDevice->m_vectValues.end() && !pLmceDevice->HasMainValue(); ++it)
 	{
 		OpenZWave::ValueID ourValue = *it;
 		string ourLabel = OpenZWave::Manager::Get()->GetValueLabel(ourValue);
-		if ((pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_MULTILEVEL ||
-		     pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_BINARY) &&
-		    (ourLabel == "Temperature" || ourLabel == "Luminance"))
-		{
-			pLmceDevice->SetMainValue(i);
-		} else if (ourLabel == "Sensor")
-		{
-			// There are some devices that is a binary switch, but also have a Sensor input,
-			// which we need to map. When selecting the main label here, GetDeviceTemplate will give us
-			// a generic sensor device - if not we would get the default, which is binary switch.
-			pLmceDevice->SetMainValue(i);
-		}
+        if (pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_ALARM_SENSOR &&
+                (ourLabel == "Smoke" || ourLabel == "Temperature")) {
+            // Alarm sensor - smoke sensor ? Some sensors also have a built-in temperature sensor
+            pLmceDevice->SetMainValue(i);
+        } else if ((pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_MULTILEVEL ||
+                 pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_BINARY) &&
+                (ourLabel == "Temperature" || ourLabel == "Luminance"))
+        {
+            pLmceDevice->SetMainValue(i);
+        } else if (ourLabel == "Sensor" && pLmceDevice->m_pNodeInfo->m_generic != GENERIC_TYPE_ALARM_SENSOR)
+        {
+            // There are some devices that is a binary switch, but also have a Sensor input,
+            // which we need to map. When selecting the main label here, GetDeviceTemplate will give us
+            // a generic sensor device - if not we would get the default, which is binary switch.
+            pLmceDevice->SetMainValue(i);
+        }
 		i++;
 	}
 	// then find the device template for the device
@@ -1359,35 +1373,69 @@ void ZWave::SetDeviceTemplate(LMCEDevice* pLmceDevice)
 	pLmceDevice->m_dwPK_Parent_Device = PK_Parent_Device;
 }
 
+/**
+ * @brief ZWave::GetDeviceTemplate
+ * Get the device template for the specified LMCEDevice based on device type and values
+ *
+ * @param pLmceDevice
+ * @param PK_Device_Parent
+ * @return
+ */
 unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_Parent) {
 	unsigned long devicetemplate = 0;
 	string label = "<none>";
-	if (pLmceDevice->HasMainValue())
+    NodeInfo* node = pLmceDevice->m_pNodeInfo;
+    uint32 homeId = pLmceDevice->m_pNodeInfo->m_homeId;
+    uint8 nodeId = pLmceDevice->m_pNodeInfo->m_nodeId;
+    string manuId = OpenZWave::Manager::Get()->GetNodeManufacturerId(homeId, nodeId);
+    string prodType = OpenZWave::Manager::Get()->GetNodeProductType(homeId, nodeId);
+    string prodId = OpenZWave::Manager::Get()->GetNodeProductId(homeId, nodeId);
+
+    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GetDeviceTemplate() manufacturer = %s, prodType = %s, prodId = %s", manuId.c_str(), prodType.c_str(), prodId.c_str());
+
+    // If we have a main value we can do some more inteligent detection and special handling
+    if (pLmceDevice->HasMainValue())
 	{
 		label = OpenZWave::Manager::Get()->GetValueLabel(pLmceDevice->GetMainValue());
-	
-		if ( label == "Temperature" )
+
+        if ((manuId == "001e" && prodType == "0002" && pLmceDevice->GetMainValue().GetInstance() == 0)
+                // HSM100 motion detector, value with instance = 0 is motion detector
+                // (label has been both "Sensor" and "Luminance" and is not checked in case it changes again)
+
+                || (manuId == "0086" && prodType == "0002" && prodId == "0005" && label == "Sensor")
+                // Aeotec multi-sensor motion detector
+                ) {
+            devicetemplate = DEVICETEMPLATE_Motion_Detector_CONST;
+        } else if ( label == "Temperature" )
 		{
 			devicetemplate = DEVICETEMPLATE_Temperature_sensor_CONST;
 			PK_Device_Parent = m_dwPK_ClimateInterface;
 		} else if ( label == "Luminance" )
 		{
-			devicetemplate = DEVICETEMPLATE_Brightness_sensor_CONST;
-			PK_Device_Parent = m_dwPK_ClimateInterface;
+            devicetemplate = DEVICETEMPLATE_Brightness_sensor_CONST;
+            PK_Device_Parent = m_dwPK_ClimateInterface;
 		} else if ( label == "Relative Humidity" )
 		{
 			devicetemplate = DEVICETEMPLATE_Humidity_sensor_CONST;
 			PK_Device_Parent = m_dwPK_ClimateInterface;
-		} else if ( label == "Sensor" )
+        } else if ( label == "Smoke" )
+        {
+            devicetemplate = DEVICETEMPLATE_Smoke_Detector_CONST;
+            PK_Device_Parent = m_dwPK_SecurityInterface;
+        } else if ( label == "Sensor" )
 		{
-			// TODO: maybe this is a motion sensor. Check product id??
-			devicetemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
+            devicetemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
 			PK_Device_Parent = m_dwPK_SecurityInterface;
         }
+        if (devicetemplate == DEVICETEMPLATE_Motion_Detector_CONST)
+            PK_Device_Parent = m_dwPK_SecurityInterface;
 		if (devicetemplate > 0)
 			return devicetemplate;
 	}
-	NodeInfo* node = pLmceDevice->m_pNodeInfo;
+
+    // The ZWave defined generic and specific type are used as fallback.
+    // They are useful for/ catching the basic device types but fails for composite devices
+    // with multiple sensors/functions in the same node.
 	switch(node->m_generic) {
 		case GENERIC_TYPE_GENERIC_CONTROLLER:
 		case GENERIC_TYPE_STATIC_CONTROLLER:
@@ -1490,7 +1538,10 @@ string ZWave::DTToName(unsigned long PK_DeviceTemplate)
 	case DEVICETEMPLATE_Generic_Sensor_CONST:
 		name = "Generic Sensor";
 		break;
-	case DEVICETEMPLATE_Multilevel_Sensor_CONST:
+    case DEVICETEMPLATE_Motion_Detector_CONST:
+        name = "Motion Detector";
+        break;
+    case DEVICETEMPLATE_Multilevel_Sensor_CONST:
 		name = "Multilevel Sensor";
 		break;
 	case DEVICETEMPLATE_Smoke_Detector_CONST:
