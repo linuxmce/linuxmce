@@ -111,11 +111,9 @@ void Description_set(string val);
 
 		
 		bool Define_isNull();
-bool Description_isNull();
 
 			
 		void Define_setNull(bool val);
-void Description_setNull(bool val);
 	
 	
 		void Delete();

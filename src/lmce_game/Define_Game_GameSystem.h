@@ -19,6 +19,8 @@
 #define GAME_GAMESYSTEM_SUBTITLE_TABLE_FIELD "Game_GameSystem.Subtitle"
 #define GAME_GAMESYSTEM_YEAR_FIELD "Year"
 #define GAME_GAMESYSTEM_YEAR_TABLE_FIELD "Game_GameSystem.Year"
+#define GAME_GAMESYSTEM_HISTORY_FIELD "History"
+#define GAME_GAMESYSTEM_HISTORY_TABLE_FIELD "Game_GameSystem.History"
 
 
 #endif

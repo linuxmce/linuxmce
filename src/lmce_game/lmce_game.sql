@@ -22,8 +22,9 @@ CREATE TABLE Rom (
 
 CREATE TABLE Game (
        PK_Game INTEGER AUTO_INCREMENT NOT NULL,
-       FK_NameHash INTEGER NOT NULL,
-       PRIMARY KEY (PK_Game)
+       FK_NameHash INTEGER UNIQUE NOT NULL,
+       PRIMARY KEY (PK_Game),
+       KEY(FK_NameHash)
 );
 
 CREATE TABLE Game_GameSystem (
@@ -35,6 +36,7 @@ CREATE TABLE Game_GameSystem (
        Name VARCHAR(128),
        Subtitle VARCHAR(128),
        Year INTEGER,
+       History TEXT,
        PRIMARY KEY (PK_Game_GameSystem),
        KEY(FK_Game),
        KEY(FK_GameSystem)
@@ -42,7 +44,7 @@ CREATE TABLE Game_GameSystem (
 
 CREATE TABLE Manufacturer (
        PK_Manufacturer INTEGER AUTO_INCREMENT NOT NULL,
-       FK_NameHash INTEGER NOT NULL,
+       FK_NameHash INTEGER UNIQUE NOT NULL,
        PRIMARY KEY (PK_Manufacturer),
        KEY(FK_NameHash)
 );
@@ -50,7 +52,7 @@ CREATE TABLE Manufacturer (
 CREATE TABLE Genre (
        PK_Genre INTEGER AUTO_INCREMENT NOT NULL,
        FK_Genre_Parent INTEGER,
-       FK_NameHash INTEGER NOT NULL,
+       FK_NameHash INTEGER UNIQUE NOT NULL,
        PRIMARY KEY(PK_Genre),
        KEY(FK_NameHash)
 );
@@ -58,7 +60,7 @@ CREATE TABLE Genre (
 CREATE TABLE GameSystem (
        PK_GameSystem INTEGER AUTO_INCREMENT NOT NULL,
        Define VARCHAR(64),
-       Description VARCHAR(128),
+       Description VARCHAR(128) UNIQUE NOT NULL,
        PRIMARY KEY (PK_GameSystem)
 );
 

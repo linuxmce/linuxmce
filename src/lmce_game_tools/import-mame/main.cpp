@@ -29,6 +29,7 @@ int main(int argc, char* argv[])
   string sCategoryPath; // Path to Category.ini file.
   string sROMPath;     // Path to ROMs for checksum.
   string sPicturePath; // Path to Pictures
+  string sHistoryPath; // PAth to History file.
   char c;              // Current Option.
   int iRetCode;        // Return code
 
@@ -46,32 +47,39 @@ int main(int argc, char* argv[])
       switch (c)
 	{
 	case 'p':
-	  if (argc > 8)
+	  if (argc > 10)
 	    {
 	      sMamePath = argv[++optnum];
 	      bError=false;
 	    }
 	  break;
 	case 'c':
-	  if (argc > 8)
+	  if (argc > 10)
 	    {
 	      sCategoryPath = argv[++optnum];
 	      bError=false;
 	    }
 	  break;
 	case 'r':
-	  if (argc > 8)
+	  if (argc > 10)
 	    {
 	      sROMPath = argv[++optnum];
 	      bError=false;
 	    }
 	  break;
 	case 't':
-	  if (argc > 8)
+	  if (argc > 10)
 	    {
 	      sPicturePath = argv[++optnum];
 	      bError=false;
 	    }
+	  break;
+	case 'h':
+	  if (argc > 10)
+	    {
+	      sHistoryPath = argv[++optnum];
+	      bError=false;
+	    }	  
 	  break;
 	}
     }
@@ -80,16 +88,17 @@ int main(int argc, char* argv[])
     {
       cout << "Imports new MAME ROMs into lmce_game for inclusion via sqlCVS." << endl
 	   << endl 
-	   << "Usage: import-mame -p /path/to/mame" << endl
+	   << "Usage: import-mame -p /path/to/mame -c category/Category.ini -r /mame/roms -t /mame/snap -h /mame/history.dat" << endl
 	   << endl
 	   << "\t -p -- The Path to the MAME binary. (Required)" << endl
-	   << "\t -c -- The Path to the Category.ini file." << endl
-	   << "\t -r -- The Path to the ROMs. " << endl
-	   << "\t -t -- The Path to the Snaps." << endl;
+	   << "\t -c -- The Path to the Category.ini file. (Required)" << endl
+	   << "\t -r -- The Path to the ROMs. (Required)" << endl
+	   << "\t -t -- The Path to the Snaps. (Required)" << endl
+	   << "\t -h -- The Path to the history.dat file. (Required)" << endl;
       exit(1);
     }
 
-  ImportMAME *pImportMAME = new ImportMAME(sMamePath,sCategoryPath,sROMPath,sPicturePath);
+  ImportMAME *pImportMAME = new ImportMAME(sMamePath,sCategoryPath,sROMPath,sPicturePath,sHistoryPath);
   iRetCode = pImportMAME->Run();
 
   delete pImportMAME;

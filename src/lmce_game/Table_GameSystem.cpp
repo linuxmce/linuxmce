@@ -138,7 +138,8 @@ void Row_GameSystem::SetDefaultValues()
 	m_PK_GameSystem = 0;
 is_null[0] = false;
 is_null[1] = true;
-is_null[2] = true;
+m_Description = "";
+is_null[2] = false;
 
 
 	is_added=false;
@@ -171,17 +172,10 @@ m_Description = val; is_modified=true; is_null[2]=false;}
 bool Row_GameSystem::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
-bool Row_GameSystem::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
 
 			
 void Row_GameSystem::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
-is_modified=true;
-}
-void Row_GameSystem::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
 is_modified=true;
 }
 	
