@@ -167,10 +167,10 @@ class MAMEControl
     sRet+="\"maximum\":\""+m_sMaximum+"\", ";
     sRet+="\"sensitivity\":\""+m_sSensitivity+"\", ";
     sRet+="\"keydelta\":\""+m_sKeyDelta+"\", ";
-    sRet+="\"reverse\":\""+m_sReverse+"\"";
+    sRet+="\"reverse\":\""+m_sReverse+"\",";
     sRet+="\"ways\":\""+m_sWays+"\", ";
     sRet+="\"ways2\":\""+m_sWays2+"\", ";
-    sRet+="\"ways3\";\""+m_sWays3+"\"";
+    sRet+="\"ways3\":\""+m_sWays3+"\"";
     sRet+="}";
     return sRet;
   }
@@ -223,15 +223,20 @@ class MAMEInput
     return sRet;
   }
 
+  void MachineInputControls_add(MAMEControl* control)
+  {
+    m_vectMAMEControls.push_back(control);
+  }
+
   string to_json()
   {
     string sRet="";
     sRet+="{";
-    sRet+="\"service\":\""+m_sService+"\"";
-    sRet+="\"tilt\":\""+m_sTilt+"\"";
-    sRet+="\"players\":\""+m_sPlayers+"\"";
-    sRet+="\"buttons\":\""+m_sButtons+"\"";
-    sRet+="\"coins\":\""+m_sCoins+"\"";
+    sRet+="\"service\":\""+m_sService+"\", ";
+    sRet+="\"tilt\":\""+m_sTilt+"\", ";
+    sRet+="\"players\":\""+m_sPlayers+"\", ";
+    sRet+="\"buttons\":\""+m_sButtons+"\", ";
+    sRet+="\"coins\":\""+m_sCoins+"\", ";
     sRet+="\"controls\":["+MachineInputControls_get()+"]";
     sRet+="}";
     return sRet;

@@ -1359,15 +1359,15 @@ bool Database::ProcessMachine(MAMEMachine* m)
   // Add Configuration entry if needed, otherwise query, come out with a PK_Configuration
   
   long int liPK_Configuration;
-  if (!ConfigurationExists(m))
-    {
+  //  if (!ConfigurationExists(m))
+  //    {
       // Add Configuration Entry
       liPK_Configuration=AddConfiguration(m);
-    }
-  else
-    {
-      liPK_Configuration=GetPKConfiguration(m);
-    }
+      //    }
+      // else
+      //  {
+      //  liPK_Configuration=GetPKConfiguration(m);
+      //  }
   
   m->liPK_Configuration_set(liPK_Configuration);
 

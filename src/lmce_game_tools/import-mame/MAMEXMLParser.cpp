@@ -132,6 +132,22 @@ bool MAMEXMLParser::parseMAMEOutput()
 					xnINPUT.child("input").attribute("players").value(),
 					xnINPUT.child("input").attribute("buttons").value(),
 					xnINPUT.child("input").attribute("coins").value()));
+      
+      xnINPUT=xnMACHINE;
+
+      for (pugi::xml_node xnCONTROL: xnINPUT.child("input").children("control"))
+	{
+	  m->MachineInput_get()->MachineInputControls_add(new MAMEControl(
+									  xnCONTROL.attribute("type").value(),
+									  xnCONTROL.attribute("minimum").value(),
+									  xnCONTROL.attribute("maximum").value(),
+									  xnCONTROL.attribute("sensitivity").value(),
+									  xnCONTROL.attribute("keydelta").value(),
+									  xnCONTROL.attribute("reverse").value(),
+									  xnCONTROL.attribute("ways").value(),
+									  xnCONTROL.attribute("ways2").value(),
+									  xnCONTROL.attribute("ways3").value()));
+	}
 
       for (pugi::xml_node xnDISPLAY: xnDISPLAYS.children("display"))
 	{
