@@ -26,6 +26,8 @@ XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb
 
 Gen_Dev_Files +=
 sources += IdentifierBase.cpp \
+	DVDXMLParser.cpp \
+	pugixml.cpp \
 	IdentifierCDDB.cpp
 
 #<-dceag-mf-b->
