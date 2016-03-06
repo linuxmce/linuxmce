@@ -71,6 +71,7 @@ cp ${Moon_RootLocation}/DEBIAN/control{.in,}
 sed -i "s/{Kernel_Version}/${Moon_KernelVersion}/g" ${Moon_RootLocation}/DEBIAN/control
 sed -i "s/{Kernel_Arch}/${Moon_KernelArch}/g"       ${Moon_RootLocation}/DEBIAN/control
 
+# Create .deb file
 rm -rf pkgrootdir
 cp -a ${Moon_RootLocation} pkgrootdir
 find pkgrootdir -type d -name .svn -exec rm -rf '{}' ';' -prune
@@ -78,3 +79,25 @@ cd pkgrootdir
 dpkg-deb -b . ..
 cd ..
 rm -rf pkgrootdir
+
+## Create .changes file
+Package_Filename="./linux-image-diskless_${Moon_KernelVersion}-lmce1_all.deb"
+changes_file="./linux-image-diskless_${Moon_KernelVersion}-lmce1_all.changes"
+cp ./linux-image-diskless.changes.in "${changes_file}"
+Date=$(date +"%a, %d %b %Y %X %z")
+Package_sha1sum=$(sha1sum "${Package_Filename}" | cut -d' ' -f1 )
+Package_sha256sum=$(sha256sum "${Package_Filename}" | cut -d' ' -f1 )
+Package_md5sum=$(md5sum "${Package_Filename}" | cut -d' ' -f1 )
+Package_Size=$(du -b "${Package_Filename}" | cut -f1 )
+Moon_Distribution=$(lsb_release -cs)
+sed -i "s/{Date}/${Date}/g" "${changes_file}"
+sed -i "s/{Kernel_Version}/${Moon_KernelVersion}/g" "${changes_file}"
+sed -i "s/{Kernel_Arch}/${Moon_KernelArch}/g" "${changes_file}"
+sed -i "s/{Distribution}/${Moon_Distribution}/g" "${changes_file}"
+sed -i "s,{Package_Filename},${Package_Filename},g" "${changes_file}"
+sed -i "s/{Package_sha1sum}/${Package_sha1sum}/g" "${changes_file}"
+sed -i "s/{Package_sha256sum}/${Package_sha256sum}/g" "${changes_file}"
+sed -i "s/{Package_md5sum}/${Package_md5sum}/g" "${changes_file}"
+sed -i "s/{Package_Size}/${Package_Size}/g" "${changes_file}"
+
+exit 0

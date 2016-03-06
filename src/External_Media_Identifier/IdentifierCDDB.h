@@ -17,7 +17,7 @@ namespace DCE
   class IdentifierCDDB : public IdentifierBase
   {
   public:
-    IdentifierCDDB(string sPath);
+    IdentifierCDDB(string sPath, string sID);
     ~IdentifierCDDB();
     virtual bool Init();
     virtual bool Identify();

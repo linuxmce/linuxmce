@@ -248,7 +248,7 @@ UpdateUpgrade () {
 TimeUpdate () {
 	StatsMessage "Synchronizing time with an online server"
 	#Update system time to match ntp server
-	ntpdate ntp.ubuntu.com
+	ntpdate ntp.ubuntu.com || :
 }
 
 Disable_NetworkManager () {

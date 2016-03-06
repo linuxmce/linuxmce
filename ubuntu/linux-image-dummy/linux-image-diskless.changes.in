@@ -1,0 +1,22 @@
+Format: 1.8
+Date: {Date}
+Source: linux-image-diskless
+Binary: linux-image-diskless
+Architecture: {Kernel_Arch}
+Version: {Kernel_Version}-lmce1
+Distribution: {Distribution}
+Urgency: low
+Maintainer: LinuxMCE Team <packaging@linuxmce.org>
+Changed-By: LinuxMCE Team <packaging@linuxmce.org>
+Description:
+ linux-image-diskless  - Default diskless boot kernel
+Changes:
+ linux-image-diskless ({Kernel_Version}-lmce1) {Distribution}; urgency=low
+ .
+   * Initial release
+Checksums-Sha1:
+ {Package_sha1sum} {Package_Size} {Package_Filename}
+Checksums-Sha256:
+ {Package_sha256sum} {Package_Size} {Package_Filename}
+Files:
+ {Package_md5sum} {Package_Size} net extra {Package_Filename}

@@ -87,6 +87,11 @@ Item{
         if(pictureList.length==0)
             return
 
+        if (!settings.isScreenSaverEnabled()) {
+            console.log("Orbiter screensaver not enabled")
+            return;
+        }
+
         img1.source=getImage();
         screenSaverTimer.start()
         console.log("Orbiter Consume Screensaver images")
@@ -98,6 +103,10 @@ Item{
         if(manager.currentScreen !=="Screen_1.qml")
             return;
 
+        if (!settings.isScreenSaverEnabled()) {
+            console.log("Orbiter screensaver not enabled")
+            return;
+        }
         var link = getImage()
         // console.log("Getting "+link)
         if(img1.closing) {

@@ -61,4 +61,6 @@ if [ "$R" -lt "1" ] ; then
 	RunSQL "$Q"
 fi
 
+Configure_NTP_Server
+
 exit 0

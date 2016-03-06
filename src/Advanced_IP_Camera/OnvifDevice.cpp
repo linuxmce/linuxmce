@@ -22,10 +22,10 @@
 using namespace std;
 using namespace DCE;
 
-OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC) : CameraDevice(pAIPC),
+OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : CameraDevice(pAIPC, pData),
     m_pDeviceProxy(NULL), m_pPTZProxy(NULL), m_pMediaProxy(NULL)
 {
-	string url = pAIPC->GetBaseURL();
+    string url = m_sBaseURL;
 	url += "/onvif/device_service"; // default onvif entry point
 	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): url = %s", url.c_str());
     m_pDeviceProxy = new DeviceBindingProxy(url.c_str());
@@ -309,7 +309,7 @@ bool OnvifDevice::Get_Image(int iWidth, int iHeight, char **pData, int *iData_Si
 {
     LoggerWrapper::GetInstance ()->Write (LV_WARNING, "Get_Image() start, m_sImageURI = %s", m_sImageURI.c_str());
     if (!m_sImageURI.empty())
-        return m_pAIPC->HttpGet(m_sImageURI, pData, iData_Size);
+        return m_pAIPC->HttpGet(m_sImageURI, m_sUser, m_sPasswd, pData, iData_Size);
     return false;
 }
 

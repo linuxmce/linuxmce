@@ -55,6 +55,14 @@ namespace DCE {
 			return m_iMainValue >= 0;
 		}
 
+        /**
+         * @brief IsCompatible determines if the valueid/label is compatible with this device (in LinuxMCE terms).
+         * The important thing here is if LinuxMCE would separate the device or not.
+         * (example: a temperatur sensor and a brightness sensor would be two separate LMCE devices)
+         * @param newValue
+         * @param label
+         * @return
+         */
 		bool IsCompatible(OpenZWave::ValueID newValue, string label) {
 			for (vector<OpenZWave::ValueID>::iterator it = m_vectValues.begin(); it != m_vectValues.end(); ++it)
 			{
