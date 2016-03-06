@@ -18,10 +18,11 @@ namespace DCE
   {
   public:
     string m_sPath; // The path to identify
+    string m_sDiskId; // LMCE internal reference for unidentified disc
     bool m_bIsIdentified; // Media Identifier was able to identify media
     bool m_bultipleMatches; // There were multiple matches.
     enum eIdentityType {NONE,CDDB_TAB,MISC_TAB};
-    IdentifierBase(string sPath);
+    IdentifierBase(string sPath, string sID);
     ~IdentifierBase();
     virtual bool Init();
     virtual bool Identify();

@@ -1,3 +1,9 @@
+chan-sccp-b (4.2.0-4lmce1) unstable; urgency=medium
+
+  * fix version creation data so pkg builds reliably
+
+ -- phenigma <phenigma@hotmail.com>  Sat, 30 Jan 2016 18:45:03 +0000
+
 chan-sccp-b (4.2.0-4) stable; urgency=high
 
   * New Features in V4.2

@@ -15,6 +15,8 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include "../pluto_main/Define_DeviceData.h"
+#include "../pluto_main/Define_DeviceTemplate.h"
 
 #include <iostream>
 using namespace std;
@@ -32,7 +34,7 @@ using namespace DCE;
 // The primary constructor when the class is created as a stand-alone device
 Advanced_IP_Camera::Advanced_IP_Camera(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: Advanced_IP_Camera_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter),
-      m_pCameraDevice(NULL), m_CurlMutex("curl_mutex")
+      m_CurlMutex("curl_mutex")
 //<-dceag-const-e->
 {
     m_CurlMutex.Init (NULL);
@@ -53,25 +55,10 @@ Advanced_IP_Camera::Advanced_IP_Camera(Command_Impl *pPrimaryDeviceCommand, Devi
 Advanced_IP_Camera::~Advanced_IP_Camera()
 //<-dceag-dest-e->
 {
-
-
-        for( vector<EventMethod*>::const_iterator it = m_vectEventMethod.begin();
-                        it != m_vectEventMethod.end(); ++it )
-	{
-		if ( *it != NULL )
-		{
-			(*it)->Stop();
-			delete (*it);
-		}
-	}
-        for( map<int, OutputDevice*>::const_iterator it = m_mapPK_Device_OutputDevice.begin();
-                        it != m_mapPK_Device_OutputDevice.end(); ++it )
-	{
-		delete (*it).second;
-	}
-
-	if (m_pCameraDevice != NULL)
-		delete m_pCameraDevice;
+    for (size_t i = 0; i < m_dequeCameraDevice.size();i++) {
+        if (m_dequeCameraDevice[i] != NULL)
+            delete m_dequeCameraDevice[i];
+    }
 
     curl_easy_cleanup(m_pCurl);
     curl_global_cleanup();
@@ -89,183 +76,68 @@ bool Advanced_IP_Camera::GetConfig()
     if (!m_pCurl)
         return false;
 
-	// Put your code here to initialize the data in this class
-	// The configuration parameters DATA_ are now populated
-	m_sBaseURL = "http://"+GetIpAddress();
-	if (DATA_Get_TCP_Port() && DATA_Get_TCP_Port() != 80)
-	{
-		m_sBaseURL += ":" + StringUtils::itos(DATA_Get_TCP_Port());
-	}
-	m_sImgPath = DATA_Get_Path();
-
-	m_sUser = DATA_Get_AuthUser();
-	m_sPasswd = DATA_Get_AuthPassword();
-
-	m_vectEventMethod.resize(5);
-        for( int i = 0; i < m_vectEventMethod.size(); i++ )
-	{
-		m_vectEventMethod[i] = NULL;
-	}
-	string config = DATA_Get_Configuration();
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Configuration = %s", config.c_str());
-	vector<string> parameters;
-	SplitConfig(config, parameters);
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() parameters.size = %d", parameters.size());
-	if (parameters.size() > 0)
-	{
-		string val = parameters[0];
-		if (StringUtils::StartsWith(val, "type="))
-		{
-			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() type = %s", val.substr(5).c_str());
-			if (StringUtils::EndsWith(val, "onvif"))
-			{
-				LoggerWrapper::GetInstance ()->Write (LV_WARNING, "getConfig() creating onvif device");
-				m_pCameraDevice = new OnvifDevice(this);
-			} else {
-				LoggerWrapper::GetInstance ()->Write (LV_WARNING, "getConfig() falling back to url device");
-				m_pCameraDevice = new URLAccessDevice(this);
-			}
-		}
-	}
-    if (!m_pCameraDevice)
-        return false;
-    if  (!m_pCameraDevice->LoadConfig(parameters))
-        return false;
-
-
-    for (int i = 0; i < parameters.size(); i++)
-    {
-        size_t pos = parameters[i].find_first_of("=");
-        if (pos != string::npos)
+    // Check for old style config
+    string config = DATA_Get_Configuration();
+    if (StringUtils::StartsWith(config, "multi")) {
+        // New config
+        // See what child devices we have, decode their configuration
+        DeviceData_Impl* pChildDevice;
+        LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Children:");
+            for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
+                            it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
         {
-            string key = parameters[i].substr(0, pos);
-            key = StringUtils::TrimSpaces(key);
-            string value = parameters[i].substr(pos+1);
-            value = StringUtils::TrimSpaces(value);
-            LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() key = %s, value = %s", key.c_str(), value.c_str());
+            pChildDevice = (*it);
+            LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() PK_Device= %d", pChildDevice->m_dwPK_Device);
+            CreateCameraChild(pChildDevice);
+        }
+    } else {
+        // assume old config
+        CreateCameraChild(m_pData);
+    }
 
-            if (StringUtils::StartsWith(key, "eventMethod")) {
-                int num = atoi(key.substr(11).c_str());
-                if (num > 0)
+    return true;
+}
+
+
+bool Advanced_IP_Camera::CreateCameraChild(DeviceData_Impl* pData)
+{
+    string config = pData->m_mapParameters[DEVICEDATA_Configuration_CONST];
+    LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CreateCameraChild() Configuration = %s", config.c_str());
+    vector<string> parameters;
+    SplitConfig(config, parameters);
+    LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CreateCameraChild() parameters.size = %d", parameters.size());
+
+    // First use DT to detect type
+    CameraDevice* pCameraDevice = NULL;
+    if (pData->m_dwPK_DeviceTemplate == DEVICETEMPLATE_ONVIF_camera_CONST) {
+        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "CreateCameraChild() creating onvif device");
+        pCameraDevice = new OnvifDevice(this, pData);
+    } else {
+        // Then fall back to configuration data
+        if (parameters.size() > 0)
+        {
+            string val = parameters[0];
+            if (StringUtils::StartsWith(val, "type="))
+            {
+                LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CreateCameraChild() type = %s", val.substr(5).c_str());
+                if (StringUtils::EndsWith(val, "onvif"))
                 {
-                    EventMethod* pEventMethod = GetEventMethod(num);
-                    if (pEventMethod != NULL)
-                        pEventMethod->m_sMethod = value;
-                }
-            } else if (StringUtils::StartsWith(key, "eventURL")) {
-                int num = atoi(key.substr(8).c_str());
-                if (num > 0)
-                {
-                    EventMethod* pEventMethod = GetEventMethod(num);
-                    if (pEventMethod != NULL)
-                        pEventMethod->m_sURL = value;
-                }
-            } else if (StringUtils::StartsWith(key, "eventInterval")) {
-                int num = atoi(key.substr(8).c_str());
-                if (num > 0)
-                {
-                    EventMethod* pEventMethod = GetEventMethod(num);
-                    if (pEventMethod != NULL && atoi(value.c_str()) > 0)
-                        pEventMethod->m_iInterval = atoi(value.c_str());
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "CreateCameraChild() creating onvif device");
+                    pCameraDevice = new OnvifDevice(this, pData);
                 }
             }
         }
     }
-	// See what child devices we have, decode their configuration and assign them to an Event Method
-	DeviceData_Impl* pChildDevice;
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Children:");
-        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
-                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
-	{
-                pChildDevice = (*it);
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() PK_Device= %d", pChildDevice->m_dwPK_Device);
-		if (pChildDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Motion_Detector_CONST ||
-			pChildDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Generic_Sensor_CONST)
-		{
-			InputDevice* pInputDevice = new InputDevice(pChildDevice->m_dwPK_Device, pChildDevice->m_dwPK_DeviceTemplate);
-			pInputDevice->status = 0;
-			string value;
-			GetChildDeviceData(pChildDevice->m_dwPK_Device, DEVICEDATA_Capabilities_CONST, value);
-			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Motion detector, capabilities = %s", value.c_str());
-			SplitConfig(value, parameters);
-			EventMethod* pEventMethod = NULL;
-			for (int i = 0; i < parameters.size(); i++)
-			{
-				size_t pos = parameters[i].find_first_of("=");
-				if (pos != string::npos)
-				{
-					string key = parameters[i].substr(0, pos);
-					key = StringUtils::TrimSpaces(key);
-					string value = parameters[i].substr(pos+1);
-					value = StringUtils::TrimSpaces(value);
-					LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() key = %s, value = %s", key.c_str(), value.c_str());
-					if (StringUtils::StartsWith(key, "method")) {
-						int num = atoi(value.c_str());
-						pEventMethod = GetEventMethod(num);
-						if (pEventMethod != NULL) 
-							pEventMethod->Add(pInputDevice);
-					} else if (StringUtils::StartsWith(key, "triggerMethod")) {
-						pInputDevice->m_sTriggerMethod = value;
-					} else if (StringUtils::StartsWith(key, "patternOn")) {
-						pInputDevice->m_sPatternOn = value;
-					} else if (StringUtils::StartsWith(key, "patternOff")) {
-						pInputDevice->m_sPatternOff = value;
-					}
-				}
-			}
-		} else if (pChildDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Generic_Input_Ouput_CONST)
-		{
-			OutputDevice* pOutputDevice = new OutputDevice(pChildDevice->m_dwPK_Device, pChildDevice->m_dwPK_DeviceTemplate);
-			pOutputDevice->status = 0;
-			string value;
-			GetChildDeviceData(pChildDevice->m_dwPK_Device, DEVICEDATA_Capabilities_CONST, value);
-			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() Generic Input Output, capabilities = %s", value.c_str());
-			SplitConfig(value, parameters);
-			for (int i = 0; i < parameters.size(); i++)
-			{
-				size_t pos = parameters[i].find_first_of("=");
-				if (pos != string::npos)
-				{
-					string key = parameters[i].substr(0, pos);
-					key = StringUtils::TrimSpaces(key);
-					string value = parameters[i].substr(pos+1);
-					value = StringUtils::TrimSpaces(value);
-					LoggerWrapper::GetInstance ()->Write (LV_STATUS, "getConfig() key = %s, value = %s", key.c_str(), value.c_str());
-					if (StringUtils::StartsWith(key, "controlMethod")) {
-						pOutputDevice->m_sControlMethod = value;
-					} else if (StringUtils::StartsWith(key, "on")) {
-						pOutputDevice->m_sOn = value;
-					} else if (StringUtils::StartsWith(key, "off")) {
-						pOutputDevice->m_sOff = value;
-					}
-				}
-			}
-			m_mapPK_Device_OutputDevice[pChildDevice->m_dwPK_Device] = pOutputDevice;
-		}
-	}
-	
-	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "m_vectEventMethod.size() = %d. Configured EventMethods:", m_vectEventMethod.size());
-	for (int i = 0; i < m_vectEventMethod.size(); i++)
-	{
-		EventMethod* pEventMethod = m_vectEventMethod[i];
-		if (pEventMethod != NULL)
-		{
-			LoggerWrapper::GetInstance ()->Write (LV_WARNING, "GetConfig(): EventMethod %d, %s", i+1, pEventMethod->ToString().c_str());
-			pEventMethod->Start();
-		}
+    // Last, lets assume it is a URL access device
+    if (!pCameraDevice) {
+        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "CreateCameraChild() Assuming URL Access Device - which may be wrong, you should update your config.");
+        pCameraDevice = new URLAccessDevice(this, pData);
+    }
+    if  (!pCameraDevice->LoadConfig(parameters))
+        return false;
 
-	}
-	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "m_mapPK_Device_OutputDevice.size() = %d. Configured OutputDevices:", m_mapPK_Device_OutputDevice.size());
-        for( map<int, OutputDevice*>::const_iterator it = m_mapPK_Device_OutputDevice.begin();
-                        it != m_mapPK_Device_OutputDevice.end(); ++it )
-	{
-		OutputDevice* pOutputDevice = (*it).second;
-		if (pOutputDevice != NULL)
-		{
-			LoggerWrapper::GetInstance ()->Write (LV_WARNING, "GetConfig(): OutputDevice %s", pOutputDevice->ToString().c_str());
-		}
+    m_dequeCameraDevice.push_back(pCameraDevice);
 
-	}
 	return true;
 }
 
@@ -278,43 +150,6 @@ void Advanced_IP_Camera::SplitConfig(string config, vector<string> &parameters)
 	} else {
 		parameters = StringUtils::Split(config, "\n");
 	}
-}
-
-EventMethod* Advanced_IP_Camera::GetEventMethod(int i)
-{
-	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "GetEventMethod() requested EventMethod num = %d", i);
-	EventMethod* pEventMethod = NULL;
-	if (i > 0 && i <= 5)
-	{
-		pEventMethod = m_vectEventMethod[i-1];
-		if (pEventMethod == NULL)
-		{
-			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "GetEventMethod() new EventMethod num = %d", i);
-			pEventMethod = new EventMethod(this);
-			m_vectEventMethod[i-1] = pEventMethod;
-		}
-	}
-	return pEventMethod;
-}
-
-string Advanced_IP_Camera::GetBaseURL()
-{
-	return m_sBaseURL;
-}
-
-string Advanced_IP_Camera::GetImgPath()
-{
-	return m_sImgPath;
-}
-
-string Advanced_IP_Camera::GetPassword()
-{
-	return m_sPasswd;
-}
-
-string Advanced_IP_Camera::GetUser()
-{
-	return m_sUser;
 }
 
 void Advanced_IP_Camera::InputStatusChanged(InputDevice* pInputDevice, int newStatus)
@@ -344,6 +179,11 @@ bool Advanced_IP_Camera::Register()
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
+void Advanced_IP_Camera::CreateChildren()
+{
+
+}
+
 /*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
@@ -368,43 +208,45 @@ void Advanced_IP_Camera::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Im
 {
 
 	sCMD_Result = "UNHANDLED CHILD";
-	
-	map<int, OutputDevice*>::iterator it = m_mapPK_Device_OutputDevice.find(pDeviceData_Impl->m_dwPK_Device);
-	if ( it != m_mapPK_Device_OutputDevice.end() ) 
-	{
-		OutputDevice* pDevice = (*it).second;
 
-		if (pMessage->m_dwID == COMMAND_Generic_On_CONST ||
-		    pMessage->m_dwID == COMMAND_Generic_Off_CONST)
-		{
-			/*	if (ChangeOutput(pDevice, pMessage->m_dwID == COMMAND_Generic_On_CONST)) 
-			{
-				sCMD_Result = "OK";
-				}*/
-		}
-	}
+    unsigned long PK_Device = pDeviceData_Impl->m_dwPK_Device;
+    CameraDevice* pDevice = FindCameraDevice(PK_Device);
+    if (pDevice != NULL) {
+        pDevice->ReceiveCommandForChild(PK_Device,sCMD_Result,pMessage);
+    }
 }
 
-void Advanced_IP_Camera::SetupCurl(string sUrl)
+CameraDevice* Advanced_IP_Camera::FindCameraDevice(unsigned long PK_Device)
+{
+    LoggerWrapper::GetInstance ()->Write (LV_STATUS, "FindCameraDevice() looking for device = %d", PK_Device);
+    for (size_t i = 0; i < m_dequeCameraDevice.size();i++) {
+        if (m_dequeCameraDevice[i]->HasChild(PK_Device))
+            return m_dequeCameraDevice[i];
+    }
+    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "FindCameraDevice() device = %d not found", PK_Device);
+    return NULL;
+}
+
+void Advanced_IP_Camera::SetupCurl(string sUrl, string sUser, string sPasswd)
 {
     LoggerWrapper::GetInstance ()->Write (LV_STATUS, "SetupCurl() start: sUrl: %s", sUrl.c_str ());
     curl_easy_setopt(m_pCurl, CURLOPT_URL, sUrl.c_str());
 
     curl_easy_setopt(m_pCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    if (!m_sUser.empty())
+    if (!sUser.empty())
     {
         curl_easy_setopt(m_pCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, m_sUser.c_str());
-        if (!m_sPasswd.empty()) {
-            curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, m_sPasswd.c_str());
+        curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, sUser.c_str());
+        if (!sPasswd.empty()) {
+            curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, sPasswd.c_str());
         }
     }
 }
 
-bool Advanced_IP_Camera::DoURLAccess(string sUrl)
+bool Advanced_IP_Camera::DoURLAccess(string sUrl, string sUser, string sPasswd)
 {
     PLUTO_SAFETY_LOCK (cm, m_CurlMutex);
-    SetupCurl(sUrl);
+    SetupCurl(sUrl,sUser, sPasswd);
     CallbackData data;
     curl_easy_setopt(m_pCurl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(m_pCurl, CURLOPT_WRITEDATA, (void *)&data);
@@ -448,7 +290,7 @@ size_t Advanced_IP_Camera::WriteCallback(void *ptr, size_t size, size_t nmemb, v
     return realsize;
 }
 
-bool Advanced_IP_Camera::HttpGet(string sUrl, char **pData,int *iData_Size)
+bool Advanced_IP_Camera::HttpGet(string sUrl, string sUser, string sPasswd, char **pData,int *iData_Size)
 {
     CallbackData data;
 
@@ -460,12 +302,12 @@ bool Advanced_IP_Camera::HttpGet(string sUrl, char **pData,int *iData_Size)
     curl_easy_setopt(m_pCurl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(m_pCurl, CURLOPT_WRITEDATA, (void *)&data);
     curl_easy_setopt(m_pCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    if (!m_sUser.empty())
+    if (!sUser.empty())
     {
         curl_easy_setopt(m_pCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, m_sUser.c_str());
-        if (!m_sPasswd.empty()) {
-            curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, m_sPasswd.c_str());
+        curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, sUser.c_str());
+        if (!sPasswd.empty()) {
+            curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, sPasswd.c_str());
         }
     }
 
@@ -532,8 +374,9 @@ void Advanced_IP_Camera::ReceivedUnknownCommand(string &sCMD_Result,Message *pMe
 void Advanced_IP_Camera::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
-	if (m_pCameraDevice != NULL)
-		m_pCameraDevice->Get_Image(iWidth, iHeight, pData, iData_Size, sFormat);
+    CameraDevice* pDevice = FindCameraDevice(m_dwPK_Device);
+    if (pDevice != NULL)
+        pDevice->Get_Image(iWidth, iHeight, pData, iData_Size, sFormat);
     sCMD_Result = "OK";
 }
 
@@ -548,9 +391,12 @@ void Advanced_IP_Camera::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *
 //<-dceag-c200-e->
 {
     sCMD_Result = "UNKNOWN COMMAND";
-    if (m_pCameraDevice->MoveUp(1))
-    {
-        sCMD_Result = "OK";
+    CameraDevice* pDevice = FindCameraDevice(m_dwPK_Device);
+    if (pDevice != NULL) {
+        if (pDevice->MoveUp(1))
+        {
+            sCMD_Result = "OK";
+        }
     }
 }
 //<-dceag-c201-b->
@@ -564,9 +410,12 @@ void Advanced_IP_Camera::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message
 //<-dceag-c201-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
-    if (m_pCameraDevice->MoveDown(1))
-    {
-        sCMD_Result = "OK";
+    CameraDevice* pDevice = FindCameraDevice(m_dwPK_Device);
+    if (pDevice != NULL) {
+        if (pDevice->MoveDown(1))
+        {
+            sCMD_Result = "OK";
+        }
     }
 }
 //<-dceag-c202-b->
@@ -580,9 +429,12 @@ void Advanced_IP_Camera::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message
 //<-dceag-c202-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
-    if (m_pCameraDevice->MoveLeft(1))
-    {
-        sCMD_Result = "OK";
+    CameraDevice* pDevice = FindCameraDevice(m_dwPK_Device);
+    if (pDevice != NULL) {
+        if (pDevice->MoveLeft(1))
+        {
+            sCMD_Result = "OK";
+        }
     }
 }
 //<-dceag-c203-b->
@@ -596,9 +448,12 @@ void Advanced_IP_Camera::CMD_Move_Right(int iStreamID,string &sCMD_Result,Messag
 //<-dceag-c203-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
-    if (m_pCameraDevice->MoveRight(1))
-    {
-        sCMD_Result = "OK";
+    CameraDevice* pDevice = FindCameraDevice(m_dwPK_Device);
+    if (pDevice != NULL) {
+        if (pDevice->MoveDown(1))
+        {
+            sCMD_Result = "OK";
+        }
     }
 }
 //<-dceag-c684-b->
@@ -610,9 +465,12 @@ void Advanced_IP_Camera::CMD_Zoom_In(string &sCMD_Result,Message *pMessage)
 //<-dceag-c684-e->
 {
     sCMD_Result = "UNKNOWN COMMAND";
-    if (m_pCameraDevice->ZoomIn(1))
-    {
-        sCMD_Result = "OK";
+    CameraDevice* pDevice = FindCameraDevice(m_dwPK_Device);
+    if (pDevice != NULL) {
+        if (pDevice->ZoomIn(1))
+        {
+            sCMD_Result = "OK";
+        }
     }
 }
 //<-dceag-c685-b->
@@ -624,8 +482,11 @@ void Advanced_IP_Camera::CMD_Zoom_Out(string &sCMD_Result,Message *pMessage)
 //<-dceag-c685-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
-    if (m_pCameraDevice->ZoomOut(1))
-    {
-        sCMD_Result = "OK";
+    CameraDevice* pDevice = FindCameraDevice(m_dwPK_Device);
+    if (pDevice != NULL) {
+        if (pDevice->ZoomOut(1))
+        {
+            sCMD_Result = "OK";
+        }
     }
 }

@@ -136,6 +136,7 @@ Site="
 		AllowOverride All
 		Order allow,deny
 		allow from all
+		RedirectMatch ^/mythweb /html/mythweb
 		RedirectMatch ^/$ /lmce-admin/
 	</Directory>
 
@@ -215,10 +216,10 @@ if ! BlacklistConfFiles '/etc/apache2/apache2.conf' ;then
 		cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.pbackup || :
 	fi
 
-	if [ -d /etc/apache2/conf.d ] ; then
-		ConfDir="/etc/apache2/conf.d"
-	elif [ -d /etc/apache2/conf-available ] ; then
+	if [ -d /etc/apache2/conf-available ] ; then
 		ConfDir="/etc/apache2/conf-available"
+	elif [ -d /etc/apache2/conf.d ] ; then
+		ConfDir="/etc/apache2/conf.d"
 	fi
 	if ! grep ServerName "${ConfDir}/lmce.conf" >/dev/null ; then
 		if [[ -z "${HostName}" ]] ; then

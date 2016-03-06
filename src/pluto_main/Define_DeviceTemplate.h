@@ -2169,6 +2169,7 @@
 #define DEVICETEMPLATE_Generic_Access_Control_Panel_CONST 2341
 #define DEVICETEMPLATE_Humidity_sensor_CONST 2342
 #define DEVICETEMPLATE_Compute_Stick_CONST 2343
+#define DEVICETEMPLATE_ONVIF_camera_CONST 2344
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"
