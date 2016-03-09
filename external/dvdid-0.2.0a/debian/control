@@ -1,0 +1,13 @@
+Source: dvdid
+Maintainer: phenigma <phenigma@hotmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: libdvdid0
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: the dvdid library
+ This package contains dvdid library
+
