@@ -23,7 +23,7 @@ namespace DCE
     bool m_bultipleMatches; // There were multiple matches.
     enum eIdentityType {NONE,CDDB_TAB,MISC_TAB};
     IdentifierBase(string sPath, string sID);
-    ~IdentifierBase();
+    virtual ~IdentifierBase();
     virtual bool Init();
     virtual bool Identify();
     virtual string GetIdentifiedData();

@@ -116,6 +116,8 @@ void *XRecordExtensionHandler::recordingThreadMainFunction(void *arguments)
 	recordClient = XRecordAllClients;
 	recordRange->device_events.first = KeyPress;
 	recordRange->device_events.last = MotionNotify;
+	recordRange->delivered_events.first = KeyPress;
+	recordRange->delivered_events.last = MotionNotify;
 
 	recordRange->core_requests.first = X_NoOperation;
 	recordRange->core_requests.last = X_NoOperation;
