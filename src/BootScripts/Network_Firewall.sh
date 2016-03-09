@@ -686,7 +686,7 @@ if [[ ! -z "$RULE" ]]; then
    echo "set rule offline"
 	IPVersion="$(echo $PROTOCOL | cut -d- -f2)"
 	if [[ "$IPVersion" = "ipv4" ]]; then
-		sql="UPDATE Firewall SET Offline='1' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL' AND Place='$PLACE'";
+		sql="UPDATE Firewall SET Offline='1' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL'";
 		$(RunSQL "$sql")
 		CHAIN=${CHAIN^^}
 		$IPTABLES -D $CHAIN $PLACE
@@ -703,8 +703,14 @@ if [[ ! -z "$RULE" ]]; then
 	IPVersion="$(echo $PROTOCOL | cut -d- -f2)"
 	echo "$IPVersion"
 	if [[ "$IPVersion" = "ipv4" ]]; then
-		sql="UPDATE Firewall SET Offline='0' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL' AND Place='$PLACE'";
+		sql="SELECT Protocol FROM Firewall WHERE RuleType='$CHAIN' AND SourceIP='$SOURCEIP' AND Protocol='$PROTOCOL'"
 		$(RunSQL "$sql")
+		if ! [ "$R" ]; then
+			
+		else
+			sql="UPDATE Firewall SET Offline='0' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL'";
+			$(RunSQL "$sql")
+		fi
 		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL' AND Place='$PLACE' AND Disabled='0'"
         R=$(RunSQL "$Q")
         for Port in $R; do
