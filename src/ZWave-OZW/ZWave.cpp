@@ -1398,10 +1398,8 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
 	{
 		label = OpenZWave::Manager::Get()->GetValueLabel(pLmceDevice->GetMainValue());
 
-        if ((manuId == "001e" && prodType == "0002" && pLmceDevice->GetMainValue().GetInstance() == 0)
-                // HSM100 motion detector, value with instance = 0 is motion detector
-                // (label has been both "Sensor" and "Luminance" and is not checked in case it changes again)
-
+        if ((manuId == "001e" && prodType == "0002" && pLmceDevice->GetMainValue().GetInstance() == 1)
+                // HSM100 motion detector, value with instance = 1 is motion detector
                 || (manuId == "0086" && prodType == "0002" && prodId == "0005" && label == "Sensor")
                 // Aeotec multi-sensor motion detector
                 ) {
