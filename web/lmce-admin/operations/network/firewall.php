@@ -907,7 +907,8 @@ function firewall($output,$dbADO) {
 			}
 			$out.='<td align="center"><textarea rows="2" cols="4" name="Description" value="" /></textarea></td>
 			<td align="center">&nbsp;</td>
-		</tr>		<tr>
+		</tr>
+		<tr>
 			<td colspan="100%" align="center" bgcolor="#EEEEEE"><input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_CONST').'" /> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'" /></td>
 		</tr>';
 		if (@$AdvancedFirewall == 1){
@@ -921,10 +922,10 @@ function firewall($output,$dbADO) {
 		<tr>
 			<td colspan="100%" align="left">** This field is '.translate('TEXT_OPTIONAL_FIELD_CONST').' only not with port_forward (NAT)</td>
 		</tr>
-		<tr>
+		<!--<tr>
 			<td colspan="100%" align="left">*** with port_forward (NAT), port on the core is 9000 and the destination port on the internal device is 9001 data on this field is 9000:9001</td>
 
-		</tr>
+		</tr>-->
 	</table>	
 	</form>
 		<script>
@@ -1262,3 +1263,4 @@ function writeConf($accessFile, $variable,$oldValue,$newValue)
 	}
 	fclose($handle);
 }
+?>
