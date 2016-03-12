@@ -4,6 +4,7 @@ function firewall($output,$dbADO) {
  	includeLangFile('common.lang.php');
  	includeLangFile('firewall.lang.php');
 	
+		include(APPROOT.'/include/dhcpd-tools/DHCPd-parse.php');
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $res ADORecordSet */
@@ -161,6 +162,34 @@ function firewall($output,$dbADO) {
 		}
 	}
 	
+	//Select known devices with a ipaddress.
+	$queryknowndeviceip="SELECT IPaddress, Description  FROM `Device` WHERE `IPaddress`!='' ORDER BY IPaddress ASC"; 
+	$resknowndeviceip=$dbADO->Execute($queryknowndeviceip);
+	while ($row=$resknowndeviceip->FetchRow()) {
+			$ip[]=$row['IPaddress'];
+			$name[]=$row['Description'];
+		}
+	$iplistdb=array_combine($name, $ip);
+	
+		//get ipadresses from dhcp
+	$readFile = "/var/lib/dhcp/dhcpd.leases";
+	$test = new Leases;
+	if (!isset($_GET['error']) && !$test->readLease($readFile)) {
+		header("Location: index.php?section=DHCPLeases&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." $readFile");
+	exit();
+	}
+
+		while($lease = $test->nextLease()){
+			if ($lease["status"] == 'active' ) {
+				$ip[]=$lease["ip_addr"];
+				$name[]=$lease["hostname"];
+			}
+		}
+	//merge both lists (known devices and dhcp)
+	$iplistdhcp=array_combine($name, $ip);
+	$iplist=array_unique(array_merge($iplistdb, $iplistdhcp), SORT_REGULAR);
+
+	
 	$i=0;
 	if (@$AdvancedFirewall == 1){
 			$res=$dbADO->Execute('SELECT PK_Firewall, Matchname FROM Firewall WHERE Protocol=\'chain-ipv4\' ORDER BY PK_Firewall');
@@ -191,8 +220,8 @@ function firewall($output,$dbADO) {
 		} else {
 			$start_chains=Array(
 			"0"=>"input",
-			"2"=>"port_forward (NAT)",
-			"3"=>"output",
+			"1"=>"forward",
+			"2"=>"output",
 			);
 		}
 	};
@@ -450,7 +479,7 @@ function firewall($output,$dbADO) {
                                 <option value="ipv4" '.((@$fwVersion!="ipv4")?'':'selected').'>IPv4 Firewall</option>
                                 <option value="ipv6" '.((@$fwVersion!="ipv6")?'':'selected').'>IPv6 Firewall</option>
                         </select>
-			<td colspan="30%" align="right"><input type="button" class="button" name="IDIOT" value="Reset '.@$fwVersion.' firewall to defaults" onclick="confirmResetFirewall()"></td>
+			<td colspan="30%" align="right"><input type="button" class="button" name="RESET" value="Reset '.$fwVersion.' firewall to defaults" onclick="confirmResetFirewall()" /></td>
 		</tr>
 		<tr><td colspan="100%"><hr></td></tr>';
 		$i=0;
@@ -569,8 +598,7 @@ function firewall($output,$dbADO) {
 				$out.=$tr;
 				$out.='<td align="center"><input type="checkbox" name="disable" value="'.$row['PK_Firewall'].'" onclick="if (this.checked) { confirmDisableRule('.$row['PK_Firewall'].') } else { confirmEnableRule('.$row['PK_Firewall'].') }" '.((@$Disabled!=1)?'':'checked').' /></td>';
 					if (@$AdvancedFirewall == 1){
-						$out.='<td align="center"><a href="index.php?section=firewall&action=move&moverule='.$prevrule.'" style="text-decoration: none;">&#8679;</a><a href="index.php?section=firewall&action=move&moverule='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8681;</a></td>';
-						$prevrule=$row['PK_Firewall'];
+						$out.='<td align="center"><a href="index.php?section=firewall&action=moveback&id='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8679;</a><a href="index.php?section=firewall&action=movenext&id='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8681;</a></td>';
 					}
 					$out.='<script>
 						function saveRule()
@@ -761,8 +789,7 @@ function firewall($output,$dbADO) {
 				$out.=$tr;
 				$out.='<td align="center"><input type="checkbox" name="disable" value="'.$row['PK_Firewall'].'" onclick="if (this.checked) { confirmDisableRule('.$row['PK_Firewall'].') } else { confirmEnableRule('.$row['PK_Firewall'].') }" '.((@$Disabled!=1)?'':'checked').' /></td>';
 				if (@$AdvancedFirewall == 1){
-					$out.='<td align="center"><a href="index.php?section=firewall&action=move&moverule='.$prevrule.'" style="text-decoration: none;">&#8679;</a><a href="index.php?section=firewall&action=move&moverule='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8681;</a></td>';
-					$prevrule=$row['PK_Firewall'];
+					$out.='<td align="center"><a href="index.php?section=firewall&action=moveback&id='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8679;</a><a href="index.php?section=firewall&action=movenext&id='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8681;</a></td>';
 				}
 				$out.='<td align="center">'.$protocol[1].'</td>
 				<td align="center">'.$row['RuleType'].'</td>';
@@ -911,7 +938,7 @@ function firewall($output,$dbADO) {
 		<tr>
 			<td colspan="100%" align="center" bgcolor="#EEEEEE"><input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_CONST').'" /> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'" /></td>
 		</tr>';
-		if (@$AdvancedFirewall == 1){
+		if ($AdvancedFirewall == 1){
 		$out.='<tr>
 			<td colspan="100%" align="center" bgcolor="#EEEEEE">'.translate('TEXT_NAME_OF_NEW_CHAIN_CONST').': <input type="TEXT" name="New_Chain" /><input type="submit" class="button" name="add_Chain" value="'.translate('TEXT_ADD_CONST').'" onClick="add_Chain()" /></td>
 		</tr>';
@@ -943,7 +970,15 @@ function firewall($output,$dbADO) {
 
 		if(isset($_POST['add'])){
 			//Get the post data to local variables
-			$Chain=isset($_POST['chain'])? mysql_real_escape_string($_POST['chain']):'INPUT';
+			if ($AdvancedFirewall=1){
+				$Chain=isset($_POST['chain'])? mysql_real_escape_string($_POST['chain']):'INPUT';
+				if ($Chain == "port_forward (NAT)") {
+					$table='NAT';
+					$Chain=$_POST['RuleType'];
+				}
+			} else { 
+				$Chain='AUTO';
+			}
 			$IntIF=isset($_POST['IntIf'])? mysql_real_escape_string($_POST['IntIf']):'NULL';
 			if ( $IntIF == '') {
 				$IntIF='NULL';
@@ -989,11 +1024,7 @@ function firewall($output,$dbADO) {
 			}
 			$RPolicy=isset($_POST['RPolicy'])? mysql_real_escape_string($_POST['RPolicy']):'ACCEPT';
 			$Description=isset($_POST['Description'])? mysql_real_escape_string($_POST['Description']):'NULL';
-			if (isset($_POST['chain'])) {	
-				if (in_array($_POST['chain'], $chains)) {
-					$Place='';
-				}
-			}
+			
 			$options='-L Rule -H local ';
 			if (isset($table)) {
 				$options.=' -t '.$table;
@@ -1012,8 +1043,18 @@ function firewall($output,$dbADO) {
 
 		if (isset($_POST['save_Rule'])){
 			$IntIF=isset($_POST['save_IntIf'])?mysql_real_escape_string($_POST['save_IntIf']):'NULL';
+			if ( $IntIF == '') {
+				$IntIF='NULL';
+			}
 			$ExtIF=isset($$_POST['save_ExtIf'])?mysql_real_escape_string($_POST['save_ExtIf']):'NULL';
+			$ExtIF=isset($_POST['ExtIf'])? mysql_real_escape_string($_POST['ExtIf']):'NULL';
+			if ( $ExtIF == ''){
+				$ExtIF='NULL';
+			}
 			$Matchname=isset($_POST['save_Matchname'])?mysql_real_escape_string($_POST['save_Matchname']):'NULL';
+			if ( $Matchname == ''){
+				$Matchname='NULL';
+			}
 			$Place=$_POST['save_place'];
 			if ($_POST['save_protocol'] == 'tcp & udp') {
 				$Protocol='all-'.$_POST['save_IPVersion'];
@@ -1021,10 +1062,31 @@ function firewall($output,$dbADO) {
 				$Protocol=@$_POST['save_protocol'].'-'.$_POST['save_IPVersion'];
 			}
 			$SourcePort=isset($_POST['save_SourcePort'])?mysql_real_escape_string($_POST['save_SourcePort']):'NULL';
+			if ( $SourcePort == '') {
+				$SourcePort='NULL';
+			}
 			$SourcePortEnd=isset($_POST['save_SourcePortEnd'])?mysql_real_escape_string($_POST['save_SourcePortEnd']):'NULL';
+			if ( $SourcePortEnd == '') {
+				$SourcePortEnd='NULL';
+			}
 			$DestinationPort=isset($_POST['save_DestinationPort'])?mysql_real_escape_string($_POST['save_DestinationPort']):'NULL';
+			if ( $DestinationPort == '') {
+				$DestinationPort='NULL';
+			}
 			$DestinationPortEnd=isset($_POST['save_DestinationPortEnd'])?mysql_real_escape_string($_POST['save_DestinationPortEnd']):'NULL';
+			if ( $DestinationPortEnd == '') {
+				$DestinationPortEnd='NULL';
+			}
 			$DestinationIP=isset($_POST['save_DestinationIP'])?mysql_real_escape_string($_POST['save_DestinationIP']):'NULL';
+			if ( $DestinationIP == '') {
+				$DestinationIP='NULL';
+			} elseif ( $DestinationIP == 'not') {
+				if ( $_POST['DestinationIP_M'] == ''){
+						$DestinationIP='NULL';
+				} else {
+					$DestinationIP=$_POST['DestinationIP_M'];
+				}
+			}
 			if (isset($_POST['save_RuleType']) && $_POST['save_RuleType'] != "") {
 				$Table=$_POST['save_Chain'];
 				$RuleType=$_POST['save_RuleType'];
@@ -1033,6 +1095,10 @@ function firewall($output,$dbADO) {
 				$Chain=$_POST['save_Chain'];
 			}
 			$SourceIP=isset($_POST['save_SourceIP'])?mysql_real_escape_string($_POST['save_SourceIP']):'NULL';
+			$SourceIP=isset($_POST['SourceIP'])? mysql_real_escape_string($_POST['SourceIP']):'NULL';
+			if ( $SourceIP == '') {
+				$SourceIP='NULL';
+			}
 			$RPolicy=isset($_POST['save_RPolicy'])?mysql_real_escape_string($_POST['save_RPolicy']):'NULL';
 			$Description=isset($_POST['save_Description'])?mysql_real_escape_string($_POST['save_Description']):'';
 

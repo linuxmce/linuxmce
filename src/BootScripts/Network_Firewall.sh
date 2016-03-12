@@ -36,7 +36,9 @@ IPTables()
 			 RuleType="$(echo $RuleType | cut -d"-" -f 2)"
 		fi
 		
-		RuleType=${RuleType^^}
+		if [[ "$RuleType" = "input" ]] || [[ "$RuleType" = "forward" ]] || [[ "$RuleType" = "output" ]]; then
+			RuleType=${RuleType^^}
+		fi
 		
 		if [[ -z $ACTION ]] || [[ "$ACTION" == "add" ]]; then
 			RuleType="-A $RuleType"
@@ -45,7 +47,7 @@ IPTables()
 	        elif [[ $ACTION = "del" ]]; then
 			RuleType="-D $RuleType $Place"
 		fi
-		echo "$ACTION"
+
 		if [[ "$Table" != "" ]] &&  [[ "$Table" != "NULL" ]]; then
 			Table="-t $Table"
 		else
@@ -115,7 +117,7 @@ IPTables()
                                 FilterIP6="-s $FilterIP"
                         fi
                 fi
-				echo "$SrcPort"
+
                 if [[ "$SrcPort" = ""  ]] ||  [[ "$SrcPort" = ":" ]] || [[ "$SrcPort" = "0" ]] || [[ "$SrcPort" = ":0" ]] || [[ "$SrcPort" = "NULL" ]] || [[ "$SrcPort" = "NULL:0" ]] || [[ "$SrcPort" = "NULL:NULL" ]] || [[ "$parmSPort" = "NULL" ]]; then
                         parmSPort=""
                 else
@@ -152,7 +154,7 @@ IPTables()
                                 DestIP6="-d $DestIP"
                         fi
                 fi
-				echo "$DestPort"
+
                 if [[ "$DestPort" == ""  ]] || [[ "$DestPort" == ":" ]] || [[ "$DestPort" == "0" ]] || [[ "$DestPort" == "NULL" ]] || [[ "$DestPort" == "NULL:NULL" ]]; then
                         parmDPort=""
                 else
@@ -264,7 +266,7 @@ Manual_CHain_Rules()
 		if [ "$Table" = "NULL" ]; then
 			Table=""
 		fi
-                RPolicy=$(Field 11 "$Port")
+                RPolicy=$(Field 12 "$Port")
                 Description=$(Field 12 "$Port")
 
                 #echo IPTables "$IPVersion" "-A $chain" "$IntIf" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
@@ -757,44 +759,47 @@ if [[ ! -z "$RULE" ]]; then
 	fi
   exit 0
   fi
+
   echo "add/insert rule"
   echo "$HOST" "$TABLE" "$ACTION" "$CHAIN" "$PLACE" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "$RPOLICY" "$DESCRIPTION"
- 
- re='^[0-9]+$'
-  if ! [[ $PLACE =~ $re ]]; then
-	IPVersion="$(echo $PROTOCOL | cut -d- -f2)"
-	highest="SELECT MAX( Place ) AS max FROM Firewall WHERE RuleType='$CHAIN' AND Protocol LIKE '%-$IPVersion'"
-	R=$(RunSQL "$highest")
-	for max in $R; do
-        max=$(Field 1 "$max")
-	done
-    PLACE=$[max+1]
-  fi
+  if [[ "$CHAIN" = "AUTO" ]]; then
+	re='^[0-9]+$'
+	if ! [[ $PLACE =~ $re ]]; then
+		IPVersion="$(echo $PROTOCOL | cut -d- -f2)"
+		highest="SELECT MAX( Place ) AS max FROM Firewall WHERE RuleType='$CHAIN' AND Protocol LIKE '%-$IPVersion'"
+		R=$(RunSQL "$highest")
+		for max in $R; do
+			max=$(Field 1 "$max")
+		done
+		PLACE=$[max+1]
+	fi
 
-  if [[ "$ExtIP" = "dhcp" ]]; then
-	ExtIP=$(ip addr show $ExtIf | awk '/inet / {print $2}')
-	ExtIP="$(echo $ExtIP | cut -d/ -f1)"
-  fi
-  echo "$DESTINATIONIP $ExtIP $DESTINATIONPORT"
-  if [[ "$DESTINATIONIP" = "$ExtIP" ]] || [[ "$DESTINATIONIP" = "NULL" ]]; then
+	if [[ "$ExtIP" = "dhcp" ]]; then
+		ExtIP=$(ip addr show $ExtIf | awk '/inet / {print $2}')
+		ExtIP="$(echo $ExtIP | cut -d/ -f1)"
+	fi
+	echo "$DESTINATIONIP $ExtIP $DESTINATIONPORT"
+	if [[ "$DESTINATIONIP" = "$ExtIP" ]] || [[ "$DESTINATIONIP" = "NULL" ]]; then
 		if [[ "$SOURCEPORT" = "0" ]] || [[ "$SOURCEPORT" = "NULL" ]]; then
 			echo "input or other chain rule"
-			AddRuleFromExt "$ACTION" "$PLACE" "filter" "$CHAIN" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "$RPOLICY" "$DESCRIPTION"
+			AddRuleFromExt "$ACTION" "$PLACE" "filter" "INPUT" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "$RPOLICY" "$DESCRIPTION"
 		else
 			echo "PREROUTING REDIRECT (1)"
 			AddRuleFromExt "$ACTION" "$PLACE" "nat" "PREROUTING" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "REDIRECT" "$DESCRIPTION"
 			AddRuleFromExt "$ACTION" "$PLACE" "filter" "FORWARD" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "ACCEPT" "$DESCRIPTION"
-			
 		fi
 	elif [[ "$DESTINATIONIP" = "127.0.0.1" ]] || [[ "$DESTINATIONIP" = "$IntIP" ]]; then
-       echo "PREROUTING REDIRECT (2)"
-	   AddRuleFromExt "$ACTION" "$PLACE" "nat" "PREROUTING" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "REDIRECT" "$DESCRIPTION"
-	   AddRuleFromExt "$ACTION" "$PLACE" "filter" "FORWARD" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "ACCEPT" "$DESCRIPTION"
+		echo "PREROUTING REDIRECT (2)"
+		AddRuleFromExt "$ACTION" "$PLACE" "nat" "PREROUTING" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "REDIRECT" "$DESCRIPTION"
+		AddRuleFromExt "$ACTION" "$PLACE" "filter" "FORWARD" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "ACCEPT" "$DESCRIPTION"
 	else
-	   echo "PREROUTING DNAT"
-	   AddRuleFromExt "$ACTION" "$PLACE" "nat" "PREROUTING" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "DNAT" "$DESCRIPTION"
-	   AddRuleFromExt "$ACTION" "$PLACE" "filter" "FORWARD" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "ACCEPT" "$DESCRIPTION"
+		echo "PREROUTING DNAT"
+		AddRuleFromExt "$ACTION" "$PLACE" "nat" "PREROUTING" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "DNAT" "$DESCRIPTION"
+		AddRuleFromExt "$ACTION" "$PLACE" "filter" "FORWARD" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "ACCEPT" "$DESCRIPTION"
 	fi
+else 
+	AddRuleFromExt "$ACTION" "$PLACE" "$TABLE" "$CHAIN" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "$RPOLICY" "$DESCRIPTION"
+fi
 else	
 
 #####
