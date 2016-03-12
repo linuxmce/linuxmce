@@ -725,9 +725,9 @@ function firewall($output,$dbADO) {
 						$out.='</select></td>
 					<input type="hidden" name="save_RuleType" value="'.$save_RuleType[1].'" />
 					<td align="center"><input type="text" name="save_SourceIP" value="'.$row['SourceIP'].'" size="8"></td>
-					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /><!-- to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" />--></B></td>
+					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /> to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" /></B></td>
 					<td align="center"><input type="text" name="save_DestinationIP" value="'.$row['DestinationIP'].'" size="8" /></td>
-                    <td align="center"><input type="text" name="save_DestinationPort" value="'.$row['DestinationPort'].'" size="4" /></td>';
+                    <td align="center"><input type="text" name="save_DestinationPort" value="'.$Destinationport[0].'" size="4" /><input type="hidden" name="save_DestinationPortEnd" value="'.$Destinationport[1].'" /></td>';
 					if (@$AdvancedFirewall == 1){
 						$out.='<td align="center"><select name="save_RPolicy" STYLE="width:70px">';
 						foreach ($RPolicy as $string){
@@ -976,6 +976,12 @@ function firewall($output,$dbADO) {
 			$DestinationIP=isset($_POST['DestinationIP'])? mysql_real_escape_string($_POST['DestinationIP']):'0';
 			if ( $DestinationIP == '') {
 				$DestinationIP='NULL';
+			} elseif ( $DestinationIP == 'not') {
+				if ( $_POST['DestinationIP_M'] == ''){
+						$DestinationIP='NULL';
+				} else {
+					$DestinationIP=$_POST['DestinationIP_M'];
+				}
 			}
 			$SourceIP=isset($_POST['SourceIP'])? mysql_real_escape_string($_POST['SourceIP']):'NULL';
 			if ( $SourceIP == '') {
@@ -1001,7 +1007,8 @@ function firewall($output,$dbADO) {
 			}
 			$options.=' -I '.$IntIF.' -O '.$ExtIF.' -M '.$Matchname.' -P '.$Protocol.' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
-		}
+			echo $options;
+			}
 
 		if (isset($_POST['save_Rule'])){
 			$IntIF=isset($_POST['save_IntIf'])?mysql_real_escape_string($_POST['save_IntIf']):'NULL';
@@ -1053,6 +1060,7 @@ function firewall($output,$dbADO) {
 				$options.=' -p '.$Place;
 			}
 			$options.=' -A add -I '.$IntIF.' -O '.$ExtIF.' -M '.$Matchname.' -P '.$Protocol.' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
+			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 		}
 		

@@ -116,7 +116,7 @@ IPTables()
                         fi
                 fi
 				echo "$SrcPort"
-                if [[ "$SrcPort" = ""  ]] ||  [[ "$SrcPort" = ":" ]] || [[ "$SrcPort" = "0" ]] || [[ "$SrcPort" = "NULL:0" ]] || [[ "$SrcPort" = "NULL:NULL" ]] || [[ "$parmSPort" = "NULL" ]]; then
+                if [[ "$SrcPort" = ""  ]] ||  [[ "$SrcPort" = ":" ]] || [[ "$SrcPort" = "0" ]] || [[ "$SrcPort" = ":0" ]] || [[ "$SrcPort" = "NULL" ]] || [[ "$SrcPort" = "NULL:0" ]] || [[ "$SrcPort" = "NULL:NULL" ]] || [[ "$parmSPort" = "NULL" ]]; then
                         parmSPort=""
                 else
 						SPortend="$(echo $SrcPort | cut -d: -f 2)"
@@ -237,7 +237,7 @@ Manual_CHain_Rules()
         IPVersion="$1"
         chain="$2"
 
-        Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,DestinationPortEnd,RulType,RPolicy,Description FROM Firewall WHERE RuleType='$chain' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
+        Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,DestinationPortEnd,RuleType,RPolicy,Description FROM Firewall WHERE RuleType='$chain' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
         R=$(RunSQL "$Q")
 
         for Port in $R; do
@@ -295,7 +295,7 @@ AddRuleFromExt()
 		ChainF="nat-$ChainF"
     fi
 	
-  #Get the highest record from the db with the associated RulType. 
+  #Get the highest record from the db with the associated RuleType. 
   highest="SELECT MAX( Place ) AS max FROM Firewall WHERE RuleType='$ChainF'"
   R=$(RunSQL "$highest")
   for max in $R; do
@@ -448,7 +448,7 @@ if [[ ! -z "$RULE" ]]; then
   if [[ "$RULE" == "BLOCKLIST" ]]; then
     if [[ "$ACTION" = "add" ]]; then
         echo "BLOCKLIST add"
-         #Get the highest record from the db with the associated RulType.
+         #Get the highest record from the db with the associated RuleType.
          highest="SELECT MAX( Place ) AS max FROM Firewall WHERE RuleType='BLOCKLIST'"
          R=$(RunSQL "$highest")
          for max in $R; do
@@ -706,7 +706,7 @@ if [[ ! -z "$RULE" ]]; then
 		sql="SELECT Protocol FROM Firewall WHERE RuleType='$CHAIN' AND SourceIP='$SOURCEIP' AND Protocol='$PROTOCOL'"
 		$(RunSQL "$sql")
 		if ! [ "$R" ]; then
-			
+			echo "1"
 		else
 			sql="UPDATE Firewall SET Offline='0' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL'";
 			$(RunSQL "$sql")
@@ -776,8 +776,8 @@ if [[ ! -z "$RULE" ]]; then
 	ExtIP="$(echo $ExtIP | cut -d/ -f1)"
   fi
   echo "$DESTINATIONIP $ExtIP $DESTINATIONPORT"
-  if [[ "$DESTINATIONIP" = "$ExtIP" ]]; then
-		if [[ "$SOURCEPORT" = "0" ]] && [[ "$DESTINATIONPORT" != "0" ]] && [[ "$DESTINATIONPORT" != "NULL" ]] || [[ "$SOURCEPORT" = "NULL" ]] && [[ "$DESTINATIONPORT" != "0" ]] && [[ "$DESTINATIONPORT" != "NULL" ]]; then
+  if [[ "$DESTINATIONIP" = "$ExtIP" ]] || [[ "$DESTINATIONIP" = "NULL" ]]; then
+		if [[ "$SOURCEPORT" = "0" ]] || [[ "$SOURCEPORT" = "NULL" ]]; then
 			echo "input or other chain rule"
 			AddRuleFromExt "$ACTION" "$PLACE" "filter" "$CHAIN" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT" "$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT" "$DESTINATIONPORTEND" "$RPOLICY" "$DESCRIPTION"
 		else
