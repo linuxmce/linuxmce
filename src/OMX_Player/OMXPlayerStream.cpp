@@ -6,6 +6,8 @@
 #include "utilities/linux/window_manager/WMController/WMController.h"
 #include "WindowUtils/WindowUtils.h"
 
+#include <cmath>
+
 namespace DCE
 {
 
@@ -21,12 +23,14 @@ OMXPlayerStream::OMXPlayerStream(string sAudioDevice, bool bPassthrough, string 
 
 OMXPlayerStream::~OMXPlayerStream()
 {
+	DestroyWindow();
 }
 
 bool OMXPlayerStream::Init()
 {
 	XInitThreads();
-	if ((m_pDisplay = XOpenDisplay(getenv("DISPLAY"))) == NULL)
+
+	if (( m_pXDisplay = XOpenDisplay(getenv("DISPLAY"))) == NULL )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OMXPlayerStream::Init() - Could not open X display from %s",getenv("DISPLAY"));
 		return false;
@@ -38,63 +42,196 @@ bool OMXPlayerStream::Init()
 		return false;
 	}
 
+	GetXDisplayAspectRatio();
+
 	if (!Minimize())
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OMXPlayerStream::Init() could not minimize VLC window.");
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OMXPlayerStream::Init() could not minimize OMX window.");
 		// return false;
 	}
 	return true;
 }
 
+int OMXPlayerStream::XServerEventProcessor(XEvent &event )
+{
+/*
+	if (!m_bInitialized)
+	{
+		LoggerWrapper::GetInstance()->Write( LV_WARNING, "XServerEventProcessor called on non-initialized stream - aborting command");
+		return false;
+	}
+*/
+
+	switch ( event.type )
+	{
+		/*
+		case ClientMessage:
+		{
+			Atom XA_DELETE_WINDOW;
+			XA_DELETE_WINDOW = XInternAtom( m_pFactory->m_pXDisplay, "WM_DELETE_WINDOW", False );
+
+			if ( ( unsigned ) event.xclient.data.l[ 0 ] == XA_DELETE_WINDOW )
+			{
+				LoggerWrapper::GetInstance()->Write( LV_STATUS, "Xine_Stream::XServerEventProcessor XA_DELETE_WINDOW" );
+				m_bIsRendering = false;
+			}
+			break;
+		}
+		*/
+
+		/*
+		case Expose:
+		{
+			XExposeEvent *exposeEvent = ( XExposeEvent * ) & event;
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Expose with count %d", exposeEvent->count);
+
+			if ( exposeEvent->count != 0 )
+				break;
+
+			if ( m_pXineVideoOutput )
+				xine_port_send_gui_data( m_pXineVideoOutput, XINE_GUI_SEND_EXPOSE_EVENT, exposeEvent );
+
+			break;
+		}
+		*/
+
+		case ConfigureNotify:
+		{
+			XConfigureEvent *cev = ( XConfigureEvent * ) & event;
+			Window tmp_win;
+
+			int xpos, ypos, width, height;
+
+			Log("ConfigureNotify");
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify: %ix%i", cev->width, cev->height);
+			width = cev->width;
+			height = cev->height;
+
+			if ( ( cev->x == 0 ) && ( cev->y == 0 ) )
+			{
+				XLockDisplay( cev->display );
+				XTranslateCoordinates( cev->display, cev->window, DefaultRootWindow( cev->display ), 0, 0, &xpos, &ypos, &tmp_win );
+				XUnlockDisplay( cev->display );
+			}
+			else
+			{
+				xpos = cev->x;
+				ypos = cev->y;
+			}
+
+			// If the window has changed size/position then change the omxplayer display size
+			if ( width != m_iwidth || height != m_iheight || xpos != m_ixpos || ypos != m_iypos )
+			{
+				Log("ConfigureNotify - Resize");
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify - Resize: %ix%i @ %1,%1", width, height, xpos, ypos);
+
+				m_iwidth = width;
+				m_iheight = height;
+				m_ixpos = xpos;
+				m_iypos = ypos;
+
+				// TODO: Send resize to omxplayer video!
+			}
+		}
+		break;
+	}
+	return 0;
+}
+
+
+void OMXPlayerStream::GetXDisplayAspectRatio()
+// Calculate aspect ratio of screen
+{
+	XLockDisplay(m_pXDisplay);
+
+	m_iCurrentScreen = XDefaultScreen( m_pXDisplay );
+	int WidthMM = DisplayWidthMM(m_pXDisplay, m_iCurrentScreen);
+	int HeightMM = DisplayHeightMM(m_pXDisplay, m_iCurrentScreen);
+
+	// Projectors can return a physical size of 0x0 mm. This prevents a division by zero when 0x0 occurs.
+	if (WidthMM == 0)
+		WidthMM = 1;
+	if (HeightMM == 0)
+		HeightMM = 1;
+
+	// calculating pixel aspect
+	double res_h = DisplayWidth(m_pXDisplay, m_iCurrentScreen) * 1000 / WidthMM;
+	double res_v = DisplayHeight(m_pXDisplay, m_iCurrentScreen) * 1000 / HeightMM;
+
+	m_dScreenPixelAspect = res_v / res_h;
+
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "XServer screen aspect %f", m_dScreenPixelAspect );
+
+	if ( fabs( m_dScreenPixelAspect - 1.0 ) < 0.01 )
+		m_dScreenPixelAspect = 1.0;
+
+	XUnlockDisplay(m_pXDisplay);
+}
 
 
 bool OMXPlayerStream::CreateWindow()
 {
-	int xpos, ypos, width, height, border;
 	XSizeHints sizeHints;
 	XClassHint classHint;
 
-	xpos=10;
-	ypos=20;
-	width=100;
-	height=100;
-	border=0;
+ 	m_ixpos = 10;
+	m_iypos = 20;
+	m_iwidth = 100;
+	m_iheight = 100;
+	int border = 0;
 
-	XLockDisplay(m_pDisplay);
+	XLockDisplay(m_pXDisplay);
 
-	m_Window = XCreateSimpleWindow(m_pDisplay, XDefaultRootWindow(m_pDisplay), xpos, ypos, width, height, border, 0, 0);
+	m_Window = XCreateSimpleWindow(m_pXDisplay, XDefaultRootWindow(m_pXDisplay), m_ixpos, m_iypos, m_iwidth, m_iheight, border, 0, 0);
 
 	classHint.res_name = ( char* ) m_sWindowTitle.c_str();
 	classHint.res_class = ( char* ) m_sWindowTitle.c_str();
-	XSetClassHint ( m_pDisplay, m_Window, &classHint );
+	XSetClassHint ( m_pXDisplay, m_Window, &classHint );
 
-	classHint.res_class = ( char* ) m_sWindowTitle.c_str();
-	XSetClassHint ( m_pDisplay, m_Window, &classHint );
+	// select window structure (size/position) event notifications
+	XSelectInput( m_pXDisplay, m_Window, StructureNotifyMask );
 
-	XSetStandardProperties( m_pDisplay, m_Window, m_sWindowTitle.c_str(), m_sWindowTitle.c_str(), None, NULL, 0, 0 );
+	XSetStandardProperties( m_pXDisplay, m_Window, m_sWindowTitle.c_str(), m_sWindowTitle.c_str(), None, NULL, 0, 0 );
 
 	// changing wm hints
 	sizeHints.win_gravity = StaticGravity;
 	sizeHints.flags = PPosition | PSize | PWinGravity;
+	XSetWMNormalHints( m_pXDisplay, m_Window, &sizeHints );
 
-	XSetWMNormalHints( m_pDisplay, m_Window, &sizeHints );
-	Atom XA_DELETE_WINDOW = XInternAtom( m_pDisplay, "WM_DELETE_WINDOW", False );
-	XSetWMProtocols( m_pDisplay, m_Window, &XA_DELETE_WINDOW, 1 );
+	Atom XA_DELETE_WINDOW = XInternAtom( m_pXDisplay, "WM_DELETE_WINDOW", False );
+	XSetWMProtocols( m_pXDisplay, m_Window, &XA_DELETE_WINDOW, 1 );
 
-	int xcode = XMapWindow( m_pDisplay, m_Window );
+	int xcode = XMapWindow( m_pXDisplay, m_Window );
 	LoggerWrapper::GetInstance()->Write( LV_WARNING, "XMapWindow returned: %i", xcode);
 
-	XSync(m_pDisplay, false);
-	XUnlockDisplay(m_pDisplay);
+	XSync(m_pXDisplay, false);
+	XUnlockDisplay(m_pXDisplay);
 
 	return true;
-  }
+}
+
+bool OMXPlayerStream::DestroyWindow()
+{
+	if ( m_pXDisplay != NULL )
+	{
+		XLockDisplay( m_pXDisplay );
+
+		XDestroyWindow( m_pXDisplay, m_Window );
+
+		XUnlockDisplay( m_pXDisplay );
+		XCloseDisplay ( m_pXDisplay );
+
+		m_pXDisplay = NULL;
+	}
+
+	return true;
+}
 
 bool OMXPlayerStream::Minimize()
 {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OMXPlayerStream::Minimize() - attempting to minimize OMX window.");
 
-	if (!m_pDisplay)
+	if (!m_pXDisplay)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OMXPlayerStream::Minimize() - no display set.");
 		return false;
@@ -125,8 +262,6 @@ bool OMXPlayerStream::Minimize()
 
 // inherited from OMXPlayerInterface
 void OMXPlayerStream::Stop(int iStreamID) {
-//	Log("OMXPlayerStream::Stop - iStreamID: " + to_string(iStreamID));
-
 	// stop the event thread first
 	if ( threadEventLoop != 0)
 	{
@@ -140,15 +275,7 @@ void OMXPlayerStream::Stop(int iStreamID) {
 		pthread_join( threadEventLoop, NULL );
 		Log("OMXPlayerStream::Stop - Stopped event processor." );
 		threadEventLoop = 0;
-}
-
-
-	STATE state = Get_PlayerState();
-	if ( iStreamID == m_iStreamID || iStreamID == 0)
-		if ( state != STATE::STOPPING && state != STATE::STOPPED ) {
-			Log("OMXPlayerStream::Stop - Stopping -- iStreamID: " + to_string(iStreamID));
-			OMXPlayerInterface::Stop();
-		}
+	}
 }
 
 void OMXPlayerStream::SetDeviceData_SubtitleTracks() {
@@ -247,7 +374,9 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 		Log("OMXPlayerStream::Play - Event processor started" );
 	}
 	else
+	{
 		Log("OMXPlayerStream::Play - Event processor not false?!?!?" );
+	}
 
 	SetDeviceData_SubtitleTracks();
 
@@ -261,11 +390,14 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 
 void OMXPlayerStream::Log(string txt) {
 	m_mtxLog.lock();
-	if (m_pPlayer) {
+	if (m_pPlayer)
+	{
 		m_pPlayer->Log(txt);
 	}
 	else
+	{
 		cout << "*** " << txt << endl;
+	}
 	m_mtxLog.unlock();
 }
 
@@ -285,7 +417,9 @@ void OMXPlayerStream::PlayerStateNotifier(OMXPlayerInterface::STATE playerState)
 		m_pPlayer->StateChanged(playerState, sMediaURL, iStreamID, bEvent);
 	}
 	else
+	{
 		Log("OMXPlayerStream::PlayerStateNotifier - no m_pPlayer");
+	}
 }
 
 string OMXPlayerStream::GetPosition()
@@ -293,14 +427,18 @@ string OMXPlayerStream::GetPosition()
 	string sPosition;
 
 	if( m_iChapter!=-1 )
+	{
 		sPosition += " CHAPTER:" + StringUtils::itos(m_iChapter);
+	}
 
 	int currentTime = Get_Position() / 1000;
 	int totalTime = m_xDuration / 1000;
 	sPosition += " POS:" + StringUtils::itos(currentTime);
 
 	if( m_iTitle!=-1 )
+	{
 		sPosition += " TITLE:" + StringUtils::itos(m_iTitle);
+	}
 
 	sPosition += " SUBTITLE:" + StringUtils::itos(Get_Subtitle());
 	sPosition += " AUDIO:" + StringUtils::itos(Get_Audio());
@@ -311,34 +449,22 @@ string OMXPlayerStream::GetPosition()
 
 void OMXPlayerStream::ReportTimecode()
 {
-//	Log("OMXPlayerStream::ReportTimecode() - called.");
+	OMXPlayerInterface::STATE state = Get_PlayerState();
 
-	STATE state = Get_PlayerState();
 	if ( state != STATE::PLAYING )
 	{
 		Log("OMXPlayerStream::ReportTimecode - skipping report as we're not PLAYING");
 		return;
 	}
-	// FIXME: CHECK STATE
-//	if (!m_bInitialized)
-//	{
-//		LoggerWrapper::GetInstance()->Write( LV_WARNING, "ReportTimecode called on non-initialized stream - aborting command");
-//		return;
-//	}
 
-//	if (!m_iTimeCodeReportFrequency||!m_bIsRendering )
 	if (!m_iTimeCodeReportFrequency )
+	{
 	       return;
+	}
 
-//	if( m_bIsVDR )
-//	{
-//		LoggerWrapper::GetInstance()->Write(LV_STATUS,"ignoring vdr timecode for now");
-//		return;
-//	}
 	int iSpeed = Get_Speed() / 1000;
 
 	m_pPlayer->ReportTimecodeViaIP( m_iStreamID, iSpeed);
-//	Log("OMXPlayerStream::ReportTimecode() - Timecode reported.");
 }
 
 int OMXPlayerStream::CalculatePosition(string &sMediaPosition,string *sMRL,int *Subtitle,int *Angle,int *AudioTrack)
@@ -376,7 +502,7 @@ int OMXPlayerStream::CalculatePosition(string &sMediaPosition,string *sMRL,int *
 
 	pos = sMediaPosition.find(" POS:");
 	if( pos!=string::npos )
-	iPos = atoi( sMediaPosition.substr(pos+5).c_str() );
+		iPos = atoi( sMediaPosition.substr(pos+5).c_str() );
 
 	return iPos;
 }
@@ -452,14 +578,19 @@ bool OMXPlayerStream::setUnMute(string &sCMD_Result)
 	return true;
 }
 
+// there is no setVideo function as of yet
 /*
-int OMXPlayerStream::setVideo(int track) {
+int OMXPlayerStream::setVideo(int track)
+{
 	if ( track < ( OMXPlayerInterface::getMaxVideo() ) )
-		if ( OMXPlayerInterface::setVideo(track) ) {
+	{
+		if ( OMXPlayerInterface::setVideo(track) )
+		{
 			SetDeviceData_VideoTracks();
 			m_pPlayer->EVENT_Angle_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
 			return track;
 		}
+	}
 	return -1;
 }
 */
@@ -469,14 +600,15 @@ int OMXPlayerStream::setAudio(int track) {
 	if ( track >= iMaxAudio || track < 0)
 		track = 0;
 
-	// TODO: Display current audio lang on all bound orbiter displays
+	// TODO: Display current audio lang on all bound orbiter displays??
 	string sID = StringUtils::itos(track);
 	string sName = "";
 	string sFormat = "";
 	string sLanguage = "";
 
 	Log("OMXPlayerStream::setAudio - " + to_string(track) );
-	if ( OMXPlayerInterface::setAudio(track) ) {
+	if ( OMXPlayerInterface::setAudio(track) )
+	{
 		SetDeviceData_AudioTracks();
 		m_pPlayer->EVENT_Audio_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
 		return track;
@@ -493,15 +625,14 @@ int OMXPlayerStream::getCurrentAudioTrack() {
 }
 
 int OMXPlayerStream::getCurrentSubtitle() {
-	if ( !OMXPlayerInterface::getSubtitlesShowing() ) return -1;
+	if ( !OMXPlayerInterface::getSubtitlesShowing() )
+		return -1;
 
 	return OMXPlayerInterface::getCurrentSubtitle();
 }
 
 int OMXPlayerStream::setSubtitle(int track) {
-//	if ( !OMXPlayerInterface::getSubtitlesShowing() ) track = 0;
-
-	// TODO: Display current subtitle lang on all bound orbiter displays
+	// TODO: Display current subtitle lang on all bound orbiter displays??
 	string sID = StringUtils::itos(track);
 	string sName = "";
 	string sFormat = "";
@@ -509,7 +640,8 @@ int OMXPlayerStream::setSubtitle(int track) {
 
 	int numsubs = OMXPlayerInterface::getMaxSubtitle();
 	Log("OMXPlayerStream::setSubtitle - " + to_string(track) + " of " + to_string(numsubs) );
-	if ( track < numsubs ) {
+	if ( track < numsubs )
+	{
 		if ( OMXPlayerInterface::setSubtitle(track) )
 		{
 			Log("OMXPlayerStream::setSubtitle - track available, subtitles showing");
@@ -533,7 +665,8 @@ void *EventProcessingLoop( void *pInstance )
 {
 	OMXPlayerStream * pStream = ( OMXPlayerStream* ) pInstance;
 
-//	bool checkResult;
+	XEvent event;
+	bool checkResult = false;
 
 	// counter for timecode report
 	int iCounter_TimeCode = 0;
@@ -541,38 +674,27 @@ void *EventProcessingLoop( void *pInstance )
 	// 1/10th second interval counter
 	int iCounter = 0; //, jCounter = 0;
 
-//	XEvent event;
 	while ( ! pStream->m_bExitThread )
 	{
-/*
 		//reading and process X-events
-		if (!pStream->m_bBroadcastOnly)
+		do
 		{
-			if ( pStream->m_bIsRendering )
-			{
-				do
-				{
-					XLockDisplay( pStream->m_pFactory->m_pXDisplay );
-					checkResult = XCheckWindowEvent( pStream->m_pFactory->m_pXDisplay, pStream->windows[ pStream->m_iCurrentWindow ], INPUT_MOTION, &event );
-					XUnlockDisplay( pStream->m_pFactory->m_pXDisplay );
+			XLockDisplay( pStream->m_pXDisplay );
+			checkResult = XCheckWindowEvent( pStream->m_pXDisplay, pStream->m_Window, StructureNotifyMask, &event );
+			XUnlockDisplay( pStream->m_pXDisplay );
 
-					if ( checkResult == True )
-						pStream->XServerEventProcessor( event );
-				}
-				while ( checkResult == True );
+			if ( checkResult == True )
+			{
+				pStream->XServerEventProcessor( event );
 			}
 		}
-*/
+		while ( checkResult == True );
+
 		// updating every second - position
 		if ( ++iCounter >= 10 )
 		{
-//			if (pStream->m_bInitialized)
-//			{
-//				LoggerWrapper::GetInstance()->Write( LV_WARNING, "[ID: %d] %s (seek %d) t.c. ctr %d freq %d,", pStream->m_iStreamID, pStream->GetPosition().c_str(), pStream->m_iSpecialSeekSpeed, iCounter_TimeCo$
-//			}
 			iCounter = 0;
-
-			//if it is a time - reporting our timecode to player object
+			// if it is time - report our timecode to player object
 			if ( pStream->m_iTimeCodeReportFrequency && ++iCounter_TimeCode >= pStream->m_iTimeCodeReportFrequency )
 			{
 				pStream->ReportTimecode();
@@ -580,25 +702,8 @@ void *EventProcessingLoop( void *pInstance )
 			}
 		}
 
-/*
-		// We need to wait 500ms after the stream starts before doing the seek!
-		if ( pStream->m_iSpecialOneTimeSeek )
-		{
-			jCounter++;
-			if ( jCounter > 5 )
-			{
-				pStream->Seek(pStream->m_iSpecialOneTimeSeek,10000); // As long as we're within 10 seconds that's fine
-				pStream->m_iSpecialOneTimeSeek = 0;
-				pStream->ReportTimecode();
-				pStream->changePlaybackSpeed( PLAYBACK_NORMAL );
-			}
-		}
-		else
-		{
-			jCounter = 0;
-		}
-*/
-/*
+		// FIXME: Add this
+		/*
 		//updating time and speed when @trickplay mode
 		if (pStream->m_bTrickModeActive)
 		{
@@ -608,10 +713,10 @@ void *EventProcessingLoop( void *pInstance )
 				pStream->DisplaySpeedAndTimeCode();
 			}
 		}
-*/
+		*/
 
-// FIXME: Add this
-/*
+		// FIXME: Add this
+		/*
 		//updating time and speed when paused
 		if ( pStream->Get_Speed==0)
 		{
@@ -621,13 +726,14 @@ void *EventProcessingLoop( void *pInstance )
 				pStream->DisplaySpeedAndTimeCode();
 			}
 		}
-*/
-/*
+		*/
+
+		/*
 		if ( pStream->m_iSpecialSeekSpeed )
 			pStream->HandleSpecialSeekSpeed();
-*/
-		usleep( 100000 );
+		*/
 
+		usleep( 100000 );
 	}
 
 	return NULL;

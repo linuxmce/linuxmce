@@ -1222,7 +1222,7 @@ void OMX_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
 
 	string sIPTimeCodeInfo = mediaInfo.ToString();
 
-	Log("OMX_Player::ReportTimecodeViaIP - " + sIPTimeCodeInfo );
+//	Log("OMX_Player::ReportTimecodeViaIP - " + sIPTimeCodeInfo );
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
 	EVENT_Media_Position_Changed(atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName, StringUtils::itos(mediaInfo.m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
 
