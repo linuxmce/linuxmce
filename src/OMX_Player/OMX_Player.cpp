@@ -66,6 +66,11 @@ OMX_Player::OMX_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pDa
 OMX_Player::~OMX_Player()
 //<-dceag-dest-e->
 {
+	if ( m_pOMXPlayer )
+	{
+		 m_pOMXPlayer->Stop(0);
+	}
+
 	EVENT_Playback_Completed("",0,false);
 
 	if (m_pNotificationSocket)
@@ -123,6 +128,8 @@ bool OMX_Player::GetConfig()
 		m_sAudioDevice = m_sAudioDevice[0];
                 m_bPassthrough = true;
 	}
+
+	m_bVolumeControl = DATA_Get_Volume_Control();
 
 	m_sGpuDeInt = "";
 	m_pOMXPlayer = new OMXPlayerStream(m_sAudioDevice, m_bPassthrough, m_sGpuDeInt, this, DATA_Get_Time_Code_Report_Frequency());
@@ -1327,7 +1334,10 @@ void OMX_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMe
         cout << "Command #89 - Vol Up" << endl;
 	cout << "Parm #72 - Repeat_Command=" << iRepeat_Command << endl;
 
-	m_pOMXPlayer->setVolumeUp(iRepeat_Command, sCMD_Result);
+	if ( m_bVolumeControl )
+	{
+		m_pOMXPlayer->setVolumeUp(iRepeat_Command, sCMD_Result);
+	}
 	return;
 }
 //<-dceag-c90-b->
@@ -1343,7 +1353,10 @@ void OMX_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *p
         cout << "Command #90 - Vol Down" << endl;
 	cout << "Parm #72 - Repeat_Command=" << iRepeat_Command << endl;
 
-	m_pOMXPlayer->setVolumeDown(iRepeat_Command, sCMD_Result);
+	if ( m_bVolumeControl )
+	{
+		m_pOMXPlayer->setVolumeDown(iRepeat_Command, sCMD_Result);
+	}
 	return;
 }
 //<-dceag-c97-b->
