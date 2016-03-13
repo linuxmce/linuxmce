@@ -342,7 +342,7 @@ function outsideAccess($output,$dbADO) {
 
 			if($oldAllow80==0){
 				if($allow80==1){
-					$options='-L Rule -H local -t filter -A add -p '.$WebId1.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S NULL -s NULL -r '.$coreIPv4.' -D 80 -d NULL -T ACCEPT -c \'webadmin default port\'';
+					$options='-L Rule -H local -t filter -A add -p '.$WebId1.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S NULL -s NULL -r '.$coreIPv4.' -D 80 -d NULL -T ACCEPT -c \'webadmin default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}else{
@@ -353,7 +353,7 @@ function outsideAccess($output,$dbADO) {
 			}
 			if($oldAllowOnPort==0){
 				if($allowOnPort==1){
-					$options='-L Rule -H local -t filter -A add -p '.$WebId2.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$port.' -s NULL -r 127.0.0.1 -D 80 -d NULL -T ACCEPT -c \'webadmin non default port\'';
+					$options='-L Rule -H local -t nat -A add -p '.$WebId2.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$port.' -s NULL -r 127.0.0.1 -D 80 -d NULL -T ACCEPT -c \'webadmin non default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}else{
@@ -363,24 +363,24 @@ function outsideAccess($output,$dbADO) {
 				}elseif($port!=$oldPort){
 					$options='-L Rule -H local -t nat -A Del -p '.$WebId2.' -C PREROUTING -P tcp-ipv4';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
-					$options='-L Rule -H local -t filter -A add -p '.$WebId2.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$port.' -s NULL -s NULL -r 127.0.0.1 -D 80 -d NULL -T ACCEPT -c \'webadmin non default port\'';
+					$options='-L Rule -H local -t filter -A add -p '.$WebId2.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$port.' -s NULL -s NULL -r 127.0.0.1 -D 80 -d NULL -T ACCEPT -c \'webadmin non default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}
 			if($oldAllow443==0){
 				if($allow443==1){
-					$options='-L Rule -H local -t filter -A add -p '.$SslId1.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S NULL -s NULL -r '.$coreIPv4.' -D 443 -d NULL -T ACCEPT -c \'SSL webadmin default port\'';
+					$options='-L Rule -H local -t filter -A add -p '.$SslId1.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S NULL -s NULL -r '.$coreIPv4.' -D 443 -d NULL -T ACCEPT -c \'SSL webadmin default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}else{
 				if($allow443==0){
-					$options='-L Rule -H local -t filter -A Del -p '.$SslId1.' -C INPUT -P tcp-ipv4';
+					$options='-L Rule -H local -t filter -A Del -p '.$SslId1.' -C AUTO -P tcp-ipv4';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}
 			if($oldAllowSSLOnPort==0){
 				if($allowSSLOnPort==1){
-					$options='-L Rule -H local -t filter -A add -p '.$SslId2.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$sslport.' -s NULL -r 127.0.0.1 -D 443 -d NULL -T ACCEPT -c \'SSL webadmin non default port\'';
+					$options='-L Rule -H local -t filter -A add -p '.$SslId2.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$sslport.' -s NULL -r 127.0.0.1 -D 443 -d NULL -T ACCEPT -c \'SSL webadmin non default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}else{
@@ -390,13 +390,13 @@ function outsideAccess($output,$dbADO) {
 				}elseif($sslport!=$oldSSLPort){
 					$options='-L Rule -H local -t filter -A Del -p '.$SslId2.' -C PREROUTING -P tcp-ipv4';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
-					$options='-L Rule -H local -t filter -A add -p '.$SslId2.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$sslport.' -s NULL -r 127.0.0.1 -D 443 -d NULL -T ACCEPT -c \'SSL webadmin non default port\'';
+					$options='-L Rule -H local -t filter -A add -p '.$SslId2.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$sslport.' -s NULL -r 127.0.0.1 -D 443 -d NULL -T ACCEPT -c \'SSL webadmin non default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}
 			if($oldAllow22==0){
 				if($allow22==1){
-					$options='-L Rule -H local -t filter -A add -p '.$SshId1.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S NULL -s NULL -r '.$coreIPv4.' -D 22 -d NULL -T ACCEPT -c \'SSH default port\'';
+					$options='-L Rule -H local -t filter -A add -p '.$SshId1.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S NULL -s NULL -r '.$coreIPv4.' -D 22 -d NULL -T ACCEPT -c \'SSH default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}else{
@@ -407,7 +407,7 @@ function outsideAccess($output,$dbADO) {
 			}
 			if($oldAllowSSHOnPort==0){
 				if($allowSSHOnPort==1){
-					$options='-L Rule -H local -t filter -A add -p '.$SshId2.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$sshport.' -s NULL -r 127.0.0.1 -D 22 -d NULL -T ACCEPT -c \'SSH non default port\'';
+					$options='-L Rule -H local -t filter -A add -p '.$SshId2.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$sshport.' -s NULL -r 127.0.0.1 -D 22 -d NULL -T ACCEPT -c \'SSH non default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}else{
@@ -417,7 +417,7 @@ function outsideAccess($output,$dbADO) {
 				}elseif($sshport!=$oldSSHPort){
 					$options='-L Rule -H local -t nat -A Del -p '.$SshId2.' -C PREROUTING -P tcp-ipv4';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
-					$options='-L Rule -H local -t filter -A add -p '.$SshId2.' -C INPUT -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$sshport.' -s NULL -r 127.0.0.1 -D 22 -d NULL -T ACCEPT -c \'SSH non default port\'';
+					$options='-L Rule -H local -t filter -A add -p '.$SshId2.' -C AUTO -I NULL -O NULL -M NULL -P tcp-ipv4 -R NULL -S '.$sshport.' -s NULL -r 127.0.0.1 -D 22 -d NULL -T ACCEPT -c \'SSH non default port\'';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}
