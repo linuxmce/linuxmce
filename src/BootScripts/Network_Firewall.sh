@@ -91,7 +91,11 @@ IPTables()
 					Protocol="-p tcp"
 				elif [[ "$Protocol" = "udp" ]]; then
 					Protocol="-p udp"
-				else
+				elif [[ "$Protocol" = "icmp" ]]; then
+					Protocol="-p icmp"
+				elif [[ "$Protocol" = "icmpv6" ]]; then
+					Protocol="-p icmpv6"
+				else 
 					Protocol=""
 				fi
 			
@@ -117,7 +121,8 @@ IPTables()
                                 FilterIP6="-s $FilterIP"
                         fi
                 fi
-
+				
+				echo "$SrcPort"
                 if [[ "$SrcPort" = ""  ]] ||  [[ "$SrcPort" = ":" ]] || [[ "$SrcPort" = "0" ]] || [[ "$SrcPort" = ":0" ]] || [[ "$SrcPort" = "NULL" ]] || [[ "$SrcPort" = "NULL:0" ]] || [[ "$SrcPort" = "NULL:NULL" ]] || [[ "$parmSPort" = "NULL" ]]; then
                         parmSPort=""
                 else
@@ -463,7 +468,7 @@ if [[ ! -z "$RULE" ]]; then
          done
          PLACE=$[$max+1]
 	    #insert the rule into the database
-         sql="INSERT INTO Firewall (Place,IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES ('$PLACE','$INIF','$OUTIF','$MATCHNAME','$PROTOCOL','$SOURCEPORT:$SOURCEPORTEND','$DESTINATIONPORT','$DESTINATIONPORTEND','$DESTINATIONIP','$CHAIN','$SOURCEIP','$RPOLICY','$DESCRIPTION')"
+         sql="INSERT INTO Firewall (Place,IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES ('$PLACE','$INIF','$OUTIF','$MATCHNAME','$PROTOCOL','$SOURCEPORT','$SOURCEPORTEND','$DESTINATIONPORT:$DESTINATIONPORTEND','$DESTINATIONIP','$CHAIN','$SOURCEIP','$RPOLICY','$DESCRIPTION')"
          $(RunSQL "$sql")
          #add the rule to iptables
 		 IPVersion="$(echo $PROTOCOL | cut -d- -f2)"
@@ -472,7 +477,7 @@ if [[ ! -z "$RULE" ]]; then
          IPTables "$IPVersion" "$ACTION" "$PLACE" "$TABLE" "BLOCKLIST" "$INIF" "$OUTIF" "$MATCHNAME" "$PROTOCOL" "$SOURCEIP" "$SOURCEPORT:$SOURCEPORTEND" "$DESTINATIONIP" "$DESTINATIONPORT:$DESTINATIONPORTEND" "$RPOLICY" "$DESCRIPTION"
 	elif [[ "$ACTION" = "Flush" ]]; then
         echo "BLOCKLIST Flush"
-        sql="DELETE FROM Firewall WHERE RuleType='BLOCKLIST' AND Protocol like '%-ipv4' AND RPolicy='DROP'"
+        sql="DELETE FROM Firewall WHERE RuleType='BLOCKLIST' AND Protocol='all-ipv4' AND RPolicy='DROP'"
         $(RunSQL "$sql")
         $IPTABLES -F BLOCKLIST
     fi
@@ -698,12 +703,12 @@ if [[ ! -z "$RULE" ]]; then
 	if [[ "$IPVersion" = "ipv4" ]]; then
 		sql="UPDATE Firewall SET Offline='1' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL'";
 		$(RunSQL "$sql")
-		CHAIN=${CHAIN^^}
+		#CHAIN=${CHAIN^^}
 		$IPTABLES -D $CHAIN $PLACE
 	else
 		sql="UPDATE Firewall SET Offline='1' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL' AND Place='$PLACE'";
 		$(RunSQL "$sql")
-		CHAIN=${CHAIN^^}
+		#CHAIN=${CHAIN^^}
 		$IP6TABLES -D $CHAIN $PLACE
 	fi
   exit 0
