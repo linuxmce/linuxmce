@@ -236,7 +236,7 @@ function firewall($output,$dbADO) {
 	$protocolsarr=Array(
 	"0"=>"tcp",
 	"1"=>"udp",
-	"2"=>"tcp & udp",
+	//"2"=>"tcp & udp",
 	);
 
 	$protocolsarrAdvanced=Array(
@@ -615,6 +615,7 @@ function firewall($output,$dbADO) {
 	{	
 		document.getElementById(\'firewall\').save_Rule.value;
 		document.getElementById(\'firewall\').save_place.value;
+		document.getElementById(\'firewall\').save_OldChain.value;
 		document.getElementById(\'firewall\').save_IntIf.value;
 		document.getElementById(\'firewall\').save_ExtIf.value;
 		document.getElementById(\'firewall\').save_Matchname.value;
@@ -648,6 +649,7 @@ function firewall($output,$dbADO) {
 							</select></td>';
 						}
 						$out.='<input type="hidden" name="save_place" value="'.$row['Place'].'" />
+								<input type="hidden"name="save_OldChain" value="'.$row['RuleType'].'" />
 						</td><td align="center"><select name="save_Chain">
 							'.$save_chain_options.'
 							
@@ -839,9 +841,13 @@ function firewall($output,$dbADO) {
                                                	if ( $row['SourcePort'] == ''){
                                                        	$out.='<td align="center"></td>';
                                                 }else{
+													if ($row['SourcePort'] == 'NULL'){
+														$out.='<td align="center"></td>';
+													} else {
        	                                                $out.='<td align="center">'.($protocol[0] == 'ip' ? 'protocol: ' : '').
 						$row['SourcePort'].($row['SourcePortEnd'] > 0 ? ' to '.$row['SourcePortEnd'] : '').'</B></td>';
-                       	                        }
+													}
+												}
                                	                $out.='<td align="center">'.$row['DestinationIP'].'</td>
 						<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>';
 						if (@$AdvancedFirewall == 1){
@@ -988,10 +994,10 @@ function firewall($output,$dbADO) {
 
 		if(isset($_POST['add'])){
 			//Get the post data to local variables
-			if ($AdvancedFirewall=1){
+			if ($AdvancedFirewall == 1){
 				$Chain=isset($_POST['Chain'])? mysql_real_escape_string($_POST['Chain']):'INPUT';
 				if ($Chain == "port_forward (NAT)") {
-					$table='NAT';
+					$table='nat';
 					$Chain=$_POST['RuleType'];
 				}
 			} else { 
@@ -1009,7 +1015,11 @@ function firewall($output,$dbADO) {
 			if ( $Matchname == ''){
 				$Matchname='NULL';
 			}
-			$Protocol=mysql_real_escape_string($_POST['protocol'].'-ipv4');
+			if ($_POST['protocol'] == 'tcp & udp') {
+				$Protocol='all-'.$_POST['IPVersion'];
+			} else {
+				$Protocol=@$_POST['protocol'].'-'.$_POST['IPVersion'];
+			}
 			$SourcePort=isset($_POST['SourcePort'])? mysql_real_escape_string($_POST['SourcePort']):'0';
 			if ( $SourcePort == '') {
 				$SourcePort='NULL';
@@ -1053,16 +1063,17 @@ function firewall($output,$dbADO) {
 			if (isset($Place)) {
 				$options.=' -p '.$Place;
 			}
-			$options.=' -I '.$IntIF.' -O '.$ExtIF.' -M '.$Matchname.' -P '.$Protocol.' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
+			$options.=' -I '.$IntIF.' -O '.$ExtIF.' -M \''.$Matchname.'\' -P \''.$Protocol.'\' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 			echo $options;
 			}
 
 		if (isset($_POST['save_Rule'])){
-			if ($AdvancedFirewall=1){
+			$OldChain=$_POST['save_OldChain'];
+			if ($AdvancedFirewall == 1){
 				$Chain=isset($_POST['save_Chain'])? mysql_real_escape_string($_POST['save_Chain']):'INPUT';
 				if ($Chain == "port_forward (NAT)") {
-					$table='NAT';
+					$table='nat';
 					$Chain=$_POST['save_RuleType'];
 				}
 			} else { 
@@ -1072,8 +1083,7 @@ function firewall($output,$dbADO) {
 			if ( $IntIF == '') {
 				$IntIF='NULL';
 			}
-			$ExtIF=isset($$_POST['save_ExtIf'])?mysql_real_escape_string($_POST['save_ExtIf']):'NULL';
-			$ExtIF=isset($_POST['ExtIf'])? mysql_real_escape_string($_POST['ExtIf']):'NULL';
+			$ExtIF=isset($_POST['save_ExtIf'])?mysql_real_escape_string($_POST['save_ExtIf']):'NULL';
 			if ( $ExtIF == ''){
 				$ExtIF='NULL';
 			}
@@ -1114,7 +1124,6 @@ function firewall($output,$dbADO) {
 				}
 			}
 			$SourceIP=isset($_POST['save_SourceIP'])?mysql_real_escape_string($_POST['save_SourceIP']):'NULL';
-			$SourceIP=isset($_POST['SourceIP'])? mysql_real_escape_string($_POST['SourceIP']):'NULL';
 			if ( $SourceIP == '') {
 				$SourceIP='NULL';
 			}
@@ -1126,7 +1135,7 @@ function firewall($output,$dbADO) {
 				$options.=' -t '.$Table;
 			}
 			
-			$options.='-A Del -p '.$Place.' -C '.$Chain.' -P '.$Protocol;
+			$options.='-A Del -p '.$Place.' -C '.$OldChain.' -P '.$Protocol;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 			//sleep(10);
 			$options='-L Rule -H local ';
@@ -1144,7 +1153,7 @@ function firewall($output,$dbADO) {
 			if (isset($Place)) {
 				$options.=' -p '.$Place;
 			}
-			$options.=' -A add -I '.$IntIF.' -O '.$ExtIF.' -M '.$Matchname.' -P '.$Protocol.' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
+			$options.=' -A add -I '.$IntIF.' -O '.$ExtIF.' -M \''.$Matchname.'\' -P \''.$Protocol.'\' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
 			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 		}
