@@ -353,6 +353,16 @@ function firewall($output,$dbADO) {
 			document.getElementById(\'firewall\').DestinationIP_M.disabled=true;
 		}
 	}
+	
+	function save_enableDestinationIP() 
+	{
+		if(document.getElementById(\'firewall\').save_DestinationIP.value=="not"){
+			document.getElementById(\'firewall\').save_DestinationIP_M.disabled=false;
+		} else {
+			document.getElementById(\'firewall\').save_DestinationIP_M.disabled=true;
+		}
+	}
+
 
         function confirmDisableFirewall(ver)
         {
@@ -754,7 +764,15 @@ function firewall($output,$dbADO) {
 					<input type="hidden" name="save_RuleType" value="'.$save_RuleType[1].'" />
 					<td align="center"><input type="text" name="save_SourceIP" value="'.$row['SourceIP'].'" size="8"></td>
 					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /> to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" /></B></td>
-					<td align="center"><input type="text" name="save_DestinationIP" value="'.$row['DestinationIP'].'" size="8" /></td>
+					<td align="center"><select name="save_DestinationIP" onChange="save_enableDestinationIP()">
+								<option value="'.$coreIPv4.'">CORE WAN IP</option>';
+								foreach ($iplist as $name => $value){
+										$out.='<option value="'.$value.'">'.$name.'&nbsp;'.$value.'</option>';
+								}
+								$out.='<option value="127.0.0.1">localhost (127.0.0.1)</option>
+								<option value="not">not on the list</option>
+								</select>
+			<input type="text" name="save_DestinationIP_M" size="13" disabled /></td>
                     <td align="center"><input type="text" name="save_DestinationPort" value="'.$Destinationport[0].'" size="4" /><input type="hidden" name="save_DestinationPortEnd" value="'.$Destinationport[1].'" /></td>';
 					if (@$AdvancedFirewall == 1){
 						$out.='<td align="center"><select name="save_RPolicy" STYLE="width:70px">';
@@ -971,7 +989,7 @@ function firewall($output,$dbADO) {
 		if(isset($_POST['add'])){
 			//Get the post data to local variables
 			if ($AdvancedFirewall=1){
-				$Chain=isset($_POST['chain'])? mysql_real_escape_string($_POST['chain']):'INPUT';
+				$Chain=isset($_POST['Chain'])? mysql_real_escape_string($_POST['Chain']):'INPUT';
 				if ($Chain == "port_forward (NAT)") {
 					$table='NAT';
 					$Chain=$_POST['RuleType'];
@@ -1042,7 +1060,7 @@ function firewall($output,$dbADO) {
 
 		if (isset($_POST['save_Rule'])){
 			if ($AdvancedFirewall=1){
-				$Chain=isset($_POST['save_chain'])? mysql_real_escape_string($_POST['save_chain']):'INPUT';
+				$Chain=isset($_POST['save_Chain'])? mysql_real_escape_string($_POST['save_Chain']):'INPUT';
 				if ($Chain == "port_forward (NAT)") {
 					$table='NAT';
 					$Chain=$_POST['save_RuleType'];
@@ -1089,10 +1107,10 @@ function firewall($output,$dbADO) {
 			if ( $DestinationIP == '') {
 				$DestinationIP='NULL';
 			} elseif ( $DestinationIP == 'not') {
-				if ( $_POST['DestinationIP_M'] == ''){
+				if ( $_POST['save_DestinationIP_M'] == ''){
 						$DestinationIP='NULL';
 				} else {
-					$DestinationIP=$_POST['DestinationIP_M'];
+					$DestinationIP=$_POST['save_DestinationIP_M'];
 				}
 			}
 			$SourceIP=isset($_POST['save_SourceIP'])?mysql_real_escape_string($_POST['save_SourceIP']):'NULL';
