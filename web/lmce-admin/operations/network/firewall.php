@@ -4,7 +4,7 @@ function firewall($output,$dbADO) {
  	includeLangFile('common.lang.php');
  	includeLangFile('firewall.lang.php');
 	
-		include(APPROOT.'/include/dhcpd-tools/DHCPd-parse.php');
+	include(APPROOT.'/include/dhcpd-tools/DHCPd-parse.php');
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $res ADORecordSet */
@@ -1031,8 +1031,7 @@ function firewall($output,$dbADO) {
 			} else {
 				$options.=' -t filter';
 			}
-			$options.=' -A add';
-			$options.=' -C '.$Chain;
+			$options.=' -A add -C '.$Chain;
 			if (isset($Place)) {
 				$options.=' -p '.$Place;
 			}
@@ -1042,6 +1041,15 @@ function firewall($output,$dbADO) {
 			}
 
 		if (isset($_POST['save_Rule'])){
+			if ($AdvancedFirewall=1){
+				$Chain=isset($_POST['save_chain'])? mysql_real_escape_string($_POST['save_chain']):'INPUT';
+				if ($Chain == "port_forward (NAT)") {
+					$table='NAT';
+					$Chain=$_POST['save_RuleType'];
+				}
+			} else { 
+				$Chain='AUTO';
+			}
 			$IntIF=isset($_POST['save_IntIf'])?mysql_real_escape_string($_POST['save_IntIf']):'NULL';
 			if ( $IntIF == '') {
 				$IntIF='NULL';
@@ -1086,13 +1094,6 @@ function firewall($output,$dbADO) {
 				} else {
 					$DestinationIP=$_POST['DestinationIP_M'];
 				}
-			}
-			if (isset($_POST['save_RuleType']) && $_POST['save_RuleType'] != "") {
-				$Table=$_POST['save_Chain'];
-				$RuleType=$_POST['save_RuleType'];
-				$Chain=$Table."-".$RuleType;
-			} else {
-				$Chain=$_POST['save_Chain'];
 			}
 			$SourceIP=isset($_POST['save_SourceIP'])?mysql_real_escape_string($_POST['save_SourceIP']):'NULL';
 			$SourceIP=isset($_POST['SourceIP'])? mysql_real_escape_string($_POST['SourceIP']):'NULL';

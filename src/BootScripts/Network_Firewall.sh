@@ -449,6 +449,11 @@ shift $(($OPTIND - 1))
 if [[ ! -z "$RULE" ]]; then
   if [[ "$RULE" == "BLOCKLIST" ]]; then
     if [[ "$ACTION" = "add" ]]; then
+		sql="SELECT * FROM Firewall WHERE RuleType='INPUT' AND RPolicy='BLOCKLIST' AND Protocol='all-ipv4'"
+		R=$(RunSQL "$sql")
+		if ! [ "$R" ]; then
+			AddRuleFromExt "insert" "1" "filter" "INPUT" "NULL" "NULL" "NULL" "all-ipv4" "NULL" "NULL" "NULL" "NULL" "NULL" "NULL" "BLOCKLIST" "BLOCKLIST"
+		fi
         echo "BLOCKLIST add"
          #Get the highest record from the db with the associated RuleType.
          highest="SELECT MAX( Place ) AS max FROM Firewall WHERE RuleType='BLOCKLIST'"
@@ -476,10 +481,13 @@ if [[ ! -z "$RULE" ]]; then
   if [[ "$ACTION" == "addchain" ]]; then
 	IPVersion="$(echo $PROTOCOL | cut -d- -f2)"
 	if [[ "$IPVersion" = "ipv4" ]]; then
-		sql="INSERT INTO Firewall (Matchname, Protocol) VALUES ('$CHAIN','$PROTOCOL')"
-		$(RunSQL "$sql")
-		
-		$IPTABLES -N $CHAIN
+		sql="SELECT * FROM Firewall WHERE Matchname='$CHAIN' AND Protocol='$PROTOCOL'"
+		R=$(RunSQL "$sql")
+		if ! [ "$R" ]; then
+			sql="INSERT INTO Firewall (Matchname, Protocol) VALUES ('$CHAIN','$PROTOCOL')"
+			$(RunSQL "$sql")	
+			$IPTABLES -N $CHAIN
+		fi
 	else
 	
 		$IP6TABLES -N $CHAIN
@@ -498,8 +506,7 @@ if [[ ! -z "$RULE" ]]; then
 		#Rename the rules
 		sql="UPDATE Firewall SET RuleType='$CHAIN' WHERE RuleType='$DESCRIPTION'"
 		$(RunSQL "$sql")
-		
-		$IPTABLES -E $DESCRIPTION $CHAIN
+			$IPTABLES -E $DESCRIPTION $CHAIN
 	else
 	
 		$IP6TABLES -E $DESCRIPTION $CHAIN
@@ -511,6 +518,7 @@ if [[ ! -z "$RULE" ]]; then
 	if [[ "$IPVersion" = "ipv4" ]]; then
 		sql="DELETE FROM Firewall WHERE Matchname='$CHAIN' AND Protocol='$PROTOCOL'"
 		$(RunSQL "$sql")
+		$IPTABLES -F $CHAIN
 		$IPTABLES -X $CHAIN
 	else
 		
