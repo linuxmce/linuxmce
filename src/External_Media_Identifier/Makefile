@@ -28,6 +28,7 @@ Gen_Dev_Files +=
 sources += IdentifierBase.cpp \
 	IdentifierDVDBase.cpp \
 	IdentifierDVDMDR.cpp \
+	IdentifierDVDXML.cpp \
 	DVDXMLParser.cpp \
 	DVDXMLQuery.cpp \
 	DVDID.cpp \

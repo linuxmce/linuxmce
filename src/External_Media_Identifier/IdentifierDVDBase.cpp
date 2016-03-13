@@ -42,6 +42,7 @@ void IdentifierDVDBase::UnmountDVD()
     }
 
   umount(m_sTempPath.c_str());
+  unlink(m_sTempPath.c_str());
 
   m_sTempPath="";
   m_bIsMounted=false;
