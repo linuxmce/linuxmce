@@ -244,7 +244,7 @@ Manual_CHain_Rules()
         IPVersion="$1"
         chain="$2"
 
-        Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,DestinationPortEnd,RuleType,RPolicy,Description FROM Firewall WHERE RuleType='$chain' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
+        Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RuleType,RPolicy,Description FROM Firewall WHERE RuleType='$chain' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
         R=$(RunSQL "$Q")
 
         for Port in $R; do
@@ -262,8 +262,7 @@ Manual_CHain_Rules()
                 SrcPort2="$SrcPort1"
                 DestIP=$(Field 8 "$Port")
                 DestPort=$(Field 9 "$Port")
-				DestPortEnd=$(Field 10 "$Port")
-				tmp=$(Field 11 "$Port")
+				tmp=$(Field 10 "$Port")
                 echo $tmp | grep -q '-'
                 if [ $? -eq 0 ]; then
 					Table="$(echo $tmp | cut -d"-" -f 1)"
@@ -271,7 +270,7 @@ Manual_CHain_Rules()
 		if [ "$Table" = "NULL" ]; then
 			Table=""
 		fi
-                RPolicy=$(Field 12 "$Port")
+                RPolicy=$(Field 11 "$Port")
                 Description=$(Field 12 "$Port")
 
                 #echo IPTables "$IPVersion" "-A $chain" "$IntIf" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
@@ -1234,7 +1233,7 @@ for ForwardType in "${ForwardTypeArr[@]}"; do
         else
                 dbForwardType='%-'$ForwardType
         fi
-        Q="SELECT RuleType,IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,DestinationPortEnd,RPolicy,Description FROM Firewall WHERE RuleType LIKE '$dbForwardType' AND Protocol LIKE '%ipv4' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
+        Q="SELECT RuleType,IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType LIKE '$dbForwardType' AND Protocol LIKE '%ipv4' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
         R=$(RunSQL "$Q")
                         for Port in $R; do
                                 IPVersion="ipv4"
@@ -1262,8 +1261,8 @@ for ForwardType in "${ForwardTypeArr[@]}"; do
                                 DestIP=$(Field 9 "$Port")
                                 DestPort=$(Field 10 "$Port")
 								Table="nat"
-                                RPolicy=$(Field 12 "$Port")
-                                Description=$(Field 13 "$Port")
+                                RPolicy=$(Field 11 "$Port")
+                                Description=$(Field 12 "$Port")
 
                                 if [[ "$DestPort" == "" ]] || [[ "$DestPort" == "NULL" ]] || [[ "$DestPort" == "NULL:NULL" ]]; then
                                         parmDPort=""
