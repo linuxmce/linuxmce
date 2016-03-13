@@ -238,6 +238,14 @@ public:
 			return atoi(m_mapParameters[DEVICEDATA_Port_CONST].c_str());
 	}
 
+	bool Get_Volume_Control()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Volume_Control_CONST)=="1" ? true : false);
+		else
+			return (m_mapParameters[DEVICEDATA_Volume_Control_CONST]=="1" ? true : false);
+	}
+
 };
 
 
@@ -353,6 +361,7 @@ public:
 	string DATA_Get_Name() { return GetData()->Get_Name(); }
 	string DATA_Get_Deinterlacing_Mode() { return GetData()->Get_Deinterlacing_Mode(); }
 	int DATA_Get_Port() { return GetData()->Get_Port(); }
+	bool DATA_Get_Volume_Control() { return GetData()->Get_Volume_Control(); }
 	//Event accessors
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription) { GetEvents()->Playback_Info_Changed(sMediaDescription.c_str(),sSectionDescription.c_str(),sSynposisDescription.c_str()); }
 	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors) { GetEvents()->Playback_Completed(sMRL.c_str(),iStream_ID,bWith_Errors); }
