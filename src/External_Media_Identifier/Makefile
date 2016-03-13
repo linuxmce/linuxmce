@@ -22,11 +22,17 @@ sources = Main.cpp External_Media_Identifier.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=-std=c++0x
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb
+XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb -lcurl -ldvdid
 
 Gen_Dev_Files +=
 sources += IdentifierBase.cpp \
+	IdentifierDVDBase.cpp \
+	IdentifierDVDMDR.cpp \
 	DVDXMLParser.cpp \
+	DVDXMLQuery.cpp \
+	DVDID.cpp \
+	MDRDVDParser.cpp \
+	MDRDVDQuery.cpp \
 	pugixml.cpp \
 	IdentifierCDDB.cpp
 
