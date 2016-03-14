@@ -25,7 +25,8 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb -lcurl -ldvdid
 
 Gen_Dev_Files +=
-sources += IdentifierBase.cpp \
+sources += HTTPPicture.cpp \
+	IdentifierBase.cpp \
 	IdentifierDVDBase.cpp \
 	IdentifierDVDMDR.cpp \
 	IdentifierDVDXML.cpp \
