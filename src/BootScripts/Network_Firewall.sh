@@ -95,7 +95,9 @@ IPTables()
 					Protocol="-p icmp"
 				elif [[ "$Protocol" = "icmpv6" ]]; then
 					Protocol="-p icmpv6"
-				else 
+				elif [[ "$Protocol" = "all" ]]; then
+					Protocol="all"
+				else
 					Protocol=""
 				fi
 			
@@ -694,6 +696,40 @@ if [[ ! -z "$RULE" ]]; then
 	else
 		$IP6TABLES -D $CHAIN $PLACE
 	fi
+  exit 0
+  fi
+  if [[ "$ACTION" = "EnableVPN" ]]; then
+		#add the chain 
+		Q="INSERT INTO Firewall (Protocol, Matchname) VALUES('chain-ipv4', 'VPN');"
+        $(RunSQL "$Q")
+		#Iptables
+		$IPTABLES -N VPN
+		
+		#add the links to the chain VPN
+		#input
+		AddRuleFromExt "insert" "2" "filter" "INPUT" "NULL" "NULL" "NULL" "ip-ipv4" "NULL" "NULL" "NULL" "NULL" "NULL" "NULL" "VPN" "Allow VPN"
+		#forward
+		AddRuleFromExt "insert" "2" "filter" "FORWARD" "NULL" "NULL" "NULL" "ip-ipv4" "NULL" "NULL" "NULL" "NULL" "NULL" "NULL" "VPN" "Allow VPN"		
+		#add the rules
+		#500
+		AddRuleFromExt "insert" "1" "filter" "VPN" "NULL" "NULL" "-m policy --dir in --pol none" "udp-ipv4" "NULL" "NULL" "NULL" "NULL" "500" "NULL" "ACCEPT" "Allow VPN"
+		#4500
+		AddRuleFromExt "insert" "2" "filter" "VPN" "NULL" "NULL" "-m policy --dir in --pol none" "udp-ipv4" "NULL" "NULL" "NULL" "NULL" "4500" "NULL" "ACCEPT" "Allow VPN"
+        $(RunSQL "$Q")
+		#1701 nee to be in ipsec.
+		AddRuleFromExt "insert" "3" "filter" "VPN" "NULL" "NULL" "-m policy --dir in --pol ipsec" "udp-ipv4" "NULL" "NULL" "NULL" "NULL" "1701" "NULL" "ACCEPT" "Allow VPN"
+        $(RunSQL "$Q")
+  exit 0
+  fi
+  if [[ "$ACTION" = "DisableVPN" ]]; then
+		#Get the link id's to remove (TODO)
+		sql="SELECT Place FROM Firewall WHERE" 
+		#delete chain
+		sql="DELETE FROM Firewall WHERE Matchname='VPN'"
+		$(RunSQL "$sql")
+		$IPTABLES -F VPN
+		$IPTABLES -X VPN
+		#rules
   exit 0
   fi
   if [[ "$ACTION" = "Offline" ]]; then

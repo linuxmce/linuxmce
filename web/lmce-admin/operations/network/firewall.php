@@ -236,7 +236,7 @@ function firewall($output,$dbADO) {
 	$protocolsarr=Array(
 	"0"=>"tcp",
 	"1"=>"udp",
-	//"2"=>"tcp & udp",
+	"2"=>"tcp & udp",
 	);
 
 	$protocolsarrAdvanced=Array(
