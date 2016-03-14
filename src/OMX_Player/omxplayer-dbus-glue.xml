@@ -47,6 +47,9 @@
     <method name="PlaybackStatus">
       <arg type="s" direction="out"/>
     </method>
+    <method name="GetSource">
+      <arg type="s" direction="out"/>
+    </method>
     <method name="Volume">
       <arg type="d" direction="out"/>
     </method>
@@ -57,6 +60,18 @@
     <method name="Mute"></method>
     <method name="Unmute"></method>
     <method name="Position">
+      <arg type="x" direction="out"/>
+    </method>
+    <method name="Aspect">
+      <arg type="d" direction="out"/>
+    </method>
+    <method name="VideoStreamCount">
+      <arg type="x" direction="out"/>
+    </method>
+    <method name="ResWidth">
+      <arg type="x" direction="out"/>
+    </method>
+    <method name="ResHeight">
       <arg type="x" direction="out"/>
     </method>
     <method name="Duration">
@@ -84,9 +99,31 @@
       <arg type="x" name="position" direction="in"/>
       <arg type="x" direction="out"/>
     </method>
+    <method name="SetAlpha">
+      <arg type="s" name="path" direction="in"/>
+      <arg type="x" name="alpha" direction="in"/>
+      <arg type="x" direction="out"/>
+    </method>
+    <method name="SetAspectMode">
+      <arg type="s" name="path" direction="in"/>
+      <arg type="s" name="aspectMode" direction="in"/>
+      <arg type="s" direction="out"/>
+    </method>
     <method name="ListSubtitles">
       <arg type="as" direction="out"/>
     </method>
+    <method name="VideoPos">
+      <arg type="s" name="path" direction="in"/>
+      <arg type="s" name="win" direction="in"/>
+      <arg type="s" direction="out"/>
+    </method>
+    <method name="SetVideoCropPos">
+      <arg type="s" name="path" direction="in"/>
+      <arg type="s" name="win" direction="in"/>
+      <arg type="s" direction="out"/>
+    </method>
+    <method name="HideVideo"></method>
+    <method name="UnHideVideo"></method>
     <method name="ListAudio">
       <arg type="as" direction="out"/>
     </method>
