@@ -276,6 +276,15 @@ void OMXPlayerStream::Stop(int iStreamID) {
 		Log("OMXPlayerStream::Stop - Stopped event processor." );
 		threadEventLoop = 0;
 	}
+
+	STATE state = Get_PlayerState();
+	if ( iStreamID == m_iStreamID || iStreamID == 0)
+	{
+		if ( state != STATE::STOPPING && state != STATE::STOPPED ) {
+			Log("OMXPlayerStream::Stop - Stopping -- iStreamID: " + to_string(iStreamID));
+			OMXPlayerInterface::Stop();
+		}
+	}
 }
 
 void OMXPlayerStream::SetDeviceData_SubtitleTracks() {
