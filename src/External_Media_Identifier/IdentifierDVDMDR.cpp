@@ -11,6 +11,7 @@
 #include "DCE/Logger.h"
 #include "../pluto_media/Define_AttributeType.h"
 #include "OutputMiscTab.h"
+#include "HTTPPicture.h"
 
 using namespace DCE;
 using namespace std;
@@ -126,6 +127,21 @@ string IdentifierDVDMDR::GetIdentifiedData()
 
 }
 
+string IdentifierDVDMDR::GetPictureData()
+{
+  HTTPPicture* p = new HTTPPicture(m_pParser->Reply_get()->DVDCoverURL_get());
+
+  if (!p->get())
+    return "";
+
+  return p->Data_get(); 
+}
+
+string IdentifierDVDMDR::GetPictureURL()
+{
+  return m_pParser->Reply_get()->DVDCoverURL_get();
+}
+
 void IdentifierDVDMDR::DumpReplyToLog(MDRDVDReply* pReply)
 {
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Title: %s",pReply->DVDTitle_get().c_str());
@@ -135,6 +151,7 @@ void IdentifierDVDMDR::DumpReplyToLog(MDRDVDReply* pReply)
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Rating: %s",pReply->Rating_get().c_str());
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Genre: %s",pReply->Genre_get().c_str());
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Number of Titles: %s",pReply->Titles_get().size());
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- DVD Cover URL %s",pReply->DVDCoverURL_get().c_str());
 
   for (vector<MDRTitle*>::iterator it = pReply->Titles_get().begin(); it!=pReply->Titles_get().end(); ++it)
     {
