@@ -26,6 +26,7 @@ XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb -lcurl -ldvdid
 
 Gen_Dev_Files +=
 sources += HTTPPicture.cpp \
+	WMMCDI.cpp \
 	IdentifierBase.cpp \
 	IdentifierDVDBase.cpp \
 	IdentifierDVDMDR.cpp \
