@@ -42,6 +42,8 @@ bool MDRDVDParser::parse()
   string sReleaseDate=doc.child("METADATA").child("MDR-DVD").child_value("releaseDate");
   string sGenre=doc.child("METADATA").child("MDR-DVD").child_value("genre");
   string sDVDCoverURL=doc.child("METADATA").child("MDR-DVD").child_value("largeCoverParams");
+
+  sDVDCoverURL=string(DVD_COVER_URL_PREFIX) + "/" + sDVDCoverURL;
   
   m_pReply=new MDRDVDReply(sDVDTitle,
 			   sStudio,

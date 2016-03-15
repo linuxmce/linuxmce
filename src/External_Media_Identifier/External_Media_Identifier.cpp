@@ -187,19 +187,23 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
   string sIdentifiedData = pIdentifier->GetIdentifiedData();
   
   sCMD_Result = sIdentifiedData;
-  char *Data = strdup( sIdentifiedData.c_str() );
+  const char *Data = pIdentifier->GetPictureData().data();
+  if (pIdentifier->GetPictureData().size() == 0)
+    Data = NULL;
+
+  size_t iData_Size = pIdentifier->GetPictureData().size();
   DCE::CMD_Media_Identified CMD_Media_Identified( m_dwPK_Device, pMessage->m_dwPK_Device_From,
 						  iPK_Device, sCMD_Result, sID,
-						  Data, sizeof(*Data),
+						  (char*)Data, iData_Size,
 						  pIdentifier->GetIdentityType(), iPK_MediaType,
 						  sFilename, "",
 						  &iEK_Disc);
   SendCommand(CMD_Media_Identified);
 
-  if (Data)
-    {
-      free(Data);
-    }
+  // if (Data)
+  //   {
+  //     free(Data);
+  //   }
 
   if (pIdentifier)
     {

@@ -34,7 +34,8 @@ namespace DCE
     virtual bool Init();
     virtual bool Identify();
     virtual string GetIdentifiedData();
-
+    virtual string GetPictureData();
+    virtual string GetPictureURL();
   };
 }
 
