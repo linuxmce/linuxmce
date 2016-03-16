@@ -117,15 +117,13 @@ private:
   friend void* PlayerOutputReader(void *pInstance);
 
   // player command class methods
-  int64_t Send_Seek(int64_t);
   void Send_Quit(void);
   void Send_Stop(void);
   void Send_Action(int);
   void Send_Pause(void);
   int64_t Send_SetPosition(std::string sMediaPosition, int64_t xPos);
-  std::vector< std::string > Do_ListAudio();
-  std::vector< std::string > Do_ListVideo();
-  std::vector< std::string > Do_ListSubtitles();
+  std::vector< std::string > ListAudio();
+  std::vector< std::string > ListSubtitles();
 
   // general class methods
   void SetState(STATE PlayerState);
@@ -138,7 +136,7 @@ private:
   virtual void Log(string txt);
   void OpenPipes(void);
   void ClosePipes(void);
-  void Do_QuitOnError(void);
+  void QuitOnError(void);
   string ZeroPad(int num, int width);
   string TimeFromUSec(uint64_t usecs);
   int64_t USecFromTime(string sTime);
@@ -157,28 +155,29 @@ public:
   OMXPlayerInterface(string sAudioDevice, bool bPassthrough, string sGpuDeInt);
   virtual ~OMXPlayerInterface();
 
-  void Do_HideSubtitles();
-  void Do_ShowSubtitles();
-  bool Do_SelectSubtitle(int track);
-  bool Do_SelectVideo(int track);
-  bool Do_SelectAudio(int track);
-  void Do_Seek(int64_t);
-  void Do_Rewind(void);
-  void Do_FastForward(void);
-  void Do_Pause(void);
-  void Do_SeekBackSmall();
-  void Do_SeekForwardSmall();
-  void Do_SeekBackLarge();
-  void Do_SeekForwardLarge();
-  void Do_DecreaseVolume();
-  void Do_IncreaseVolume();
-  void Do_DecreaseSpeed();
-  void Do_IncreaseSpeed();
-  void Do_VolumeUp();
-  void Do_VolumeDown();
-  void Do_Mute();
-  void Do_UnMute();
-  void Do_SetPosition(std::string sMediaURL, int64_t xPos);
+  std::vector< std::string > ListVideo();
+  void HideSubtitles();
+  void ShowSubtitles();
+  bool SelectSubtitle(int track);
+  bool SelectVideo(int track);
+  bool SelectAudio(int track);
+  int64_t Seek(int64_t);
+  void Rewind(void);
+  void FastForward(void);
+  void Pause(void);
+  void SeekBackSmall();
+  void SeekForwardSmall();
+  void SeekBackLarge();
+  void SeekForwardLarge();
+  void DecreaseVolume();
+  void IncreaseVolume();
+  void DecreaseSpeed();
+  void IncreaseSpeed();
+  void VolumeUp();
+  void VolumeDown();
+  void Mute();
+  void UnMute();
+  void SetPosition(std::string sMediaURL, int64_t xPos);
   std::vector< std::string > Get_ListAudio();
   std::vector< std::string > Get_ListVideo();
   std::vector< std::string > Get_ListSubtitles();
@@ -192,8 +191,6 @@ public:
   bool setVideo(int track);
   bool setAudio(int track);
   bool setSubtitle(int track);
-  void ShowSubtitles();
-  void HideSubtitles();
   bool getSubtitlesShowing();
 
 

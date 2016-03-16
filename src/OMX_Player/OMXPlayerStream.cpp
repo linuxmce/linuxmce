@@ -338,7 +338,7 @@ void OMXPlayerStream::SetDeviceData_VideoTracks() {
 	std::string sVideo("");
 	sVideo = std::to_string(OMXPlayerInterface::getCurrentVideo()) + "\n";
 	std::vector< std::string > vsVideo;
-	vsVideo = OMXPlayerInterface::Get_ListVideo();
+	vsVideo = OMXPlayerInterface::ListVideo();
 	for(std::vector<std::string>::iterator it = vsVideo.begin(); it < vsVideo.end(); it++)
 	{
 		string::size_type tokenPos=0;
@@ -548,13 +548,13 @@ bool OMXPlayerStream::GetScreenShot(int iWidth, int iHeight, string& sCMD_Result
 
 bool OMXPlayerStream::setVolumeUp(int iRepeat_Command, string &sCMD_Result)
 {
-	OMXPlayerInterface::Do_UnMute();
-	OMXPlayerInterface::Do_IncreaseVolume();
+	OMXPlayerInterface::UnMute();
+	OMXPlayerInterface::IncreaseVolume();
 	for (int repeats = iRepeat_Command - 1; repeats > 1; --repeats)
 	{
 		// FIXME: get the repeat delay from the db?
 		sleep(50);
-		OMXPlayerInterface::Do_IncreaseVolume();
+		OMXPlayerInterface::IncreaseVolume();
 	}
 	sCMD_Result="OK";
 	return true;
@@ -562,12 +562,12 @@ bool OMXPlayerStream::setVolumeUp(int iRepeat_Command, string &sCMD_Result)
 
 bool OMXPlayerStream::setVolumeDown(int iRepeat_Command, string &sCMD_Result)
 {
-	OMXPlayerInterface::Do_DecreaseVolume();
+	OMXPlayerInterface::DecreaseVolume();
 	for (int repeats = iRepeat_Command - 1; repeats > 1; --repeats)
 	{
 		// FIXME: get the repeat delay from the db?
 		sleep(50);
-		OMXPlayerInterface::Do_DecreaseVolume();
+		OMXPlayerInterface::DecreaseVolume();
 	}
 	sCMD_Result="OK";
 	return true;
@@ -575,14 +575,14 @@ bool OMXPlayerStream::setVolumeDown(int iRepeat_Command, string &sCMD_Result)
 
 bool OMXPlayerStream::setMute(string &sCMD_Result)
 {
-	OMXPlayerInterface::Do_Mute();
+	OMXPlayerInterface::Mute();
 	sCMD_Result="OK";
 	return true;
 }
 
 bool OMXPlayerStream::setUnMute(string &sCMD_Result)
 {
-	OMXPlayerInterface::Do_UnMute();
+	OMXPlayerInterface::UnMute();
 	sCMD_Result="OK";
 	return true;
 }
