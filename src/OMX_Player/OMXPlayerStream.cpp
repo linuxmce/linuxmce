@@ -122,8 +122,9 @@ int OMXPlayerStream::XServerEventProcessor(XEvent &event )
 			// If the window has changed size/position then change the omxplayer display size
 			if ( width != m_iwidth || height != m_iheight || xpos != m_ixpos || ypos != m_iypos )
 			{
-				Log("ConfigureNotify - Resize");
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify - Resize: %ix%i @ %1,%1", width, height, xpos, ypos);
+				string text = "ConfigureNotify - Resize: " + to_string(width) + "x" + to_string(height) + " @ " + to_string(xpos) + "," + to_string(ypos);
+				Log(text);
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify - Resize: %ix%i @ %i,%i", width, height, xpos, ypos);
 
 				m_iwidth = width;
 				m_iheight = height;
