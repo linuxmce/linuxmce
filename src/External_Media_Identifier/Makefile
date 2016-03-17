@@ -22,11 +22,21 @@ sources = Main.cpp External_Media_Identifier.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=-std=c++0x
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb
+XTRALDLIBS = -lmysqlclient_r -lcdio -lcddb -lcurl -ldvdid
 
 Gen_Dev_Files +=
-sources += IdentifierBase.cpp \
+sources += HTTPPicture.cpp \
+	WMMCDI.cpp \
+	IdentifierBase.cpp \
+	IdentifierDVDBase.cpp \
+	IdentifierDVDMDR.cpp \
+	IdentifierDVDXML.cpp \
 	DVDXMLParser.cpp \
+	DVDXMLQuery.cpp \
+	DVDID.cpp \
+	MDRCDParser.cpp \
+	MDRDVDParser.cpp \
+	MDRDVDQuery.cpp \
 	pugixml.cpp \
 	IdentifierCDDB.cpp
 
@@ -36,7 +46,7 @@ LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
-all: bin so
+all: bin 
 
 bin: External_Media_Identifier
 

@@ -42,6 +42,8 @@ bool MDRDVDParser::parse()
   string sReleaseDate=doc.child("METADATA").child("MDR-DVD").child_value("releaseDate");
   string sGenre=doc.child("METADATA").child("MDR-DVD").child_value("genre");
   string sDVDCoverURL=doc.child("METADATA").child("MDR-DVD").child_value("largeCoverParams");
+
+  sDVDCoverURL=string(DVD_COVER_URL_PREFIX) + "/" + sDVDCoverURL;
   
   m_pReply=new MDRDVDReply(sDVDTitle,
 			   sStudio,
@@ -59,8 +61,6 @@ bool MDRDVDParser::parse()
 
       if (sNodeName != "title")
 	continue;
-
-      cout << xnTITLE.name() << endl; 
 
       xml_node xnTitleNum=xnTITLE;
       xml_node xnTitle=xnTITLE;
