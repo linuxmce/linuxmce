@@ -62,8 +62,6 @@ bool MDRDVDParser::parse()
       if (sNodeName != "title")
 	continue;
 
-      cout << xnTITLE.name() << endl; 
-
       xml_node xnTitleNum=xnTITLE;
       xml_node xnTitle=xnTITLE;
       xml_node xnStudio=xnTITLE;
