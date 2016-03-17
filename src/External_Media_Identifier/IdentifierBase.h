@@ -27,7 +27,8 @@ namespace DCE
     virtual bool Init();
     virtual bool Identify();
     virtual string GetIdentifiedData();
-//    virtual eIdentityType GetIdentityType();
+    virtual string GetPictureURL();
+    virtual string GetPictureData();
     virtual string GetIdentityType();
     virtual int GetMediaType();
   };

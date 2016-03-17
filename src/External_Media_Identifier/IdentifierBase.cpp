@@ -61,3 +61,13 @@ int IdentifierBase::GetMediaType()
 {
   return 0; // unknown
 }
+
+string IdentifierBase::GetPictureURL()
+{
+  return ""; 
+}
+
+string IdentifierBase::GetPictureData()
+{
+  return "";
+}
