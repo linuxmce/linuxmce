@@ -92,6 +92,12 @@ private:
 
   int	m_iErrCount;
 
+  // window position data
+  int16_t m_ixpos;
+  int16_t m_iypos;
+  int16_t m_iwidth;
+  int16_t m_iheight;
+
   // mutexes for data access
   mutex m_mtxLocal;
   mutex m_mtxPlayer;
@@ -188,6 +194,7 @@ public:
   int getMaxAudio();
   int getCurrentSubtitle();
   int getMaxSubtitle();
+  bool setVideoPos(int16_t xpos, int16_t ypos, int16_t width, int16_t height);
   bool setVideo(int track);
   bool setAudio(int track);
   bool setSubtitle(int track);

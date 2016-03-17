@@ -381,6 +381,51 @@ std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
 	return ret;
 }
 
+bool OMXPlayerInterface::setVideoPos(int16_t xpos, int16_t ypos, int16_t width, int16_t height)
+{
+	Log("OMXPlayerInterface::setVideoPos - called");
+
+	std::string ret;
+	int err_count = 0;
+	bool done(false);
+	std::string win("");
+
+	if ( ! (( xpos != m_ixpos ) || ( ypos != m_iypos ) ||
+	        ( width != m_iwidth ) || ( m_iheight != m_iheight )))
+	{
+		return done;
+	}
+
+	// TODO: tokenize ret below to set this data after a successful call.
+	m_ixpos = xpos;
+	m_iypos = ypos;
+	m_iwidth = xpos + width;
+	m_iheight = ypos + height;
+
+	win += to_string(xpos) + ",";
+	win += to_string(ypos) + ",";
+	win += to_string(xpos + width) + ",";
+	win += to_string(ypos + height);
+
+	Log("OMXPlayerInterface::setVideoPos - called 2");
+	while ( !done && (++err_count < DBUS_RETRIES))
+	{
+		try
+		{
+			ret = g_player_client->VideoPos(ret, win);
+			done = true;
+		}
+		catch (DBus::Error &dbus_err)
+		{
+			Log("setVideoPos() - D-Bus error - omxplayer has gone away?");
+			Reconnect_Player();
+		}
+	}
+
+	Log("OMXPlayerInterface::setVideoPos - called - done");
+	return done;
+}
+
 bool OMXPlayerInterface::setVideo(int track) {
 	bool ret(false);
 	int err_count=0;
@@ -974,6 +1019,12 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
       char *nokeys = (char *)"--no-keys";
       args.push_back(nokeys);
     }
+
+if (false) {
+  // set window size/location
+  char *win = (char *)"--win'300,0,700,239'";
+  args.push_back(win);
+}
 
     if (true) {
       // add the starting position
