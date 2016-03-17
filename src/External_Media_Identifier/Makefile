@@ -34,6 +34,7 @@ sources += HTTPPicture.cpp \
 	DVDXMLParser.cpp \
 	DVDXMLQuery.cpp \
 	DVDID.cpp \
+	MDRCDParser.cpp \
 	MDRDVDParser.cpp \
 	MDRDVDQuery.cpp \
 	pugixml.cpp \
@@ -45,7 +46,7 @@ LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
-all: bin so
+all: bin 
 
 bin: External_Media_Identifier
 
