@@ -126,12 +126,17 @@ int OMXPlayerStream::XServerEventProcessor(XEvent &event )
 				Log(text);
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify - Resize: %ix%i @ %i,%i", width, height, xpos, ypos);
 
-				m_iwidth = width;
-				m_iheight = height;
 				m_ixpos = xpos;
 				m_iypos = ypos;
+				m_iwidth = width;
+				m_iheight = height;
 
 				// TODO: Send resize to omxplayer video!
+				if ( !OMXPlayerInterface::setVideoPos(xpos, ypos, width, height) )
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify - ERROR Resize: %ix%i @ %i,%i", width, height, xpos, ypos);
+				}
+
 			}
 		}
 		break;
