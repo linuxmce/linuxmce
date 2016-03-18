@@ -35,6 +35,7 @@ sources += HTTPPicture.cpp \
 	DVDXMLQuery.cpp \
 	DVDID.cpp \
 	MDRCDParser.cpp \
+	MDRCDQuery.cpp \
 	MDRDVDParser.cpp \
 	MDRDVDQuery.cpp \
 	pugixml.cpp \
