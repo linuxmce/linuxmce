@@ -83,8 +83,11 @@ OMXPlayerInterface::OMXPlayerInterface(string sAudioDevice, bool bPassthrough, s
   DBus::_init_threading();
   DBus::default_dispatcher = &dispatcher;
 
+
   // launch omxplayer with no options forcing it to create a dbus session and session id files.
-  string sFullname = "/usr/bin/omxplayer";
+  string sFullname = "killall -9 omxplayer.bin";
+  system( sFullname.c_str() );
+  sFullname = "/usr/bin/omxplayer";
   system( sFullname.c_str() );
 }
 
@@ -152,6 +155,7 @@ void OMXPlayerInterface::Disconnect_Player() {
 
 bool OMXPlayerInterface::Reconnect_Player() {
     Log("Reconnect_Player() - reconnecting dbus player interface");
+    std::lock_guard<std::mutex> guard(m_mtxPlayer);
     Disconnect_Player();
     return Connect_Player();
 }
@@ -264,6 +268,7 @@ void OMXPlayerInterface::HideSubtitles() {
 	{
 		try
 		{
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			g_player_client->HideSubtitles();
 			m_bSubtitlesShowing = false;
 			done = true;
@@ -285,6 +290,7 @@ void OMXPlayerInterface::ShowSubtitles() {
 	{
 		try
 		{
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			g_player_client->ShowSubtitles();
 			m_bSubtitlesShowing = true;
 			done = true;
@@ -303,10 +309,12 @@ bool OMXPlayerInterface::setSubtitle(int track) {
 	bool ret(false);
 	int err_count=0;
 	bool done=false;
+
 	while ( !done && (++err_count < DBUS_RETRIES))
 	{
 		try
 		{
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			ret = g_player_client->SelectSubtitle(track);
 			done = true;
 		}
@@ -361,6 +369,7 @@ std::vector< std::string > OMXPlayerInterface::ListSubtitles() {
 	{
 		try
 		{
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			ret = g_player_client->ListSubtitles();
 			done = true;
 		}
@@ -388,6 +397,7 @@ bool OMXPlayerInterface::setVideoPos(int16_t xpos, int16_t ypos, int16_t width, 
 	std::string ret;
 	int err_count = 0;
 	bool done(false);
+	std::string path("/not/used");
 	std::string win("");
 
 	if ( ! (( xpos != m_ixpos ) || ( ypos != m_iypos ) ||
@@ -402,18 +412,17 @@ bool OMXPlayerInterface::setVideoPos(int16_t xpos, int16_t ypos, int16_t width, 
 	m_iwidth = xpos + width;
 	m_iheight = ypos + height;
 
-	win += to_string(xpos) + ",";
-	win += to_string(ypos) + ",";
-	win += to_string(xpos + width) + ",";
-	win += to_string(ypos + height);
+	win = to_string(xpos) + " " + to_string(ypos) + " " + to_string(xpos + width) + " " + to_string(ypos + height);
 
-	Log("OMXPlayerInterface::setVideoPos - called 2");
-	while ( !done && (++err_count < DBUS_RETRIES))
+Log("OMXPlayerInterface::setVideoPos - called 2 - " + win);
+//	while ( !done && (++err_count < DBUS_RETRIES))
 	{
 		try
 		{
-			ret = g_player_client->VideoPos(ret, win);
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
+			ret = g_player_client->VideoPos(path, win);
 			done = true;
+Log("OMXPlayerInterface::setVideoPos - called 3 - " + ret);
 		}
 		catch (DBus::Error &dbus_err)
 		{
@@ -436,6 +445,7 @@ bool OMXPlayerInterface::setVideo(int track) {
 		try
 		{
 			Log("setVideo() - SelectVideo(track) does not exist in dbus interface.");
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			//ret = g_player_client->SelectVideo(track);
 			done = true;
 		}
@@ -491,6 +501,7 @@ std::vector< std::string > OMXPlayerInterface::ListVideo() {
 	{
 		try
 		{
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			ret = g_player_client->ListVideo();
 			done = true;
 		}
@@ -516,6 +527,7 @@ bool OMXPlayerInterface::setAudio(int track) {
 	{
 		try
 		{
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			ret = g_player_client->SelectAudio(track);
 			done = true;
 		}
@@ -566,6 +578,7 @@ std::vector< std::string > OMXPlayerInterface::ListAudio() {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxPlayer);
       ret = g_player_client->ListAudio();
       done = true;
     }
@@ -629,6 +642,7 @@ int64_t OMXPlayerInterface::Seek(int64_t usecs) {
 	{
 		try
 		{
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			sought = g_player_client->Seek(usecs);
 			done = true;
 		}
@@ -662,6 +676,7 @@ int64_t OMXPlayerInterface::Send_SetPosition(string sMediaURL, int64_t xPos) {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxPlayer);
       ret = g_player_client->SetPosition(sMediaURL, xPos);
       done = true;
     }
@@ -761,6 +776,7 @@ void OMXPlayerInterface::Send_Action(int Action) {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxPlayer);
       g_player_client->Action(Action);
       done = true;
     }
@@ -781,6 +797,7 @@ void OMXPlayerInterface::Pause() {
 	{
 		try
 		{
+			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			g_player_client->Pause();
 			done = true;
 		}
@@ -798,6 +815,7 @@ void OMXPlayerInterface::Send_Stop() {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxPlayer);
       g_player_client->Stop();
       done = true;
     }
@@ -1020,10 +1038,12 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
       args.push_back(nokeys);
     }
 
-if (false) {
+if (true) {
   // set window size/location
-  char *win = (char *)"--win'300,0,700,239'";
+  char *win = (char *)"--win"; //'300 0 700 239'";
   args.push_back(win);
+  char *pos = (char *)"300,0,700,239";
+  args.push_back(pos);
 }
 
     if (true) {
