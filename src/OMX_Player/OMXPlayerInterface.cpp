@@ -200,6 +200,7 @@ void OMXPlayerInterface::Disconnect_Properties() {
 
 bool OMXPlayerInterface::Reconnect_Properties() {
     Log("Reconnect_Properties() - reconnecting dbus player interface");
+    std::lock_guard<std::mutex> guard(m_mtxProps);
     Disconnect_Properties();
     return Connect_Properties();
 }
@@ -390,15 +391,16 @@ std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
 	return ret;
 }
 
-bool OMXPlayerInterface::setVideoPos(int16_t xpos, int16_t ypos, int16_t width, int16_t height)
+bool OMXPlayerInterface::setVideoPos(string sMediaURL, int16_t xpos, int16_t ypos, int16_t width, int16_t height)
 {
 	Log("OMXPlayerInterface::setVideoPos - called");
 
-	std::string ret;
 	int err_count = 0;
 	bool done(false);
-	std::string path("/not/used");
+	std::string ret;
 	std::string win("");
+
+	string path("/not/used");
 
 	if ( ! (( xpos != m_ixpos ) || ( ypos != m_iypos ) ||
 	        ( width != m_iwidth ) || ( m_iheight != m_iheight )))
@@ -406,7 +408,7 @@ bool OMXPlayerInterface::setVideoPos(int16_t xpos, int16_t ypos, int16_t width, 
 		return done;
 	}
 
-	// TODO: tokenize ret below to set this data after a successful call.
+	// TODO: tokenize ret below to set this data after a successful call.?
 	m_ixpos = xpos;
 	m_iypos = ypos;
 	m_iwidth = xpos + width;
@@ -414,19 +416,21 @@ bool OMXPlayerInterface::setVideoPos(int16_t xpos, int16_t ypos, int16_t width, 
 
 	win = to_string(xpos) + " " + to_string(ypos) + " " + to_string(xpos + width) + " " + to_string(ypos + height);
 
-Log("OMXPlayerInterface::setVideoPos - called 2 - " + win);
-//	while ( !done && (++err_count < DBUS_RETRIES))
+	while ( !done && (++err_count < 3 /*DBUS_RETRIES*/ ))
 	{
 		try
 		{
+Log("OMXPlayerInterface::setVideoPos - called 2 - " + win);
 			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			ret = g_player_client->VideoPos(path, win);
-			done = true;
 Log("OMXPlayerInterface::setVideoPos - called 3 - " + ret);
+			done = true;
 		}
 		catch (DBus::Error &dbus_err)
 		{
 			Log("setVideoPos() - D-Bus error - omxplayer has gone away?");
+			Log(dbus_err.name());
+			Log(dbus_err.message());
 			Reconnect_Player();
 		}
 	}
@@ -714,6 +718,7 @@ void OMXPlayerInterface::Mute() {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxProps);
       g_props_client->Mute();
       done = true;
     }
@@ -729,6 +734,7 @@ void OMXPlayerInterface::UnMute() {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxProps);
       g_props_client->Unmute();
       done = true;
     }
@@ -905,9 +911,12 @@ void OMXPlayerInterface::Send_Quit() {
     return;
   }
 
-  if (!g_props_client->CanQuit() ) {
-    Log("Send_Quit() - player unable to quit");
-    return; // false;
+  {
+    std::lock_guard<std::mutex> guard(m_mtxProps);
+    if (!g_props_client->CanQuit() ) {
+      Log("Send_Quit() - player unable to quit");
+      return; // false;
+    }
   }
 
   if (!g_root_client) {
@@ -919,6 +928,7 @@ void OMXPlayerInterface::Send_Quit() {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxRoot);
       g_root_client->Quit();
       done = true;
     }
@@ -1159,6 +1169,7 @@ if (true) {
       bool bIdentity = false;
       while (!bIdentity && ++i<=DBUS_RETRIES) {
         try {
+          std::lock_guard<std::mutex> guard(m_mtxProps);
           sIdentity = g_props_client->Identity();
           bIdentity = true;
         }
@@ -1272,6 +1283,7 @@ string OMXPlayerInterface::Get_PlaybackStatus(void) {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxProps);
       ret = g_props_client->PlaybackStatus();
       done = true;
     }
@@ -1288,6 +1300,7 @@ uint64_t OMXPlayerInterface::Get_Position(void) {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxProps);
       ret = g_props_client->Position();
       done = true;
     }
@@ -1304,6 +1317,7 @@ uint64_t OMXPlayerInterface::Get_Duration(void) {
   bool done=false;
   while ( !done && (++err_count < DBUS_RETRIES)) {
     try {
+      std::lock_guard<std::mutex> guard(m_mtxProps);
       ret = g_props_client->Duration();
       done = true;
     }
@@ -1316,6 +1330,7 @@ uint64_t OMXPlayerInterface::Get_Duration(void) {
 
 bool OMXPlayerInterface::Get_CanQuit(void) {
   bool ret;
+  std::lock_guard<std::mutex> guard(m_mtxProps);
   ret = g_props_client->CanQuit();
   return ret;
 }

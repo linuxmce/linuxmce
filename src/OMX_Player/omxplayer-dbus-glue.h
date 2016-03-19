@@ -498,7 +498,7 @@ public:
         return argout;
     }
 
-    std::string VideoPos(const std::string& path, const std::string& win)
+    std::string VideoPos(const ::DBus::Path& path, const std::string& win)
     {
         ::DBus::CallMessage call;
         ::DBus::MessageIter wi = call.writer();
@@ -514,7 +514,7 @@ public:
         return argout;
     }
 
-    std::string SetVideoCropPos(const std::string& path, const std::string& win)
+    std::string SetVideoCropPos(const ::DBus::Path& path, const std::string& win)
     {
         ::DBus::CallMessage call;
         ::DBus::MessageIter wi = call.writer();
