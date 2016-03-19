@@ -393,8 +393,6 @@ std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
 
 bool OMXPlayerInterface::setVideoPos(string sMediaURL, int16_t xpos, int16_t ypos, int16_t width, int16_t height)
 {
-	Log("OMXPlayerInterface::setVideoPos - called");
-
 	int err_count = 0;
 	bool done(false);
 	std::string ret;
@@ -420,10 +418,9 @@ bool OMXPlayerInterface::setVideoPos(string sMediaURL, int16_t xpos, int16_t ypo
 	{
 		try
 		{
-Log("OMXPlayerInterface::setVideoPos - called 2 - " + win);
+			Log("OMXPlayerInterface::setVideoPos - called - " + win);
 			std::lock_guard<std::mutex> guard(m_mtxPlayer);
 			ret = g_player_client->VideoPos(path, win);
-Log("OMXPlayerInterface::setVideoPos - called 3 - " + ret);
 			done = true;
 		}
 		catch (DBus::Error &dbus_err)
@@ -435,7 +432,7 @@ Log("OMXPlayerInterface::setVideoPos - called 3 - " + ret);
 		}
 	}
 
-	Log("OMXPlayerInterface::setVideoPos - called - done");
+//	Log("OMXPlayerInterface::setVideoPos - called - done");
 	return done;
 }
 
@@ -1048,13 +1045,20 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
       args.push_back(nokeys);
     }
 
-if (true) {
-  // set window size/location
-  char *win = (char *)"--win"; //'300 0 700 239'";
-  args.push_back(win);
-  char *pos = (char *)"300,0,700,239";
-  args.push_back(pos);
-}
+    if (false) {
+      // set window size/location
+      char *win = (char *)"--win";
+      args.push_back(win);
+      char *pos = (char *)"0,0,100,100";
+      args.push_back(pos);
+    }
+
+    if (true) {
+      char *aspect = (char *)"--aspect-mode";
+      args.push_back(aspect);
+      char *type = (char *)"letterbox";
+      args.push_back(type);
+    }
 
     if (true) {
       // add the starting position
