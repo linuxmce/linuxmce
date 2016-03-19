@@ -31,6 +31,7 @@ sources += HTTPPicture.cpp \
 	IdentifierDVDBase.cpp \
 	IdentifierDVDMDR.cpp \
 	IdentifierDVDXML.cpp \
+	IdentifierCDMDR.cpp \
 	DVDXMLParser.cpp \
 	DVDXMLQuery.cpp \
 	DVDID.cpp \
