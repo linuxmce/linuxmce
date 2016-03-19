@@ -79,21 +79,21 @@ int OMXPlayerStream::XServerEventProcessor(XEvent &event )
 		}
 		*/
 
-		/*
 		case Expose:
 		{
 			XExposeEvent *exposeEvent = ( XExposeEvent * ) & event;
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Expose with count %d", exposeEvent->count);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify: Expose with count %d", exposeEvent->count);
 
 			if ( exposeEvent->count != 0 )
 				break;
 
+		/*
 			if ( m_pXineVideoOutput )
 				xine_port_send_gui_data( m_pXineVideoOutput, XINE_GUI_SEND_EXPOSE_EVENT, exposeEvent );
 
+		*/
 			break;
 		}
-		*/
 
 		case ConfigureNotify:
 		{
@@ -102,8 +102,10 @@ int OMXPlayerStream::XServerEventProcessor(XEvent &event )
 
 			int xpos, ypos, width, height;
 
-			Log("ConfigureNotify");
+			string text = "ConfigureNotify - " + to_string(cev->width) + "x" + to_string(cev->height) + " ABOVE: " + to_string(cev->above);
+			Log(text);
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify: %ix%i", cev->width, cev->height);
+
 			width = cev->width;
 			height = cev->height;
 
