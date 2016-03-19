@@ -113,12 +113,12 @@
       <arg type="as" direction="out"/>
     </method>
     <method name="VideoPos">
-      <arg type="s" name="path" direction="in"/>
+      <arg type="o" name="path" direction="in"/>
       <arg type="s" name="win" direction="in"/>
       <arg type="s" direction="out"/>
     </method>
     <method name="SetVideoCropPos">
-      <arg type="s" name="path" direction="in"/>
+      <arg type="o" name="path" direction="in"/>
       <arg type="s" name="win" direction="in"/>
       <arg type="s" direction="out"/>
     </method>

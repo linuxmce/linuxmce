@@ -194,7 +194,7 @@ public:
   int getMaxAudio();
   int getCurrentSubtitle();
   int getMaxSubtitle();
-  bool setVideoPos(int16_t xpos, int16_t ypos, int16_t width, int16_t height);
+  bool setVideoPos(string sMediaURL, int16_t xpos, int16_t ypos, int16_t width, int16_t height);
   bool setVideo(int track);
   bool setAudio(int track);
   bool setSubtitle(int track);

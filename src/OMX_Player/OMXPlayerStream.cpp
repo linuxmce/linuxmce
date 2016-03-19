@@ -132,7 +132,7 @@ int OMXPlayerStream::XServerEventProcessor(XEvent &event )
 				m_iheight = height;
 
 				// TODO: Send resize to omxplayer video!
-				if ( !OMXPlayerInterface::setVideoPos(xpos, ypos, width, height) )
+				if ( !OMXPlayerInterface::setVideoPos(m_sMediaURL, xpos, ypos, width, height) )
 				{
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify - ERROR Resize: %ix%i @ %i,%i", width, height, xpos, ypos);
 				}
