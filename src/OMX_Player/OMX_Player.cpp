@@ -66,11 +66,6 @@ OMX_Player::OMX_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pDa
 OMX_Player::~OMX_Player()
 //<-dceag-dest-e->
 {
-	if ( m_pOMXPlayer )
-	{
-		 m_pOMXPlayer->Stop(0);
-	}
-
 	EVENT_Playback_Completed("",0,false);
 
 	if (m_pNotificationSocket)
@@ -430,7 +425,7 @@ void OMX_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
 	if ( m_pOMXPlayer->Get_PlaybackStatus() == "Playing" )
-		m_pOMXPlayer->Do_Pause();
+		m_pOMXPlayer->Pause();
 
 	sCMD_Result = "OK";
 }
@@ -450,7 +445,7 @@ void OMX_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
 	if ( m_pOMXPlayer->Get_PlaybackStatus() == "Paused" )
-		m_pOMXPlayer->Do_Pause();
+		m_pOMXPlayer->Pause();
 
 	sCMD_Result = "OK";
 }
@@ -478,25 +473,25 @@ void OMX_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 	string sStatus = m_pOMXPlayer->Get_PlaybackStatus();
 	if ( iMediaPlaybackSpeed == 1000 ) {
 		if ( sStatus == "Playing" ) {
-			m_pOMXPlayer->Do_Pause();
+			m_pOMXPlayer->Pause();
 		}
-		m_pOMXPlayer->Do_Pause();
+		m_pOMXPlayer->Pause();
 	}
 	else if ( iMediaPlaybackSpeed > 10 ) {
-		m_pOMXPlayer->Do_FastForward();
+		m_pOMXPlayer->FastForward();
 	}
 	else if ( iMediaPlaybackSpeed < 10 ) {
-		m_pOMXPlayer->Do_Rewind();
+		m_pOMXPlayer->Rewind();
 	}
 	else if ( iMediaPlaybackSpeed > 0 && iMediaPlaybackSpeed < 10 ) {
-		m_pOMXPlayer->Do_IncreaseSpeed();
+		m_pOMXPlayer->IncreaseSpeed();
 	}
 	else if ( iMediaPlaybackSpeed < 0 && iMediaPlaybackSpeed > -10 ) {
-		m_pOMXPlayer->Do_DecreaseSpeed();
+		m_pOMXPlayer->DecreaseSpeed();
 	}
 	else if ( iMediaPlaybackSpeed == 0 ) {
 		if ( sStatus == "Playing" ) {
-			m_pOMXPlayer->Do_Pause();
+			m_pOMXPlayer->Pause();
 		}
 	}
 	sCMD_Result = "OK";
@@ -530,7 +525,7 @@ void OMX_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStr
 	xValue = xValue * sec;
 
 	cout << "Seeking: " << TimeFromUSec(xValue) << endl;
-	m_pOMXPlayer->Do_Seek(xValue);
+	m_pOMXPlayer->Seek(xValue);
 }
 
 //<-dceag-c63-b->
@@ -605,12 +600,12 @@ void OMX_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
 
 	if ( sValue_To_Assign == "+1" ) {
 		cout << "Calling - Seek(" << xSeekVal << ") - [" << TimeFromUSec(xSeekVal) << "]" << endl;
-		m_pOMXPlayer->Do_Seek(xSeekVal);
+		m_pOMXPlayer->Seek(xSeekVal);
 	}
 	else if ( sValue_To_Assign == "-1" ) {
 		xSeekVal = xSeekVal/3;
 		cout << "Calling - Seek(" << -xSeekVal << ") - [-" << TimeFromUSec(xSeekVal) << "]" << endl;
-		m_pOMXPlayer->Do_Seek(-xSeekVal);
+		m_pOMXPlayer->Seek(-xSeekVal);
 	}
 
 	sCMD_Result = "OK";
@@ -631,7 +626,7 @@ void OMX_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
 	if ( m_pOMXPlayer->Get_PlaybackStatus() == "Playing" )
-		m_pOMXPlayer->Do_Pause();
+		m_pOMXPlayer->Pause();
 
 	sCMD_Result = "OK";
 }
@@ -981,8 +976,8 @@ void OMX_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
 	cout << "TOTAL: " << mapMediaInfo["TOTAL"] << ", " << xDuration << endl;
 
 	string sMediaURL = "";
-	m_pOMXPlayer->Do_Seek(xTime);
-//	m_pOMXPlayer->Do_SetPosition(sMediaURL, xTime);
+	m_pOMXPlayer->Seek(xTime);
+//	m_pOMXPlayer->SetPosition(sMediaURL, xTime);
 
 
 	if ( m_pOMXPlayer->getCurrentSubtitle() != iSubtitle )
@@ -1222,7 +1217,7 @@ void OMX_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
 
 	string sIPTimeCodeInfo = mediaInfo.ToString();
 
-	Log("OMX_Player::ReportTimecodeViaIP - " + sIPTimeCodeInfo );
+//	Log("OMX_Player::ReportTimecodeViaIP - " + sIPTimeCodeInfo );
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
 	EVENT_Media_Position_Changed(atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName, StringUtils::itos(mediaInfo.m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
 
