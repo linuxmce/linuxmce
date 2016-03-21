@@ -108,7 +108,7 @@ Item{
 
         //        StyledText{
         //            id:connectstatus
-        //            text: "Orbiter "+ manager.iPK_Device + " is connected to "+ manager.m_ipAddress
+        //            text: "Orbiter "+ manager.iPK_Device + " is connected to "+ manager.currentRouter
         //            color: "aliceblue"
         //            font.letterSpacing: 2
         //            //            anchors.left: parent.left

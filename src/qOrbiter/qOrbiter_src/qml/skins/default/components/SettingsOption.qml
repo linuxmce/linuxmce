@@ -12,8 +12,10 @@ Item{
     property variant settingValue:settings.getOption( cat, val)
     property bool useSwitch:false
     property bool useSpinbox:false
+    property bool useTextInput:false
 
     signal valueChanged(int localValue)
+    signal textValueChanged(string text)
     function save(){
 
     }
@@ -29,6 +31,10 @@ Item{
 
     onUseSwitchChanged: {
         if(useSwitch) control_component.sourceComponent=switch_comp
+    }
+
+    onUseTextInputChanged: {
+        if(useTextInput) control_component.sourceComponent=text_input
     }
 
     signal activated();
@@ -64,11 +70,46 @@ Item{
             value: Number(settingValue)
             onValueChanged:{
                 settingsRow.valueChanged(value)
+
                }
         }
     }
 
+    Component{
+        id:text_input
+
+        Rectangle{
+            anchors{
+                right:parent.right
+                verticalCenter: parent.verticalCenter
+            }
+            width: Style.scaleX(25)
+            height: Style.scaleY(5)
+            color:"darkgrey"
+            border.color: "blue"
+            border.width: 2
+            TextInput{
+            anchors.fill: parent
+                Component.onCompleted: {
+                    ms.enabled=false
+                }
+
+                text: String(settingValue)
+                font.pointSize:  Style.appFontSize_title
+                color: "white"
+                onAccepted: {
+                    settingsRow.valueChanged(text)
+                    settings.setOption(cat,val,text)
+                    settingValue = settings.getOption( cat, val)
+                }
+            }
+        }
+
+
+    }
+
     StyledText{
+        id:label
         anchors{
             left:parent.left
 
@@ -79,6 +120,7 @@ Item{
     }
     
     StyledText{
+        id:settingValDisplay
         visible: !useSwitch
         fontSize: Style.appFontSize_title
         anchors{
@@ -99,6 +141,7 @@ Item{
     }
 
     MouseArea{
+        id:ms
         anchors.fill: parent
         onClicked: activated()
         enabled: !useSwitch && !useSpinbox

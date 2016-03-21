@@ -76,35 +76,35 @@ Item{
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width *.65
         spacing: scaleX(15)
-        Rectangle {
-            id: connectbutton
-            height: theme.appButtonHeight*theme.dpRatio
-            width: theme.appButtonWidth*theme.dpRatio
-            radius:height
-            color:theme.appbutton_confirm_color
+//        Rectangle {
+//            id: connectbutton
+//            height: theme.appButtonHeight*theme.dpRatio
+//            width: theme.appButtonWidth*theme.dpRatio
+//            radius:height
+//            color:theme.appbutton_confirm_color
 
-            Text {
-                id: name
-                anchors.centerIn: parent
+//            Text {
+//                id: name
+//                anchors.centerIn: parent
 
-                text: qsTr("Go!")
-                font.pixelSize: theme.appFontSize_list
-                verticalAlignment: Text.AlignTop
-                font.bold: true
-                font.family: myFont.name
-                color:theme.apptext_color_active
-            }
+//                text: qsTr("Go!")
+//                font.pixelSize: theme.appFontSize_list
+//                verticalAlignment: Text.AlignTop
+//                font.bold: true
+//                font.family: myFont.name
+//                color:theme.apptext_color_active
+//            }
 
 
-            MouseArea{
-                hoverEnabled: true
-                onEntered: parent.color="green"
-                onExited: parent.color="red"
-                anchors.fill: parent
-                onClicked: { orbiterWindow.qmlSetupLmce(orbiterWindow.deviceno, routerip.text) }
-                anchors.verticalCenter: parent.verticalCenter
-            }
-        }
+//            MouseArea{
+//                hoverEnabled: true
+//                onEntered: parent.color="green"
+//                onExited: parent.color="red"
+//                anchors.fill: parent
+//                onClicked: { orbiterWindow.qmlSetupLmce(orbiterWindow.deviceno, routerip.text) }
+//                anchors.verticalCenter: parent.verticalCenter
+//            }
+//        }
 
         Rectangle {
             id: exitbutton

@@ -18,8 +18,22 @@ Item{
             SettingsOption {
                 id: router_addy
                 cat:SettingsType.Settings_Network
+                val:SettingsKey.Setting_Network_Last_Used
+                settingName: qsTr("Current Router")
+            }
+            SettingsOption {
+                id: home_router
+                cat:SettingsType.Settings_Network
                 val:SettingsKey.Setting_Network_Router
-                settingName: qsTr("Router Address")
+                settingName: qsTr("Internal Address")
+                useTextInput: true
+            }
+            SettingsOption {
+                id: ext_router
+                cat:SettingsType.Settings_Network
+                val:SettingsKey.Setting_Network_ExternalHostname
+                settingName: qsTr("External Address")
+                useTextInput: true
             }
             SettingsOption {
                 id: device_id_setting
