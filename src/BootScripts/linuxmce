@@ -182,9 +182,9 @@ start() {
 	log_daemon_msg "Starting up LinuxMCE" "linuxmce"
 	err=0
 
-	service kdm stop || :
-	service sddm stop || :
-	service lightdm stop || :
+	service kdm stop >/dev/null 2>&1 || :
+	service sddm stop >/dev/null 2>&1 || :
+	service lightdm stop >/dev/null 2>&1 || :
 
 	# Disable display manager
 	mkdir -p "/etc/X11"
@@ -256,6 +256,7 @@ start() {
 				sleep 1
 			done
 		fi
+		StartService "Verify Device and Child PK_Distro values" "/usr/pluto/bin/VerifyDistro.sh" "&"
 		StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh" "&"
 		StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
 		StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"

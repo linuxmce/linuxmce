@@ -275,6 +275,7 @@
 #define DEVICEDATA_Use_as_mountpoint_on_Userspace_CONST 322
 #define DEVICEDATA_Disks_CONST 323
 #define DEVICEDATA_Number_of_jobs_CONST 324
+#define DEVICEDATA_Volume_Control_CONST 325
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"

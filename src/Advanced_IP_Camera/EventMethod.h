@@ -25,6 +25,7 @@
 namespace DCE {
 
 	class Advanced_IP_Camera;
+    class CameraDevice;
 
   class InputDevice {
        public:
@@ -67,6 +68,7 @@ namespace DCE {
   class EventMethod {
   private:
 	  Advanced_IP_Camera* m_pCamera;
+      CameraDevice* m_pCameraDevice;
 	  bool m_bRunning;
 	  vector<InputDevice*> m_vectInputDevices;
 
@@ -77,7 +79,7 @@ namespace DCE {
 	  string m_sMethod;
 	  int m_iInterval;
 	  string m_sURL;
-	  EventMethod(Advanced_IP_Camera* pCamera);
+      EventMethod(Advanced_IP_Camera* pCamera, CameraDevice* pCameraDevice);
 	  ~EventMethod();
 
 	  void Start();

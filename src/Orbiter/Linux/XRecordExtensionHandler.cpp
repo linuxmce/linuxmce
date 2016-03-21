@@ -114,6 +114,13 @@ void *XRecordExtensionHandler::recordingThreadMainFunction(void *arguments)
 	recordRange = XRecordAllocRange();
 
 	recordClient = XRecordAllClients;
+
+	// For RPi official touchscreen, events don't reach the orbiter device for some reason.
+	if ( FileUtils::DirExists( "/sys/devices/platform/rpi_ft5406/" ) )
+	{
+		recordRange->delivered_events.first = KeyPress;
+		recordRange->delivered_events.last = MotionNotify;
+	}
 	recordRange->device_events.first = KeyPress;
 	recordRange->device_events.last = MotionNotify;
 

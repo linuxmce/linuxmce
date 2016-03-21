@@ -32,13 +32,19 @@ class OMXPlayerStream : public OMXPlayerInterface
     mutex m_mtxLog;
 
     // display (X window) related
-    Display* m_pDisplay;
+    Display* m_pXDisplay;
     Window m_Window;
     XEvent *m_Event;
     Cursor m_Cursor;
+    int m_ixpos, m_iypos, m_iwidth, m_iheight;
+    double m_dScreenPixelAspect;
+    int m_iCurrentScreen;
 
     // methods
     void Log(string txt);
+
+    // x window control
+    int XServerEventProcessor(XEvent &event );
 
     // events processing thread
     pthread_t threadEventLoop;
@@ -61,8 +67,10 @@ class OMXPlayerStream : public OMXPlayerInterface
 
     // x window control
     bool Init();
+    void GetXDisplayAspectRatio();
     bool CreateWindow();
     bool Minimize();
+    bool DestroyWindow();
 
     // media control
     bool Play(int iStreamID, string sMediaURL, string sMediaPosition, int iMediaType);

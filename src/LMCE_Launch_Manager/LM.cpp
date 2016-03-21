@@ -1107,10 +1107,10 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 			sleep(30);
 
 			writeLog("initialize_LMdevice: router should be reloaded, retrying connect", false, LV_WARNING);
-			delete m_pLMCE_Launch_Manager;
-			m_pLMCE_Launch_Manager = NULL;
+//			delete m_pLMCE_Launch_Manager;
+//			m_pLMCE_Launch_Manager = NULL;
 		}
-		if( bConnected && m_pLMCE_Launch_Manager->Connect(m_pLMCE_Launch_Manager->PK_DeviceTemplate_get()) ) 
+		else if( bConnected && m_pLMCE_Launch_Manager->Connect(m_pLMCE_Launch_Manager->PK_DeviceTemplate_get()) ) 
 		{
 			writeLog("Connected OK", true, LV_STATUS);
 			
@@ -1153,17 +1153,26 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 void LM::updateScripts()
 {
 	//Put all scripts we want to run on boot and each reload here
-	writeOSD("Detecting Serial Ports. Please Wait.");
+	writeOSD("Detecting Serial Ports");
 	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_STATUS);
 	string sCmd = "/usr/pluto/bin/UpdateAvailableSerialPorts.sh";
 	exec_system(sCmd,true);
-	writeOSD("Detecting Sound Cards. Please Wait.");
+
+	writeOSD("Detecting Sound Cards");
 	writeLog("Running UpdateAvailableSoundCards.sh", true, LV_STATUS);
 	string sCmd2="/usr/pluto/bin/UpdateAvailableSoundCards.sh";
 	exec_system(sCmd2,true);
-	writeLog("Process completed.");
 
-		
+	// only run on the core
+	if (m_bCoreRunning)
+	{
+		writeOSD("Detecting Soft Squeeze Devices");
+		writeLog("Running UpdateSqueezeDevices.sh", true, LV_STATUS);
+		string sCmd3="/usr/pluto/bin/UpdateSqueezeDevices.sh";
+		exec_system(sCmd3,true);
+	}
+
+	writeLog("Process completed.");
 }
 
 //TODO: Do I really need a custom list type? It was used to make porting easier, but maybe using a vector would be best.. Also general cleanup of code...
@@ -1245,11 +1254,15 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 	string s;
 	DBResult dbrCoreDevices;
 
-
 	m_iDevicesLevel = 0;
 //	m_pDevicesUpdateTimer->start(1000); TODO: Need to add an Alarm to do the same thing....
 	writeLog("startCoreDevices()");
 	writeOSD("Starting Core Devices");
+
+	writeLog("startCoreDevices() - calling Config_Device_Changes.sh");
+	string sCmd = "/usr/pluto/bin/Config_Device_Changes.sh";
+	exec_system(sCmd,true);
+
 
 	if ( m_dbPlutoDatabase.connected() ) {
 		// fetching list of non-MD devices under Core

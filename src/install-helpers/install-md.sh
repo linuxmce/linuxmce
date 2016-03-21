@@ -154,95 +154,20 @@ MD_Cleanup () {
 
 MD_ClearInstalledPackages () {
 	StatsMessage "Clearing DB of installed packages..."
-	Q="DELETE FROM Package_Device WHERE FK_Device='${PK_Device}';
+	Q="DELETE FROM Package_Device WHERE FK_Device='${PK_Device}'"
 	R=$(RunSQL "$Q")
+}
+
+MD_Config_NTP_Client()
+{
+	. ${BASE_DIR}/bin/Config_Ops.sh
+	if [[ "$AutostartCore" != "1" ]] && [[ "$DCERouter" != "localhost" ]] ; then
+	        sed -i 's/^#disable auth/disable auth/' /etc/ntp.conf
+	        sed -i 's/^#broadcastclient/broadcastclient/' /etc/ntp.conf
+		service ntp restart || :
+	fi
 }
 
 return 0
 
-###########################################################
-###########################################################
-### Deprecated Functions
-###########################################################
-###########################################################
 
-
-
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-
-
-dontrun() {
-	#### This is a generic MD firstboot file
-
-	if [ ! -f "$DEVID_FILE" ]; then
-		echo "ERR: interactor has not yet created '$DEVID_FILE'."
-		return 10
-	fi
-
-	# run any device specific firstboot add-on scripts here
-	for f in ${BASE_DIR}/install/firstboot_lmce_* ; do
-		StatsMessage "Running device specific script: ${f}_preinst - Begin"
-		. "$f" || :
-		$(basename "$f")_preinst || :
-		StatsMessage "Running device specific script: ${f}_preinst - End"
-	done
-
-	MD_Config_MySQL_Client
-	MD_System_Level_Prep
-	#MD_Seamless_Compatability
-	#MD_Preseed
-	MD_Update
-	MD_Setup_Fstab
-	MD_Setup_Plutoconf
-
-        # run any device specific firstboot add-on kernel config here
-        ret=""
-        for f in ${BASE_DIR}/install/firstboot_lmce_* ; do
-                StatsMessage "Running device specific script: ${f}_kernel - Begin"
-                . "$f" || :
-                $(basename "$f")_kernel || :
-                ret="0"
-                StatsMessage "Running device specific script: ${f}_kernel - End"
-        done
-        # Default kernel install, if the above is not run
-        if [[ "$ret" != "0" ]] ; then
-		MD_Install_Kernel
-        fi
-
-	MD_Install_Packages	# X and kubuntu-desktop
-	Disable_DisplayManager
-	Disable_NetworkManager
-	MD_Populate_Debcache
-	MD_Cleanup
-
-	# run any device specific firstboot add-on scripts here
-	for f in ${BASE_DIR}/install/firstboot_lmce_* ; do
-		StatsMessage "Running device specific script: ${f}_postinst - Begin"
-		. "$f" || :
-		$(basename "$f")_postinst || :
-		StatsMessage "Running device specific script: ${f}_postinst - End"
-	done
-
-	StatsMessage "Setting firstboot = false"
-	ConfSet "FirstBoot" "false"
-	sync
-
-	StatsMessage "Rebooting in 5 seconds"
-	sleep 1
-	StatsMessage "Rebooting in 4 seconds"
-	sleep 1
-	StatsMessage "Rebooting in 3 seconds"
-	sleep 1
-	StatsMessage "Rebooting in 2 seconds"
-	sleep 1
-	StatsMessage "Rebooting in 1 seconds"
-	sleep 1
-	StatsMessage "Rebooting"
-	reboot
-	return 0
-}
