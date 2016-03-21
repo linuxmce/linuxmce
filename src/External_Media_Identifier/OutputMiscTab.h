@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 namespace DCE
 {
@@ -31,20 +32,20 @@ namespace DCE
   {
   public:
     OutputMiscTab() { };
-    OutputMiscTab(unsigned int iDiskId)
+    OutputMiscTab(string sDiskId)
     {
-       m_iDiskId = iDiskId;
+       m_sDiskId = sDiskId;
     };
     ~OutputMiscTab() { };
 
   private:
-    unsigned int m_iDiskId;
+    string m_sDiskId;
     vector<OutputMiscTabAttribute> m_vAttributes;
 
   public:
-    void setDiskId(unsigned int iDiskId)
+    void setDiskId(string sDiskId)
     {
-      m_iDiskId = iDiskId;
+      m_sDiskId = sDiskId;
     };
 
     void addAttribute(int iTrack, int iAttributeType, int iSection, string sWholeName)
@@ -56,23 +57,28 @@ namespace DCE
       Attribute.m_iSection = iSection;
       Attribute.m_sWholeName = sWholeName;
 
+//cerr << endl << "ERR: " << Attribute.m_iTrack << " " << Attribute.m_iPK_AttributeType << " " << Attribute.m_iSection << " " << Attribute.m_sWholeName << endl;
+
       m_vAttributes.push_back(Attribute);
     };
 
     string OutputAttributes()
     {
-      string sOutput;
 
-      sOutput = m_iDiskId + "\n";
+      string sOutput = "";
 
+      sOutput += m_sDiskId + "\n";
+//cerr << "OUTPUT: " << m_sDiskId << " -- " << endl;
       for(vector<OutputMiscTabAttribute>::iterator it = m_vAttributes.begin(); it != m_vAttributes.end(); ++it)
       {
         OutputMiscTabAttribute Attribute = *it;
 
-        sOutput += Attribute.m_iTrack + "\t";
-	sOutput += Attribute.m_iPK_AttributeType + "\t";
-	sOutput += Attribute.m_iSection + "\t";
+        sOutput += to_string(Attribute.m_iTrack) + "\t";
+	sOutput += to_string(Attribute.m_iPK_AttributeType) + "\t";
+	sOutput += to_string(Attribute.m_iSection) + "\t";
 	sOutput += Attribute.m_sWholeName + "\n";
+
+//cerr << Attribute.m_iTrack << " " << Attribute.m_iPK_AttributeType << " " << Attribute.m_iSection << " " << Attribute.m_sWholeName << endl;
       }
 
       return sOutput;

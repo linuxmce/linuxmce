@@ -1,0 +1,1 @@
+This LinuxMCE repository contains the complete source code currently in use.

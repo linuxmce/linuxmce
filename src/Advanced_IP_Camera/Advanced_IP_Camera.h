@@ -22,9 +22,9 @@
 #include <curl/easy.h>
 
 #include <pthread.h>
+#include <deque>
 
 #include "EventMethod.h"
-#include "OutputDevice.h"
 
 //<-dceag-decl-b->
 namespace DCE
@@ -37,19 +37,11 @@ namespace DCE
 		// Private member variables
         pluto_pthread_mutex_t m_CurlMutex;
         CURLM* m_pCurl;
-        void SetupCurl(string sUrl);
+        void SetupCurl(string sUrl, string sUser, string sPasswd);
         static size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *ourpointer);
-        CameraDevice* m_pCameraDevice;
-	  string m_sBaseURL;
-	  string m_sImgPath;
-	  string m_sUser;
-	  string m_sPasswd;
-	  
-	  vector<EventMethod*> m_vectEventMethod;
-	  map<int, OutputDevice*> m_mapPK_Device_OutputDevice;
+        deque<CameraDevice*> m_dequeCameraDevice;
 	  
 	        // Private methods
-	  EventMethod* GetEventMethod(int i);
 public:
 		// Public member variables
 
@@ -64,19 +56,16 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
-		string GetBaseURL();
-		string GetImgPath();
-		string GetUser();
-		string GetPassword();
-
 		void InputStatusChanged(InputDevice* inputDevice, string trigger);
 		void InputStatusChanged(InputDevice* pInputDevice, int newStatus);
 
-		void SplitConfig(string value, vector<string> &parameters);
+        bool DoURLAccess(string sUrl, string sUser, string sPass);
+        bool HttpGet(string sURL, string sUser, string sPass, char **pData,int *iData_Size);
 
-        bool DoURLAccess(string sUrl);
-        bool HttpGet(string sURL, char **pData,int *iData_Size);
-
+        static void SplitConfig(string value, vector<string> &parameters);
+        bool CreateCameraChild(DeviceData_Impl* pData);
+        CameraDevice* FindCameraDevice(unsigned long PK_Device);
+        void CreateChildren();
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file

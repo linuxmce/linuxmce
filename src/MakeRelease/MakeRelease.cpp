@@ -417,27 +417,27 @@ int main(int argc, char *argv[])
 		vector<Row_Package_Source *> vectRow_Package_Source_All;
 		string::size_type pos=0;
 		string sPK_RepositorySource;
-	cout << g_sPK_RepositorySource << endl;	
+		cout << g_sPK_RepositorySource << endl;	
 		while( (sPK_RepositorySource=StringUtils::Tokenize(g_sPK_RepositorySource,",",pos)).length() )
 		{
 			vector<Row_Package_Source *> vectRow_Package_Source;
 			g_pDatabase_pluto_main->Package_Source_get()->GetRows( 
 				"FK_Package=" + StringUtils::itos(pRow_Package->PK_Package_get()) + " AND " +
 				"FK_RepositorySource=" + sPK_RepositorySource,&vectRow_Package_Source);
-	cout << "sources: " << vectRow_Package_Source.size() << endl;	
+			cout << "sources: " << vectRow_Package_Source.size() << endl;	
 			for(size_t s=0;s<vectRow_Package_Source.size();++s)
 			{
 				Row_Package_Source *pRow_Package_Source = vectRow_Package_Source[s];
-		// Update the version record
-		cout << "Setting version for package " << pRow_Package_Source->FK_Package_get() << " " << pRow_Package_Source->FK_Package_getrow()->Description_get() << 
-			" Source " << pRow_Package_Source->PK_Package_Source_get() << " " << pRow_Package_Source->FK_RepositorySource_getrow()->Description_get() <<
-			": " << g_pRow_Version->VersionName_get() << endl;
+				// Update the version record
+				cout << "Setting version for package " << pRow_Package_Source->FK_Package_get() << " " << pRow_Package_Source->FK_Package_getrow()->Description_get() << 
+					" Source " << pRow_Package_Source->PK_Package_Source_get() << " " << pRow_Package_Source->FK_RepositorySource_getrow()->Description_get() <<
+					": " << g_pRow_Version->VersionName_get() << endl;
 
 				if( g_bSetVersion )
 				{
-					if( pRow_Package_Source->FK_RepositorySource_get()==REPOSITORYSOURCE_Pluto_CVS_CONST || pRow_Package_Source->FK_RepositorySource_get()==REPOSITORYSOURCE_Pluto_SVN_CONST )
-						pRow_Package_Source->Version_set(g_pRow_Version->VersionName_get());
-					else
+//					if( pRow_Package_Source->FK_RepositorySource_get()==REPOSITORYSOURCE_Pluto_CVS_CONST || pRow_Package_Source->FK_RepositorySource_get()==REPOSITORYSOURCE_Pluto_SVN_CONST )
+//						pRow_Package_Source->Version_set(g_pRow_Version->VersionName_get());
+//					else
 						pRow_Package_Source->Version_set(g_pRow_Version->VersionName_get());
 				}
 			}
@@ -559,7 +559,7 @@ bool CreateSources(Row_Package *pRow_Package)
 	vector<Row_Package_Source *> vectRow_Package_Source_All;
 	string::size_type pos=0;
 	string sPK_RepositorySource;
-cout << g_sPK_RepositorySource << endl;	
+	cout << g_sPK_RepositorySource << endl;	
 	while( (sPK_RepositorySource=StringUtils::Tokenize(g_sPK_RepositorySource,",",pos)).length() )
 	{
 		vector<Row_Package_Source *> vectRow_Package_Source;
@@ -1100,7 +1100,7 @@ AsksSourceQuests:
 			cout << "***WARNING*** There is no separate input directory.  Using the output directory.  This isn't normal" << endl;
 			sSource = sCompiledOutput;
 		}
-		
+
 		cout << "\tChecking directory: " << pRow_Package_Directory->Path_get() << endl;
 		cout << "\t------------------------" << endl;
 
@@ -1124,19 +1124,17 @@ AsksSourceQuests:
 			return false;
 		}
 
-       if( sCompiledOutput[0]!='/' )
-		   sCompiledOutput = g_sSourcecodePrefix + sCompiledOutput;
+		if( sCompiledOutput[0]!='/' )
+			sCompiledOutput = g_sSourcecodePrefix + sCompiledOutput;
 
-	   if( !FileUtils::DirExists(sCompiledOutput) )
+		if( !FileUtils::DirExists(sCompiledOutput) )
 		{
 			cout << "Warning: Compiled Output directory: " << sCompiledOutput << " doesn't exist" << endl;
 #ifndef WIN32
-            system(("mkdir -p " + sCompiledOutput).c_str());
-#endif			
+			system(("mkdir -p " + sCompiledOutput).c_str());
+#endif
 		}
-	   
 
-		
 		if( !g_bSimulate )
 		{
 			chdir(sSourceDirectory.c_str());
@@ -1164,7 +1162,7 @@ AsksSourceQuests:
 
 			cout << "I can't find a corresponding row in Package_Source_Compat." << endl
 				<< "This is normal if this package cannot be built with this distro." << endl;
-				
+
 			if( g_bSupressPrompts || !AskYNQuestion("Add a record Package_Source_Compat and try to build it?",false) )
 				return true;
 
@@ -1312,7 +1310,7 @@ return true;
 	//ChDir to Temporary Directory
 	chdir(MyPath.c_str());
 
-cout << "Making CVS Checkout to temporary\n";
+	cout << "Making CVS Checkout to temporary\n";
 	//Checking Version From SourceForge
 	cmd = " cvs -d:ext:plutoinc@cvs.sourceforge.net:/cvsroot/ checkout " + pRow_Package_Source->Name_get();
 	system(cmd.c_str());
@@ -1320,16 +1318,16 @@ cout << "Making CVS Checkout to temporary\n";
 	cmd = pRow_Package_Source->Name_get();
 	chdir(cmd.c_str());
 
-cout << "Reading files from temporary ";
+	cout << "Reading files from temporary ";
 	getcwd(direct, 255);
 	FileUtils::FindFiles(MyList, direct, "*.*", true, "");
-cout << " [Done]\n";
+	cout << " [Done]\n";
 
 	//reading actual directory list
 //	cout<<"\n\n SourceForgeCVS : "<<pRow_Package_Source->FK_Package_getrow()->Description_get();
 //	cout<<"\n Nr of files : "<<listFileInfo.size();
-	
-cout << "Copying Files\n";
+
+	cout << "Copying Files\n";
 /////////////-------------------- We copy the files from the project to the temporary
 	flag = false;
 
@@ -1347,7 +1345,7 @@ cout << "Copying Files\n";
 			} else {
 				cmd = cmd + "/" + FileUtils::FilenameWithoutPath(pFileInfo->m_sSource);
 			}
-			
+
 			cmd2 = FileUtils::BasePath(*iMyList);
 			pos = cmd2.rfind("/");
 			length = cmd2.length();
@@ -1547,7 +1545,14 @@ string Makefile = "none:\n"
 	}
 	fprintf(f, "%s", Makefile.c_str());
 	fclose(f);
-	system("echo | DEBFULLNAME='LinuxMCE Developers' dh_make -c gpl -s -n -e 'developers@linuxmce.org'");
+	if( g_iPK_Distro==DISTRO_Ubuntu_Precise_CONST )
+	{
+		system("echo | DEBFULLNAME='LinuxMCE Developers' dh_make -c gpl -s -n -e 'developers@linuxmce.org'");
+	}
+	else
+	{
+		system("DEBFULLNAME='LinuxMCE Developers' dh_make -y -c gpl -s -n -e 'developers@linuxmce.org'");
+	}
 #endif
 
 	list<FileInfo *>::iterator iFileInfo;
@@ -1643,7 +1648,7 @@ string Makefile = "none:\n"
 			sPkgVerBase = iLastDot == string::npos ? "" : sPkgVersion.substr(0, iLastDot);
 		}
 		int iPkgManufacturer = pRow_Package_Source_Dependency->FK_Package_getrow()->FK_Manufacturer_get();
-		if (iPkgManufacturer == 1 || iPkgManufacturer == 1108) /* HARDCODED: 1 = Pluto, 1108 = Pluto Closed Source */
+		if (iPkgManufacturer == 1 || iPkgManufacturer == 1108 || iPkgManufacturer == 1176 ) /* HARDCODED: 1 = Pluto, 1108 = Pluto Closed Source, 1176 = LinuxMCE MakeRelease */
 		{
 			if( pRow_Package_Package->PreDependency_get()==1 )
 				sPreDepends += ", " + sPkgName;
@@ -1804,7 +1809,14 @@ string Makefile = "none:\n"
 	}
 	fprintf(f, "%s", Makefile.c_str());
 	fclose(f);
-	system("echo | DEBFULLNAME='LinuxMCE Developers' dh_make -c gpl -s -n -e 'developers@linuxmce.org'");
+	if( g_iPK_Distro==DISTRO_Ubuntu_Precise_CONST )
+	{
+		system("echo | DEBFULLNAME='LinuxMCE Developers' dh_make -c gpl -s -n -e 'developers@linuxmce.org'");
+	}
+	else
+	{
+		system("DEBFULLNAME='LinuxMCE Developers' dh_make -y -c gpl -s -n -e 'developers@linuxmce.org'");
+	}
 //	mkdir("DEBIAN", 0666);
 #endif
 
@@ -2024,6 +2036,7 @@ string Makefile = "none:\n"
 //		sPreDepends = "pluto-kernel-upgrade ";
 //	}
 
+	// Interate through all of this package's dependencies for addition to the list
 	for (size_t s=0;s<vect_pRow_Package_Source_Dependencies.size();++s)
 	{
 		Row_Package_Source *pRow_Package_Source_Dependency = vect_pRow_Package_Source_Dependencies[s];
@@ -2044,7 +2057,7 @@ string Makefile = "none:\n"
 			sPkgVerBase = iLastDot == string::npos ? "" : sPkgVersion.substr(0, iLastDot);
 		}
 		int iPkgManufacturer = pRow_Package_Source_Dependency->FK_Package_getrow()->FK_Manufacturer_get();
-		if (iPkgManufacturer == 1 || iPkgManufacturer == 1108) /* HARDCODED: 1 = Pluto, 1108 = Pluto Closed Source */
+		if (iPkgManufacturer == 1 || iPkgManufacturer == 1108 || iPkgManufacturer == 1176 ) /* HARDCODED: 1 = Pluto, 1108 = Pluto Closed Source, 1176 = LinuxMCE MakeRelease */
 		{
 			if( pRow_Package_Package->PreDependency_get()==1 )
 				sPreDepends += ", " + sPkgName;
