@@ -457,8 +457,6 @@ void MediaManager::processSocketdata()
 void MediaManager::playbackInfoUpdated(QString mediaTitle, QString mediaSubTitle, QString name, int screen)
 {
     qDebug() << Q_FUNC_INFO ;
-  if( mediaTitle.isEmpty() ||  mediaSubTitle.isEmpty() || name.isEmpty() )
-      return;
 
     //mediaPlayer->updateMetadata(playbackData);
     mediaPlayer->updateMetadata(mediaTitle, mediaSubTitle, name, screen);

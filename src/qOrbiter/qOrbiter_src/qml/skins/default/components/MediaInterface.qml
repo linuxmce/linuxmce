@@ -10,7 +10,7 @@ Item{
     property bool mediaPlayerConnected:lmceData.connected
     property int mediaPlayerId:manager.mediaPlayerID
     property bool active:lmceData.mediaPlaying
-    property string k_currentMediaTitle:qmlPlayer.metaData.title
+    property string k_currentMediaTitle: qmlPlayer.playbackState === MediaPlayer.PlayingState ? qmlPlayer.metaData.title : ""
 
     onK_currentMediaTitleChanged: {
         if(manager.i_current_mediaType !== (4||5) )
@@ -150,21 +150,31 @@ Item{
         autoLoad: true
 
         function checkMetaData(){
+
+
+            console.log("Checking Metadata")
             console.log(JSON.stringify(metaData, null, "\t"))
-            lmceData.pluginNotifyStart(
-                        String("\nTitle: "+qmlPlayer.metaData.title+"\t"),
-                        qmlPlayer.metaData.audioCodec,
-                        qmlPlayer.metaData.videoCodec
-                        ) ;
+            var title = qmlPlayer.metaData.title
+            var artist = qmlPlayer.metaData.albumArtist
+
+            if(String(title).length==0)
+                title=qmlPlayer.source
+
+            if(String(artist).length==0)
+                artist=qsTr("Unknown Artist")
+
+            lmceData.playbackInfoUpdated(title, qmlPlayer.metaData.publisher, qmlPlayer.metaData.albumArtist, 54)
+
+//            lmceData.pluginNotifyStart(
+//                        String("\nTitle: "+qmlPlayer.metaData.title+"\t"),
+//                        qmlPlayer.metaData.audioCodec,
+//                        qmlPlayer.metaData.videoCodec
+//                        ) ;
         }
 
         onPlaybackStateChanged: {
             switch (playbackState){
-            case MediaPlayer.PlayingState: lmceData.pluginNotifyStart(
-                                               String("\nTitle: "+qmlPlayer.metaData.title+"\t"),
-                                               qmlPlayer.metaData.audioCodec,
-                                               qmlPlayer.metaData.videoCodec
-                                               ) ; break
+            case MediaPlayer.PlayingState: checkMetaData();  break
             case MediaPlayer.PausedState: console.log("Qml Player Has Been Paused"); break;
             case MediaPlayer.StoppedState: console.log("Preparing next media") ; break;
             default:console.log("Playback State Changed"); break;

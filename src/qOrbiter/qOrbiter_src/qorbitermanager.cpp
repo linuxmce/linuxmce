@@ -1986,14 +1986,14 @@ bool qorbiterManager::readLocalConfig(){
 
 bool qorbiterManager::writeConfig()
 {
-   // settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router, m_ipAddress);
-   // qDebug() <<  Q_FUNC_INFO << "Router IP: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router);
-   // settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
-   // qDebug() <<  Q_FUNC_INFO << "Device ID: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
+    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router, m_ipAddress);
+    qDebug() <<  Q_FUNC_INFO << "Router IP: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router);
+    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
+    qDebug() <<  Q_FUNC_INFO << "Device ID: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     /* old below this line and will be replaced */
    // qDebug() << Q_FUNC_INFO;
-    //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
-   // settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
+       //setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
+    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
     QDomDocument localConfig;
     QString xmlPath;
 
