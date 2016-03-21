@@ -78,6 +78,8 @@ Item {
         cache: false       
         opacity: selected ? 1 : .24
     }
+
+
     Colorize {
            anchors.fill: fpDevice_image
            source: fpDevice_image
@@ -167,6 +169,16 @@ Item {
             color:"black"
         }
 
+        Rectangle{
+            anchors.fill: parent
+            color: "green"
+            visible: fpDevice_image.source==""
+            opacity: 65
+            Text{
+                anchors.centerIn: parent
+                text:"QMP"
+            }
+        }
 
     MouseArea{
         anchors.fill: sprite_root

@@ -14,7 +14,6 @@ Item{
         target: dcenowplaying
         onPlayListPositionChanged:{
             console.log("Playlist position changed to "+dcenowplaying.m_iplaylistPosition)
-
             generic_model.listView.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
             generic_model.refresh()
 
@@ -26,7 +25,7 @@ Item{
         label: qsTr("%1 item(s)").arg(modelCount)
         dataGrid:18
         dataGridLabel:"Playlist"
-        //    model:manager.getDataGridModel("Playlist", 18)
+       // model:manager.getDataGridModel("Playlist", 18)
         delegate: Item{
             height:Style.scaleY(10)
             anchors{
