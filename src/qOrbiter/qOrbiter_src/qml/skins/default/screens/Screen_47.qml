@@ -79,6 +79,22 @@ StyledScreen {
                 onAlphaSelected: multi_view_list.seek(selectedAlpha)
             }
         }
+
+        LargeStyledButton{
+            height:manager.isProfile ? Style.scaleY(15) : Style.scaleY(22)
+            anchors{
+                left:typeSelection.left
+                right: typeSelection.right
+                bottom:typeSelection.top
+            }
+            buttonText: qsTr("Browse By File")
+            visible: typeSelection.visible
+            onActivated: {
+                attribfilter.setSelectionStatus("File")
+                innerContent.state="selection"
+            }
+        }
+
         GridView{
             id:typeSelection
             Component.onCompleted: innerContent.forceActiveFocus()
@@ -94,7 +110,7 @@ StyledScreen {
                 LargeStyledButton{
                 height:typeSelection.cellHeight -5
                 width: typeSelection.cellWidth -5
-                arrow: true
+                arrow: false
                 buttonText: name
                 onActivated: {
                     mediatypefilter.setSelectionStatus(name); innerContent.state="selection"
