@@ -385,13 +385,6 @@ cddb_disc_t *cd_read(char *device)
 {
     cddb_disc_t *disc = NULL;   /* libcddb disc structure */
 
-#ifndef HAVE_LIBCDIO
-
-    fprintf(stderr, "*** libcdio support missing, CD access failed ***\n");
-    fprintf(stderr, "*** see http://www.gnu.org/software/libcdio/ ***\n");
-
-#else
-
     CdIo_t *cdio;               /* libcdio CD access structure */
     track_t cnt, t;             /* track counters */
     lba_t lba;                  /* Logical Block Address */
@@ -460,8 +453,6 @@ cddb_disc_t *cd_read(char *device)
 //  free(device);
     FREE_NOT_NULL(foffset);
 //    FREE_NOT_NULL(device);
-
-#endif
 
     return disc;
 }
