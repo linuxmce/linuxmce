@@ -144,19 +144,17 @@ Detect() {
 
 		auxPath=$(echo "$auxPath $Path" | sed -e 's/^[ \t]*//')
 	done
-	availPath=$auxPath
+	availPath="$auxPath"
 	[[ -n "$DEBUG" ]] && echo "auxPath: $auxPath" # DEBUG
 
-	## Remove paths that belong to a mounted RAID
-	if [[ -x /sbin/mdadm ]]; then
-		auxPath=""
-		for Path in $availPath; do
-			if [[ "$(mdadm --examine ${Path} 2>&1)" == *"No md superblock"* ]]; then
-				auxPath=$(echo "$auxPath $Path" | sed -e 's/^[ \t]*//')
-			fi
-		done
-		availPath="$auxPath"
-	fi
+	## Remove paths that belong to a linux RAID
+	auxPath=""
+	for Path in $availPath; do
+		if [[ "$(blkid -s TYPE -o value ${Path})" != "linux_raid_member" ]]; then
+			auxPath=$(echo "$auxPath $Path" | sed -e 's/^[ \t]*//')
+		fi
+	done
+	availPath="$auxPath"
 	[[ -n "$DEBUG" ]] && echo "availPath: $availPath" # DEBUG
 
 	## Test to see if we found any available paths
