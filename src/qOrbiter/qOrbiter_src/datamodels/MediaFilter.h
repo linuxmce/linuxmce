@@ -149,7 +149,14 @@ public:
             break;
         case 5: q_usersPrivate = "0,"+param; break;
         case 6: if (param.contains("!P")) { emit itemSelected(param);  break; }
-            else { q_attributetype_sort = param;  break; }
+            else {
+                q_attributetype_sort = param;
+                if(q_attributetype_sort == "0"){
+                    q_pk_attribute="";
+                    q_subType ="";
+                }
+                break;
+            }
         case 7: q_pk_users = param;          break;
         case 8: q_last_viewed = param;       break;
         case 9:

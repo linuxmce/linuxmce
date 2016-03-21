@@ -173,7 +173,12 @@ void AttributeSortModel::sortModel(int column, Qt::SortOrder order)
 
 void AttributeSortModel::setSelectionStatus(QString format)
 {
+
     AttributeSortItem* item = find(format);
+    if(!item){
+        qWarning() << format << " was not found";
+        return;
+    }
     item->updateSelection(!item->selectedStatus());
     if(!m_allowMulti){
         qDebug() << "exclusive sort, unchecking other items!";
@@ -185,7 +190,6 @@ void AttributeSortModel::setSelectionStatus(QString format)
 
     //return state;
     ReturnSelectedItems();
-
 }
 
 bool AttributeSortModel::getSelectionStatus(QString format)
