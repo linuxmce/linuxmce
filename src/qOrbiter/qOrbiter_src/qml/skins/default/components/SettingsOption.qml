@@ -62,6 +62,7 @@ Item{
     Component{
         id:combo_bx
         QtControls.SpinBox{
+            minimumValue: -10
             anchors{
                 right:parent.right
                 verticalCenter: parent.verticalCenter

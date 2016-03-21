@@ -45,6 +45,7 @@ private:
 		bool m_bPassthrough;
 		string m_sGpuDeInt;
 		bool m_bIsMute;
+		bool m_bVolumeControl;
 
 		bool stopped = true;
 		int64_t m_xDuration;
@@ -102,6 +103,7 @@ public:
 	string DATA_Get_Name();
 	string DATA_Get_Deinterlacing_Mode();
 	int DATA_Get_Port();
+	bool DATA_Get_Volume_Control();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);

@@ -252,7 +252,7 @@ function advancedZWave($output,$dbADO){
 		}
 		function addNode(secure) {
 		    showStatus(true, true);
-		    performCommand({"addNode":1, "secure": (secure ? "true" : false)});
+		    performCommand({"addNode":1, "secure": (secure ? "true" : "false")});
 		}
 		function removeNode() {
 		    showStatus(true, true);
@@ -659,7 +659,7 @@ p.status {
 	        $node = $_POST['node'];
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 842 239 '.$id.' 249 '.$group.' 250 -'.$node;
 	    } else if (isset($_POST['addNode'])) {
-                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 39 '.($_POST['secure'] == 'S' ? '"S"' : '" "');
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 39 '.($_POST['secure'] == 'true' ? 'S' : '" "');
 	    } else if (isset($_POST['cancelControllerCommand'])) {
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 48 5';
 	    } else if (isset($_POST['removeNode'])) {

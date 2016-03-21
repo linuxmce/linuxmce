@@ -104,7 +104,7 @@ function createUser($output,$dbADO) {
 					$resLanguages->MoveFirst();
 					$languagesTxt='';
 					while ($rowLanguages=$resLanguages->fetchRow()) {
-						$languagesTxt.='<option '.(@$_SESSION['createUser']['userLanguage']==$rowLanguages['PK_Language']?"selected='selected'":'').' value="'.$rowLanguages['PK_Language'].'">'.$rowLanguages['Description'].'</option>';
+						$languagesTxt.='<option '.('1'==$rowLanguages['PK_Language']?"selected='selected'":'').' value="'.$rowLanguages['PK_Language'].'">'.$rowLanguages['Description'].'</option>';
 					}
 			}
 			$out.='

@@ -13,6 +13,8 @@
 #define URLAccessDevice_h
 
 #include "CameraDevice.h"
+#include "EventMethod.h"
+#include "OutputDevice.h"
 
 namespace DCE
 {
@@ -22,11 +24,13 @@ namespace DCE
         string m_sEventURL;
         string m_sControlURL;
         string m_sPanUpCmd, m_sPanDownCmd, m_sPanLeftCmd, m_sPanRightCmd, m_sZoomInCmd, m_sZoomOutCmd;
+        vector<EventMethod*> m_vectEventMethod;
+        string m_sImgPath;
 
 		bool ChangeOutput(OutputDevice* pDevice, bool newState);
 
     public:
-	        URLAccessDevice(Advanced_IP_Camera* pAIPC);
+            URLAccessDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData);
 		virtual ~URLAccessDevice();
         bool LoadConfig(vector<string> parameters);
         bool Get_Image(int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat);
@@ -36,6 +40,7 @@ namespace DCE
         bool MoveDown(int step);
         bool ZoomIn(int step);
         bool ZoomOut(int step);
+        EventMethod* GetEventMethod(int i);
     };
 }
 

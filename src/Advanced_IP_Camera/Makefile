@@ -28,6 +28,9 @@ XTRALDLIBS = -lcurl -lmysqlclient_r -lgsoap++ -lgsoapssl++ -lssl -lcrypto
 Gen_Dev_Files +=
 sources += EventMethod.cpp CameraDevice.cpp OnvifDevice.cpp URLAccessDevice.cpp onvif/soapDeviceBindingProxy.cpp onvif/soapPTZBindingProxy.cpp onvif/soapMediaBindingProxy.cpp onvif/soapC.cpp gsoap/duration.cpp gsoap/wsseapi.cpp gsoap/mecevp.cpp gsoap/wsaapi.cpp gsoap/smdevp.cpp
 
+gsoap_dir:
+	mkdir -p gsoap
+
 gsoap/duration.cpp:
 	cp /usr/share/gsoap/custom/duration.c gsoap/duration.cpp
 
@@ -87,9 +90,9 @@ endif
 # needs gsoap >=2.8.16
 onvif-get:
 	wsdl2h -P -x -I/usr/share/gsoap/WS -o onvif/onvif.h http://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl http://www.onvif.org/onvif/ver20/ptz/wsdl/ptz.wsdl http://www.onvif.org/onvif/ver10/media/wsdl/media.wsdl
-	sed -i '/#import "stlvector.h"/a#import "wsse.h"' onvif/onvif.h
+	sed -i '/#import "wsa5.h"/i#import "wsse.h"' onvif/onvif.h
 
 onvif-gen: onvif-get
 	soapcpp2 -j -C -I/usr/share/gsoap -I/usr/share/gsoap/import -d onvif -i onvif/onvif.h
 
-onvif: onvif-get onvif-gen
+onvif: gsoap_dir onvif-get onvif-gen

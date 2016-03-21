@@ -1,0 +1,121 @@
+#!/bin/bash
+
+#set -e
+
+if [[ -n "$HEADER_FB_RPIB" ]]; then
+	return 0
+fi
+HEADER_FB_RPIB=included
+
+find_linux_root_device() {
+	RDEV=$(mountpoint -d /)
+
+	for file in $(find /dev -type b 2>/dev/null) ; 	do
+		MAJOR=$(stat --printf="%t" "$file")
+		MAJOR_DEC=$((16#$MAJOR))
+		MINOR=$(stat --printf="%T" "$file")
+		MINOR_DEC=$((16#$MINOR))
+
+		if [ "$MAJOR_DEC:$MINOR_DEC" = "$RDEV" ]; then
+			ROOTDEVICE="$file"
+			break;
+		fi
+	done
+	echo "$ROOTDEVICE"
+}
+
+firstboot_mid_rpib_preinst() {
+	# Resize the SD Card to full size prior to doing anything else
+	ret=2;
+	if [ ! -f /etc/part_resized ] ; then
+		StatsMessage "Resizing the SD Card partition"
+
+		ROOT_PART=$(find_linux_root_device)
+		PART_NUM=${ROOT_PART#/dev/mmcblk0p}
+		PART_START=$(parted /dev/mmcblk0 -ms unit s p | grep "^${PART_NUM}" | cut -f 2 -d: | grep -o '[0-9]*')
+
+		fdisk /dev/mmcblk0 <<EOF
+p
+d
+$PART_NUM
+n
+p
+$PART_NUM
+$PART_START
+
+w
+EOF
+		StatsMessage "Resizing partition done"
+		echo "done" > /etc/part_resized
+
+		# tell kernel about new partition table
+#		partprobe
+#		ret=$?
+#
+#		if [ "$ret" != "0" ] ; then
+			StatsMessage "Rebooting to complete resize"
+			StatsMessage "Rebooting in 5 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 4 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 3 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 2 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 1 seconds..."
+			sleep 1
+			reboot
+			return 0
+#		fi
+	fi
+
+	if [ ! -f /etc/sd_resized ] ; then
+		StatsMessage "Resizing the SD Card filesystem"
+		ROOT_PART=$(find_linux_root_device)
+		resize2fs $ROOT_PART
+		ret=$?
+		if [ "$ret" != "0" ] ; then
+			StatsMessage "Resizing filesystem failed!"
+		else
+			StatsMessage "Resizing filesystem completed"
+			echo "done" > /etc/sd_resized
+		fi
+	fi
+
+	return 0
+}
+
+
+firstboot_mid_rpib_kernel() {
+#	StatsMessage "Installing RPi2 kernel and headers"
+#	apt-get -f -y --no-install-recommends install linux-headers-rpi2 linux-image-rpi2 || :
+#	VerifyExitCode "Install linux image & headers for rpi2 failed"
+
+	return 0
+}
+
+firstboot_mid_rpib_postinst() {
+	StatsMessage "Installing admin utilities"
+	apt-get -f -y install sudo-ldap
+
+	StatsMessage "Installing RPi X.Org driver fbturbo"
+	apt-get -f -y --no-install-recommends install xserver-xorg-video-fbturbo
+
+	StatsMessage "Setting up X.Org for fbturbo driver"
+	cat <<-EOF >> /etc/X11/xorg.conf
+		Section "Device"
+		    Identifier "Raspberry Pi FBDEV"
+		    Driver "fbturbo"
+		    Option "fbdev" "/dev/fb0"
+		    Option "SwapbuffersWait" "true"
+		EndSection
+		EOF
+
+	StatsMessage "Setting up rpi2 specific boot settings"
+	. /usr/pluto/bin/Config_Ops.sh
+
+	ConfSet "AVWizardOverride" "0"
+	ConfSet "AVWizardDone" "1"
+
+	return 0
+}
