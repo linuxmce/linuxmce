@@ -56,6 +56,7 @@ if [[ -n "$1" ]]; then
 fi
 
 echo "Processing :: Updating all deb-cache locations"
+/usr/pluto/bin/BootMessage.sh "Updating deb-cache"
 
 mkdir -p /usr/pluto/deb-cache/${DEB_CACHE}
 
@@ -71,6 +72,8 @@ touch /usr/pluto/deb-cache/Packages
 gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
 
 if [[ "$PK_Device" == "1" ]] || mountpoint -q /usr/pluto/deb-cache/ ; then
+	/usr/pluto/bin/BootMessage.sh "Updating deb-cache: Moving this devices archives to deb-cache"
+
 	# move files to new deb_cache
 	if [[ -n "$(find /usr/pluto/deb-cache/ -maxdepth 1 -iname '*.deb')" ]]; then
 		echo "Moving the old deb-cache to /usr/pluto/deb-cache/${DEB_CACHE}"
@@ -91,6 +94,8 @@ done
 
 for Moon_RootLocation in $(find /usr/pluto/diskless/* -maxdepth 0 -type d 2>/dev/null); do
 if [[ -n "$Moon_RootLocation" && -e "$Moon_RootLocation/etc/pluto.conf" ]]; then
+	/usr/pluto/bin/BootMessage.sh "Updating deb-cache: Moving diskless archives to deb-cache"
+
 	TARGET_DISTRO=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 	TARGET_RELEASE=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -c -s)
 	TARGET_ARCH=$(LC_ALL="C" chroot ${Moon_RootLocation} apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
@@ -142,6 +147,8 @@ done
 for cache_name in "$UPDATE_CACHE"; do
 if [[ -n "$cache_name" ]]; then
         echo "Updating packages list in /usr/pluto/deb-cache/$cache_name"
+	/usr/pluto/bin/BootMessage.sh "Updating deb-cache: Updating packages list in /usr/pluto/deb-cache/$cache_name"
+
         update_debcache /usr/pluto/deb-cache/$cache_name || :
 fi
 done

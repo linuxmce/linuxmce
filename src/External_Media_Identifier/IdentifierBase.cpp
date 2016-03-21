@@ -18,9 +18,10 @@ using namespace DCE;
 /**
  * ctor - pass in file or device path to identify.
  */
-IdentifierBase::IdentifierBase(string sPath)
+IdentifierBase::IdentifierBase(string sPath, string sID)
 {
   m_sPath = sPath;
+  m_sDiskId = sID;
 }
 
 /**
@@ -59,4 +60,14 @@ string IdentifierBase::GetIdentityType()
 int IdentifierBase::GetMediaType()
 {
   return 0; // unknown
+}
+
+string IdentifierBase::GetPictureURL()
+{
+  return ""; 
+}
+
+string IdentifierBase::GetPictureData()
+{
+  return "";
 }

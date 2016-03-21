@@ -107,6 +107,7 @@ else
 	ConfDep_Distro=
 fi
 
+/usr/pluto/bin/BootMessage.sh "Building package install list"
 echo /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert install
 # Give feedback on the main console.
 echo ConfirmDependencies INSTALL is running >>/dev/tty1
@@ -122,6 +123,7 @@ chmod +x "$CUsh"
 echo InstallNewDevice is running >>/dev/tty1
 
 WaitLock "InstallNewDevice" "Config_Device_Changes" # don't step on InstallNewDevices scripts that may be running in the background
+/usr/pluto/bin/BootMessage.sh "Installing packages"
 date -R
 if bash -x "$CUsh"; then
 	Unset_NeedConfigure_Children "$PK_Device"
@@ -129,19 +131,20 @@ fi
 Unlock "InstallNewDevice" "Config_Device_Changes"
 #rm "$CUsh"
 
-echo ConfirmDependencies buildall is running >>/dev/tty1
+if [[ "0" == "1" ]] ; then
+	echo ConfirmDependencies buildall is running >>/dev/tty1
 
-echo /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert buildall
-mkdir -p /usr/pluto/sources
+	echo /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert buildall
+	mkdir -p /usr/pluto/sources
 
-: >"/usr/pluto/sources/buildall.sh"
-echo '#!/bin/bash' >>"/usr/pluto/sources/buildall.sh"
-echo "cd /usr/pluto/sources" >>"/usr/pluto/sources/buildall.sh"
-/usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert buildall >>"/usr/pluto/sources/buildall.sh"
-rm -f "/usr/pluto/install/compile.sh" # old version mistake precaution
-ln -sf "/usr/pluto/sources/buildall.sh" "/usr/pluto/install/compile.sh"
-chmod +x "/usr/pluto/sources/buildall.sh"
-
+	: >"/usr/pluto/sources/buildall.sh"
+	echo '#!/bin/bash' >>"/usr/pluto/sources/buildall.sh"
+	echo "cd /usr/pluto/sources" >>"/usr/pluto/sources/buildall.sh"
+	/usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert buildall >>"/usr/pluto/sources/buildall.sh"
+	rm -f "/usr/pluto/install/compile.sh" # old version mistake precaution
+	ln -sf "/usr/pluto/sources/buildall.sh" "/usr/pluto/install/compile.sh"
+	chmod +x "/usr/pluto/sources/buildall.sh"
+fi
 
 if [[ "$StartLocalDevice" == "y" ]]; then
 	echo Starting local devices >>/dev/tty1
@@ -149,4 +152,4 @@ if [[ "$StartLocalDevice" == "y" ]]; then
         /usr/pluto/bin/MessageSend "$DCERouter" 0 "$PK_Device" 7 12
 fi
 
-#
+exit 0

@@ -32,7 +32,7 @@ namespace DCE
 		bool PTZ(float panx,float pany, float zoom);
 
     public:
-        OnvifDevice(Advanced_IP_Camera* pAIPC);
+        OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData);
 		virtual ~OnvifDevice();
         bool Get_Image(int iWidth, int iHeight, char **pData, int *iData_Size, string *sFormat);
         bool MoveLeft(int step);
@@ -41,6 +41,9 @@ namespace DCE
         bool MoveDown(int step);
         bool ZoomIn(int step);
         bool ZoomOut(int step);
+        void ReceiveCommandForChild(unsigned long pkDevice, string &sCMD_Result, Message* pMessage) {};
+        bool ChangeOutput(OutputDevice* pDevice, bool newState) {}
+
     };
 }
 

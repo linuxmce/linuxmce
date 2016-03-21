@@ -25,6 +25,7 @@ SettingInterface::SettingInterface(QObject *parent) :
     m_lookup.insert(SettingsKeyType::Setting_Ui_Skin, "skin");
     m_lookup.insert(SettingsKeyType::Setting_Ui_NetworkLoading, "usenetwork");
     m_lookup.insert(SettingsKeyType::Setting_Ui_PrefSize, "preferredsize");
+    m_lookup.insert(SettingsKeyType::Setting_Ui_ScreenSaver, "screensaverenabled");
     m_lookup.insert(SettingsKeyType::Setting_Text_sizemod, "sizemodifier");
     m_lookup.insert(SettingsKeyType::Setting_Text_font, "font");
     m_lookup.insert(SettingsKeyType::Setting_Text_language, "language");
@@ -99,8 +100,15 @@ void SettingInterface::initializeSettings()
         m_settings.setValue("skin","default");
         m_settings.setValue("usenetwork", false);
         m_settings.setValue("preferredsize", "small");
+        m_settings.setValue("screensaverenabled", true);
         m_settings.endGroup();
         log(tr("Finished Initializing UI Settings"));
+    } else {
+        m_settings.beginGroup("ui");
+        if (m_settings.contains("screensaverenabled")) {
+            m_settings.setValue("screensaverenabled", m_settings.value("screensaverenabled").toBool());
+        }
+        m_settings.endGroup();
     }
 
     if(!m_settings.childGroups().contains("textoptions")){

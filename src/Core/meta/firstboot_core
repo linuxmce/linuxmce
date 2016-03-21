@@ -23,6 +23,7 @@ Configure_Network_Options # determine ip & int/ext if
 Configure_Network_Files # write /etc/network/interfaces /etc/hosts
 ifup -a || :
 TimeUpdate
+Configure_NTP_Server
 # Do not create and config under ubiquity.
 if ! grep ubiquity /proc/cmdline ; then
 	Create_And_Config_Core # create the core device in the database
@@ -30,6 +31,7 @@ if ! grep ubiquity /proc/cmdline ; then
 	/usr/pluto/bin/Network_Setup.sh # setup all networking related services
 fi
 Configure_SSH_Server
+Configure_SSH_Client
 
 ###########################################################
 ###########################################################

@@ -22,6 +22,7 @@ if [ install = "$1" ]; then
 		sun-java6-jre shared/accepted-sun-dlj-v1-1 boolean true
 		sun-java6-jre sun-java6-jre/jcepolicy note
 		sun-java6-jre sun-java6-jre/stopthread boolean true
+		ola ola/daemon boolean true
 		EOF
 	debconf-set-selections /tmp/preseed.cfg
 

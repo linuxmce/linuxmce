@@ -289,6 +289,33 @@ Configure_SSH_Server() {
 	dpkg-reconfigure -pcritical openssh-server
 }
 
+Configure_SSH_Client() {
+	# add additional ciphers to ssh client to permit connections to jessie from trusty.
+	if ! grep -q aes128-ctr /etc/ssh/ssh_config ; then
+		sed -i 's/Ciphers.*/&,aes128-ctr,aes192-ctr,aes256-ctr/' /etc/ssh/ssh_config
+	fi
+}
+
+Configure_NTP_Server()
+{
+	. ${BASE_DIR}/bin/Config_Ops.sh # pluto-boot-scripts
+	. ${BASE_DIR}/bin/SQL_Ops.sh    # pluto-boot-scripts
+
+	Core_PK_Device="$PK_Device"
+
+	# FIXME: get from DB?? this should be loaded from above
+	Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Core_PK_Device' AND FK_DeviceData='32'"
+        R=$(RunSQL "$Q")
+
+	IntIP=$(echo $R | cut -d"|" -f2 | cut -d"," -f2)
+
+	if [[ -n "$IntIP" ]]; then
+		BCastIP=$(echo "$IntIP" | cut -d"." -f1-3).255
+		sed -i 's/^#broadcast [1-9.]*.[1-9.]*/broadcast $BCastIP/' /etc/ntp.conf
+		service ntp restart || :
+	fi
+}
+
 #######################################################
 ### Other Setup Functions
 #######################################################
@@ -334,7 +361,6 @@ CreateDisklessImage () {
 	local diskless_log=/var/log/pluto/Diskless_Create-`date +"%F"`.log
 	nohup ${BASE_DIR}/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
 }
-
 
 return 0
 

@@ -29,6 +29,7 @@ MD_Setup_Plutoconf
 MD_Setup_Hostname
 MD_Copy_SSH_Keys
 MD_Set_Timezone
+MD_Config_NTP_Client
 MD_Config_MySQL_Client
 ConfigSources
 gpgUpdate
@@ -50,6 +51,7 @@ fi
 AptDistUpgrade
 MD_Populate_Debcache
 MD_Cleanup
+MD_ClearInstalledPackages
 ##########################################################################################################
 ##########################################################################################################
 # run any device specific firstboot add-on scripts
