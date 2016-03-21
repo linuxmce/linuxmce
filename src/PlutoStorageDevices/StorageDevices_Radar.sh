@@ -163,6 +163,12 @@ Detect() {
 			## I assume someone left this non working MessageSend line in for reference, and have done the same.
 			#/usr/pluto/bin/MessageSend $DCERouter 0 $OrbiterIDList 1 741 159 228 109 "[$pathPosition]" 156 $PK_Device 163 "$InfoMessage"
 
+			## do not mount optical disc devices
+			partition_cdrom=$(udevadm info --query=all --name="${pathPosition}" | grep 'ID_TYPE=cd')
+			if [[ "$partition_cdrom" != "" ]] ; then
+				continue
+			fi
+
 			## Get info about this volume
 			partition_diskname=$(udevadm info --query=all --name="${pathPosition}" | grep 'ID_MODEL=' | cut -d'=' -f2)
 			partition_serial=$(udevadm info --query=all --name="${pathPosition}" | grep 'ID_SERIAL_SHORT=' | cut -d'=' -f2)
