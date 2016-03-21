@@ -198,11 +198,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief Used to track orientation \deprecated */
     Q_PROPERTY (bool isProfile READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief if the device is in profile or landscape mode */
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)/*!< \brief Contains string of current screen. \code manager.currentScreen \endcode  \ingroup qorbiter_properties */
-    Q_PROPERTY (QString m_ipAddress READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)/*!< \brief Contains string of current ip address \code manager.m_ipAddress \endcode  \ingroup qorbiter_properties  */
-    Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
-    Q_PROPERTY (QString externalip READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
-    Q_PROPERTY (bool usingExternal READ getUsingExternal WRITE setUsingExternal NOTIFY usingExternalChanged) /*! \brief Used to indicate to the user and application if the external ip is in use */
-    Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
+
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )/*!< \brief Contains the number of cells returned in media grid \code manager.media_pageSeperator \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged) /*!< \brief Contains the current page of the media grid is on. Starts at 0. \ingroup qorbiter_properties */
     Q_PROPERTY(bool osdStatus READ getDisplayStatus WRITE toggleDisplay NOTIFY osdChanged )
@@ -219,17 +215,28 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
     Q_PROPERTY (QString imagePath READ getImagePath WRITE setImagePath NOTIFY imagePathChanged)
     Q_PROPERTY(QString currentSkin READ getCurrentSkin WRITE setConfigSkin NOTIFY currentSkinChanged)/*! \brief Contains the current skins name */
-    Q_PROPERTY(QString routerPort READ getRouterPort WRITE setRouterPort NOTIFY routerPortChanged)
+
     Q_PROPERTY(int isPhone READ getFormFactor WRITE setFormFactor NOTIFY formFactorChanged) /*! \brief If the device is a phone or not/ \deprecated */
     Q_PROPERTY(QString m_localAddress  READ getLocalAddress WRITE setLocalAddress NOTIFY localAddressChanged) /*! \brief the  ip address for this device */
     Q_PROPERTY(QStringList screensaverImages READ getScreensaverImages NOTIFY screenSaverImagesReady ) /*! \brief A list of the current screen saver image paths */
     Q_PROPERTY(int screenSaverTimeout READ getScreenSaverTimeout WRITE setScreensaverTimerout NOTIFY screenSaverTimeoutChanged) /*! \brief The screensaver timeout when there is no video stream, or no media playing */
     Q_PROPERTY(bool bReload READ getReloadStatus NOTIFY bReloadChanged) /*! \brief if reload is reqested */
-    Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged) /*! \brief if the device is on it's 'Home network' */
+
     Q_PROPERTY(int hostDevice READ getHostDevice WRITE setHostDevice NOTIFY hostDeviceChanged)
     Q_PROPERTY(bool useNetworkSkins READ useNetworkSkins WRITE setUseNetworkSkins NOTIFY useNetworkSkinsChanged)
     Q_PROPERTY(QString skinEntryFile READ skinEntryFile NOTIFY skinEntryFileChanged)
     Q_PROPERTY(bool uiReady READ getUiReady NOTIFY uiReadyChanged)
+
+    //*-------Router / network related
+    Q_PROPERTY(QString currentRouter READ getCurrentRouter WRITE setCurrentRouter NOTIFY currentRouterChanged)
+    Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged) /*! \brief if the device is on it's 'Home network' */
+    Q_PROPERTY(QString routerPort READ getRouterPort WRITE setRouterPort NOTIFY routerPortChanged)
+    Q_PROPERTY (QString m_ipAddress READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)/*!< \brief Contains string of current ip address \code manager.currentRouter \endcode  \ingroup qorbiter_properties  */
+    Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
+    Q_PROPERTY (QString externalip READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
+    Q_PROPERTY (bool usingExternal READ getUsingExternal WRITE setUsingExternal NOTIFY usingExternalChanged) /*! \brief Used to indicate to the user and application if the external ip is in use */
+    Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
+
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -573,7 +580,12 @@ Param 10 - pk_attribute
     void setCurrentTheme(const QString &currentTheme);
     DCECommand* getDCECommand();
 
+    QString getCurrentRouter()  {return m_currentRouter ;}
+    void setCurrentRouter( QString currentRouter) {if(m_currentRouter==currentRouter) return; m_currentRouter = currentRouter; emit currentRouterChanged();  }
+
 signals:
+    void currentRouterChanged();
+
     void appHeightChanged();
     void appWidthChanged();
     void currentThemeChanged();
@@ -986,7 +998,7 @@ public slots:
     void setInternalHost(QString h) { if(h==internalHost){return;} internalHost = h; emit internalHostChanged();}
     QString getInternalHost() {return internalHost;}
 
-    void setUsingExternal(bool t){ if(usingExternal != t ){ usingExternal=t; emit usingExternalChanged( usingExternal); } }
+    void setUsingExternal(bool t){ if(usingExternal != t ){ usingExternal=t; emit usingExternalChanged( usingExternal);  setHomeNetwork(usingExternal);} }
     bool getUsingExternal(){return usingExternal;}
 
     void setHomeNetwork(bool y) { if(homeNetwork != y) { homeNetwork=y; emit homeNetworkChanged();  } }
@@ -1864,6 +1876,7 @@ private slots:
     bool createThemeStyle();
 
 private:
+    QString m_currentRouter;
     QString m_skinSelector;
     QQmlFileSelector *selector;
     QFileSelector *m_selector;

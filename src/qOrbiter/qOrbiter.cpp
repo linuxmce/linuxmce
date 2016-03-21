@@ -2988,7 +2988,7 @@ void qOrbiter::checkTimeCode(int npDevice)
     DeviceData_Base *pDevice =m_pData->m_AllDevices.m_mapDeviceData_Base_Find((long)npDevice) ;
 
     qWarning() << pDevice->m_dwPK_DeviceTemplate;
-    string sIPAddress ="";
+    string sIPAddress =pDevice->m_sIPAddress;
     string defaultPort= m_pEvent->GetDeviceDataFromDatabase(pDevice->m_dwPK_Device, DEVICEDATA_Port_CONST);
 
 
@@ -3035,6 +3035,12 @@ void qOrbiter::checkTimeCode(int npDevice)
 
         } else if(pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qMediaPlayer_CONST ){
             sIPAddress = GetCurrentDeviceData(m_dwPK_Device_NowPlaying, DEVICEDATA_TCP_Address_CONST);
+
+            if(sIPAddress.empty()){
+                qWarning("QMediaPlayer Has Not IP address!");
+                qDebug() << GetCurrentDeviceData(m_dwPK_Device_NowPlaying, DEVICEDATA_TCP_Address_CONST).c_str();
+                return;
+            }
         }
         else
         { qWarning() << "Could not find ip address";

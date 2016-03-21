@@ -6,7 +6,7 @@ StyledScreen {
     Component.onCompleted: {
         updateQorbiter()
     }
-    property string requestUrl: ("http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+manager.iPK_Device)
+    property string requestUrl: ("http://"+manager.currentRouter+"/lmce-admin/qOrbiterGenerator.php?d="+manager.iPK_Device)
 
     Panel{
         anchors.fill: parent

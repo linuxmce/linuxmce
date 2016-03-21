@@ -129,7 +129,7 @@ Item {
         Component.onCompleted: {
             console.log("initializing qml media player::"+manager.mediaPlayerID)
             if(manager.mediaPlayerID !== -1){
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
                 androidSystem.startAudioService(dceplayer.callbackAddress);
             }
         }
@@ -138,7 +138,7 @@ Item {
             target:manager
             onMediaPlayerIdChanged:{
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
-                dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
             }
             onConnectedStateChanged:{
                 if(manager.connectedState ){
@@ -305,8 +305,8 @@ Item {
         width: qmlroot.width
         interval:60000
         anchors.centerIn: qmlroot
-        active:manager.m_ipAddress = manager.internalHost
-        requestUrl:manager.m_ipAddress
+        active:manager.currentRouter = manager.internalHost
+        requestUrl:manager.currentRouter
 
         Component.onCompleted: {
             if(glScreenSaver.pictureCount===0 && glScreenSaver.active){

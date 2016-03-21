@@ -122,7 +122,7 @@ Item {
 
         Component.onCompleted: {
             if(manager.mediaPlayerID !== -1){
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
                 androidSystem.startAudioService(dceplayer.callbackAddress);
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
 
@@ -133,7 +133,7 @@ Item {
             target:manager
             onMediaPlayerIdChanged:{
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
-                dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
 
             }
         }
@@ -323,8 +323,8 @@ Item {
             right: qml_root.right
         }
         interval:30000
-        active:manager.m_ipAddress==="192.168.80.1"
-        requestUrl:manager.m_ipAddress
+        active:manager.currentRouter==="192.168.80.1"
+        requestUrl:manager.currentRouter
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
         }

@@ -289,7 +289,7 @@ public slots:
         setMediaPlaying(false);
     }
 
-    void qmlPlaybackEnded(bool ended){        
+    void qmlPlaybackEnded(bool ended){
         mediaPlayer->EVENT_Playback_Completed(mediaPlayer->getCurrentMediaUrl().toStdString(),mediaPlayer->getStreamID(), ended);
     }
 
@@ -414,7 +414,7 @@ public slots:
     bool getMediaPlaying() {return mediaPlaying;}
 
     void setFileReference(QString f){
-qDebug() << "Updating file url.";
+        qDebug() << "Updating file url.";
         fileReference = f;
         pluginUrl = fileReference;
 #if defined(ANDROID) || defined(Q_OS_IOS) || defined(QT5)
@@ -596,7 +596,15 @@ qDebug() << "Updating file url.";
         initializePlayer();
     }
 
-    void pluginNotifyStart(){startTimeCodeServer(); mediaPlayer->EVENT_Playback_Started(this->fileReference.toStdString(), mediaPlayer->i_StreamId, "", "", "");}
+    void pluginNotifyStart(QString title, QString audioOptions="", QString videoOptions=""){
+        startTimeCodeServer();
+        mediaPlayer->EVENT_Playback_Started(
+                    this->fileReference.toStdString(),
+                    mediaPlayer->i_StreamId,
+                    title.toStdString(),
+                    audioOptions.toStdString(),
+                    videoOptions.toStdString());
+                                                                                           }
     void pluginNotifyEnd(bool withError){mediaPlayer->EVENT_Playback_Completed(this->fileReference.toStdString(), mediaPlayer->i_StreamId, withError);}
 
 #ifndef __ANDROID__
@@ -606,7 +614,7 @@ qDebug() << "Updating file url.";
 #endif
 
     //Event slots
-    void playbackInfoUpdated(QVariant playbackData);
+    void playbackInfoUpdated(QString mediaTitle, QString mediaSubTitle, QString name, int screen);
 
 
 private:

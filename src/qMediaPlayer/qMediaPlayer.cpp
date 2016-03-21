@@ -1980,19 +1980,12 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 
 void qMediaPlayer::updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen)
 {
-    // EVENT_Media_Description_Changed(mediaTitle.toStdString());
-    DeviceData_Base *p = this->m_pData->m_pDevice_Core->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
-    QString whatisthis(",4962,47,244,224,230");
-    whatisthis.prepend(QString::number(screen));
 
-    CMD_Set_Now_Playing setNowPlaying(this->m_dwPK_Device,p->m_dwPK_Device, whatisthis.toStdString() ,mediaTitle.toStdString(),mediaSubtitle.toStdString(),this->i_pkMediaType,this->i_StreamId,0,name.toStdString(),QString::number(this->m_dwPK_Device).toStdString().c_str(), false);
-    SendCommand(setNowPlaying);
-
-    string mt = mediaTitle.toStdString();
     string mst = mediaSubtitle.toStdString();
-    string nm = name.toStdString();
+    string mt = mediaTitle.toStdString();
+    string nm = name.toStdString()+"\t" +mt;
+    EVENT_Playback_Started(nm, i_StreamId, mst, "true", "true");
 
-    EVENT_Playback_Info_Changed(mt, mst, nm);
 }
 
 void qMediaPlayer::confirmMediaStarted(QString description)

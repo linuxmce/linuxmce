@@ -99,7 +99,7 @@ Item {
             focus:true
             interval:8000
             anchors.centerIn: parent
-            requestUrl:manager.m_ipAddress
+            requestUrl:manager.currentRouter
             Connections{
                 target:manager
                 onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
