@@ -106,6 +106,9 @@ public:
 	*/
 
 //<-dceag-h-e->
+                bool MediaDescriptionChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+                bool PlaybackStarted( class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo);
+
 	};
 
 //<-dceag-end-b->
