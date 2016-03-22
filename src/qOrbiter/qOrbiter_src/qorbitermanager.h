@@ -1056,8 +1056,8 @@ public slots:
     //! Returns the current screen in string format
     QString getCurrentScreen();
     //! Sets the current screen in string format.
-    void setCurrentScreen(QString s);
-    void setCurrentScreen(int s);
+    void setCurrentScreen(QString s, bool force=false);
+    void setCurrentScreen(int s, bool force=false);
     //security related
     Q_INVOKABLE void requestSingleView(int camera);
     /*!

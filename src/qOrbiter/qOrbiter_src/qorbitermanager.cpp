@@ -309,8 +309,6 @@ void qorbiterManager::gotoQScreen(QString s){
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
-
-
     } else {
         setDceResponse("screenchange() FAILED, sending request screen");
     }
@@ -330,7 +328,6 @@ void qorbiterManager::goBacktoQScreen(){
         setCurrentScreen(gotoScreenList->last());
         if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
             setDceResponse("Done call to backwards screenchange()");
-
             screenChange(currentScreen);
         } else {
             setDceResponse(" backwards screenchange() FAILED");
@@ -2906,11 +2903,11 @@ QString qorbiterManager::getCurrentScreen(){
     return currentScreen;
 }
 
-void qorbiterManager::setCurrentScreen(QString s)
+void qorbiterManager::setCurrentScreen(QString s, bool force)
 {
 
     if(!s.contains(".qml")){
-        setCurrentScreen(s.toInt());
+        setCurrentScreen(s.toInt(), force);
         return;
     }
 
@@ -2918,19 +2915,19 @@ void qorbiterManager::setCurrentScreen(QString s)
         clearAllDataGrid();
     }
 
-    if(s!=currentScreen){
+    if(s!=currentScreen || force){
         currentScreen = s;
         emit screenChange(s);
     }
 
 }
 
-void qorbiterManager::setCurrentScreen(int s)
+void qorbiterManager::setCurrentScreen(int s, bool force)
 {
 
     QString i = QString("Screen_%1.qml").arg(QString::number(s));
 
-    if(i!=currentScreen){
+    if(i!=currentScreen || force){
         currentScreen = i;
         emit screenChange(i);
 
