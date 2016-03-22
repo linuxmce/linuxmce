@@ -1083,41 +1083,41 @@ void HueController::checkLightInformation()
 
 
             QString chanaddress = b->getController()->getIpAddress()+":"+QString::number(b->id());
-            qDebug()<< chanaddress;
+           // qDebug()<< chanaddress;
             CMD_Set_Device_Data setController(this->m_dwPK_Device, 4, b->linuxmceId(),chanaddress.toStdString(),DEVICEDATA_PortChannel_Number_CONST);
             if(SendCommand(setController)){
-                qDebug() << "Set port / channel";
+              //  qDebug() << "Set port / channel";
             }
 
             /* needs fix to check name diff */
 
             CMD_Set_Device_Data setName(m_dwPK_Device, 4, b->linuxmceId(), b->displayName().toStdString(), DEVICEDATA_Name_CONST);
             if(SendCommand(setName)){
-                qDebug()<<"Set Device Name";
+             //   qDebug()<<"Set Device Name";
             }
 
             CMD_Set_Device_Data setDesc(m_dwPK_Device, 4, b->linuxmceId(), b->displayName().toStdString(), DEVICEDATA_Description_CONST);
             if(SendCommand(setDesc)){
-                qDebug() << " Updated display name " << b->displayName();
+               // qDebug() << " Updated display name " << b->displayName();
             }
 
 
 
             CMD_Set_Device_Data setId(m_dwPK_Device, 4, b->linuxmceId(), b->uniqueId().toStdString(), DEVICEDATA_Serial_Number_CONST);
             if(SendCommand(setId)){
-                qDebug()<<"Set uniqueId " << b->uniqueId();
+              //  qDebug()<<"Set uniqueId " << b->uniqueId();
             }
 
             CMD_Set_Device_Data setType(m_dwPK_Device, 4, b->linuxmceId(), b->getLightType().toStdString(), DEVICEDATA_Type_CONST );
             if(SendCommand(setType)){
-                qDebug() <<"Set type";
+              //  qDebug() <<"Set type";
             }
         }
 
     }
 
     rt->deleteLater();
-    m_updateStatus=false;
+   // m_updateStatus=false;
     qDebug() << Q_FUNC_INFO <<  QDateTime::currentDateTime() << " exit status " ;
 }
 
@@ -1130,7 +1130,7 @@ void HueController::handleDeviceEvent(int whichEvent)
 
     if(whichEvent==EVENT_Device_OnOff_CONST ){
         if(b->linuxmceId()==0)return;
-        qDebug() << Q_FUNC_INFO;
+       // qDebug() << Q_FUNC_INFO;
 
         DCE::Message *m = new DCE::Message (
                     b->linuxmceId(),
