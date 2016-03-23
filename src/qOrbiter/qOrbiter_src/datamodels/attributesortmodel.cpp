@@ -57,7 +57,7 @@ void AttributeSortModel::insertRow(int row, AttributeSortItem *item)
 {
     beginInsertRows(QModelIndex(), row, row);
     connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-    //qDebug() << "Inserting at:" << row;
+  //  qDebug() << "Inserting at:" << row;
     m_list.insert(row, item);
     endInsertRows();
 }
@@ -66,11 +66,12 @@ void AttributeSortModel::handleItemChange()
 {
     AttributeSortItem* item = static_cast<AttributeSortItem*>(sender());
     QModelIndex index = indexFromItem(item);
-    //qDebug() << "Handling item change for:" << index;
+  //  qDebug() << "Handling item change for:" << index << item->name();
     if(index.isValid())
     {
-
         emit dataChanged(index, index ,index.row());
+    } else {
+        qDebug() << " invalid model index" << index;
     }
 }
 
@@ -89,7 +90,7 @@ bool AttributeSortModel::resetInternalData()
 
     qDeleteAll(m_list);
     m_list.clear();
-    qDebug("Attribute Sort Model Cleared.");
+   qDebug("Attribute Sort Model Cleared.");
     return true;
 }
 bool AttributeSortModel::allowMulti() const
@@ -113,7 +114,9 @@ AttributeSortItem * AttributeSortModel::find(const QString &id) const
 
 QModelIndex AttributeSortModel::indexFromItem(const AttributeSortItem *item) const
 {
+
     Q_ASSERT(item);
+
     for(int row=0; row<m_list.size(); ++row) {
 
         if(m_list.at(row) == item) return index(row);
@@ -186,7 +189,7 @@ void AttributeSortModel::setSelectionStatus(QString format)
             if(uitem->id()!= item->id()) uitem->m_isSelected = false;
         }
     }
-    qDebug() << "Set State for:" << format << "to " << item->selectedStatus();
+  //  qDebug() << "Set State for:" << format << "to " << item->selectedStatus();
 
     //return state;
     ReturnSelectedItems();
@@ -212,7 +215,7 @@ void AttributeSortModel::ReturnSelectedItems()
         if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
     }
     QString qs_sorting_string= t_selected_items.join(",");
-    qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
+  //  qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
     emit SetTypeSort(filterLevel, qs_sorting_string);
 }
 
