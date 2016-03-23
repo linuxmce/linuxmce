@@ -74,22 +74,45 @@ StyledScreen {
                onAlphaSelected: multi_view_list.seek(selectedAlpha)
             }
         }
+        LargeStyledButton{
+            id:file_select_btn
+            anchors{
+                top:parent.top
+                topMargin:Style.scaleY(15)
+                left:typeSelection.left
+                right: typeSelection.right
+            }
+            height:Style.scaleY(8)
+            buttonText: qsTr("Browse By File")
+            visible: typeSelection.visible
+            onActivated: {
+                attribfilter.setSelectionStatus("File")
+                innerContent.state="selection"
+            }
+
+        }
+
         GridView{
             id:typeSelection
             Component.onCompleted: innerContent.forceActiveFocus()
             onActiveFocusChanged: console.log("media focus")
-            anchors.centerIn: parent
+            anchors{
+                top:file_select_btn.bottom
+                topMargin:5
+                horizontalCenter: parent.horizontalCenter
+            }
+
             height:parent.height / 2
-            width: parent.width *.85
+            width: parent.width *.95
             model:mediatypefilter
-            cellWidth:manager.isProfile ? Style.scaleX(30) : Style.scaleX(20)
+            cellWidth:typeSelection.width/3
             cellHeight:manager.isProfile ? Style.scaleY(15) : Style.scaleY(22)
             cacheBuffer:50
             delegate:
                 LargeStyledButton{
                 height:typeSelection.cellHeight -5
                 width: typeSelection.cellWidth -5
-                arrow: true
+                arrow: false
                 buttonText: name
                 onActivated: {
                     mediatypefilter.setSelectionStatus(name); innerContent.state="selection"
