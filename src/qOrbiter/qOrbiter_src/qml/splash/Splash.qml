@@ -42,7 +42,7 @@ Item {
 
     Component.onCompleted: {
         console.log("Splash is loaded")
-        orbiterWindow.qmlSetupLmce(manager.iPK_Device, manager.m_ipAddress)
+        orbiterWindow.qmlSetupLmce(manager.iPK_Device, manager.currentRouter)
         splashLogic.forceActiveFocus()
     }
     focus:true

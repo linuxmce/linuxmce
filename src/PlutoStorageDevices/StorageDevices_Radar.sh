@@ -144,19 +144,17 @@ Detect() {
 
 		auxPath=$(echo "$auxPath $Path" | sed -e 's/^[ \t]*//')
 	done
-	availPath=$auxPath
+	availPath="$auxPath"
 	[[ -n "$DEBUG" ]] && echo "auxPath: $auxPath" # DEBUG
 
-	## Remove paths that belong to a mounted RAID
-	if [[ -x /sbin/mdadm ]]; then
-		auxPath=""
-		for Path in $availPath; do
-			if [[ "$(mdadm --examine ${Path} 2>&1)" == *"No md superblock"* ]]; then
-				auxPath=$(echo "$auxPath $Path" | sed -e 's/^[ \t]*//')
-			fi
-		done
-		availPath="$auxPath"
-	fi
+	## Remove paths that belong to a linux RAID
+	auxPath=""
+	for Path in $availPath; do
+		if [[ "$(blkid -s TYPE -o value ${Path})" != "linux_raid_member" ]]; then
+			auxPath=$(echo "$auxPath $Path" | sed -e 's/^[ \t]*//')
+		fi
+	done
+	availPath="$auxPath"
 	[[ -n "$DEBUG" ]] && echo "availPath: $availPath" # DEBUG
 
 	## Test to see if we found any available paths
@@ -164,6 +162,12 @@ Detect() {
 		for pathPosition in $availPath; do
 			## I assume someone left this non working MessageSend line in for reference, and have done the same.
 			#/usr/pluto/bin/MessageSend $DCERouter 0 $OrbiterIDList 1 741 159 228 109 "[$pathPosition]" 156 $PK_Device 163 "$InfoMessage"
+
+			## do not mount optical disc devices
+			partition_cdrom=$(udevadm info --query=all --name="${pathPosition}" | grep 'ID_TYPE=cd')
+			if [[ "$partition_cdrom" != "" ]] ; then
+				continue
+			fi
 
 			## Get info about this volume
 			partition_diskname=$(udevadm info --query=all --name="${pathPosition}" | grep 'ID_MODEL=' | cut -d'=' -f2)

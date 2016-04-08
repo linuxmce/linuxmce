@@ -19,6 +19,7 @@ Loader {
         onScreenChange:{
             qmlRoot.resetTimeout();
             console.log( "Manager screen::"+ manager.currentScreen)
+            console.log("Current PageLoader Screen::"+currentScreen)
             nextScreen=manager.currentScreen
             qmlRoot.clearDialogs();
         }

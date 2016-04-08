@@ -44,6 +44,8 @@ Item {
         //        }
 
         for(var param in screen_params){
+
+            if(param)
             console.log("Screen parameter property %1 -- %2").arg(param).arg(screenparams.getParam(param))
         }
     }

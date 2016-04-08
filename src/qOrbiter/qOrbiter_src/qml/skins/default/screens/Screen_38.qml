@@ -79,7 +79,7 @@ StyledScreen {
                     buttonText: name
                     width: parent.width
                     onActivated: {
-                        console.log("\n"+JSON.stringify(props, null, "\t"))
+                     //   console.log("\n"+JSON.stringify(props, null, "\t"))
                         manager.resendCode(selectedDevice, commandnumber)
                     }
                 }

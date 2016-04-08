@@ -105,6 +105,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_window(NULL),
     m_dceRequestNo(1)
 {
+
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -308,8 +309,6 @@ void qorbiterManager::gotoQScreen(QString s){
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
-
-
     } else {
         setDceResponse("screenchange() FAILED, sending request screen");
     }
@@ -329,7 +328,6 @@ void qorbiterManager::goBacktoQScreen(){
         setCurrentScreen(gotoScreenList->last());
         if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
             setDceResponse("Done call to backwards screenchange()");
-
             screenChange(currentScreen);
         } else {
             setDceResponse(" backwards screenchange() FAILED");
@@ -359,8 +357,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id){
     setDceResponse("Starting Manager with connection to :"+QString::fromStdString(sRouterIP));
 
     if(sRouterIP.length() < 7){
-        setDceResponse("Ip is empty, using alternate :"+this->m_ipAddress);
-        sRouterIP = m_ipAddress.toStdString();
+        setDceResponse("Ip is empty, using alternate :"+this->m_currentRouter);
+        sRouterIP = m_currentRouter.toStdString();
     }
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
     if(mb_useNetworkSkins){
@@ -825,7 +823,7 @@ void qorbiterManager::getConfiguration()
 {
     QNetworkRequest updateDevice;
     QNetworkAccessManager *ud= new QNetworkAccessManager();
-    updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
+    updateDevice.setUrl("http://"+m_currentRouter+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfig(QNetworkReply*)));
     ud->get(updateDevice);
     // DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
@@ -1362,7 +1360,7 @@ void qorbiterManager::regenOrbiter()
 
     QNetworkRequest updateDevice;
     QNetworkAccessManager *ud= new QNetworkAccessManager();
-    updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
+    updateDevice.setUrl("http://"+m_currentRouter+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(regenComplete(QNetworkReply*)));
     ud->get(updateDevice);
 
@@ -1725,7 +1723,7 @@ void qorbiterManager::getMediaDevices()
 
     QNetworkAccessManager * m = new QNetworkAccessManager();
     QNetworkRequest req;
-    req.setUrl(QUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?m"));
+    req.setUrl(QUrl("http://"+m_currentRouter+"/lmce-admin/qOrbiterGenerator.php?m"));
     m->get(req);
     QObject::connect(m, SIGNAL(finished(QNetworkReply*)), this, SLOT(setMediaDevices(QNetworkReply*)));
 }
@@ -1990,8 +1988,9 @@ bool qorbiterManager::writeConfig()
     settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
     qDebug() <<  Q_FUNC_INFO << "Device ID: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     /* old below this line and will be replaced */
-    qDebug() << Q_FUNC_INFO;
-    //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
+   // qDebug() << Q_FUNC_INFO;
+       //setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
+    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
     QDomDocument localConfig;
     QString xmlPath;
 
@@ -2562,7 +2561,7 @@ void qorbiterManager::setupUiSelectors(){
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType.remove("/qml"));
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
+    remoteDirectoryPath = "http://"+m_currentRouter+"/lmce-admin/skins"+buildType.remove("/qml");
     m_remoteQmlPath = remoteDirectoryPath;
 
 
@@ -2763,13 +2762,18 @@ bool qorbiterManager::restoreSettings()
     int tId= settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     qDebug() << Q_FUNC_INFO << "Settings device id" << tId;
     QString trouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
+    QString extRouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_ExternalHostname).toString();
     mb_useNetworkSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
+    QString last =  settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used).toString();
+    qDebug() << "Current router " << m_currentRouter;
     /*Fix Me! */ currentSkin="default";
     qDebug() << "Using network skins?" << mb_useNetworkSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";
         setDeviceNumber(tId);
         setInternalIp(trouter);
+        setExternalHost(extRouter);
+        setCurrentRouter(!usingExternal ? trouter : extRouter);
     }
     return true;
 }
@@ -2899,11 +2903,11 @@ QString qorbiterManager::getCurrentScreen(){
     return currentScreen;
 }
 
-void qorbiterManager::setCurrentScreen(QString s)
+void qorbiterManager::setCurrentScreen(QString s, bool force)
 {
 
     if(!s.contains(".qml")){
-        setCurrentScreen(s.toInt());
+        setCurrentScreen(s.toInt(), force);
         return;
     }
 
@@ -2911,19 +2915,19 @@ void qorbiterManager::setCurrentScreen(QString s)
         clearAllDataGrid();
     }
 
-    if(s!=currentScreen){
+    if(s!=currentScreen || force){
         currentScreen = s;
         emit screenChange(s);
     }
 
 }
 
-void qorbiterManager::setCurrentScreen(int s)
+void qorbiterManager::setCurrentScreen(int s, bool force)
 {
 
     QString i = QString("Screen_%1.qml").arg(QString::number(s));
 
-    if(i!=currentScreen){
+    if(i!=currentScreen || force){
         currentScreen = i;
         emit screenChange(i);
 

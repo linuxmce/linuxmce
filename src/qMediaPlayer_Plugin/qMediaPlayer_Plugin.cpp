@@ -91,7 +91,18 @@ bool qMediaPlayer_Plugin::Register()
     m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
 
     RegisterMsgInterceptor(( MessageInterceptorFn )( &qMediaPlayer_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
-
+    ListDeviceData_Router *pListDeviceData_Router = m_pRouter->m_mapDeviceByTemplate_Find(DEVICETEMPLATE_qMediaPlayer_CONST);
+    if( pListDeviceData_Router )
+    {
+            for(ListDeviceData_Router::iterator it=pListDeviceData_Router->begin();it!=pListDeviceData_Router->end();++it)
+            {
+                    DeviceData_Router *pDevice_qMediaPlayer = *it;
+                    //RegisterMsgInterceptor( ( MessageInterceptorFn )( &Media_Plugin::PlaybackStarted ), 0, pDevice_qMediaPlayer->m_dwPK_Device, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Started_CONST );
+                  //  RegisterMsgInterceptor( ( MessageInterceptorFn )( &VDRPlugin::TuneToChannel ), 0, pDevice_VDRPlayer->m_dwPK_Device, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Tune_to_channel_CONST );
+                  RegisterMsgInterceptor( ( MessageInterceptorFn )( &Media_Plugin::PlaybackStarted ),0, pDevice_qMediaPlayer->m_dwPK_Device, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Started_CONST );
+                  RegisterMsgInterceptor( ( MessageInterceptorFn )( &qMediaPlayer_Plugin::PlaybackStarted ), pDevice_qMediaPlayer->m_dwPK_Device, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Started_CONST );
+            }
+    }
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -117,7 +128,7 @@ qMediaPlayer_Plugin_Command *Create_qMediaPlayer_Plugin(Command_Impl *pPrimaryDe
 void qMediaPlayer_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+        sCMD_Result = "UNHANDLED";
 }
 
 /*
@@ -130,8 +141,10 @@ void qMediaPlayer_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pM
 //<-dceag-cmduk-e->
 {
 
-    sCMD_Result = "UNKNOWN DEVICE";
+    sCMD_Result = "UNHANDLED";
 }
+
+
 
 //<-dceag-sample-b->
 /*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
@@ -833,3 +846,51 @@ bool qMediaPlayer_Plugin::ConfirmSourceIsADestination(string &sMRL, QMediaStream
 }
 
 
+bool qMediaPlayer_Plugin::PlaybackStarted(Socket *pSocket, Message *pMessage, DeviceData_Base *pDeviceFrom, DeviceData_Base *pDeviceTo)
+{
+    PLUTO_SAFETY_LOCK(mm,m_pMedia_Plugin->m_MediaMutex);
+    int iStreamID = atoi( pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST].c_str( ) );
+    string sMRL = pMessage->m_mapParameters[EVENTPARAMETER_MRL_CONST];
+    string sSection = pMessage->m_mapParameters[EVENTPARAMETER_SectionDescription_CONST];
+    string sAudio = pMessage->m_mapParameters[EVENTPARAMETER_Audio_CONST];
+    string sVideo = pMessage->m_mapParameters[EVENTPARAMETER_Video_CONST];
+
+  MediaStream * pMediaStream = m_pMedia_Plugin->m_mapMediaStream_Find( iStreamID, pMessage->m_dwPK_Device_From );
+    QMediaStream *pQMediaStream = (QMediaStream *) pMediaStream;
+
+if ( pQMediaStream == NULL  )
+{
+    LoggerWrapper::GetInstance()->Write(LV_WARNING, "Qmediaplayer_Plugin::PlaybackStarted Stream ID %d is not mapped to a media stream object", iStreamID);
+    return false;
+} else {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING, "Qmediaplayer_Plugin::PlaybackStarted Stream ID %d is mapped to a media stream object", iStreamID);
+}
+
+
+    pQMediaStream->m_sMediaDescription = sMRL;
+    pQMediaStream->m_sSectionDescription = sSection;
+    pQMediaStream->m_sMediaSynopsis = sAudio + "/" + sVideo;
+    pQMediaStream->m_bContainsTitlesOrSections=true;
+    LoggerWrapper::GetInstance()->Write(LV_WARNING, "Qmediaplayer_Plugin::PlaybackStarted Stream title %s is mapped to a media stream object", sSection.c_str());
+    m_pMedia_Plugin->MediaInfoChanged(pQMediaStream,true);
+
+    return false;
+}
+
+
+bool qMediaPlayer_Plugin::MediaDescriptionChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+
+    int iStreamID = atoi( pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST].c_str( ) );
+    MediaStream * pMediaStream = m_pMedia_Plugin->m_mapMediaStream_Find( iStreamID, pMessage->m_dwPK_Device_From );
+     QMediaStream *pQMediaStream = (QMediaStream *) pMediaStream;
+
+
+    if( pQMediaStream )
+    {
+        pQMediaStream->m_sMediaDescription = pMessage->m_mapParameters[EVENTPARAMETER_Text_CONST];
+        m_pMedia_Plugin->MediaInfoChanged(pQMediaStream, true);
+    }
+
+    return false;
+}

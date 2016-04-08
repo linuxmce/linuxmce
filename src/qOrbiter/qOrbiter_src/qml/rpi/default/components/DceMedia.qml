@@ -16,7 +16,7 @@ Item {
          onMediaPlayingChanged: console.log("Media Playback status changed locally "+mediaBuffer)
         Component.onCompleted: {
                                    console.log("initializing media player "+manager.mediaPlayerID)
-                                   dceMediaController.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                                   dceMediaController.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
                                }
 
     }
@@ -28,7 +28,7 @@ Item {
         // onOrientationChanged:dceplayer.setorbiterWindowSize(manager.appHeight, manager.appWidth)
         onMediaPlayerIdChanged:{
             console.log("initializing media player"+manager.mediaPlayerID)
-            dceMediaController.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+            dceMediaController.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
         }
     }
 
