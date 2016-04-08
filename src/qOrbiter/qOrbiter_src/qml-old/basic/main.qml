@@ -33,7 +33,7 @@ Item {
 	            onOrientationChanged:dceplayer.setorbiterWindowSize(appH, appW)
 	            onMediaPlayerIdChanged:{
 	                 console.log("initializing media player")
-	                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+	                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
 	            }
         	}
 	}

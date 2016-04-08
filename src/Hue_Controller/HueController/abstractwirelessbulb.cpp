@@ -8,7 +8,7 @@ AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, 
     QObject(parent),
     mp_controller(p_controller),
     m_CurrentLevel(0.0),
-    m_powerOn(false),
+    m_powerOn(true),
     m_brightness(0)
 {
    qDebug() << Q_FUNC_INFO << "ctor";
@@ -89,7 +89,9 @@ bool AbstractWirelessBulb::powerOn() const
 
 void AbstractWirelessBulb::setPowerOn(bool powerOn)
 {
-    if(m_powerOn == powerOn) return;
+
+    bool stateChanged=false;
+    if(m_powerOn != powerOn) stateChanged=true;
 
     m_powerOn = powerOn;
     emit powerOnChanged();
@@ -97,8 +99,11 @@ void AbstractWirelessBulb::setPowerOn(bool powerOn)
     if(linuxmceId()==0)
         return;
 
-    emit dceMessage(EVENT_Device_OnOff_CONST);
-    qDebug() << QString("%1 Light Changed, sending event").arg(displayName());
+    if(stateChanged){
+        emit dceMessage(EVENT_Device_OnOff_CONST);
+        qDebug() << QString("%1 Light Changed, sending event").arg(displayName());
+    }
+
 
 }
 int AbstractWirelessBulb::bulbType() const

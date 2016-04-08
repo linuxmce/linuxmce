@@ -26,7 +26,7 @@ public:
     int 	m_iPK_DesignObj_RemoteOSD_After_Menu;
     int 	m_iPK_DesignObj_Remote_Popup_After_Menu;
 
-    virtual ~QMediaStream();
+    virtual ~QMediaStream();  
     virtual int GetType();
 
   virtual  bool ShouldUseStreaming();

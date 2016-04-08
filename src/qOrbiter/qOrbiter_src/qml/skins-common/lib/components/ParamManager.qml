@@ -3,7 +3,7 @@ Item{
     id:paramManager
 
 
-           property string requestUrl: ("http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?c=")
+           property string requestUrl: ("http://"+manager.currentRouter+"/lmce-admin/qOrbiterGenerator.php?c=")
 
            function getParams(cmd_no, idx){
 

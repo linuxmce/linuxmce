@@ -37,7 +37,10 @@ Item{
         case 1:media_grid_container.sourceComponent=list_view; break;
         default:media_grid_container.sourceComponent=list_view;
         }
+
     }
+
+
 
     function load(){
         currentGrid.model= manager.getDataGridModel("MediaFile", 63);
@@ -65,7 +68,7 @@ Item{
         }
 
         onDgRequestFinished:{
-           lastViewIndex=manager.currentIndex
+            lastViewIndex=manager.currentIndex
             currentGrid.currentIndex=manager.currentIndex
             currentGrid.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
         }
@@ -88,27 +91,19 @@ Item{
 
     Loader{
         id:media_grid_container
-        onSourceChanged: {
-            if(media_grid_container.status==Loader.Ready){
-                console.log("!!onSourceChanged!!!")
-              //  item.model = manager.getDataGridModel("MediaFile", 63)
-
-        }
-
-        onLoaded: {
-            if(media_grid_container.status==Loader.Ready){
-                console.log("!!!on loaded !!!")
-                item.model = manager.getDataGridModel("MediaFile", 63)
-                item.positionViewAtIndex(lastViewIndex, ListView.Beginning)
-            }
-            }
-        }
 
         anchors{
             left:parent.left
             right:parent.right
             bottom:parent.bottom
             top:parent.top
+        }
+        onSourceComponentChanged: {
+            if(media_grid_container.status==Loader.Ready){
+                console.log("!!!on loaded !!!")
+                item.model = manager.getDataGridModel("MediaFile", 63)
+                item.positionViewAtIndex(lastViewIndex, ListView.Beginning)
+            }
         }
 
     }
@@ -141,8 +136,7 @@ Item{
                 Image{
                     id:imdbImg
                     fillMode: Image.PreserveAspectCrop
-
-                    source:path !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+                    source:path !=="" ? "http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
                     anchors.fill: parent
                     anchors.margins: 10
                     smooth: true

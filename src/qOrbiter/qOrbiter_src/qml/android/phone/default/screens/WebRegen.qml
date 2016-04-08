@@ -13,7 +13,7 @@ StyledScreen {
         opacity: .85
     }
 
- property string requestUrl: ("http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+manager.iPK_Device)
+ property string requestUrl: ("http://"+manager.currentRouter+"/lmce-admin/qOrbiterGenerator.php?d="+manager.iPK_Device)
     StyledText {
         id: label
         text: qsTr("Regenerating your Configuration data...")

@@ -67,6 +67,10 @@ Item{
                         buttonRadius: status ? 5 : 0
                         buttonText: filterdlg.selectingUser? username: name
                        txtObj.font.bold: status
+                       property bool isSelected:status
+                       onIsSelectedChanged: {
+                        console.log(name + "qml status "+ status)
+                       }
                         onActivated: {
                             if(filterdlg.selectingUser){
                                 filterdlg.authUser=pkUser
@@ -75,6 +79,8 @@ Item{
                             }
 
                             selectionView.model.setSelectionStatus(name);
+                            if(!selectionView.model.allowMulti)
+                                pop.close()
 
                         }
                         // arrow:filterdlg.selectingUser ? "false" : selectionView.model.getSelectionStatus(name)

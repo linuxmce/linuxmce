@@ -113,6 +113,7 @@ class MDRDVDReply
       m_sRating=sRating;
       m_sReleaseDate=sReleaseDate;
       m_sGenre=sGenre;
+      m_sDVDCoverURL=sDVDCoverURL;
     }
 
   virtual ~MDRDVDReply()
@@ -129,7 +130,7 @@ class MDRDVDReply
   string Director_get() {return m_sDirector;}
   string Rating_get() {return m_sRating;}
   string Genre_get() {return m_sGenre;}
-
+  string DVDCoverURL_get() {return m_sDVDCoverURL;}
   vector<MDRTitle*> Titles_get() {return m_vectTitles;}
 
   void Title_add(MDRTitle* title) {m_vectTitles.push_back(title);}

@@ -158,7 +158,7 @@ GenericPopup{
                 }
                 PropertyChanges{
                     target: imdb_background
-                    source:!manager.isProfile ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+content_item.bgImageProp : ""
+                    source:!manager.isProfile ? "http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+content_item.bgImageProp : ""
                 }
             },
             State{

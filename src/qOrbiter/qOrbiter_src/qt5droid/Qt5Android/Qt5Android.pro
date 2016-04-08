@@ -61,6 +61,8 @@ TRANSLATIONS += app_de.ts
        # qmlplugins.path = /libs/armeabi
         }
 
+        QML_ROOT_PATH=../../qml/
+
         #This is the only locally deployed qml file. Its purpose is to provide initial logic for connecting to the core,
         #and error handling, etc. It is not designer editable and should be considered as and .h / .cpp file when changing
         #and the implications of such.

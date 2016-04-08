@@ -10,6 +10,14 @@ Item{
     property bool mediaPlayerConnected:lmceData.connected
     property int mediaPlayerId:manager.mediaPlayerID
     property bool active:lmceData.mediaPlaying
+    property string k_currentMediaTitle: qmlPlayer.playbackState === MediaPlayer.PlayingState ? qmlPlayer.metaData.title : ""
+
+    onK_currentMediaTitleChanged: {
+        if(manager.i_current_mediaType !== (4||5) )
+            qmlPlayer.checkMetaData()
+    }
+
+
 
     function prepareMedia(mediaUrl){
         processLabel.text="Please Wait, pre-processing media for mobile device."
@@ -113,8 +121,8 @@ Item{
 
         Component.onCompleted: {
             if(manager.mediaPlayerID!==-1){
-                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                console.log("onCompleted::initializing qml media player::"+manager.mediaPlayerID+"::"+manager.m_ipAddress)
+                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
+                console.log("onCompleted::initializing qml media player::"+manager.mediaPlayerID+"::"+manager.currentRouter)
             }
         }
 
@@ -123,13 +131,13 @@ Item{
             onMediaPlayerIdChanged:{
                 if(manager.mediaPlayerID!==-1){
                     console.log("onIdChanged::initializing qml media player::"+manager.mediaPlayerID)
-                    lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                    lmceData.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
                 }
             }
             onConnectedStateChanged:{
                 if(manager.connectedState ){
                     qmlPlayer.stop()
-                    //lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                    //lmceData.setConnectionDetails(manager.mediaPlayerID, manager.currentRouter)
                     mediaPlayerRoot.restart()
                 }
             }
@@ -141,9 +149,32 @@ Item{
         autoPlay: true
         autoLoad: true
 
+        function checkMetaData(){
+
+
+            console.log("Checking Metadata")
+            console.log(JSON.stringify(metaData, null, "\t"))
+            var title = qmlPlayer.metaData.title
+            var artist = qmlPlayer.metaData.albumArtist
+
+            if(String(title).length==0)
+                title=qmlPlayer.source
+
+            if(String(artist).length==0)
+                artist=qsTr("Unknown Artist")
+
+            lmceData.playbackInfoUpdated(title, qmlPlayer.metaData.publisher, qmlPlayer.metaData.albumArtist, 54)
+
+//            lmceData.pluginNotifyStart(
+//                        String("\nTitle: "+qmlPlayer.metaData.title+"\t"),
+//                        qmlPlayer.metaData.audioCodec,
+//                        qmlPlayer.metaData.videoCodec
+//                        ) ;
+        }
+
         onPlaybackStateChanged: {
             switch (playbackState){
-            case MediaPlayer.PlayingState: lmceData.pluginNotifyStart() ;break
+            case MediaPlayer.PlayingState: checkMetaData();  break
             case MediaPlayer.PausedState: console.log("Qml Player Has Been Paused"); break;
             case MediaPlayer.StoppedState: console.log("Preparing next media") ; break;
             default:console.log("Playback State Changed"); break;
@@ -172,6 +203,7 @@ Item{
         }
 
         onMediaObjectChanged: {
+            console.log("MediaInterface::OnMediaObjectChanged")
             console.log(JSON.stringify(metaData, null, "\t"))
             lmceData.playbackInfoUpdated(metaData);
         }

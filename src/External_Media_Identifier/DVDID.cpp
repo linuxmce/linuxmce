@@ -30,10 +30,9 @@ string DVDID::DVDID_get()
   if (m_sPath.empty())
     return "";
 
-  int i=0;
   int e=0;
 
-  i=dvdid_calculate(&m_iDVDID,m_sPath.c_str(),&e);
+  dvdid_calculate(&m_iDVDID,m_sPath.c_str(),&e);
 
   sprintf(output,"%08" PRIx32 "%08" PRIx32, (uint32_t)(m_iDVDID >> 32), (uint32_t)m_iDVDID);
   sOutput=output;

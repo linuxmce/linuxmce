@@ -279,8 +279,8 @@ Item {
         interval:10000
         useAnimation: false
         onDebugInfoChanged: console.log(debugInfo)
-        active:true //manager.m_ipAddress==="192.168.80.1"
-        requestUrl:manager.m_ipAddress
+        active:true //manager.currentRouter==="192.168.80.1"
+        requestUrl:manager.currentRouter
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
             console.log("Orbiter Consume Screensaver images")
