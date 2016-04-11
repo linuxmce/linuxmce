@@ -32,8 +32,11 @@ IPTables()
 		
 		grep -qv "[-]" <<< $RuleType
         if [ ! $? -eq 0 ]; then
-			Table="$(echo $RuleType | cut -d"-" -f 1)"
-			 RuleType="$(echo $RuleType | cut -d"-" -f 2)"
+			tmp="$(echo $RuleType | cut -d"-" -f 1)"
+			if [ ! $tmp = "fail2ban" ]; then
+				Table="$(echo $RuleType | cut -d"-" -f 1)"
+				RuleType="$(echo $RuleType | cut -d"-" -f 2)"
+			fi
 		fi
 		
 		if [[ "$RuleType" = "input" ]] || [[ "$RuleType" = "forward" ]] || [[ "$RuleType" = "output" ]]; then
@@ -267,7 +270,8 @@ Manual_CHain_Rules()
 				tmp=$(Field 10 "$Port")
                 echo $tmp | grep -q '-'
                 if [ $? -eq 0 ]; then
-					Table="$(echo $tmp | cut -d"-" -f 1)"
+					#Table="$(echo $tmp | cut -d"-" -f 1)"
+					Table=""
 				fi
 		if [ "$Table" = "NULL" ]; then
 			Table=""
@@ -275,8 +279,8 @@ Manual_CHain_Rules()
                 RPolicy=$(Field 11 "$Port")
                 Description=$(Field 12 "$Port")
 
-                #echo IPTables "$IPVersion" "-A $chain" "$IntIf" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
-                          IPTables "$IPVersion" "add" "0" "$Table" "$chain" "$IntIf" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
+                echo IPTables "$IPVersion" "-A $chain" "$IntIf" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
+                     IPTables "$IPVersion" "add" "0" "$Table" "$chain" "$IntIf" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
         done
 }
 
