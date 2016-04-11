@@ -6,8 +6,9 @@
 #program selection - please choose only one
 
 #ban="csf"
-ban="iptables"
+#ban="iptables"
 #ban="apf"
+ban="lmce"
 
 #logfile
 
@@ -39,11 +40,16 @@ echo "`date` - adding new blocks" >> $log
 echo "------------------------------------------------------------------------------------------" >> $log
 echo "" >> $log
 blocklist=$(cat /etc/block.txt |awk '/^[0-9]/'|awk '{print $1"/"$3}'|sort -n)
-$iptables -F BLOCKLIST
-$iptables -X BLOCKLIST
-$iptables -D INPUT -j BLOCKLIST
-$iptables -N BLOCKLIST
-$iptables -I INPUT -j BLOCKLIST
+if [ $ban == "iptables" ]; then
+	$iptables -F BLOCKLIST
+	$iptables -X BLOCKLIST
+	$iptables -D INPUT -j BLOCKLIST
+	$iptables -N BLOCKLIST
+	$iptables -I INPUT -j BLOCKLIST
+elif [ $ban == "lmce" ]; then
+	/usr/pluto/bin/Network_Firewall.sh -L BLOCKLIST -A Flush
+	/usr/pluto/bin/Network_Firewall.sh -L Rule -H local -A addchain -C BLOCKLIST -P chain-ipv4
+fi
 for ip in $blocklist
 do
     if [ $ban == "csf" ]; then
@@ -55,6 +61,10 @@ do
     elif [ $ban == "apf" ]; then
       echo "`date` - running 'apf -d $ip {DSHIELD_`date +%Y.%m.%d`}'" >> $log
       $apf -d $ip {DSHIELD_`date +%Y.%m.%d`}
+   elif [ $ban == "lmce" ]; then
+	
+	echo "`date` - running 'lmce -d $ip {DSHIELD_`date +%Y.%m.%d`}'" >> $log
+	/usr/pluto/bin/Network_Firewall.sh -L BLOCKLIST -H local -A add -P all-ipv4 -C BLOCKLIST -R $ip -T DROP
     fi
 done
 
