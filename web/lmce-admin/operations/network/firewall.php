@@ -19,7 +19,7 @@ function firewall($output,$dbADO) {
 		parse_str($comf);
 	}		
 	if(count($retArray)==0){
-		$_GET['error'].='Insuffient rights: pluto.conf file cannot be opened.';
+		$_GET['error'].='Insufficient rights: pluto.conf file cannot be opened.';
 	}
 	// grep all interfaces
 	exec('cat /proc/net/dev | tail -n +3 | cut -d":" -f 1  | sed -e \'s/^[ \t]*//\'',$ifArray);
@@ -1070,7 +1070,6 @@ function firewall($output,$dbADO) {
 			}
 			$options.=' -I '.$IntIF.' -O '.$ExtIF.' -M \''.$Matchname.'\' -P \''.$Protocol.'\' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
-			echo $options;
 			}
 
 		if (isset($_POST['save_Rule'])){
@@ -1160,7 +1159,6 @@ function firewall($output,$dbADO) {
 				$options.=' -p '.$Place;
 			}
 			$options.=' -A add -I '.$IntIF.' -O '.$ExtIF.' -M \''.$Matchname.'\' -P \''.$Protocol.'\' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
-			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 		}
 		
@@ -1179,7 +1177,6 @@ function firewall($output,$dbADO) {
 			$row=$res->FetchRow();
 			$old_name=$row['Matchname'];
 			$options='-L Rule -H local -A editchain -C '.$chain_name.' -P '.$fwVersion.' -c '.$old_name.'';
-			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 		}
 		
@@ -1190,7 +1187,6 @@ function firewall($output,$dbADO) {
 			$Chain=$row['Matchname'];
 			$Protocol=$row['Protocol'];
 			$options='-L Rule -H local -A delchain -C '.$Chain.' -P '.$Protocol.'';
-			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 		}
 		
@@ -1229,7 +1225,6 @@ function firewall($output,$dbADO) {
 			$Protocol=$row['Protocol'];
 			$Place=$row['Place'];
 			$options='-L Rule -H local -A move -p '.$Place.' -C '.$RuleType.' -P '.$Protocol.' -c '.$_GET['action'].'';
-			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
         }
 		
@@ -1327,7 +1322,8 @@ function firewall($output,$dbADO) {
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh'.$options);
 		}
 		
-		//header("Location: index.php?section=firewall&msg=".translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
+		//echo $options;
+		header("Location: index.php?section=firewall&msg=".translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
 	}
 	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
 	$output->setPageTitle(translate('TEXT_FIREWALL_RULES_CONST'));
