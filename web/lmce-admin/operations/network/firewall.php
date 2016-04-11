@@ -19,7 +19,7 @@ function firewall($output,$dbADO) {
 		parse_str($comf);
 	}		
 	if(count($retArray)==0){
-		$_GET['error'].='Insuffient rights: pluto.conf file cannot be opened.';
+		$_GET['error'].='Insufficient rights: pluto.conf file cannot be opened.';
 	}
 	// grep all interfaces
 	exec('cat /proc/net/dev | tail -n +3 | cut -d":" -f 1  | sed -e \'s/^[ \t]*//\'',$ifArray);
