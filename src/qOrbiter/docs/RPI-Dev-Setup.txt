@@ -1,0 +1,30 @@
+This document is intended to serve as a guide to setting up a Raspberry Pi to function as a Media Director with linuxMCE
+
+==Hardware==
+As per current linuxMCE documentation at http://wiki.linuxmce.org/index.php/RaspberryPi
+Your core must be LinuxMCE 1204 or higher.
+The recommended device is the RPiB 2 or 3. The RPiB 2 runs at a reasonable speed and can support most functions of a LinuxMCE MediaDirector. The RPiB 3 runs about 50% faster in tests than the RPiB 2.
+The following Raspbian based SD cards are bootable on anything that is a Raspberry Pi Model B or higher. RPiB 1 performance is very, very, very slow.
+
+==Setup==
+This section is intended to outline the steps needed for setting up your linuxmce installation.
+
+=On the Core=
+You will need to do these things BEFORE you run the raspberry pi for the first time to make this as smooth as possible.
+
+*Create qMD device on  your core manually.
+*Set the MAC address manually. This does mean you will need the mac address somehow before booting it to see the mac address...
+**How?
+*Run the two following scripts, in this order on your core.
+** /usr/pluto/bin/Diskless_Setup.sh
+** /usr/pluto/bin/Disked_Setup.sh
+
+Proceed to the raspberry pi setup portion.
+
+=Raspberry Pi Image=
+You can find the link to the latest image here: http://wiki.linuxmce.org/index.php/RaspberryPi#Setup_Steps
+
+*DL the image
+*Untar the image
+*Utilize the dd instructions on Raspberry pi
+** Linux https://www.raspberrypi.org/documentation/installation/installing-images/linux.md
