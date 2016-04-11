@@ -82,8 +82,7 @@ symbian:TARGET.UID3 = 0xE15A481D
 # Allow network access on Symbian
 symbian:TARGET.CAPABILITY += NetworkServices
 
-# Default rules for deployment.
-include(deployment.pri)
+
 
 # When we do stuff for Symbian, why not define the target in here...
 symbian {
@@ -119,7 +118,8 @@ linux-rasp-pi-g++ || pi{
        # DEPLOYMENTFOLDERS += folder_02  #folder_01
         QT+= qml
         QT-=declarative
-        target.path=/opt/QOrbiter      
+        DESTDIR=""
+        target.path=/usr/pluto/bin
         INSTALLS+=target
 
         plugins_folder.source = imports
@@ -256,13 +256,15 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 INCLUDEPATH += ../../ ../../DCE/
 
 
-RESOURCES+= skinData.qrc
+
 
 noqrc{
 DEFINES+=NOQRC
-RESOURCES+=qmlFile.qrc
+RESOURCES-=qmlFile.qrc
+RESOURCES-=skinData.qrc
 } else {
 RESOURCES+=qmlFile.qrc
+RESOURCES+= skinData.qrc
 }
 
 
@@ -558,7 +560,8 @@ DISTFILES += \
     qml/skins/default/components/FloorplanFanSwitch.qml \
     qml/skins/default/components/FloorplanSetTemp.qml \
     qml/skins/default/components/FloorplanHeatCool.qml \
-    qml/skins/default/components/FloorplanDefaultControl.qml
+    qml/skins/default/components/FloorplanDefaultControl.qml \
+    ../docs/RPI-Dev-Setup.txt
 
 
 

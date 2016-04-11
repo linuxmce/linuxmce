@@ -18,10 +18,14 @@ default=LinuxMCE.conf
 defaultssl=LinuxMCE-ssl.conf
 
 PHP_CONFIG_FILE=
-if [[ -e /etc/php5/apache2/php.ini ]] ;then
-	PHP_CONFIG_FILE=/etc/php5/apache2/php.ini
+if [[ -e /etc/php/7.0/apache2/php.ini ]] ; then
+	PHP_CONFIG_FILE=/etc/php/7.0/apache2/php.ini
 else
-	PHP_CONFIG_FILE=/etc/php4/apache2/php.ini
+	if [[ -e /etc/php5/apache2/php.ini ]] ;then
+		PHP_CONFIG_FILE=/etc/php5/apache2/php.ini
+	else
+		PHP_CONFIG_FILE=/etc/php4/apache2/php.ini
+	fi
 fi
 
 # clean out old pluto-admin links

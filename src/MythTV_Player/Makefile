@@ -6,10 +6,20 @@ SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3 -fmessage-length=0
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = -L$(ROOT)/lib
-EXTERNAL_LIBS_NAMES = mysqlclient_r pthread
+EXTERNAL_LIBS_NAMES = pthread
 INTERNAL_LIBS_NAMES = SerializeClass DCECommon PlutoUtils WindowUtils
+
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDFLAGS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDFLAGS += -lmysqlclient_r
+endif
 
 MYNAME = MythTV_Player
 VERSION = 2.0.0

@@ -32,11 +32,44 @@
 #include <QStringList>
 #include <QImage>
 #include <QUrl>
+#include "QQmlListProperty"
 
 #ifdef debug
 #include <QDebug>
 #endif
+#include "qmap.h"
+#include "../pluto_media/Define_AttributeType.h"
 
+
+class FileDetailsObject : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QString attribute READ attribute WRITE setAttribute NOTIFY attributeChanged)
+    Q_PROPERTY(int attributeValue READ attributeValue WRITE setAttributeValue NOTIFY attributeValueChanged)
+    Q_PROPERTY(int attributeType READ attributeType WRITE setAttributeType NOTIFY attributeTypeChanged)
+
+public:
+    FileDetailsObject(int a, QString b, int c):m_attributeValue(a), m_attribute(b), m_attributeType(c) { }
+    FileDetailsObject(){}
+
+    QString attribute() const{ return m_attribute; }
+    void setAttribute(const QString &attribute){ m_attribute= attribute; emit attributeChanged();}
+
+    int attributeValue() const{ return m_attributeValue; }
+    void setAttributeValue(int attributeValue) { m_attributeValue = attributeValue; emit attributeValueChanged(); }
+
+    int attributeType() {return m_attributeType;}
+    void setAttributeType(int attributeType){m_attributeType = attributeType; emit attributeTypeChanged(); }
+
+signals:
+    void attributeValueChanged();
+    void attributeChanged();
+    void attributeTypeChanged();
+private:
+    QString m_attribute;
+    int m_attributeValue;
+    int m_attributeType;
+};
 
 /*!
  * \brief The FileDetailsClass class is responsible for presenting a files properties in one object.
@@ -57,26 +90,38 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)/*!< \brief The string value of the storage device. \ingroup file_details*/
 
 
-   // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
+    // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
     Q_PROPERTY(QString rating READ getRating WRITE setRating NOTIFY ratingChanged)/*!< \brief The rating if availible of the media.  \ingroup file_details*/
     //media title variable that can be independant of what is passed initially by now playing
     Q_PROPERTY(QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged )/*!< \brief The main title of the media \ingroup file_details*/
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)/*!< \brief Duplicate of qs_maintitle? \ingroup file_details*/
+
     Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged) /*!< \brief Genre of media \ingroup file_details*/
+    Q_PROPERTY(QQmlListProperty<FileDetailsObject> genreList READ genreList NOTIFY genreChanged)
+
     Q_PROPERTY (QString studio READ getStudio WRITE setStudio NOTIFY studioChanged) /*!< \brief Publishing studio if availible  \ingroup file_details*/
+    Q_PROPERTY(QQmlListProperty<FileDetailsObject> studioList READ studioList NOTIFY studioChanged)
     //television related variables
     Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged) /*!< \brief The current program. Applies to tv and some broadcast media  \ingroup file_details*/
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)/*!<  \brief The current channel for broadcast media file_details*/
     Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged) /*!< \brief Schedules direct channel id  \ingroup file_details*/
     Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged) /*!< \brief Episode number   \ingroup file_details*/
+
     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged) /*!< \brief The director of the current media.  \ingroup file_details*/
+    Q_PROPERTY(QQmlListProperty <FileDetailsObject> directorList READ directorList NOTIFY directorChanged )
+
+
     //audio related
     Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged) /*!< \brief The album  \ingroup file_details*/
     Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged) /*!< \brief The current track \ingroup file_details*/
+
     Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged) /*!< \brief String of '|' seperated performers.  \ingroup file_details*/
     Q_PROPERTY (QStringList performers READ getPerformerList) /*!< \brief List of performers \warning experimental  \ingroup file_details*/
+    Q_PROPERTY(QQmlListProperty <FileDetailsObject>performersList READ performersList NOTIFY performersChanged )
+    Q_PROPERTY(QQmlListProperty<FileDetailsObject> albumArtistList READ albumArtistList NOTIFY albumArtistChanged)
     Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged) /*!< Composer  \ingroup file_details*/
     Q_PROPERTY (QStringList composers READ getComposerList) /*!< \brief List of composers \warning Experimental  \ingroup file_details*/
+
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo change to enum.  \ingroup file_details*/
     Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged)
     Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged)
@@ -133,6 +178,7 @@ public:
 
 
 signals:
+    void albumArtistChanged();
     void storageDeviceChanged();
     void objectChanged();
     void pathChanged();
@@ -186,30 +232,29 @@ signals:
 
 public slots:
 
+    void handleNewFileAttribute(int attribType, int attribute, QString val);
+
     void clear();
 
     void setRating(const QString r) {rating = r; emit ratingChanged();}
     QString getRating(){return rating;}
 
+
     void setStorageDevice(const QString device) {
         qs_storageDevice = device;
-        if(device=="-1")
-        {
-            storageDeviceNo=-1;
-        }
+        if(device=="-1") {  storageDeviceNo=-1; }
         else
-        {
-            storageDeviceNo = qs_storageDevice.toInt();
-        }
+        { storageDeviceNo = qs_storageDevice.toInt(); }
         emit storageDeviceChanged();
     }
 
     QString getStorageDevice() {return qs_storageDevice;}
 
-
-
     void setProgram(const QString newProgram) {program = newProgram;  emit programChanged();}
-    QString getProgram () {return program;}
+    QString getProgram () {
+        if(!m_attributeMap.contains(ATTRIBUTETYPE_Program_CONST)) return "";
+        return m_attributeMap.value(ATTRIBUTETYPE_Program_CONST).at(0)->attribute();
+    }
 
     void setTitle (const QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
     QString getTitle () {return qs_mainTitle;}
@@ -227,9 +272,18 @@ public slots:
     QString getMediaTitle () {return mediatitle;}
 
     void setStudio (const QString inc_studio) {studio.append(inc_studio) = inc_studio;  emit studioChanged();}
-    QString getStudio () {return studio;}
+    QString getStudio () {
+        if(!m_attributeMap.contains(ATTRIBUTETYPE_Studio_CONST) || m_attributeMap.value(ATTRIBUTETYPE_Studio_CONST).isEmpty())
+            return "";
+        return m_attributeMap.value(ATTRIBUTETYPE_Studio_CONST).first()->attribute();
+    }
+    QQmlListProperty<FileDetailsObject> studioList(){
+        return QQmlListProperty<FileDetailsObject>(this, m_studioList);
+    }
 
     //--tv getters and setters-------------//
+
+
 
     void setChannel (const QString inc_channel) {channel = inc_channel;  emit channelChanged();}
     QString getChannel () {return channel;}
@@ -251,6 +305,14 @@ public slots:
     QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
     QStringList getPerformerList() {return performers;}
 
+    QQmlListProperty <FileDetailsObject> performersList(){
+        return QQmlListProperty<FileDetailsObject>(this, m_performerList);
+    }
+
+    QQmlListProperty<FileDetailsObject> albumArtistList(){
+        return QQmlListProperty<FileDetailsObject>(this, m_albumArtistList);
+    }
+
     void setComposers (const QString inc_composer) {composers << inc_composer;  emit composersChanged();}
     QString getComposers() {composerlist = composers.join(" | "); return composerlist;}
     QStringList getComposerList() {return composers;}
@@ -258,8 +320,17 @@ public slots:
     void setDirector (const QString inc_director) {directors << inc_director;  emit directorChanged();}
     QString getDirector() {director = directors.join(" | "); return director;}
 
+    QQmlListProperty <FileDetailsObject> directorList() {
+       QList<FileDetailsObject*> t =  m_attributeMap.value(ATTRIBUTETYPE_Director_CONST);
+        return QQmlListProperty<FileDetailsObject>(this,t);
+    }
+
     void setGenre (const QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
     QString getGenre() { return genre;}
+
+    QQmlListProperty<FileDetailsObject> genreList(){
+        return QQmlListProperty<FileDetailsObject>(this, m_genreList);
+    }
 
     void setFileMediaType();
 
@@ -300,6 +371,17 @@ public slots:
 
     // Q_INVOKABLE void setSelectionStatus(QString format);
     // Q_INVOKABLE bool getSelectionStatus();
+private:
+    QHash<int, QList<FileDetailsObject*> > m_attributeMap;
+    QMap<int, QString> m_performerMap;
+
+    QList<FileDetailsObject*>  m_performerList;
+    QList<FileDetailsObject*>  m_albumArtistList;
+    QList<FileDetailsObject*>  m_studioList;
+    QList<FileDetailsObject*>  m_genreList;
+    QList<FileDetailsObject*>  m_composerWriterList;
+    QList<FileDetailsObject*>  m_directorList;
+    QMap<int, FileDetailsObject*>  m_singleItemMap;
 
 };
 

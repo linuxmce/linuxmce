@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = -L$(ROOT)/lib
-BASELDLIBS = -lPlutoUtils -lDCECommon
+BASELDLIBS = -lPlutoUtils -lDCECommon -lSerializeClass
 
 MYNAME = MediaIdentifierTest
 VERSION = 2.0.0

@@ -121,6 +121,8 @@ void GetInformation(const ID3_Tag &myTag, map<int,string>& mapAttributes,
 		PK_Attr = ATTRIBUTETYPE_Episode_CONST;
 	else if(id == "TPE1")
 		PK_Attr = ATTRIBUTETYPE_Performer_CONST;
+	else if(id == "TPE2")
+		PK_Attr = ATTRIBUTETYPE_Album_Artist_CONST;
 	else if(id == "TCON")
 		PK_Attr = ATTRIBUTETYPE_Genre_CONST;
 	else if(id == "TRCK")
@@ -544,6 +546,11 @@ void SetId3Info(string sFilename, const map<int,string>& mapAttributes,
 
         switch(PK_Attr)
         {
+	    // TODO: deal with ATTRIBUTETYPE_Album_Artist_CONST, no generalized function??
+	    case ATTRIBUTETYPE_Album_Artist_CONST:
+		//ID3x_AddAlbumArtist(&myTag, sValue.c_str(), true); // ??
+	        break;
+
             case ATTRIBUTETYPE_Performer_CONST:
                 ID3_AddArtist(&myTag, sValue.c_str(), true); 
                 break;
@@ -591,6 +598,11 @@ void RemoveId3Tag(string sFilename, int nTagType, string sValue)
 
 	switch(nTagType)
 	{
+	    // TODO: deal with ATTRIBUTETYPE_Album_Artist_CONST, no generalized function??
+		case ATTRIBUTETYPE_Album_Artist_CONST:
+			//ID3x_RemoveAlbumArtist(&myTag); // ??
+			break;
+
 		case ATTRIBUTETYPE_Performer_CONST:
 			ID3_RemoveArtists(&myTag); 
 			break;

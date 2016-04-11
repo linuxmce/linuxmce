@@ -5,12 +5,15 @@ LDFLAGS = -L$(ROOT)/lib
 LDLIBS = -lRACommon -lDCECommon -lPlutoUtils -lSerializeClass -lpthread #-lattr 
 CXX = g++
 
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
-
-#
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
 
 sources = CommonFunctions.cpp Tribunerequests.cpp R_GetLineups.cpp \
 	R_GetChannels.cpp R_GetDiffs.cpp ClientFunctions.cpp \

@@ -59,8 +59,9 @@ bool MDRCDParser::parse()
       xml_node xnTrackNum=xnTRACK;
       xml_node xnTrackTitle=xnTRACK;
       string sTrackNum=xnTrackNum.child_value("trackNumber");
+      string sTrackPerformer=xnTrackNum.child_value("trackPerformer");
       string sTrackTitle=xnTrackNum.child_value("trackTitle");
-      MDRTrack *t = new MDRTrack(sTrackNum, sTrackTitle);
+      MDRTrack *t = new MDRTrack(sTrackNum, sTrackPerformer, sTrackTitle);
       m_pReply->Track_add(t);
     }
   return true;
@@ -85,6 +86,7 @@ bool MDRCDParser::parse()
 // 	{
 // 	  MDRTrack* t = *it;
 // 	  cout << "Track: " << t->TrackNumber_get() << endl;
+// 	  cout << "Performer: " << t->TrackPerformer_get() << endl;
 // 	  cout << "Title: " << t->TrackTitle_get() << endl;
 // 	  cout << "-------------------------------------------------------" << endl;
 // 	}

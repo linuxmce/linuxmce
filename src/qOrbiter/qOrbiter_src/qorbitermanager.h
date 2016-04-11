@@ -245,13 +245,13 @@ class qorbiterManager : public QObject
 
 public:
 #if QT5 && !ANDROID
-    qorbiterManager(QObject *qOrbiter_ptr, QQuickView * view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings,QString overridePath, QObject *parent=0);  //constructor
+    qorbiterManager(QObject *qOrbiter_ptr, QQuickView * view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings,QString overridePath, bool isOsd, QObject *parent=0);  //constructor
 #elif ANDROID && QT5
-    qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath,QObject *parent=0);
+    qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath,bool isOsd=false, QObject *parent=0);
 #elif ANDROID
-    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings,QString overridePath,   QObject *parent =0);
+    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings,QString overridePath, bool isOsd=false,  QObject *parent =0);
 #elif   QT4_8
-    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView * view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath, QObject *parent=0);  //constructor
+    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView * view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath,bool isOsd =false, QObject *parent=0);  //constructor
 #endif
 
     ~qorbiterManager();
@@ -584,6 +584,9 @@ Param 10 - pk_attribute
     void setCurrentRouter( QString currentRouter) {if(m_currentRouter==currentRouter) return; m_currentRouter = currentRouter; emit currentRouterChanged();  }
 
 signals:
+    void forceReloadRouter();
+    void newDceAlert(QString text, QVariant tokens, int timeout, int interruption);
+
     void currentRouterChanged();
 
     void appHeightChanged();
@@ -826,7 +829,9 @@ signals:
 
 public slots:
 
+    void jumpToAttributeGrid(int attributeType, int attribute);
 
+    void handleDceAlert(QString text, QString tokens, int timeout, int interruption);
     int entertainArea() {return iea_area;}
     int room() {return iFK_Room;}
     void setHostDevice(int d){ if(hostDevice != d ) {hostDevice=d; emit hostDeviceChanged(); }  }
@@ -1669,6 +1674,7 @@ public slots:
     void replaceHandler();
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
+    void forceReload();
     void setVariable(int variable, QString valueToAssign){ if(!valueToAssign.isEmpty())  emit setDceVar(variable, valueToAssign);  }
     void setText(QString sDesignObj, QString sValue, int iPK_Text);
     //@}
@@ -1696,55 +1702,73 @@ public slots:
 
     void handleDceGuiCommand(int c){
         QString cmdOut;
+       int keyEvent=-1;
 
         switch(c){
         case BackClearEntry:
             emit dceRemoteCommand(c , "Back/Clear Entry" );
+            keyEvent = Qt::Key_Clear;
             break;
 
         case BackPriorMenu:
             emit dceRemoteCommand(c , "Back/Prior Menu" );
+             keyEvent = Qt::Key_Back;
             break;
 
         case EnterGo:
             emit dceRemoteCommand(c , "Enter/Go" );
+            keyEvent = Qt::Key_Enter;
             break;
 
         case Guide:
             emit dceRemoteCommand(c , "Guide" );
+            keyEvent = Qt::Key_F6;
             break;
 
         case Menu:
             emit dceRemoteCommand(c , "Menu" );
+            keyEvent = Qt::Key_Menu;
             break;
 
         case MoveDown:
             emit dceRemoteCommand(c , "Move Down" );
+            keyEvent = Qt::Key_Down;
             break;
 
-        case MoveLeft:
+        case MoveLeft:           
             emit dceRemoteCommand(c , "Move Left" );
+            keyEvent = Qt::Key_Left;
             break;
 
         case MoveRight:
             emit dceRemoteCommand(c , "Move Right" );
+            keyEvent = Qt::Key_Right;
             break;
 
         case MoveUp:
             emit dceRemoteCommand(c , "Move Up" );
+            keyEvent = Qt::Key_Up;
             break;
 
         case Off:
             emit dceRemoteCommand(c , "Off" );
+            keyEvent = Qt::Key_PowerOff;
             break;
 
         case On:
             emit dceRemoteCommand(c , "On" );
+            keyEvent = Qt::Key_Zenkaku_Hankaku;
             break;
 
         default:
             qWarning()<< "unhandled command" << cmdOut;
         }
+
+        if(keyEvent != -1){
+            QKeyEvent *outKey = new QKeyEvent (QEvent::KeyPress, keyEvent , Qt::NoModifier);
+            QCoreApplication::postEvent (m_appEngine->rootObjects().first(), outKey);
+        }
+
     }
 
     Q_INVOKABLE void setLanguage(QString lang){
@@ -1840,7 +1864,7 @@ public slots:
         }
 
         checkOrientation(QSize(appWidth, appHeight));
-       m_appEngine->clearComponentCache();
+        m_appEngine->clearComponentCache();
         // updateProfileSelector();
     }
 

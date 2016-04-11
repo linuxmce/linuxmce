@@ -296,8 +296,10 @@ int main(int argc, char* argv[])
             screenSize=0;
             break;
         case 'o':
-            screen="fullscreen";
-            screenSize=0;
+            //used for md type devices. a work around at the moment
+            screen="md-fullscreen";
+            screenSize=-1;
+            deviceType=0;
             break;
         case 'z':
             screenSize=atoi(argv[++optnum]);
@@ -371,6 +373,14 @@ int main(int argc, char* argv[])
 #endif
         bool fs = false;
         bool fm = false;
+        bool isOsd = screen=="md-fullscreen"; //qOrbiter::PK_DeviceTemplate_get_static()==DEVICETEMPLATE_OnScreen_qOrbiter_CONST;
+        if(isOsd){
+            qDebug() << "Starting qMd";
+            fs=true;
+            fm=true;
+        } else {
+            qDebug() << "Starting client qorbiter " << qOrbiter::PK_DeviceTemplate_get_static();
+        }
         if(screen =="fullscreen"){
             fs=true;
             fm=true;
@@ -412,7 +422,9 @@ int main(int argc, char* argv[])
             sRouter_IP = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_ExternalHostname).toString().toStdString();
 
         QString name = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
+
         qOrbiter pqOrbiter(name, PK_Device, sRouter_IP,true,bLocalMode );
+        pqOrbiter.setOsd(isOsd);
 
         qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
@@ -438,7 +450,8 @@ int main(int argc, char* argv[])
 
         QQmlApplicationEngine engine;
 
-        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize, &engine);
+
+        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize, &engine, isOsd );
 
         engine.rootContext()->setContextProperty("settings", &settings);
         engine.rootContext()->setContextProperty("orbiterVersion", QString::fromLocal8Bit(VERSION));
@@ -452,7 +465,7 @@ int main(int argc, char* argv[])
 
 #ifndef ANDROID
 
-        qorbiterManager  w(&pqOrbiter, &orbiterWin.mainView, &engine, screenSize, &settings, overrideDir);
+        qorbiterManager  w(&pqOrbiter, &orbiterWin.mainView, &engine, screenSize, &settings, overrideDir, isOsd);
         if(!sRouter_IP.empty()){
             w.setInternalIp(QString::fromStdString(sRouter_IP));
             orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
@@ -511,7 +524,7 @@ int main(int argc, char* argv[])
 
         //shutdown signals
         QObject::connect(&w, SIGNAL(destroyed()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(shutdown()));
+        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &w, SLOT(closeOrbiter()));
         QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
         QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));

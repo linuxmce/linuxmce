@@ -14,7 +14,7 @@ for ((i = 0; i < ${#Params[@]}; i++)); do
         esac
 done
 
-DD_DISTRO_Raspbian_CONST=19
+DISTRO=$(lsb_release -is)
 Executable=/usr/pluto/bin/qorbiter-core-gl
 
 cd /usr/pluto/bin
@@ -22,11 +22,11 @@ cd /usr/pluto/bin
 killall WatchGyroRemote  # In case it was running it will be grabbing the hid device
 
 PLATFORM=""
-if [[ "$PK_Distro" == "$DD_DISTRO_Raspbian_CONST" ]] ;then
+if [[ "$DISTRO" == "Raspbian" ]] ;then
 	# FIXME: this should be done globally - export the rpi library path
 	export LD_LIBRARY_PATH=/opt/vc/lib
 
-	PLATFORM="-platform eglfs"
+	export PLATFORM="-platform eglfs"
 fi
 
 ## Run qOrbiter

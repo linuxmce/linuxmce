@@ -72,13 +72,13 @@ using namespace DCE;
   messaging system will be the initial method of communication
 */
 #if (QT5) && !defined (ANDROID)
-qorbiterManager::qorbiterManager(QObject * qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings, QString overridePath, QObject *parent) :
+qorbiterManager::qorbiterManager(QObject * qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings, QString overridePath, bool isOsd, QObject *parent) :
     #elif ANDROID && QT5
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper,SettingInterface *appSettings, QString overridePath, QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper,SettingInterface *appSettings, QString overridePath, bool isOsd, QObject *parent) :
     #elif ANDROID
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath, QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath, bool isOsd, QObject *parent) :
     #else
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath,  QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath, bool isOsd, QObject *parent) :
 
     #endif
     QObject(parent),qorbiterUIwin(view), tskinModel(NULL),
@@ -105,7 +105,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_window(NULL),
     m_dceRequestNo(1)
 {
-
+    m_bIsOSD = isOsd;
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -115,7 +115,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     //appHeight=480; appWidth=640;
     currentSkin="default";
     QString path;
-
 
     if(m_skinOverridePath==""){
 #ifdef NOQRC
@@ -170,8 +169,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_screenInfo = new ScreenInfo();
     m_selector=new QFileSelector(m_appEngine);
     selector=new QQmlFileSelector(m_appEngine);
-    selector->setSelector(m_selector);
-    qDebug() << m_selector->allSelectors().join("\n");
+   // selector->setSelector(m_selector);
+   // qDebug() << "Selector List\n" << m_selector->allSelectors().join(",");
     //  selector->setSelector(m_selector);
 #endif
 
@@ -253,7 +252,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
         connect(m_window->screen(), SIGNAL(primaryOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         // connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
-        qDebug() << "Set QQuickWindow Ptr";
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
 
@@ -397,8 +395,6 @@ void qorbiterManager::refreshUI(QUrl url){
  */
 void qorbiterManager::processConfig(QNetworkReply *config)
 {
-
-    qDebug() << Q_FUNC_INFO;
 
     if(!alreadyConfigured){
         iPK_Device_DatagridPlugIn =  long(6);
@@ -841,7 +837,7 @@ bool qorbiterManager::OrbiterGen()
  */
 void qorbiterManager::swapSkins(QString incSkin)
 {
-    qDebug() << Q_FUNC_INFO;
+
     emit skinMessage("swapping skin to::" + incSkin);
 
     if(currentSkin==incSkin) return;
@@ -866,7 +862,6 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
         emit skinDataLoaded(false);
         emit skinMessage("Loading has failed, falling back to failsafe!");
         swapSkins("default");
-
     } else {
 
         m_bStartingUp = false;
@@ -998,8 +993,7 @@ void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVar
 
 void qorbiterManager::clearDataGrid(QString dataGridId)
 {
-    if(!modelPoolLock.tryLockForWrite()){
-        //  qDebug() << "clearDatagrid("<<dataGridId<<"):: failed to lock mutex.";
+    if(!modelPoolLock.tryLockForWrite()){      
         return;
     }
 
@@ -1018,7 +1012,6 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
 
     }
     modelPoolLock.unlock();
-    // qDebug() << "manager.clearDataGrid() end";
     emit modelChanged();
 }
 
@@ -1742,19 +1735,19 @@ void qorbiterManager::playMedia(QString FK_Media) {
     }
     //changed to remove media type as that is decided on by the media plugin and passed back
     CMD_MH_Play_Media cmd(
-                          iPK_Device,
-                          iMediaPluginID,
-                          0 ,
-                          FK_Media.toStdString(),
-                          0,
-                          0,
-                          sEntertainArea,
-                          false,
-                          false,
-                          false,
-                          false,
-                          false
-                          );
+                iPK_Device,
+                iMediaPluginID,
+                0 ,
+                FK_Media.toStdString(),
+                0,
+                0,
+                sEntertainArea,
+                false,
+                false,
+                false,
+                false,
+                false
+                );
     emit sendDceCommand(cmd);
 }
 
@@ -1762,7 +1755,7 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
 {
     QString fkFile = QString("!r" + QString::number(disc) + ":" + QString::number(device));
 
-  CMD_MH_Play_Media playDisc(
+    CMD_MH_Play_Media playDisc(
                 iPK_Device,
                 iMediaPluginID,
                 0,
@@ -1777,11 +1770,10 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
                 0 /* bDont_Setup_AV */
                 );
 
-     emit sendDceCommand(playDisc);
+    emit sendDceCommand(playDisc);
 }
 
 void qorbiterManager::mythTvPlay(){
-    qDebug() << "Sending play to mythtv";
     CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, this->nowPlayingButton->getStreamID() , 1000, true);
     emit sendDceCommand(cmd);
 }
@@ -1886,8 +1878,11 @@ bool qorbiterManager::loadSkins(QUrl base)
 void qorbiterManager::quickReload()
 {
     emit reloadRouter();
-    setReloadStatus(true);
+}
 
+void qorbiterManager::forceReload()
+{
+    emit forceReloadRouter();
 }
 
 void qorbiterManager::showUI(bool b){
@@ -1988,8 +1983,8 @@ bool qorbiterManager::writeConfig()
     settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
     qDebug() <<  Q_FUNC_INFO << "Device ID: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     /* old below this line and will be replaced */
-   // qDebug() << Q_FUNC_INFO;
-       //setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
+    // qDebug() << Q_FUNC_INFO;
+    //setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
     QDomDocument localConfig;
     QString xmlPath;
@@ -2070,18 +2065,10 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     qDebug() << "Param = " << param;
     switch (paramType)
     {
-    case 0:
-        setGridMediaType(param);
-        break;
-    case 1:
-        setSubType(param);
-        break;
-    case 2:
-        setGridFileFormat(param);
-        break;
-    case 3:
-        setGridAttributeGenres(param);
-        break;
+    case 0: setGridMediaType(param);            break;
+    case 1: setSubType(param);                  break;
+    case 2: setGridFileFormat(param);           break;
+    case 3: setGridAttributeGenres(param);        break;
     case 4:
         if (!param.contains("!D")){
 
@@ -2097,9 +2084,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         }
         break;
 
-    case 5:
-        setGridUsersPrivate(param+","+QString::number(userList->currentPrivateUser));
-        break;
+    case 5:setGridUsersPrivate(param+","+QString::number(userList->currentPrivateUser));  break;
     case 6:
         if (param.contains("!P"))    {
             break;
@@ -2107,12 +2092,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             setGridAttributeTypeSort(param);
             break;
         }
-    case 7:
-        setGridPkUsers(param);
-        break;
-    case 8:
-        setGridLastViewed(param);
-        break;
+    case 7: setGridPkUsers(param);         break;
+    case 8: setGridLastViewed(param);      break;
     case 9:
         if(param.contains("!F") || param.contains("!P")){
             break;
@@ -2194,8 +2175,7 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
     if(p){
 
         QVariantMap b;
-        b.insert("commands", t["commands"]);
-        //  qDebug() << b;
+        b.insert("commands", t["commands"]);    
         p->setDeviceCommand(b);
         //       foreach(QVariant cmd , t["commands"].toMap()){
         //           QVariantMap l = cmd.toMap();
@@ -2244,12 +2224,11 @@ int qorbiterManager::cancelRecording(QString sID, QString sProgramID) {
 
 void qorbiterManager::ejectDisc(int discDrive, int slot)
 {
-    qDebug() << Q_FUNC_INFO;
     emit ejectDiscDrive((long)discDrive, slot);
 }
 
-void qorbiterManager::updatePlaylist(){
-    qDebug() << "playlist updating;";
+void qorbiterManager::updatePlaylist()
+{
     GenericFlatListModel *pModel = getDataGridModel("Playlist", 18, "38");
     if(pModel){pModel->refreshData();}
 }
@@ -2257,6 +2236,16 @@ void qorbiterManager::updatePlaylist(){
 DCECommand* qorbiterManager::getDCECommand()
 {
     return new DCECommand(m_dceRequestNo.fetchAndAddAcquire(1));
+}
+
+void qorbiterManager::jumpToAttributeGrid(int attributeType, int attribute)
+{
+    mediaFilter.setFilterFromMediaGrid(attributeType,attribute);
+}
+
+void qorbiterManager::handleDceAlert(QString text, QString tokens, int timeout, int interruption)
+{
+    emit newDceAlert(text, QVariant(tokens), timeout, interruption);
 }
 
 void qorbiterManager::updateImageChanged(QImage img)
@@ -2374,7 +2363,6 @@ void qorbiterManager::checkConnection()
 
 bool qorbiterManager::cleanupData()
 {
-    qDebug() << "Cleaning up data";
     roomLights->clear();                 //current room scenarios model
 
 
@@ -2454,7 +2442,7 @@ void qorbiterManager::processError(QString msg)
 
 void qorbiterManager::setActiveSkin(QString name){
 
-    qDebug() <<"qOrbiterManager::setActiveSkin("<<name<<")";
+
     if(!mb_useNetworkSkins){
         swapSkins(name);
         return;
@@ -2640,14 +2628,23 @@ bool qorbiterManager::setSizeSelector()
     QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
     QStringList t;
 
+
     if(m_testScreenSize==-1){
         qDebug () << Q_FUNC_INFO << "Using device information ";
-        t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+
+        if(m_bIsOSD){
+              t  << "md"<<  m_screenInfo->primaryScreen()->deviceSizeString() <<  psize  << m_screenInfo->primaryScreen()->resolutionString(); ;
+
+            qDebug() << "Device set as embedded (rpi) device";
+        } else {
+              t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+        }
+
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
         m_window->setPosition(250, 250);
-        setAppH(400);
-
+       // setAppH(640);
+       // setAppW(800);
 #else
         m_window->showFullScreen();
 #endif
@@ -2685,6 +2682,7 @@ bool qorbiterManager::createThemeStyle()
         qWarning() << " Window Set, loading theme style";
     }
 
+
     selector->setSelector(m_selector);
     if(m_style ){
         qDebug() << Q_FUNC_INFO << "Deleting style";
@@ -2692,13 +2690,16 @@ bool qorbiterManager::createThemeStyle()
     }
 
     setSkinEntryFile(selectPath( "skins/"+currentSkin+"/Main.qml"));
+
+    qDebug() << "Skin entry file set to " << selectPath( "skins/"+currentSkin+"/Main.qml");
 #ifdef NOQRC
+    qDebug() << "Using local path for NOQRC flag";
     QString fp =m_localQmlPath+"skins/"+currentSkin+"/Style.qml";
 #else
     QString fp ="skins/"+currentSkin+"/Style.qml";
 #endif
     qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
-    qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
+    qDebug() << Q_FUNC_INFO << "Current Selectors \n\t" << m_selector->allSelectors().join("\n\t");
     QString filePath =  selectPath(fp);
 
     qDebug() << "Style file path " << filePath;
@@ -2752,7 +2753,6 @@ void qorbiterManager::setSkinEntryFile(const QString &skinEntryFile)
 {
     if(m_skinEntryFile==skinEntryFile) return;
     m_skinEntryFile = skinEntryFile; emit skinEntryFileChanged();
-    qDebug() << m_skinEntryFile;
 }
 
 
@@ -2795,17 +2795,12 @@ bool qorbiterManager::setupLocalSkins()
 
     QJsonDocument themeDoc = QJsonDocument::fromJson(themeJson.toUtf8());
 
-    if(!themeDoc.isObject())
-        qDebug() << Q_FUNC_INFO << "invalid object ";
-
     QJsonObject themeObject = themeDoc.object();
 
     if(themeObject.isEmpty())
         return false;
 
     QVariantMap t = themeObject.toVariantMap();
-    qDebug() << Q_FUNC_INFO << themeObject.value("themelist");
-
 }
 
 void qorbiterManager::handleViewError(QList<QQmlError>)
@@ -2832,7 +2827,6 @@ void qorbiterManager::replaceHandler()
 
 void qorbiterManager::setDceResponse(QString response)
 {
-    qDebug() << "DCE Response" << response;
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
@@ -2983,9 +2977,6 @@ void qorbiterManager::reloadQml()
         qWarning() << " Window Set, reloading QML";
     }
 
-    qDebug() << Q_FUNC_INFO ;
-
-
     if(m_style && !mb_useNetworkSkins ){
         qDebug() << Q_FUNC_INFO << "Deleting style";
         m_style->deleteLater();
@@ -3017,13 +3008,13 @@ void qorbiterManager::reloadQml()
     m_style = nustyle.create();
 
     if(m_style){
-        qDebug() << Q_FUNC_INFO << " New style applied. " << filePath;
+        qDebug() << Q_FUNC_INFO << " New style created. " << filePath;
     } else {
         qDebug() << Q_FUNC_INFO << nustyle.errors();
         qDebug() << "New style failed application! " << filePath;
     }
 
-    m_appEngine->clearComponentCache();
+   // m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
     setUiReady(true);
@@ -3092,12 +3083,14 @@ void qorbiterManager::resetScreenSize(){
 bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
 {
     qOrbiter * ptr = qobject_cast<qOrbiter*>(qOrbiter_ptr);
-    QObject::connect(ptr, &qOrbiter::dgRequestFinished, this, &qorbiterManager::handleDgRequestFinished);
-    QObject::connect(ptr, &qOrbiter::discreteAudioChanged, this, &qorbiterManager::setDiscreteAudio);
-    QObject::connect(ptr, &qOrbiter::commandResponseChanged, this, &qorbiterManager::setCommandResponse);
-    QObject::connect(ptr, &qOrbiter::mediaResponseChanged, this, &qorbiterManager::setMediaResponse);
-    QObject::connect(ptr, &qOrbiter::deviceResponseChanged, this, &qorbiterManager::setDeviceResponse);
-    QObject::connect(ptr, &qOrbiter::eventResponseChanged, this, &qorbiterManager::setEventResponse);
+    QObject::connect(this, SIGNAL(forceReloadRouter()), ptr, SLOT(forceReloadRouter()), Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::showAlert, this, &qorbiterManager::handleDceAlert, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::dgRequestFinished, this, &qorbiterManager::handleDgRequestFinished, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::discreteAudioChanged, this, &qorbiterManager::setDiscreteAudio, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::commandResponseChanged, this, &qorbiterManager::setCommandResponse, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::mediaResponseChanged, this, &qorbiterManager::setMediaResponse, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::deviceResponseChanged, this, &qorbiterManager::setDeviceResponse, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::eventResponseChanged, this, &qorbiterManager::setEventResponse, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::liveAvPath, this, &qorbiterManager::setLiveAvPath, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::containsVideo, this, &qorbiterManager::setContainsVideo, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::isOsd, this, &qorbiterManager::setOsd, Qt::QueuedConnection);

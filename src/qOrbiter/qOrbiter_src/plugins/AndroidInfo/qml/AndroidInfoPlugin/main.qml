@@ -5,7 +5,7 @@ Item {
     anchors.fill: parent
     focus:true
     Keys.onReleased: {
-        console.log(event.key)
+
         event.accepted = true
     }
 
@@ -22,8 +22,6 @@ Item {
     width: parent.width
     anchors.top: parent.top
    }
-
-
 
     Row{
         id:nav

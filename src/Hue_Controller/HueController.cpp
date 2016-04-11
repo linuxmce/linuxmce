@@ -1003,6 +1003,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
             if(existingBulb->mapParameters_Find(DEVICEDATA_UnitNo_CONST).c_str() == QString::number(b->id())){
                 qDebug() << "Matched existing light" << b->displayName();
                 b->setLinuxmceId(existingBulb->m_dwPK_Device);
+                b->setRoom(existingBulb->m_dwPK_Room);
             } else {
                 //  qDebug() << "no match  existing light" << existingBulb->mapParameters_Find(DEVICEDATA_UnitNo_CONST).c_str() << "::" << b->id();
             }

@@ -26,15 +26,10 @@ if [ "$1" = "0" ]; then
 	JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
 	JOIN DeviceCategory ON FK_DeviceCategory=PK_DeviceCategory
 	WHERE (FK_DeviceCategory=5 OR FK_DeviceCategory_Parent=5)
-#	AND Device.FK_DeviceTemplate NOT IN
-#		( SELECT PK_DeviceTemplate FROM DeviceTemplate WHERE Description LIKE '%qorbiter%' )
 	AND Device.FK_Installation=$PK_Installation"
 else
 	Q="SELECT Device.PK_Device FROM Device
-	WHERE PK_Device in ($1)
-#	AND Device.FK_DeviceTemplate NOT IN 
-#		( SELECT PK_DeviceTemplate FROM DeviceTemplate WHERE Description LIKE '%qorbiter%' )
-	"
+	WHERE PK_Device in ($1)"
 fi
 Orbiters=$(RunSQL "$Q")
 

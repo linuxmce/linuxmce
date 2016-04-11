@@ -7,12 +7,16 @@ CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/taglib -I/usr/include/e
 LDFLAGS=-L$(ROOT)/lib -L/usr/local/lib
 LDLIBS= -lpluto_media -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag -lexiv2
 
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
-
-#
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+	MYSQL_LIBS = -lmysqlclient_r
+endif
 
 sources = Main.cpp \
 UpdateMedia.cpp \
@@ -39,7 +43,7 @@ all: $(sources:.cpp=.o)
 	cp UpdateMedia $(ROOT)/bin/
 
 GAMEROM: GAMEROM.o GAMEROMMain.o
-	$(CXX) -o GAMEROM $+ $(LDFLAGS) -llmce_game -lPlutoUtils -lSerializeClass -lDCECommon -lpthread
+	$(CXX) -o GAMEROM $+ $(LDFLAGS) -llmce_game -lPlutoUtils -lSerializeClass -lDCECommon -lpthread $(MYSQL_LIBS)
 	cp GAMEROM $(ROOT)/bin/
 
 clean:

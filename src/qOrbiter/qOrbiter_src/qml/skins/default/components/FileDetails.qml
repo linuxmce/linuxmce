@@ -23,7 +23,7 @@ GenericPopup{
             property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
             width:profile ? Style.scaleX(25) : Style.scaleX(45)
             height:profile ? Style.scaleY(65) : Style.scaleY(58)
-            source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
+            source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
             smooth: true
         }
 

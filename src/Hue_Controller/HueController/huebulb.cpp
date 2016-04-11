@@ -5,8 +5,6 @@
 HueBulb::HueBulb(HueControllerHardware *hw): resetColor("#90C638")
 {
     setController(hw);
-
-
 }
 
 void HueBulb::proccessStateInformation(QVariantMap d)

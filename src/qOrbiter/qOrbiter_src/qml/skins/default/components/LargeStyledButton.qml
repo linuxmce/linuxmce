@@ -21,8 +21,9 @@ Item {
         } else{
             currentSelection=false
         }
-
     }
+
+
 
     Keys.onReturnPressed: {
         activated()

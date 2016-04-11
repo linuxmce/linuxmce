@@ -7,7 +7,10 @@ import QtGraphicalEffects 1.0
 Item{
     id:indexContent
     anchors.fill: parent
-
+    Component.onCompleted: {
+        manager.setAppH(640)
+        manager.setAppW(800)
+    }
 
 
 
@@ -44,7 +47,7 @@ Item{
     
     Text{
         id:loadingText
-        text:"Please Wait, Loading"
+        text:"Please Wait, Loading QOrbiter Linux"
         color:"white"
         anchors.centerIn: parent
         font.pointSize: 22
@@ -65,14 +68,14 @@ Item{
         Text {
             id: deviceSettings
             text: qsTr("Device Settings")
-            color:settings.ready ? "green" : "red"          
+            color:settings.ready ? "green" : "red"
         }
 
     }
     PropertyAnimation{
         target: spinner
         running: true
-       property: "rotation"
+        property: "rotation"
         from:0
         to:360
         loops: Animation.Infinite

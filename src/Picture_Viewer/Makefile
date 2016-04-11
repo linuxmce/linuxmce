@@ -7,9 +7,19 @@ SNR_LDFLAGS ?=
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
 
 MYNAME = Picture_Viewer
 VERSION = 2.0.0
@@ -22,7 +32,7 @@ sources = Main.cpp Picture_Viewer.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS += -I/usr/include/SDL -I/usr/include/exiv2 `pkg-config --cflags glib-2.0`
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lSDL -lSDL_image -lXrender -lXmu -lSDL_gfx -lexiv2 `pkg-config --libs glib-2.0` -lX11
+XTRALDLIBS = -lSDL -lSDL_image -lXrender -lXmu -lSDL_gfx -lexiv2 `pkg-config --libs glib-2.0` -lX11
 
 Gen_Dev_Files +=
 sources += Picture.cpp \
