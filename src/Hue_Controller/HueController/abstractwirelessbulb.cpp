@@ -8,8 +8,9 @@ AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, 
     QObject(parent),
     mp_controller(p_controller),
     m_CurrentLevel(0.0),
-    m_powerOn(true),
-    m_brightness(0)
+    m_powerOn(false),
+    m_brightness(0),
+    m_room(-1)
 {
    qDebug() << Q_FUNC_INFO << "ctor";
     if(mp_controller){
@@ -166,6 +167,16 @@ HueControllerHardware *AbstractWirelessBulb::getController()
 void AbstractWirelessBulb::setController(HueControllerHardware *c)
 {
     mp_controller=c;
+}
+int AbstractWirelessBulb::getRoom() const
+{
+    return m_room;
+}
+
+void AbstractWirelessBulb::setRoom(int room)
+{
+    m_room = room;
+    emit roomChanged();
 }
 
 
