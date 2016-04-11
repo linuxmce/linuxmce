@@ -814,42 +814,68 @@ function firewall($output,$dbADO) {
 				$out.='<td align="center">'.$protocol[1].'</td>
 				<td align="center">'.$row['RuleType'].'</td>';
 						if (@$AdvancedFirewall == 1){
-							if ($row['IntIF']=="ipv6tunn"){
-								$IntIf="ipv6tunnel";
+							if ($row['IntIF']=="NULL"){
+								$IntIf="";
 							} else {
-								$IntIf=$row['IntIF'];
+								if ($row['IntIF']=="ipv6tunn"){
+									$IntIf="ipv6tunnel";
+								} else {
+									$IntIf=$row['IntIF'];
+								}
 							}
-							if ($row['ExtIF']=="ipv6tunn"){
-								$ExtIf="ipv6tunnel";
+							if ($row['ExtIF']=="NULL"){
+								$ExtIf="";
 							} else {
-								$ExtIf=$row['ExtIF'];
-							}
-        	                if ( $chains[$i] == 'input' )  {
-                	            $out.='<td>'.$IntIf.'
+								if ($row['ExtIF']=="ipv6tunn"){
+									$ExtIf="ipv6tunnel";
+								} else {
+									$ExtIf=$row['ExtIF'];
+								}
+							}	
+							if ( $chains[$i] == 'input' )  {
+								$out.='<td>'.$IntIf.'
 								<td></td>';
-                            } elseif ( $chains[$i] == 'output' ) {
-        	                      $out.='<td></td>';
+							} elseif ( $chains[$i] == 'output' ) {
+        	                    $out.='<td></td>';
 								$out.='<td>'.$ExtIf.'</td>';
-                        	} else {
+							} else {
 								$out.='<td>'.$IntIf.'</td>
 								<td>'.$ExtIf.'</td>';
 							}
-							$out.='<td>'.$row['Matchname'].'</td>';
+							if ($row['Matchname']=="NULL"){
+								$out.='<td></td>';
+							} else {
+								$out.='<td>'.$row['Matchname'].'</td>';
+							}
 						}
-						$out.='<td align="center">'.$protocol[0].'</td>
-						<td align="center">'.$row['SourceIP'].'</td>';
-                                               	if ( $row['SourcePort'] == ''){
-                                                       	$out.='<td align="center"></td>';
-                                                }else{
-													if ($row['SourcePort'] == 'NULL'){
-														$out.='<td align="center"></td>';
-													} else {
-       	                                                $out.='<td align="center">'.($protocol[0] == 'ip' ? 'protocol: ' : '').
+						$out.='<td align="center">'.$protocol[0].'</td>';
+						if ($row['SourceIP']=="NULL"){
+							$out.='<td align="center"></td>';
+						} else {
+							$out.='<td align="center">'.$row['SourceIP'].'</td>';
+						}
+                        if ( $row['SourcePort'] == '' or $row['SourcePort'] == 'NULL' ){
+                            $out.='<td align="center"></td>';
+                        }else{
+							$out.='<td align="center">'.($protocol[0] == 'ip' ? 'protocol: ' : '').
 						$row['SourcePort'].($row['SourcePortEnd'] > 0 ? ' to '.$row['SourcePortEnd'] : '').'</B></td>';
-													}
-												}
-                               	                $out.='<td align="center">'.$row['DestinationIP'].'</td>
-						<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>';
+							//$out.='<td align="center">'.$row['SourcePort'].'</td>';
+						}						
+						if ($row['DestinationIP']=="NULL"){
+							$out.='<td align="center"></td>';
+						} else {
+							$out.='<td align="center">'.$row['DestinationIP'].'</td>';
+						}
+						$expdestport=explode(':',$row['DestinationPort']);
+						if ($expdestport[0]=="NULL"){
+							$out.='<td align="center"></td>';
+						}else{
+							if ( $expdestport[1]=="NULL" or $expdestport[1]=="0"){
+								$out.='<td align="center">'.$expdestport[0].'</td>';
+							} else {
+								$out.='<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>';
+							}
+						}
 						if (@$AdvancedFirewall == 1){
 							$out.='<td align="center">'.$row['RPolicy'].'</td>';
 						}
