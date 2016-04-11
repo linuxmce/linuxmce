@@ -641,12 +641,12 @@ function firewall($output,$dbADO) {
 					</select>';
 						if ($AdvancedFirewall == 1) {
 							$out.='
-							place<br />
+							<!--place<br />
 							<select name="save_place" STYLE="width:70px">
 								<option value="2">Middle</option>
 								<option value="1">First</option>
 								<option value="3">Last</option>
-							</select></td>';
+							</select></td>-->';
 						}
 						$out.='<input type="hidden" name="save_place" value="'.$row['Place'].'" />
 								<input type="hidden"name="save_OldChain" value="'.$row['RuleType'].'" />
@@ -1028,13 +1028,18 @@ function firewall($output,$dbADO) {
 			if ( $SourcePortEnd == '') {
 				$SourcePortEnd='NULL';
 			}
-			$DestinationPort=isset($_POST['DestinationPort'])? mysql_real_escape_string($_POST['DestinationPort']):'0';
-			if ( $DestinationPort == '') {
+			$DestinationPort=isset($_POST['DestinationPort'])? mysql_real_escape_string($_POST['DestinationPort']):'0:0';
+			if ( $DestinationPort == '0:0') {
 				$DestinationPort='NULL';
-			}
-			$DestinationPortEnd=isset($_POST['DestinationPortEnd'])? mysql_real_escape_string($_POST['DestinationPortEnd']):'0';
-			if ( $DestinationPortEnd == '') {
 				$DestinationPortEnd='NULL';
+			} else {
+				$DestinationPortarr=explode(':', $_POST['DestinationPort']);
+				$DestinationPort=$DestinationPortarr[0];
+				if (!isset($DestinationPortarr[1])) {
+					$DestinationPortEnd=':0';
+				} else {
+					$DestinationPortEnd=$DestinationPortarr[1];
+				}
 			}
 			$DestinationIP=isset($_POST['DestinationIP'])? mysql_real_escape_string($_POST['DestinationIP']):'0';
 			if ( $DestinationIP == '') {
@@ -1105,13 +1110,14 @@ function firewall($output,$dbADO) {
 			if ( $SourcePortEnd == '') {
 				$SourcePortEnd='NULL';
 			}
-			$DestinationPort=isset($_POST['save_DestinationPort'])?mysql_real_escape_string($_POST['save_DestinationPort']):'NULL';
+			$DestinationPort=isset($_POST['save_DestinationPort'])?mysql_real_escape_string($_POST['save_DestinationPort']):'NULL:NULL';
 			if ( $DestinationPort == '') {
 				$DestinationPort='NULL';
-			}
-			$DestinationPortEnd=isset($_POST['save_DestinationPortEnd'])?mysql_real_escape_string($_POST['save_DestinationPortEnd']):'NULL';
-			if ( $DestinationPortEnd == '') {
 				$DestinationPortEnd='NULL';
+			} else {
+				$DestinationPortarr=explode(':', $_POST['save_DestinationPort']);
+				$DestinationPort=$DestinationPortarr[0];
+				$DestinationPortEnd=$DestinationPortarr[1];
 			}
 			$DestinationIP=isset($_POST['save_DestinationIP'])?mysql_real_escape_string($_POST['save_DestinationIP']):'NULL';
 			if ( $DestinationIP == '') {
