@@ -20,6 +20,9 @@
 #include "Gen_Devices/External_Media_IdentifierBase.h"
 //<-dceag-d-e->
 
+#include "IdentifierBase.h"
+#include "IdentifyDisc.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -29,8 +32,11 @@ namespace DCE
 		// Private member variables
 
 		// Private methods
+	  bool AttemptIdentify(IdentifierBase* pIdentifier);
 public:
 		// Public member variables
+	  
+	  IdentifyDisc* m_pIdentifyDisc;
 
 //<-dceag-const-b->
 public:
@@ -43,11 +49,7 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
-//<-dceag-const2-b->
-		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
-		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		External_Media_Identifier(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-//<-dceag-const2-e->
+//<-dceag-const2-b->!
 
 //<-dceag-h-b->
 	/*

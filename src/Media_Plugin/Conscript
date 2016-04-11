@@ -3,7 +3,7 @@ Import qw( env BIN LIB );
 $env = $env->clone(
 		'CXXFLAGS_LOCAL' => '-I/usr/include/mysql',
 		'LDFLAGS' => '-shared',
-		LIBS => $env->{LIBS} . ' -lpluto_main -lpluto_media -lmysqlclient_r '
+		LIBS => $env->{LIBS} . ' -lpluto_main -lpluto_media -lmysqlclient '
 
 	);
 	

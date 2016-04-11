@@ -2,8 +2,8 @@ import QtQuick 2.2
 import QtGraphicalEffects 1.0
 import QtMultimedia 5.0
 import QtQuick.Window 2.0
-import QtQuick.Controls 1.2
-import QtQuick.Dialogs 1.2
+import QtQuick.Controls 1.1
+import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.1
 
 
@@ -21,6 +21,8 @@ ApplicationWindow {
     color:"transparent"
     property string appEntryQml: manager.skinEntryFile
     property int currentStage:deviceSettingsReady+orbiterReady
+
+   // Component.onCompleted: console.log(manager.selectPath("IndexContent.qml"))
 
     //startup properties
     property int deviceSettingsReady: settings.ready ? 1 : 0

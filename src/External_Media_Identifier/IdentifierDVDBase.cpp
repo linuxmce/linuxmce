@@ -41,7 +41,8 @@ void IdentifierDVDBase::UnmountDVD()
       return;
     }
 
-  umount(m_sTempPath.c_str());
+  string sCmd="umount "+m_sTempPath;
+  system(sCmd.c_str());
   unlink(m_sTempPath.c_str());
 
   m_sTempPath="";
@@ -52,15 +53,19 @@ void IdentifierDVDBase::UnmountDVD()
 
 bool IdentifierDVDBase::MountDVD(string sPath)
 {
-  char* cPath=tempnam("/tmp/","Identifier");
+  string sTempPath = "/tmp/identifier_sr" + sPath.substr(sPath.size()-1);
+  
+  FileUtils::MakeDir(sTempPath);
+  
+  string sCmd="mount "+sPath+" "+sTempPath;
+  system(sCmd.c_str());
+  // if (FileUtils::DirExists(sTempPath+"/VIDEO_TS"))
+  //   {
+  //     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"IdentifierDVDBase::MountDVD() - Could not mount device %s",sPath.c_str());
+  //     return false;
+  //   }
 
-  if (mount(m_sPath.c_str(),cPath,"udf",0,NULL))
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"IdentifierDVDBase::MountDVD() - Could not mount device %s",sPath.c_str());
-      return false;
-    }
-
-  m_sTempPath=string(cPath);
+  m_sTempPath=sTempPath;
   m_bIsMounted=true;
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDBase::MountDVD() - Disc %s mounted at path %s",sPath.c_str(),m_sTempPath.c_str());
   return true;

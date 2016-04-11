@@ -6,9 +6,19 @@ SNR_LDFLAGS ?=
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS) `xml2-config --cflags`
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS) `xml2-config --cflags`
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib `xml2-config --libs`
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lmysqlclient_r -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
 
 MYNAME = LMCEUpdate
 VERSION = 1.0.0
@@ -19,13 +29,6 @@ CPPFLAGS +=
 CXXFLAGS +=
 LDFLAGS +=
 XTRALDLIBS =
-
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
-
-#
 
 Gen_Dev_Files +=
 sources += UpdatesXML.cpp UpdatesManager.cpp

@@ -4,7 +4,7 @@ $OLD_LIBS = $env->{LIBS};
 
 $env = $env->clone(
 	CXXFLAGS_LOCAL => '-I/usr/include/mysql',
-	LIBS => $env->{LIBS} . ' -lattr -lpluto_main -lmysqlclient_r -ldl'
+	LIBS => $env->{LIBS} . ' -lattr -lpluto_main -lmysqlclient -ldl'
 );
 
 

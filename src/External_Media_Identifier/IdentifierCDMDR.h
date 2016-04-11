@@ -36,6 +36,7 @@ namespace DCE
     virtual string GetIdentifiedData();
     virtual string GetPictureData();
     virtual string GetPictureURL();
+    virtual string GetIdentityType();
   };
 }
 

@@ -1,13 +1,18 @@
 ROOT = ..
 CXXFLAGS = -pipe -Wall -ggdb3
-CPPFLAGS = -I/usr/local/include -I$(ROOT)/DCE -I.. -I. -I/usr/include/mysql
+CPPFLAGS = -I/usr/local/include -I$(ROOT)/DCE -I.. -I.
 LDFLAGS = -L$(ROOT)/lib
-LDLIBS = -ldl -lmysqlclient -lpthread -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils
+LDLIBS = -ldl -lpthread -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils
 
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-
-#
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
 
 APPNAME = MakeRelease
 VERSION = 2.0.0

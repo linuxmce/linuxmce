@@ -6,6 +6,8 @@ Item {
     opacity: 0
     anchors.fill: parent
     Keys.onTabPressed: header.forceActiveFocus()
+    Keys.onMenuPressed: header.forceActiveFocus()
+
     property variant screen_params:[]
     Timer{
         id:failSafe
@@ -45,8 +47,8 @@ Item {
 
         for(var param in screen_params){
 
-            if(param)
-            console.log("Screen parameter property %1 -- %2").arg(param).arg(screenparams.getParam(param))
+           // if(param)
+           // console.log("Screen parameter property %1 -- %2").arg(param).arg(screenparams.getParam(param))
         }
     }
 

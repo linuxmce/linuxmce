@@ -1,11 +1,17 @@
 
 #include "filedetailsclass.h"
+#include "../pluto_media/Define_AttributeType.h"
 #include <qOrbiter/qOrbiter.h>
+#include "qmap.h"
+
 
 FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     QObject(parent)
 {
     qOrbiter*ptr = qobject_cast<qOrbiter*>(qorbiter_ptr);
+    qmlRegisterType<FileDetailsObject>("FileAttribute", 1, 0, "FileAttribute");
+
+    QObject::connect(ptr, &qOrbiter::newFileDetailAttribute, this, &FileDetailsClass::handleNewFileAttribute, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_programChanged,this, &FileDetailsClass::setProgram,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_mediaTitleChanged,this, &FileDetailsClass::setMediaTitle,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_chanIdChanged, this, &FileDetailsClass::setChannelID, Qt::QueuedConnection);
@@ -28,7 +34,32 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     QObject::connect(ptr, &qOrbiter::fd_fileChanged,this, &FileDetailsClass::setFile,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_fileNameChanged,this, &FileDetailsClass::setFilename,Qt::QueuedConnection);
 
+
     clear();
+}
+
+void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QString val)
+{
+    qDebug() << " Handling  attribute " << attribute << " value:: " << val;
+
+    switch (attribType) {
+    case ATTRIBUTETYPE_Director_CONST:m_directorList.append(new FileDetailsObject(attribute, val, attribType));             emit directorChanged();    break;
+    case ATTRIBUTETYPE_Performer_CONST:m_performerList.push_back(new FileDetailsObject(attribute, val, attribType));        emit performersChanged();  break;
+    case ATTRIBUTETYPE_Album_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType)) ;  emit albumChanged();       break;
+    case ATTRIBUTETYPE_Track_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) );  emit trackChanged();       break;
+    case ATTRIBUTETYPE_Program_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType)); emit programChanged();     break;
+    case ATTRIBUTETYPE_Rated_CONST: m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) ); emit ratingChanged();      break;
+    case ATTRIBUTETYPE_Genre_CONST: m_genreList.append(new FileDetailsObject(attribute, val, attribType));                  emit genreChanged();       break;
+    case ATTRIBUTETYPE_Episode_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType)); emit episodeChanged();     break;
+    case ATTRIBUTETYPE_Studio_CONST:m_studioList.append(new FileDetailsObject(attribute, val, attribType));                 emit studioChanged();      break;
+    case ATTRIBUTETYPE_ComposerWriter_CONST:m_composerWriterList.append(new FileDetailsObject(attribute, val, attribType)); emit composersChanged();   break;
+    case ATTRIBUTETYPE_Album_Artist_CONST:m_albumArtistList.append(new FileDetailsObject(attribute, val, attribType));      emit albumArtistChanged(); break;
+        break;
+    default:
+        qDebug() << " No handler for attribute " << attribute << " value:: " << val;
+        break;
+    }
+
 }
 
 
@@ -39,6 +70,10 @@ void FileDetailsClass::setFileMediaType()
 
 
 void FileDetailsClass::clear(){
+    m_attributeMap.clear();
+    m_performerMap.clear();
+    m_performerList.clear();
+    m_studioList.clear();
     setScreenshot("");
 
 
@@ -89,3 +124,4 @@ void FileDetailsClass::clear(){
     emit screenShotChanged();
 
 }
+

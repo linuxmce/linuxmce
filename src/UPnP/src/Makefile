@@ -5,8 +5,18 @@ CXX = g++
 CXXFLAGS = -Wall -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I$(ROOT)/Serial -I/libupnp/upnp/inc $(SNR_CPPFLAGS)
 LDFLAGS = -L$(ROOT)/lib
-EXTERNAL_LIBS_NAMES = pthread mysqlclient_r
+EXTERNAL_LIBS_NAMES = pthread
 INTERNAL_LIBS_NAMES = SerializeClass DCECommon Serial 
+
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	EXTERNAL_LIBS_NAMES += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	EXTERNAL_LIBS_NAMES += -lmysqlclient_r
+endif
 
 MYNAME = upnp
 VERSION = 1.0.0

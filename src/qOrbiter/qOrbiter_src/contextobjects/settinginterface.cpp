@@ -153,7 +153,7 @@ void SettingInterface::log(QString message)
     QString logMsg;
     logMsg=QDateTime::currentDateTime().toLocalTime().toString()+"::"+message;
     emit newLogMessage(logMsg);
-    qDebug() << logMsg;
+
 }
 
 void SettingInterface::setOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk, QVariant sval)
@@ -196,7 +196,7 @@ void SettingInterface::setOption(SettingsInterfaceType::SettingsType st, Setting
 QVariant SettingInterface::getOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk)
 {
 
-    qDebug() << Q_FUNC_INFO << "Incoming value " << (int)st;
+   // qDebug() << Q_FUNC_INFO << "Incoming value " << (int)st;
     QString grp="";
     QString key = m_lookup.value(sk);
     QVariant rtrn= QVariant("invalid");
@@ -237,7 +237,7 @@ QVariant SettingInterface::getOption(SettingsInterfaceType::SettingsType st, Set
         }
 
     } else {
-        qDebug() << Q_FUNC_INFO << "Returning settings value for key" << key;
+      //  qDebug() << Q_FUNC_INFO << "Returning settings value for key" << key;
         rtrn=m_settings.value(key);
     }
     m_settings.endGroup();

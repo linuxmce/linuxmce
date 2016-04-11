@@ -325,8 +325,15 @@ int main( int argc, char *argv[] )
 
 	makefile_out << endl; 
 	makefile_out << "#<-mkr_B_use_mysql_wrapper_b->" << endl;
-	makefile_out << "CPPFLAGS += -I/usr/include/mysql" << endl;
-	makefile_out << "LDFLAGS += -lmysqlclient_r" << endl;
+	makefile_out << "MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)" << endl;
+	makefile_out << "MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)" << endl;
+	makefile_out << "ifneq ($(strip $(MYSQL_FLAGS)),)" << endl;
+	makefile_out << "	CPPFLAGS += $(MYSQL_FLAGS)" << endl;
+	makefile_out << "	BASELDLIBS += $(MYSQL_LIBS)" << endl;
+	makefile_out << "else" << endl;
+	makefile_out << "	CPPFLAGS += -I/usr/include/mysql" << endl;
+	makefile_out << "	BASELDLIBS += -lmysqlclient_r" << endl;
+	makefile_out << "endif" << endl;
 	makefile_out << "#<-mkr_B_use_mysql_wrapper_e->" << endl;
 	makefile_out << endl;
 	makefile_out << "#" << endl;

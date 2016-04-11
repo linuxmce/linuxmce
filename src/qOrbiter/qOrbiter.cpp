@@ -24,6 +24,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include "../pluto_media/Define_AttributeType.h"
 
 #include <iostream>
 using namespace std;
@@ -59,7 +60,7 @@ qOrbiter::qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnec
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
     QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);
     QObject::connect(this, SIGNAL(transmitDceCommandResp(DCECommand*)), this, SLOT(sendDCECommandResp(DCECommand*)), Qt::DirectConnection);
-    m_bIsOSD=false;
+
     qRegisterMetaType< QMap<long, std::string> >("QMap<long, std::string>");
 
 }
@@ -70,6 +71,14 @@ bool qOrbiter::GetConfig()
         return false;
     }
 
+    int dt = m_pData->m_dwPK_DeviceTemplate;
+    if( dt ==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
+        m_bIsOSD=true;
+    } else{
+        m_bIsOSD = false;
+    }
+
+    emit deviceTemplateChanged(dt);
     PurgeInterceptors();
     RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
 
@@ -101,9 +110,6 @@ bool qOrbiter::Register()
 qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
     return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-
-
-
 }
 //<-dceag-createinst-e->
 
@@ -1021,7 +1027,12 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
+    if(m_bIsOSD){
+        m_sNowPlayingWindow =sName;
+        if(m_bContainsVideo)
+            CMD_Activate_Window(sName);
 
+    }
 
     if(i_current_mediaType !=iPK_MediaType){
         emit clearPlaylist();
@@ -1725,6 +1736,10 @@ void qOrbiter::CMD_Display_Alert(string sText,string sTokens,string sTimeout,int
     cout << "Parm #70 - Tokens=" << sTokens << endl;
     cout << "Parm #182 - Timeout=" << sTimeout << endl;
     cout << "Parm #251 - Interruption=" << iInterruption << endl;
+
+    emit showAlert(QString::fromStdString(sText), QString::fromStdString(sTokens), QString::fromStdString(sTimeout).toInt(), iInterruption);
+
+    sCMD_Result="OK";
 }
 
 //<-dceag-c810-b->
@@ -1836,6 +1851,13 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
     cout << "Parm #263 - PK_Device_To=" << iPK_Device_To << endl;
 }
 
+void qOrbiter::forceReloadRouter()
+{
+
+    DCE::CMD_Restart_DCERouter restart(this->m_dwPK_Device, this->iPK_Device_GeneralInfoPlugin, "Y" );
+    SendCommand(restart);
+}
+
 void qOrbiter::getHouseState()
 {
 
@@ -1870,7 +1892,7 @@ bool DCE::qOrbiter::initialize(){
 
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
-        qDebug() << "Starting Manager";
+        qDebug() << "Starting Manager for qorbiter with device template " << PK_DeviceTemplate_get();
         emit startManager(QString::number(m_dwPK_Device), dceIP);
 
         if(!getConfiguration()){
@@ -1967,6 +1989,10 @@ void qOrbiter::processConfigData(QNetworkReply *r)
     }
 
     emit configReady(configData);
+
+    DeviceData_Base* pDevice = this->m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
+    CMD_Regen_Orbiter_Finished regenComplete(this->m_dwPK_Device, pDevice->m_dwPK_Device, this->m_dwPK_Device);
+    SendCommandNoResponse(regenComplete);
 }
 
 
@@ -1984,7 +2010,6 @@ void DCE::qOrbiter::deinitialize()
     DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_OrbiterUnRegistered);
     emit routerConnectionChanged(false);
-    emit closeOrbiter();
     Disconnect();
     emit closeOrbiter();
 
@@ -2207,11 +2232,9 @@ void qOrbiter::requestMediaSubtypes(int type)
 
 void qOrbiter::requestTypes(int type)
 {
-    string pResponse = "";
-    string sText = "";
+    string pResponse = "";  string sText = "";
 
     CMD_Get_Attribute_Types getTypesCmd(m_dwPK_Device, iMediaPluginID, type, &sText);
-
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for attribute");
         emit newAttributeSort( new AttributeSortItem( "Recently Viewed","-1", "",false,  0));
@@ -2321,6 +2344,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
 void qOrbiter::shutdown()
 {
     // Closing and deleting of superclass member variables are done by superclass
+
 }
 
 bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceData_Base *pDeviceFrom, DeviceData_Base *pDeviceTo)
@@ -2810,7 +2834,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
 
-
     QStringList details = breaker.split(QRegExp("\\t"));
 
     int placeholder;
@@ -2896,7 +2919,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
         if(SendCommand(req_data_grid))
         {
 
-            bool barrows = false; //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             // int cellsToRender= pDataGridTable->GetRows();
@@ -2911,30 +2933,27 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             {
 
                 pCell = it->second;
-                // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
-
                 cellfk = pCell->GetValue();
-
-
 #ifdef debug
                 emit commandResponseChanged();
 #endif
-                if(attributeType == "Program") { emit fd_programChanged(attribute); }
+                int at = cellfk.remove("!A").toInt();
+                if(attributeType == "Program") { emit fd_programChanged(attribute);                 emit newFileDetailAttribute(ATTRIBUTETYPE_Program_CONST, at,attribute ); }
                 else if(attributeType == "Title") { emit fd_mediaTitleChanged(attribute); }
-                else if(attributeType == "Channel") { emit fd_chanIdChanged(attribute);   }
-                else if(attributeType == "Episode") { emit fd_episodeChanged(attribute);  }
-                else if(attributeType == "Performer") { emit fd_performersChanged(attribute); }
-                else if(attributeType == "Composer/Writer") { emit fd_composersChanged(attribute); }
-                else if(attributeType == "Director") { emit fd_directorChanged(attribute); }
-                else if(attributeType == "Genre") { emit fd_genreChanged(attribute);  }
-                else if(attributeType == "Album") { emit fd_albumChanged(attribute);  }
-                else if(attributeType == "Studio") { emit fd_studioChanged(attribute); }
-                else if(attributeType == "Track")  { emit fd_trackChanged(attribute);  }
-                else if(attributeType == "Rating") { emit fd_ratingChanged(attribute); }
+                else if(attributeType == "Channel") { emit fd_chanIdChanged(attribute);             emit newFileDetailAttribute(ATTRIBUTETYPE_TV_Channel_ID_CONST, at,attribute ); }
+                else if(attributeType == "Episode") { emit fd_episodeChanged(attribute);            emit newFileDetailAttribute(ATTRIBUTETYPE_Episode_CONST, at,attribute );}
+                else if(attributeType == "Performer") { emit fd_performersChanged(attribute);       emit newFileDetailAttribute(ATTRIBUTETYPE_Performer_CONST, at,attribute );}
+                else if(attributeType == "Composer/Writer") { emit fd_composersChanged(attribute);  emit newFileDetailAttribute(ATTRIBUTETYPE_ComposerWriter_CONST, at,attribute ); }
+                else if(attributeType == "Director") { emit fd_directorChanged(attribute);          emit newFileDetailAttribute(ATTRIBUTETYPE_Director_CONST, at,attribute ); }
+                else if(attributeType == "Genre") { emit fd_genreChanged(attribute);                emit newFileDetailAttribute(ATTRIBUTETYPE_Genre_CONST, at,attribute ); }
+                else if(attributeType == "Album") { emit fd_albumChanged(attribute);                emit newFileDetailAttribute(ATTRIBUTETYPE_Album_CONST, at,attribute ); }
+                else if(attributeType == "Studio") { emit fd_studioChanged(attribute);              emit newFileDetailAttribute(ATTRIBUTETYPE_Studio_CONST, at,attribute );}
+                else if(attributeType == "Track")  { emit fd_trackChanged(attribute);               emit newFileDetailAttribute(ATTRIBUTETYPE_Track_CONST, at,attribute ); }
+                else if(attributeType == "Rating") { emit fd_ratingChanged(attribute);              emit newFileDetailAttribute(ATTRIBUTETYPE_Rated_CONST, at,attribute ); }
                 else {
                 }
 #ifdef RPI
@@ -3782,8 +3801,16 @@ void DCE::qOrbiter::setUser(int user)
 
 void DCE::qOrbiter::quickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.
 {
+    qDebug() << Q_FUNC_INFO;
+    string sResponse;
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
     event_Impl.m_pClientSocket->SendString( "RELOAD" );
+    if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
+    {
+        CannotReloadRouter();
+        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Reload request denied: %s",sResponse.c_str());
+    }
+
 }
 
 void DCE::qOrbiter::powerOn(QString devicetype)
@@ -4330,7 +4357,14 @@ void qOrbiter::OnReload()
 #endif
     emit routerReloading("Reloading");
     emit routerConnectionChanged(false);
-    Disconnect();
+    if(m_bIsOSD){
+        qDebug() << "Is osd, exiting";
+        deinitialize();
+    } else {
+        Disconnect();
+    }
+
+
 }
 
 
@@ -4833,6 +4867,14 @@ void qOrbiter::CreateChildren(){
 
 }
 
+void qOrbiter::CannotReloadRouter()
+{
+    qDebug() << Q_FUNC_INFO;
+    QString reload_screen= QString("Screen_%1.qml").arg(QString::number(283));
+    emit gotoQml(reload_screen);
+
+}
+
 
 
 void qOrbiter::populateSetupInformation()
@@ -5259,6 +5301,7 @@ void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
 {
+    qDebug() << Q_FUNC_INFO;
     emit dceGuiCommand(Menu);
     sCMD_Result="OK";
 }

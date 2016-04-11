@@ -4,11 +4,11 @@ bin_PROGRAMS = getxmls instcheck
 
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql -I/usr/include/libxml2 -D_DEVEL_DEFINES
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/libxml2 -D_DEVEL_DEFINES
 LDFLAGS = -L$(ROOT)/lib
 # the library search path.
-getxmls_LDADD = -lmysqlclient -lpluto_main -lPlutoUtils -lDCECommon -lSerializeClass -lxml2
-instcheck_LDADD = -lmysqlclient
+getxmls_LDADD = -lpluto_main -lPlutoUtils -lDCECommon -lSerializeClass -lxml2
+instcheck_LDADD =
 
 MYNAME_getxmls = getxmls
 VERSION_getxmls = 0.0.1
@@ -19,12 +19,17 @@ VERSION_instcheck = 0.0.1
 getxmls_SOURCES = getxmls.cpp DatabaseHelper.cpp IconDecoder.cpp PackageXMLParser.cpp XMLFinder.cpp ../PlutoUtils/uuencode.cpp
 instcheck_SOURCES = instcheck.cpp
 
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
-
-#
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	getxmls_LDADD += $(MYSQL_LIBS)
+	instcheck_LDADD += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	getxmls_LDADD += -lmysqlclient
+	instcheck_LDADD += -lmysqlclient
+endif
 
 whattodo:
 	@echo "type 'make bin', 'make getxmls', 'make instcheck', 'make all'"

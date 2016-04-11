@@ -10,6 +10,16 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
+
 MYNAME = LIRC_DCE
 VERSION = 2.0.0
 MYDEVTEMPLATEID = 77mplateID
@@ -19,9 +29,9 @@ sources = Main.cpp LIRC_DCE.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/mysql
+CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -llirc_client -lmysqlclient_r -lMessageTranslation -lIRBase
+XTRALDLIBS = -llirc_client -lMessageTranslation -lIRBase
 
 Gen_Dev_Files +=
 sources += IRReceiverBase.cpp

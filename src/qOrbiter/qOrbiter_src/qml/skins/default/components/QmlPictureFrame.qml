@@ -8,12 +8,13 @@ import "../."
 Item{
     id:qmlPictureFrame
     anchors.fill: parent
-    property variant pictureList:[]
+    ListModel {
+        id: pictureList;
+    }
     property string pictureUrl:"http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=screensaver&val="
     property bool useList:true
     property bool random:true
     property int currentPic:0
-
 
     property int switchTimer:60000
     readonly property int transitionTime:switchTimer-4500
@@ -23,14 +24,22 @@ Item{
         color:"black"
     }
 
-    Component.onCompleted: loadImageList()
+    Component.onCompleted: {
+        loadImageList()
+    }
 
     Connections{
         target:manager
         onScreenSaverImagesReady:{
             loadImageList()
-
         }
+    }
+
+    function handleBadImage(){
+        console.log("Removing bad image "+pictureList.get(currentPic).img)
+        pictureList.remove(currentPic)
+        console.log(pictureList.count + " screen saver images in list.")
+        loadNextImage()
     }
 
     function transitionPlanes(){
@@ -48,7 +57,6 @@ Item{
 
     function getNextImage(){ //Only used for debug. must uncomment return for it to function
         return;
-
     }
 
 
@@ -66,16 +74,14 @@ Item{
         if(useList){
 
             if(random){
-                currentPic=Math.floor((Math.random()* pictureList.length)+1)
-
+                currentPic=Math.floor((Math.random()* pictureList.count))
             }else {
-                if(currentPic==pictureList.length){
+                if(currentPic==pictureList.count){
                     currentPic=0
                 }
                 currentPic++
             }
-
-            return pictureUrl+pictureList[currentPic]
+            return pictureUrl+pictureList.get(currentPic).img
         } else {
             return pictureUrl
         }
@@ -83,9 +89,16 @@ Item{
     }
 
     function loadImageList(){
-        pictureList = manager.getScreensaverImages()
-        if(pictureList.length==0)
+        var li = manager.getScreensaverImages()
+
+        if(li.length==0)
             return
+
+        for(var img in li){
+            var str = li[img]
+         //   console.log(str)
+            pictureList.append({"img":str})
+        }
 
         if (!settings.isScreenSaverEnabled()) {
             console.log("Orbiter screensaver not enabled")
@@ -95,7 +108,7 @@ Item{
         img1.source=getImage();
         screenSaverTimer.start()
         console.log("Orbiter Consume Screensaver images")
-        console.log("Orbiter counts " + pictureList.length)
+        console.log("Orbiter counts " + pictureList.count)
 
     }
 
@@ -129,13 +142,13 @@ Item{
     FadeImage {
         id: img1
         opacity: 0
-        onBadImageError: loadNextImage()
+        onBadImageError: handleBadImage()
         onReadyToShow: transitionPlanes()
 
     }
     FadeImage{
         id:img2
-        onBadImageError: loadNextImage()
+        onBadImageError: handleBadImage()
         onReadyToShow: transitionPlanes()
     }
 

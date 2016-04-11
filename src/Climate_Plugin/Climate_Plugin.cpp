@@ -456,8 +456,13 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 					SetStateValue(pDevice, "ON", "FAN_ONLY", sFan, sSetPoint, sTemp);
 					break;
 			}
-		}
-	}
+        }
+        else if( pMessage->m_dwID == EVENT_Humidity_Changed_CONST )
+        {
+            string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+            pDevice->m_sState_set(sLevel);
+        }
+    }
 }
 
 int Climate_Plugin::GetClimateLevel(DeviceData_Router *pDevice,int iLevel_Default)

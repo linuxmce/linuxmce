@@ -30,6 +30,8 @@ function mainMediaFilesSync($output,$mediadbADO,$dbADO) {
 	$_SESSION['filter']=(isset($_SESSION['filter']))?$_SESSION['filter']:'filter_coverart';
 	$_SESSION['filter']=(isset($_REQUEST['filter']))?$_REQUEST['filter']:$_SESSION['filter'];
 	$_SESSION['selectedFilterMode']=(isset($_SESSION['selectedFilterMode']))?$_SESSION['selectedFilterMode']:'without';
+	$_SESSION['selectedFilterMode']=(isset($_REQUEST['selectedFilterMode']))?$_REQUEST['selectedFilterMode']:$_SESSION['selectedFilterMode'];
+
 	//EDIT BY PAUL MUMBY:
 	//Added doRecursive function to js below
 	if($action=='form'){
@@ -120,12 +122,10 @@ function mainMediaFilesSync($output,$mediadbADO,$dbADO) {
 			</table>
  			<table>
  				<tr>
- 					<input type="checkbox" name="show_attributes" value="1" onclick="self.location=\'index.php?section=mainMediaFilesSync&path='.$path.'&show_attributes='.((@$_SESSION['show_attributes']==1)?0:1).'\'" '.(($_SESSION['show_attributes']==1)?'checked':'').'> '.$TEXT_SHOW_ATTRIBUTES_CONST.'
-					<input type="checkbox" name="show_woattribute" value="1" onclick="self.location=\'index.php?section=mainMediaFilesSync&path='.$path.'&show_woattribute='.((@$_SESSION['show_woattribute']==1)?0:1).'\'" '.(($_SESSION['show_woattribute']==1)?'checked':'').'>Show only items without ';
-
-			$out .= pulldownFromArray($filterModes,'selectedFilterMode',$_SESSION['selectedFilterMode'],'onChange="document.mainMediaFilesSync.action.value=\'form\';document.mainMediaFilesSync.submit();"','key','').' ';
-			$out .= pulldownFromArray($filterTypes,'filter',$_SESSION['filter'],'onChange="document.mainMediaFilesSync.action.value=\'form\';document.mainMediaFilesSync.submit();"','key','');
-			$out .= '
+					<td><input type="checkbox" name="show_attributes" value="1" onclick="self.location=\'index.php?section=mainMediaFilesSync&path='.$path.'&show_attributes='.((@$_SESSION['show_attributes']==1)?0:1).'\'" '.(($_SESSION['show_attributes']==1)?'checked':'').'> '.$TEXT_SHOW_ATTRIBUTES_CONST.' </td>
+					<td><input type="checkbox" name="show_woattribute" value="1" onclick="self.location=\'index.php?section=mainMediaFilesSync&path='.$path.'&show_woattribute='.((@$_SESSION['show_woattribute']==1)?0:1).'\'" '.(($_SESSION['show_woattribute']==1)?'checked':'').'>Show only items without </td>
+					<td>'.pulldownFromArray($filterModes,'selectedFilterMode',$_SESSION['selectedFilterMode'],'onChange="document.mainMediaFilesSync.action.value=\'form\';document.mainMediaFilesSync.submit();"','key','').'</td>
+					<td>'.pulldownFromArray($filterTypes,'filter',$_SESSION['filter'],'onChange="document.mainMediaFilesSync.action.value=\'form\';document.mainMediaFilesSync.submit();"','key','').'<td>
  				</tr>
  			</table>
 
@@ -136,7 +136,7 @@ function mainMediaFilesSync($output,$mediadbADO,$dbADO) {
 			if(isset($_REQUEST['filename']) && $_REQUEST['filename']!='')
 				$out.='<a href="index.php?section=leftMediaFilesSync" target="treeframe"><img src="scripts/treeview/diffDoc.gif" border="0" align="middle">'.$TEXT_SHOW_DIRECTORY_STRUCTURE_CONST.'</a>';
 			$out.='
-				<table cellpading="0" cellspacing="0">';
+			<table cellpading="0" cellspacing="0">';
 			$fileID=get_file_dir($path,$mediadbADO);
 			if($fileID!==false){
 				$out.='

@@ -278,5 +278,16 @@
         <file>qml/skins/default/images/ps3_tri.png</file>
         <file>qml/skins/default/images/ps3_x.png</file>
         <file>qml/skins/default/screens/Screen_259.qml</file>
+        <file>qml/skins/default/+xlarge/+raspbian/Style.qml</file>
+        <file>qml/skins/default/+xlarge/+raspbian/MainLayout.qml</file>
+        <file>qml/+linux/+raspbian/IndexContent.qml</file>
+        <file>qml/skins/default/screens/Screen_283.qml</file>
+        <file>qml/skins/default/+md/Main.qml</file>
+        <file>qml/skins/default/+md/MainLayout.qml</file>
+        <file>qml/skins/default/+md/Style.qml</file>
+        <file>qml/skins/default/components/InputController.qml</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_47.qml</file>
+        <file>qml/skins/default/components/+xlarge/FileDetails.qml</file>
+        <file>qml/skins/default/components/MetadataBlock.qml</file>
     </qresource>
 </RCC>

@@ -7,9 +7,19 @@ SNR_LDFLAGS ?=
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
 
 MYNAME = Advanced_IP_Camera
 VERSION = 2.0.0
@@ -23,7 +33,7 @@ CXXFLAGS += -DWITH_OPENSSL
 CPPFLAGS_SOAP =  -Ionvif -I/usr/share/gsoap -I/usr/share/gsoap/plugin -I/usr/share/gsoap/import -Iopenssl
 CPPFLAGS += -Ionvif -I/usr/share/gsoap -I/usr/share/gsoap/plugin -I/usr/share/gsoap/import -Iopenssl
 LDFLAGS +=
-XTRALDLIBS = -lcurl -lmysqlclient_r -lgsoap++ -lgsoapssl++ -lssl -lcrypto
+XTRALDLIBS = -lcurl -lgsoap++ -lgsoapssl++ -lssl -lcrypto
 
 Gen_Dev_Files +=
 sources += EventMethod.cpp CameraDevice.cpp OnvifDevice.cpp URLAccessDevice.cpp onvif/soapDeviceBindingProxy.cpp onvif/soapPTZBindingProxy.cpp onvif/soapMediaBindingProxy.cpp onvif/soapC.cpp gsoap/duration.cpp gsoap/wsseapi.cpp gsoap/mecevp.cpp gsoap/wsaapi.cpp gsoap/smdevp.cpp
