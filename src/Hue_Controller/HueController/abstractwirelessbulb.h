@@ -97,6 +97,9 @@ public:
     QString getLightType() const;
     void setLightType(const QString &lightType);
 
+    int getRoom() const;
+    void setRoom(int room);
+
 signals:
     void serialNumberChanged();
     void displayNameChanged();
@@ -116,6 +119,7 @@ signals:
     void rgbColorChanged();
     void brightnessChanged();
     void lightTypeChanged();
+    void roomChanged();
     void dceMessage(int t);
 
 public slots:
@@ -149,6 +153,7 @@ private:
     int m_redLevel;
     int m_greenLevel;
     int m_blueLevel;
+    int m_room;
 
     QString m_lightType;
 
