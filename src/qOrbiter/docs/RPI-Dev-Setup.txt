@@ -28,3 +28,6 @@ You can find the link to the latest image here: http://wiki.linuxmce.org/index.p
 *Untar the image
 *Utilize the dd instructions on Raspberry pi
 ** Linux https://www.raspberrypi.org/documentation/installation/installing-images/linux.md
+
+
+More to come
