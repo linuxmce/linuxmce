@@ -85,8 +85,8 @@ Wizard::Wizard()
 	AVWizardConfParser ConfigurationParser;
 	this->AVWizardOptions = ConfigurationParser.ParseFile();
 	this->FrontEnd = NULL;
-	this->Width = 640;
-	this->Height = 480;
+	this->Width = 1024;
+	this->Height = 768;
 
 	this->FullScreen = false;
 	MainPage = NULL;
@@ -551,10 +551,10 @@ void Wizard::SetExitWithCode(int Code)
 
 void Wizard::Resize(bool FullScreen)
 {
-	Width = 640;
+	Width = 1024;
 	if(AVWizardOptions->GetDictionary()->Exists( "WindowWidth"))
 		Width = Utils::StringToInt32(AVWizardOptions->GetDictionary()->GetValue("WindowWidth"));
-	Height = 480;
+	Height = 768;
 	if(AVWizardOptions->GetDictionary()->Exists( "WindowHeight"))
 		Height = Utils::StringToInt32(AVWizardOptions->GetDictionary()->GetValue("WindowHeight"));
 

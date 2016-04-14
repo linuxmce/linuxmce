@@ -3,7 +3,7 @@
 . /usr/pluto/bin/AVWizard-Common.sh
 
 Output=VGA
-Resolution=640x480
+Resolution=1024x768
 
 if [[ -f /tmp/avwizard-resolution-defaults.txt ]]; then
 	DefaultSettings=$(</tmp/avwizard-resolution-defaults.txt)

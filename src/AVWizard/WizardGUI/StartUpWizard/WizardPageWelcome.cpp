@@ -87,27 +87,27 @@ WizardPageWelcome::WizardPageWelcome(GenericBackEnd* FrontEnd, std::string Name)
 	switch (KeyCode)
 	{
 		case SDLK_1:
-			Command = CommandXConfigure + "640x480 --output DVI";
+			Command = CommandXConfigure + "1024x768 --output DVI";
 			DoBeep();
 			break;
 		case SDLK_q:
-			Command = CommandXConfigure + "640x480 --output DVI-2";
+			Command = CommandXConfigure + "1024x768 --output DVI-2";
 			DoBeep();
 			break;
 		case SDLK_a:
-			Command = CommandXConfigure + "640x480 --output HDMI-0";
+			Command = CommandXConfigure + "720p --output HDMI-0";
 			DoBeep();
 			break;
 		case SDLK_2:
-			Command = CommandXConfigure + "640x480 --output VGA";
+			Command = CommandXConfigure + "1024x768 --output VGA";
 			DoBeep();
 			break;
 		case SDLK_w:
-			Command = CommandXConfigure + "640x480 --output VGA-2";
+			Command = CommandXConfigure + "1024x768 --output VGA-2";
 			DoBeep();
 			break;
 		case SDLK_l:
-			Command = CommandXConfigure + "640x480 --output LVDS";
+			Command = CommandXConfigure + "1024x768 --output LVDS";
 			DoBeep();
 			break;
 		case SDLK_3:
