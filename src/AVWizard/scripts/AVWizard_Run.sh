@@ -62,11 +62,11 @@ SetupX () {
 	# default test assumes HDMI connection
 	bash -x ${BaseDir}/Xconfigure.sh --conffile "$XF86Config" --resolution '1280x720@60' --output HDMI-0 --tv-standard '720p (16:9)' --no-test
 	if ! TestXConfig "$Display" "$XF86Config"; then
-		# Try a VGA connection with 640x480
-		bash -x ${BaseDir}/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --no-test
+		# Try a VGA connection with 1024x768
+		bash -x ${BaseDir}/Xconfigure.sh --conffile "$XF86Config" --resolution '1024x768@60' --output VGA --no-test
 		if ! TestXConfig "$Display" "$XF86Config"; then
 			# vesa test
-			bash -x ${BaseDir}/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --force-vesa --no-test
+			bash -x ${BaseDir}/Xconfigure.sh --conffile "$XF86Config" --resolution '1024x768@60' --output VGA --force-vesa --no-test
 			if ! TestXConfig "$Display" "$XF86Config"; then
 				# all tests failed
 				beep -l 350 -f 300 &
@@ -117,10 +117,10 @@ DualBus () {
 
 SetDefaults () {
 	WizSet Video_Ratio '4_3'
-	WizSet Resolution '640x480'
-	WizSet VideoResolution '640x480'
-	WizSet WindowWidth 640
-	WizSet WindowHeight 480
+	WizSet Resolution '1024x768'
+	WizSet VideoResolution '1024x768'
+	WizSet WindowWidth 1024
+	WizSet WindowHeight 768
 	WizSet Refresh '60'
 	WizSet VideoRefresh '60'
 	WizSet VideoOutput 'VGA'
@@ -143,7 +143,7 @@ SetDefaults () {
 	WizSet RemoteCmd "$RemoteCmd"
 	WizSet GamepadCmd "$GamepadCmd"
 	WizSet ExitCode 1 # by default, we fail (i.e. on Ctrl+Alt+Bkspc)
-	echo "640x480 60 640 480 VGA" >/tmp/avwizard-resolution.txt
+	echo "1024x768 60 1024 768 VGA" >/tmp/avwizard-resolution.txt
 }
 
 SetDefaults_720p () {

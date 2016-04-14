@@ -11,7 +11,7 @@ case "$Param" in
 		VideoOutput=$(SpcField 5 "$WizResolution")
 		TVStandard=$(SpcField 6 "$WizResolution")
 
-		ResolutionDefaults="640x480 60 640 480 VGA"
+		ResolutionDefaults="1024x768 60 1024 768 VGA"
 		if [[ -f "/tmp/avwizard-resolution-defaults.txt" ]]; then
 			ResolutionDefaults="$(</tmp/avwizard-resolution-defaults.txt)"
 		fi

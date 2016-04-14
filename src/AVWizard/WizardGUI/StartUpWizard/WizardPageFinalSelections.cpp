@@ -129,7 +129,7 @@ std::string WizardPageFinalSelections::GetVideoResolution(SettingsDictionary* AV
 #ifdef DEBUG
 	std::cout<<"WizardPageFinalSelections::GetVideoRatio()"<<std::endl;
 #endif
-	std::string ResolutionStr = "640x480";
+	std::string ResolutionStr = "1024x768";
 	if(AVWizardSettings->Exists("VideoResolution"))
 		ResolutionStr =  AVWizardSettings->GetValue("VideoResolution");
 
