@@ -9,3 +9,4 @@ export RPI_TOOLCHAIN=$TOOLCHAN_PATH
 export QT_BRANCH=5.5
 
 
+echo "done with setEnv.sh"

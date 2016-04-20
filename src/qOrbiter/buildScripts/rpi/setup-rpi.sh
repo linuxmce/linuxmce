@@ -1,8 +1,6 @@
-#!/bin/sh
-sudo apt-get install build-essential git autoconf automake libtool
-
+#!/bin/bash
 source setEnv.sh
-
+sudo apt-get install build-essential git autoconf automake libtool
 #ROOT_FS_MOUNT="/mnt/rasp-pi-rootfs"
 #TARGET_USER="golgoj4"
 #TARGET_IP="192.168.80.2"
@@ -39,9 +37,9 @@ clear
 
 if [ -e "rpi-tools/sysroot-relativelinks.py" ];
 then
-echo "Have symlink file"
+echo "Have symlink file, will run symlinks fix script"
 else
-echo "Getting symlink fix script"
+echo "Getting symlink fix script and run symlinks fix script"
 wget https://raw.githubusercontent.com/riscv/riscv-poky/master/scripts/sysroot-relativelinks.py
 chmod +x sysroot-relativelinks.py
 mv sysroot-relativelinks.py rpi-tools
@@ -49,8 +47,8 @@ fi
 
 if [ -d "rpi-tools/sysroot" ];
 then
-echo "Sysroot in place"
-cd rpi-tools
+echo "Sysroot in place connecting to $TARGET_USER@$TARGET_IP:"
+cd "rpi-tools"
 rsync -avz $TARGET_USER@$TARGET_IP:/lib sysroot
 rsync -avz $TARGET_USER@$TARGET_IP:/usr/include sysroot/usr
 rsync -avz $TARGET_USER@$TARGET_IP:/usr/lib sysroot/usr
