@@ -10,6 +10,16 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
+
 MYNAME = EIB
 VERSION = 2.0.0
 MYDEVTEMPLATEID = 49mplateID
@@ -19,9 +29,9 @@ sources = Main.cpp EIB.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/mysql
+CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lSerial -lrt -lmysqlclient_r
+XTRALDLIBS = -lSerial -lrt
 
 Gen_Dev_Files +=
 sources += messagepool.cpp busconnector.cpp message.cpp thread.cpp mutex.cpp event.cpp bauinitmessage.cpp ackmessage.cpp statemachine.cpp telegrammessage.cpp monitorrequestmessage.cpp timetracker.cpp extendedserialport.cpp duplicatefilterpoolinterceptor.cpp

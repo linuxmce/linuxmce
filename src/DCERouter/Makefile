@@ -8,12 +8,15 @@ LDFLAGS += -L$(ROOT)/lib -lxml2
 #LDLIBS = -lpthread -lmysqlclient_r -lattr -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lFakeEPG -lqt-mt -lmyth-0.16 -lmythtv-0.16
 LDLIBS += -lpthread -lattr -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -ldl
 
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
-
-#
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
 
 APPNAME=DCERouter
 VERSION=2.0.0

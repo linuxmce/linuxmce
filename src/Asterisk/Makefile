@@ -11,6 +11,16 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
+
 MYNAME = Asterisk
 VERSION = 2.0.0
 MYDEVTEMPLATEID = 45mplateID
@@ -20,10 +30,10 @@ sources = Main.cpp Asterisk.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/mysql
+CPPFLAGS +=
 LDFLAGS +=
 LDLIBS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS =
 
 Gen_Dev_Files +=
 sources += \
@@ -46,13 +56,6 @@ sources += \
 	communicationhandler.cpp \
 	callsstatuscommand.cpp \
 	utils.cpp 
-
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
-
-#
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

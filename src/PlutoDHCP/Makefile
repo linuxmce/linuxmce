@@ -3,9 +3,20 @@ ROOT=..
 CXX=g++
 CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3
-CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql
+CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE
 LDFLAGS=-L$(ROOT)/lib
-LDLIBS=-lDCECommon -lSerializeClass -lmysqlclient_r -lPlutoUtils -lpluto_main
+LDLIBS=-lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main
+
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
+
 
 all: Main.o PlutoDHCP.o
 	g++ Main.o PlutoDHCP.o -o PlutoDHCP $(LDFLAGS) $(LDLIBS)
