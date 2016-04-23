@@ -15,10 +15,10 @@ MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
 MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
 ifneq ($(strip $(MYSQL_FLAGS)),)
 	CPPFLAGS += $(MYSQL_FLAGS)
-	LDFLAGS += $(MYSQL_LIBS)
+	LDLIBS += $(MYSQL_LIBS)
 else
 	CPPFLAGS += -I/usr/include/mysql
-	LDFLAGS += -lmysqlclient_r
+	LDLIBS += -lmysqlclient_r
 endif
 
 MYNAME = VDR
@@ -51,13 +51,13 @@ bin: VDR
 so: VDR.so
 
 VDR.so: $(sources:.cpp=.o) $(INTERNAL_LIBS_NAMES:%=$(ROOT)/lib/lib%.so) Makefile
-	$(CXX) -shared -o $(MYNAME).so $(call cpath,$(sources:.cpp=.o)) $(LDFLAGS) $(LDLIBS_NAMES:%=-l%)
+	$(CXX) -shared -o $(MYNAME).so $(call cpath,$(sources:.cpp=.o)) $(LDFLAGS) $(LDLIBS_NAMES:%=-l%) $(LDLIBS)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 
 VDR: $(sources:.cpp=.o) $(INTERNAL_LIBS_NAMES:%=$(ROOT)/lib/lib%.so) Makefile
-	$(CXX) -o $(MYNAME) $(call cpath,$(sources:.cpp=.o)) $(LDFLAGS) $(LDLIBS_NAMES:%=-l%)
+	$(CXX) -o $(MYNAME) $(call cpath,$(sources:.cpp=.o)) $(LDFLAGS) $(LDLIBS_NAMES:%=-l%) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
 
