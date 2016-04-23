@@ -42,7 +42,7 @@ all: $(sources:.cpp=.o)
 	cp UpdateMedia $(ROOT)/bin/
 
 GAMEROM: GAMEROM.o GAMEROMMain.o
-	$(CXX) -o GAMEROM $+ $(LDFLAGS) -llmce_game -lPlutoUtils -lSerializeClass -lDCECommon -lpthread
+	$(CXX) -o GAMEROM $+ $(LDFLAGS) -llmce_game -lPlutoUtils -lSerializeClass -lDCECommon -lpthread $(MYSQL_LIBS)
 	cp GAMEROM $(ROOT)/bin/
 
 clean:
