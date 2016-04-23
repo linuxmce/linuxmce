@@ -9,7 +9,7 @@ LDLIBS=-lDCECommon -lSerializeClass -lPlutoUtils
 
 MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
 MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
-ifneq (($(MYSQL_FLAGS)),)
+ifneq ($(strip $(MYSQL_FLAGS)),)
 	CPPFLAGS += $(MYSQL_FLAGS)
 	LDLIBS += $(MYSQL_LIBS)
 else
