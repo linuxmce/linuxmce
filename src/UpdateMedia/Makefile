@@ -15,6 +15,7 @@ ifneq ($(strip $(MYSQL_FLAGS)),)
 else
 	CPPFLAGS += -I/usr/include/mysql
 	LDLIBS += -lmysqlclient_r
+	MYSQL_LIBS = -lmysqlclient_r
 endif
 
 sources = Main.cpp \
