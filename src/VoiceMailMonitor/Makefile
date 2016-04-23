@@ -3,9 +3,20 @@ ROOT=..
 CXX=g++
 CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3
-CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql -I$(ROOT)/inotify
+CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I$(ROOT)/inotify
 LDFLAGS=-L$(ROOT)/lib -L/usr/local/lib
-LDLIBS= -lDCECommon -lmysqlclient_r -lPlutoUtils -lmp3lame
+LDLIBS= -lDCECommon -lPlutoUtils -lmp3lame
+
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
+
 
 sources = Main.cpp \
 $(ROOT)/inotify/inotify_class.cpp \

@@ -7,9 +7,19 @@ SNR_LDFLAGS =
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql -I./include $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I./include $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
 
 MYNAME = DLNA
 VERSION = 2.0.0
@@ -22,7 +32,7 @@ sources = Main.cpp DLNA.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS += -I/usr/include/qt4/ 
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lQtGui -lQtCore -lHUpnp -lHUpnpAv -lpluto_main -lQtNetwork
+XTRALDLIBS = -lQtGui -lQtCore -lHUpnp -lHUpnpAv -lpluto_main -lQtNetwork
 
 Gen_Dev_Files +=
 sources += DLNAEngine.cpp LMCERenderer.cpp LMCERendererConnectionManager.cpp moc_LMCERenderer.cpp

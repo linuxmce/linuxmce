@@ -7,9 +7,19 @@ SNR_LDFLAGS ?=
 ROOT = ..
 CXX ?= g++
 CXXFLAGS += -Wall -fPIC -ggdb3
-CPPFLAGS += -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS) -I/opt/owfs/include
-LDFLAGS += $(SNR_LDFLAGS) -L$(ROOT)/lib -L/usr/lib/mysql -L/opt/owfs/lib
+CPPFLAGS += -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS) -I/opt/owfs/include
+LDFLAGS += $(SNR_LDFLAGS) -L$(ROOT)/lib -L/opt/owfs/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lowcapi
+
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
 
 MYNAME = OneWire
 VERSION = 2.0.0
@@ -22,7 +32,7 @@ sources = Main.cpp OneWire.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS =
 
 Gen_Dev_Files +=
 sources +=

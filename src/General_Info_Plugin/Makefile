@@ -7,9 +7,19 @@ SNR_LDFLAGS ?=
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
 
 MYNAME = General_Info_Plugin
 VERSION = 2.0.0
@@ -20,16 +30,10 @@ sources = Main.cpp General_Info_Plugin.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/mysql #-DWEB_QUERY_DEBUG -DDEBUG
+CPPFLAGS +=
+#-DWEB_QUERY_DEBUG -DDEBUG
 LDFLAGS +=
-XTRALDLIBS = -lpluto_main -lmysqlclient_r -lpluto_media
-
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
-
-#
+XTRALDLIBS = -lpluto_main -lpluto_media
 
 Gen_Dev_Files += 
 sources += Web_DHCP_Query.cpp \

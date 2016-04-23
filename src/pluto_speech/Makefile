@@ -4,12 +4,16 @@ CPPFLAGS =  -I.. -I../.. -I../DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DM
 CXX = g++
 LDFLAGS = -L$(ROOT)/lib
 
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
 
-#
 
 sources = ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp Database_pluto_speech.cpp TableRow.cpp \
 Table_Alias.cpp \

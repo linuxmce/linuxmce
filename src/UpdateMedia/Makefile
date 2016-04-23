@@ -7,12 +7,15 @@ CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/taglib -I/usr/include/e
 LDFLAGS=-L$(ROOT)/lib -L/usr/local/lib
 LDLIBS= -lpluto_media -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag -lexiv2
 
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
-
-#
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
 
 sources = Main.cpp \
 UpdateMedia.cpp \

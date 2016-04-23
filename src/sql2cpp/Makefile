@@ -2,10 +2,20 @@ SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 
 ROOT = ..
 CXXFLAGS = -Wall -g 
-CPPFLAGS = -I$(ROOT)/ -I$(ROOT)/DCE -I$(ROOT)/VIPShared -I/usr/include/mysql -D_REENTRANT -D_GNU_SOURCE $(SNR_CPPFLAGS) -DGENERATOR
+CPPFLAGS = -I$(ROOT)/ -I$(ROOT)/DCE -I$(ROOT)/VIPShared -D_REENTRANT -D_GNU_SOURCE $(SNR_CPPFLAGS) -DGENERATOR
 LDFLAGS = -L$(ROOT)/lib 
-LDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lmysqlclient_r -lattr
+LDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lattr
 CXX = g++
+
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
 
 APPNAME = sql2cpp
 VERSION = 2.0.0

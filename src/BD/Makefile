@@ -1,9 +1,19 @@
 ROOT=..
 CXXFLAGS = -fpermissive -fPIC -Wall -g -D_GNU_SOURCE
-CPPFLAGS = -I./ -I../../ -I../ -I/usr/include/mysql -I$(ROOT) -I$(ROOT)/DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DMULTI_THREADED -DUSE_MYSQL -DVIPSERVER -DXBTSOCKET -DBLUETOOTH_DONGLE -DMULTI_THREADED
+CPPFLAGS = -I./ -I../../ -I../ -I$(ROOT) -I$(ROOT)/DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DMULTI_THREADED -DUSE_MYSQL -DVIPSERVER -DXBTSOCKET -DBLUETOOTH_DONGLE -DMULTI_THREADED
 CXX = g++
 LDFLAGS = -L$(ROOT)/lib
-LDLIBS = -lmysqlclient_r
+LDLIBS =
+
+MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
+MYSQL_LIBS = `pkg-config --libs mysqlclient`
+ifneq (($(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
 
 sources = BDCommand.cpp BDCommandProcessor.cpp BDCommandProcessor_Linux_Bluetooth.cpp sdpbrowse.cpp
 #sources = BDCommand.cpp BDCommandProcessor.cpp
