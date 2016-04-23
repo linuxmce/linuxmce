@@ -19,8 +19,8 @@ VERSION_instcheck = 0.0.1
 getxmls_SOURCES = getxmls.cpp DatabaseHelper.cpp IconDecoder.cpp PackageXMLParser.cpp XMLFinder.cpp ../PlutoUtils/uuencode.cpp
 instcheck_SOURCES = instcheck.cpp
 
-MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
-MYSQL_LIBS = `pkg-config --libs mysqlclient`
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
 ifneq (($(MYSQL_FLAGS)),)
 	CPPFLAGS += $(MYSQL_FLAGS)
 	getxmls_LDADD += $(MYSQL_LIBS)

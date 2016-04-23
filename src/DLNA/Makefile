@@ -11,8 +11,8 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I./include $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
-MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
-MYSQL_LIBS = `pkg-config --libs mysqlclient`
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
 ifneq (($(MYSQL_FLAGS)),)
 	CPPFLAGS += $(MYSQL_FLAGS)
 	BASELDLIBS += $(MYSQL_LIBS)

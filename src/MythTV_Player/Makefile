@@ -11,8 +11,8 @@ LDFLAGS = -L$(ROOT)/lib
 EXTERNAL_LIBS_NAMES = pthread
 INTERNAL_LIBS_NAMES = SerializeClass DCECommon PlutoUtils WindowUtils
 
-MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
-MYSQL_LIBS = `pkg-config --libs mysqlclient`
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
 ifneq (($(MYSQL_FLAGS)),)
 	CPPFLAGS += $(MYSQL_FLAGS)
 	LDFLAGS += $(MYSQL_LIBS)

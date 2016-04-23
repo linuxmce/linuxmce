@@ -9,8 +9,8 @@ CPPFLAGS = -I/usr/local/include -I$(ROOT)/DCE -I.. -I. -I/usr/include/SDL -I$(TS
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 LDLIBS = -ldl -lpluto_main -lpluto_media -lDCECommon -lPlutoUtils -lSerializeClass -lSDL -lSGE -lSDL_gfx -lSDL_image -lSDL_ttf -lGL -lXrender -lSDL_Helpers -lz -lpthread
 
-MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
-MYSQL_LIBS = `pkg-config --libs mysqlclient`
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
 ifneq (($(MYSQL_FLAGS)),)
 	CPPFLAGS += $(MYSQL_FLAGS)
 	LDLIBS += $(MYSQL_LIBS)
