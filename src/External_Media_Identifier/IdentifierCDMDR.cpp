@@ -157,3 +157,8 @@ void IdentifierCDMDR::DumpReplyToLog(MDRCDReply* pReply)
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"-------------------------------------------");
     }
 }
+
+string IdentifierCDMDR::GetIdentityType()
+{
+  return "MISC-TAB";
+}
