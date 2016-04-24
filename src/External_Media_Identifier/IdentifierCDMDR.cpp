@@ -115,8 +115,8 @@ string IdentifierCDMDR::GetIdentifiedData()
       DiscData.addAttribute(trackNum, ATTRIBUTETYPE_Track_CONST, 0, t->TrackNumber_get());
       DiscData.addAttribute(trackNum, ATTRIBUTETYPE_Title_CONST, 0, t->TrackTitle_get());
       DiscData.addAttribute(trackNum, ATTRIBUTETYPE_Performer_CONST, 0, r->AlbumArtist_get());
-      DiscData.addAttribute(trackNum, ATTRIBUTETYPE_Album_CONST, 0, r->AlbumTitle_get());
-      DiscData.addAttribute(trackNum, ATTRIBUTETYPE_Genre_CONST, 0, r->Genre_get());
+      // DiscData.addAttribute(trackNum, ATTRIBUTETYPE_Album_CONST, 0, r->AlbumTitle_get());
+      // DiscData.addAttribute(trackNum, ATTRIBUTETYPE_Genre_CONST, 0, r->Genre_get());
     }
   
   return DiscData.OutputAttributes();
@@ -156,4 +156,9 @@ void IdentifierCDMDR::DumpReplyToLog(MDRCDReply* pReply)
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Track Title: %s",t->TrackTitle_get().c_str());
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"-------------------------------------------");
     }
+}
+
+string IdentifierCDMDR::GetIdentityType()
+{
+  return "MISC-TAB";
 }

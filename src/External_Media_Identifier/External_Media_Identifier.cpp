@@ -25,7 +25,8 @@ using namespace DCE;
 //<-dceag-d-e->
 
 
-#include "IdentifierCDDB.h"
+#include "IdentifierCDMDR.h"
+#include "IdentifierDVDMDR.h"
 #include <iostream>
 #include "pluto_main/Define_MediaType.h"
 
@@ -168,7 +169,10 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
   switch(iPK_MediaType)
     {
     case MEDIATYPE_pluto_CD_CONST:
-      pIdentifier = new IdentifierCDDB(sFilename, sID);
+      pIdentifier = new IdentifierCDMDR(sFilename, sID);
+      break;
+    case MEDIATYPE_pluto_DVD_CONST:
+      pIdentifier = new IdentifierDVDMDR(sFilename,sID);
       break;
     default:
       LoggerWrapper::GetInstance()->Write(LV_WARNING,"CMD_Identify_Media() - I do not know how to identify disks of media type %d. Aborting identify.",iPK_MediaType);
