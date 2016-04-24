@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef DVDXMLPARSER_H
-#define DVDXMLPARSER_H
+#ifndef MDRDVDPARSER_H
+#define MDRDVDPARSER_H
 
 #include <string>
 #include <vector>
