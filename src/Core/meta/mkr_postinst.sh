@@ -13,10 +13,21 @@ echo "UPDATE user SET Create_view_priv = 'Y', Show_view_priv = 'Y', \
 	FLUSH PRIVILEGES; \
 	" | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
 
+PHP_CONFIG_FILE=
+if [[ -e /etc/php/7.0/apache2/php.ini ]] ; then
+	PHP_CONFIG_FILE=/etc/php/7.0/apache2/php.ini
+else
+	if [[ -e /etc/php5/apache2/php.ini ]] ;then
+		PHP_CONFIG_FILE=/etc/php5/apache2/php.ini
+	else
+		PHP_CONFIG_FILE=/etc/php4/apache2/php.ini
+	fi
+fi
+
 # Raise max char limit on php.ini
-if ! BlacklistConfFiles '/etc/php5/apache2/php.ini' ;then
-	if ! grep -q 'max_input_vars' /etc/php5/apache2/php.ini; then
-		echo "max_input_vars = 15000" >> /etc/php5/apache2/php.ini
+if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
+	if ! grep -q 'max_input_vars' "$PHP_CONFIG_FILE" ; then
+		echo "max_input_vars = 15000" >> "$PHP_CONFIG_FILE"
 	fi
 fi
 
