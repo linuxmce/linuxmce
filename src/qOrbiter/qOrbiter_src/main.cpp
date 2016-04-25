@@ -296,8 +296,10 @@ int main(int argc, char* argv[])
             screenSize=0;
             break;
         case 'o':
-            screen="fullscreen";
-            screenSize=0;
+            //used for md type devices. a work around at the moment
+            screen="md-fullscreen";
+            screenSize=-1;
+            deviceType=0;
             break;
         case 'z':
             screenSize=atoi(argv[++optnum]);
@@ -371,6 +373,14 @@ int main(int argc, char* argv[])
 #endif
         bool fs = false;
         bool fm = false;
+        bool isOsd = screen=="md-fullscreen"; //qOrbiter::PK_DeviceTemplate_get_static()==DEVICETEMPLATE_OnScreen_qOrbiter_CONST;
+        if(isOsd){
+            qDebug() << "Starting qMd";
+            fs=true;
+            fm=true;
+        } else {
+            qDebug() << "Starting client qorbiter " << qOrbiter::PK_DeviceTemplate_get_static();
+        }
         if(screen =="fullscreen"){
             fs=true;
             fm=true;
@@ -438,7 +448,8 @@ int main(int argc, char* argv[])
 
         QQmlApplicationEngine engine;
 
-        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize, &engine);
+
+        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize, &engine, isOsd );
 
         engine.rootContext()->setContextProperty("settings", &settings);
         engine.rootContext()->setContextProperty("orbiterVersion", QString::fromLocal8Bit(VERSION));
@@ -452,7 +463,7 @@ int main(int argc, char* argv[])
 
 #ifndef ANDROID
 
-        qorbiterManager  w(&pqOrbiter, &orbiterWin.mainView, &engine, screenSize, &settings, overrideDir);
+        qorbiterManager  w(&pqOrbiter, &orbiterWin.mainView, &engine, screenSize, &settings, overrideDir, isOsd);
         if(!sRouter_IP.empty()){
             w.setInternalIp(QString::fromStdString(sRouter_IP));
             orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));

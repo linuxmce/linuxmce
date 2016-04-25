@@ -6,7 +6,10 @@
 #include <QMap>
 #include <QDebug>
 #include "math.h"
-
+/*!
+ * \brief The ScreenData class
+ * \ingroup fileselectors
+ */
 class ScreenData : public QObject
 {
     Q_OBJECT
@@ -50,6 +53,10 @@ public:
     virtual ~ScreenData() {}
 };
 
+/*!
+ * \brief The ScreenObject class
+ * \ingroup fileselectors
+ */
 class ScreenObject : public QObject
 {
     Q_OBJECT
@@ -306,6 +313,10 @@ private:
     ScreenData::PixelDensityScale m_pixelScale;
 };
 
+/*!
+ * \brief The ScreenInfo class
+ * \ingroup fileselectors
+ */
 class ScreenInfo : public QObject
 {
     Q_OBJECT
