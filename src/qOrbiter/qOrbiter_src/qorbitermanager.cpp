@@ -72,13 +72,13 @@ using namespace DCE;
   messaging system will be the initial method of communication
 */
 #if (QT5) && !defined (ANDROID)
-qorbiterManager::qorbiterManager(QObject * qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings, QString overridePath, QObject *parent) :
+qorbiterManager::qorbiterManager(QObject * qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings, QString overridePath, bool isOsd, QObject *parent) :
     #elif ANDROID && QT5
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper,SettingInterface *appSettings, QString overridePath, QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper,SettingInterface *appSettings, QString overridePath, bool isOsd, QObject *parent) :
     #elif ANDROID
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath, QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath, bool isOsd, QObject *parent) :
     #else
-qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath,  QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath, bool isOsd, QObject *parent) :
 
     #endif
     QObject(parent),qorbiterUIwin(view), tskinModel(NULL),
@@ -105,7 +105,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_window(NULL),
     m_dceRequestNo(1)
 {
-
+    m_bIsOSD = isOsd;
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -170,8 +170,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_screenInfo = new ScreenInfo();
     m_selector=new QFileSelector(m_appEngine);
     selector=new QQmlFileSelector(m_appEngine);
-    selector->setSelector(m_selector);
-    qDebug() << m_selector->allSelectors().join("\n");
+   // selector->setSelector(m_selector);
+   // qDebug() << "Selector List\n" << m_selector->allSelectors().join(",");
     //  selector->setSelector(m_selector);
 #endif
 
@@ -1742,19 +1742,19 @@ void qorbiterManager::playMedia(QString FK_Media) {
     }
     //changed to remove media type as that is decided on by the media plugin and passed back
     CMD_MH_Play_Media cmd(
-                          iPK_Device,
-                          iMediaPluginID,
-                          0 ,
-                          FK_Media.toStdString(),
-                          0,
-                          0,
-                          sEntertainArea,
-                          false,
-                          false,
-                          false,
-                          false,
-                          false
-                          );
+                iPK_Device,
+                iMediaPluginID,
+                0 ,
+                FK_Media.toStdString(),
+                0,
+                0,
+                sEntertainArea,
+                false,
+                false,
+                false,
+                false,
+                false
+                );
     emit sendDceCommand(cmd);
 }
 
@@ -1762,7 +1762,7 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
 {
     QString fkFile = QString("!r" + QString::number(disc) + ":" + QString::number(device));
 
-  CMD_MH_Play_Media playDisc(
+    CMD_MH_Play_Media playDisc(
                 iPK_Device,
                 iMediaPluginID,
                 0,
@@ -1777,7 +1777,7 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
                 0 /* bDont_Setup_AV */
                 );
 
-     emit sendDceCommand(playDisc);
+    emit sendDceCommand(playDisc);
 }
 
 void qorbiterManager::mythTvPlay(){
@@ -1988,8 +1988,8 @@ bool qorbiterManager::writeConfig()
     settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
     qDebug() <<  Q_FUNC_INFO << "Device ID: " << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     /* old below this line and will be replaced */
-   // qDebug() << Q_FUNC_INFO;
-       //setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
+    // qDebug() << Q_FUNC_INFO;
+    //setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
     QDomDocument localConfig;
     QString xmlPath;
@@ -2640,14 +2640,23 @@ bool qorbiterManager::setSizeSelector()
     QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
     QStringList t;
 
+
     if(m_testScreenSize==-1){
         qDebug () << Q_FUNC_INFO << "Using device information ";
-        t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+
+        if(m_bIsOSD){
+              t  <<  m_screenInfo->primaryScreen()->deviceSizeString() << "raspbian"<<  psize  << m_screenInfo->primaryScreen()->resolutionString(); ;
+
+            qDebug() << "Device set as embedded (rpi) device";
+        } else {
+              t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+        }
+
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
         m_window->setPosition(250, 250);
-        setAppH(400);
-
+       // setAppH(640);
+       // setAppW(800);
 #else
         m_window->showFullScreen();
 #endif
@@ -2685,6 +2694,7 @@ bool qorbiterManager::createThemeStyle()
         qWarning() << " Window Set, loading theme style";
     }
 
+
     selector->setSelector(m_selector);
     if(m_style ){
         qDebug() << Q_FUNC_INFO << "Deleting style";
@@ -2692,13 +2702,16 @@ bool qorbiterManager::createThemeStyle()
     }
 
     setSkinEntryFile(selectPath( "skins/"+currentSkin+"/Main.qml"));
+
+    qDebug() << "Skin entry file set to " << selectPath( "skins/"+currentSkin+"/Main.qml");
 #ifdef NOQRC
+    qDebug() << "Using local path for NOQRC flag";
     QString fp =m_localQmlPath+"skins/"+currentSkin+"/Style.qml";
 #else
     QString fp ="skins/"+currentSkin+"/Style.qml";
 #endif
     qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
-    qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
+    qDebug() << Q_FUNC_INFO << "Current Selectors \n\t" << m_selector->allSelectors().join("\n\t");
     QString filePath =  selectPath(fp);
 
     qDebug() << "Style file path " << filePath;
@@ -3017,13 +3030,13 @@ void qorbiterManager::reloadQml()
     m_style = nustyle.create();
 
     if(m_style){
-        qDebug() << Q_FUNC_INFO << " New style applied. " << filePath;
+        qDebug() << Q_FUNC_INFO << " New style created. " << filePath;
     } else {
         qDebug() << Q_FUNC_INFO << nustyle.errors();
         qDebug() << "New style failed application! " << filePath;
     }
 
-    m_appEngine->clearComponentCache();
+   // m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
     setUiReady(true);

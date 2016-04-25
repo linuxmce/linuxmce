@@ -245,13 +245,13 @@ class qorbiterManager : public QObject
 
 public:
 #if QT5 && !ANDROID
-    qorbiterManager(QObject *qOrbiter_ptr, QQuickView * view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings,QString overridePath, QObject *parent=0);  //constructor
+    qorbiterManager(QObject *qOrbiter_ptr, QQuickView * view, QQmlApplicationEngine *engine, int testSize, SettingInterface *appSettings,QString overridePath, bool isOsd, QObject *parent=0);  //constructor
 #elif ANDROID && QT5
-    qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath,QObject *parent=0);
+    qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings, QString overridePath,bool isOsd=false, QObject *parent=0);
 #elif ANDROID
-    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings,QString overridePath,   QObject *parent =0);
+    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, QQmlApplicationEngine *engine, AndroidSystem *jniHelper, SettingInterface *appSettings,QString overridePath, bool isOsd=false,  QObject *parent =0);
 #elif   QT4_8
-    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView * view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath, QObject *parent=0);  //constructor
+    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView * view, QQmlApplicationEngine *engine, int testSize,SettingInterface *appSettings,QString overridePath,bool isOsd =false, QObject *parent=0);  //constructor
 #endif
 
     ~qorbiterManager();
