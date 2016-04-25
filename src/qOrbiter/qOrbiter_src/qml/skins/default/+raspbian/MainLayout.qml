@@ -1,10 +1,9 @@
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
-//import AudioVisual 1.0
 import org.linuxmce.screens 1.0
 import "."
 import "../."
-import "components"
+import "../components"
 
 
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
@@ -92,14 +91,6 @@ Item {
             anchors.fill: parent
             onClicked: uiOn=!uiOn
         }
-
-    }
-
-    MediaInterface{
-        id:mediaPlayer
-        anchors.centerIn: parent
-        height:parent.height
-        width:parent.width
 
     }
 
