@@ -12,7 +12,7 @@ This section is intended to outline the steps needed for setting up your linuxmc
 =On the Core=
 You will need to do these things BEFORE you run the raspberry pi for the first time to make this as smooth as possible.
 
-*Create qMD device on  your core manually.
+*Create qMD device on  your core manually, device template 2281 (RPi as qMD)
 *Set the MAC address manually. This does mean you will need the mac address somehow before booting it to see the mac address...
 **How?
 *Run the two following scripts, in this order on your core.
@@ -30,4 +30,9 @@ You can find the link to the latest image here: http://wiki.linuxmce.org/index.p
 ** Linux https://www.raspberrypi.org/documentation/installation/installing-images/linux.md
 
 
-More to come
+Tools
+Qt Source
+downloads.qt.io
+Download the current version of Qt you are targeting (source)
+
+CrossCompiler
