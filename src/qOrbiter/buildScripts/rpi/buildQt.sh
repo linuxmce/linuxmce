@@ -14,7 +14,8 @@ if [ $? -eq 0 ]; then
 make install
 ENDTIME=$(date)
 echo "Finished install"
-
+echo "Qt Sync to rpi"
+rsync -avz qt/qt5pi  $TARGET_USER@$TARGET_IP:/usr/local
 else
 clear
 echo "Your Build failed. manually run to find the errors"
