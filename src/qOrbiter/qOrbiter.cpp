@@ -59,7 +59,7 @@ qOrbiter::qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnec
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
     QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);
     QObject::connect(this, SIGNAL(transmitDceCommandResp(DCECommand*)), this, SLOT(sendDCECommandResp(DCECommand*)), Qt::DirectConnection);
-    m_bIsOSD=false;
+
     qRegisterMetaType< QMap<long, std::string> >("QMap<long, std::string>");
 
 }
@@ -69,6 +69,16 @@ bool qOrbiter::GetConfig()
     if(!qOrbiter_Command::GetConfig()){
         return false;
     }
+
+    int dt = m_pData->m_dwPK_DeviceTemplate;
+    if( dt ==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
+        m_bIsOSD=true;
+    } else{
+        m_bIsOSD = false;
+    }
+
+    emit deviceTemplateChanged(dt);
+
 
     PurgeInterceptors();
     RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
@@ -101,9 +111,6 @@ bool qOrbiter::Register()
 qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
     return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-
-
-
 }
 //<-dceag-createinst-e->
 
@@ -1870,7 +1877,7 @@ bool DCE::qOrbiter::initialize(){
 
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
-        qDebug() << "Starting Manager";
+        qDebug() << "Starting Manager for qorbiter with device template " << PK_DeviceTemplate_get();
         emit startManager(QString::number(m_dwPK_Device), dceIP);
 
         if(!getConfiguration()){
