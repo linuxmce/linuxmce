@@ -5,7 +5,8 @@ import "." //used to import the style object as singleton
 
 Item{
     id:qmlRoot
-    anchors.fill: parent
+    height: 1080
+    width:1920
 
 
     property bool screensaverActive:false

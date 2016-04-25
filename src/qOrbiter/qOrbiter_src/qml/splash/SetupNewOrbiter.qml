@@ -138,7 +138,7 @@ Item {
             code:"en"
         }
         ListElement{
-            dataTitle:qsTr("German")
+            dataTitle:"German"
         }
     }
 
