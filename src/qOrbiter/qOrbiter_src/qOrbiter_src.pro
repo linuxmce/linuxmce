@@ -119,7 +119,7 @@ linux-rasp-pi-g++ || pi{
        # DEPLOYMENTFOLDERS += folder_02  #folder_01
         QT+= qml
         QT-=declarative
-        target.path=/opt/QOrbiter      
+        target.path=/opt/QOrbiter
         INSTALLS+=target
 
         plugins_folder.source = imports
@@ -558,7 +558,8 @@ DISTFILES += \
     qml/skins/default/components/FloorplanFanSwitch.qml \
     qml/skins/default/components/FloorplanSetTemp.qml \
     qml/skins/default/components/FloorplanHeatCool.qml \
-    qml/skins/default/components/FloorplanDefaultControl.qml
+    qml/skins/default/components/FloorplanDefaultControl.qml \
+    ../docs/RPI-Dev-Setup.txt
 
 
 

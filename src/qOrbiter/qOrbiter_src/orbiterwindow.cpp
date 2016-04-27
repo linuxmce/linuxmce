@@ -34,7 +34,7 @@
 #include <QtWidgets/QApplication>
 #include <contextobjects/screeninfo.h>
 #include "QQmlApplicationEngine"
-
+#include "qqmlfileselector.h"
 
 #else
 #include <qmlapplicationviewer.h>
@@ -51,7 +51,7 @@
 #include "../iOS/qOrbiter/ioshelpers.h"
 #endif
 
-orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, int simScreenSize, QQmlApplicationEngine *engine, QObject *parent) :
+orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, int simScreenSize, QQmlApplicationEngine *engine, bool isOsd, QObject *parent) :
     QObject(parent),
     deviceno(deviceid), router(QString::fromStdString(routerip)), internalIp("0.0.0.0"), externalIp("0.0.0.0"),
     usingExternal(false),
@@ -60,6 +60,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     b_orbiterConfigReady(false), b_devicePresent(false),
     b_skinDataReady(false), b_skinIndexReady(false),
     b_reloadStatus(false), fullScreenOrbiter(fullScreen),
+    m_bIsOsd(isOsd),
     m_appEngine(engine)
 {
     m_appEngine->rootContext()->setContextProperty("orbiterWindow", this);
@@ -75,6 +76,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     m_appEngine->addImportPath("lib");
     m_appEngine->addImportPath("qml");
 
+    if(isOsd){
+        QQmlFileSelector *winSelector = new QQmlFileSelector(m_appEngine->rootContext()->engine());
+        winSelector->setExtraSelectors(QStringList() << "raspbian" );
+    }
     qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();   
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
     m_appEngine->rootContext()->setContextProperty("window", this);

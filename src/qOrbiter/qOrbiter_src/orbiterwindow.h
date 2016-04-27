@@ -64,7 +64,7 @@ public:
  * \param frameless - set to true of no frame is desired.
  * \param parent
      */
-    explicit orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, int simScreenSize, QQmlApplicationEngine *engine,  QObject *parent = 0);
+    explicit orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, int simScreenSize, QQmlApplicationEngine *engine, bool isOsd,  QObject *parent = 0);
     //public members
 
     QString message;
@@ -228,6 +228,7 @@ signals:
 
 private :
     QQmlApplicationEngine *m_appEngine;
+    bool m_bIsOsd;
 };
 #endif
 

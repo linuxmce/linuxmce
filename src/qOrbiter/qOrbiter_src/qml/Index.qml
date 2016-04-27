@@ -22,6 +22,8 @@ ApplicationWindow {
     property string appEntryQml: manager.skinEntryFile
     property int currentStage:deviceSettingsReady+orbiterReady
 
+   // Component.onCompleted: console.log(manager.selectPath("IndexContent.qml"))
+
     //startup properties
     property int deviceSettingsReady: settings.ready ? 1 : 0
     property int orbiterReady:manager.uiReady ? 1 : 0
