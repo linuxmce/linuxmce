@@ -20,16 +20,15 @@ StyledScreen{
             id:messageContainer
             function formatText(){
                 var t1 = screenparams.getParam(163)
-
-
             }
 
             StyledText{
                 id:messageLabel
-                text: screenparams.getParam(163)
+                text: screenparams.getParam(9)
                 font.pointSize: largeFontSize
+                width: parent.width
                 anchors{
-                    top:parent.top
+                    verticalCenter: parent.verticalCenter
                     horizontalCenter: parent.horizontalCenter
                 }
                 font.bold: true
@@ -43,10 +42,10 @@ StyledScreen{
                     horizontalCenter: parent.horizontalCenter
                 }
 
-                visible: screenparams.getParam(181) ==1
+               // visible: screenparams.getParam(181) ==1
                 StyledButton{
                     visible:parent.visible
-                    buttonText:qsTr("Reload Router")
+                    buttonText:qsTr("Force Reload Router")
                 }
                 StyledButton{
                     visible:parent.visible

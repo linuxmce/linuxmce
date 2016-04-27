@@ -87,6 +87,7 @@ Item {
 
     QmlPictureFrame {
         id: qmlPictureFrame
+        visible:!dcenowplaying.b_mediaPlaying
         MouseArea{
             anchors.fill: parent
             onClicked: uiOn=!uiOn

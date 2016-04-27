@@ -19,8 +19,6 @@ StyledScreen {
                 console.log("activating child "+ focusIndex)
                 flow.children[focusIndex].forceActiveFocus()
             }
-
-
         }
         onActiveFocusChanged: console.log("flow has focus")
 
@@ -28,7 +26,7 @@ StyledScreen {
             height:Style.scaleY(15)
 
             buttonText: "Regen\nOrbiter"
-            onActivated:  regenOrbiter(manager.iPK_Device)
+            onActivated: manager.regenOrbiter(manager.iPK_Device)
         }
 
         LargeStyledButton{
