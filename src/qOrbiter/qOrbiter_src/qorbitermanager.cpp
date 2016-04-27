@@ -1886,8 +1886,11 @@ bool qorbiterManager::loadSkins(QUrl base)
 void qorbiterManager::quickReload()
 {
     emit reloadRouter();
-    setReloadStatus(true);
+}
 
+void qorbiterManager::forceReload()
+{
+    emit forceReloadRouter();
 }
 
 void qorbiterManager::showUI(bool b){
@@ -2257,6 +2260,12 @@ void qorbiterManager::updatePlaylist(){
 DCECommand* qorbiterManager::getDCECommand()
 {
     return new DCECommand(m_dceRequestNo.fetchAndAddAcquire(1));
+}
+
+void qorbiterManager::handleDceAlert(QString text, QString tokens, int timeout, int interruption)
+{
+    emit newDceAlert(text, QVariant(tokens), timeout, interruption);
+    qDebug() << Q_FUNC_INFO << text;
 }
 
 void qorbiterManager::updateImageChanged(QImage img)
@@ -3105,12 +3114,14 @@ void qorbiterManager::resetScreenSize(){
 bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
 {
     qOrbiter * ptr = qobject_cast<qOrbiter*>(qOrbiter_ptr);
-    QObject::connect(ptr, &qOrbiter::dgRequestFinished, this, &qorbiterManager::handleDgRequestFinished);
-    QObject::connect(ptr, &qOrbiter::discreteAudioChanged, this, &qorbiterManager::setDiscreteAudio);
-    QObject::connect(ptr, &qOrbiter::commandResponseChanged, this, &qorbiterManager::setCommandResponse);
-    QObject::connect(ptr, &qOrbiter::mediaResponseChanged, this, &qorbiterManager::setMediaResponse);
-    QObject::connect(ptr, &qOrbiter::deviceResponseChanged, this, &qorbiterManager::setDeviceResponse);
-    QObject::connect(ptr, &qOrbiter::eventResponseChanged, this, &qorbiterManager::setEventResponse);
+    QObject::connect(this, SIGNAL(forceReloadRouter()), ptr, SLOT(forceReloadRouter()), Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::showAlert, this, &qorbiterManager::handleDceAlert, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::dgRequestFinished, this, &qorbiterManager::handleDgRequestFinished, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::discreteAudioChanged, this, &qorbiterManager::setDiscreteAudio, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::commandResponseChanged, this, &qorbiterManager::setCommandResponse, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::mediaResponseChanged, this, &qorbiterManager::setMediaResponse, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::deviceResponseChanged, this, &qorbiterManager::setDeviceResponse, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::eventResponseChanged, this, &qorbiterManager::setEventResponse, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::liveAvPath, this, &qorbiterManager::setLiveAvPath, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::containsVideo, this, &qorbiterManager::setContainsVideo, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::isOsd, this, &qorbiterManager::setOsd, Qt::QueuedConnection);

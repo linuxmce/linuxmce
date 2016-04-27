@@ -584,6 +584,9 @@ Param 10 - pk_attribute
     void setCurrentRouter( QString currentRouter) {if(m_currentRouter==currentRouter) return; m_currentRouter = currentRouter; emit currentRouterChanged();  }
 
 signals:
+    void forceReloadRouter();
+    void newDceAlert(QString text, QVariant tokens, int timeout, int interruption);
+
     void currentRouterChanged();
 
     void appHeightChanged();
@@ -826,7 +829,7 @@ signals:
 
 public slots:
 
-
+    void handleDceAlert(QString text, QString tokens, int timeout, int interruption);
     int entertainArea() {return iea_area;}
     int room() {return iFK_Room;}
     void setHostDevice(int d){ if(hostDevice != d ) {hostDevice=d; emit hostDeviceChanged(); }  }
@@ -1669,6 +1672,7 @@ public slots:
     void replaceHandler();
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
+    void forceReload();
     void setVariable(int variable, QString valueToAssign){ if(!valueToAssign.isEmpty())  emit setDceVar(variable, valueToAssign);  }
     void setText(QString sDesignObj, QString sValue, int iPK_Text);
     //@}
@@ -1840,7 +1844,7 @@ public slots:
         }
 
         checkOrientation(QSize(appWidth, appHeight));
-       m_appEngine->clearComponentCache();
+        m_appEngine->clearComponentCache();
         // updateProfileSelector();
     }
 

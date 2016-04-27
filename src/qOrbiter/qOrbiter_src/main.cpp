@@ -422,6 +422,7 @@ int main(int argc, char* argv[])
             sRouter_IP = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_ExternalHostname).toString().toStdString();
 
         QString name = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
+
         qOrbiter pqOrbiter(name, PK_Device, sRouter_IP,true,bLocalMode );
 
         qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");

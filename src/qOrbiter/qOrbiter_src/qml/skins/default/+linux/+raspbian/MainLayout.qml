@@ -87,6 +87,7 @@ Item {
 
     QmlPictureFrame {
         id: qmlPictureFrame
+        visible:false
         MouseArea{
             anchors.fill: parent
             onClicked: uiOn=!uiOn

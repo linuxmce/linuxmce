@@ -287,5 +287,6 @@
         <file>qml/skins/default/+raspbian/Main.qml</file>
         <file>qml/skins/default/+linux/+raspbian/Main.qml</file>
         <file>qml/+linux/+raspbian/IndexContent.qml</file>
+        <file>qml/skins/default/screens/Screen_283.qml</file>
     </qresource>
 </RCC>

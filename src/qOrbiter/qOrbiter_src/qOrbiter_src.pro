@@ -119,7 +119,8 @@ linux-rasp-pi-g++ || pi{
        # DEPLOYMENTFOLDERS += folder_02  #folder_01
         QT+= qml
         QT-=declarative
-        target.path=/opt/QOrbiter
+        DESTDIR=""
+        target.path=/usr/pluto/bin
         INSTALLS+=target
 
         plugins_folder.source = imports
