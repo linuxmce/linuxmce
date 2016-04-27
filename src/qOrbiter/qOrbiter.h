@@ -25,6 +25,7 @@
 //	DCE Implemenation for #2186 qOrbiter
 
 #include "Gen_Devices/qOrbiterBase.h"
+
 //<-dceag-d-e->
 #include <DataGrid.h>
 #include "Virtual_Device_Translator.h"
@@ -76,6 +77,8 @@ namespace DCE
  *processing of data. Information is emitted across threads via connections.
  *
  */
+
+
 class qOrbiter : public qOrbiter_Command
 {
     //<-dceag-decl-e->
@@ -276,6 +279,7 @@ public:
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
     virtual void CreateChildren();
+  virtual void CannotReloadRouter();
 
 
 
@@ -1335,6 +1339,8 @@ light, climate, media, security, telecom */
 
 signals:
 
+    void showAlert(QString text, QString tokens, int timeout, int interruption);
+
     void timecodeEvent(QString ea, QMap<long, std::string> mp);
     void timecodeEvent(int room, QMap<long, std::string> mp);
 
@@ -1765,7 +1771,7 @@ signals:
     void DCEHostChanged();
 
 public slots:
-
+    void forceReloadRouter();
     void getHouseState(); /*! Used to update user status, weather, housemode, voicemails */
 
     void setGridPause(bool g){ gridPaused =g; emit gridPauseChanged(gridPaused); if(!gridPaused){populateAdditionalMedia();} qDebug() << "Grid is paused ::" << gridPaused; }
@@ -1892,9 +1898,6 @@ public slots:
     void addToPlaylist(bool now, string playlist);
     //-------------------------------------------------------
     void grabScreenshot(QString fileWithPath);
-
-
-
 
     //buttons from the more screen
     void extraButtons(QString button);
