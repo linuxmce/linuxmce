@@ -12,11 +12,10 @@
         <file>qml/+linux/+xlarge/IndexContent.qml</file>
         <file>qml/Themes.json</file>
         <file>qml/skins/default/screens/Screen_209.qml</file>
-    </qresource>
-    <qresource prefix="/">
         <file>config.xml</file>
         <file>qml/SkinError.qml</file>
         <file>qml/RegenScreen.qml</file>
+        <file>qml/skins/default/+xlarge/IndexContent.qml</file>
     </qresource>
     <qresource prefix="/lang">
         <file>translations/de_DE.qm</file>
