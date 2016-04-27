@@ -1732,6 +1732,10 @@ void qOrbiter::CMD_Display_Alert(string sText,string sTokens,string sTimeout,int
     cout << "Parm #70 - Tokens=" << sTokens << endl;
     cout << "Parm #182 - Timeout=" << sTimeout << endl;
     cout << "Parm #251 - Interruption=" << iInterruption << endl;
+
+    emit showAlert(QString::fromStdString(sText), QString::fromStdString(sTokens), QString::fromStdString(sTimeout).toInt(), iInterruption);
+
+    sCMD_Result="OK";
 }
 
 //<-dceag-c810-b->
@@ -1841,6 +1845,15 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
     cout << "Parm #83 - PhoneExtension=" << sPhoneExtension << endl;
     cout << "Parm #184 - PK_Device_From=" << sPK_Device_From << endl;
     cout << "Parm #263 - PK_Device_To=" << iPK_Device_To << endl;
+}
+
+void qOrbiter::forceReloadRouter()
+{
+
+    QString preMsg(QString::number(this->m_dwPK_Device )+" " + QString::number(DEVICEID_DCEROUTER)+ " 7 6");
+   qDebug() << Q_FUNC_INFO << preMsg;
+    DCE::Message m( preMsg.toStdString() );
+    this->m_pPrimaryDeviceCommand->SendMessage(&m, true);
 }
 
 void qOrbiter::getHouseState()
@@ -1974,6 +1987,10 @@ void qOrbiter::processConfigData(QNetworkReply *r)
     }
 
     emit configReady(configData);
+
+    DeviceData_Base* pDevice = this->m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
+    CMD_Regen_Orbiter_Finished regenComplete(this->m_dwPK_Device, pDevice->m_dwPK_Device, this->m_dwPK_Device);
+    SendCommandNoResponse(regenComplete);
 }
 
 
@@ -3789,8 +3806,16 @@ void DCE::qOrbiter::setUser(int user)
 
 void DCE::qOrbiter::quickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.
 {
+    qDebug() << Q_FUNC_INFO;
+    string sResponse;
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
     event_Impl.m_pClientSocket->SendString( "RELOAD" );
+    if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
+    {
+        CannotReloadRouter();
+        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Reload request denied: %s",sResponse.c_str());
+    }
+
 }
 
 void DCE::qOrbiter::powerOn(QString devicetype)
@@ -4837,6 +4862,14 @@ void qOrbiter::CreateChildren(){
     }
     emit commandResponseChanged("Finished spawning children!");
     emit routerConnectionChanged(true);
+
+}
+
+void qOrbiter::CannotReloadRouter()
+{
+    qDebug() << Q_FUNC_INFO;
+    QString reload_screen= QString("Screen_%1.qml").arg(QString::number(283));
+   emit gotoQml(reload_screen);
 
 }
 
