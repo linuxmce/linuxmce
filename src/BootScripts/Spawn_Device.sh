@@ -171,6 +171,8 @@ done
 if [[ "$i" -gt "$MAX_RESPAWN_COUNT"  ]]; then
 	Logging $TYPE $SEVERITY_CRITICAL $module "Aborting restart of device $device_id..."
 	Logging $TYPE $SEVERITY_CRITICAL $module "Aborting restart of device $device_id..." "$LogFile"
+	sed -i "/^$device_id$/ d" "$AlreadyRunning"
+	Unlock "Spawn_Device" "$device_id" >>/var/log/pluto/Spawn_Device.log
 fi
 #<-mkr_b_ubuntu_e->
 #
