@@ -280,13 +280,10 @@
         <file>qml/skins/default/screens/Screen_259.qml</file>
         <file>qml/skins/default/+xlarge/+raspbian/Style.qml</file>
         <file>qml/skins/default/+xlarge/+raspbian/MainLayout.qml</file>
-        <file>qml/skins/default/+linux/+raspbian/Style.qml</file>
-        <file>qml/skins/default/+linux/+raspbian/MainLayout.qml</file>
-        <file>qml/skins/default/+raspbian/Style.qml</file>
-        <file>qml/skins/default/+raspbian/MainLayout.qml</file>
-        <file>qml/skins/default/+raspbian/Main.qml</file>
-        <file>qml/skins/default/+linux/+raspbian/Main.qml</file>
         <file>qml/+linux/+raspbian/IndexContent.qml</file>
         <file>qml/skins/default/screens/Screen_283.qml</file>
+        <file>qml/skins/default/+md/Main.qml</file>
+        <file>qml/skins/default/+md/MainLayout.qml</file>
+        <file>qml/skins/default/+md/Style.qml</file>
     </qresource>
 </RCC>

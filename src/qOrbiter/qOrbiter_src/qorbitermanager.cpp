@@ -2654,7 +2654,7 @@ bool qorbiterManager::setSizeSelector()
         qDebug () << Q_FUNC_INFO << "Using device information ";
 
         if(m_bIsOSD){
-              t  <<  m_screenInfo->primaryScreen()->deviceSizeString() << "raspbian"<<  psize  << m_screenInfo->primaryScreen()->resolutionString(); ;
+              t  << "md"<<  m_screenInfo->primaryScreen()->deviceSizeString() <<  psize  << m_screenInfo->primaryScreen()->resolutionString(); ;
 
             qDebug() << "Device set as embedded (rpi) device";
         } else {

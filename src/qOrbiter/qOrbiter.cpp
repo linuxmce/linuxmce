@@ -1850,10 +1850,8 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 void qOrbiter::forceReloadRouter()
 {
 
-    QString preMsg(QString::number(this->m_dwPK_Device )+" " + QString::number(DEVICEID_DCEROUTER)+ " 7 6");
-   qDebug() << Q_FUNC_INFO << preMsg;
-    DCE::Message m( preMsg.toStdString() );
-    this->m_pPrimaryDeviceCommand->SendMessage(&m, true);
+    DCE::CMD_Restart_DCERouter restart(this->m_dwPK_Device, this->iPK_Device_GeneralInfoPlugin, "Y" );
+    SendCommand(restart);
 }
 
 void qOrbiter::getHouseState()
