@@ -82,8 +82,7 @@ symbian:TARGET.UID3 = 0xE15A481D
 # Allow network access on Symbian
 symbian:TARGET.CAPABILITY += NetworkServices
 
-# Default rules for deployment.
-include(deployment.pri)
+
 
 # When we do stuff for Symbian, why not define the target in here...
 symbian {
