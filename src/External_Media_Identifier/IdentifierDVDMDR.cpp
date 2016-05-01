@@ -144,30 +144,30 @@ string IdentifierDVDMDR::GetPictureURL()
 
 void IdentifierDVDMDR::DumpReplyToLog(MDRDVDReply* pReply)
 {
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Title: %s",pReply->DVDTitle_get().c_str());
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Studio: %s",pReply->Studio_get().c_str());
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Actors: %s",pReply->Actors_get().c_str());
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Director: %s",pReply->Director_get().c_str());
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Rating: %s",pReply->Rating_get().c_str());
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Genre: %s",pReply->Genre_get().c_str());
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Number of Titles: %s",pReply->Titles_get().size());
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- DVD Cover URL %s",pReply->DVDCoverURL_get().c_str());
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Title: %s",pReply->DVDTitle_get().c_str());
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Studio: %s",pReply->Studio_get().c_str());
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Actors: %s",pReply->Actors_get().c_str());
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Director: %s",pReply->Director_get().c_str());
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Rating: %s",pReply->Rating_get().c_str());
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Genre: %s",pReply->Genre_get().c_str());
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- Number of Titles: %s",pReply->Titles_get().size());
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"-- DVD Cover URL %s",pReply->DVDCoverURL_get().c_str());
 
-  for (vector<MDRTitle*>::iterator it = pReply->Titles_get().begin(); it!=pReply->Titles_get().end(); ++it)
-    {
-      MDRTitle* t = *it;
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Title #%s",t->TitleNum_get().c_str());
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Title: %s",t->Title_get().c_str());
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Studio: %s",t->Studio_get().c_str());
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Director: %s",t->Director_get().c_str());
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Actors: %s",t->Actors_get().c_str());
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Rating: %s",t->Rating_get().c_str());
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Genre: %s",t->Genre_get().c_str());
-      for (vector<MDRChapter*>::iterator cit = t->Chapters_get().begin(); cit!=t->Chapters_get().end();++cit)
-	{
-	  MDRChapter* c = *cit;
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"== Chapter #%s",c->ChapterNum_get().c_str());
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"== Chapter Name: %s",c->ChapterTitle_get().c_str());
-	}
-    }
+  // for (vector<MDRTitle*>::iterator it = pReply->Titles_get().begin(); it!=pReply->Titles_get().end(); ++it)
+  //   {
+  //     MDRTitle* t = *it;
+  //     LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Title #%s",t->TitleNum_get().c_str());
+  //     LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Title: %s",t->Title_get().c_str());
+  //     LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Studio: %s",t->Studio_get().c_str());
+  //     LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Director: %s",t->Director_get().c_str());
+  //     LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Actors: %s",t->Actors_get().c_str());
+  //     LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Rating: %s",t->Rating_get().c_str());
+  //     LoggerWrapper::GetInstance()->Write(LV_STATUS,"++ Genre: %s",t->Genre_get().c_str());
+  //     for (vector<MDRChapter*>::iterator cit = t->Chapters_get().begin(); cit!=t->Chapters_get().end();++cit)
+  // 	{
+  // 	  MDRChapter* c = *cit;
+  // 	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"== Chapter #%s",c->ChapterNum_get().c_str());
+  // 	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"== Chapter Name: %s",c->ChapterTitle_get().c_str());
+  // 	}
+  //   }
 }
