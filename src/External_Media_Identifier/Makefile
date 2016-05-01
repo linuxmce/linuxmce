@@ -36,6 +36,7 @@ XTRALDLIBS = -lcdio -lcddb -lcurl -ldvdid
 
 Gen_Dev_Files +=
 sources += HTTPPicture.cpp \
+        IdentifyDisc.cpp \
 	WMMCDI.cpp \
 	IdentifierBase.cpp \
 	IdentifierDVDBase.cpp \
@@ -50,7 +51,7 @@ sources += HTTPPicture.cpp \
 	MDRDVDParser.cpp \
 	MDRDVDQuery.cpp \
 	pugixml.cpp \
-	IdentifierCDDB.cpp
+	IdentifierCDDB.cpp 
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

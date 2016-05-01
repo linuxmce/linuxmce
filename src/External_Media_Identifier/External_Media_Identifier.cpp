@@ -29,6 +29,16 @@ using namespace DCE;
 #include "IdentifierDVDMDR.h"
 #include <iostream>
 #include "pluto_main/Define_MediaType.h"
+#include "Disk_Drive_Functions/Disk_Drive_Functions.h"
+#include <fcntl.h>
+#ifndef WIN32
+#include <sys/ioctl.h>
+#include <sys/mount.h>
+#endif
+
+#include <limits.h>
+
+#include <sstream>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -36,21 +46,20 @@ External_Media_Identifier::External_Media_Identifier(int DeviceID, string Server
 	: External_Media_Identifier_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+  m_pIdentifyDisc = new IdentifyDisc();
 }
 
-//<-dceag-const2-b->
-// The constructor when the class is created as an embedded instance within another stand-alone device
-External_Media_Identifier::External_Media_Identifier(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: External_Media_Identifier_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
-{
-}
+//<-dceag-const2-b->!
 
 //<-dceag-dest-b->
 External_Media_Identifier::~External_Media_Identifier()
 //<-dceag-dest-e->
 {
-	
+  if (m_pIdentifyDisc)
+    {
+      delete m_pIdentifyDisc;
+      m_pIdentifyDisc=NULL;
+    }
 }
 
 //<-dceag-getconfig-b->
@@ -76,12 +85,7 @@ bool External_Media_Identifier::Register()
 /*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
-//<-dceag-createinst-b->
-External_Media_Identifier_Command *Create_External_Media_Identifier(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-{
-	return new External_Media_Identifier(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-}
-//<-dceag-createinst-e->
+//<-dceag-createinst-b->!
 
 /*
 	When you receive commands that are destined to one of your children,
@@ -133,71 +137,57 @@ void External_Media_Identifier::ReceivedUnknownCommand(string &sCMD_Result,Messa
 
 void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,string sFilename,int iPK_Device_Related,string &sCMD_Result,Message *pMessage)
 //<-dceag-c314-e->
-{
-  // cout << "Need to implement command #314 - Identify Media" << endl;
-  // cout << "Parm #2 - PK_Device=" << iPK_Device << endl;
-  // cout << "Parm #10 - ID=" << sID << endl;
-  // cout << "Parm #13 - Filename=" << sFilename << endl;
-  // cout << "Parm #201 - PK_Device_Related=" << iPK_Device_Related << endl;
-
-  string sText = "";
-  int iPK_MediaType = 0;
-  int iEK_Disc = 0;
-  string sDisks = "";
-  string sURL = "";
-  string sBlock_Device = "";
-  
-  CMD_Get_Disk_Info CMD_Get_Disk_Info(m_dwPK_Device, 
-				      (iPK_Device_Related == 0 ? pMessage->m_dwPK_Device_From : iPK_Device_Related), 
-				      &sText, 
-				      &iPK_MediaType, 
-				      &iEK_Disc, 
-				      &sDisks, 
-				      &sURL, 
-				      &sBlock_Device);
- 
-  SendCommand(CMD_Get_Disk_Info);
-
-  if (iPK_MediaType == 0)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"CMD_Identify_Media() - Returned mediatype from CMD_Get_Disk_Info == 0, ignoring.");
-      return;
-    }
- 
+{    
   IdentifierBase* pIdentifier = NULL;
+  int iPK_MediaType=0;
 
-  switch(iPK_MediaType)
+  IdentifyDisc::DiscType discType = m_pIdentifyDisc->Identify(sFilename);
+
+  switch (discType)
     {
-    case MEDIATYPE_pluto_CD_CONST:
+    case IdentifyDisc::DiscType::CD:
       pIdentifier = new IdentifierCDMDR(sFilename, sID);
       break;
-    case MEDIATYPE_pluto_DVD_CONST:
-      pIdentifier = new IdentifierDVDMDR(sFilename,sID);
+    case IdentifyDisc::DiscType::DVD:
+      pIdentifier = new IdentifierDVDMDR(sFilename, sID);
       break;
+    case IdentifyDisc::DiscType::UNKNOWN:
     default:
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"CMD_Identify_Media() - I do not know how to identify disks of media type %d. Aborting identify.",iPK_MediaType);
-      break;
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not identify disc. Aborting");
+      sCMD_Result="ERROR";
+      return;
     }
-  
-  if (pIdentifier == NULL)
-    return;
 
+  if (pIdentifier==NULL)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Identify_Media(): pIdentifier is NULL");
+    }
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Init()");
   if (!pIdentifier->Init())
     return;
 
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Identify()");
   if (!pIdentifier->Identify())
     return;
-  
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->GetIdentifiedData()");
   string sIdentifiedData = pIdentifier->GetIdentifiedData();
   
-  sCMD_Result = sIdentifiedData;
+  sCMD_Result = "OK";
   const char *Data = pIdentifier->GetPictureData().data();
   if (pIdentifier->GetPictureData().size() == 0)
     Data = NULL;
 
+  int iEK_Disc=0;
+
   size_t iData_Size = pIdentifier->GetPictureData().size();
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling CMD_Media_Identified();");
+
   DCE::CMD_Media_Identified CMD_Media_Identified( m_dwPK_Device, pMessage->m_dwPK_Device_From,
-						  iPK_Device, sCMD_Result, sID,
+						  iPK_Device, sIdentifiedData, sID,
+
 						  (char*)Data, iData_Size,
 						  pIdentifier->GetIdentityType(), iPK_MediaType,
 						  sFilename, "",
