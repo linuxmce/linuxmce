@@ -260,6 +260,7 @@ string IdentifierCDDB::GetIdentifiedData()
             sTrackArtist = s;
             printf(" by %s", s);
             // for each found item DiscData.addAttribute(track,attributetype,section,wholename);
+            DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Album_Artist_CONST, 0, sDiscArtist);
             DiscData.addAttribute(iTrackNum, ATTRIBUTETYPE_Performer_CONST, 0, sTrackArtist);
         }
 
