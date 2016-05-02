@@ -52,6 +52,7 @@
 #define ATTRIBUTETYPE_Episode_Number_CONST 51
 #define ATTRIBUTETYPE_TV_Season_ID_CONST 52
 #define ATTRIBUTETYPE_System_Configuration_CONST 56
+#define ATTRIBUTETYPE_Album_Artist_CONST 57
 
 #define ATTRIBUTETYPE_TABLE "AttributeType"
 #define ATTRIBUTETYPE_PK_ATTRIBUTETYPE_FIELD "PK_AttributeType"
