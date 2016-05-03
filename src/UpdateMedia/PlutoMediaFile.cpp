@@ -180,7 +180,12 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 	if( INode>0 )
 	{
 		vector<Row_File *> vectRow_File;
-		m_pDatabase_pluto_media->File_get()->GetRows("INode=" + StringUtils::itos(INode),&vectRow_File);
+		// Attempt to match against m_sDirectory to not cross match files, then check against INode only (file has moved).
+		m_pDatabase_pluto_media->File_get()->GetRows("INode=" + StringUtils::itos(INode) + " AND Path='" + m_sDirectory + "'",&vectRow_File);
+		if ( !vectRow_File.size() )
+		{
+			m_pDatabase_pluto_media->File_get()->GetRows("INode=" + StringUtils::itos(INode),&vectRow_File);
+		}
 		if( vectRow_File.size() )  // Should only be 1
 		{
 			Row_File *pRow_File = vectRow_File[0];
@@ -234,7 +239,7 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 	}
 	
 	// HACKOMAT - The VDR information files do not have an extension (since 1.7.4)
-	if ( m_sFile.c_str() == "info")
+	if ( m_sFile == "info")
 	{
 #ifdef UPDATEMEDIA_DEBUG
         	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "VDR file %s/%s is now defined as video file", m_sDirectory.c_str(), m_sFile.c_str());
@@ -433,9 +438,10 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 		mapPlutoMediaAttributes.size(), m_pPlutoMediaAttributes->m_mapAttributes.size());
 #endif
 	// For albums we don't want to add a new one for each media file.  All media from the same album
-	// should be grouped into a single album attribute.  However since different performers could have
-	// albums of the same name we need to maek a pass first to find the performer and skip the album, and then another pass
-	// to add the album
+	// should be grouped into a single album attribute.  However since different (Album Artists)[performers] could have
+	// albums of the same name we need to make a pass first to find the (Album Artist)[performer] and skip the album,
+	// and then another pass to add the album, this should prioritize Album Artist (if available) over performer
+	int PK_Attribute_Album_Artist=0;
 	int PK_Attribute_Performer=0;
 	for(int iPass=0;iPass<2;++iPass)
 	{
@@ -447,6 +453,7 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 
 			bool bAttributeAlreadyAdded = false;
 
+			// If this runs, then only new fields are added to the DB.  Existing fields are not updated.
 			if(!bAddAllToDb)
 			{
 				for(MapPlutoMediaAttributes::iterator itdb = mapPlutoMediaAttributes.begin(),
@@ -461,25 +468,42 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 						pPlutoMediaAttribute->m_nSection == pDBPlutoMediaAttribute->m_nSection
 						)
 					{
-						if( pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Performer_CONST )
+						// need to do a first pass for Album Artist, if not found use Performer
+						if( pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Album_Artist_CONST )
+						{
+							PK_Attribute_Album_Artist = pDBPlutoMediaAttribute->m_nPK_Attribute;
+						}
+						else if( pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Performer_CONST )
+						{
 							PK_Attribute_Performer = pDBPlutoMediaAttribute->m_nPK_Attribute;
+							if( !PK_Attribute_Album_Artist )
+							{
+								// If we don't have an Album Artist, choose the first Performer we come across
+								PK_Attribute_Album_Artist = PK_Attribute_Performer;
+							}
+						}
 						bAttributeAlreadyAdded = true;
 						break;
 					}
 				}
 			}
 
-			if(!bAttributeAlreadyAdded)
+			// This has been altered to use Album Artist when available, otherwise the first performer in the list
+			if(!bAttributeAlreadyAdded )
 			{
 				if(pPlutoMediaAttribute->m_nType > 0 && !StringUtils::OnlyWhiteSpace(pPlutoMediaAttribute->m_sName))
 				{
+					// Do not add album attribute on pass 0, only add album attribute on pass 1
 					if( (iPass==0 && pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Album_CONST) || (iPass==1 && pPlutoMediaAttribute->m_nType!=ATTRIBUTETYPE_Album_CONST) )
 						continue; // See notes above
 
+					// When getting the album attribute this will grab the specific album associated with this Album Artist/Performer
+					// Request the current attributes' value as it exists in the DB right now.
 					MediaAttributes_LowLevel mediaAttributes_LowLevel(m_pDatabase_pluto_media);
 					Row_Attribute *pRow_Attribute = mediaAttributes_LowLevel.GetAttributeFromDescription(m_nPK_MediaType,
-						pPlutoMediaAttribute->m_nType, pPlutoMediaAttribute->m_sName, PK_Attribute_Performer);
+						pPlutoMediaAttribute->m_nType, pPlutoMediaAttribute->m_sName, PK_Attribute_Album_Artist /*PK_Attribute_Performer*/ );
 
+					// Skip this attribute if it is invalid in anyway?  I'm unsure of exactly when this would return NULL.
 					if( pRow_Attribute==NULL )
 					{
 						LoggerWrapper::GetInstance()->Write(LV_WARNING,"PlutoMediaFile::SyncDbAttributes attribute type %d/%s is empty",
@@ -487,11 +511,25 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 						continue;
 					}
 
+					// Assigns current PK_Attribute = to value currently in the DB
 					pPlutoMediaAttribute->m_nPK_Attribute = pRow_Attribute->PK_Attribute_get();
-					if( pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Performer_CONST )
-						PK_Attribute_Performer = pPlutoMediaAttribute->m_nPK_Attribute;
 
-					//already in the database?
+					// If this is the Album Artist or Peformer record the PK value
+					if( pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Album_Artist_CONST )
+					{
+						PK_Attribute_Album_Artist = pPlutoMediaAttribute->m_nPK_Attribute;
+					}
+					if( pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Performer_CONST )
+					{
+						PK_Attribute_Performer = pPlutoMediaAttribute->m_nPK_Attribute;
+						if( !PK_Attribute_Album_Artist )
+						{
+							// If we don't have an Album Artist, choose the first Performer we come across
+							PK_Attribute_Album_Artist = PK_Attribute_Performer;
+						}
+					}
+
+					//already in the database? if not, put it in the database
 					if(NULL == m_pDatabase_pluto_media->File_Attribute_get()->GetRow(
 						PK_File, pRow_Attribute->PK_Attribute_get(),
 						pPlutoMediaAttribute->m_nTrack, pPlutoMediaAttribute->m_nSection)
@@ -770,8 +808,8 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 		vector<Row_File_Attribute *> vectRow_File_Attribute;
 		m_pDatabase_pluto_media->File_Attribute_get()->GetRows("FK_File = " + StringUtils::ltos(pRow_File->PK_File_get()),
 			&vectRow_File_Attribute);
-		
-        //Iterate through the vector and mark all the rows as deleted		
+
+		//Iterate through the vector and mark all the rows as deleted
 		for(vector<Row_File_Attribute *>::iterator it = vectRow_File_Attribute.begin();
 			it != vectRow_File_Attribute.end(); ++it
 		)
@@ -1062,8 +1100,8 @@ int PlutoMediaFile::GetPicAttribute(int PK_File)
 #ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: got picture %d associated to file %d", PK_Picture, PK_File);
 #endif
-        SetPicAttribute(PK_Picture, sPictureUrl);
-        return PK_Picture;  // The first pic for this directory
+		SetPicAttribute(PK_Picture, sPictureUrl);
+		return PK_Picture;  // The first pic for this directory
     }
 
     //Does one of the attributes have a picture?
