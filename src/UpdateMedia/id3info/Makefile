@@ -1,4 +1,4 @@
-ROOT=..
+ROOT=../..
 
 CXX=g++
 CC=$(CXX)
@@ -10,7 +10,7 @@ LDLIBS= -lid3
 sources = id3info.cpp \
 
 all: $(sources:.cpp=.o)
-	$(CXX) -o id3info $+ $(LDFLAGS) $(LDLIBS)
+	$(CXX) -o id3info $+ $(LDFLAGS) $(LDLIBS) $(CPPFLAGS)
 
 clean:
 	rm -f id3info $(sources:.cpp=.o) 
