@@ -186,7 +186,7 @@ FileHandlerFactory::~FileHandlerFactory(void)
 /*static*/ bool FileHandlerFactory::IsValidTagFile(string sDirectory, string sFile)
 {
 	string sExtension = FileUtils::FindExtension(sFile);
-	return sExtension == "ogg" || sExtension == "flac";
+	return sExtension == "ogg" || sExtension == "flac" || sExtension == "mp3";
 }
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidImageFile(string sDirectory, string sFile)

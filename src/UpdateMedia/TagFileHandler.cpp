@@ -10,6 +10,8 @@ using namespace DCE;
 
 #include <tag.h>
 #include <fileref.h>
+#include <tpropertymap.h>
+//#include <tstring.h>
 using namespace TagLib;
 //-----------------------------------------------------------------------------------------------------
 namespace UpdateMediaVars
@@ -127,7 +129,7 @@ string TagFileHandler::GetFileAttribute()
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool TagFileHandler::IsSupported()
 {
-	const string csSupportedExtensions("ogg:flac");
+	const string csSupportedExtensions("ogg:flac:mp3");
 	string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFullFilename));
 
 	if(sExtension.empty())
@@ -149,6 +151,11 @@ string TagFileHandler::GetFileSourceForDB()
 		return "F";
 }
 //-----------------------------------------------------------------------------------------------------
+string getAlbumArtist(string sFilename)
+{
+
+}
+//-----------------------------------------------------------------------------------------------------
 void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 	FileRef *f = new FileRef(m_sFullFilename.c_str());
@@ -157,6 +164,20 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 #ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::GetTagInfo: tags present");
 #endif
+
+		// Get Album Artist, from properties
+		TagLib::PropertyMap tags = f->file()->properties();
+		for(TagLib::PropertyMap::ConstIterator i = tags.begin(); i != tags.end(); ++i) {
+			if ( (i->first == "ALBUMARTIST") || (i->first == "ALBUM ARTIST") )
+			{
+				for(TagLib::StringList::ConstIterator j = i->second.begin(); j != i->second.end(); ++j) {
+					TagLib::String album_artist = *j;
+					mapAttributes[ATTRIBUTETYPE_Album_Artist_CONST] = album_artist.to8Bit(true);
+					break;
+				}
+			}
+		}
+
 		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit(true);
 		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit(true);
 		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit(true);
@@ -194,6 +215,9 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 	FileRef *f = new FileRef(m_sFullFilename.c_str());
 	if(NULL != f)
 	{
+		// Set Album Artist, in properties
+		f->file()->properties().insert("ALBUMARTIST",String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_Artist_CONST), String::UTF8));
+
 		f->tag()->setArtist(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Performer_CONST), String::UTF8));
 		f->tag()->setTitle(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Title_CONST), String::UTF8));
 		f->tag()->setGenre(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Genre_CONST), String::UTF8));
@@ -213,6 +237,9 @@ void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 	{
 		switch(nTagType)
 		{
+			case ATTRIBUTETYPE_Album_Artist_CONST:
+				f->file()->properties().erase("ALBUMARTIST");
+				break;
 			case ATTRIBUTETYPE_Performer_CONST:
 				if(f->tag()->artist() == sValue)
 					f->tag()->setArtist("");
