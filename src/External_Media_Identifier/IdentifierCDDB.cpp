@@ -169,9 +169,10 @@ string IdentifierCDDB::GetIdentifiedData()
 // !!!! This is the 'Album Artist' which can often be different than the
 //  'Track Artist' which can vary due to guest artists. -phenigma
     /* 1. The artist name, disc title and extended data. */
-    printf("Artist:   %s\n", STR_OR_NULL(cddb_disc_get_artist(disc)));
+    printf("Album Artist:   %s\n", STR_OR_NULL(cddb_disc_get_artist(disc)));
     string sDiscArtist = cddb_disc_get_artist(disc);
     // disc artist - album artist
+    DiscData.addAttribute(0, ATTRIBUTETYPE_Album_Artist_CONST, 0, sDiscArtist);
     DiscData.addAttribute(0, ATTRIBUTETYPE_Performer_CONST, 0, sDiscArtist);
 
     printf("Title:    %s\n", STR_OR_NULL(cddb_disc_get_title(disc)));

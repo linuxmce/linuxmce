@@ -355,6 +355,11 @@ start() {
 		fi
 	fi
 
+	# Start core services - not required until after DCERouter is running
+	if [[ "$AutostartCore" -eq "1" ]] && [[ "$AutostartMedia" -eq "0" ]]; then
+		screen -r LMCE_Launch_Manager
+	fi
+
 	return $err
 }
 
