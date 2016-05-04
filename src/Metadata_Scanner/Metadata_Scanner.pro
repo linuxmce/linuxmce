@@ -20,11 +20,15 @@ SOURCES += main.cpp \
     items/mediaitem.cpp  \
     parsing/mediaparser.cpp \
     services/metadataservicebase.cpp \
-    databaseinteractor.cpp
+    databaseinteractor.cpp \
+    services/tmdbservice.cpp \
+    services/tvdbservice.cpp
 
 HEADERS += \
     scanmanager.h \
     items/mediaitem.h \
     parsing/mediaparser.h \
     services/metadataservicebase.h \
-    databaseinteractor.h
+    databaseinteractor.h \
+    services/tmdbservice.h \
+    services/tvdbservice.h

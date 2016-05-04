@@ -2,6 +2,8 @@
 #include "qdebug.h"
 #include "qdatetime.h"
 #include "services/metadataservicebase.h"
+#include "services/tmdbservice.h"
+#include "services/tvdbservice.h"
 ScanManager::ScanManager(QObject *parent) : QObject(parent)
 {
 
@@ -26,6 +28,15 @@ void ScanManager::addItemForUpdate(MediaItem *item)
 bool ScanManager::registerMetadataProviders()
 {
     log(QString(Q_FUNC_INFO));
+
+    TVDBService *tvdb = new TVDBService("Tvdb.com");
+    TMDBService *tmdb = new TMDBService("TMDB.com");
+    m_services.push_back(tvdb);
+    m_services.push_back(tmdb);
+
+    foreach(MetadataServiceBase*m , m_services){
+        qDebug() << m->serviceName() << " Is registered.";
+    }
 
     return true;
 }

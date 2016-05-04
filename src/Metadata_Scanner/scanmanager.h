@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <items/mediaitem.h>
+#include <services/metadataservicebase.h>
 /*!
  * \brief The ScanManager class. Main object that will do the heavy lifting.
  */
@@ -24,6 +25,7 @@ private:
 private:
     QList<MediaItem*> m_itemQueue;
     QList<MediaItem*> m_outgoingQueue;
+    QList<MetadataServiceBase*> m_services;
 };
 
 #endif // SCANMANAGER_H

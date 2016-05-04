@@ -18,6 +18,7 @@ public:
 signals:
     void updateMediaItem(MediaItem*item);
 
+
 public slots:
     void processMediaItem(MediaItem *item);
     void setSupportedMediaTypes(QVector<int> mediaTypes);
