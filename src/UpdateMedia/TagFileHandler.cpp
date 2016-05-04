@@ -185,6 +185,11 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 
 // FIXME: Need to de-tokenize/tokenize items as mapAttributes[] can hold multiple entries
 		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit(true);
+		if (mapAttributes[ATTRIBUTETYPE_Album_Artist_CONST] == "" )
+		{
+			mapAttributes[ATTRIBUTETYPE_Album_Artist_CONST] = mapAttributes[ATTRIBUTETYPE_Performer_CONST];
+		}
+
 		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit(true);
 // FIXME: Need to de-tokenize/tokenize items as mapAttributes[] can hold multiple entries
 		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit(true);
