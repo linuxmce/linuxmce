@@ -4,6 +4,7 @@
 #include <QObject>
 #include "qmap.h"
 #include "../pluto_main/Define_MediaType.h"
+#include "../pluto_media/Define_MediaSubType.h"
 #include "../pluto_media/Define_AttributeType.h"
 
 
