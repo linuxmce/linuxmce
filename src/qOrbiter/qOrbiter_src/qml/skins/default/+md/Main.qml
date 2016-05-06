@@ -84,10 +84,10 @@ Item{
         switch(event.key){
         case Qt.Key_F5: console.log("Reloading qml"); manager.qmlReload(); break;
         case Qt.Key_R: console.log("Rotating"); manager.setDesiredOrientation(manager.isProfile ? Qt.LandscapeOrientation : Qt.PortraitOrientation); break;
+        case Qt.Key_Back:
         case Qt.Key_Backspace: console.log("Back Button Hard Key"); manager.goBacktoQScreen();break;
         case Qt.Key_Back: console.log("Back Key pressed"); manager.goBacktoQScreen(); event.accepted=true; break;
-
-        default:console.log("qmlRoot::Key "+event.key+" is unhandled."); qmlRoot.unhandledKey( event.key ); break;
+        default:console.log("+md / qmlRoot::Key "+event.key+" is unhandled."); qmlRoot.unhandledKey( event.key ); break;
         }
 
     }

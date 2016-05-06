@@ -1700,55 +1700,73 @@ public slots:
 
     void handleDceGuiCommand(int c){
         QString cmdOut;
+       int keyEvent=-1;
 
         switch(c){
         case BackClearEntry:
             emit dceRemoteCommand(c , "Back/Clear Entry" );
+            keyEvent = Qt::Key_Clear;
             break;
 
         case BackPriorMenu:
             emit dceRemoteCommand(c , "Back/Prior Menu" );
+             keyEvent = Qt::Key_Back;
             break;
 
         case EnterGo:
             emit dceRemoteCommand(c , "Enter/Go" );
+            keyEvent = Qt::Key_Enter;
             break;
 
         case Guide:
             emit dceRemoteCommand(c , "Guide" );
+            keyEvent = Qt::Key_Guide;
             break;
 
         case Menu:
             emit dceRemoteCommand(c , "Menu" );
+            keyEvent = Qt::Key_Menu;
             break;
 
         case MoveDown:
             emit dceRemoteCommand(c , "Move Down" );
+            keyEvent = Qt::Key_Down;
             break;
 
-        case MoveLeft:
+        case MoveLeft:           
             emit dceRemoteCommand(c , "Move Left" );
+            keyEvent = Qt::Key_Left;
             break;
 
         case MoveRight:
             emit dceRemoteCommand(c , "Move Right" );
+            keyEvent = Qt::Key_Right;
             break;
 
         case MoveUp:
             emit dceRemoteCommand(c , "Move Up" );
+            keyEvent = Qt::Key_Up;
             break;
 
         case Off:
             emit dceRemoteCommand(c , "Off" );
+            keyEvent = Qt::Key_PowerOff;
             break;
 
         case On:
             emit dceRemoteCommand(c , "On" );
+            keyEvent = Qt::Key_Zenkaku_Hankaku;
             break;
 
         default:
             qWarning()<< "unhandled command" << cmdOut;
         }
+
+        if(keyEvent != -1){
+            QKeyEvent *outKey = new QKeyEvent (QEvent::KeyPress, keyEvent , Qt::NoModifier);
+            QCoreApplication::postEvent (m_appEngine->rootObjects().first(), outKey);
+        }
+
     }
 
     Q_INVOKABLE void setLanguage(QString lang){
