@@ -35,15 +35,22 @@ bool MDRDVDParser::parse()
     return false;
 
   string sDVDTitle=doc.child("METADATA").child("MDR-DVD").child_value("dvdTitle");
+  cout << "Added Title: " << sDVDTitle << endl;
   string sStudio=doc.child("METADATA").child("MDR-DVD").child_value("studio");
+  cout << "Added Studio: " << sStudio << endl;
   string sActors=doc.child("METADATA").child("MDR-DVD").child_value("actors");
+  cout << "Added Actors: " << sActors << endl;
   string sDirector=doc.child("METADATA").child("MDR-DVD").child_value("director");
+  cout << "Added Director: " << sDirector << endl;
   string sRating=doc.child("METADATA").child("MDR-DVD").child_value("MPAARating");
+  cout << "Added Rating: " << sRating << endl; 
   string sReleaseDate=doc.child("METADATA").child("MDR-DVD").child_value("releaseDate");
+  cout << "Added Release Date: " << sReleaseDate << endl;
   string sGenre=doc.child("METADATA").child("MDR-DVD").child_value("genre");
+  cout << "Added Genre: " << sGenre << endl;
   string sDVDCoverURL=doc.child("METADATA").child("MDR-DVD").child_value("largeCoverParams");
-
   sDVDCoverURL=string(DVD_COVER_URL_PREFIX) + "/" + sDVDCoverURL;
+  cout << "Added DVD Cover URL: " << sDVDCoverURL << endl;
   
   m_pReply=new MDRDVDReply(sDVDTitle,
 			   sStudio,
@@ -54,6 +61,7 @@ bool MDRDVDParser::parse()
 			   sGenre,
 			   sDVDCoverURL);
 
+  cout << "Created Reply object" << endl;
   
   for (pugi::xml_node xnTITLE: doc.child("METADATA").child("MDR-DVD").children())
     {
@@ -61,6 +69,8 @@ bool MDRDVDParser::parse()
 
       if (sNodeName != "title")
 	continue;
+
+      cout << "Constructing MDRTitle" << endl;
 
       xml_node xnTitleNum=xnTITLE;
       xml_node xnTitle=xnTITLE;
@@ -70,12 +80,19 @@ bool MDRDVDParser::parse()
       xml_node xnRating=xnTITLE;
       xml_node xnGenre=xnTITLE;
       string sTitleNum=xnTitleNum.child_value("titleNum");
+      cout << "Added Title #" << sTitleNum << endl;
       string sTitle=xnTitle.child_value("titleTitle");
+      cout << "Added Title: " << sTitle << endl;
       string sStudio=xnStudio.child_value("studio");
+      cout << "Added Title: " << sStudio << endl;
       string sDirector=xnDirector.child_value("director");
+      cout << "Added Director: " << sDirector << endl;
       string sActors=xnActors.child_value("actors");
+      cout << "Added Actors: " << sActors << endl;
       string sRating=xnRating.child_value("MPAARating");
+      cout << "Added Rating: " << sRating << endl;
       string sGenre=xnGenre.child_value("genre");
+      cout << "Added Genre: " << sGenre << endl;
       MDRTitle* t = new MDRTitle(sTitleNum,
 				 sTitle,
 				 sStudio,
@@ -84,15 +101,22 @@ bool MDRDVDParser::parse()
 				 sRating,
 				 sGenre);
       
+      cout << "MDRTitle Constructed" << endl;
+
       for (pugi::xml_node xnCHAPTER: xnTITLE.children("chapter"))
 	{
+	  cout << "Constructing MDRChapter" << endl;
 	  xml_node xnChapterNum=xnCHAPTER;
 	  xml_node xnChapterTitle=xnCHAPTER;
 	  string sChapterNum=xnChapterNum.child_value("chapterNum");
+	  cout << "Added Chapter #" << sChapterNum << endl;
 	  string sChapterTitle=xnChapterTitle.child_value("chapterTitle");
+	  cout << "Added Chapter Title: " << sChapterTitle << endl;
 	  t->Chapter_add(new MDRChapter(sChapterNum, sChapterTitle));
+	  cout << "Added Chapter to title. " << endl;
 	}
       m_pReply->Title_add(t);
+      cout << "Added Title to Reply." << endl;
     }
 
   return true;
