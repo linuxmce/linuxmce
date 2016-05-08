@@ -43,6 +43,8 @@ bool IdentifierDVDMDR::Identify()
   if (!IdentifierDVDBase::Identify())
     return false;
 
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::Identify() - DVD ID is: ",DVDID_get().c_str());
+
   m_pQuery=new MDRDVDQuery(DVDID_get());
 
   if (!m_pQuery)
@@ -58,7 +60,7 @@ bool IdentifierDVDMDR::Identify()
     }
   else
     {
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::Identify() - Received output from MDR. Length: %d bytes.",m_pQuery->Reply_get().size());
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::Identify() - Received output from MDR. Length: %d bytes., Output: %s",m_pQuery->Reply_get().size(), m_pQuery->Reply_get().c_str());
     }
 
   m_pParser=new MDRDVDParser(m_pQuery->Reply_get());
@@ -85,6 +87,10 @@ bool IdentifierDVDMDR::Identify()
 void IdentifierDVDMDR::SplitActorsIntoVector(string sActors, vector<string>& vectActors)
 {
   StringUtils::Tokenize(sActors,";",vectActors);
+  for (vector<string>::iterator it=vectActors.begin(); it!=vectActors.end(); ++it)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::SplitActorsIntoVector: Actor: %s",it->c_str());
+    }
 }
 
 string IdentifierDVDMDR::GetIdentifiedData()
@@ -92,11 +98,17 @@ string IdentifierDVDMDR::GetIdentifiedData()
   OutputMiscTab DiscData(m_pQuery->DVDId_get());
   MDRDVDReply* r = m_pParser->Reply_get();
 
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::GetIdentifiedData() - Adding Disc ID %s",m_pQuery->DVDId_get().c_str());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Disc_ID_CONST, 0, m_pQuery->DVDId_get());
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::GetIdentifiedData() - Adding DVD Title %s",r->DVDTitle_get().c_str());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Title_CONST, 0, r->DVDTitle_get());
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::GetIdentifiedData() - Adding Studio %s",r->Studio_get().c_str());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Studio_CONST, 0, r->Studio_get());
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::GetIdentifiedData() - Adding Director %s",r->Director_get().c_str());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Director_CONST, 0, r->Director_get());
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::GetIdentifiedData() - Adding Rating %s",r->Rating_get().c_str());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Rating_CONST, 0, r->Rating_get());
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::GetIdentifiedData() - Adding Genre %s",r->Genre_get().c_str());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Genre_CONST, 0, r->Genre_get());
   
   vector<string> vectActors;
@@ -106,20 +118,23 @@ string IdentifierDVDMDR::GetIdentifiedData()
   for (vector<string>::iterator it=vectActors.begin(); it!=vectActors.end(); ++it)
     {
       string sActor=*it;
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifierDVDMDR::GetIdentifiedData() - Adding Actor %s",sActor.c_str());
       DiscData.addAttribute(0, ATTRIBUTETYPE_Performer_CONST, 0, sActor);
     }
 
-  // now we iterate through titles and chapters
-  for (vector<MDRTitle*>::iterator it=r->Titles_get().begin(); it!=r->Titles_get().end(); ++it)
+  vector<MDRTitle*> vectTitles = r->Titles_get();
+  for (vector<MDRTitle*>::iterator it=vectTitles.begin(); it!=vectTitles.end(); ++it)
     {
       MDRTitle* t = *it;
-      for (vector<MDRChapter*>::iterator cit=t->Chapters_get().begin(); cit!=t->Chapters_get().end(); ++cit)
+      vector<MDRChapter*> vectChapters = t->Chapters_get();
+      for (vector<MDRChapter*>::iterator cit=vectChapters.begin(); cit!=vectChapters.end(); ++cit)
 	{
 	  MDRChapter* c = *cit;
 	  DiscData.addAttribute(atoi(t->TitleNum_get().c_str()),
 				ATTRIBUTETYPE_Chapter_CONST,
 				atoi(c->ChapterNum_get().c_str()),
 				c->ChapterTitle_get());
+	  
 	}
     }
   
