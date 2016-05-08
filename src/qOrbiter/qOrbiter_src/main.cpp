@@ -424,6 +424,7 @@ int main(int argc, char* argv[])
         QString name = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
 
         qOrbiter pqOrbiter(name, PK_Device, sRouter_IP,true,bLocalMode );
+        pqOrbiter.setOsd(isOsd);
 
         qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
@@ -523,7 +524,7 @@ int main(int argc, char* argv[])
 
         //shutdown signals
         QObject::connect(&w, SIGNAL(destroyed()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(shutdown()));
+        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &w, SLOT(closeOrbiter()));
         QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
         QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));

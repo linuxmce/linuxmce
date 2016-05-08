@@ -78,7 +78,7 @@ bool qOrbiter::GetConfig()
     }
 
     emit deviceTemplateChanged(dt);
-
+ CMD_Identify_Media identifyMedia();
 
     PurgeInterceptors();
     RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
@@ -2006,7 +2006,6 @@ void DCE::qOrbiter::deinitialize()
     DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_OrbiterUnRegistered);
     emit routerConnectionChanged(false);
-    emit closeOrbiter();
     Disconnect();
     emit closeOrbiter();
 
@@ -2229,11 +2228,9 @@ void qOrbiter::requestMediaSubtypes(int type)
 
 void qOrbiter::requestTypes(int type)
 {
-    string pResponse = "";
-    string sText = "";
+    string pResponse = "";  string sText = "";
 
     CMD_Get_Attribute_Types getTypesCmd(m_dwPK_Device, iMediaPluginID, type, &sText);
-
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for attribute");
         emit newAttributeSort( new AttributeSortItem( "Recently Viewed","-1", "",false,  0));
@@ -2343,6 +2340,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
 void qOrbiter::shutdown()
 {
     // Closing and deleting of superclass member variables are done by superclass
+
 }
 
 bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceData_Base *pDeviceFrom, DeviceData_Base *pDeviceTo)
@@ -4360,7 +4358,14 @@ void qOrbiter::OnReload()
 #endif
     emit routerReloading("Reloading");
     emit routerConnectionChanged(false);
-    Disconnect();
+    if(m_bIsOSD){
+        qDebug() << "Is osd, exiting";
+       deinitialize();
+    } else {
+        Disconnect();
+    }
+
+
 }
 
 
@@ -5297,6 +5302,7 @@ void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
 {
+    qDebug() << Q_FUNC_INFO;
     emit dceGuiCommand(Menu);
     sCMD_Result="OK";
 }

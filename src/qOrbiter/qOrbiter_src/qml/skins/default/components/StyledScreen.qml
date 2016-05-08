@@ -6,6 +6,8 @@ Item {
     opacity: 0
     anchors.fill: parent
     Keys.onTabPressed: header.forceActiveFocus()
+    Keys.onMenuPressed: header.forceActiveFocus()
+
     property variant screen_params:[]
     Timer{
         id:failSafe
