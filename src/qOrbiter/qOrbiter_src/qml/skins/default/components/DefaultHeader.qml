@@ -11,6 +11,9 @@ Item{
     activeFocusOnTab: false
     onActiveFocusChanged: {
         console.log("Header has focus ? "+ activeFocus)
+        console.log("Header is active "+ active)
+    }
+    onActiveChanged: {
 
     }
 

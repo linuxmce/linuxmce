@@ -103,6 +103,7 @@ string IdentifierCDMDR::GetIdentifiedData()
 
   DiscData.addAttribute(0, ATTRIBUTETYPE_Disc_ID_CONST, 0, m_pWMMCDI->WMMCDIId_get());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Album_CONST, 0, r->AlbumTitle_get());
+  DiscData.addAttribute(0, ATTRIBUTETYPE_Album_Artist_CONST, 0, r->AlbumArtist_get());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Performer_CONST, 0, r->AlbumArtist_get());
   DiscData.addAttribute(0, ATTRIBUTETYPE_Genre_CONST, 0, r->Genre_get());
 

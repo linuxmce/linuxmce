@@ -36,7 +36,7 @@ StyledScreen {
     Item{
         id:innerContent
         anchors.fill: parent
-
+        focus:true
         state:manager.q_mediaType =="5" ? "entry" : "selection"
         onActiveFocusChanged: {
             if(!activeFocus)

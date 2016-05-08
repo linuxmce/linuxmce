@@ -108,10 +108,9 @@ Loader {
         }
     }
     
-
-    
     onLoaded: {
         console.log("Screen Changed:" + pageLoader.source)
+        item.forceActiveFocus()
     }
     onStatusChanged:  if (pageLoader.status == Component.Ready)
                       {

@@ -285,5 +285,6 @@
         <file>qml/skins/default/+md/Main.qml</file>
         <file>qml/skins/default/+md/MainLayout.qml</file>
         <file>qml/skins/default/+md/Style.qml</file>
+        <file>qml/skins/default/components/InputController.qml</file>
     </qresource>
 </RCC>
