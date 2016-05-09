@@ -185,13 +185,23 @@ FileHandlerFactory::~FileHandlerFactory(void)
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidTagFile(string sDirectory, string sFile)
 {
-	string sExtension = FileUtils::FindExtension(sFile);
-	return sExtension == "ogg" || sExtension == "flac" || sExtension == "mp3";
+        const string csSupportedExtensions("ogg:flac:mp3:mp4:wav:asf");
+        string sExtension = StringUtils::ToLower(FileUtils::FindExtension(sFile));
+
+        if(sExtension.empty())
+                return false;
+
+        return csSupportedExtensions.find(sExtension) != string::npos;
 }
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidImageFile(string sDirectory, string sFile)
 {
-	string sExtension = FileUtils::FindExtension(sFile);
-	return sExtension == "jpg";
+        const string csSupportedExtensions("jpg");
+        string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFile));
+
+        if(sExtension.empty())
+                return false;
+
+        return csSupportedExtensions.find(sExtension) != string::npos;
 }
 //-----------------------------------------------------------------------------------------------------
