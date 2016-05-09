@@ -104,7 +104,7 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 			end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 		{
 			if ( !mapAttributes[it->first].empty() )
-				mapAttributes[it->first] += "/";
+				mapAttributes[it->first] += ";";
 			// create a map copy of the existing multi map
 			mapAttributes[it->first] += it->second->m_sName;
 		}
@@ -191,11 +191,11 @@ void TagFileHandler::stov(string s, std::vector<string> &v, string acDelimiters 
 	}
 }
 //-----------------------------------------------------------------------------------------------------
-string TagFileHandler::vtos(std::vector<string> v, const char cDelimiter /* = '/' */ )
+string TagFileHandler::vtos(std::vector<string> v, const char cDelimiter /* = ';' */ )
 {
 	string s;
 
-	// Create a single string with all property values seperated by '/'
+	// Create a single string with all property values seperated by ';'
 	for (std::vector<string>::iterator it = v.begin(); it != v.end(); ++it)
 	{
 		string entry = *it;
@@ -395,6 +395,8 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 	TagLib::PropertyMap::Iterator tag = f->file()->properties().find(sName);
 	if ( tag != f->file()->properties().end() )
 	{
+/*
+	// FIXME: the following line segfaults. Perhaps an empty value? Needs investigation.
 		TagLib::StringList::Iterator value = tag->second.find(sValue);
 		if ( value != tag->second.end() )
 		{
@@ -405,6 +407,7 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 				f->file()->properties().erase(sName);
 			}
 		}
+*/
 	}
 }
 //-----------------------------------------------------------------------------------------------------
