@@ -45,7 +45,7 @@ private:
 
 	string ExtractAttribute(const map<int,string>& mapAttributes, int key);
 
-	void stov(string s, std::vector<string> &v, string acDelimiters = ";,");
+	void stov(string s, std::vector<string> &v, string acDelimiters = "/;,");
 	string vtos(std::vector<string> v, const char cDelimiter = ';');
 };
 //-----------------------------------------------------------------------------------------------------
