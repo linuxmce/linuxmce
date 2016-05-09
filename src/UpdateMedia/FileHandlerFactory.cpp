@@ -197,7 +197,7 @@ FileHandlerFactory::~FileHandlerFactory(void)
 /*static*/ bool FileHandlerFactory::IsValidImageFile(string sDirectory, string sFile)
 {
         const string csSupportedExtensions("jpg");
-        string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFile));
+        string sExtension = StringUtils::ToLower(FileUtils::FindExtension(sFile));
 
         if(sExtension.empty())
                 return false;

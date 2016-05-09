@@ -224,6 +224,8 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		std::vector<string> vsAlbum;
 		std::vector<string> vsTrack;
 		std::vector<string> vsDate;
+		std::vector<string> vsComposerWriter;
+		std::vector<string> vsStudio;
 
 		// Get Album Artist, from file properties i==propertyname, j==propertyvalue
 		TagLib::PropertyMap tags = f->file()->properties();
@@ -263,6 +265,14 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					stov(sProperty, vsDate);
 				}
+				else if ( i->first == "COMPOSER" )
+				{
+					stov(sProperty, vsComposerWriter);
+				}
+				else if ( i->first == "LABEL" )
+				{
+					stov(sProperty, vsStudio);
+				}
 			}
 		}
 		stov(f->tag()->artist().to8Bit(true), vsPerformer);
@@ -289,6 +299,8 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		mapAttributes[ATTRIBUTETYPE_Album_CONST] = vtos( vsAlbum );
 		mapAttributes[ATTRIBUTETYPE_Track_CONST] = vtos( vsTrack );
 		mapAttributes[ATTRIBUTETYPE_Release_Date_CONST] = vtos( vsDate );
+		mapAttributes[ATTRIBUTETYPE_ComposerWriter_CONST] = vtos( vsComposerWriter );
+		mapAttributes[ATTRIBUTETYPE_Studio_CONST] = vtos( vsStudio );
 
 		string coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/cover.jpg";
 		if ( FileUtils::FileExists( coverfilename ) ) {
