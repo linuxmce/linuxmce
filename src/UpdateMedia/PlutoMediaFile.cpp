@@ -89,9 +89,9 @@ PlutoMediaFile::PlutoMediaFile(Database_pluto_media *pDatabase_pluto_media, int 
 	m_MediaSyncMode(modeNone), m_pPlutoMediaAttributes(NULL)
 {
 	//initializations
-    m_pDatabase_pluto_media = pDatabase_pluto_media;
-    m_sDirectory = sDirectory;
-    m_sFile = sFile;
+	m_pDatabase_pluto_media = pDatabase_pluto_media;
+	m_sDirectory = sDirectory;
+	m_sFile = sFile;
 	m_nOurInstallationID = PK_Installation;
 	m_nPK_MediaType = 0;
 	m_bNewFileToDb = false;
@@ -231,22 +231,22 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 #ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s/%s not IN db-attr: %d INode: %d", m_sDirectory.c_str(), m_sFile.c_str(), PK_File, INode);
 #endif
-    // Is it a media file?
-    if(!PK_MediaType)
+	// Is it a media file?
+	if(!PK_MediaType)
 	{
-        PK_MediaType = PlutoMediaIdentifier::Identify(m_sDirectory + "/" + m_sFile);
+		PK_MediaType = PlutoMediaIdentifier::Identify(m_sDirectory + "/" + m_sFile);
 		m_nPK_MediaType = PK_MediaType;
 	}
-	
+
 	// HACKOMAT - The VDR information files do not have an extension (since 1.7.4)
 	if ( m_sFile == "info")
 	{
 #ifdef UPDATEMEDIA_DEBUG
-        	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "VDR file %s/%s is now defined as video file", m_sDirectory.c_str(), m_sFile.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "VDR file %s/%s is now defined as video file", m_sDirectory.c_str(), m_sFile.c_str());
 #endif
-	        m_nPK_MediaType = 5;
-	        PK_MediaType = 5;
-        }
+		m_nPK_MediaType = 5;
+		PK_MediaType = 5;
+	}
 
 	if(PK_MediaType == 0)
 	{
@@ -272,40 +272,44 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 				PK_MediaType = MEDIATYPE_misc_DocViewer_CONST;
 		}
 	}
+
 #ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media Type is: %d, is folder %d", PK_MediaType, m_bIsDir);
 #endif
 	if(!PK_File)
-    {
+	{
 		if(PK_MediaType || m_bIsDir)
-            return AddFileToDatabase(PK_MediaType);
-        else
-        {
+		{
+			return AddFileToDatabase(PK_MediaType);
+		}
+		else
+		{
 #ifdef UPDATEMEDIA_STATUS
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "not a media file");
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "not a media file");
 #endif
-            return 0;
-        }
-    }
-    else
-    {
+			return 0;
+		}
+	}
+	else
+	{
 #ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Reusing file, updating media type to %d", PK_MediaType);
 #endif
 
-        Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(PK_File);
-        if( !pRow_File )
-        {
-            SetFileAttribute(0);  // The file doesn't exist.  Shouldn't really happen
+		Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(PK_File);
+		if( !pRow_File )
+		{
+			SetFileAttribute(0);  // The file doesn't exist.  Shouldn't really happen
 #ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Huh??  not in db now");
 #endif
-            return 0;
-        }
-        // it was in the database, but it's been moved to a different directory or renamed
+			return 0;
+		}
+
+		// it was in the database, but it's been moved to a different directory or renamed
 		pRow_File->Reload();
-        pRow_File->Path_set(m_sDirectory);
-        pRow_File->Filename_set(m_sFile);
+		pRow_File->Path_set(m_sDirectory);
+		pRow_File->Filename_set(m_sFile);
 		pRow_File->EK_MediaType_set(PK_MediaType);
 		pRow_File->IsDirectory_set(m_bIsDir);
 		pRow_File->Source_set(m_spFileHandler->GetFileSourceForDB());
@@ -315,7 +319,7 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 		pRow_File->Table_File_get()->Commit();
 
 		m_pPlutoMediaAttributes->m_nFileID = PK_File;
-    }
+	}
 
 	return PK_File;
 }
@@ -328,7 +332,7 @@ void PlutoMediaFile::SaveEveryThingToDb()
 	// Is it a media file?
 	if(!m_nPK_MediaType)
 		m_nPK_MediaType = PlutoMediaIdentifier::Identify(m_sDirectory + "/" + m_sFile);
-	
+
 	//not a media file
 	if(!m_nPK_MediaType)
 		return;
@@ -493,7 +497,7 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 			{
 				if(pPlutoMediaAttribute->m_nType > 0 && !StringUtils::OnlyWhiteSpace(pPlutoMediaAttribute->m_sName))
 				{
-					// Do not add album attribute on pass 0, only add album attribute on pass 1
+					// Do not add album attribute on pass 0, add only the album attribute on pass 1
 					if( (iPass==0 && pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Album_CONST) || (iPass==1 && pPlutoMediaAttribute->m_nType!=ATTRIBUTETYPE_Album_CONST) )
 						continue; // See notes above
 
@@ -886,13 +890,11 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 					pRow_File->PK_File_get(), m_pPlutoMediaAttributes->m_nPictureID);
 #endif
 			}
-			else
-			{
 #ifdef UPDATEMEDIA_STATUS
+			else
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlutoMediaFile::AddFileToDatabase Failed to add picture to file: PK_File %d, picture url: %s",
 					pRow_File->PK_File_get(), m_pPlutoMediaAttributes->m_sPictureUrl.c_str());
 #endif
-			}
 		}
 	}
 
@@ -914,7 +916,7 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 		system(sCmd.c_str());
 	}
 
-    return pRow_File->PK_File_get();
+return pRow_File->PK_File_get();
 }
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::SetMediaType(int PK_File, int PK_MediaType)
@@ -1040,7 +1042,7 @@ int PlutoMediaFile::GetFileAttribute()
 		m_sDirectory.c_str(), m_sFile.c_str(),
 		m_pPlutoMediaAttributes->m_nInstallationID, m_nOurInstallationID, m_pPlutoMediaAttributes->m_nFileID);
 #endif
-    return 0;
+return 0;
 }
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::SetPicAttribute(int PK_Picture, string sPictureUrl)
@@ -1069,7 +1071,7 @@ int PlutoMediaFile::GetFileIDFromDB()
 int PlutoMediaFile::GetPicAttribute(int PK_File)
 {
 	//got the file in the database?
-    if(!PK_File)
+	if(!PK_File)
 	{
 		PK_File = GetFileIDFromDB();
 		m_pPlutoMediaAttributes->m_nFileID = PK_File;
@@ -1086,13 +1088,13 @@ int PlutoMediaFile::GetPicAttribute(int PK_File)
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: file %d", PK_File);
 #endif
 	//got any picture associated with the file?
-    vector<Row_Picture_File *> vectPicture_File;
-    m_pDatabase_pluto_media->Picture_File_get()->GetRows("FK_File=" + StringUtils::itos(PK_File),&vectPicture_File);
+	vector<Row_Picture_File *> vectPicture_File;
+	m_pDatabase_pluto_media->Picture_File_get()->GetRows("FK_File=" + StringUtils::itos(PK_File),&vectPicture_File);
 #ifdef UPDATEMEDIA_STATUS
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Found %d pics for file", vectPicture_File.size());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Found %d pics for file", vectPicture_File.size());
 #endif
-    if( vectPicture_File.size() )
-    {
+	if( vectPicture_File.size() )
+	{
 		long PK_Picture = vectPicture_File[0]->FK_Picture_get();
 		Row_Picture *pRow_Picture = m_pDatabase_pluto_media->Picture_get()->GetRow(PK_Picture);
 		string sPictureUrl = NULL != pRow_Picture ? pRow_Picture->URL_get() : "";
@@ -1102,33 +1104,34 @@ int PlutoMediaFile::GetPicAttribute(int PK_File)
 #endif
 		SetPicAttribute(PK_Picture, sPictureUrl);
 		return PK_Picture;  // The first pic for this directory
-    }
+	}
 
-    //Does one of the attributes have a picture?
-    vector<Row_Picture_Attribute *> vectPicture_Attribute;
-    m_pDatabase_pluto_media->Picture_Attribute_get()->GetRows(
-        "JOIN File_Attribute ON Picture_Attribute.FK_Attribute=File_Attribute.FK_Attribute "
-        " JOIN Attribute ON Picture_Attribute.FK_Attribute=Attribute.PK_Attribute "
-        " JOIN AttributeType ON Attribute.FK_AttributeType=AttributeType.PK_AttributeType "
-        " WHERE FK_File=" + 
-        StringUtils::itos(PK_File) +
-        " ORDER BY `PicPriority`",&vectPicture_Attribute);
+	//Does one of the attributes have a picture?
+	vector<Row_Picture_Attribute *> vectPicture_Attribute;
+	m_pDatabase_pluto_media->Picture_Attribute_get()->GetRows(
+	"JOIN File_Attribute ON Picture_Attribute.FK_Attribute=File_Attribute.FK_Attribute "
+	" JOIN Attribute ON Picture_Attribute.FK_Attribute=Attribute.PK_Attribute "
+	" JOIN AttributeType ON Attribute.FK_AttributeType=AttributeType.PK_AttributeType "
+	" WHERE FK_File=" + 
+	StringUtils::itos(PK_File) +
+	" ORDER BY `PicPriority`",&vectPicture_Attribute);
 
 #ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Found %d pics for attribute", (int) vectPicture_Attribute.size());
 #endif
-    if( vectPicture_Attribute.size())
-    {
+	if( vectPicture_Attribute.size())
+	{
 		long PK_Picture = vectPicture_Attribute[0]->FK_Picture_get();
 		Row_Picture *pRow_Picture = m_pDatabase_pluto_media->Picture_get()->GetRow(PK_Picture);
 		string sPictureUrl = NULL != pRow_Picture ? pRow_Picture->URL_get() : "";
+
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: got picture %d associated to attribute %d", PK_Picture, 
-			vectPicture_Attribute[0]->FK_Attribute_get());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: got picture %d associated to attribute %d", PK_Picture, 
 #endif
-        SetPicAttribute(PK_Picture, sPictureUrl);
-        return PK_Picture;  // The first pic for this directory
-    }
+		vectPicture_Attribute[0]->FK_Attribute_get());
+		SetPicAttribute(PK_Picture, sPictureUrl);
+		return PK_Picture;  // The first pic for this directory
+	}
 
 	if(m_pPlutoMediaAttributes->m_mapCoverarts.empty())
 	{
@@ -1175,7 +1178,7 @@ int PlutoMediaFile::GetPicAttribute(int PK_File)
 #ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: got no picture for file %d", PK_File);
 #endif
-    return 0;
+	return 0;
 }
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::SavePlutoAttributes()
@@ -1526,8 +1529,8 @@ void PlutoMediaFile::LoadBookmarkPictures()
 #ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "LoadBookmarkPictures: clear bookmarks from file."
 			"We'll use those from db: %d", nNumBookmarksFromDB);
-		m_pPlutoMediaAttributes->ClearBookmarks();
 #endif
+		m_pPlutoMediaAttributes->ClearBookmarks();
 	}
 
 	PlutoSqlResult result;
@@ -1705,7 +1708,7 @@ void PlutoMediaFile::SavePicture(pair<unsigned long, char *> pairPicture, int nP
 				else
 				{
 					LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Cannot read image from disk: %s", sTempPictureNameThumb.c_str());
-				}				
+				}
 			}
 		}
 		else
@@ -1763,7 +1766,7 @@ int PlutoMediaFile::NumberOfBookmarksFromDB()
 		"FK_File = " + StringUtils::ltos(m_pPlutoMediaAttributes->m_nFileID);
 
 	int nNumberOfBookmarksFromDB = 0;
-    if((result_count.r = m_pDatabase_pluto_media->db_wrapper_query_result(SQLCount)) && (row_count = db_wrapper_fetch_row(result_count.r)) && NULL != row_count[0])
+	if((result_count.r = m_pDatabase_pluto_media->db_wrapper_query_result(SQLCount)) && (row_count = db_wrapper_fetch_row(result_count.r)) && NULL != row_count[0])
 		nNumberOfBookmarksFromDB = atoi(row_count[0]);
 
 	return nNumberOfBookmarksFromDB;
@@ -1781,7 +1784,7 @@ void PlutoMediaFile::GenerateMd5SumsCoverartsFromDb(list<string>& listMd5Sums)
 		Row_Picture_File *pRow_Picture_File = *it;
 
 		string sPictureFile = "/home/mediapics/" + StringUtils::ltos(pRow_Picture_File->FK_Picture_get()) + ".jpg";
-		
+
 		if(FileUtils::FileExists(sPictureFile))
 		{
 			string sMd5Sum = FileUtils::FileChecksum(sPictureFile);
@@ -1806,27 +1809,27 @@ map<string,int> PlutoMediaIdentifier::m_mapExtensions;
 #ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Activating Pluto Media Identifier...");
 #endif
-    vector<Row_MediaType *> vectRow_MediaType;
-    pDatabase_pluto_main->MediaType_get()->GetRows("1=1",&vectRow_MediaType);
-    for(size_t s=0;s<vectRow_MediaType.size();++s)
-    {
-        Row_MediaType *pRow_MediaType = vectRow_MediaType[s];
-        string::size_type pos=0;
-        string sExtensions = pRow_MediaType->Extensions_get();
-        while(pos < sExtensions.size() )
+	vector<Row_MediaType *> vectRow_MediaType;
+	pDatabase_pluto_main->MediaType_get()->GetRows("1=1",&vectRow_MediaType);
+	for(size_t s=0;s<vectRow_MediaType.size();++s)
+	{
+		Row_MediaType *pRow_MediaType = vectRow_MediaType[s];
+		string::size_type pos=0;
+		string sExtensions = pRow_MediaType->Extensions_get();
+		while(pos < sExtensions.size() )
 			m_mapExtensions[StringUtils::ToLower(StringUtils::Tokenize(sExtensions,",",pos))] = pRow_MediaType->PK_MediaType_get();
-    }
+	}
 
-    vector<Row_DeviceTemplate_MediaType *> vectRow_DeviceTemplate_MediaType;
-    pDatabase_pluto_main->DeviceTemplate_MediaType_get()->GetRows("1=1",&vectRow_DeviceTemplate_MediaType);
-    for(size_t s=0;s<vectRow_DeviceTemplate_MediaType.size();++s)
-    {
-        Row_DeviceTemplate_MediaType *pRow_DeviceTemplate_MediaType = vectRow_DeviceTemplate_MediaType[s];
-        string::size_type pos=0;
-        string sExtensions = pRow_DeviceTemplate_MediaType->Extensions_get();
-        while(pos < sExtensions.size() )
-            m_mapExtensions[StringUtils::ToLower(StringUtils::Tokenize(sExtensions,",",pos))] = pRow_DeviceTemplate_MediaType->FK_MediaType_get();
-    }
+	vector<Row_DeviceTemplate_MediaType *> vectRow_DeviceTemplate_MediaType;
+	pDatabase_pluto_main->DeviceTemplate_MediaType_get()->GetRows("1=1",&vectRow_DeviceTemplate_MediaType);
+	for(size_t s=0;s<vectRow_DeviceTemplate_MediaType.size();++s)
+	{
+		Row_DeviceTemplate_MediaType *pRow_DeviceTemplate_MediaType = vectRow_DeviceTemplate_MediaType[s];
+		string::size_type pos=0;
+		string sExtensions = pRow_DeviceTemplate_MediaType->Extensions_get();
+		while(pos < sExtensions.size() )
+		m_mapExtensions[StringUtils::ToLower(StringUtils::Tokenize(sExtensions,",",pos))] = pRow_DeviceTemplate_MediaType->FK_MediaType_get();
+	}
 
 #ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Pluto Media Identifier activated. Extensions %d", m_mapExtensions.size());
@@ -1844,14 +1847,14 @@ map<string,int> PlutoMediaIdentifier::m_mapExtensions;
 //-----------------------------------------------------------------------------------------------------
 /*static*/ int PlutoMediaIdentifier::Identify(string sFilename)
 {
-    //we'll try first to identify the media based on the extension
-    //if we don't find any extention to match it, we'll use MediaIdentifier which uses the magic from files
+	//we'll try first to identify the media based on the extension
+	//if we don't find any extention to match it, we'll use MediaIdentifier which uses the magic from files
 	string sExtension = FileUtils::FindExtension(sFilename);
 
 	if(sExtension.empty() && (sFilename != "info") )
 		return 0;
 
-    map<string, int>::iterator it = m_mapExtensions.find(StringUtils::ToLower(sExtension));
-    return it != m_mapExtensions.end() ? it->second : 0 /*MediaIdentifier::GetFileMediaType(sFilename)*/;
+	map<string, int>::iterator it = m_mapExtensions.find(StringUtils::ToLower(sExtension));
+	return it != m_mapExtensions.end() ? it->second : 0 /*MediaIdentifier::GetFileMediaType(sFilename)*/;
 }
 //-----------------------------------------------------------------------------------------------------
