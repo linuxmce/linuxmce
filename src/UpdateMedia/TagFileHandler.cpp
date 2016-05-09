@@ -280,7 +280,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					stov(sProperty, vsTotalDiscs);
 				}
-				else if ( i->first == "DISC???" )
+				else if ( i->first == "DISCNUMBER" )
 				{
 					stov(sProperty, vsDisc);
 				}
