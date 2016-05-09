@@ -153,13 +153,13 @@ string TagFileHandler::GetFileAttribute()
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool TagFileHandler::IsSupported()
 {
-	const string csSupportedExtensions("ogg:flac:mp3");
+	const string csSupportedExtensions("ogg:flac:mp3:mp4:wav:asf");
 	string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFullFilename));
 
 	if(sExtension.empty())
 		return false;
 
-    return csSupportedExtensions.find(sExtension) != string::npos;
+	return csSupportedExtensions.find(sExtension) != string::npos;
 }
 //-----------------------------------------------------------------------------------------------------
 bool TagFileHandler::FileAttributeExists()
