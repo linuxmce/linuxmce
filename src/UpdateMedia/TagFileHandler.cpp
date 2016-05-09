@@ -226,6 +226,9 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		std::vector<string> vsDate;
 		std::vector<string> vsComposerWriter;
 		std::vector<string> vsStudio;
+		std::vector<string> vsTotalDiscs;
+		std::vector<string> vsDisc;
+		std::vector<string> vsSynopsis;
 
 		// Get Album Artist, from file properties i==propertyname, j==propertyvalue
 		TagLib::PropertyMap tags = f->file()->properties();
@@ -273,6 +276,18 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					stov(sProperty, vsStudio);
 				}
+				else if ( i->first == "TOTALDISCS" )
+				{
+					stov(sProperty, vsTotalDiscs);
+				}
+				else if ( i->first == "DISC???" )
+				{
+					stov(sProperty, vsDisc);
+				}
+				else if ( i->first == "COMMENT" )
+				{
+					stov(sProperty, vsSynopsis);
+				}
 			}
 		}
 		stov(f->tag()->artist().to8Bit(true), vsPerformer);
@@ -301,6 +316,9 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		mapAttributes[ATTRIBUTETYPE_Release_Date_CONST] = vtos( vsDate );
 		mapAttributes[ATTRIBUTETYPE_ComposerWriter_CONST] = vtos( vsComposerWriter );
 		mapAttributes[ATTRIBUTETYPE_Studio_CONST] = vtos( vsStudio );
+		mapAttributes[ATTRIBUTETYPE_Number_of_Discs_CONST] = vtos( vsTotalDiscs );
+		mapAttributes[ATTRIBUTETYPE_Disc_ID_CONST] = vtos( vsDisc );
+		mapAttributes[ATTRIBUTETYPE_Synopsis_CONST] = vtos( vsSynopsis );
 
 		string coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/cover.jpg";
 		if ( FileUtils::FileExists( coverfilename ) ) {
