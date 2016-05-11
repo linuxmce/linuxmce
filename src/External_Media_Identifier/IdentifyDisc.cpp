@@ -156,6 +156,7 @@ namespace DCE
       case CDS_DATA_1:
       case CDS_DATA_2:
 	discType = GetDataTrackType(sDiscDevice);
+	break;
       case CDS_NO_INFO:
       case CDS_NO_DISC:
       case CDS_TRAY_OPEN:

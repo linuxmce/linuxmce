@@ -18,12 +18,14 @@ class MDRTrack
 {
  private:
   string m_sTrackNumber;
+  string m_sTrackPerformer;
   string m_sTrackTitle;
   
  public:
-  MDRTrack(string sTrackNumber, string sTrackTitle)
+  MDRTrack(string sTrackNumber, string sTrackPerformer, string sTrackTitle)
     {
       m_sTrackNumber=sTrackNumber;
+      m_sTrackPerformer=sTrackPerformer;
       m_sTrackTitle=sTrackTitle;
     }
   virtual ~MDRTrack()
@@ -32,6 +34,7 @@ class MDRTrack
     }
 
   string TrackNumber_get() {return m_sTrackNumber;}
+  string TrackPerformer_get() {return m_sTrackPerformer;}
   string TrackTitle_get() {return m_sTrackTitle;}
 
 };

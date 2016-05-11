@@ -194,11 +194,6 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
 						  &iEK_Disc);
   SendCommand(CMD_Media_Identified);
 
-  // if (Data)
-  //   {
-  //     free(Data);
-  //   }
-
   if (pIdentifier)
     {
       delete pIdentifier;
