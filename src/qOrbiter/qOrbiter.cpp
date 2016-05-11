@@ -79,8 +79,6 @@ bool qOrbiter::GetConfig()
     }
 
     emit deviceTemplateChanged(dt);
-    CMD_Identify_Media identifyMedia();
-
     PurgeInterceptors();
     RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
 
@@ -1030,9 +1028,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
     if(m_bIsOSD){
-       m_sNowPlayingWindow =sName;
-       if(m_bContainsVideo)
-           CMD_Activate_Window(sName);
+        m_sNowPlayingWindow =sName;
+        if(m_bContainsVideo)
+            CMD_Activate_Window(sName);
 
     }
 
@@ -2935,29 +2933,27 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             {
 
                 pCell = it->second;
-                // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
-                qDebug() << cellfk;
 #ifdef debug
                 emit commandResponseChanged();
 #endif
                 int at = cellfk.remove("!A").toInt();
-                if(attributeType == "Program") {qDebug() << "program " << attribute; emit fd_programChanged(attribute); emit newFileDetailAttribute(ATTRIBUTETYPE_Program_CONST, at,attribute ); }
+                if(attributeType == "Program") { emit fd_programChanged(attribute);                 emit newFileDetailAttribute(ATTRIBUTETYPE_Program_CONST, at,attribute ); }
                 else if(attributeType == "Title") { emit fd_mediaTitleChanged(attribute); }
-                else if(attributeType == "Channel") { emit fd_chanIdChanged(attribute);   }
-                else if(attributeType == "Episode") { emit fd_episodeChanged(attribute);  }
-                else if(attributeType == "Performer") { emit fd_performersChanged(attribute); }
-                else if(attributeType == "Composer/Writer") { emit fd_composersChanged(attribute); }
-                else if(attributeType == "Director") { emit fd_directorChanged(attribute);  emit newFileDetailAttribute(ATTRIBUTETYPE_Director_CONST, at,attribute ); }
-                else if(attributeType == "Genre") { emit fd_genreChanged(attribute);  }
-                else if(attributeType == "Album") { emit fd_albumChanged(attribute);  }
-                else if(attributeType == "Studio") { emit fd_studioChanged(attribute); }
-                else if(attributeType == "Track")  { emit fd_trackChanged(attribute);  }
-                else if(attributeType == "Rating") { emit fd_ratingChanged(attribute); }
+                else if(attributeType == "Channel") { emit fd_chanIdChanged(attribute);             emit newFileDetailAttribute(ATTRIBUTETYPE_TV_Channel_ID_CONST, at,attribute ); }
+                else if(attributeType == "Episode") { emit fd_episodeChanged(attribute);            emit newFileDetailAttribute(ATTRIBUTETYPE_Episode_CONST, at,attribute );}
+                else if(attributeType == "Performer") { emit fd_performersChanged(attribute);       emit newFileDetailAttribute(ATTRIBUTETYPE_Performer_CONST, at,attribute );}
+                else if(attributeType == "Composer/Writer") { emit fd_composersChanged(attribute);  emit newFileDetailAttribute(ATTRIBUTETYPE_ComposerWriter_CONST, at,attribute ); }
+                else if(attributeType == "Director") { emit fd_directorChanged(attribute);          emit newFileDetailAttribute(ATTRIBUTETYPE_Director_CONST, at,attribute ); }
+                else if(attributeType == "Genre") { emit fd_genreChanged(attribute);                emit newFileDetailAttribute(ATTRIBUTETYPE_Genre_CONST, at,attribute ); }
+                else if(attributeType == "Album") { emit fd_albumChanged(attribute);                emit newFileDetailAttribute(ATTRIBUTETYPE_Album_CONST, at,attribute ); }
+                else if(attributeType == "Studio") { emit fd_studioChanged(attribute);              emit newFileDetailAttribute(ATTRIBUTETYPE_Studio_CONST, at,attribute );}
+                else if(attributeType == "Track")  { emit fd_trackChanged(attribute);               emit newFileDetailAttribute(ATTRIBUTETYPE_Track_CONST, at,attribute ); }
+                else if(attributeType == "Rating") { emit fd_ratingChanged(attribute);              emit newFileDetailAttribute(ATTRIBUTETYPE_Rated_CONST, at,attribute ); }
                 else {
                 }
 #ifdef RPI

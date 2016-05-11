@@ -47,13 +47,18 @@ void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QSt
 
     m_attributeMap.insert(attribType, new FileDetailsObject(attribute, val));
 
-
+     qDebug() << " Handling  attribute " << attribute << " value:: " << val;
     switch (attribType) {
-    case ATTRIBUTETYPE_Director_CONST:emit directorChanged(); break;
-    case ATTRIBUTETYPE_Performer_CONST: emit performersChanged(); ; break;
-    case ATTRIBUTETYPE_Album_CONST: emit albumChanged(); break;
-    case ATTRIBUTETYPE_Track_CONST:emit trackChanged();break;
-    case ATTRIBUTETYPE_Program_CONST: emit programChanged(); break;
+    case ATTRIBUTETYPE_Director_CONST:emit directorChanged();       break;
+    case ATTRIBUTETYPE_Performer_CONST: emit performersChanged();   break;
+    case ATTRIBUTETYPE_Album_CONST: emit albumChanged();            break;
+    case ATTRIBUTETYPE_Track_CONST:emit trackChanged();             break;
+    case ATTRIBUTETYPE_Program_CONST: emit programChanged();        break;
+    case ATTRIBUTETYPE_Rated_CONST: emit ratingChanged();           break;
+    case ATTRIBUTETYPE_Genre_CONST: emit genreChanged();            break;
+    case ATTRIBUTETYPE_Episode_CONST:emit episodeChanged();         break;
+    case ATTRIBUTETYPE_Studio_CONST:emit studioChanged();           break;
+    case ATTRIBUTETYPE_ComposerWriter_CONST:emit composersChanged();break;
         break;
     default:
         qDebug() << " No handler for attribute " << attribute << " value:: " << val;
