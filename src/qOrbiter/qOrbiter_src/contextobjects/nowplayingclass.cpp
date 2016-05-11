@@ -80,6 +80,5 @@ void NowPlayingClass::resetData()
     //    setImage(QImage());
     //    setStreamImage(QImage());
 
-
 }
 

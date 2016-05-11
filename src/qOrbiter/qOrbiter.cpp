@@ -24,6 +24,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include "../pluto_media/Define_AttributeType.h"
 
 #include <iostream>
 using namespace std;
@@ -78,7 +79,7 @@ bool qOrbiter::GetConfig()
     }
 
     emit deviceTemplateChanged(dt);
- CMD_Identify_Media identifyMedia();
+    CMD_Identify_Media identifyMedia();
 
     PurgeInterceptors();
     RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
@@ -1028,7 +1029,12 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
+    if(m_bIsOSD){
+       m_sNowPlayingWindow =sName;
+       if(m_bContainsVideo)
+           CMD_Activate_Window(sName);
 
+    }
 
     if(i_current_mediaType !=iPK_MediaType){
         emit clearPlaylist();
@@ -2830,7 +2836,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
 
-
     QStringList details = breaker.split(QRegExp("\\t"));
 
     int placeholder;
@@ -2916,7 +2921,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
         if(SendCommand(req_data_grid))
         {
 
-            bool barrows = false; //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             // int cellsToRender= pDataGridTable->GetRows();
@@ -2936,20 +2940,19 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
-
                 cellfk = pCell->GetValue();
-
-
+                qDebug() << cellfk;
 #ifdef debug
                 emit commandResponseChanged();
 #endif
-                if(attributeType == "Program") { emit fd_programChanged(attribute); }
+                int at = cellfk.remove("!A").toInt();
+                if(attributeType == "Program") {qDebug() << "program " << attribute; emit fd_programChanged(attribute); emit newFileDetailAttribute(ATTRIBUTETYPE_Program_CONST, at,attribute ); }
                 else if(attributeType == "Title") { emit fd_mediaTitleChanged(attribute); }
                 else if(attributeType == "Channel") { emit fd_chanIdChanged(attribute);   }
                 else if(attributeType == "Episode") { emit fd_episodeChanged(attribute);  }
                 else if(attributeType == "Performer") { emit fd_performersChanged(attribute); }
                 else if(attributeType == "Composer/Writer") { emit fd_composersChanged(attribute); }
-                else if(attributeType == "Director") { emit fd_directorChanged(attribute); }
+                else if(attributeType == "Director") { emit fd_directorChanged(attribute);  emit newFileDetailAttribute(ATTRIBUTETYPE_Director_CONST, at,attribute ); }
                 else if(attributeType == "Genre") { emit fd_genreChanged(attribute);  }
                 else if(attributeType == "Album") { emit fd_albumChanged(attribute);  }
                 else if(attributeType == "Studio") { emit fd_studioChanged(attribute); }
@@ -4360,7 +4363,7 @@ void qOrbiter::OnReload()
     emit routerConnectionChanged(false);
     if(m_bIsOSD){
         qDebug() << "Is osd, exiting";
-       deinitialize();
+        deinitialize();
     } else {
         Disconnect();
     }
@@ -4872,7 +4875,7 @@ void qOrbiter::CannotReloadRouter()
 {
     qDebug() << Q_FUNC_INFO;
     QString reload_screen= QString("Screen_%1.qml").arg(QString::number(283));
-   emit gotoQml(reload_screen);
+    emit gotoQml(reload_screen);
 
 }
 

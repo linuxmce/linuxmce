@@ -1,7 +1,7 @@
 import QtQuick 2.2
 import org.linuxmce.enums 1.0
 import "../components"
-import "../"
+import "../../."
 GenericPopup{
     id:fileDetails
     title: qsTr("Media Information", "File Details")
@@ -26,65 +26,81 @@ GenericPopup{
             source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
             smooth: true
         }
-
+        Rectangle{
+            id:metaBg
+            width: metadata.width
+            height: metadata.height
+            color: "black"
+            opacity: .65
+            anchors.centerIn: metadata
+        }
         Column{
-           id:metadata
-           spacing: 5
-           width: Style.listViewWidth_large
-           height: parent.height
-           anchors.right: content_item.right
-           StyledText{
-               width: parent.width
-               id:title
-               text:qsTr("Title: ")+filedetailsclass.mediatitle
-           }
-           StyledText{
-                width: parent.width
-               id:album
-               text:qsTr("Album: ")+filedetailsclass.album
-           }
-           StyledText{
-                width: parent.width
-               id:director
-               text:qsTr("Director: ")+filedetailsclass.director
-           }
-           StyledText{
-                width: parent.width
-               id:compwriter
-               text:qsTr("Composer/Writer: ")+filedetailsclass.composerlist
-           }
-           StyledText{
-                width: parent.width
-                height:manager.q_mediaType == 5 ? 0 : parent.height *.15
-               id:artists
-               text:manager.q_mediaType == 5 ? "" : qsTr("Artist: ")+filedetailsclass.performerlist
-           }
-           StyledText{
-               width: parent.width
-               id:program
-               text:qsTr("Program: ")+filedetailsclass.program
-           }
-           StyledText{
-                width: parent.width
-               id:episode
-               text:qsTr("Episode: ")+filedetailsclass.episode
-           }
-           StyledText{
-                width: parent.width
-               id:description
-               text:qsTr("Synopsis:\n")+filedetailsclass.synop
+            id:metadata
+            spacing: 5
+            width:  parent.width /2 //Style.listViewWidth_large
+            height: parent.height
+            anchors.right: content_item.right
+            StyledText{
 
-           }
-           StyledText{
                 width: parent.width
-               id:studio
-               text:qsTr("Studio: ")+filedetailsclass.studio
-           }
-           StyledText{
+                id:title
+                text:qsTr("Title: ")+filedetailsclass.mediatitle
+                fontSize: largeFontSize
+            }
+            StyledText{
                 width: parent.width
-               id:release
-               text:qsTr("Filename: ")+filedetailsclass.filename
-           }
+                id:album
+                text:qsTr("Album: ")+filedetailsclass.album
+            }
+
+            StyledText{
+                width: parent.width
+                id:director
+                text:qsTr("Director: ")+filedetailsclass.director
+            }
+
+            StyledText{
+                width: parent.width
+                id:compwriter
+                text:qsTr("Composer/Writer: ")+filedetailsclass.composerlist
+            }
+
+            StyledText{
+                width: parent.width
+                //height:manager.q_mediaType == 5 ? 0 : parent.height *.15
+                id:artists
+                text:manager.q_mediaType == 5 ? qsTr("Starring: ")+filedetailsclass.performerlist : qsTr("Artist: ")+filedetailsclass.performerlist
+            }
+
+            StyledText{
+                width: parent.width
+                id:program
+                text:qsTr("Program: ")+filedetailsclass.program
+            }
+
+            StyledText{
+                width: parent.width
+                id:episode
+                text:qsTr("Episode: ")+filedetailsclass.episode
+            }
+
+            StyledText{
+                width: parent.width
+                id:description
+                text:qsTr("Synopsis:\n")+filedetailsclass.synop
+            }
+
+            StyledText{
+                width: parent.width
+                id:studio
+                text:qsTr("Studio: ")+filedetailsclass.studio
+            }
+
+            StyledText{
+                width: parent.width
+                id:release
+                text:qsTr("Filename: ")+filedetailsclass.filename
+            }
 
         }
 
@@ -141,14 +157,25 @@ GenericPopup{
                     target: imdb_background
                     source:""
                 }
+                PropertyChanges { target: episode; visible:false }
+                PropertyChanges { target: program; visible:false }
+                PropertyChanges { target: description; visible:false }
+                PropertyChanges { target: studio; visible:false }
+                PropertyChanges { target: director; visible:false }
             },
             State {
-                when:manager.q_mediaType==MediaTypes.LMCE_StoredVideo
+                when:manager.q_mediaType==MediaTypes.LMCE_StoredVideo && manager.q_subType == MediaSubtypes.MOVIES
                 name: "video"
                 PropertyChanges{
                     target: imdb_background
                     source:"http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+content_item.bgImageProp
                 }
+
+                PropertyChanges { target: album; visible:false }
+                PropertyChanges { target: compwriter; visible:false }
+                PropertyChanges { target: album; visible:false }
+                PropertyChanges { target: episode; visible:false }
+                PropertyChanges { target: program; visible:false }
 
             },
             State{

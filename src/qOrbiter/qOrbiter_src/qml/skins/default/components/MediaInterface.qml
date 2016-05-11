@@ -198,7 +198,7 @@ Item{
                 console.log(errorString+"::NetworkError")
             } else if(qmlPlayer.error==MediaPlayer.ResourceError){
                 console.log(errorString+"::ResourceError")
-                lmceData.pluginNotifyEnd()
+                lmceData.pluginNotifyEnd(errorString)
             }
         }
 

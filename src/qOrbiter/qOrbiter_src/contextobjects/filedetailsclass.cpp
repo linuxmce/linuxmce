@@ -1,11 +1,15 @@
 
 #include "filedetailsclass.h"
+#include "../pluto_media/Define_AttributeType.h"
 #include <qOrbiter/qOrbiter.h>
+#include "qmap.h"
+
 
 FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     QObject(parent)
 {
     qOrbiter*ptr = qobject_cast<qOrbiter*>(qorbiter_ptr);
+    QObject::connect(ptr, &qOrbiter::newFileDetailAttribute, this, &FileDetailsClass::handleNewFileAttribute, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_programChanged,this, &FileDetailsClass::setProgram,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_mediaTitleChanged,this, &FileDetailsClass::setMediaTitle,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_chanIdChanged, this, &FileDetailsClass::setChannelID, Qt::QueuedConnection);
@@ -28,7 +32,33 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     QObject::connect(ptr, &qOrbiter::fd_fileChanged,this, &FileDetailsClass::setFile,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_fileNameChanged,this, &FileDetailsClass::setFilename,Qt::QueuedConnection);
 
+
     clear();
+}
+
+void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QString val)
+{
+    if(attribType==ATTRIBUTETYPE_Performer_CONST){
+        if(!m_performerMap.contains(attribute)){
+            m_performerMap.insert(attribute, val);
+        }
+        return;
+    }
+
+    m_attributeMap.insert(attribType, new FileDetailsObject(attribute, val));
+
+
+    switch (attribType) {
+    case ATTRIBUTETYPE_Director_CONST:emit directorChanged(); break;
+    case ATTRIBUTETYPE_Performer_CONST: emit performersChanged(); ; break;
+    case ATTRIBUTETYPE_Album_CONST: emit albumChanged(); break;
+    case ATTRIBUTETYPE_Track_CONST:emit trackChanged();break;
+    case ATTRIBUTETYPE_Program_CONST: emit programChanged(); break;
+        break;
+    default:
+        qDebug() << " No handler for attribute " << attribute << " value:: " << val;
+        break;
+    }
 }
 
 

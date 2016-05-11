@@ -22,5 +22,6 @@
         <file>translations/fr_FR.qm</file>
         <file>translations/es_ES.qm</file>
         <file>translations/en_US.qm</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_47.qml</file>
     </qresource>
 </RCC>
