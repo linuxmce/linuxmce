@@ -48,7 +48,8 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 #endif
 	//get common id3 attributes
 	map<int, string> mapAttributes;
-	GetId3Info(sFileWithAttributes, mapAttributes, listPicturesForTags);	
+	GetId3Info(sFileWithAttributes, mapAttributes, listPicturesForTags);
+
 #ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: id3 attributes loaded (from id3 file - common tags) %d", 
 		mapAttributes.size());
@@ -59,11 +60,12 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		int nType = it->first;
 		string sValue = it->second;
 
+// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 		MapPlutoMediaAttributes::iterator itm = pPlutoMediaAttributes->m_mapAttributes.find(nType);
 		if(itm == pPlutoMediaAttributes->m_mapAttributes.end())
 			pPlutoMediaAttributes->m_mapAttributes.insert(
 				std::make_pair(
-					nType, 
+					nType,
 					new PlutoMediaAttribute(0,nType, sValue)
 				)
 			);
@@ -83,10 +85,12 @@ bool ID3FileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
 #endif
 	//Temporary map with attributes for common tags
+// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 	map<int, string> mapAttributes;
 	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
 		end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 	{
+// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 		mapAttributes[it->first] = it->second->m_sName;
 	}
 
@@ -129,6 +133,8 @@ bool ID3FileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttr
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
 		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
 #endif
+
+// FIXME: need to de-tokenize/tokenize as this attribute can contain multiple values
 	RemoveId3Tag(sFileWithAttributes, nTagType, sValue);
 	return true;
 }
@@ -146,12 +152,14 @@ string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttri
 	}
 
 	string sFileWithAttributes = m_sFile;
+
+	// This section permits us to check external .id3 files to use for media without tag support
 	if(!IsSupported())
 	{
 		if(UpdateMediaFileUtils::IsDirectory(m_sFullFilename.c_str()))
 			sFileWithAttributes = m_sFile + "/" + m_sFile + ".id3";
 		else
-            sFileWithAttributes = m_sFile + ".id3";
+			sFileWithAttributes = m_sFile + ".id3";
 
 		if(FileUtils::FileExists(m_sDirectory + "/" + sFileWithAttributes))
 			return sFileWithAttributes;
