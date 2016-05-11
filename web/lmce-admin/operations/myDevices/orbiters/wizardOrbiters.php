@@ -69,6 +69,8 @@ function wizardOrbiters($output,$dbADO) {
 
 
 		// Media Sort Option - Golgoj4
+		//  From pluto_media - MediaType_AtrributeType
+		//  string sSQL = "EK_MediaType=" + StringUtils::itos(m_pOrbiterGenerator->m_dwMediaType) + " and MediaSortOption is not null order by MediaSortOption";
 		$vArray=array("Recently Used" => -1, "Filename" => "0", "Title" => 13, "Performer"=>2, "Genre"=>8, "Director"=>1, "Program"=>12);
 		$sortHandle=$dbADO->Execute('select EK_AttributeType_DefaultSort from MediaType WHERE PK_MediaType=5');
 		if ($sortHandle) {
@@ -93,7 +95,7 @@ function wizardOrbiters($output,$dbADO) {
 		<input type="submit" class="button" name="setDefaultSortVideo" value="'.translate('TEXT_DEFAULT_SORT_CONST').'">
 		</td>';
 
-		$asortArray = array("Recently Used" => -1, "Filename" => "0", "Title" => 13, "Performer"=>2, "Genre"=>8, "Album"=> 3);
+		$asortArray = array("Recently Used" => -1, "Filename" => "0", "Title" => 13, "Performer"=>2, "Genre"=>8, "Album"=> 3, "Album Artist"=>57);
 		$sortHandle=$dbADO->Execute('select EK_AttributeType_DefaultSort from MediaType WHERE PK_MediaType=4');
                 if ($sortHandle) {
                         $sortRow=$sortHandle->FetchRow();
