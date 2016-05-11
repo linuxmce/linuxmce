@@ -68,7 +68,7 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QString qs_storageDevice READ getStorageDevice READ getStorageDevice NOTIFY storageDeviceChanged)/*!< \brief The string value of the storage device. \ingroup file_details*/
 
 
-   // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
+    // Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY objectChanged)
     Q_PROPERTY(QString rating READ getRating WRITE setRating NOTIFY ratingChanged)/*!< \brief The rating if availible of the media.  \ingroup file_details*/
     //media title variable that can be independant of what is passed initially by now playing
     Q_PROPERTY(QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged )/*!< \brief The main title of the media \ingroup file_details*/
@@ -206,23 +206,19 @@ public slots:
 
     void setStorageDevice(const QString device) {
         qs_storageDevice = device;
-        if(device=="-1")
-        {
-            storageDeviceNo=-1;
-        }
+        if(device=="-1") {  storageDeviceNo=-1; }
         else
-        {
-            storageDeviceNo = qs_storageDevice.toInt();
-        }
+        { storageDeviceNo = qs_storageDevice.toInt(); }
         emit storageDeviceChanged();
     }
 
     QString getStorageDevice() {return qs_storageDevice;}
 
-
-
     void setProgram(const QString newProgram) {program = newProgram;  emit programChanged();}
-    QString getProgram () { if(!m_attributeMap.contains(ATTRIBUTETYPE_Program_CONST)) return "";  return m_attributeMap.value(ATTRIBUTETYPE_Program_CONST)->attribute;   }
+    QString getProgram () {
+        if(!m_attributeMap.contains(ATTRIBUTETYPE_Program_CONST)) return "";
+        return m_attributeMap.value(ATTRIBUTETYPE_Program_CONST)->attribute;
+    }
 
     void setTitle (const QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
     QString getTitle () {return qs_mainTitle;}
@@ -240,7 +236,12 @@ public slots:
     QString getMediaTitle () {return mediatitle;}
 
     void setStudio (const QString inc_studio) {studio.append(inc_studio) = inc_studio;  emit studioChanged();}
-    QString getStudio () {return studio;}
+    QString getStudio () {
+        if(!m_attributeMap.contains(ATTRIBUTETYPE_Studio_CONST))
+            return "";
+
+        return m_attributeMap.value(ATTRIBUTETYPE_Studio_CONST)->attribute;
+    }
 
     //--tv getters and setters-------------//
 
