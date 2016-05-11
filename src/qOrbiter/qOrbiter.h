@@ -160,6 +160,7 @@ QString deviceName;
     bool b_mediaPlaying;                                /**< set by the media engine   */
     int internal_streamID;
     int internal_playback_speed;
+    string m_sNowPlayingWindow;
     //@}
 
     /*! @name Datagrid Member Variables. */
@@ -1669,6 +1670,7 @@ signals:
  */
     ///@{
     void clearFileDetails();
+    void newFileDetailAttribute(int attribType, int attribute, QString value);
     void fd_fileChanged(QString f);
     void fd_fileNameChanged(QString f);
     void fd_show(bool s);

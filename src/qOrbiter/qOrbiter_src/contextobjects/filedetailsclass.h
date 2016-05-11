@@ -36,7 +36,18 @@
 #ifdef debug
 #include <QDebug>
 #endif
+#include "qmap.h"
+#include "../pluto_media/Define_AttributeType.h"
 
+
+class FileDetailsObject
+{
+
+public:
+    FileDetailsObject(int a, QString b) { attributeValue = a; attribute = b;}
+    QString attribute;
+    int attributeValue;
+};
 
 /*!
  * \brief The FileDetailsClass class is responsible for presenting a files properties in one object.
@@ -186,6 +197,8 @@ signals:
 
 public slots:
 
+    void handleNewFileAttribute(int attribType, int attribute, QString val);
+
     void clear();
 
     void setRating(const QString r) {rating = r; emit ratingChanged();}
@@ -209,7 +222,7 @@ public slots:
 
 
     void setProgram(const QString newProgram) {program = newProgram;  emit programChanged();}
-    QString getProgram () {return program;}
+    QString getProgram () { if(!m_attributeMap.contains(ATTRIBUTETYPE_Program_CONST)) return "";  return m_attributeMap.value(ATTRIBUTETYPE_Program_CONST)->attribute;   }
 
     void setTitle (const QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
     QString getTitle () {return qs_mainTitle;}
@@ -300,6 +313,9 @@ public slots:
 
     // Q_INVOKABLE void setSelectionStatus(QString format);
     // Q_INVOKABLE bool getSelectionStatus();
+private:
+    QMap<int, FileDetailsObject*> m_attributeMap;
+    QMap<int, QString> m_performerMap;
 
 };
 

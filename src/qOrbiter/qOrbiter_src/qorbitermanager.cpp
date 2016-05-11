@@ -116,7 +116,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     currentSkin="default";
     QString path;
 
-
     if(m_skinOverridePath==""){
 #ifdef NOQRC
         qDebug() << "Using NOQRC";
@@ -866,7 +865,6 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
         emit skinDataLoaded(false);
         emit skinMessage("Loading has failed, falling back to failsafe!");
         swapSkins("default");
-
     } else {
 
         m_bStartingUp = false;

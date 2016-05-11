@@ -286,5 +286,8 @@
         <file>qml/skins/default/+md/MainLayout.qml</file>
         <file>qml/skins/default/+md/Style.qml</file>
         <file>qml/skins/default/components/InputController.qml</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_47.qml</file>
+        <file>qml/skins/default/components/+xlarge/FileDetails.qml</file>
+        <file>qml/skins/default/components/MetadataBlock.qml</file>
     </qresource>
 </RCC>
