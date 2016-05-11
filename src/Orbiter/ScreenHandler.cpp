@@ -1066,7 +1066,7 @@ void ScreenHandler::SelectedAttributeCell(DataGridCell *pCell)
 	// the sort.  Normally it goes to 'Title'.  However for Artists it goes to Albums
 	// and for media without titles, like pictures, it goes to filename (which is 0)
 	if( (mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_pluto_CD_CONST || mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_pluto_StoredAudio_CONST)
-		&& mediaFileBrowserOptions.m_PK_AttributeType_Sort==ATTRIBUTETYPE_Performer_CONST )
+		&& (mediaFileBrowserOptions.m_PK_AttributeType_Sort==ATTRIBUTETYPE_Performer_CONST || mediaFileBrowserOptions.m_PK_AttributeType_Sort==ATTRIBUTETYPE_Album_Artist_CONST) )
 			mediaFileBrowserOptions.m_PK_AttributeType_Sort = ATTRIBUTETYPE_Album_CONST;
         else if (mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_lmce_StreamedAudio_CONST &&
                  mediaFileBrowserOptions.m_PK_AttributeType_Sort==ATTRIBUTETYPE_Genre_CONST)
