@@ -829,6 +829,8 @@ signals:
 
 public slots:
 
+    void jumpToAttributeGrid(int attributeType, int attribute);
+
     void handleDceAlert(QString text, QString tokens, int timeout, int interruption);
     int entertainArea() {return iea_area;}
     int room() {return iFK_Room;}
