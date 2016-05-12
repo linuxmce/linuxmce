@@ -254,19 +254,19 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				}
 				else if ( i->first == "TITLE" )
 				{
-					stov(sProperty, vsTitle);
+					stov(sProperty, vsTitle, "");
 				}
 				else if ( i->first == "ALBUM" )
 				{
-					stov(sProperty, vsAlbum);
+					stov(sProperty, vsAlbum, "");
 				}
 				else if ( i->first == "TRACKNUMBER" )
 				{
-					stov(sProperty, vsTrack);
+					stov(sProperty, vsTrack, "");
 				}
 				else if ( i->first == "DATE" )
 				{
-					stov(sProperty, vsDate);
+					stov(sProperty, vsDate, "");
 				}
 				else if ( i->first == "COMPOSER" )
 				{
@@ -278,11 +278,11 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				}
 				else if ( i->first == "TOTALDISCS" )
 				{
-					stov(sProperty, vsTotalDiscs);
+					stov(sProperty, vsTotalDiscs, "");
 				}
 				else if ( i->first == "DISCNUMBER" )
 				{
-					stov(sProperty, vsDisc);
+					stov(sProperty, vsDisc, "");
 				}
 				else if ( i->first == "COMMENT" )
 				{
