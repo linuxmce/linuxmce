@@ -104,6 +104,30 @@ public:
     }
 
     /*
+     * Set a custom filter based on the user choosing an attribute directly,
+     * such as from the file details screen
+     *
+     */
+    void setFilterFromMediaGrid(int attributeType, int attribute){
+
+        q_subType="";                                     //2
+       // q_fileFormat="";                                  //3
+        q_attribute_genres="";                            //4
+        q_mediaSources ="1,2";                            //5 need comma delineation
+        q_usersPrivate = "0";                             //6
+        q_attributetype_sort="";                          //7
+        q_pk_users="0";                                   //8
+        q_last_viewed=" 2 ";                              //9
+        q_pk_attribute=QString::number(attribute);        //10
+        qs_seek ="";
+
+        updateAttributeToList();
+        emit filterChanged(q_mediaType);
+        emit filterStringChanged(dataGridId);
+        newMediaFilter();
+    }
+
+    /*
      * Set a filter parameter
      * Calling this will trigger filterChanged+filterStringChanged signals
      */
@@ -247,6 +271,8 @@ public:
             else if(q_attributetype_sort =="3" && q_pk_attribute !="") //album
             {
                 q_attributetype_sort = "13";
+            } else if(q_attributetype_sort == "" && q_pk_attribute !="" ) {
+                q_attributetype_sort = "3";
             }
         }
         //photos

@@ -2071,18 +2071,10 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     qDebug() << "Param = " << param;
     switch (paramType)
     {
-    case 0:
-        setGridMediaType(param);
-        break;
-    case 1:
-        setSubType(param);
-        break;
-    case 2:
-        setGridFileFormat(param);
-        break;
-    case 3:
-        setGridAttributeGenres(param);
-        break;
+    case 0: setGridMediaType(param);            break;
+    case 1: setSubType(param);                  break;
+    case 2: setGridFileFormat(param);           break;
+    case 3: setGridAttributeGenres(param);        break;
     case 4:
         if (!param.contains("!D")){
 
@@ -2098,9 +2090,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         }
         break;
 
-    case 5:
-        setGridUsersPrivate(param+","+QString::number(userList->currentPrivateUser));
-        break;
+    case 5:setGridUsersPrivate(param+","+QString::number(userList->currentPrivateUser));  break;
     case 6:
         if (param.contains("!P"))    {
             break;
@@ -2108,12 +2098,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             setGridAttributeTypeSort(param);
             break;
         }
-    case 7:
-        setGridPkUsers(param);
-        break;
-    case 8:
-        setGridLastViewed(param);
-        break;
+    case 7: setGridPkUsers(param);         break;
+    case 8: setGridLastViewed(param);      break;
     case 9:
         if(param.contains("!F") || param.contains("!P")){
             break;
@@ -2258,6 +2244,12 @@ void qorbiterManager::updatePlaylist(){
 DCECommand* qorbiterManager::getDCECommand()
 {
     return new DCECommand(m_dceRequestNo.fetchAndAddAcquire(1));
+}
+
+void qorbiterManager::jumpToAttributeGrid(int attributeType, int attribute)
+{
+    qDebug() << Q_FUNC_INFO;
+    mediaFilter.setFilterFromMediaGrid(attributeType,attribute);
 }
 
 void qorbiterManager::handleDceAlert(QString text, QString tokens, int timeout, int interruption)

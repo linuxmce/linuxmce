@@ -188,6 +188,11 @@ GenericPopup{
                         height:parent.height
                         text:modelData.attribute
                     }
+
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked:manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                    }
                 }
             }
 
@@ -214,6 +219,10 @@ GenericPopup{
                 }
                 delegate:StyledText{
                     text:modelData.attribute
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked:manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                    }
                 }
             }
 
