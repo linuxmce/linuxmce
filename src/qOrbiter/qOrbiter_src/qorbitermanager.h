@@ -1722,7 +1722,7 @@ public slots:
 
         case Guide:
             emit dceRemoteCommand(c , "Guide" );
-            keyEvent = Qt::Key_Guide;
+            keyEvent = Qt::Key_F6;
             break;
 
         case Menu:
