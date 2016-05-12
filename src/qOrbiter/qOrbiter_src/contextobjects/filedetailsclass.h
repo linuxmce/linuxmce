@@ -239,6 +239,7 @@ public slots:
     void setRating(const QString r) {rating = r; emit ratingChanged();}
     QString getRating(){return rating;}
 
+
     void setStorageDevice(const QString device) {
         qs_storageDevice = device;
         if(device=="-1") {  storageDeviceNo=-1; }
@@ -308,16 +309,6 @@ public slots:
         return QQmlListProperty<FileDetailsObject>(this, m_performerList);
     }
 
-    int countPerformers(QQmlListProperty<FileDetailsObject>*property){
-        FileDetailsClass* t = qobject_cast<FileDetailsClass*>(property->object);
-        return m_performerList.count();
-    }
-
-    FileDetailsObject* performer(QQmlListProperty<FileDetailsObject> *property, int index){
-           FileDetailsClass* fd = qobject_cast<FileDetailsClass*>(property->object);      
-        return m_performerList.at(index);
-    }
-
     QQmlListProperty<FileDetailsObject> albumArtistList(){
         return QQmlListProperty<FileDetailsObject>(this, m_albumArtistList);
     }
@@ -333,7 +324,6 @@ public slots:
        QList<FileDetailsObject*> t =  m_attributeMap.value(ATTRIBUTETYPE_Director_CONST);
         return QQmlListProperty<FileDetailsObject>(this,t);
     }
-
 
     void setGenre (const QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
     QString getGenre() { return genre;}
@@ -391,6 +381,7 @@ private:
     QList<FileDetailsObject*>  m_genreList;
     QList<FileDetailsObject*>  m_composerWriterList;
     QList<FileDetailsObject*>  m_directorList;
+    QMap<int, FileDetailsObject*>  m_singleItemMap;
 
 };
 

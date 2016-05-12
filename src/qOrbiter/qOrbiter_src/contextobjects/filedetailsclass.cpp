@@ -43,17 +43,17 @@ void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QSt
     qDebug() << " Handling  attribute " << attribute << " value:: " << val;
 
     switch (attribType) {
-    case ATTRIBUTETYPE_Director_CONST:m_directorList.append(new FileDetailsObject(attribute, val, attribType));emit directorChanged();       break;
-    case ATTRIBUTETYPE_Performer_CONST:m_performerList.push_back(new FileDetailsObject(attribute, val, attribType));    emit performersChanged();  break;
-    case ATTRIBUTETYPE_Album_CONST: emit albumChanged();            break;
-    case ATTRIBUTETYPE_Track_CONST:emit trackChanged();             break;
-    case ATTRIBUTETYPE_Program_CONST: emit programChanged();        break;
-    case ATTRIBUTETYPE_Rated_CONST: emit ratingChanged();           break;
-    case ATTRIBUTETYPE_Genre_CONST: m_genreList.append(new FileDetailsObject(attribute, val, attribType));  emit genreChanged();            break;
-    case ATTRIBUTETYPE_Episode_CONST:emit episodeChanged();         break;
-    case ATTRIBUTETYPE_Studio_CONST:m_studioList.append(new FileDetailsObject(attribute, val, attribType));emit studioChanged();        break;
-    case ATTRIBUTETYPE_ComposerWriter_CONST:m_composerWriterList.append(new FileDetailsObject(attribute, val, attribType));  emit composersChanged();break;
-    case ATTRIBUTETYPE_Album_Artist_CONST:m_albumArtistList.append(new FileDetailsObject(attribute, val, attribType)); emit albumArtistChanged(); break;
+    case ATTRIBUTETYPE_Director_CONST:m_directorList.append(new FileDetailsObject(attribute, val, attribType));             emit directorChanged();    break;
+    case ATTRIBUTETYPE_Performer_CONST:m_performerList.push_back(new FileDetailsObject(attribute, val, attribType));        emit performersChanged();  break;
+    case ATTRIBUTETYPE_Album_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType)) ;  emit albumChanged();       break;
+    case ATTRIBUTETYPE_Track_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) );  emit trackChanged();       break;
+    case ATTRIBUTETYPE_Program_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType)); emit programChanged();     break;
+    case ATTRIBUTETYPE_Rated_CONST: m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) ); emit ratingChanged();      break;
+    case ATTRIBUTETYPE_Genre_CONST: m_genreList.append(new FileDetailsObject(attribute, val, attribType));                  emit genreChanged();       break;
+    case ATTRIBUTETYPE_Episode_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType)); emit episodeChanged();     break;
+    case ATTRIBUTETYPE_Studio_CONST:m_studioList.append(new FileDetailsObject(attribute, val, attribType));                 emit studioChanged();      break;
+    case ATTRIBUTETYPE_ComposerWriter_CONST:m_composerWriterList.append(new FileDetailsObject(attribute, val, attribType)); emit composersChanged();   break;
+    case ATTRIBUTETYPE_Album_Artist_CONST:m_albumArtistList.append(new FileDetailsObject(attribute, val, attribType));      emit albumArtistChanged(); break;
         break;
     default:
         qDebug() << " No handler for attribute " << attribute << " value:: " << val;
