@@ -252,7 +252,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
         connect(m_window->screen(), SIGNAL(primaryOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         // connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
-        qDebug() << "Set QQuickWindow Ptr";
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
 
@@ -396,8 +395,6 @@ void qorbiterManager::refreshUI(QUrl url){
  */
 void qorbiterManager::processConfig(QNetworkReply *config)
 {
-
-    qDebug() << Q_FUNC_INFO;
 
     if(!alreadyConfigured){
         iPK_Device_DatagridPlugIn =  long(6);
@@ -840,7 +837,7 @@ bool qorbiterManager::OrbiterGen()
  */
 void qorbiterManager::swapSkins(QString incSkin)
 {
-    qDebug() << Q_FUNC_INFO;
+
     emit skinMessage("swapping skin to::" + incSkin);
 
     if(currentSkin==incSkin) return;
@@ -996,8 +993,7 @@ void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVar
 
 void qorbiterManager::clearDataGrid(QString dataGridId)
 {
-    if(!modelPoolLock.tryLockForWrite()){
-        //  qDebug() << "clearDatagrid("<<dataGridId<<"):: failed to lock mutex.";
+    if(!modelPoolLock.tryLockForWrite()){      
         return;
     }
 
@@ -1016,7 +1012,6 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
 
     }
     modelPoolLock.unlock();
-    // qDebug() << "manager.clearDataGrid() end";
     emit modelChanged();
 }
 
@@ -1779,7 +1774,6 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
 }
 
 void qorbiterManager::mythTvPlay(){
-    qDebug() << "Sending play to mythtv";
     CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, this->nowPlayingButton->getStreamID() , 1000, true);
     emit sendDceCommand(cmd);
 }
@@ -2181,8 +2175,7 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
     if(p){
 
         QVariantMap b;
-        b.insert("commands", t["commands"]);
-        //  qDebug() << b;
+        b.insert("commands", t["commands"]);    
         p->setDeviceCommand(b);
         //       foreach(QVariant cmd , t["commands"].toMap()){
         //           QVariantMap l = cmd.toMap();
@@ -2231,12 +2224,11 @@ int qorbiterManager::cancelRecording(QString sID, QString sProgramID) {
 
 void qorbiterManager::ejectDisc(int discDrive, int slot)
 {
-    qDebug() << Q_FUNC_INFO;
     emit ejectDiscDrive((long)discDrive, slot);
 }
 
-void qorbiterManager::updatePlaylist(){
-    qDebug() << "playlist updating;";
+void qorbiterManager::updatePlaylist()
+{
     GenericFlatListModel *pModel = getDataGridModel("Playlist", 18, "38");
     if(pModel){pModel->refreshData();}
 }
@@ -2248,14 +2240,12 @@ DCECommand* qorbiterManager::getDCECommand()
 
 void qorbiterManager::jumpToAttributeGrid(int attributeType, int attribute)
 {
-    qDebug() << Q_FUNC_INFO;
     mediaFilter.setFilterFromMediaGrid(attributeType,attribute);
 }
 
 void qorbiterManager::handleDceAlert(QString text, QString tokens, int timeout, int interruption)
 {
     emit newDceAlert(text, QVariant(tokens), timeout, interruption);
-    qDebug() << Q_FUNC_INFO << text;
 }
 
 void qorbiterManager::updateImageChanged(QImage img)
@@ -2373,7 +2363,6 @@ void qorbiterManager::checkConnection()
 
 bool qorbiterManager::cleanupData()
 {
-    qDebug() << "Cleaning up data";
     roomLights->clear();                 //current room scenarios model
 
 
@@ -2453,7 +2442,7 @@ void qorbiterManager::processError(QString msg)
 
 void qorbiterManager::setActiveSkin(QString name){
 
-    qDebug() <<"qOrbiterManager::setActiveSkin("<<name<<")";
+
     if(!mb_useNetworkSkins){
         swapSkins(name);
         return;
@@ -2764,7 +2753,6 @@ void qorbiterManager::setSkinEntryFile(const QString &skinEntryFile)
 {
     if(m_skinEntryFile==skinEntryFile) return;
     m_skinEntryFile = skinEntryFile; emit skinEntryFileChanged();
-    qDebug() << m_skinEntryFile;
 }
 
 
@@ -2807,17 +2795,12 @@ bool qorbiterManager::setupLocalSkins()
 
     QJsonDocument themeDoc = QJsonDocument::fromJson(themeJson.toUtf8());
 
-    if(!themeDoc.isObject())
-        qDebug() << Q_FUNC_INFO << "invalid object ";
-
     QJsonObject themeObject = themeDoc.object();
 
     if(themeObject.isEmpty())
         return false;
 
     QVariantMap t = themeObject.toVariantMap();
-    qDebug() << Q_FUNC_INFO << themeObject.value("themelist");
-
 }
 
 void qorbiterManager::handleViewError(QList<QQmlError>)
@@ -2844,7 +2827,6 @@ void qorbiterManager::replaceHandler()
 
 void qorbiterManager::setDceResponse(QString response)
 {
-    qDebug() << "DCE Response" << response;
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
@@ -2994,9 +2976,6 @@ void qorbiterManager::reloadQml()
     } else {
         qWarning() << " Window Set, reloading QML";
     }
-
-    qDebug() << Q_FUNC_INFO ;
-
 
     if(m_style && !mb_useNetworkSkins ){
         qDebug() << Q_FUNC_INFO << "Deleting style";
