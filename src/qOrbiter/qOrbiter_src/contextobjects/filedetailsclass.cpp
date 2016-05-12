@@ -9,6 +9,8 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     QObject(parent)
 {
     qOrbiter*ptr = qobject_cast<qOrbiter*>(qorbiter_ptr);
+    qmlRegisterType<FileDetailsObject>("FileAttribute", 1, 0, "FileAttribute");
+
     QObject::connect(ptr, &qOrbiter::newFileDetailAttribute, this, &FileDetailsClass::handleNewFileAttribute, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_programChanged,this, &FileDetailsClass::setProgram,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_mediaTitleChanged,this, &FileDetailsClass::setMediaTitle,Qt::QueuedConnection);
@@ -38,32 +40,25 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
 
 void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QString val)
 {
-    if(attribType==ATTRIBUTETYPE_Performer_CONST){
-        if(!m_performerMap.contains(attribute)){
-            m_performerMap.insert(attribute, val);
-        }
-        return;
-    }
+    qDebug() << " Handling  attribute " << attribute << " value:: " << val;
 
-    m_attributeMap.insert(attribType, new FileDetailsObject(attribute, val));
-
-     qDebug() << " Handling  attribute " << attribute << " value:: " << val;
-    switch (attribType) {
-    case ATTRIBUTETYPE_Director_CONST:emit directorChanged();       break;
-    case ATTRIBUTETYPE_Performer_CONST: emit performersChanged();   break;
+      switch (attribType) {
+    case ATTRIBUTETYPE_Director_CONST:m_directorList.append(new FileDetailsObject(attribute, val, attribType));emit directorChanged();       break;
+    case ATTRIBUTETYPE_Performer_CONST:m_performerList.push_back(new FileDetailsObject(attribute, val, attribType));    emit performersChanged();  break;
     case ATTRIBUTETYPE_Album_CONST: emit albumChanged();            break;
     case ATTRIBUTETYPE_Track_CONST:emit trackChanged();             break;
     case ATTRIBUTETYPE_Program_CONST: emit programChanged();        break;
     case ATTRIBUTETYPE_Rated_CONST: emit ratingChanged();           break;
-    case ATTRIBUTETYPE_Genre_CONST: emit genreChanged();            break;
+    case ATTRIBUTETYPE_Genre_CONST: m_genreList.append(new FileDetailsObject(attribute, val, attribType));  emit genreChanged();            break;
     case ATTRIBUTETYPE_Episode_CONST:emit episodeChanged();         break;
-    case ATTRIBUTETYPE_Studio_CONST:emit studioChanged();           break;
-    case ATTRIBUTETYPE_ComposerWriter_CONST:emit composersChanged();break;
+    case ATTRIBUTETYPE_Studio_CONST:m_studioList.append(new FileDetailsObject(attribute, val, attribType));emit studioChanged();        break;
+    case ATTRIBUTETYPE_ComposerWriter_CONST:m_composerWriterList.append(new FileDetailsObject(attribute, val, attribType));  emit composersChanged();break;
         break;
     default:
         qDebug() << " No handler for attribute " << attribute << " value:: " << val;
         break;
     }
+
 }
 
 
@@ -74,6 +69,10 @@ void FileDetailsClass::setFileMediaType()
 
 
 void FileDetailsClass::clear(){
+    m_attributeMap.clear();
+    m_performerMap.clear();
+    m_performerList.clear();
+    m_studioList.clear();
     setScreenshot("");
 
 
@@ -124,3 +123,4 @@ void FileDetailsClass::clear(){
     emit screenShotChanged();
 
 }
+

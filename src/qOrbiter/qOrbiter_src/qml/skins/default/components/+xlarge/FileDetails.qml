@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.enums 1.0
+import FileAttribute 1.0
 import "../components"
 import "../../."
 GenericPopup{
@@ -25,6 +26,7 @@ GenericPopup{
             height:profile ? Style.scaleY(65) : Style.scaleY(58)
             source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
             smooth: true
+
         }
         Rectangle{
             id:metaBg
@@ -33,9 +35,11 @@ GenericPopup{
             color: "black"
             opacity: .65
             anchors.centerIn: metadata
+            visible: metadata.visible
         }
         Column{
             id:metadata
+            visible: false
             spacing: 5
             width:  parent.width /2 //Style.listViewWidth_large
             height: parent.height
@@ -65,12 +69,26 @@ GenericPopup{
                 text:qsTr("Composer/Writer: ")+filedetailsclass.composerlist
             }
 
-            StyledText{
+            GridView{
+                id:perfs
+                height: 100
                 width: parent.width
-                //height:manager.q_mediaType == 5 ? 0 : parent.height *.15
-                id:artists
-                text:manager.q_mediaType == 5 ? qsTr("Starring: ")+filedetailsclass.performerlist : qsTr("Artist: ")+filedetailsclass.performerlist
+                clip:true
+
+                model:filedetailsclass.performersList
+                delegate: StyledText{
+                    width: parent.width
+                    text:modelData.attribute
+                }
             }
+
+
+            //            StyledText{
+            //                width: parent.width
+            //                //height:manager.q_mediaType == 5 ? 0 : parent.height *.15
+            //                id:artists
+            //                text:manager.q_mediaType == 5 ? qsTr("Starring: ")+filedetailsclass.performerlist : qsTr("Artist: ")+filedetailsclass.performerlist
+            //            }
 
             StyledText{
                 width: parent.width
@@ -104,6 +122,102 @@ GenericPopup{
 
         }
 
+        Item{
+            anchors{
+                left:parent.left
+                right:parent.right
+                bottom:media_options.top
+            }
+            height:parent.height *.35 + synop2.height
+
+            Rectangle{ color: "black"; anchors.fill: parent; opacity: .45}
+
+            StyledText{
+                anchors{
+                    top:parent.top
+                    left:parent.left
+                }
+                id:title2
+                text:qsTr("Title: ")+filedetailsclass.mediatitle
+                fontSize: largeFontSize
+            }
+
+            StyledText{
+                anchors{
+                    top:parent.top
+                    left:parent.left
+                }
+                width: parent.width
+                id:album2
+                text:qsTr("Album: ")+filedetailsclass.album
+            }
+
+            StyledText{
+                id:director2
+                text:qsTr("Director: ")+filedetailsclass.director
+                anchors{
+                    left:parent.left
+                    top:title2.bottom
+                }
+            }
+
+            ListView{
+
+                anchors{
+                    left:parent.left
+                    right:studio2.left
+                    bottom:synop2.top
+                    top:director2.bottom
+                }
+
+                orientation: ListView.Horizontal
+                clip:true
+
+                spacing:10
+                model:filedetailsclass.performersList
+                delegate: Item{
+                    height: 240
+                    width: 160
+                    Rectangle{
+                        anchors.fill: parent
+                        color:"grey"
+                        opacity: .45
+                    }
+                    StyledText{
+                        width:parent.width
+                        height:parent.height
+                        text:modelData.attribute
+                    }
+                }
+            }
+
+            StyledText{
+                id:synop2
+                anchors{
+                    bottom:parent.bottom
+                    left:parent.left
+                }
+
+                width: parent.width
+
+                text:filedetailsclass.synop
+            }
+
+            ListView{
+                width: parent.width*.35
+                height: 200
+                id:studio2
+               model:filedetailsclass.studioList
+                anchors{
+                    right:parent.right
+                    top:parent.top
+                }
+                delegate:StyledText{
+                    text:modelData.attribute
+                }
+            }
+
+        }
         Row{
             id:media_options
             focus:true
@@ -135,7 +249,7 @@ GenericPopup{
                 arrow: activeFocus
             }
             LargeStyledButton{
-                buttonText: qsTr("Close", "Close orbiterWindow")
+                buttonText: qsTr("Close", "Close window")
                 height: parent.height
                 width: parent.width/4
                 arrow: activeFocus
@@ -162,6 +276,9 @@ GenericPopup{
                 PropertyChanges { target: description; visible:false }
                 PropertyChanges { target: studio; visible:false }
                 PropertyChanges { target: director; visible:false }
+                PropertyChanges { target: album2; visible:true }
+                PropertyChanges { target: compwriter; visible:true }
+
             },
             State {
                 when:manager.q_mediaType==MediaTypes.LMCE_StoredVideo && manager.q_subType == MediaSubtypes.MOVIES
@@ -174,6 +291,7 @@ GenericPopup{
                 PropertyChanges { target: album; visible:false }
                 PropertyChanges { target: compwriter; visible:false }
                 PropertyChanges { target: album; visible:false }
+                PropertyChanges { target: album2; visible:false }
                 PropertyChanges { target: episode; visible:false }
                 PropertyChanges { target: program; visible:false }
 
