@@ -286,7 +286,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				}
 				else if ( i->first == "COMMENT" )
 				{
-					stov(sProperty, vsSynopsis);
+					stov(sProperty, vsSynopsis, "");
 				}
 			}
 		}
