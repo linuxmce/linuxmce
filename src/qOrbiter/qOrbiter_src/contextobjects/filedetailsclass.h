@@ -118,7 +118,7 @@ class FileDetailsClass : public QObject
     Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged) /*!< \brief String of '|' seperated performers.  \ingroup file_details*/
     Q_PROPERTY (QStringList performers READ getPerformerList) /*!< \brief List of performers \warning experimental  \ingroup file_details*/
     Q_PROPERTY(QQmlListProperty <FileDetailsObject>performersList READ performersList NOTIFY performersChanged )
-
+    Q_PROPERTY(QQmlListProperty<FileDetailsObject> albumArtistList READ albumArtistList NOTIFY albumArtistChanged)
     Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged) /*!< Composer  \ingroup file_details*/
     Q_PROPERTY (QStringList composers READ getComposerList) /*!< \brief List of composers \warning Experimental  \ingroup file_details*/
 
@@ -178,6 +178,7 @@ public:
 
 
 signals:
+    void albumArtistChanged();
     void storageDeviceChanged();
     void objectChanged();
     void pathChanged();
@@ -317,6 +318,10 @@ public slots:
         return m_performerList.at(index);
     }
 
+    QQmlListProperty<FileDetailsObject> albumArtistList(){
+        return QQmlListProperty<FileDetailsObject>(this, m_albumArtistList);
+    }
+
     void setComposers (const QString inc_composer) {composers << inc_composer;  emit composersChanged();}
     QString getComposers() {composerlist = composers.join(" | "); return composerlist;}
     QStringList getComposerList() {return composers;}
@@ -381,6 +386,7 @@ private:
     QMap<int, QString> m_performerMap;
 
     QList<FileDetailsObject*>  m_performerList;
+    QList<FileDetailsObject*>  m_albumArtistList;
     QList<FileDetailsObject*>  m_studioList;
     QList<FileDetailsObject*>  m_genreList;
     QList<FileDetailsObject*>  m_composerWriterList;
