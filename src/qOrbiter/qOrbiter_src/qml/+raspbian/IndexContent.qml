@@ -40,7 +40,7 @@ Item{
 
     Text{
         id:loadingText
-        text:"Please Wait, Loading RaspberryPi as MD"
+        text:"Please Wait, Loading RaspberryPi as MD!!"
         color:"red"
         font.bold: true
         anchors.centerIn: parent

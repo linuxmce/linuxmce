@@ -78,9 +78,9 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
     if(isOsd){
         QQmlFileSelector *winSelector = new QQmlFileSelector(m_appEngine->rootContext()->engine());
-        winSelector->setExtraSelectors(QStringList() << "raspbian" );
+        winSelector->setExtraSelectors(QStringList() << "md" );
     }
-    qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();   
+   // qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
     m_appEngine->rootContext()->setContextProperty("window", this);
 #ifdef NOQRC
