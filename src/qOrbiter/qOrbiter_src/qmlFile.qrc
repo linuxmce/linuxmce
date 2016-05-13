@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">    
+    <qresource prefix="/">
         <file>qml/SkinError.qml</file>
         <file>qml/Index.qml</file>
         <file>qml/IndexContent.qml</file>
@@ -34,7 +34,7 @@
         <file>qml/skins/default/images/arrow.png</file>
         <file>qml/skins/default/images/options.png</file>
         <file>qml/skins/default/images/splash_bg.png</file>
-        <file>qml/skins/default/images/vertical_arrow.png</file>        
+        <file>qml/skins/default/images/vertical_arrow.png</file>
         <file>qml/skins/default/images/ps3_o.png</file>
         <file>qml/skins/default/images/ps3_sq.png</file>
         <file>qml/skins/default/images/ps3_tri.png</file>
@@ -89,7 +89,7 @@
         <file>qml/skins/default/screens/Screen_284.qml</file>
         <file>qml/skins/default/screens/Screen_298.qml</file>
         <file>qml/skins/default/screens/Screen_308.qml</file>
-        <file>qml/skins/default/screens/Screen_309.qml</file>        
+        <file>qml/skins/default/screens/Screen_309.qml</file>
         <file>qml/skins/default/screens/Screen_17.qml</file>
         <file>qml/skins/default/screens/Screen_205.qml</file>
         <file>qml/skins/default/screens/+xlarge/Screen_47.qml</file>
@@ -286,5 +286,6 @@
         <file>qml/skins/default/+xlarge/MainLayout.qml</file>
         <file>qml/skins/default/+xlarge/Style.qml</file>
         <file>qml/skins/default/+medium/MainLayout.qml</file>
+        <file>qml/skins/default/+xlarge/Main.qml</file>
     </qresource>
 </RCC>
