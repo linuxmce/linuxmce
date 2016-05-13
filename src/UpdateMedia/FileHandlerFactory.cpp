@@ -185,7 +185,7 @@ FileHandlerFactory::~FileHandlerFactory(void)
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidTagFile(string sDirectory, string sFile)
 {
-        const string csSupportedExtensions("ogg:flac:mp3:mp4:wav:asf");
+        const string csSupportedExtensions("mp3:ogg:flac:mp4:wv:wav::oga:mpc:spx:opus:tta:m4a:m4r:m4p:3g2:m4v:wma:asf:aif:aiff:afc:aifc:ape:s3m");
         string sExtension = StringUtils::ToLower(FileUtils::FindExtension(sFile));
 
         if(sExtension.empty())
