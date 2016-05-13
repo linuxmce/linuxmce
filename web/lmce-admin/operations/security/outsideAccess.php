@@ -8,13 +8,16 @@ function outsideAccess($output,$dbADO) {
 	
 	$installationID = cleanInteger($_SESSION['installationID']);
 	
+	$accessFile=$GLOBALS['pluto.conf'];
+
+	// check if firewall is disabled
 	exec('cat '.$accessFile.' | grep -v -E "^#|^$" ',$retArray);	
 	foreach ($retArray as $comf){
 		parse_str($comf);
 	}		
-	/*if(count($retArray)==0){
-		$_GET['error'].='Insuffient rights: pluto.conf file cannot be opened.';
-	}*/
+	if(count($retArray)==0){
+		$_GET['error'].='Insufficient rights: pluto.conf file cannot be opened.';
+	}
 
 	function getMAC($int){
 		$mac = exec("ip link show $int | awk '/ether/ {print $2}'");

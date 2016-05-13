@@ -19,7 +19,7 @@ function firewall($output,$dbADO) {
 		parse_str($comf);
 	}		
 	if(count($retArray)==0){
-		$_GET['error'].='Insuffient rights: pluto.conf file cannot be opened.';
+		$_GET['error'].='Insufficient rights: pluto.conf file cannot be opened.';
 	}
 	// grep all interfaces
 	exec('cat /proc/net/dev | tail -n +3 | cut -d":" -f 1  | sed -e \'s/^[ \t]*//\'',$ifArray);
@@ -641,12 +641,12 @@ function firewall($output,$dbADO) {
 					</select>';
 						if ($AdvancedFirewall == 1) {
 							$out.='
-							place<br />
+							<!--place<br />
 							<select name="save_place" STYLE="width:70px">
 								<option value="2">Middle</option>
 								<option value="1">First</option>
 								<option value="3">Last</option>
-							</select></td>';
+							</select></td>-->';
 						}
 						$out.='<input type="hidden" name="save_place" value="'.$row['Place'].'" />
 								<input type="hidden"name="save_OldChain" value="'.$row['RuleType'].'" />
@@ -1028,13 +1028,18 @@ function firewall($output,$dbADO) {
 			if ( $SourcePortEnd == '') {
 				$SourcePortEnd='NULL';
 			}
-			$DestinationPort=isset($_POST['DestinationPort'])? mysql_real_escape_string($_POST['DestinationPort']):'0';
-			if ( $DestinationPort == '') {
+			$DestinationPort=isset($_POST['DestinationPort'])? mysql_real_escape_string($_POST['DestinationPort']):'0:0';
+			if ( $DestinationPort == '0:0') {
 				$DestinationPort='NULL';
-			}
-			$DestinationPortEnd=isset($_POST['DestinationPortEnd'])? mysql_real_escape_string($_POST['DestinationPortEnd']):'0';
-			if ( $DestinationPortEnd == '') {
 				$DestinationPortEnd='NULL';
+			} else {
+				$DestinationPortarr=explode(':', $_POST['DestinationPort']);
+				$DestinationPort=$DestinationPortarr[0];
+				if (!isset($DestinationPortarr[1])) {
+					$DestinationPortEnd=':0';
+				} else {
+					$DestinationPortEnd=$DestinationPortarr[1];
+				}
 			}
 			$DestinationIP=isset($_POST['DestinationIP'])? mysql_real_escape_string($_POST['DestinationIP']):'0';
 			if ( $DestinationIP == '') {
@@ -1065,7 +1070,6 @@ function firewall($output,$dbADO) {
 			}
 			$options.=' -I '.$IntIF.' -O '.$ExtIF.' -M \''.$Matchname.'\' -P \''.$Protocol.'\' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
-			echo $options;
 			}
 
 		if (isset($_POST['save_Rule'])){
@@ -1105,13 +1109,14 @@ function firewall($output,$dbADO) {
 			if ( $SourcePortEnd == '') {
 				$SourcePortEnd='NULL';
 			}
-			$DestinationPort=isset($_POST['save_DestinationPort'])?mysql_real_escape_string($_POST['save_DestinationPort']):'NULL';
+			$DestinationPort=isset($_POST['save_DestinationPort'])?mysql_real_escape_string($_POST['save_DestinationPort']):'NULL:NULL';
 			if ( $DestinationPort == '') {
 				$DestinationPort='NULL';
-			}
-			$DestinationPortEnd=isset($_POST['save_DestinationPortEnd'])?mysql_real_escape_string($_POST['save_DestinationPortEnd']):'NULL';
-			if ( $DestinationPortEnd == '') {
 				$DestinationPortEnd='NULL';
+			} else {
+				$DestinationPortarr=explode(':', $_POST['save_DestinationPort']);
+				$DestinationPort=$DestinationPortarr[0];
+				$DestinationPortEnd=$DestinationPortarr[1];
 			}
 			$DestinationIP=isset($_POST['save_DestinationIP'])?mysql_real_escape_string($_POST['save_DestinationIP']):'NULL';
 			if ( $DestinationIP == '') {
@@ -1154,7 +1159,6 @@ function firewall($output,$dbADO) {
 				$options.=' -p '.$Place;
 			}
 			$options.=' -A add -I '.$IntIF.' -O '.$ExtIF.' -M \''.$Matchname.'\' -P \''.$Protocol.'\' -R '.$SourceIP.' -S '.$SourcePort.' -s '.$SourcePortEnd.' -r '.$DestinationIP.' -D '.$DestinationPort.' -d '.$DestinationPortEnd.' -T '.$RPolicy.' -c \''.$Description.'\'';
-			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 		}
 		
@@ -1173,7 +1177,6 @@ function firewall($output,$dbADO) {
 			$row=$res->FetchRow();
 			$old_name=$row['Matchname'];
 			$options='-L Rule -H local -A editchain -C '.$chain_name.' -P '.$fwVersion.' -c '.$old_name.'';
-			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 		}
 		
@@ -1184,7 +1187,6 @@ function firewall($output,$dbADO) {
 			$Chain=$row['Matchname'];
 			$Protocol=$row['Protocol'];
 			$options='-L Rule -H local -A delchain -C '.$Chain.' -P '.$Protocol.'';
-			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 		}
 		
@@ -1223,7 +1225,6 @@ function firewall($output,$dbADO) {
 			$Protocol=$row['Protocol'];
 			$Place=$row['Place'];
 			$options='-L Rule -H local -A move -p '.$Place.' -C '.$RuleType.' -P '.$Protocol.' -c '.$_GET['action'].'';
-			echo $options;
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
         }
 		
@@ -1321,7 +1322,8 @@ function firewall($output,$dbADO) {
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh'.$options);
 		}
 		
-		//header("Location: index.php?section=firewall&msg=".translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
+		//echo $options;
+		header("Location: index.php?section=firewall&msg=".translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
 	}
 	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
 	$output->setPageTitle(translate('TEXT_FIREWALL_RULES_CONST'));
