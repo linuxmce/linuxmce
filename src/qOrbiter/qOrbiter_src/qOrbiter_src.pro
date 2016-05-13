@@ -231,7 +231,7 @@ folder_04.target=$$DESTDIR
 DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
 
 linux-rasp-pi-g++{
-	DEPLOYMENTFOLDERS -= plugins_folder
+        DEPLOYMENTFOLDERS -= plugins_folder
 }
 
 macx-clang{
