@@ -1,5 +1,12 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/">    
+        <file>qml/SkinError.qml</file>
+        <file>qml/Index.qml</file>
+        <file>qml/IndexContent.qml</file>
+        <file>qml/splash/ConnectionElement.qml</file>
+        <file>qml/splash/GenericSplashList.qml</file>
+        <file>qml/splash/SetupScreen.qml</file>
+        <file>qml/splash/LoadingView.qml</file>
         <file>qml/splash/ConnectionBox.qml</file>
         <file>qml/splash/Switch.qml</file>
         <file>qml/splash/Style.qml</file>
@@ -24,23 +31,14 @@
         <file>qml/skins/default/qmldir</file>
         <file>qml/skins/default/MainLayout.qml</file>
         <file>qml/skins/default/PageLoader.qml</file>
-        <file>qml/skins/default/screens/Screen_1.qml</file>
-        <file>qml/skins/default/screens/Screen_44.qml</file>
-        <file>qml/skins/default/screens/Screen_47.qml</file>
-        <file>qml/skins/default/screens/Screen_X.qml</file>
-        <file>qml/skins/default/screens/+xlarge/Screen_1.qml</file>
-        <file>qml/skins/default/screens/+xlarge/Screen_44.qml</file>
-        <file>qml/SkinError.qml</file>
         <file>qml/skins/default/images/arrow.png</file>
         <file>qml/skins/default/images/options.png</file>
         <file>qml/skins/default/images/splash_bg.png</file>
-        <file>qml/skins/default/images/vertical_arrow.png</file>
-        <file>qml/skins/default/+medium/Style.qml</file>
-        <file>qml/skins/default/+small/Style.qml</file>
-        <file>qml/skins/default/+small/MainLayout.qml</file>
-        <file>qml/skins/default/+xlarge/MainLayout.qml</file>
-        <file>qml/skins/default/+xlarge/Style.qml</file>
-        <file>qml/skins/default/+medium/MainLayout.qml</file>
+        <file>qml/skins/default/images/vertical_arrow.png</file>        
+        <file>qml/skins/default/images/ps3_o.png</file>
+        <file>qml/skins/default/images/ps3_sq.png</file>
+        <file>qml/skins/default/images/ps3_tri.png</file>
+        <file>qml/skins/default/images/ps3_x.png</file>
         <file>qml/skins/default/screens/+small/Screen_47.qml</file>
         <file>qml/skins/default/screens/Screen_70.qml</file>
         <file>qml/skins/default/screens/Screen_17.qml</file>
@@ -91,8 +89,12 @@
         <file>qml/skins/default/screens/Screen_284.qml</file>
         <file>qml/skins/default/screens/Screen_298.qml</file>
         <file>qml/skins/default/screens/Screen_308.qml</file>
-        <file>qml/skins/default/screens/Screen_309.qml</file>
+        <file>qml/skins/default/screens/Screen_309.qml</file>        
+        <file>qml/skins/default/screens/Screen_17.qml</file>
+        <file>qml/skins/default/screens/Screen_205.qml</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_47.qml</file>
         <file>qml/skins/default/components/WaitSpinner.qml</file>
+        <file>qml/skins/default/components/InputController.qml</file>
         <file>qml/skins/default/components/GenericPlaybackScreen.qml</file>
         <file>qml/skins/default/components/BackButton.qml</file>
         <file>qml/skins/default/components/NowPlayingButton.qml</file>
@@ -142,6 +144,8 @@
         <file>qml/skins/default/components/PSMediaSquare.qml</file>
         <file>qml/skins/default/components/Resend.qml</file>
         <file>qml/skins/default/components/Thumbnail.qml</file>
+        <file>qml/skins/default/components/ImageButton.qml</file>
+        <file>qml/skins/default/components/MediaInterface.qml</file>
         <file>qml/skins/default/images/rw_up.png</file>
         <file>qml/skins/default/images/volup_up.png</file>
         <file>qml/skins/default/images/voldown_up.png</file>
@@ -153,13 +157,6 @@
         <file>qml/skins/default/images/lightsdown_up.png</file>
         <file>qml/skins/default/images/lightsup_up.png</file>
         <file>qml/skins/default/images/ff_up.png</file>
-        <file>qml/skins/default/components/ImageButton.qml</file>
-        <file>qml/skins/default/components/MediaInterface.qml</file>
-        <file>qml/skins/default/+large/MainLayout.qml</file>
-        <file>qml/skins/default/+large/Style.qml</file>
-        <file>qml/skins/default/screens/Screen_17.qml</file>
-        <file>qml/skins/default/screens/Screen_205.qml</file>
-        <file>qml/splash/LoadingView.qml</file>
         <file>qml/skins/default/components/ScrollRow.qml</file>
         <file>qml/skins/default/components/Slider.qml</file>
         <file>qml/skins/default/components/SendCommandBox.qml</file>
@@ -171,6 +168,15 @@
         <file>qml/skins/default/components/FloorPlandisplayTemplate.qml</file>
         <file>qml/skins/default/components/ColorSlider.qml</file>
         <file>qml/skins/default/components/TabletFloorplanLayout.qml</file>
+        <file>qml/skins/default/components/Alphabetlist.qml</file>
+        <file>qml/skins/default/components/ControlPopupContainer.qml</file>
+        <file>qml/skins/default/components/FloorplanOnOff.qml</file>
+        <file>qml/skins/default/components/FloorplanFanSwitch.qml</file>
+        <file>qml/skins/default/components/FloorplanDefaultControl.qml</file>
+        <file>qml/skins/default/components/FloorplanHeatCool.qml</file>
+        <file>qml/skins/default/components/FloorplanSetTemp.qml</file>
+        <file>qml/skins/default/components/+xlarge/FileDetails.qml</file>
+        <file>qml/skins/default/components/MetadataBlock.qml</file>
         <file>qml/skins/default/images/floorplan/1.png</file>
         <file>qml/skins/default/images/floorplan/2.png</file>
         <file>qml/skins/default/images/floorplan/3.png</file>
@@ -208,13 +214,6 @@
         <file>qml/skins/default/images/floorplan/smallpower.png</file>
         <file>qml/skins/default/images/floorplan/sprinkler.png</file>
         <file>qml/skins/default/images/floorplan/vcr.png</file>
-        <file>qml/skins/default/components/Alphabetlist.qml</file>
-        <file>qml/skins/default/components/ControlPopupContainer.qml</file>
-        <file>qml/skins/default/components/FloorplanOnOff.qml</file>
-        <file>qml/skins/default/components/FloorplanFanSwitch.qml</file>
-        <file>qml/skins/default/components/FloorplanDefaultControl.qml</file>
-        <file>qml/skins/default/components/FloorplanHeatCool.qml</file>
-        <file>qml/skins/default/components/FloorplanSetTemp.qml</file>
         <file>qml/skins/default/screens/Screen_206.qml</file>
         <file>qml/skins/default/screens/Screen_20.qml</file>
         <file>qml/skins/default/screens/Screen_24.qml</file>
@@ -265,32 +264,27 @@
         <file>qml/skins/default/screens/Screen_96.qml</file>
         <file>qml/skins/default/screens/Screen_98.qml</file>
         <file>qml/skins/default/screens/Screen_99.qml</file>
-        <file>qml/splash/ConnectionElement.qml</file>
-        <file>qml/splash/GenericSplashList.qml</file>
-        <file>qml/splash/SetupScreen.qml</file>
         <file>qml/skins/default/screens/Screen_204.qml</file>
-        <file>qml/skins/default/screens/Screen_Reload.qml</file>
-        <file>qml/Index.qml</file>
-        <file>qml/IndexContent.qml</file>
-        <file>qml/skins/default/components/TelecomDevices.qml</file>
-        <file>qml/skins/default/images/ps3_o.png</file>
-        <file>qml/skins/default/images/ps3_sq.png</file>
-        <file>qml/skins/default/images/ps3_tri.png</file>
-        <file>qml/skins/default/images/ps3_x.png</file>
         <file>qml/skins/default/screens/Screen_259.qml</file>
-        <file>qml/skins/default/+xlarge/+raspbian/Style.qml</file>
-        <file>qml/skins/default/+xlarge/+raspbian/MainLayout.qml</file>
-        <file>qml/+linux/+raspbian/IndexContent.qml</file>
         <file>qml/skins/default/screens/Screen_283.qml</file>
+        <file>qml/skins/default/screens/Screen_1.qml</file>
+        <file>qml/skins/default/screens/Screen_44.qml</file>
+        <file>qml/skins/default/screens/Screen_47.qml</file>
+        <file>qml/skins/default/screens/Screen_X.qml</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_1.qml</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_44.qml</file>
+        <file>qml/skins/default/screens/Screen_Reload.qml</file>
+        <file>qml/skins/default/components/TelecomDevices.qml</file>
         <file>qml/skins/default/+md/Main.qml</file>
         <file>qml/skins/default/+md/MainLayout.qml</file>
         <file>qml/skins/default/+md/Style.qml</file>
-        <file>qml/skins/default/components/InputController.qml</file>
-        <file>qml/skins/default/screens/+xlarge/Screen_47.qml</file>
-        <file>qml/skins/default/components/+xlarge/FileDetails.qml</file>
-        <file>qml/skins/default/components/MetadataBlock.qml</file>
-        <file>qml/skins/default/+linux/Main.qml</file>
-        <file>qml/skins/default/+linux/MainLayout.qml</file>
-        <file>qml/skins/default/+linux/Style.qml</file>
+        <file>qml/skins/default/+large/MainLayout.qml</file>
+        <file>qml/skins/default/+large/Style.qml</file>
+        <file>qml/skins/default/+medium/Style.qml</file>
+        <file>qml/skins/default/+small/Style.qml</file>
+        <file>qml/skins/default/+small/MainLayout.qml</file>
+        <file>qml/skins/default/+xlarge/MainLayout.qml</file>
+        <file>qml/skins/default/+xlarge/Style.qml</file>
+        <file>qml/skins/default/+medium/MainLayout.qml</file>
     </qresource>
 </RCC>

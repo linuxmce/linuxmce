@@ -45,7 +45,6 @@ GenericPopup{
             height: parent.height
             anchors.right: content_item.right
             StyledText{
-
                 width: parent.width
                 id:title
                 text:qsTr("Title: ")+filedetailsclass.mediatitle
@@ -123,6 +122,7 @@ GenericPopup{
         }
 
         Item{
+            id:lowerMetadata
             anchors{
                 left:parent.left
                 right:parent.right
@@ -132,56 +132,77 @@ GenericPopup{
 
             Rectangle{ color: "black"; anchors.fill: parent; opacity: .45}
 
-            StyledText{
+            Column{
+                id:focus_col
+                focus: true
+                onActiveFocusChanged: if(activeFocus) { currentIndex = 0 } else { ocus_col.children[currentIndex].current = false }
+                property int currentIndex:0
+                spacing: 10
+                property int max:focus_col.children.length-1
+                Keys.onUpPressed: if(currentIndex === 0 ){ currentIndex= max;} else {currentIndex--}
+                Keys.onDownPressed: if(currentIndex=== max) {  performer_list.forceActiveFocus()  } else {currentIndex++}
+                onCurrentIndexChanged: {  if(focus_col.children[currentIndex].visible) {focus_col.children[currentIndex].current=true } else { currentIndex++ } }
                 anchors{
                     top:parent.top
                     left:parent.left
                 }
-                id:title2
-                text:qsTr("Title: ")+filedetailsclass.mediatitle
-                fontSize: largeFontSize
-            }
 
-            StyledText{
-                anchors{
-                    top:parent.top
-                    left:parent.left
+                StyledText{
+                    id:title2
+                    property bool current:false
+                    text:qsTr("Title: ")+filedetailsclass.mediatitle
+                    fontSize: largeFontSize
+                   font.bold:current
                 }
-                width: parent.width
-                id:album2
-                text:qsTr("Album: ")+filedetailsclass.album
-            }
 
-            StyledText{
-                id:director2
-                text:qsTr("Director: ")+filedetailsclass.director
-                anchors{
-                    left:parent.left
-                    top:title2.bottom
+                StyledText{
+                    width: parent.width
+                    property bool current:false
+                    id:album2
+                    text:qsTr("Album: ")+filedetailsclass.album
+                    font.bold:current
+                }
+
+                StyledText{
+                    id:director2
+                    property bool current:false
+                    text:qsTr("Director: ")+filedetailsclass.director
+                    font.bold:current
                 }
             }
 
             ListView{
-
+                id:performer_list
+                focus:true
                 anchors{
                     left:parent.left
-                    right:studio2.left
+                    right:studio_list.left
                     bottom:synop2.top
-                    top:director2.bottom
+                    top:focus_col.bottom
                 }
-
+                keyNavigationWraps: true
+                Keys.onUpPressed: focus_col.forceActiveFocus()
+                Keys.onDownPressed: media_options.forceActiveFocus()
+                onActiveFocusChanged: if(!activeFocus) {currentIndex = -1} else {currentIndex = 0}
                 orientation: ListView.Horizontal
                 clip:true
-
                 spacing:10
                 model:filedetailsclass.performersList
                 delegate: Item{
-                    height: 240
-                    width: 160
+                    height: 240 * (current ? 1.5 : 1)
+                    width: 160  * (current ? 1.5 : 1 )
+                    PropertyAnimation{
+                        properties: "height, width"
+                        duration: 220
+                    }
+
+                    property bool current: performer_list.currentIndex === index
                     Rectangle{
                         anchors.fill: parent
                         color:"grey"
                         opacity: .45
+                        border.color: "white"
+                        border.width: current ? 1 : 0
                     }
                     StyledText{
                         width:parent.width
@@ -196,23 +217,12 @@ GenericPopup{
                 }
             }
 
-            StyledText{
-                id:synop2
-                anchors{
-                    bottom:parent.bottom
-                    left:parent.left
-                }
-
-                width: parent.width
-
-                text:filedetailsclass.synop
-            }
-
             ListView{
+                focus: true
+                id:studio_list
                 width: parent.width*.35
                 height: 200
-                id:studio2
-               model:filedetailsclass.studioList
+                model:filedetailsclass.studioList
                 anchors{
                     right:parent.right
                     top:parent.top
@@ -226,6 +236,18 @@ GenericPopup{
                 }
             }
 
+            StyledText{
+                id:synop2
+                anchors{
+                    bottom:parent.bottom
+                    left:parent.left
+                }
+                width: parent.width
+                text:filedetailsclass.synop
+            }
+
+
+
         }
         Row{
             id:media_options
@@ -235,6 +257,7 @@ GenericPopup{
             property int max:media_options.children.length-1
             Keys.onLeftPressed: if(currentIndex === 0 ){ currentIndex= max;} else {currentIndex--}
             Keys.onRightPressed: if(currentIndex=== max) {  currentIndex=0   } else {currentIndex++}
+            Keys.onUpPressed: performer_list.forceActiveFocus()
             onCurrentIndexChanged: {media_options.children[currentIndex].forceActiveFocus(); }
             onActiveFocusChanged: if(activeFocus)currentIndex=0
             anchors{

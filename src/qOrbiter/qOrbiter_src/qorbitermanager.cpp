@@ -3022,7 +3022,7 @@ void qorbiterManager::reloadQml()
         qDebug() << "New style failed application! " << filePath;
     }
 
-    // m_appEngine->clearComponentCache();
+     m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
     setUiReady(true);
