@@ -3,7 +3,7 @@ import org.linuxmce.enums 1.0
 import org.linuxmce.screens 1.0
 import QtGraphicalEffects 1.0
 import enums.media 1.0
-import QtQuick.Controls 1.2
+import QtQuick.Controls 1.1
 import "../."
 Panel{
     id:generic_playback_panel

@@ -289,5 +289,8 @@
         <file>qml/skins/default/screens/+xlarge/Screen_47.qml</file>
         <file>qml/skins/default/components/+xlarge/FileDetails.qml</file>
         <file>qml/skins/default/components/MetadataBlock.qml</file>
+        <file>qml/skins/default/+linux/Main.qml</file>
+        <file>qml/skins/default/+linux/MainLayout.qml</file>
+        <file>qml/skins/default/+linux/Style.qml</file>
     </qresource>
 </RCC>

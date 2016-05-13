@@ -1,16 +1,18 @@
 import QtQuick 2.2
-//import QtGraphicalEffects 1.0
-//import AudioVisual 1.0
+import QtGraphicalEffects 1.0
 import org.linuxmce.screens 1.0
 import "."
 import "../."
-import "components"
+import "../components"
 
 
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
 Item {
     id:layout
     anchors.fill: qmlRoot
+    objectName: "mainlayoutobject"
+
+
 
     property bool uiOn:false
     property alias scenarioModel:current_scenarios.model
@@ -26,6 +28,24 @@ Item {
 
     function raiseNavigation(raise){
         uiOn=raise;
+
+//        if(!raise)
+//            layout.forceActiveFocus()
+//        else
+//            header.active=true
+    }
+
+    function menuToggle(){
+
+        console.log("Shift Focus")
+        if(layout.activeFocus){
+            qmlRoot.resetTimeout();
+            header.forceActiveFocus()
+        } else if (header.active){
+            footer.forceActiveFocus()
+        } else {
+            layout.forceActiveFocus()
+        }
     }
 
     Connections{
@@ -34,7 +54,6 @@ Item {
             console.log("screen saver activated")
             uiOn=false
             pageLoader.toggleContent(false)
-
         }
         onResetTimeout:{
             pageLoader.toggleContent(true)
@@ -60,46 +79,26 @@ Item {
 
     Component.onCompleted:{
         forceActiveFocus()
-
     }
+
     onActiveFocusChanged: {
         console.log("Layout has focus ? "+ activeFocus)
-        if(pageLoader.item)
-            pageLoader.item.forceActiveFocus()
-    }
-
-    Keys.onEscapePressed: uiOn=false
-
-    Keys.onTabPressed: {
-
-        console.log("Shift Focus")
-        if(layout.activeFocus){
-            qmlRoot.resetTimeout();
-            header.forceActiveFocus()
-        } else if (header.activeFocus){
-            footer.forceActiveFocus()
-        } else {
-            layout.forceActiveFocus()
-
+        if(activeFocus){
+            if(pageLoader.item)
+                pageLoader.item.forceActiveFocus()
         }
     }
 
-
+    Keys.onTabPressed: { menuToggle() }
+    Keys.onMenuPressed: {menuToggle()}
 
     QmlPictureFrame {
         id: qmlPictureFrame
+        visible:!dcenowplaying.b_mediaPlaying
         MouseArea{
             anchors.fill: parent
             onClicked: uiOn=!uiOn
         }
-
-    }
-
-    MediaInterface{
-        id:mediaPlayer
-        anchors.centerIn: parent
-        height:parent.height
-        width:parent.width
 
     }
 
@@ -118,11 +117,35 @@ Item {
     DefaultHeader {
         id: header
         focus:true
+        objectName: "+md header"
         property int currentItem:-1
+
+        function moveLeft(){
+            if(header.currentItem==0)return; header.currentItem--
+        }
+        function moveRight(){
+            if(header.currentItem===2)return; header.currentItem++
+        }
+
+        function jumpToFooter(){
+            footer.forceActiveFocus()
+        }
+
+        function hideMenu(){
+            layout.forceActiveFocus()
+        }
+
+        onActiveChanged: {
+            if(active)
+                currentItem=0
+        }
 
         onActiveFocusChanged:{
             if(activeFocus){
-                uiOn=true ; currentItem=0; active=true
+                uiOn=true ;
+                active=true
+                currentItem=0;
+
             } else {
                 currentItem=0
             }
@@ -132,10 +155,10 @@ Item {
             topControls.children[currentItem].forceActiveFocus()
         }
 
-        Keys.onLeftPressed: { if(currentItem==0)return; currentItem--}
-        Keys.onRightPressed: {if(currentItem===2)return; currentItem++}
-        Keys.onDownPressed:{ footer.forceActiveFocus() }
-        Keys.onEscapePressed: layout.forceActiveFocus()
+        Keys.onLeftPressed: { header.moveLeft() }
+        Keys.onRightPressed: {header.moveRight() }
+        Keys.onDownPressed:{ header.jumpToFooter() }
+        Keys.onBackPressed: header.hideMenu()
 
         Row{
             id:topControls
@@ -170,7 +193,6 @@ Item {
 
     Item{
         id:centralScenarios
-
         height: current_scenarios.count * Style.scaleY(13)
         width:Style.scaleX(15)
         anchors.bottom: footer.top
@@ -190,12 +212,13 @@ Item {
                 commandToExecute=-1
                 currentIndex=-1
             }
+
             delegate: LargeStyledButton{
                 id:scenario_delegate
                 focus:true
+
                 onCurrentSelectionChanged:{
                     current_scenarios.commandToExecute=params
-
                 }
 
                 function execute(){
@@ -219,12 +242,13 @@ Item {
         id: footer
         state: header.state
         focus:true
+
         onActiveFocusChanged:{
             if(activeFocus){
                 header.active=false
-                if(activeFocus)scenarioList.forceActiveFocus()
+                scenarioList.currentIndex=0;
+                scenarioList.forceActiveFocus()
             }
-
         }
 
         ListView{
@@ -232,6 +256,10 @@ Item {
             Keys.priority:Keys.BeforeItem
             focus:true
             spacing: 5
+            onCurrentIndexChanged: {
+                console.log(currentIndex+ " << current index")
+            }
+
             onActiveFocusChanged: {
                 if(activeFocus)
                     footer.activated=true
@@ -269,6 +297,8 @@ Item {
                 }
             }
 
+
+
             Component.onCompleted: {
                 scenarios.append({
                                      "name":"Advanced",
@@ -282,21 +312,27 @@ Item {
             model:qmlRoot.scenarios
             delegate:  LargeStyledButton{
                 id:btn
+                objectName: name
                 buttonText:name
                 arrow:false
+
 
                 Keys.forwardTo: [ scenarioList ]
 
                 onActiveFocusChanged:{
                     if(activeFocus){
+                        console.log(name +" has focus")
                         scenarioList.setModel(floorplantype)
                         centralScenarios.x = x
                     }
                 }
                 onActivated:{
+                    console.log(name + " was activated")
                     forceActiveFocus()
-                    if(floorplantype===-1)
-                        manager.currentScreen="Screen_44.qml";scenarioList.currentIndex=0;
+                    if(floorplantype===-1){
+                        manager.currentScreen="Screen_44.qml";
+                        scenarioList.currentIndex=0;
+                    }
                 }
             }
         }

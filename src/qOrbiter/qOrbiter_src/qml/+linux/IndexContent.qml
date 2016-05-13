@@ -47,7 +47,7 @@ Item{
     
     Text{
         id:loadingText
-        text:"Please Wait, Loading QOrbiter Linux"
+        text:"Please Wait, Loading QOrbiter Linux Generic"
         color:"white"
         anchors.centerIn: parent
         font.pointSize: 22

@@ -169,8 +169,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_screenInfo = new ScreenInfo();
     m_selector=new QFileSelector(m_appEngine);
     selector=new QQmlFileSelector(m_appEngine);
-   // selector->setSelector(m_selector);
-   // qDebug() << "Selector List\n" << m_selector->allSelectors().join(",");
+    // selector->setSelector(m_selector);
+    // qDebug() << "Selector List\n" << m_selector->allSelectors().join(",");
     //  selector->setSelector(m_selector);
 #endif
 
@@ -993,7 +993,7 @@ void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVar
 
 void qorbiterManager::clearDataGrid(QString dataGridId)
 {
-    if(!modelPoolLock.tryLockForWrite()){      
+    if(!modelPoolLock.tryLockForWrite()){
         return;
     }
 
@@ -2175,7 +2175,7 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
     if(p){
 
         QVariantMap b;
-        b.insert("commands", t["commands"]);    
+        b.insert("commands", t["commands"]);
         p->setDeviceCommand(b);
         //       foreach(QVariant cmd , t["commands"].toMap()){
         //           QVariantMap l = cmd.toMap();
@@ -2633,18 +2633,18 @@ bool qorbiterManager::setSizeSelector()
         qDebug () << Q_FUNC_INFO << "Using device information ";
 
         if(m_bIsOSD){
-              t  << "md"<<  m_screenInfo->primaryScreen()->deviceSizeString() <<  psize  << m_screenInfo->primaryScreen()->resolutionString(); ;
+            t  << "md"<<  m_screenInfo->primaryScreen()->deviceSizeString() <<  psize  << m_screenInfo->primaryScreen()->resolutionString(); ;
 
             qDebug() << "Device set as embedded (rpi) device";
         } else {
-              t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+            t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         }
 
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
         m_window->setPosition(250, 250);
-       // setAppH(640);
-       // setAppW(800);
+        // setAppH(640);
+        // setAppW(800);
 #else
         m_window->showFullScreen();
 #endif
@@ -2689,14 +2689,22 @@ bool qorbiterManager::createThemeStyle()
         m_style->deleteLater();
     }
 
-    setSkinEntryFile(selectPath( "skins/"+currentSkin+"/Main.qml"));
+    if(m_bIsOSD){
+        setSkinEntryFile(selectPath( "skins/"+currentSkin+"/+md/Main.qml"));
+    } else {
+        setSkinEntryFile(selectPath( "skins/"+currentSkin+"/Main.qml"));
+    }
 
-    qDebug() << "Skin entry file set to " << selectPath( "skins/"+currentSkin+"/Main.qml");
+    qDebug() << "Skin entry file set to " << m_skinEntryFile;
+    QString fp;
 #ifdef NOQRC
     qDebug() << "Using local path for NOQRC flag";
-    QString fp =m_localQmlPath+"skins/"+currentSkin+"/Style.qml";
+    fp =m_localQmlPath+"skins/"+currentSkin+"/Style.qml";
 #else
-    QString fp ="skins/"+currentSkin+"/Style.qml";
+    if(m_bIsOSD)
+        fp ="skins/"+currentSkin+"/+md/Style.qml";
+    else
+        fp ="skins/"+currentSkin+"/Style.qml";
 #endif
     qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
     qDebug() << Q_FUNC_INFO << "Current Selectors \n\t" << m_selector->allSelectors().join("\n\t");
@@ -2713,7 +2721,7 @@ bool qorbiterManager::createThemeStyle()
         qDebug() << "New style failed application! " << filePath;
     }
 
-    m_appEngine->clearComponentCache();
+    //  m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
     qDebug() << Q_FUNC_INFO << " exit ";
@@ -3014,7 +3022,7 @@ void qorbiterManager::reloadQml()
         qDebug() << "New style failed application! " << filePath;
     }
 
-   // m_appEngine->clearComponentCache();
+    // m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
     setUiReady(true);
