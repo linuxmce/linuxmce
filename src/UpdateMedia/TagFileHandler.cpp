@@ -153,7 +153,7 @@ string TagFileHandler::GetFileAttribute()
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool TagFileHandler::IsSupported()
 {
-	const string csSupportedExtensions("ogg:flac:mp3:mp4:wav:asf");
+	const string csSupportedExtensions("mp3:ogg:flac:mp4:wv:wav::oga:mpc:spx:opus:tta:m4a:m4r:m4p:3g2:m4v:wma:asf:aif:aiff:afc:aifc:ape:s3m");
 	string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFullFilename));
 
 	if(sExtension.empty())
@@ -254,19 +254,19 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				}
 				else if ( i->first == "TITLE" )
 				{
-					stov(sProperty, vsTitle);
+					stov(sProperty, vsTitle, "");
 				}
 				else if ( i->first == "ALBUM" )
 				{
-					stov(sProperty, vsAlbum);
+					stov(sProperty, vsAlbum, "");
 				}
 				else if ( i->first == "TRACKNUMBER" )
 				{
-					stov(sProperty, vsTrack);
+					stov(sProperty, vsTrack, "");
 				}
 				else if ( i->first == "DATE" )
 				{
-					stov(sProperty, vsDate);
+					stov(sProperty, vsDate, "");
 				}
 				else if ( i->first == "COMPOSER" )
 				{
@@ -278,15 +278,15 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				}
 				else if ( i->first == "TOTALDISCS" )
 				{
-					stov(sProperty, vsTotalDiscs);
+					stov(sProperty, vsTotalDiscs, "");
 				}
 				else if ( i->first == "DISCNUMBER" )
 				{
-					stov(sProperty, vsDisc);
+					stov(sProperty, vsDisc, "");
 				}
 				else if ( i->first == "COMMENT" )
 				{
-					stov(sProperty, vsSynopsis);
+					stov(sProperty, vsSynopsis, "");
 				}
 			}
 		}
