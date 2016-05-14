@@ -175,7 +175,7 @@ string TagFileHandler::GetFileSourceForDB()
 		return "F";
 }
 //-----------------------------------------------------------------------------------------------------
-void TagFileHandler::stov(string s, std::vector<string> &v, string acDelimiters /* = "/;," */ )
+void TagFileHandler::stov(string s, std::vector<string> &v, string acDelimiters /* = "|;/" */ )
 {
 	string::size_type CurPos = 0;
 	string sToken;
