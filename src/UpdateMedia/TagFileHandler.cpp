@@ -135,17 +135,22 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 			pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
 
 		list<pair<char *, size_t> > listPictures;
-		for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin();
-			itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
+		for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin(); itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
 		{
 #ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
 #endif
 			listPictures.push_back(make_pair(itc->second, itc->first));
 		}
-
+#ifdef UPDATEMEDIA_STATUS
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: SetTagInfo");
+#endif
 		//Save common tag tags
-		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
+// TODO: FIXME: fix this not working so attributes save to the file
+//		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
+#ifdef UPDATEMEDIA_STATUS
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: listPictures.clear()");
+#endif
 		listPictures.clear();
 	}
 	else
@@ -423,7 +428,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
 		{
 			cout << "MP4 MP4 MP4" << endl;
-
+/*
 			TagLib::MP4::Tag* tag = mp4File->tag();
 			TagLib::MP4::ItemListMap itemListMap = tag->itemListMap();
 			TagLib::MP4::Item coverItem = itemListMap["covr"];
@@ -448,10 +453,11 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
 
 						// the following adds this image to the lmce picture vector
-						listPictures.push_back(make_pair(pPictureData, nBinSize));
+//						listPictures.push_back(make_pair(pPictureData, nBinSize));
 					}
 				}
 			}
+*/
 		}
 
 /*
