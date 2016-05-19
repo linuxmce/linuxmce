@@ -19,12 +19,12 @@ Item {
     focus:true
     activeFocusOnTab: false
 
-    //    onUiOnChanged: {
-    //        if(uiOn)
-    //           // qmlRoot.resetTimeout()
-    //        else
-    //            qmlRoot.screenSaverActivated()
-    //    }
+        onUiOnChanged: {
+            if(uiOn)
+                qmlRoot.resetTimeout()
+            else
+                qmlRoot.screenSaverActivated()
+        }
 
     function raiseNavigation(raise){
         uiOn=raise;

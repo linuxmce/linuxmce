@@ -135,10 +135,10 @@ GenericPopup{
             Column{
                 id:focus_col
                 focus: true
-                onActiveFocusChanged: if(activeFocus) { currentIndex = 0 } else { ocus_col.children[currentIndex].current = false }
+                onActiveFocusChanged: if(activeFocus) { currentIndex = 0 } else { focus_col.children[currentIndex].current = false }
                 property int currentIndex:0
                 spacing: 10
-                property int max:focus_col.children.length-1
+                property int max:focus_col.children.length
                 Keys.onUpPressed: if(currentIndex === 0 ){ currentIndex= max;} else {currentIndex--}
                 Keys.onDownPressed: if(currentIndex=== max) {  performer_list.forceActiveFocus()  } else {currentIndex++}
                 onCurrentIndexChanged: {  if(focus_col.children[currentIndex].visible) {focus_col.children[currentIndex].current=true } else { currentIndex++ } }
