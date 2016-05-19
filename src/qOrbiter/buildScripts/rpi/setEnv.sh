@@ -1,6 +1,6 @@
 #!/bin/bash
 export ROOT_FS_MOUNT="/mnt/rasp-pi-rootfs"
-export QT_VERSION=qt-5.4.2
+export QT_VERSION=qt-5.3.2
 export TARGET_USER="rpi"
 export TARGET_IP="192.168.80.2"
 export TOOLCHAN_PATH=""

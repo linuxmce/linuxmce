@@ -10,7 +10,7 @@ Item{
     property bool mediaPlayerConnected:lmceData.connected
     property int mediaPlayerId:manager.mediaPlayerID
     property bool active:lmceData.mediaPlaying
-    property string k_currentMediaTitle: qmlPlayer.playbackState === MediaPlayer.PlayingState ? qmlPlayer.metaData.title : ""
+    property string k_currentMediaTitle: dcenowplaying.mediatitle //qmlPlayer.playbackState === MediaPlayer.PlayingState ? qmlPlayer.metaData.title : ""
 
     onK_currentMediaTitleChanged: {
         if(manager.i_current_mediaType !== (4||5) )
@@ -21,19 +21,20 @@ Item{
 
     function prepareMedia(mediaUrl){
         processLabel.text="Please Wait, pre-processing media for mobile device."
-        var url = mediaUrl+"&pre=1";
-        console.log("Prepare url-->"+url );
-        var request = new XMLHttpRequest();
-        request.onreadystatechange=function(){
-            if(request.readyState==XMLHttpRequest.DONE){
-                console.log("prepare finished, updating data.");
-                // processLabel.text=request.responseText;
-                qmlPlayer.source = lmceData.pluginUrl;
-            }
+      //  var url = String(mediaUrl).replace("qOrbiterGenerator.php?id=/home/public/data/", "media");
+        console.log("Prepare url-->"+mediaUrl );
+         qmlPlayer.source = mediaUrl;
+//        var request = new XMLHttpRequest();
+//        request.onreadystatechange=function(){
+//            if(request.readyState==XMLHttpRequest.DONE){
+//                console.log("prepare finished, updating data.");
+//                // processLabel.text=request.responseText;
+//                qmlPlayer.source = url;
+//            }
 
-        }
-        request.open("GET", url);
-        request.send();
+//        }
+//        request.open("GET", url);
+//        request.send();
     }
 
 
@@ -64,6 +65,8 @@ Item{
             }
 
         }
+
+
 
         /* TODO Add reconnect handler in cpp and here */
         /* TODO Change android url to streaming url, generic for other devices. */
@@ -149,8 +152,8 @@ Item{
         autoPlay: true
         autoLoad: true
 
+        onBufferProgressChanged: console.log("Buffer progress "+bufferProgress)
         function checkMetaData(){
-
 
             console.log("Checking Metadata")
             console.log(JSON.stringify(metaData, null, "\t"))
