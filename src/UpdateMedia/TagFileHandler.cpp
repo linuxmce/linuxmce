@@ -526,15 +526,16 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 	// is it an MPEG file? access pics like this
 	else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
 	{
-		if ( mpegFile->ID3v2Tag() )
+		TagLib::ID3v2::Tag *tag = mpegFile->ID3v2Tag(true);
+		if ( tag )
 		{
 			// picture frame
-			TagLib::ID3v2::FrameList frameList = mpegFile->ID3v2Tag()->frameListMap()["APIC"];
-			if (!frameList.isEmpty() )
+			TagLib::ID3v2::FrameList frameList = tag->frameListMap()["APIC"];
+			if ( !frameList.isEmpty() )
 			{
-				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+				for( TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
 				{
-					mpegFile->ID3v2Tag()->removeFrame( *it );
+					tag->removeFrame( *it );
 				}
 			}
 		}
@@ -543,31 +544,32 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 		{
 			TagLib::ByteVector picData( it->first, (unsigned int)it->second );
 
-			TagLib::ID3v2::AttachedPictureFrame *picFrame = new TagLib::ID3v2::AttachedPictureFrame( picData );
-			picFrame->setType(TagLib::ID3v2::AttachedPictureFrame::FrontCover);
-			picFrame->setMimeType("image/jpeg");
+			TagLib::ID3v2::AttachedPictureFrame *frame = new TagLib::ID3v2::AttachedPictureFrame( picData );
+			frame->setType(TagLib::ID3v2::AttachedPictureFrame::FrontCover);
+			frame->setMimeType("image/jpeg");
 
-			mpegFile->ID3v2Tag()->addFrame(picFrame);
+			tag->addFrame(frame);
+			mpegFile->save();
 		}
 	}
 
 	// is it an MP4 (AAC, ALAC, video) file? access pics like this
 	else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
 	{
-/*
-		// FIXME: online API doesn't correspond to files, need to work on this
-		mp4File->tag()->removeItem("covr");
+		TagLib::MP4::Tag *tag = mp4File->tag();
+		TagLib::MP4::ItemListMap itemsListMap = tag->itemListMap();
+		TagLib::MP4::CoverArtList coverArtList;
 
-		TagLib::MP4::CoverArtList *coverArtList;// = new TagLib::MP4::CoverArtList(...);
 		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
 		{
-			TagLib::MP4::CoverArt *coverArt = new TagLib::MP4::CoverArt( TagLib::MP4::CoverArt::JPEG, *it->first);
-			coverArtList->append(coverArt);
+			TagLib::MP4::CoverArt coverArt = TagLib::MP4::CoverArt( TagLib::MP4::CoverArt::JPEG, *it->first);
+			coverArtList.append(coverArt);
 		}
 
-		TagLib::MP4::Item::Item *tagItem = new TagLib::MP4::Item::Item	( coverArtList )
-		mp4File->tag()->itemListMap()->addItem(tagItem);
-*/
+		TagLib::MP4::Item coverItem(coverArtList);
+		itemsListMap.erase("covr");
+		itemsListMap.insert("covr", coverItem);
+		tag->save();
 	}
 
 	// is it an ASF (wma) file? access pics like this
