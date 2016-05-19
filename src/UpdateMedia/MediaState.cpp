@@ -129,7 +129,7 @@ void MediaState::LoadDbInfo(Database_pluto_media *pDatabase_pluto_media, string 
 	if(NULL != (allresult.r = pDatabase_pluto_media->db_wrapper_query_result(sSql)))
 	{
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfo got %d rows <- FIXME: this is erroneously reporting 0", allresult.r->row_count);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfo got %d rows <- this is erroneously reporting 0", allresult.r->row_count);
 #endif
 		//reset current state, load fresh info
 		m_mapMediaState.clear();
@@ -398,7 +398,7 @@ MediaItemState MediaState::LoadDbInfoForFile(Database_pluto_media *pDatabase_plu
 	if(NULL != (allresult.r = pDatabase_pluto_media->db_wrapper_query_result(sSql)))
 	{
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile got %d rows <- FIXME: this is erroneously reporting 0", allresult.r->row_count);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile got %d rows <- this is erroneously reporting 0", allresult.r->row_count);
 #endif
 		if(NULL != (row = db_wrapper_fetch_row(allresult.r)))
 		{
