@@ -84,10 +84,10 @@ using namespace UpdateMediaVars;
 
 /*
  * This method syncs the pictures for attributes and files. 
- * It updates pictures for attributes of type performer, album and title where there exists no pictures.
- * It finds pictures to assign to this by looking at pictures assigned to the file that has these attributes.
+ * It updates pictures for attributes of type performer, album and title where there is no currently assigned picture attribute.
+ * It finds pictures to assign to this by looking at pictures assigned to the file that has these attributes (Album Artist/Performer/Album).
  *
- * - Attibute (PK_Attribute)
+ * - Attribute (PK_Attribute)
  *     |  FK_Attribute
  *     \- File_Attribute
  *     |   \ FK_File
@@ -100,7 +100,8 @@ void SyncAttributes()
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Synchronizing pictures for attributes... "); 
 
 	// Assign all file pictures to the corresponding title attribute
-	string sqlTitle = "SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, File.Filename, File.Path FROM Attribute "
+	string sqlTitle =
+		"SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, File.Filename, File.Path FROM Attribute "
 		"JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
 		"JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
 		"JOIN File ON File_Attribute.FK_File=PK_File "
@@ -124,15 +125,21 @@ void SyncAttributes()
 	int nAffectedRecords = 0;
 	if (!bDryRun) {
 		int rows = g_pDatabase_pluto_media->threaded_db_wrapper_query(
-		"INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
-		"SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture FROM Attribute "
-		"JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
-		"JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
-		"LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
-		"WHERE Picture_Attribute.FK_Picture is NULL AND FK_AttributeType IN (" 
-		TOSTRING(ATTRIBUTETYPE_Title_CONST) ") "
-		"GROUP BY PK_Attribute"
+			"INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
+			"    SELECT "
+			"        PK_Attribute, "
+			"        MIN( Picture_File.FK_Picture) AS FK_Picture
+			"    FROM Attribute "
+			"        JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
+			"        JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
+			"        LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
+			"            WHERE "
+			"                Picture_Attribute.FK_Picture IS NULL "
+			"            AND "
+			"                FK_AttributeType= " TOSTRING(ATTRIBUTETYPE_Title_CONST)
+			"    GROUP BY PK_Attribute"
 		);
+
 		if (rows == -1) {
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attributes sync failed!"); 
 		} else {
@@ -140,14 +147,16 @@ void SyncAttributes()
 		}
 	}
 
-        // Find all performer and album attributes that does not have a picture, but that have files with pictures
-	string sqlPerformer = "SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, f.Filename, f.Path, f.PK_File, AttributeType.PK_AttributeType FROM Attribute "
+        // Find all Album Artist, Performer and Album attributes that do not have a picture, but that have files with pictures
+	string sqlPerformer =
+		"SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, f.Filename, f.Path, f.PK_File, AttributeType.PK_AttributeType FROM Attribute "
 		"JOIN File_Attribute tfa ON tfa.FK_Attribute=PK_Attribute "
 		"JOIN Picture_File ON Picture_File.FK_File=tfa.FK_File "
 		"JOIN File f ON tfa.FK_File=f.PK_File "
 		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
 		"LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
 		"WHERE Picture_Attribute.FK_Picture is NULL AND FK_AttributeType IN (" 
+		TOSTRING(ATTRIBUTETYPE_Album_Artist_CONST) ", "
 		TOSTRING(ATTRIBUTETYPE_Performer_CONST) ", "
 		TOSTRING(ATTRIBUTETYPE_Album_CONST) ") " 
 		"AND f.EK_MediaType IN (4) "
@@ -162,19 +171,40 @@ void SyncAttributes()
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "  - File '%s/%s' has one, checking..",
 							    row[5], row[4]);
 			string sqlCheck;
-			if (atoi(row[7]) == 2)
+			if (atoi(row[7]) == ATTRIBUTETYPE_Album_Artist_CONST || atoi(row[7]) == ATTRIBUTETYPE_Performer_CONST)
 			{
-				// Performer
-				// If assigning to performer, make sure all songs on this album have the same performer
-				// SQL will return number of songs on album - number of songs on album with same performer
-				sqlCheck = "SELECT (SELECT count(fa.FK_File) FROM File_Attribute fa " 
-					"JOIN Attribute albumAttr ON albumAttr.PK_Attribute = fa.FK_Attribute AND albumAttr.FK_AttributeType = 3 " 
-					"JOIN File_Attribute f2 ON f2.FK_Attribute = albumAttr.PK_Attribute WHERE f2.FK_File = "+string(row[6])+ " " 
-					") - (SELECT count(f.PK_File) FROM File f "
-					"JOIN File_Attribute pfa ON pfa.FK_File = f.PK_File AND pfa.FK_Attribute = "+string(row[0])+" " 
-					"JOIN File_Attribute afa ON afa.FK_File = "+string(row[6])+" " 
-					"JOIN Attribute albumAttr ON albumAttr.PK_Attribute = afa.FK_Attribute AND albumAttr.FK_AttributeType = 3) AS fileCount ";
-			} else if (atoi(row[7]) == 3)
+				// Album Artist
+				// If assigning to Album Artist/Performer, make sure all songs on this album have the same
+				// Album Artist/Performer before assigning the albume picture to the Album Artist/Performer
+				// SQL will return ((# of songs on album) - (# of songs on album with same Album Artist/Performer))
+				// If *all* tracks match the Album Artist/Performer the picture be added to the Album Artist/Performer
+				sqlCheck =
+					"SELECT "
+					"( "
+					"  SELECT "
+					"      count(fa.FK_File) "
+					"  FROM File_Attribute fa "
+					"  JOIN Attribute albumAttr ON "
+					"      albumAttr.PK_Attribute = fa.FK_Attribute AND "
+					"      albumAttr.FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					"  JOIN File_Attribute f2 ON "
+					"      f2.FK_Attribute = albumAttr.PK_Attribute "
+					"  WHERE f2.FK_File = "+string(row[6])+ " "
+					") - ( "
+					"  SELECT "
+					"      count(f.PK_File) "
+					"  FROM File f "
+					"  JOIN File_Attribute pfa ON "
+					"      pfa.FK_File = f.PK_File AND"
+					"      pfa.FK_Attribute = "+string(row[0])+" "
+					"  JOIN File_Attribute afa ON "
+					"      afa.FK_File = "+string(row[6])+" "
+					"  JOIN Attribute albumAttr ON "
+					"      albumAttr.PK_Attribute = afa.FK_Attribute AND "
+					"      albumAttr.FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					") AS fileCount ";
+			}
+			else if (atoi(row[7]) == ATTRIBUTETYPE_Album_CONST)
 			{
 				// Album
 				// If assigning to album, make sure all files have the same picture
@@ -193,26 +223,22 @@ void SyncAttributes()
 					LoggerWrapper::GetInstance()->Write(LV_WARNING, "  - Result '%s'",
 							    row2[0]);
 					if (atoi(row2[0]) == 0) {
-						LoggerWrapper::GetInstance()->Write(LV_WARNING, "  - Assigning picture to attriute",
+						LoggerWrapper::GetInstance()->Write(LV_WARNING, "  - Assigning picture to attribute",
 							    row2[0]);
 						if (!bDryRun) {
-							string sqlInsert = "INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
-								"VALUES("+string(row[0])+","+string(row[1])+")";
+							string sqlInsert = "INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) VALUES("+string(row[0])+","+string(row[1])+")";
 							int rows = g_pDatabase_pluto_media->threaded_db_wrapper_query(sqlInsert);
 							if(rows == -1)
 								LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Update failed!");
 							else
-								nAffectedRecords++;
+								++nAffectedRecords;
 						}
 
 					}
 				}
 			}
-				
 		}
 	}
-
-
 
 	if(nAffectedRecords == -1)
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attributes sync failed!"); 
@@ -224,7 +250,6 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Found duplicated attribute %s, pk %d, type %d. Won't touch it.",
 					    Name.c_str(), PK_Attribute, PK_AttributeType);
 
-	//TODO: need to look at re-enabling this
 	//char *AffectedTables[] =
 	//{
 	//	"File_Attribute", 
@@ -269,15 +294,23 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 }
 void RemoveDuplicatedAttributes()
 {
-	string sSqlDuplicatedAttributes = 
-		"SELECT Name, FK_AttributeType, PK_Attribute FROM Attribute\n"
-		"GROUP BY Name, FK_AttributeType\n"
-		"HAVING Count(PK_Attribute) > 1";
+	string sSqlDuplicatedAttributes =
+		"SELECT "
+		"    FK_AttributeType, "
+		"    Name, "
+		"    PK_Attribute "
+		"FROM "
+		"    Attribute "
+		"GROUP BY "
+		"    FK_AttributeType "
+		"    Name, "
+		"HAVING "
+		"    Count(PK_Attribute) > 1";
 
 	enum DuplicatedAttributesFields
 	{
-		dafName,
 		dafAttributerType,
+		dafName,
 		dafAttribute
 	};
 
@@ -405,7 +438,6 @@ void *UpdateMediaThread(void *)
 		abstime.tv_nsec = 0;
 		flm.TimedCondWait(abstime);		
 	}
-	return NULL;
 }
 
 void OnModify(list<string> &listFiles) 
