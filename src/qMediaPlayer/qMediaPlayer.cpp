@@ -445,7 +445,15 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         setCurrentMediaUrl(QString::fromStdString(sMediaURL));
 
     }else{
-        QString externalPlayerPath = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?id="+QString::fromStdString(sMediaURL);
+        QString mod = QString::fromStdString(sMediaURL);
+
+        if(mod.contains("/home/public/data")){
+           mod = QString::fromStdString(sMediaURL).remove("/home/public/");
+        } else {
+            //handle private/upnp media?
+        }
+
+        QString externalPlayerPath = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/"+mod;
         qWarning() << "Sending plugin modified original MRL==>" << externalPlayerPath;
         setCurrentMediaUrl(externalPlayerPath);
     }
