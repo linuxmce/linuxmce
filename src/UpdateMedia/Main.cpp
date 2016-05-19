@@ -302,8 +302,8 @@ void RemoveDuplicatedAttributes()
 		"FROM "
 		"    Attribute "
 		"GROUP BY "
-		"    FK_AttributeType "
-		"    Name, "
+		"    FK_AttributeType, "
+		"    Name "
 		"HAVING "
 		"    Count(PK_Attribute) > 1";
 
