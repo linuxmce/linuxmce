@@ -443,7 +443,6 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 					cout << "Picture found of type: 'covr'" << endl;
 					if ( coverArt.format() == TagLib::MP4::CoverArt::JPEG )
 				        {
-
 						TagLib::ByteVector picData = coverArt.data();
 
 						size_t nBinSize = (size_t)picData.size();
@@ -459,13 +458,38 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 			}
 
 		}
-/*
+
 		// is it an ASF (wma) file? access pics like this
 		else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
 		{
 			cout << "ASF ASF ASF" << endl;
+
+			TagLib::ASF::Tag* tag = asfFile->tag();
+			const TagLib::ASF::AttributeListMap& attrListMap = tag->attributeListMap();
+			const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
+
+			if ( !attrListMap.empty() )
+			{
+				for(TagLib::ASF::AttributeList::ConstIterator it = attrList.begin(); it != attrList.end(); ++it)
+				{
+					TagLib::ASF::Picture pic = *it.toPicture();
+					if ( pic->type() == TagLib::ASF::Type::FrontCover)
+				        {
+						TagLib::ByteVector picData = pic.picture();
+
+						size_t nBinSize = (size_t)picData.size();
+						char *pPictureData = new char[nBinSize];
+						memcpy(pPictureData, picData.data(), nBinSize);
+
+						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+
+						// add this image to the lmce picture vector
+						listPictures.push_back(make_pair(pPictureData, nBinSize));
+					}
+				}
+			}
 		}
-*/
+
 
 		// get pic from a .jpg in the same directory
 		string coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/cover.jpg";
