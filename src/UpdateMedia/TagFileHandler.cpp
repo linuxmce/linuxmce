@@ -465,15 +465,16 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 			cout << "ASF ASF ASF" << endl;
 
 			TagLib::ASF::Tag* tag = asfFile->tag();
-			const TagLib::ASF::AttributeListMap& attrListMap = tag->attributeListMap();
-			const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
+			TagLib::ASF::AttributeListMap attrListMap = tag->attributeListMap();
+			TagLib::ASF::AttributeList attrList = attrListMap["WM/Picture"];
 
-			if ( !attrListMap.empty() )
+			if ( !attrListMap.isEmpty() )
 			{
 				for(TagLib::ASF::AttributeList::ConstIterator it = attrList.begin(); it != attrList.end(); ++it)
 				{
-					TagLib::ASF::Picture pic = *it.toPicture();
-					if ( pic->type() == TagLib::ASF::Type::FrontCover)
+					TagLib::ASF::Attribute attr = *it;
+					TagLib::ASF::Picture pic = attr.toPicture();
+					if ( pic.type() == TagLib::ASF::Picture::FrontCover)
 				        {
 						TagLib::ByteVector picData = pic.picture();
 
