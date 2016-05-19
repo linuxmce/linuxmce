@@ -224,6 +224,7 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Found duplicated attribute %s, pk %d, type %d. Won't touch it.",
 					    Name.c_str(), PK_Attribute, PK_AttributeType);
 
+	//TODO: need to look at re-enabling this
 	//char *AffectedTables[] =
 	//{
 	//	"File_Attribute", 
@@ -404,6 +405,7 @@ void *UpdateMediaThread(void *)
 		abstime.tv_nsec = 0;
 		flm.TimedCondWait(abstime);		
 	}
+	return NULL;
 }
 
 void OnModify(list<string> &listFiles) 

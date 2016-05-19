@@ -36,6 +36,7 @@ private:
 
 	void GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);
 	void SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures);
+	void InsertTagPictures(TagLib::FileRef *&f, const list<pair<char *, size_t> >& listPictures);
 	void InsertTagValues(TagLib::FileRef *&f , string sName, string sParameters);
 	void RemoveTagValue(TagLib::FileRef *&f, const string sName, string sValue);
 	void RemoveTag(string sFilename, int nTagType, string sValue);
