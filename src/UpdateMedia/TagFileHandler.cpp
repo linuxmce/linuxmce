@@ -142,12 +142,8 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 #endif
 			listPictures.push_back(make_pair(itc->second, itc->first));
 		}
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: SetTagInfo");
-#endif
 		//Save common tag tags
-// TODO: FIXME: fix this not working so attributes save to the file
-//		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
+		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
 #ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: listPictures.clear()");
 #endif
@@ -209,10 +205,14 @@ void TagFileHandler::stov(string s, std::vector<string> &v, string acDelimiters 
 	while( ( sToken = StringUtils::Tokenize( s, acDelimiters.c_str(), CurPos )) != "" )
 	{
 		// Add to vector if it doesn't already exist
-		std::vector<string>::iterator it = find (v.begin(), v.end(), StringUtils::TrimSpaces(sToken) );
-		if ( it == v.end() )
+		sToken = StringUtils::TrimSpaces(sToken);
+		if( !sToken.empty() )
 		{
-			v.push_back( StringUtils::TrimSpaces(sToken));
+			std::vector<string>::iterator it = find (v.begin(), v.end(), sToken );
+			if ( it == v.end() )
+			{
+				v.push_back( StringUtils::TrimSpaces(sToken));
+			}
 		}
 	}
 }
@@ -236,7 +236,7 @@ string TagFileHandler::vtos(std::vector<string> v, const char cDelimiter /* = ';
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
-	FileRef *f = new FileRef(m_sFullFilename.c_str());
+	FileRef *f = new FileRef(sFilename.c_str());
 	if(!f->isNull()) //ensure tag is present before trying to read and data.
 	{
 
@@ -353,7 +353,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		{
 			cout << "FLAC FLAC FLAC" << endl;
 
-			TagLib::List<TagLib::FLAC::Picture*>picList = flacFile->pictureList();
+			TagLib::List<TagLib::FLAC::Picture*> picList = flacFile->pictureList();
 			if ( !picList.isEmpty())
 			{
 				for (TagLib::List<TagLib::FLAC::Picture*>::ConstIterator it = picList.begin(); it != picList.end(); ++it)
@@ -377,7 +377,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 
 							cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
 
-							// the following adds this image to the lmce picture vector
+							// add this image to the lmce picture vector
 							listPictures.push_back(make_pair(pPictureData, nBinSize));
 						}
 					}
@@ -415,7 +415,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 
 								cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
 
-								// the following adds this image to the lmce picture vector
+								// add this image to the lmce picture vector
 								listPictures.push_back(make_pair(pPictureData, nBinSize));
 							}
 						}
@@ -428,7 +428,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
 		{
 			cout << "MP4 MP4 MP4" << endl;
-/*
+
 			TagLib::MP4::Tag* tag = mp4File->tag();
 			TagLib::MP4::ItemListMap itemListMap = tag->itemListMap();
 			TagLib::MP4::Item coverItem = itemListMap["covr"];
@@ -452,14 +452,13 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 
 						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
 
-						// the following adds this image to the lmce picture vector
-//						listPictures.push_back(make_pair(pPictureData, nBinSize));
+						// add this image to the lmce picture vector
+						listPictures.push_back(make_pair(pPictureData, nBinSize));
 					}
 				}
 			}
-*/
-		}
 
+		}
 /*
 		// is it an ASF (wma) file? access pics like this
 		else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
@@ -469,11 +468,13 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 */
 
 		// get pic from a .jpg in the same directory
-		string coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/cover.jpg";
+		string coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/cover.jpg";
 		if ( !FileUtils::FileExists( coverfilename ) )
-			coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/folder.jpg";
+			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Cover.jpg";
 		if ( !FileUtils::FileExists( coverfilename ) )
-			coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/folder2.jpg";
+			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/folder.jpg";
+		if ( !FileUtils::FileExists( coverfilename ) )
+			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Folder.jpg";
 		if ( FileUtils::FileExists( coverfilename ) )
 		{
 			cout << "fetching cover: "<< coverfilename << "\n";
@@ -496,8 +497,94 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 	}
 }
 //-----------------------------------------------------------------------------------------------------
+void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char *, size_t> >& listPictures)
+{
+	if ( listPictures.empty() )
+		return;
+
+#ifdef UPDATEMEDIA_STATUS
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::InsertPictures: inserting");
+#endif
+
+	// is it a FLAC file? access pics like this
+	if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
+	{
+		flacFile->pictureList().clear();
+
+		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
+		{
+			TagLib::ByteVector picData( it->first, (unsigned int)it->second );
+
+			TagLib::FLAC::Picture *pic = new TagLib::FLAC::Picture( picData );
+			pic->setType(TagLib::FLAC::Picture::FrontCover);
+			pic->setMimeType("image/jpeg");
+
+			flacFile->pictureList().append(pic);
+		}
+	}
+
+	// is it an MPEG file? access pics like this
+	else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
+	{
+		if ( mpegFile->ID3v2Tag() )
+		{
+			// picture frame
+			TagLib::ID3v2::FrameList frameList = mpegFile->ID3v2Tag()->frameListMap()["APIC"];
+			if (!frameList.isEmpty() )
+			{
+				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+				{
+					mpegFile->ID3v2Tag()->removeFrame( *it );
+				}
+			}
+		}
+
+		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
+		{
+			TagLib::ByteVector picData( it->first, (unsigned int)it->second );
+
+			TagLib::ID3v2::AttachedPictureFrame *picFrame = new TagLib::ID3v2::AttachedPictureFrame( picData );
+			picFrame->setType(TagLib::ID3v2::AttachedPictureFrame::FrontCover);
+			picFrame->setMimeType("image/jpeg");
+
+			mpegFile->ID3v2Tag()->addFrame(picFrame);
+		}
+	}
+
+	// is it an MP4 (AAC, ALAC, video) file? access pics like this
+	else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
+	{
+/*
+		// FIXME: online API doesn't correspond to files, need to work on this
+		mp4File->tag()->removeItem("covr");
+
+		TagLib::MP4::CoverArtList *coverArtList;// = new TagLib::MP4::CoverArtList(...);
+		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
+		{
+			TagLib::MP4::CoverArt *coverArt = new TagLib::MP4::CoverArt( TagLib::MP4::CoverArt::JPEG, *it->first);
+			coverArtList->append(coverArt);
+		}
+
+		TagLib::MP4::Item::Item *tagItem = new TagLib::MP4::Item::Item	( coverArtList )
+		mp4File->tag()->itemListMap()->addItem(tagItem);
+*/
+	}
+
+	// is it an ASF (wma) file? access pics like this
+	else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
+	{
+
+		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
+		{
+		}
+	}
+}
+//-----------------------------------------------------------------------------------------------------
 void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string sParameters)
 {
+#ifdef UPDATEMEDIA_STATUS
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::InsertTagValues: - %s, %s", sName.c_str(), sParameters.c_str());
+#endif
 	std::vector<string> vsParameters;
 	stov(sParameters, vsParameters);
 
@@ -509,7 +596,11 @@ void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string s
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures)
 {
-	FileRef *f = new FileRef(m_sFullFilename.c_str());
+#ifdef UPDATEMEDIA_STATUS
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: SetTagInfo");
+#endif
+
+	FileRef *f = new FileRef(sFilename.c_str());
 	if(NULL != f)
 	{
 		string sParameters;
@@ -542,6 +633,9 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		InsertTagValues(f, string("DATE"), sParameters);
 		f->tag()->setYear(atoi(sParameters.c_str()));
 
+		// TODO: picture storing in tag/file?
+		InsertTagPictures(f, listPictures);
+
 		f->save();
 		delete f;
 	}
@@ -552,25 +646,17 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 	TagLib::PropertyMap::Iterator tag = f->file()->properties().find(sName);
 	if ( tag != f->file()->properties().end() )
 	{
-/*
-	// FIXME: the following line segfaults. Perhaps an empty value? Needs investigation.
 		TagLib::StringList::Iterator value = tag->second.find(sValue);
 		if ( value != tag->second.end() )
 		{
 			*tag->second.erase( value );
-
-			if ( !tag->second.size() )
-			{
-				f->file()->properties().erase(sName);
-			}
 		}
-*/
 	}
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 {
-	FileRef *f = new FileRef(m_sFullFilename.c_str());
+	FileRef *f = new FileRef(sFilename.c_str());
 	if(NULL != f)
 	{
 		switch(nTagType)
