@@ -128,7 +128,7 @@ void SyncAttributes()
 			"INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
 			"    SELECT "
 			"        PK_Attribute, "
-			"        MIN( Picture_File.FK_Picture) AS FK_Picture
+			"        MIN( Picture_File.FK_Picture) AS FK_Picture "
 			"    FROM Attribute "
 			"        JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
 			"        JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
