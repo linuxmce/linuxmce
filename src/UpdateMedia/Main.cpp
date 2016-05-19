@@ -191,17 +191,26 @@ void SyncAttributes()
 					"      f2.FK_Attribute = albumAttr.PK_Attribute "
 					"  WHERE f2.FK_File = "+string(row[6])+ " "
 					") - ( "
-					"  SELECT "
-					"      count(f.PK_File) "
-					"  FROM File f "
-					"  JOIN File_Attribute pfa ON "
-					"      pfa.FK_File = f.PK_File AND"
-					"      pfa.FK_Attribute = "+string(row[0])+" "
-					"  JOIN File_Attribute afa ON "
-					"      afa.FK_File = "+string(row[6])+" "
-					"  JOIN Attribute albumAttr ON "
-					"      albumAttr.PK_Attribute = afa.FK_Attribute AND "
-					"      albumAttr.FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					"  SELECT COUNT(FK_File) "
+					"    FROM File_Attribute "
+					"    INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
+					"  WHERE FK_AttributeType= " + string(row[7]) + " "
+					"    AND PK_Attribute= " + string(row[0]) + " "
+					"    AND FK_File IN "
+					"    ( "
+					"      SELECT FK_File "
+					"        FROM File_Attribute "
+					"        INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
+					"      WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					"        AND PK_Attribute = "
+					"        ( "
+					"          SELECT PK_Attribute "
+					"            FROM File_Attribute "
+					"            INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
+					"          WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					"            AND FK_File = " + string(row[6]) + " "
+					"        ) "
+					"    ) "
 					") AS fileCount ";
 			}
 			else if (atoi(row[7]) == ATTRIBUTETYPE_Album_CONST)
@@ -212,7 +221,7 @@ void SyncAttributes()
 			  //					"JOIN File_Attribute f2 ON f2.FK_File = pf.FK_File WHERE f2.FK_Attribute = "+string(row[0])+ " "
 			  //		") - 1";
 			}
-			
+
 			PlutoSqlResult result2;
 			DB_ROW row2;
 			if((result2.r = g_pDatabase_pluto_media->db_wrapper_query_result(sqlCheck)))
