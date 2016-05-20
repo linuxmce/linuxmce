@@ -125,21 +125,15 @@ void SyncAttributes()
 	int nAffectedRecords = 0;
 	if (!bDryRun) {
 		int rows = g_pDatabase_pluto_media->threaded_db_wrapper_query(
-			"INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
-			"    SELECT "
-			"        PK_Attribute, "
-			"        MIN( Picture_File.FK_Picture) AS FK_Picture "
-			"    FROM Attribute "
-			"        JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
-			"        JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
-			"        LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
-			"            WHERE "
-			"                Picture_Attribute.FK_Picture IS NULL "
-			"            AND "
-			"                FK_AttributeType= " TOSTRING(ATTRIBUTETYPE_Title_CONST)
-			"    GROUP BY PK_Attribute"
+		"INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
+		"SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture FROM Attribute "
+		"JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
+		"JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
+		"LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
+		"WHERE Picture_Attribute.FK_Picture is NULL AND FK_AttributeType IN (" 
+		TOSTRING(ATTRIBUTETYPE_Title_CONST) ") "
+		"GROUP BY PK_Attribute"
 		);
-
 		if (rows == -1) {
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attributes sync failed!"); 
 		} else {
@@ -186,31 +180,22 @@ void SyncAttributes()
 					"  FROM File_Attribute fa "
 					"  JOIN Attribute albumAttr ON "
 					"      albumAttr.PK_Attribute = fa.FK_Attribute AND "
-					"      albumAttr.FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					"      albumAttr.FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Album_CONST) " "
 					"  JOIN File_Attribute f2 ON "
 					"      f2.FK_Attribute = albumAttr.PK_Attribute "
 					"  WHERE f2.FK_File = "+string(row[6])+ " "
 					") - ( "
-					"  SELECT COUNT(FK_File) "
-					"    FROM File_Attribute "
-					"    INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
-					"  WHERE FK_AttributeType= " + string(row[7]) + " "
-					"    AND PK_Attribute= " + string(row[0]) + " "
-					"    AND FK_File IN "
-					"    ( "
-					"      SELECT FK_File "
-					"        FROM File_Attribute "
-					"        INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
-					"      WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST)
-					"        AND PK_Attribute = "
-					"        ( "
-					"          SELECT PK_Attribute "
-					"            FROM File_Attribute "
-					"            INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
-					"          WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST)
-					"            AND FK_File = " + string(row[6]) + " "
-					"        ) "
-					"    ) "
+					"  SELECT "
+					"      count(f.PK_File) "
+					"  FROM File f "
+					"  JOIN File_Attribute pfa ON "
+					"      pfa.FK_File = f.PK_File AND"
+					"      pfa.FK_Attribute = "+string(row[0])+" "
+					"  JOIN File_Attribute afa ON "
+					"      afa.FK_File = "+string(row[6])+" "
+					"  JOIN Attribute albumAttr ON "
+					"      albumAttr.PK_Attribute = afa.FK_Attribute AND "
+					"      albumAttr.FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Album_CONST) " "
 					") AS fileCount ";
 			}
 			else if (atoi(row[7]) == ATTRIBUTETYPE_Album_CONST)
@@ -221,7 +206,7 @@ void SyncAttributes()
 			  //					"JOIN File_Attribute f2 ON f2.FK_File = pf.FK_File WHERE f2.FK_Attribute = "+string(row[0])+ " "
 			  //		") - 1";
 			}
-
+			
 			PlutoSqlResult result2;
 			DB_ROW row2;
 			if((result2.r = g_pDatabase_pluto_media->db_wrapper_query_result(sqlCheck)))
@@ -235,12 +220,13 @@ void SyncAttributes()
 						LoggerWrapper::GetInstance()->Write(LV_WARNING, "  - Assigning picture to attribute",
 							    row2[0]);
 						if (!bDryRun) {
-							string sqlInsert = "INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) VALUES("+string(row[0])+","+string(row[1])+")";
+							string sqlInsert = "INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
+								"VALUES("+string(row[0])+","+string(row[1])+")";
 							int rows = g_pDatabase_pluto_media->threaded_db_wrapper_query(sqlInsert);
 							if(rows == -1)
 								LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Update failed!");
 							else
-								++nAffectedRecords;
+								nAffectedRecords++;
 						}
 
 					}
@@ -303,23 +289,15 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 }
 void RemoveDuplicatedAttributes()
 {
-	string sSqlDuplicatedAttributes =
-		"SELECT "
-		"    FK_AttributeType, "
-		"    Name, "
-		"    PK_Attribute "
-		"FROM "
-		"    Attribute "
-		"GROUP BY "
-		"    FK_AttributeType, "
-		"    Name "
-		"HAVING "
-		"    Count(PK_Attribute) > 1";
+	string sSqlDuplicatedAttributes = 
+		"SELECT Name, FK_AttributeType, PK_Attribute FROM Attribute\n"
+		"GROUP BY Name, FK_AttributeType\n"
+		"HAVING Count(PK_Attribute) > 1";
 
 	enum DuplicatedAttributesFields
 	{
-		dafAttributerType,
 		dafName,
+		dafAttributerType,
 		dafAttribute
 	};
 

@@ -79,15 +79,21 @@ void FileNotifier::Watch(string sDirectory)
 	}
 #endif
 
-    list<string> listFilesOnDisk;
-    FileUtils::FindDirectories(listFilesOnDisk,sDirectory,true,false,0,sDirectory + "/");  
+	//FIXME: check and do not register against external shares (nfs)
+	// currently inotify watches are put on nfs files, and they do not get notifications
+	// as nfs shares do not support inotify behaviour
+	// only changes made from the machine that creates the watch will be notified
+	// changes made to the share from other systems will not provide notification
+
+	list<string> listFilesOnDisk;
+	FileUtils::FindDirectories(listFilesOnDisk,sDirectory,true,false,0,sDirectory + "/");  
 	listFilesOnDisk.push_back(sDirectory);
-		
+
 	PLUTO_SAFETY_LOCK(wfm, m_WatchedFilesMutex);
-    for(list<string>::iterator it = listFilesOnDisk.begin(); it != listFilesOnDisk.end(); it++)
+	for(list<string>::iterator it = listFilesOnDisk.begin(); it != listFilesOnDisk.end(); it++)
 	{
-        string sItem = *it;
-			
+		string sItem = *it;
+
 		try
 		{
 			int wd = m_inotify.watch(*it, IN_ALL_EVENTS);
