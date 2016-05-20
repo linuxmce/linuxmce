@@ -116,7 +116,7 @@ public:
         q_mediaSources ="1,2";                            //5 need comma delineation
         q_usersPrivate = "0";                             //6
         q_attributetype_sort="";                          //7
-        q_pk_users="0";                                   //8
+        q_pk_users="";                                   //8 should always be empty other wise it will show a users private files by default.
         q_last_viewed=" 2 ";                              //9
         q_pk_attribute=QString::number(attribute);        //10
         qs_seek ="";
