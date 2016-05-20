@@ -68,7 +68,7 @@ using namespace DCE;
 
 #include "pluto_media/Database_pluto_media.h"
 //-----------------------------------------------------------------------------------------------------
-char *MediaSyncModeStr[] =
+char const *MediaSyncModeStr[] =
 {
 	"modeNone",
 	"modeDbToFile",

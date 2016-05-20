@@ -11,6 +11,27 @@ using namespace DCE;
 #include <fileref.h>
 #include <tpropertymap.h>
 
+/////////////////////////////////////////////
+// for FLAC files with Pics
+#include <flacfile.h>
+#include <flacpicture.h>
+
+// for MP3 files with Pics
+#include <id3v2tag.h>
+#include <mpegfile.h>
+#include <attachedpictureframe.h>
+
+// for MP4 files with Pics
+#include <mp4file.h>
+#include <mp4coverart.h>
+
+// for ASF files with Pics
+#include <asffile.h>
+#include <asfpicture.h>
+////////////////////////////////////////////
+
+
+
 using namespace TagLib;
 //-----------------------------------------------------------------------------------------------------
 namespace UpdateMediaVars
@@ -114,17 +135,22 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 			pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
 
 		list<pair<char *, size_t> > listPictures;
-		for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin();
-			itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
+		for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin(); itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
 		{
 #ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
 #endif
 			listPictures.push_back(make_pair(itc->second, itc->first));
 		}
-
+#ifdef UPDATEMEDIA_STATUS
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: SetTagInfo");
+#endif
 		//Save common tag tags
-		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
+// TODO: FIXME: fix this not working so attributes save to the file
+//		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
+#ifdef UPDATEMEDIA_STATUS
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: listPictures.clear()");
+#endif
 		listPictures.clear();
 	}
 	else
@@ -153,7 +179,7 @@ string TagFileHandler::GetFileAttribute()
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool TagFileHandler::IsSupported()
 {
-	const string csSupportedExtensions("ogg:flac:mp3:mp4:wav:asf");
+	const string csSupportedExtensions("mp3:ogg:flac:mp4:wv:wav::oga:mpc:spx:opus:tta:m4a:m4r:m4p:3g2:m4v:wma:asf:aif:aiff:afc:aifc:ape:s3m");
 	string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFullFilename));
 
 	if(sExtension.empty())
@@ -175,7 +201,7 @@ string TagFileHandler::GetFileSourceForDB()
 		return "F";
 }
 //-----------------------------------------------------------------------------------------------------
-void TagFileHandler::stov(string s, std::vector<string> &v, string acDelimiters /* = "/;," */ )
+void TagFileHandler::stov(string s, std::vector<string> &v, string acDelimiters /* = "|;/" */ )
 {
 	string::size_type CurPos = 0;
 	string sToken;
@@ -254,19 +280,19 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				}
 				else if ( i->first == "TITLE" )
 				{
-					stov(sProperty, vsTitle);
+					stov(sProperty, vsTitle, "");
 				}
 				else if ( i->first == "ALBUM" )
 				{
-					stov(sProperty, vsAlbum);
+					stov(sProperty, vsAlbum, "");
 				}
 				else if ( i->first == "TRACKNUMBER" )
 				{
-					stov(sProperty, vsTrack);
+					stov(sProperty, vsTrack, "");
 				}
 				else if ( i->first == "DATE" )
 				{
-					stov(sProperty, vsDate);
+					stov(sProperty, vsDate, "");
 				}
 				else if ( i->first == "COMPOSER" )
 				{
@@ -278,15 +304,16 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				}
 				else if ( i->first == "TOTALDISCS" )
 				{
-					stov(sProperty, vsTotalDiscs);
+					stov(sProperty, vsTotalDiscs, "");
 				}
 				else if ( i->first == "DISCNUMBER" )
 				{
-					stov(sProperty, vsDisc);
+					// TODO: split this properly when it comes in as 'x/y' or 'x of y'
+					stov(sProperty, vsDisc, "");
 				}
 				else if ( i->first == "COMMENT" )
 				{
-					stov(sProperty, vsSynopsis);
+					stov(sProperty, vsSynopsis, "");
 				}
 			}
 		}
@@ -320,22 +347,152 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		mapAttributes[ATTRIBUTETYPE_Disc_ID_CONST] = vtos( vsDisc );
 		mapAttributes[ATTRIBUTETYPE_Synopsis_CONST] = vtos( vsSynopsis );
 
+		// Pictures need to be handled differently depending on file type
+		// is it a FLAC file? access pics like this
+		if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
+		{
+			cout << "FLAC FLAC FLAC" << endl;
+
+			TagLib::List<TagLib::FLAC::Picture*>picList = flacFile->pictureList();
+			if ( !picList.isEmpty())
+			{
+				for (TagLib::List<TagLib::FLAC::Picture*>::ConstIterator it = picList.begin(); it != picList.end(); ++it)
+				{
+					TagLib::FLAC::Picture *pic = *it;
+
+					//TagLib::FLAC::Picture::Type picType = pic->type();
+					if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
+					{
+						int iType = (int)pic->type();
+						cout << "Picture found of type: " << iType << endl;
+
+						if ( pic->mimeType() == "image/jpeg")
+						{
+							// get the image
+							TagLib::ByteVector picData = pic->data();
+
+							size_t nBinSize = (size_t)picData.size();
+							char *pPictureData = new char[nBinSize];
+							memcpy(pPictureData, picData.data(), nBinSize);
+
+							cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+
+							// the following adds this image to the lmce picture vector
+							listPictures.push_back(make_pair(pPictureData, nBinSize));
+						}
+					}
+				}
+			}
+		}
+
+		// is it an MPEG file? access pics like this
+		else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
+		{
+			cout << "MPEG MPEG MPEG" << endl;
+
+			TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag();
+			if ( id3v2tag )
+			{
+				// picture frame
+				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["APIC"];
+				if (!frameList.isEmpty() )
+				{
+					for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+					{
+						TagLib::ID3v2::AttachedPictureFrame *picFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
+						if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover)
+					        {
+							int iType = (int)picFrame->type();
+							cout << "Picture found of type: " << iType << endl;
+
+							if ( picFrame->mimeType() == "image/jpeg")
+							{
+								TagLib::ByteVector picData = picFrame->picture();
+
+								size_t nBinSize = (size_t)picData.size();
+								char *pPictureData = new char[nBinSize];
+								memcpy(pPictureData, picData.data(), nBinSize);
+
+								cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+
+								// the following adds this image to the lmce picture vector
+								listPictures.push_back(make_pair(pPictureData, nBinSize));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// is it an MP4 (AAC, ALAC, video) file? access pics like this
+		else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
+		{
+			cout << "MP4 MP4 MP4" << endl;
+/*
+			TagLib::MP4::Tag* tag = mp4File->tag();
+			TagLib::MP4::ItemListMap itemListMap = tag->itemListMap();
+			TagLib::MP4::Item coverItem = itemListMap["covr"];
+			TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
+
+			if ( !coverArtList.isEmpty() )
+			{
+				for(TagLib::MP4::CoverArtList::ConstIterator it = coverArtList.begin(); it != coverArtList.end(); ++it)
+				{
+					TagLib::MP4::CoverArt coverArt = *it;
+
+					cout << "Picture found of type: 'covr'" << endl;
+					if ( coverArt.format() == TagLib::MP4::CoverArt::JPEG )
+				        {
+
+						TagLib::ByteVector picData = coverArt.data();
+
+						size_t nBinSize = (size_t)picData.size();
+						char *pPictureData = new char[nBinSize];
+						memcpy(pPictureData, picData.data(), nBinSize);
+
+						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+
+						// the following adds this image to the lmce picture vector
+//						listPictures.push_back(make_pair(pPictureData, nBinSize));
+					}
+				}
+			}
+*/
+		}
+
+/*
+		// is it an ASF (wma) file? access pics like this
+		else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
+		{
+			cout << "ASF ASF ASF" << endl;
+		}
+*/
+
+		// get pic from a .jpg in the same directory
 		string coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/cover.jpg";
-		if ( FileUtils::FileExists( coverfilename ) ) {
+		if ( !FileUtils::FileExists( coverfilename ) )
+			coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/folder.jpg";
+		if ( !FileUtils::FileExists( coverfilename ) )
+			coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/folder2.jpg";
+		if ( FileUtils::FileExists( coverfilename ) )
+		{
 			cout << "fetching cover: "<< coverfilename << "\n";
 			FILE *coverart = fopen(coverfilename.c_str(), "rb");
-			if (coverart != NULL) {
+			if (coverart != NULL)
+			{
 				fseek(coverart, 0, SEEK_END);
 				size_t nBinSize = (size_t)ftell(coverart);
-				if (nBinSize > 0) {
+				if (nBinSize > 0)
+				{
 					rewind(coverart);
 					char *pPictureData = new char[nBinSize];
 					fread(pPictureData, 1,nBinSize,coverart);
 					listPictures.push_back(make_pair(pPictureData, nBinSize));
 				}
 			}
-			delete f;
 		}
+
+		delete f;
 	}
 }
 //-----------------------------------------------------------------------------------------------------
@@ -343,10 +500,10 @@ void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string s
 {
 	std::vector<string> vsParameters;
 	stov(sParameters, vsParameters);
+
 	for (std::vector<string>::iterator it = vsParameters.begin(); it != vsParameters.end(); ++it)
 	{
 		f->file()->properties().insert(sName, String(*it, String::UTF8));
-		//f->file()->properties().insert("ALBUMARTIST",String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_Artist_CONST), String::UTF8));
 	}
 }
 //-----------------------------------------------------------------------------------------------------
