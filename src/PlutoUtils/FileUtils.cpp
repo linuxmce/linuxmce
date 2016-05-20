@@ -16,6 +16,7 @@
 
 #include "FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
+#include "PlutoUtils/ProcessUtils.h"
 #include "PlutoUtils/Other.h"
 
 #ifndef WIN32
@@ -239,6 +240,17 @@ bool FileUtils::WriteVectorToFile( string sFileName, vector<string> &vectString 
     }
     fclose(file);
     return true;
+}
+
+string FileUtils::FileSystemType( string sFile )
+{
+	string sCommandLine = "tail -n+2 <( df --output='fstype' " + sFile + ")";
+	string sOutput;
+
+	if(ProcessUtils::RunApplicationAndGetOutput(sCommandLine, sOutput))
+	{
+		return sOutput;
+	}
 }
 
 bool FileUtils::FileExists( string sFile )
