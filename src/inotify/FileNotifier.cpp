@@ -79,20 +79,22 @@ void FileNotifier::Watch(string sDirectory)
 	}
 #endif
 
-	//FIXME: check and do not register against external shares (nfs)
-	// currently inotify watches are put on nfs files, and they do not get notifications
-	// as nfs shares do not support inotify behaviour
-	// only changes made from the machine that creates the watch will be notified
-	// changes made to the share from other systems will not provide notification
-
 	list<string> listFilesOnDisk;
-	FileUtils::FindDirectories(listFilesOnDisk,sDirectory,true,false,0,sDirectory + "/");  
+	FileUtils::FindDirectories(listFilesOnDisk,sDirectory,true,false,0,sDirectory + "/");
 	listFilesOnDisk.push_back(sDirectory);
 
 	PLUTO_SAFETY_LOCK(wfm, m_WatchedFilesMutex);
 	for(list<string>::iterator it = listFilesOnDisk.begin(); it != listFilesOnDisk.end(); it++)
 	{
-		string sItem = *it;
+	        string sItem = *it;
+
+		// Cannot add inotifier notifiers for files on network shares even though it doesn't fail
+		string sFileSystemType = FileUtils::FileSystemType(sItem);
+		if (  sFileSystemType == "nfs" || sFileSystemType == "cifs" )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Skipping notifier for file %s, cannot watch network share", sItem.c_str());
+			continue;
+		}
 
 		try
 		{
