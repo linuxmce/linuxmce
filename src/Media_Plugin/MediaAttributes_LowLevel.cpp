@@ -547,7 +547,8 @@ PK_MediaType, PK_AttributeType, sName.c_str(), PK_Attribute_Related, (int) vectR
 			s += row[i] ? row[i] : "*NULL";
 			s+= "\t";
 		}
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s", s.c_str());
+	// Output the response string to the log
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"%s", s.c_str());
 	}
 }
 
