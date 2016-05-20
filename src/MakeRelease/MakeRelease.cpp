@@ -979,13 +979,14 @@ bool CompileSource(Row_Package *pRow_Package)
 	if( pRow_Package->FK_Package_Sourcecode_isNull() )
 		return true; // It's okay.  Nothing to do here
 
+/*
 	if( g_mapPackagesToBuild.find(pRow_Package->FK_Package_Sourcecode_getrow()->PK_Package_get())==g_mapPackagesToBuild.end() )
 	{
 		cout << "***ERROR***: The package: " << pRow_Package->Description_get() << " needs to be built" << endl 
 			<< "But it's source code: " << pRow_Package->FK_Package_Sourcecode_getrow()->Description_get() << " isn't in the include list!" << endl;
 		return false;
 	}
-
+*/
 	if( pRow_Package->FK_Package_Sourcecode_getrow()->IsSource_get()==0 )
 	{
 		cout << "***ERROR***: The package: " << pRow_Package->Description_get() << " indicated its source is in" << endl 
