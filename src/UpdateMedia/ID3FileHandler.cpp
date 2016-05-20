@@ -60,7 +60,6 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		int nType = it->first;
 		string sValue = it->second;
 
-// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 		MapPlutoMediaAttributes::iterator itm = pPlutoMediaAttributes->m_mapAttributes.find(nType);
 		if(itm == pPlutoMediaAttributes->m_mapAttributes.end())
 			pPlutoMediaAttributes->m_mapAttributes.insert(
@@ -85,12 +84,10 @@ bool ID3FileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
 #endif
 	//Temporary map with attributes for common tags
-// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 	map<int, string> mapAttributes;
 	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
 		end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 	{
-// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 		mapAttributes[it->first] = it->second->m_sName;
 	}
 
@@ -134,7 +131,6 @@ bool ID3FileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttr
 		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
 #endif
 
-// FIXME: need to de-tokenize/tokenize as this attribute can contain multiple values
 	RemoveId3Tag(sFileWithAttributes, nTagType, sValue);
 	return true;
 }
