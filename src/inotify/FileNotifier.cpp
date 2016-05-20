@@ -84,7 +84,7 @@ void FileNotifier::Watch(string sDirectory)
 	listFilesOnDisk.push_back(sDirectory);
 
 	PLUTO_SAFETY_LOCK(wfm, m_WatchedFilesMutex);
-	for(list<string>::iterator it = listFilesOnDisk.begin(); it != listFilesOnDisk.end(); it++)
+    for(list<string>::iterator it = listFilesOnDisk.begin(); it != listFilesOnDisk.end(); it++)
 	{
 	        string sItem = *it;
 
