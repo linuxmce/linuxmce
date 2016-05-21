@@ -51,6 +51,7 @@ namespace FileUtils
 
 	void ReadFileIntoVector( string sFileName, vector<string> &vectString ); /**< reads file into a vector of strings for each line */
     bool WriteVectorToFile( string sFileName, vector<string> &vectString ); /**< writes a file where the vector of strings are the lines */
+    string FileSystemType( string sFileName ); /**< returns the file system type that the file resides on (ext3,nfs,cfs) */
     bool FileExists( string sFileName ); /**< checks if the specified file exists */
     long FileSize(string sFileName); /**< returns the file size or zero if error */
     string FindExtension ( string sFileName ); /**< returns the extension of the file name specified */

@@ -507,6 +507,7 @@ Row_Attribute *MediaAttributes_LowLevel::GetAttributeFromDescription(int PK_Medi
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MediaAttributes_LowLevel::GetAttributeFromDescription got a blank attribute");
 		return NULL;
 	}
+
 	vector<Row_Attribute *> vectRow_Attribute;
 	Row_MediaType_AttributeType *pMediaType_AttributeType = NULL;
 	if( PK_MediaType==MEDIATYPE_pluto_CD_CONST )
@@ -528,28 +529,28 @@ Row_Attribute *MediaAttributes_LowLevel::GetAttributeFromDescription(int PK_Medi
 			"AND (FA2.FK_Attribute IS NOT NULL OR DA2.FK_Attribute IS NOT NULL OR LA2.FK_Attribute IS NOT NULL)";
 		m_pDatabase_pluto_media->Attribute_get()->GetRows(sWhere,&vectRow_Attribute);
 
-string sSQL = "select * FROM Attribute " + sWhere;
-PlutoSqlResult result;
-DB_ROW row;
-    result.r=m_pDatabase_pluto_media->db_wrapper_query_result( sSQL );
+		string sSQL = "select * FROM Attribute " + sWhere;
+		PlutoSqlResult result;
+		DB_ROW row;
+		result.r=m_pDatabase_pluto_media->db_wrapper_query_result( sSQL );
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MediaAttributes_LowLevel::GetAttributeFromDescription album rows %d PK_MediaType %d PK_AttributeType %d string sName %s PK_Attribute_Related %d size %d",
-result.r ? (int) result.r->row_count : -1,
-PK_MediaType, PK_AttributeType, sName.c_str(), PK_Attribute_Related, (int) vectRow_Attribute.size());
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MediaAttributes_LowLevel::GetAttributeFromDescription album rows %d PK_MediaType %d PK_AttributeType %d string sName %s PK_Attribute_Related %d size %d",
+		result.r ? (int) result.r->row_count : -1,PK_MediaType, PK_AttributeType, sName.c_str(), PK_Attribute_Related, (int) vectRow_Attribute.size());
 
-	if( result.r )
-{
-	while( ( row=db_wrapper_fetch_row( result.r ) ) )
-    {
-		string s;
-		for(unsigned int i=0;i<result.r->field_count;++i)
+		if( result.r )
 		{
-			s += row[i] ? row[i] : "*NULL";
-			s+= "\t";
+			while( ( row=db_wrapper_fetch_row( result.r ) ) )
+			{
+				string s;
+				for(unsigned int i=0;i<result.r->field_count;++i)
+				{
+					s += row[i] ? row[i] : "*NULL";
+					s+= "\t";
+				}
+				// Output the response string to the log
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"%s", s.c_str());
+			}
 		}
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s", s.c_str());
-	}
-}
 
 
 	}
@@ -559,9 +560,9 @@ PK_MediaType, PK_AttributeType, sName.c_str(), PK_Attribute_Related, (int) vectR
 		m_pDatabase_pluto_media->Attribute_get()->GetRows(sWhere,&vectRow_Attribute);
 	}
 
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,
-"MediaAttributes_LowLevel::GetAttributeFromDescription PK_MediaType %d PK_AttributeType %d string sName %s PK_Attribute_Related %d size %d",
-PK_MediaType, PK_AttributeType, sName.c_str(), PK_Attribute_Related, (int) vectRow_Attribute.size());
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,
+	"MediaAttributes_LowLevel::GetAttributeFromDescription PK_MediaType %d PK_AttributeType %d string sName %s PK_Attribute_Related %d size %d",
+	PK_MediaType, PK_AttributeType, sName.c_str(), PK_Attribute_Related, (int) vectRow_Attribute.size());
 
 
 	if( vectRow_Attribute.size() )
