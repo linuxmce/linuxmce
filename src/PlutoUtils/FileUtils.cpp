@@ -244,7 +244,7 @@ bool FileUtils::WriteVectorToFile( string sFileName, vector<string> &vectString 
 
 string FileUtils::FileSystemType( string sFile )
 {
-	string sCommandLine = "tail -n+2 <( df --output='fstype' " + sFile + ")";
+	string sCommandLine = "df --output='fstype' \"" + sFile + "\" | tail -n+2";
 	string sOutput;
 
 	if(ProcessUtils::RunApplicationAndGetOutput(sCommandLine, sOutput))
