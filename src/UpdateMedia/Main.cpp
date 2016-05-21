@@ -349,7 +349,7 @@ void *UpdateMediaThread(void *)
 	PlutoMediaIdentifier::Activate(g_pDatabase_pluto_main);
 
 	vector<string> vsUPnPDevices;
-	
+
 	while(true)
 	{
 		//load info about ModificationData, AttrCount, AttrDate, attributes, timestamp for all files
@@ -360,10 +360,10 @@ void *UpdateMediaThread(void *)
 #ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded fresh data from db");
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Worker thread: \"I'm wake!\"");        
-#endif		
-		//UPnP changes: as UPnP mount share doesn't work with inotify (?? 
-		//at least I don't see it firing any expected events, we are manually 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Worker thread: \"I'm wake!\"");
+#endif
+		//UPnP changes: as UPnP mount share doesn't work with inotify (??
+		//at least I don't see it firing any expected events, we are manually
 		//checking contents of 'devices' list for any changes
 		//FIXME if UPnP server went down and up with new content within 2 mins sleep
 		//changes in it's contents can go unnoticed
@@ -372,13 +372,13 @@ void *UpdateMediaThread(void *)
 			vector<string> vsNewDevices;
 			FileUtils::ReadFileIntoVector(sUPnPMountPoint+"/devices", vsNewDevices);
 			sort(vsNewDevices.begin(), vsNewDevices.end());
-			
+
 			vector<string> vsChanges;
 			set_symmetric_difference(vsNewDevices.begin(), vsNewDevices.end(), vsUPnPDevices.begin(), vsUPnPDevices.end(), back_inserter(vsChanges));
-			
+
 			if (!vsChanges.empty())
 			{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "UPnP mount point devices list changed, adding %s for processing", sUPnPMountPoint.c_str());	
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "UPnP mount point devices list changed, adding %s for processing", sUPnPMountPoint.c_str());
 				vsUPnPDevices = vsNewDevices;
 				vectModifiedFolders.push_back(sUPnPMountPoint);
 			}
@@ -386,7 +386,10 @@ void *UpdateMediaThread(void *)
 			{
 				//TODO process list if devices list appear to be same - see fixme note above
 			}
-		}		
+		}
+
+		// FIXME: we need to periodically check for any changed files that are *not* monitored by inotify
+		// inotify doesn't work on nfs or cifs unless the changes are made from the local system
 
 		PLUTO_SAFETY_LOCK(flm, g_FoldersListMutex);
 		while(vectModifiedFolders.size())
@@ -394,13 +397,13 @@ void *UpdateMediaThread(void *)
 			string sItem = vectModifiedFolders.front();
 			flm.Release();
 
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Folder to process: %s", sItem.c_str());	
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Folder to process: %s", sItem.c_str());
 			PLUTO_SAFETY_LOCK(cm, g_ConnectionMutex );
 #ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronizing '%s'...", sItem.c_str());	
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronizing '%s'...", sItem.c_str());
 #endif
 			PlutoMediaFile::ResetNewFilesAddedStatus();
-				
+
 			UpdateMedia engine(g_pDatabase_pluto_media, g_pDatabase_pluto_main, sItem);
 			engine.LoadExtensions();
 			engine.DoIt();
@@ -441,15 +444,15 @@ void *UpdateMediaThread(void *)
 			vectModifiedFolders.erase(vectModifiedFolders.begin());
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Nothing to process, sleeping 2 minute...");        
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Nothing to process, sleeping 2 minute...");
 		timespec abstime;
 		abstime.tv_sec = (long) (time(NULL) + 120);  //2 minutes
 		abstime.tv_nsec = 0;
-		flm.TimedCondWait(abstime);		
+		flm.TimedCondWait(abstime);
 	}
 }
 
-void OnModify(list<string> &listFiles) 
+void OnModify(list<string> &listFiles)
 {
 	for(list<string>::iterator it = listFiles.begin(); it != listFiles.end(); it++)
 	{
