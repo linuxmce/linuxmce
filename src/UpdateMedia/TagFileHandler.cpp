@@ -64,7 +64,7 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	GetTagInfo(sFileWithAttributes, mapAttributes, listPicturesForTags);
 
 #ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: tag attributes loaded (from tag file - common tags) %d", mapAttributes.size());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::LoadAttributes: tag attributes loaded (from tag file - common tags) %d", mapAttributes.size());
 #endif
 	//merge attributes into PlutoMediaAttributes
 	for(map<int, string>::iterator it = mapAttributes.begin(), end = mapAttributes.end(); it != end; ++it)
@@ -72,7 +72,7 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		int nType = it->first;
 		string sValue = it->second;
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# LoadAttributes, from file: type %d: '%s'", nType, sValue.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::LoadAttributes, from file: type %d: '%s'", nType, sValue.c_str());
 
 		std::vector<string> vsValues;
 		stov(sValue, vsValues);
@@ -684,7 +684,7 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 {
 #ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::RemoveTag - failing for mpeg? so disabled atm");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# DISABLED -- TagFileHandler::RemoveTag - failing for mpeg? so disabled atm");
 #endif
 /*
 	FileRef *f = new FileRef(sFilename.c_str());

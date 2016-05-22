@@ -580,7 +580,7 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 
 			if(PK_File != 0)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "The file exists in the db, do we need to compare modification times?");
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "UpdateMedia::ScanFiles The file exists in the db, do we need to compare modification times?");
 				PlutoMediaFile_.SetFileAttribute(PK_File);  
 			}
 			else
