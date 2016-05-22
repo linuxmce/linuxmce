@@ -1,5 +1,5 @@
-# CFLAGS=`pkg-config --cflags gtk+-2.0`
-# LIBS=`pkg-config --libs gtk+-2.0`
+# CFLAGS=$(shell pkg-config --cflags gtk+-2.0)
+# LIBS=$(shell pkg-config --libs gtk+-2.0)
 
 all: EnOceanPortTest
 

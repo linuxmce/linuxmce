@@ -30,9 +30,9 @@ sources = Main.cpp Picture_Viewer.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/SDL -I/usr/include/exiv2 `pkg-config --cflags glib-2.0`
+CPPFLAGS += -I/usr/include/SDL -I/usr/include/exiv2 $(shell pkg-config --cflags glib-2.0)
 LDFLAGS +=
-XTRALDLIBS = -lSDL -lSDL_image -lXrender -lXmu -lSDL_gfx -lexiv2 `pkg-config --libs glib-2.0` -lX11
+XTRALDLIBS = -lSDL -lSDL_image -lXrender -lXmu -lSDL_gfx -lexiv2 $(shell pkg-config --libs glib-2.0) -lX11
 
 Gen_Dev_Files +=
 sources += Picture.cpp \
