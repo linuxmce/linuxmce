@@ -26,6 +26,7 @@ SOURCES += ../Main.cpp \
     ../../PlutoUtils/md5c.cpp \
     ../../PlutoUtils/FileUtils.cpp \
     ../../PlutoUtils/CommonIncludes.cpp \
+    ../../PlutoUtils/ProcessUtils.cpp \
     ../../SerializeClass/SerializeClass.cpp \
     ../../DCE/Virtual_Device_Translator.cpp \
     ../../DCE/Socket.cpp \
@@ -61,6 +62,7 @@ HEADERS += \
     ../../PlutoUtils/Other.h \
     ../../PlutoUtils/getch.h \
     ../../PlutoUtils/MyStl.h \
+    ../../PlutoUtils/ProcessUtils.h \
     ../../DCE/DeviceData_Base.h \
     ../../DCE/Message.h \
     ../../DCE/ServerLogger.h \
