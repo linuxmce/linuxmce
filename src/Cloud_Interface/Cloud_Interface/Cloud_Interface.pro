@@ -54,7 +54,8 @@ HEADERS+= \
     ../../Gen_Devices/Cloud_InterfaceBase.h \
     ../Cloud_Interface.h \
     cloudinterfacecotroller.h \
-    cloudsettings.h
+    cloudsettings.h \
+    ../../PlutoUtils/ProcessUtils.h
 
 HEADERS+= \
 
@@ -91,7 +92,8 @@ SOURCES+= \
     ../../Gen_Devices/Cloud_InterfaceBase.cpp \
      ../Cloud_Interface.cpp \
     cloudinterfacecotroller.cpp \
-    cloudsettings.cpp
+    cloudsettings.cpp \
+    ../../PlutoUtils/ProcessUtils.cpp
 
 #Qt Sources
 SOURCES += ../Main.cpp \
