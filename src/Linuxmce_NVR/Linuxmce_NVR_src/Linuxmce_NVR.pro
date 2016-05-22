@@ -46,7 +46,8 @@ HEADERS += ../Linuxmce_NVR.h \
     ../managerClasses/eventlistener.h \
     ../managerClasses/httpresponder.h \
     ../managerClasses/NvrManager.h \
-    ../cameraClasses/httpsnapshotcamera.h
+    ../cameraClasses/httpsnapshotcamera.h \
+    ../../PlutoUtils/ProcessUtils.h
 
 SOURCES += ../Main.cpp \
            ../Linuxmce_NVR.cpp \
@@ -84,7 +85,8 @@ SOURCES += ../Main.cpp \
     ../managerClasses/eventlistener.cpp \
     ../managerClasses/httpresponder.cpp \
     ../managerClasses/NvrManager.cpp \
-    ../cameraClasses/httpsnapshotcamera.cpp
+    ../cameraClasses/httpsnapshotcamera.cpp \
+    ../../PlutoUtils/ProcessUtils.cpp
 
 RESOURCES += \
     static-art.qrc
