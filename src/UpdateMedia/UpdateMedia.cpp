@@ -252,13 +252,13 @@ int UpdateMedia::ReadDirectory(string sDirectory)
 #endif
 	if(IsLockedFolder(sDirectory))
 	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Skipped locked folder: %s", sDirectory.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "UpdateMedia::ReadDirectory Skipped locked folder: %s", sDirectory.c_str());
 		return 0;
 	}
 
 	if(HasSpecialFolderParent(sDirectory))
 	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Skipped directory - is a subfolder for a special folder: %s", sDirectory.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "UpdateMedia::ReadDirectory Skipped directory - is a subfolder for a special folder: %s", sDirectory.c_str());
 		return 0;
 	}
 
@@ -519,11 +519,15 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 
 		string sFile = *it;
 		if(AnyReasonToSkip(sDirectory, sFile))
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "UpdateMedia::ScanFiles File %s/%s is being skipped...",
+				sDirectory.c_str(), sFile.c_str());
 			continue;
+		}
 
 		if(FileStatusObserver::IsFileOpen(sDirectory + "/" + sFile))
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "File %s/%s is opened for writing. Adding to file status observer's thread...",
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "UpdateMedia::ScanFiles File %s/%s is opened for writing. Adding to file status observer's thread...",
 				sDirectory.c_str(), sFile.c_str());
 
 			FileStatusObserver::Instance().Observe(sDirectory + "/" + sFile);
@@ -540,7 +544,7 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 		GenericFileHandler *pFileHandler = FileHandlerFactory::CreateFileHandler(sDirectory, sFile);
 
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sync mode for %s/%s: %s", sDirectory.c_str(), sFile.c_str(), MediaSyncModeStr[sync_mode]); 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ScanFiles Sync mode for %s/%s: %s", sDirectory.c_str(), sFile.c_str(), MediaSyncModeStr[sync_mode]); 
 #endif
 		PlutoMediaFile PlutoMediaFile_(m_pDatabase_pluto_media, m_nPK_Installation, sDirectory, sFile, pFileHandler);
 
@@ -568,7 +572,7 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 			}
 
 			PlutoMediaFile_.SetFileAttribute(PK_File);
-		}	
+		}
 		else
 		{
 			// It's in the database already.  Be sure the attribute is set
@@ -576,13 +580,13 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 
 			if(PK_File != 0)
 			{
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "The file exists in the db, do we need to compare modification times?");
 				PlutoMediaFile_.SetFileAttribute(PK_File);  
 			}
 			else
 			{
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "The file exists in the db, but I can't find it's PK_File!!!");
 			}
-			
 		}
 
 		if(m_bAsDaemon)
@@ -596,11 +600,11 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"UpdateMedia::ReadDirectory PK_File is %d, won't sync pictures", PK_File);
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"UpdateMedia::ScanFiles PK_File is %d, won't sync pictures", PK_File);
 		}
 
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateMedia::ReadDirectory File %d Picture %d",PK_File,PK_Picture);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateMedia::ScanFiles File %d Picture %d",PK_File,PK_Picture);
 #endif
 		if(PK_Picture && PK_File)
 		{
@@ -619,7 +623,7 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 				if( !pRow_Picture_Attribute )
 				{
 #ifdef UPDATEMEDIA_STATUS
-					LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateMedia::ReadDirectory Adding Picture_Attribute File %d Picture %d attr %d size %d %s",PK_File,PK_Picture,pRow_Attribute->PK_Attribute_get(),(int) vectRow_Attribute.size(),sSql.c_str());
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateMedia::ScanFiles Adding Picture_Attribute File %d Picture %d attr %d size %d %s",PK_File,PK_Picture,pRow_Attribute->PK_Attribute_get(),(int) vectRow_Attribute.size(),sSql.c_str());
 					pRow_Picture_Attribute = m_pDatabase_pluto_media->Picture_Attribute_get()->AddRow();
 					pRow_Picture_Attribute->FK_Picture_set(PK_Picture);
 					pRow_Picture_Attribute->FK_Attribute_set(pRow_Attribute->PK_Attribute_get());
@@ -646,8 +650,9 @@ bool UpdateMedia::ScanSubfolders(string sDirectory, FolderType& folder_type)
 
 #ifdef UPDATEMEDIA_STATUS
 	if(!listSubDirectories.empty())
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ScanSubfolders dir %s: subdirs found: %d", 
-			sDirectory.c_str(), listSubDirectories.size());	
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ScanSubfolders dir %s: subdirs found: %d", sDirectory.c_str(), listSubDirectories.size());
+	else
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ScanSubfolders dir %s: no subdirs found", sDirectory.c_str());
 #endif
 	//is this a special folder?
 	for(list<string>::iterator it=listSubDirectories.begin();it!=listSubDirectories.end();++it)

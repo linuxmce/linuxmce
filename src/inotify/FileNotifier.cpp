@@ -95,7 +95,7 @@ void FileNotifier::Watch(string sDirectory)
 		//if (  sFileSystemType == "nfs\n" || sFileSystemType == "cifs\n" )
 		if ( sItem.find("NFS Share") != string::npos || sItem.find("SMB Share") != string::npos )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Skipping notifier for file %s, cannot watch network share", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "FileNotifier::Watch Skipping notifier for file %s, cannot watch network share", sItem.c_str());
 			continue;
 		}
 
@@ -109,12 +109,12 @@ void FileNotifier::Watch(string sDirectory)
 				m_sRootFolder = sDirectory;
 			}
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Adding file to watch map: filename %s", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "FileNotifier::Watch Adding file to watch map: filename %s", sItem.c_str());
 			m_mapWatchedFiles[wd] = *it; 
 		}
 		catch(...)
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to add notifier for file %s", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "FileNotifier::Watch Failed to add notifier for file %s", sItem.c_str());
 		}
     }
 }
@@ -139,16 +139,19 @@ void *BackgroundWorkerThread(void *p)
 			continue;
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "FileNotifier: Background thread waking up...");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "FileNotifier: BackgroundWorkerThread waking up...");
 
 		string sRootFolder = pFileNotifier->m_sRootFolder;
 		sRootFolder = FileUtils::ExcludeTrailingSlash(sRootFolder);
-		
+
+		// This does one thing only, that is adds the root directory to the list of changed files
 		list<string> listFiles;
 		listFiles.push_back(sRootFolder);
 		pFileNotifier->FireOnCreate(listFiles);
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "FileNotifier: Background thread going to sleep...");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "FileNotifier: BackgroundWorkerThread thread going to sleep...");
+
+		// TODO: Make this value configurable from webadmin 'How often to manually scan files that cannot be notified.'
 		Sleep(120 * 1000); //2 minutes
 	}
 
@@ -178,7 +181,7 @@ void *INotifyWorkerThread(void *p)
 			{
 				string sRootFolder = pFileNotifier->m_sRootFolder;
 				pFileNotifier->ResetWatches();
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Voodoo with the root folder; someone reseted our watches. Reinitializing.");
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "FileNotifier: INotifyWorkerThread Voodoo with the root folder; someone reseted our watches. Reinitializing.");
 				pFileNotifier->Watch(sRootFolder);
 			}
 		}
@@ -189,7 +192,7 @@ void *INotifyWorkerThread(void *p)
 			string sFilename = pFileNotifier->m_mapWatchedFiles_Find(event.wd) + "/" + event.name;
 			wfm.Release();
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "inotify: New event for %s", sFilename.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "FileNotifier: INotifyWorkerThread inotify: New event for %s", sFilename.c_str());
 
 			bool bIsDir = (event.mask & IN_ISDIR) != 0;
 			list<string> listFiles;
