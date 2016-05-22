@@ -351,6 +351,7 @@ SOURCES += main.cpp \
         ../../PlutoUtils/minilzo.cpp \
         ../../PlutoUtils/md5c.cpp \
         ../../PlutoUtils/FileUtils.cpp \
+        ../../PlutoUtils/ProcessUtils.cpp \
         ../../PlutoUtils/CommonIncludes.cpp \
         ../../SerializeClass/SerializeClass.cpp \
         ../../DCE/Virtual_Device_Translator.cpp \
@@ -442,6 +443,7 @@ HEADERS += \
         ../../PlutoUtils/MultiThreadIncludes.h \
         ../../PlutoUtils/StringUtils.h \
         ../../PlutoUtils/CommonIncludes.h \
+        ../../PlutoUtils/ProcessUtils.h \
         ../../PlutoUtils/Other.h \
         ../../PlutoUtils/getch.h \
         ../../PlutoUtils/MyStl.h \
