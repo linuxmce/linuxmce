@@ -502,10 +502,11 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 	list<string> listFilesOnDisk;
 	FileUtils::FindFiles(listFilesOnDisk,sDirectory,m_sExtensions,false,false,0,"");
 
-	if(!listFilesOnDisk.empty())
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ScanFiles dir %s: files found: %d", 
-			sDirectory.c_str(), listFilesOnDisk.size());	
+	if(!listFilesOnDisk.empty())
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ScanFiles dir %s: files found: %d", sDirectory.c_str(), listFilesOnDisk.size());
+	else
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ScanFiles dir %s: no files found", sDirectory.c_str());
 #endif
 	// Now start matching them up
 	for(list<string>::iterator it=listFilesOnDisk.begin();it!=listFilesOnDisk.end();++it)
@@ -556,7 +557,7 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 		{
 			PK_File = PlutoMediaFile_.HandleFileNotInDatabase();
 #ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateMedia::ReadDirectory PlutoMediaFile_.HandleFileNotInDatabase %d",PK_File);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateMedia::ScanFiles PlutoMediaFile_.HandleFileNotInDatabase %d",PK_File);
 #endif
 			if(!PK_File)
 			{

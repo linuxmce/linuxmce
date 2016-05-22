@@ -400,11 +400,11 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 					for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
 					{
 						TagLib::ID3v2::AttachedPictureFrame *picFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
-						if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover)
-					        {
-							int iType = (int)picFrame->type();
-							cout << "Picture found of type: " << iType << endl;
+						int iType = (int)picFrame->type();
+						cout << "Picture found of type: " << iType << ", string: " << picFrame->toString() << endl;
 
+//						if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover)
+//					        {
 							if ( picFrame->mimeType() == "image/jpeg")
 							{
 								TagLib::ByteVector picData = picFrame->picture();
@@ -415,10 +415,10 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 
 								cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
 
-								// add this image to the lmce picture vector
+								// the following adds this image to the lmce picture vector
 								listPictures.push_back(make_pair(pPictureData, nBinSize));
 							}
-						}
+//						}
 					}
 				}
 			}
@@ -683,6 +683,10 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 {
+#ifdef UPDATEMEDIA_STATUS
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::RemoveTag - failing for mpeg? so disabled atm");
+#endif
+/*
 	FileRef *f = new FileRef(sFilename.c_str());
 	if(NULL != f)
 	{
@@ -732,6 +736,7 @@ void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 		f->save();
 		delete f;
 	}
+*/
 }
 //-----------------------------------------------------------------------------------------------------
 string TagFileHandler::ExtractAttribute(const map<int,string>& mapAttributes, int key)
