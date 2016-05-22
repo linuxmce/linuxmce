@@ -624,7 +624,7 @@ void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string s
 void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures)
 {
 #ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: SetTagInfo");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SetTagInfo for %s", sFilename.c_str());
 #endif
 
 	FileRef *f = new FileRef(sFilename.c_str());
