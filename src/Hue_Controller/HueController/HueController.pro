@@ -17,16 +17,9 @@ INCLUDEPATH += /usr/include/qjson/ \
 
 LIBS += -lqjson
 DESTDIR=../../bin
+
+include (../../QtCommonIncludes/PlutoUtils.pri)
 SOURCES += ../Main.cpp \
-    ../../PlutoUtils/uuencode.cpp \
-    ../../PlutoUtils/ThreadedClass.cpp \
-    ../../PlutoUtils/Other.cpp \
-    ../../PlutoUtils/MultiThreadIncludes.cpp \
-    ../../PlutoUtils/minilzo.cpp \
-    ../../PlutoUtils/md5c.cpp \
-    ../../PlutoUtils/FileUtils.cpp \
-    ../../PlutoUtils/CommonIncludes.cpp \
-    ../../PlutoUtils/ProcessUtils.cpp \
     ../../SerializeClass/SerializeClass.cpp \
     ../../DCE/Virtual_Device_Translator.cpp \
     ../../DCE/Socket.cpp \
@@ -41,11 +34,9 @@ SOURCES += ../Main.cpp \
     ../../DCE/DataGrid.cpp \
     ../../DCE/Command_Impl.cpp \
     ../../DCE/AlarmManager.cpp \
-    ../../PlutoUtils/StringUtils.cpp \
     ../../DCE/ClientSocket.cpp \
     ../../DCE/DeviceData_Base.cpp \
     ../../DCE/DeviceData_Impl.cpp \
-    ../../PlutoUtils/getch.cpp \
     ../../Gen_Devices/HueControllerBase.cpp \
     ../HueController.cpp \
     huecontrollerhardware.cpp \
@@ -55,14 +46,6 @@ SOURCES += ../Main.cpp \
     hueluxbulb.cpp
 
 HEADERS += \
-     ../../PlutoUtils/ThreadedClass.h \
-    ../../PlutoUtils/MultiThreadIncludes.h \
-    ../../PlutoUtils/StringUtils.h \
-    ../../PlutoUtils/CommonIncludes.h \
-    ../../PlutoUtils/Other.h \
-    ../../PlutoUtils/getch.h \
-    ../../PlutoUtils/MyStl.h \
-    ../../PlutoUtils/ProcessUtils.h \
     ../../DCE/DeviceData_Base.h \
     ../../DCE/Message.h \
     ../../DCE/ServerLogger.h \
@@ -73,7 +56,6 @@ HEADERS += \
     ../../DCE/PlainClientSocket.h \
     ../../DCE/AlarmManager.h \
     ../../SerializeClass/SerializeClass.h \
-    ../../PlutoUtils/FileUtils.h \
     ../../pluto_main/Define_DeviceCategory.h \
     ../../pluto_main/Define_DeviceTemplate.h \
     ../../Gen_Devices/HueControllerBase.h \
