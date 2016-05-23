@@ -30,8 +30,8 @@ sources = Main.cpp VLC_Player.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += `pkg-config --cflags glib-2.0`
-LDFLAGS += `pkg-config --libs glib-2.0`
+CPPFLAGS += $(shell pkg-config --cflags glib-2.0)
+LDFLAGS += $(shell pkg-config --libs glib-2.0)
 XTRALDLIBS = -lvlc -lX11 -lXmu
 
 Gen_Dev_Files +=

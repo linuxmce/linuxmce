@@ -96,8 +96,8 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 #<-dceag-mh-e->
 
 CXXFLAGS += 
-CPPFLAGS += `pkg-config libxml-2.0 --cflags` `pkg-config glib-2.0 --cflags` `pkg-config MagickWand --cflags`
-LDFLAGS +=  -lX11 -lXmu -lXtst -lWindowUtils -lpthread `pkg-config glib-2.0 --libs` `pkg-config libxml-2.0 --libs` `pkg-config MagickWand --libs`
+CPPFLAGS += $(shell pkg-config libxml-2.0 --cflags) $(shell pkg-config glib-2.0 --cflags) $(shell pkg-config MagickWand --cflags)
+LDFLAGS +=  -lX11 -lXmu -lXtst -lWindowUtils -lpthread $(shell pkg-config glib-2.0 --libs) $(shell pkg-config libxml-2.0 --libs) $(shell pkg-config MagickWand --libs)
 XTRALDLIBS = -lm
 
 Gen_Dev_Files +=

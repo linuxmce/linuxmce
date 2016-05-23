@@ -18,7 +18,7 @@ Gen_Dev_Files = $(GENDEV)/LinphoneBase.cpp
 sources = Main.cpp Linphone.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS += -I../ -I/usr/pluto/include -I/usr/pluto/include/linphone -I/usr/pluto/include/ortp -I/usr/pluto/include/osipua -DHAVE_GLIB `pkg-config gdk-2.0 --cflags`
+CXXFLAGS += -I../ -I/usr/pluto/include -I/usr/pluto/include/linphone -I/usr/pluto/include/ortp -I/usr/pluto/include/osipua -DHAVE_GLIB $(shell pkg-config gdk-2.0 --cflags)
 CPPFLAGS +=
 LDFLAGS += -L/usr/pluto/lib
 XTRALDLIBS = -llinphone -lraw1394 -ldc1394_control
