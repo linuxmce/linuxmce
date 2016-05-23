@@ -37,7 +37,7 @@ INCLUDES+=$(shell pkg-config --cflags dbus-c++-1 2>/dev/null) $(shell pkg-config
 CXXFLAGS +=
 CPPFLAGS += $(INCLUDES) $(CFLAGS)
 LDFLAGS +=
-XTRALDLIBS = $(shell pkg-config --libs dbus-c++-1 2>dev/null) $(shell pkg-config --libs glib-2.0 2>/dev/null) -lX11 -lXmu
+XTRALDLIBS = $(shell pkg-config --libs dbus-c++-1) $(shell pkg-config --libs glib-2.0) -lX11 -lXmu
 
 Gen_Dev_Files +=
 sources += OMXPlayerStream.cpp \
