@@ -72,7 +72,7 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 #define EXTERN_REVISION_DATE
 #include "version.h"
 
-//#define  USE_DEVEL_DATABASES 
+//#define  USE_DEVEL_DATABASES
 
 using namespace std;
 using namespace DCE;
@@ -247,9 +247,6 @@ int UpdateMedia::ReadDirectory(string sDirectory)
 	// Strip any trailing /
 	sDirectory = FileUtils::ExcludeTrailingSlash(sDirectory);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ReadDirectory %s", sDirectory.c_str());
-#endif
 	if(IsLockedFolder(sDirectory))
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "UpdateMedia::ReadDirectory Skipped locked folder: %s", sDirectory.c_str());
@@ -261,6 +258,8 @@ int UpdateMedia::ReadDirectory(string sDirectory)
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "UpdateMedia::ReadDirectory Skipped directory - is a subfolder for a special folder: %s", sDirectory.c_str());
 		return 0;
 	}
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ReadDirectory %s", sDirectory.c_str());
 
 	if(!ScanFiles(sDirectory))
 		return 0;
@@ -539,7 +538,12 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 
 		MediaSyncMode sync_mode = MediaState::Instance().SyncModeNeeded(sDirectory, sFile);
 		if(sync_mode == modeNone)
+		{
+#ifdef UPDATEMEDIA_STATUS
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ScanFiles Sync mode for %s/%s: %s", sDirectory.c_str(), sFile.c_str(), MediaSyncModeStr[sync_mode]); 
+#endif
 			continue;
+		}
 
 		GenericFileHandler *pFileHandler = FileHandlerFactory::CreateFileHandler(sDirectory, sFile);
 
