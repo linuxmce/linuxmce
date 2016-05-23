@@ -174,14 +174,21 @@ MediaSyncMode MediaState::SyncModeNeeded(string sDirectory, string sFile)
 
 		//is this our file or not source defined?
 		if(item.m_cSource != 'F' && item.m_cSource != 'P' && item.m_cSource != 0)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Not a valid file to get sync mode on.");
 			return modeNone;
+		}
+
+LoggerWrapper::GetInstance()->Write(LV_WARNING, "%s/%s: old file date %s, current file date %s", 
+sDirectory.c_str(), sFile.c_str(), 
+item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
 
 		if(StringUtils::SQLDateTime(item.m_sOldFileDate) != StringUtils::SQLDateTime(sCurrentFileDate))
 		{
 #ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update db for %s/%s: old file data %s, current file date %s", 
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update db for %s/%s: old file date %s, current file date %s",
 				sDirectory.c_str(), sFile.c_str(), 
-				item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str()); 
+				item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
 #endif
 			bNeedToUpdateDb = true;
 		}
@@ -305,14 +312,13 @@ void MediaState::FileSynchronized(Database_pluto_media *pDatabase_pluto_media, s
 //-----------------------------------------------------------------------------------------------------
 string MediaState::ReadMediaFileInfo(string sDirectory, string sFile)
 {
+	string sFilePath = sDirectory + "/" + sFile;
+
 #ifdef WIN32
 	struct __stat64 buf;
 #else
 	struct stat64 buf;
 #endif
-
-	auto_ptr<GenericFileHandler> spFileHandler(FileHandlerFactory::CreateFileHandler(sDirectory, sFile));
-	string sFilePath = sDirectory + "/" + spFileHandler->GetFileAttribute();
 
 #ifdef WIN32
 	if(!_stat64(sFilePath.c_str(), &buf))
