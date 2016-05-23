@@ -179,7 +179,7 @@ string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttri
 		}
 
 		if(!FileUtils::DirExists(m_sDirectory + "/" + sFileWithAttributes))
-			FileUtils::WriteTextFile(m_sDirectory + "/" + sFileWithAttributes, ""); //touch it
+			FileUtils::WriteTextFile(m_sDirectory + "/" + sFileWithAttributes, ""); //touch it/create .id3 file
 	}
 
 	return sFileWithAttributes;
