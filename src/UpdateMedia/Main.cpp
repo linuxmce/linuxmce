@@ -450,6 +450,7 @@ void *UpdateMediaThread(void *)
 		abstime.tv_nsec = 0;
 		flm.TimedCondWait(abstime);
 	}
+	return NULL;
 }
 
 void OnModify(list<string> &listFiles)
@@ -736,9 +737,12 @@ int main(int argc, char *argv[])
 			return res;
 		}
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Creating FileNotifier... ");
+
 		FileNotifier fileNotifier(g_pDatabase_pluto_media);
 		fileNotifier.RegisterCallbacks(OnModify, OnModify); //we'll use the same callback for OnCreate and OnDelete events
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Setting FileNotifier.Watch(es)... ");
 		vector<string> vectFolders;
 		StringUtils::Tokenize(sDirectory, "|", vectFolders);
 		for(vector<string>::iterator it = vectFolders.begin(); it != vectFolders.end(); ++it)
@@ -747,11 +751,14 @@ int main(int argc, char *argv[])
 			vectModifiedFolders.push_back(*it);
 		}
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Creating UpdateMediaThread... ");
 		pthread_t UpdateMediaThreadId;
 		pthread_create(&UpdateMediaThreadId, NULL, UpdateMediaThread, NULL);
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Creating FileStatusObserver(fileNotifier)... ");
 		FileStatusObserver::Instance().SetFileNotifier(&fileNotifier);
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Starting FileNotifier... ");
 		fileNotifier.Run();//it waits for worker thread to exit; the user must press CTRL+C to finish it
 
 		FileStatusObserver::Instance().UnsetFileNotifier();
@@ -761,7 +768,7 @@ int main(int argc, char *argv[])
 
 	FileStatusObserver::Instance().Finalize();
 	MutexTracking::Delete();
-	
+
 	return 0;
 }
 
