@@ -47,15 +47,15 @@ XTRALDLIBS += -lDCECommon -lSDL -lSDL_ttf -lSDL_image -lSGE -lSDL_gfx -lXtst -lX
 
 # USE_GTK can be passed in as additional defines to SNR_CPPFLAGS to add support for GTK progress bars and prompt dialogues.
 ifeq (USE_GTK,$(findstring USE_GTK, $(SNR_CPPFLAGS)))
-CPPFLAGS += `pkg-config --cflags gtk+-x11-2.0`
-LDFLAGS += `pkg-config --libs gtk+-x11-2.0`
+CPPFLAGS += $(shell pkg-config --cflags gtk+-x11-2.0)
+LDFLAGS += $(shell pkg-config --libs gtk+-x11-2.0)
 sources += Linux/GTKPromptUser.cpp \
 	   Linux/GTKProgressWnd.cpp
 endif
 
 # wmctrl wrapper
-CPPFLAGS += -I/usr/X11R6/include `pkg-config --cflags glib-2.0`
-XTRALDLIBS += -lX11 -lXmu `pkg-config --libs glib-2.0`
+CPPFLAGS += -I/usr/X11R6/include $(shell pkg-config --cflags glib-2.0)
+XTRALDLIBS += -lX11 -lXmu $(shell pkg-config --libs glib-2.0)
 
 Gen_Dev_Files +=
 sources += \
