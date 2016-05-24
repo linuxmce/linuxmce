@@ -417,7 +417,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 								// the following adds this image to the lmce picture vector
 								listPictures.push_back(make_pair(pPictureData, nBinSize));
 							}
-/						}
+						}
 					}
 				}
 			}
