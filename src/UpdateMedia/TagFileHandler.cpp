@@ -360,8 +360,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					TagLib::FLAC::Picture *pic = *it;
 
-					//TagLib::FLAC::Picture::Type picType = pic->type();
-					if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
+//					if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
 					{
 						int iType = (int)pic->type();
 						cout << "Picture found of type: " << iType << endl;
@@ -403,8 +402,8 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 						int iType = (int)picFrame->type();
 						cout << "Picture found of type: " << iType << ", string: " << picFrame->toString() << endl;
 
-//						if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover)
-//					        {
+//						if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover )
+					        {
 							if ( picFrame->mimeType() == "image/jpeg")
 							{
 								TagLib::ByteVector picData = picFrame->picture();
@@ -418,7 +417,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 								// the following adds this image to the lmce picture vector
 								listPictures.push_back(make_pair(pPictureData, nBinSize));
 							}
-//						}
+/						}
 					}
 				}
 			}
@@ -474,7 +473,8 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					TagLib::ASF::Attribute attr = *it;
 					TagLib::ASF::Picture pic = attr.toPicture();
-					if ( pic.type() == TagLib::ASF::Picture::FrontCover)
+
+//					if ( pic.type() == TagLib::ASF::Picture::FrontCover)
 				        {
 						TagLib::ByteVector picData = pic.picture();
 
