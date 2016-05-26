@@ -29,9 +29,9 @@ Gen_Dev_Files = $(GENDEV)/AirPlay_StreamerBase.cpp
 sources = Main.cpp AirPlay_Streamer.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS += `pkg-config --cflags avahi-client` `pkg-config --cflags glib-2.0` 
+CXXFLAGS += $(shell pkg-config --cflags avahi-client) $(shell pkg-config --cflags glib-2.0)
 CPPFLAGS +=
-LDFLAGS += `pkg-config --libs avahi-client` `pkg-config --libs glib-2.0`
+LDFLAGS += $(shell pkg-config --libs avahi-client) $(shell pkg-config --libs glib-2.0)
 XTRALDLIBS = -lshairport -lao -lplist -lvlc -lX11 -lXmu
 
 Gen_Dev_Files +=

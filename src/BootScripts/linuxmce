@@ -142,7 +142,7 @@ StartX() {
 		VT=vt"$((7+VT))"
 
 		# Start X11
-		if [[ "$PK_Distro" == "$DD_DISTRO_Raspbian_Wheezy_CONST" || "$PK_Distro" == "$DD_DISTRO_Raspbian_Jessie_CONST" ]] ;then
+		if [[ "$(lsb_release -is)" == "Raspbian" ]] ;then
 			# Raspbian does not get an xorg.conf
 			Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}")
 		else
@@ -241,6 +241,18 @@ start() {
 		Message "FIRSTBOOT NOT COMPLETE, CANNOT CONTINUE LOADING LINUXMCE."
 		err=1
 		return $err
+	fi
+
+	if [[ "$AutostartCore" -eq "0" ]] && [[ "$AutostartMedia" -eq "1" ]] ; then
+		CoreIP=""
+		while [ -z "$CoreIP" ] ; do
+		        CoreIP=$(/usr/pluto/bin/core-locator)
+		        if [ -z "$CoreIP" ] ; then
+		                echo "Waiting to locate core..."
+		                sleep 1
+		        fi
+		done
+		echo "*** Core Found @ $CoreIP"
 	fi
 
 	StartService "Starting LinuxMCE Update Service" "/usr/pluto/bin/LMCEUpdate_Apply.sh"

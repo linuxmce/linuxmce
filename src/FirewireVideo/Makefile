@@ -1,7 +1,7 @@
 
 CC = gcc
-CFLAGS=`pkg-config --cflags libdc1394` -ggdb3
-LIBS=`pkg-config --libs libdc1394`
+CFLAGS=$(shell pkg-config --cflags libdc1394) -ggdb3
+LIBS=$(shell pkg-config --libs libdc1394)
 
 all: bin
 

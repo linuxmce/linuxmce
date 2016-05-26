@@ -35,8 +35,8 @@ LDFLAGS += -L/usr/X11R6/lib
 XTRALDLIBS += -lDCECommon -lSDL_Helpers -lXtst -lGL -lGLU -lXrender -lXext -lSDL -lSDL_ttf -lSDL_image -lz
 
 # wmctrl wrapper
-CPPFLAGS += -I/usr/X11R6/include `pkg-config --cflags glib-2.0`
-XTRALDLIBS += -lX11 -lXmu `pkg-config --libs glib-2.0`
+CPPFLAGS += -I/usr/X11R6/include $(shell pkg-config --cflags glib-2.0)
+XTRALDLIBS += -lX11 -lXmu $(shell pkg-config --libs glib-2.0)
 
 # Remove unnessesary libraries for Maemo Orbiter
 #ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
