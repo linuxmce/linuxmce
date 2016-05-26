@@ -125,7 +125,7 @@ message(Qt version: $$[QT_VERSION])
 message(Qt is installed in $$[QT_INSTALL_PREFIX])
 message (Build Type: $$DEFINES)
 message( Opengl Status: $$glmsg )
-
+include (../../../../QtCommonIncludes/PlutoUtils.pri)
 SOURCES += ../../main.cpp \
         ../../../qOrbiter.cpp \
         ../../../../Gen_Devices/qOrbiterBase.cpp \
@@ -149,14 +149,6 @@ SOURCES += ../../main.cpp \
         ../../datamodels/securityscenarioitem.cpp \
         ../../datamodels/telecomscenarioitem.cpp \
         ../../screensaver/screensavermodule.cpp \
-        ../../../../PlutoUtils/uuencode.cpp \
-        ../../../../PlutoUtils/ThreadedClass.cpp \
-        ../../../../PlutoUtils/Other.cpp \
-        ../../../../PlutoUtils/MultiThreadIncludes.cpp \
-        ../../../../PlutoUtils/minilzo.cpp \
-        ../../../../PlutoUtils/md5c.cpp \
-        ../../../../PlutoUtils/FileUtils.cpp \
-        ../../../../PlutoUtils/CommonIncludes.cpp \
         ../../../../SerializeClass/SerializeClass.cpp \
         ../../../../DCE/Virtual_Device_Translator.cpp \
         ../../../../DCE/Socket.cpp \
@@ -171,7 +163,6 @@ SOURCES += ../../main.cpp \
         ../../../../DCE/DataGrid.cpp \
         ../../../../DCE/Command_Impl.cpp \
         ../../../../DCE/AlarmManager.cpp \
-        ../../../../PlutoUtils/StringUtils.cpp \
         ../../../../DCE/ClientSocket.cpp \
         ../../../../DCE/DeviceData_Base.cpp \
         ../../../../DCE/DeviceData_Impl.cpp \
@@ -179,7 +170,6 @@ SOURCES += ../../main.cpp \
         ../../datamodels/skindataitem.cpp \
         ../../datamodels/DataModelItems/filtermodelitem.cpp \
         ../../datamodels/DataModelItems/genreitem.cpp \
-        ../../../../PlutoUtils/getch.cpp \
         ../../datamodels/DataModelItems/attributesortitem.cpp \
         ../../datamodels/attributesortmodel.cpp \
         ../../datamodels/DataModelItems/mediatypeitem.cpp \
@@ -249,13 +239,6 @@ qtcAddDeployment()
 
 
 HEADERS += \
-        ../../../../PlutoUtils/ThreadedClass.h \
-        ../../../../PlutoUtils/MultiThreadIncludes.h \
-        ../../../../PlutoUtils/StringUtils.h \
-        ../../../../PlutoUtils/CommonIncludes.h \
-        ../../../../PlutoUtils/Other.h \
-        ../../../../PlutoUtils/getch.h \
-        ../../../../PlutoUtils/MyStl.h \
         ../../../../DCE/DeviceData_Base.h \
         ../../../../DCE/Message.h \
         ../../../../DCE/ServerLogger.h \
@@ -266,7 +249,6 @@ HEADERS += \
         ../../../../DCE/PlainClientSocket.h \
         ../../../../DCE/AlarmManager.h \
         ../../../../SerializeClass/SerializeClass.h \
-        ../../../../PlutoUtils/FileUtils.h \
         ../../../../pluto_main/Define_DeviceCategory.h \
         ../../../../pluto_main/Define_DeviceTemplate.h \
         ../../../qOrbiter.h \
