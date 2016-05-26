@@ -30,9 +30,9 @@ sources = lmce_game_update_mame.cpp \
 	MAMEParser.cpp
 #<-dceag-mh-e->
 
-CXXFLAGS += `pkg-config libxml++-2.6 --cflags`
+CXXFLAGS += $(shell pkg-config libxml++-2.6 --cflags)
 CPPFLAGS += 
-LDFLAGS += `pkg-config libxml++-2.6 --libs`
+LDFLAGS += $(shell pkg-config libxml++-2.6 --libs)
 XTRALDLIBS = -llmce_game
 
 Gen_Dev_Files +=

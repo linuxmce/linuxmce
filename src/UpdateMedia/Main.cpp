@@ -261,19 +261,19 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 
 	//char *AffectedTables[] =
 	//{
-	//	"File_Attribute", 
-	//	"Attribute_Settings", 
-	//	"CoverArtScan", 
-	//	"Disc_Attribute", 
-	//	"Download_Attribute", 
-	//	"LongAttribute", 
-	//	"Picture_Attribute", 
+	//	"File_Attribute",
+	//	"Attribute_Settings",
+	//	"CoverArtScan",
+	//	"Disc_Attribute",
+	//	"Download_Attribute",
+	//	"LongAttribute",
+	//	"Picture_Attribute",
 	//	"SearchToken_Attribute"
 	//};
-	
+
 	//for(int i = 0; i < sizeof(AffectedTables) / sizeof(char *); ++i)
 	//{
-	//	string sSqlMoveRowsFromDuplicates = 
+	//	string sSqlMoveRowsFromDuplicates =
 	//		"UPDATE Attribute JOIN File_Attribute ON FK_Attribute = PK_Attribute\n"
 	//		"SET FK_Attribute = " + string(row[dafAttribute]) + "\n"
 	//		"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
@@ -281,22 +281,22 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 	//		"AND PK_Attribute <> " + row[dafAttribute];
 	//	g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlMoveRowsFromDuplicates);
 	//}
-	
-	//string sSqlDeleteDuplicates = 
+
+	//string sSqlDeleteDuplicates =
 	//	"DELETE FROM Attribute\n"
 	//	"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
 	//	"AND Name = '" + StringUtils::SQLEscape(row[dafName]) + "'\n"
 	//	"AND PK_Attribute <> " + row[dafAttribute];
-	
+
 	//            int nAffectedRecords = g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlDeleteDuplicates);
 	//if(nAffectedRecords == -1)
 	//{
-	//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to remove duplicated attributes! Query: %s",
+	//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Main:CombineAttributes Failed to remove duplicated attributes! Query: %s",
 	//		sSqlDeleteDuplicates.c_str());
 	//}
 	//else
 	//{
-	//	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Removed %d duplicated attributes for '%s'", 
+	//	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:CombineAttributes Removed %d duplicated attributes for '%s'", 
 	//		nAffectedRecords, row[dafName]); 
 	//}
 
@@ -323,7 +323,7 @@ void RemoveDuplicatedAttributes()
 		dafAttribute
 	};
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Removing duplicated attributes..."); 
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Main:RemoveDuplicatedAttributes Removing duplicated attributes..."); 
 
 	PlutoSqlResult result;
 	DB_ROW row;
@@ -338,7 +338,7 @@ void RemoveDuplicatedAttributes()
 		}
 	}
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Finished removing duplicated attributes!"); 
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- RemoveDuplicatedAttributes Finished removing duplicated attributes!"); 
 }
 
 void *UpdateMediaThread(void *)
@@ -354,13 +354,13 @@ void *UpdateMediaThread(void *)
 	{
 		//load info about ModificationData, AttrCount, AttrDate, attributes, timestamp for all files
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loading fresh data from db...");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Loading fresh data from db...");
 #endif
 		MediaState::Instance().LoadDbInfo(g_pDatabase_pluto_media, UpdateMediaVars::sDirectory);
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded fresh data from db");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Loaded fresh data from db");
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Worker thread: \"I'm wake!\"");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Worker thread: \"I'm wake!\"");
 #endif
 		//UPnP changes: as UPnP mount share doesn't work with inotify (??
 		//at least I don't see it firing any expected events, we are manually
@@ -378,7 +378,7 @@ void *UpdateMediaThread(void *)
 
 			if (!vsChanges.empty())
 			{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "UPnP mount point devices list changed, adding %s for processing", sUPnPMountPoint.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:UpdateMediaThread UPnP mount point devices list changed, adding %s for processing", sUPnPMountPoint.c_str());
 				vsUPnPDevices = vsNewDevices;
 				vectModifiedFolders.push_back(sUPnPMountPoint);
 			}
@@ -397,10 +397,10 @@ void *UpdateMediaThread(void *)
 			string sItem = vectModifiedFolders.front();
 			flm.Release();
 
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Folder to process: %s", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:UpdateMediaThread Folder to process: %s", sItem.c_str());
 			PLUTO_SAFETY_LOCK(cm, g_ConnectionMutex );
 #ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronizing '%s'...", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Synchronizing '%s'...", sItem.c_str());
 #endif
 			PlutoMediaFile::ResetNewFilesAddedStatus();
 
@@ -414,7 +414,7 @@ void *UpdateMediaThread(void *)
 			if( bUpdateThumbnails )
 				engine.UpdateThumbnails();
 #ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronized '%s'.", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Synchronized '%s'.", sItem.c_str());
 #endif
 			if(PlutoMediaFile::NewFilesAdded())
 			{
@@ -436,7 +436,7 @@ void *UpdateMediaThread(void *)
 
 				RemoveDuplicatedAttributes();
 #ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command \"Check for new files\" sent!");
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Command \"Check for new files\" sent!");
 #endif
 			}
 
@@ -444,12 +444,13 @@ void *UpdateMediaThread(void *)
 			vectModifiedFolders.erase(vectModifiedFolders.begin());
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Nothing to process, sleeping 2 minute...");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:UpdateMediaThread Nothing to process, sleeping 2 minute...");
 		timespec abstime;
 		abstime.tv_sec = (long) (time(NULL) + 120);  //2 minutes
 		abstime.tv_nsec = 0;
 		flm.TimedCondWait(abstime);
 	}
+	return NULL;
 }
 
 void OnModify(list<string> &listFiles)
@@ -462,8 +463,8 @@ void OnModify(list<string> &listFiles)
 		if(0 != stat(sItem.c_str(), &st))
 		{
 #ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "stat failed for %s. We'll try to parent!", sItem.c_str());
-#endif			
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:OnModify stat failed for %s. We'll try to parent!", sItem.c_str());
+#endif
 			size_t nPos = sItem.rfind("/");
 			if(nPos != string::npos)
 				sItem = sItem.substr(0, nPos);
@@ -471,7 +472,7 @@ void OnModify(list<string> &listFiles)
 			if(0 != stat(sItem.c_str(), &st))
 			{
 #ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "stat failed for %s. We'll skip it!", sItem.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:OnModify stat failed for %s. We'll skip it!", sItem.c_str());
 #endif
 				continue;
 			}
@@ -485,7 +486,7 @@ void OnModify(list<string> &listFiles)
 				sItem = sItem.substr(0, nPos);
 		}
 #ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "New folder %s to sync...", sItem.c_str());        
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:OnModify New folder %s to sync...", sItem.c_str());        
 #endif
 		PLUTO_SAFETY_LOCK(flm, g_FoldersListMutex);
 
@@ -514,14 +515,14 @@ int connectToDataBase(string sDBHost, string sDBUser, string sDBPassword, string
         g_pDatabase_pluto_media = new Database_pluto_media(LoggerWrapper::GetInstance());
         if( !g_pDatabase_pluto_media->Connect(sDBHost,sDBUser,sDBPassword,sPlutoMediaDbName,iDBPort) )
         {
-            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database!" );
+            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Main:connectToDataBase Cannot connect to database!" );
             return 1;
         }
 
         g_pDatabase_pluto_main = new Database_pluto_main(LoggerWrapper::GetInstance());
         if( !g_pDatabase_pluto_main->Connect(sDBHost,sDBUser,sDBPassword, sPlutoMainDbName,iDBPort) )
         {
-            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database!" );
+            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Main:connectToDataBase Cannot connect to database!" );
             return 2;
         }
 	return 0;
@@ -719,7 +720,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Running as daemon... ");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Running as daemon... ");
 
 		pthread_cond_init(&g_ActionCond, NULL);
 		g_ConnectionMutex.Init(NULL);
@@ -736,9 +737,12 @@ int main(int argc, char *argv[])
 			return res;
 		}
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Creating FileNotifier... ");
+
 		FileNotifier fileNotifier(g_pDatabase_pluto_media);
 		fileNotifier.RegisterCallbacks(OnModify, OnModify); //we'll use the same callback for OnCreate and OnDelete events
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Setting FileNotifier.Watch(es)... ");
 		vector<string> vectFolders;
 		StringUtils::Tokenize(sDirectory, "|", vectFolders);
 		for(vector<string>::iterator it = vectFolders.begin(); it != vectFolders.end(); ++it)
@@ -747,11 +751,14 @@ int main(int argc, char *argv[])
 			vectModifiedFolders.push_back(*it);
 		}
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Creating UpdateMediaThread... ");
 		pthread_t UpdateMediaThreadId;
 		pthread_create(&UpdateMediaThreadId, NULL, UpdateMediaThread, NULL);
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Creating FileStatusObserver(fileNotifier)... ");
 		FileStatusObserver::Instance().SetFileNotifier(&fileNotifier);
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:main Starting FileNotifier... ");
 		fileNotifier.Run();//it waits for worker thread to exit; the user must press CTRL+C to finish it
 
 		FileStatusObserver::Instance().UnsetFileNotifier();
@@ -761,7 +768,7 @@ int main(int argc, char *argv[])
 
 	FileStatusObserver::Instance().Finalize();
 	MutexTracking::Delete();
-	
+
 	return 0;
 }
 

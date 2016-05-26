@@ -64,7 +64,7 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	GetTagInfo(sFileWithAttributes, mapAttributes, listPicturesForTags);
 
 #ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: tag attributes loaded (from tag file - common tags) %d", mapAttributes.size());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::LoadAttributes: tag attributes loaded (from tag file - common tags) %d", mapAttributes.size());
 #endif
 	//merge attributes into PlutoMediaAttributes
 	for(map<int, string>::iterator it = mapAttributes.begin(), end = mapAttributes.end(); it != end; ++it)
@@ -72,7 +72,7 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		int nType = it->first;
 		string sValue = it->second;
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# LoadAttributes, from file: type %d: '%s'", nType, sValue.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::LoadAttributes, from file: type %d: '%s'", nType, sValue.c_str());
 
 		std::vector<string> vsValues;
 		stov(sValue, vsValues);
@@ -360,8 +360,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					TagLib::FLAC::Picture *pic = *it;
 
-					//TagLib::FLAC::Picture::Type picType = pic->type();
-					if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
+//					if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
 					{
 						int iType = (int)pic->type();
 						cout << "Picture found of type: " << iType << endl;
@@ -403,8 +402,8 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 						int iType = (int)picFrame->type();
 						cout << "Picture found of type: " << iType << ", string: " << picFrame->toString() << endl;
 
-//						if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover)
-//					        {
+//						if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover )
+					        {
 							if ( picFrame->mimeType() == "image/jpeg")
 							{
 								TagLib::ByteVector picData = picFrame->picture();
@@ -418,7 +417,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 								// the following adds this image to the lmce picture vector
 								listPictures.push_back(make_pair(pPictureData, nBinSize));
 							}
-//						}
+						}
 					}
 				}
 			}
@@ -474,7 +473,8 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					TagLib::ASF::Attribute attr = *it;
 					TagLib::ASF::Picture pic = attr.toPicture();
-					if ( pic.type() == TagLib::ASF::Picture::FrontCover)
+
+//					if ( pic.type() == TagLib::ASF::Picture::FrontCover)
 				        {
 						TagLib::ByteVector picData = pic.picture();
 
@@ -624,7 +624,7 @@ void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string s
 void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures)
 {
 #ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: SetTagInfo");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SetTagInfo for %s", sFilename.c_str());
 #endif
 
 	FileRef *f = new FileRef(sFilename.c_str());
@@ -684,7 +684,7 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 {
 #ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::RemoveTag - failing for mpeg? so disabled atm");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# DISABLED -- TagFileHandler::RemoveTag - failing for mpeg? so disabled atm");
 #endif
 /*
 	FileRef *f = new FileRef(sFilename.c_str());

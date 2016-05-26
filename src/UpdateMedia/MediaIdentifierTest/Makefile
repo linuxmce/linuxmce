@@ -13,6 +13,17 @@ MYDEVTEMPLATEID = 8mplateID
 
 sources = MediaIdentifierTest.cpp ../MediaIdentifier.cpp
 
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+	MYSQL_LIBS = -lmysqlclient_r
+endif
+
 CXXFLAGS += -g -O0
 CPPFLAGS += 
 LDFLAGS += 
