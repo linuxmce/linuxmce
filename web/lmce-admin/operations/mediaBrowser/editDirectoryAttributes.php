@@ -307,18 +307,18 @@ function confirmation()
 		$subType = $_POST['subType'];
 		$fileFormat = $_POST['fileFormat'];
 		updateMediaType($subType, $fileFormat, $filesArray, $mediadbADO);
+		header('Location: index.php?section=editDirectoryAttributes&fileID='.$fileID.'&msg='.$TEXT_MEDIA_FILE_UPDATED_CONST);			
+		exit();
 		}
 		
 		if (isset($_POST['clean_value']) && $_POST['clean_value'] == true)  // This value is always set, must explicitly check value -tschak
 		{
-		cleanFiles($filesArray, $mediadbADO);
-			
-			header('Location: index.php?section=editDirectoryAttributes&fileID='.$fileID.'&msg='.$TEXT_CLEANED_FILES_CONST);			
+		cleanFiles($filesArray, $mediadbADO);			
+		header('Location: index.php?section=editDirectoryAttributes&fileID='.$fileID.'&msg='.$TEXT_CLEANED_FILES_CONST);			
 		exit();
 		}
 		
-		header('Location: index.php?section=editDirectoryAttributes&fileID='.$fileID.'&msg='.$TEXT_MEDIA_FILE_UPDATED_CONST);			
-		exit();
+		
 	}
 
 	$output->setMenuTitle($TEXT_FILES_AND_MEDIA_CONST.' |');
