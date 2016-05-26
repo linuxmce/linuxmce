@@ -1066,6 +1066,24 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 
+    m_bPK_Device_NowPlaying_Audio_DiscreteVolume = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    emit discreteAudioChanged(m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
+
+    m_bContainsVideo = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    emit containsVideo(m_bContainsVideo);
+
+    m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    emit liveAvPath(m_bUsingLiveAVPath);
+    getVolume();
+
+   pos=0;
+    m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_DesignObj_Remote_Popup=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());  // ON UI2 the leftmost popup menu on the main menu
+    m_iPK_Screen_FileList=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_RemoteOSD=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_OSD_Speed=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_OSD_Track=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+
     DeviceData_Base *npd = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device_NowPlaying);
 
     QVariantMap infoMap;
@@ -1076,15 +1094,19 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         for(std::map<int, std::string>::iterator cmd_it  =npd->m_mapCommands.begin(); cmd_it!=npd->m_mapCommands.end(); cmd_it++){
             cmdMap.insert(QString::fromStdString(cmd_it->second), cmd_it->first);
         }
-        qDebug() << cmdMap;
+
         int dt = npd->m_dwPK_DeviceTemplate;
         int cat = npd->m_dwPK_DeviceCategory;
         int dv = npd->m_dwPK_Device;
         infoMap.insert("device", dv);
         infoMap.insert("isEmbedded", npd->m_bIsEmbedded);
         infoMap.insert("device_template", dt);
-        infoMap.insert("category", cat);
+        infoMap.insert("device_category", cat);
         infoMap.insert("name", QString::fromStdString(npd->m_sDescription));
+        infoMap.insert("screen_remote", m_iPK_Screen_Remote);
+        infoMap.insert("screen_remote_osd", m_iPK_Screen_RemoteOSD);
+        infoMap.insert("remote_popup_designobj", m_iPK_DesignObj_Remote_Popup );
+        infoMap.insert("screen_file_list", m_iPK_Screen_FileList);
     } else {
         infoMap.insert("isEmbedded",false);
         infoMap.insert("device_template", -1);
@@ -1103,6 +1125,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     np_deviceList.append(infoMap);
     emit nowPlayingDeviceListChanged(np_deviceList);
 
+    qDebug() << np_deviceList;
+
     if(this->m_bIsOSD ){
 
     }
@@ -1112,25 +1136,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit monitorStatusChanged(true);
     }
 
-    m_bPK_Device_NowPlaying_Audio_DiscreteVolume = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    emit discreteAudioChanged(m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
 
-    m_bContainsVideo = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    emit containsVideo(m_bContainsVideo);
-
-
-    m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    emit liveAvPath(m_bUsingLiveAVPath);
-    getVolume();
-    pos=0;
-    /*
-    m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    m_iPK_DesignObj_Remote_Popup=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());  // ON UI2 the leftmost popup menu on the main menu
-    m_iPK_Screen_FileList=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    m_iPK_Screen_RemoteOSD=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    m_iPK_Screen_OSD_Speed=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    m_iPK_Screen_OSD_Track=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    */
 
     QString scrn = sPK_DesignObj.c_str();
     int pos1 = scrn.indexOf(",");
