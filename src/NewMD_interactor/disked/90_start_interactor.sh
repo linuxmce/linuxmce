@@ -21,15 +21,6 @@ if [ -f "$DEVICEID_FILE" ]; then
 	exit 0
 fi
 
-CoreIP=""
-while [ -z "$CoreIP" ] ; do
-	CoreIP=$(/usr/pluto/bin/core-locator)
-	if [ -z "$CoreIP" ] ; then
-		echo "Interactor: Waiting to locate core..."
-		sleep 1
-	fi
-done
-
 MyIP=""
 while [ -z "$MyIP" ] ; do
 	MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
