@@ -73,15 +73,16 @@ bool qOrbiter::GetConfig()
 
     int dt = m_pData->m_dwPK_DeviceTemplate;
     if( dt ==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
-        m_bIsOSD=true;
+      //  m_bIsOSD=true;
     } else{
-        m_bIsOSD = false;
+       // m_bIsOSD = false;
     }
 
     emit deviceTemplateChanged(dt);
     PurgeInterceptors();
+#ifndef Q_OS_IOS
     RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
-
+#endif
     return true;
 
 }
@@ -1076,7 +1077,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     emit liveAvPath(m_bUsingLiveAVPath);
     getVolume();
 
-   pos=0;
+    pos=0;
     m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
     m_iPK_DesignObj_Remote_Popup=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());  // ON UI2 the leftmost popup menu on the main menu
     m_iPK_Screen_FileList=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
@@ -1087,8 +1088,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     DeviceData_Base *npd = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device_NowPlaying);
 
     QVariantMap infoMap;
-
-
     if(npd && iPK_MediaType != 0){
         QVariantMap cmdMap;
         for(std::map<int, std::string>::iterator cmd_it  =npd->m_mapCommands.begin(); cmd_it!=npd->m_mapCommands.end(); cmd_it++){
@@ -1127,20 +1126,17 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     qDebug() << np_deviceList;
 
-    if(this->m_bIsOSD ){
+    if(m_dwPK_Device_CaptureCard != 0)   {emit monitorStatusChanged(true); }
 
+
+    QString scrn;
+    if(m_bIsOSD && m_iPK_Screen_RemoteOSD != 0){
+        scrn = QString::number(m_iPK_Screen_RemoteOSD);
+    } else {
+        scrn = QString::number(m_iPK_Screen_Remote);
     }
 
-    if(m_dwPK_Device_CaptureCard != 0)
-    {
-        emit monitorStatusChanged(true);
-    }
-
-
-
-    QString scrn = sPK_DesignObj.c_str();
-    int pos1 = scrn.indexOf(",");
-    scrn.remove(pos1, scrn.length());
+    qDebug() << "Is OSD?" << m_bIsOSD;
 
     internal_streamID = iStreamID;
     emit np_playlistIndexChanged(iValue);
@@ -1159,11 +1155,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit clearTVplaylist();
     } else {
 
-
-
         if(iPK_MediaType ==4|| iPK_MediaType==5){
             QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
-
             checkTimeCode(m_dwPK_Device_NowPlaying);
             emit newTCport(port.toInt());
         }
