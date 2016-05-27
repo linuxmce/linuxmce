@@ -287,5 +287,6 @@
         <file>qml/skins/default/+xlarge/Style.qml</file>
         <file>qml/skins/default/+medium/MainLayout.qml</file>
         <file>qml/skins/default/+xlarge/Main.qml</file>
+        <file>qml/skins/default/components/StyledOSDScreen.qml</file>
     </qresource>
 </RCC>
