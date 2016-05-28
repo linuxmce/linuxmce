@@ -23,8 +23,8 @@ using namespace DCE;
 
 CameraDevice::CameraDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : m_pAIPC(pAIPC), m_pDevice(pData)
 {
-    m_sUser = pData->m_mapParameters[DEVICEDATA_AuthUser_CONST];
-    m_sPasswd = pData->m_mapParameters[DEVICEDATA_AuthPassword_CONST];
+    m_sUser = pData->m_mapParameters_Find(DEVICEDATA_AuthUser_CONST);
+    m_sPasswd = pData->m_mapParameters_Find(DEVICEDATA_AuthPassword_CONST);
     m_sBaseURL = "http://"+pData->m_sIPAddress;
     int port = atoi(pData->m_mapParameters[DEVICEDATA_TCP_Port_CONST].c_str());
     if (port == 0) {
