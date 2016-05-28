@@ -17,16 +17,20 @@
 #include "openssl/ssl.h"
 #include "plugin/wsaapi.h"
 #include "plugin/wsseapi.h"
+#include "Gen_Devices/AllCommandsRequests.h"
 
 #include <iostream>
 using namespace std;
 using namespace DCE;
 
 OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : CameraDevice(pAIPC, pData),
-    m_pDeviceProxy(NULL), m_pPTZProxy(NULL), m_pMediaProxy(NULL)
+    m_pDeviceProxy(NULL), m_pPTZProxy(NULL), m_pMediaProxy(NULL), m_pEventsProxy(NULL), m_pPullPointProxy(NULL)
 {
+    m_OnvifThread = 0;
+
+    string firstProfile = "";
     string url = m_sBaseURL;
-	url += "/onvif/device_service"; // default onvif entry point
+    url += "/onvif/device_service"; // default onvif entry point
 	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): url = %s", url.c_str());
     m_pDeviceProxy = new DeviceBindingProxy(url.c_str());
 
@@ -47,7 +51,7 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                 LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): creating Media proxy for: %s", pCaps->Media->XAddr.c_str());
                 m_pMediaProxy = new MediaBindingProxy(pCaps->Media->XAddr.c_str());
                 soap_wsse_add_Security(m_pMediaProxy);
-                soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+                soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_sUser.c_str(), m_sPasswd.c_str());
 
                 bool hasMediaProfile = false;
                 m_sMediaProfileToken = "LinuxMCE";
@@ -60,10 +64,15 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
 #endif
                     for (size_t i = 0; i < getprofilesresp.Profiles.size(); i++) {
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Media profile: %s", getprofilesresp.Profiles[i]->Name.c_str());
+                        if (i == 0)
+                            firstProfile = getprofilesresp.Profiles[i]->token;
                         if (getprofilesresp.Profiles[i]->token == m_sMediaProfileToken)
                             hasMediaProfile = true;
                     }
-                }
+		} else {
+			m_pMediaProxy->soap_stream_fault(std::cerr);
+            LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error gettting media profiles");
+        }
 
                 /*_trt__DeleteProfile dp;
                 _trt__DeleteProfileResponse dpr;
@@ -77,7 +86,7 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                     cp.Name = m_sMediaProfileToken;
                     cp.Token = &m_sMediaProfileToken;
                     _trt__CreateProfileResponse cpr;
-                    soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+                    soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_sUser.c_str(), m_sPasswd.c_str());
 #if GSOAP_VERSION >= 20822
                     if (m_pMediaProxy->CreateProfile(&cp, cpr) == SOAP_OK) {
 #else
@@ -87,7 +96,7 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
 
                     } else {
                         m_pMediaProxy->soap_stream_fault(std::cerr);
-                        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Error creating media profile");
+                        LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error creating media profile");
                     }
 
                 }
@@ -95,7 +104,7 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                 // First, find available sources
                 _trt__GetVideoSourceConfigurations gvsc;
                 _trt__GetVideoSourceConfigurationsResponse gvscr;
-                soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+                soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_sUser.c_str(), m_sPasswd.c_str());
 #if GSOAP_VERSION >= 20822
                 if (m_pMediaProxy->GetVideoSourceConfigurations(&gvsc, gvscr) == SOAP_OK) {
 #else
@@ -107,7 +116,7 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                         _trt__AddVideoSourceConfigurationResponse avscr;
                         avsc.ProfileToken = m_sMediaProfileToken;
                         avsc.ConfigurationToken = gvscr.Configurations[0]->token;
-                        soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+                        soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, "Id", m_sUser.c_str(), m_sPasswd.c_str());
 #if GSOAP_VERSION >= 20822
                         if (m_pMediaProxy->AddVideoSourceConfiguration(&avsc, avscr) == SOAP_OK) {
 #else
@@ -121,14 +130,14 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                     }
                 } else {
                     m_pMediaProxy->soap_stream_fault(std::cerr);
-                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Error getting video source configurations");
+                    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error getting video source configurations");
                 }
                 if (!m_sMediaProfileToken.empty()) {
                     _trt__GetSnapshotUri gsu;
                     gsu.ProfileToken = m_sMediaProfileToken;
                     _trt__GetSnapshotUriResponse gsur;
                     soap_wsse_add_Security(m_pMediaProxy);
-                    soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, NULL, m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+                    soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, NULL, m_sUser.c_str(), m_sPasswd.c_str());
 #if GSOAP_VERSION >= 20822
                     if (m_pMediaProxy->GetSnapshotUri(&gsu, gsur) == SOAP_OK) {
 #else
@@ -139,17 +148,24 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Image URI: %s", m_sImageURI.c_str());
                     } else {
                         m_pMediaProxy->soap_stream_fault(std::cerr);
-                        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Error getting Image URI");
+                        LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error getting Image URI");
                     }
                 }
-            }
+                if (firstProfile != "") {
+                    string streamURI = GetStreamURI(firstProfile);
+                    CMD_Set_Device_Data_DT cmd(pAIPC->m_dwPK_Device, DEVICETEMPLATE_General_Info_Plugin_CONST,
+                                           BL_SameHouse, pData->m_dwPK_Device,
+                                           streamURI, DEVICEDATA_Video_settings_CONST);
+                    pAIPC->SendCommand(cmd);
+                }
+            } // if pCaps->Media != null
             if (pCaps->PTZ != NULL)
             {
                 LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): * PTZ");
                 LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): creating PTZ proxy for: %s", pCaps->PTZ->XAddr.c_str());
                 m_pPTZProxy = new PTZBindingProxy(pCaps->PTZ->XAddr.c_str());
                 soap_wsse_add_Security(m_pPTZProxy);
-                soap_wsse_add_UsernameTokenDigest(m_pPTZProxy, NULL,  m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+                soap_wsse_add_UsernameTokenDigest(m_pPTZProxy, NULL, m_sUser.c_str(), m_sPasswd.c_str());
                 _tptz__GetNodes getNodes;
                 _tptz__GetNodesResponse pGnresp;
 #if GSOAP_VERSION >= 20822
@@ -173,13 +189,13 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                     }
                 } else {
                     m_pPTZProxy->soap_stream_fault(std::cerr);
-                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Error getting PTZ nodes");
+                    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error getting PTZ nodes");
                 }
 
                 // Get PTZ configurations
                 _tptz__GetConfigurations gptzc;
                 _tptz__GetConfigurationsResponse gptzr;
-                soap_wsse_add_UsernameTokenDigest(m_pPTZProxy, NULL, m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+                soap_wsse_add_UsernameTokenDigest(m_pPTZProxy, NULL, m_sUser.c_str(), m_sPasswd.c_str());
                 string sPtzConfigToken;
 #if GSOAP_VERSION >= 20822
                 if (m_pPTZProxy->GetConfigurations(&gptzc, gptzr) == SOAP_OK) {
@@ -206,7 +222,7 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                     }
                 } else {
                     m_pPTZProxy->soap_stream_fault(std::cerr);
-                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Error getting PTZ configurations");
+                    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error getting PTZ configurations");
                 }
 
                 if (m_pMediaProxy != NULL) {
@@ -215,7 +231,7 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                     apc.ProfileToken = m_sMediaProfileToken;
                     apc.ConfigurationToken = sPtzConfigToken;
                     _trt__AddPTZConfigurationResponse apcr;
-                    soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, NULL,  m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+                    soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, NULL, m_sUser.c_str(), m_sPasswd.c_str());
 #if GSOAP_VERSION >= 20822
                     if (m_pMediaProxy->AddPTZConfiguration(&apc, apcr) == SOAP_OK) {
 #else
@@ -225,12 +241,170 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Added PTZ config to media profile");
                     } else {
                         m_pMediaProxy->soap_stream_fault(std::cerr);
-                        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Error adding PTZ config to media profile");
+                        LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error adding PTZ config to media profile");
                     }
                 }
             }
+            if (pCaps->Events != NULL)
+            {
+                LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): * Events");
+                LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): - WSPausableSubscriptionManagerInterfaceSupport: %s", pCaps->Events->WSPausableSubscriptionManagerInterfaceSupport ? "Yes" : "No");
+                LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): - WSPullPointSupport: %s", pCaps->Events->WSPullPointSupport ? "Yes" : "No");
+                LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): - WSSubscriptionPolicySupport: %s", pCaps->Events->WSSubscriptionPolicySupport ? "Yes" : "No");
+                LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): creating Events proxy for: %s", pCaps->Events->XAddr.c_str());
+                m_pEventsProxy = new PullPointSubscriptionBindingProxy(pCaps->Events->XAddr.c_str());
+                soap_wsse_add_Security(m_pEventsProxy);
+                soap_wsse_add_UsernameTokenDigest(m_pEventsProxy, NULL, m_sUser.c_str(), m_sPasswd.c_str());
 
-		}
+                _tev__GetEventProperties gep;
+                _tev__GetEventPropertiesResponse gepr;
+#if GSOAP_VERSION >= 20822
+                if (m_pEventsProxy->GetEventProperties(&gep, gepr) == SOAP_OK) {
+#else
+                if (m_pEventsProxy->GetEventProperties(&gep, &gepr) == SOAP_OK) {
+#endif
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: TopicNamespaceLocation");
+                    for (size_t i = 0; i < gepr.TopicNamespaceLocation.size(); i++) {
+                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, " - %s", gepr.TopicNamespaceLocation.at(i).c_str());
+                    }
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: fixedTopicSet = %s", gepr.wsnt__FixedTopicSet ? "Yes" : "No");
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: Topics:");
+                    if (gepr.wstop__TopicSet != NULL && gepr.wstop__TopicSet->documentation != NULL && gepr.wstop__TopicSet->documentation->__mixed != NULL) {
+                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, " - %s", gepr.wstop__TopicSet->documentation->__mixed);
+                    } else {
+                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, " - None");
+                    }
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: MessageContentFilterDialect");
+                    for (size_t i = 0; i < gepr.MessageContentFilterDialect.size(); i++) {
+                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, " - %s", gepr.MessageContentFilterDialect.at(i).c_str());
+                    }
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: MessageContentSchemaLocation");
+                    for (size_t i = 0; i < gepr.MessageContentSchemaLocation.size(); i++) {
+                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, " - %s", gepr.MessageContentSchemaLocation.at(i).c_str());
+                    }
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: ProducerPropertiesFilterDialect");
+                    for (size_t i = 0; i < gepr.ProducerPropertiesFilterDialect.size(); i++) {
+                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, " - %s", gepr.ProducerPropertiesFilterDialect.at(i).c_str());
+                    }
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: wsnt__TopicExpressionDialect");
+                    for (size_t i = 0; i < gepr.wsnt__TopicExpressionDialect.size(); i++) {
+                         LoggerWrapper::GetInstance ()->Write (LV_WARNING, " - %s", gepr.wsnt__TopicExpressionDialect.at(i).c_str());
+                    }
+
+                } else {
+                    m_pEventsProxy->soap_stream_fault(std::cerr);
+                    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error getting event profiles");
+                }
+                soap_wsse_add_UsernameTokenDigest(m_pEventsProxy, NULL, m_sUser.c_str(), m_sPasswd.c_str());
+                _tev__GetServiceCapabilities gsc;
+                _tev__GetServiceCapabilitiesResponse gscr;
+#if GSOAP_VERSION >= 20822
+                if (m_pEventsProxy->GetServiceCapabilities(&gsc, gscr) == SOAP_OK) {
+#else
+                if (m_pEventsProxy->GetServiceCapabilities(&gsc, &gscr) == SOAP_OK) {
+#endif
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: Service capabilities:");
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: WSSubscriptionPolicySupport: %s", gscr.Capabilities->WSSubscriptionPolicySupport != NULL && gscr.Capabilities->WSSubscriptionPolicySupport ? "Yes" : "No");
+                } else {
+                    m_pEventsProxy->soap_stream_fault(std::cerr);
+                    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error getting service capabilities");
+                }
+
+                LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: Creating pull point:");
+                soap_wsse_add_UsernameTokenDigest(m_pEventsProxy, NULL, m_sUser.c_str(), m_sPasswd.c_str());
+/*
+                _wsnt__CreatePullPoint cpps;
+                _wsnt__CreatePullPointResponse cppr;
+#if GSOAP_VERSION >= 20822
+                if (m_pEventsProxy->CreatePullPoint(&cpps, cppr) == SOAP_OK) {
+#else
+                if (m_pEventsProxy->CreatePullPoint(&cpps, &cppr) == SOAP_OK) {
+#endif
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: pull point subscription created:");
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: address : %s", cppr.PullPoint.Address);
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): size %d", cppr.PullPoint.__size);
+//                    for (int i = 0; i < cppr.PullPoint.__size; i++) {
+  //                      LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): size %d", cppr.PullPoint.__anyAttribute);
+//                    }
+                    if (cppr.PullPoint.Metadata != NULL)
+                        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): metadata size %d", cppr.PullPoint.Metadata->__size);
+                    if (cppr.PullPoint.ReferenceParameters != NULL)
+*/
+                _tev__CreatePullPointSubscription cpps;
+/*                tt__EventFilter filter;
+                filter.
+/*                wsnt__FilterType filter;
+                filter.
+                        |__mixed = "tns1:Device//.".c_str();
+                cpps.Filter = filter;
+  //cpps.SubscriptionPolicy
+*/
+
+//                wstop__FullTopicExpression expr = "";
+  //              cpps.Filter = expr;
+                string termtime = "PT60S";
+                cpps.InitialTerminationTime = &termtime;
+  //              cpps.Filter = &filter;
+//                cpps.SubscriptionPolicy = ;
+                _tev__CreatePullPointSubscriptionResponse cppr;
+#if GSOAP_VERSION >= 20822
+                if (m_pEventsProxy->CreatePullPointSubscription(&cpps, cppr) == SOAP_OK) {
+#else
+                if (m_pEventsProxy->CreatePullPointSubscription(&cpps, &cppr) == SOAP_OK) {
+#endif
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Event: pull point subscription created:");
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): termination time %d", cppr.wsnt__TerminationTime);
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): SubscriptionReference.Address %s", cppr.SubscriptionReference.Address);
+                    m_sSubscriptionAddress = string(cppr.SubscriptionReference.Address);
+
+                    if (cppr.SubscriptionReference.__anyAttribute != NULL) {
+                        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): __anyAttribute %s",
+                                                              cppr.SubscriptionReference.__anyAttribute);
+                    }
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): SubscriptionReference.__size %d",
+                                                          cppr.SubscriptionReference.__size);
+                    for (int i = 0; i < cppr.SubscriptionReference.__size; i++) {
+                        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): __any %s",
+                                                              cppr.SubscriptionReference.__any[i]);
+                    }
+
+
+                    if (cppr.SubscriptionReference.Metadata != NULL) {
+                        if (cppr.SubscriptionReference.Metadata->__anyAttribute != NULL) {
+                            LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Metadata->__anyAttribute %s",
+                                                                  cppr.SubscriptionReference.ReferenceParameters->__anyAttribute);
+                        }
+                        for (int i = 0; i < cppr.SubscriptionReference.Metadata->__size; i++) {
+                            LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): MetaData__any %s",
+                                                                  cppr.SubscriptionReference.Metadata->__any[i]);
+                        }
+                    }
+                    if (cppr.SubscriptionReference.ReferenceParameters != NULL) {
+                        if (cppr.SubscriptionReference.ReferenceParameters->__anyAttribute != NULL) {
+                            LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): ReferenceParameter->__anyAttribute %s",
+                                                                  cppr.SubscriptionReference.ReferenceParameters->__anyAttribute);
+                        }
+                        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): SubscriptionReference.ReferenceParameters->__size %d",
+                                                              cppr.SubscriptionReference.ReferenceParameters->__size);
+                        for (int i = 0; i < cppr.SubscriptionReference.ReferenceParameters->__size; i++) {
+                            LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): ReferenceParameter %s",
+                                                                  cppr.SubscriptionReference.ReferenceParameters->__any[i]);
+                        }
+                    }
+
+                    // Set up proxy to read from subscription reference
+                    m_pPullPointProxy = new PullPointSubscriptionBindingProxy(cppr.SubscriptionReference.Address);
+                    soap_wsse_add_Security(m_pPullPointProxy);
+                } else {
+                    m_pEventsProxy->soap_stream_fault(std::cerr);
+                    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Error creating pull point subscription");
+                }
+
+                if (m_pPullPointProxy != NULL)
+                    Start();
+
+            }
+        }
 	}
 	else
 	{
@@ -254,12 +428,69 @@ OnvifDevice::OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData) : Ca
 
 OnvifDevice::~OnvifDevice()
 {
+    Stop();
+    pthread_join(m_OnvifThread, NULL); // wait for it to end
 	if (m_pDeviceProxy != NULL)
 		delete m_pDeviceProxy;
 	if (m_pPTZProxy != NULL)
 		delete m_pPTZProxy;
     if (m_pMediaProxy != NULL)
         delete m_pMediaProxy;
+    if (m_pEventsProxy != NULL)
+        delete m_pEventsProxy;
+    if (m_pPullPointProxy != NULL)
+        delete m_pPullPointProxy;
+}
+
+void *
+OnvifThread (void *param)
+{
+    OnvifDevice* pOnvifDevice = (OnvifDevice*)param;
+    pOnvifDevice->PullPointThread();
+    pthread_exit (NULL);
+}
+
+void OnvifDevice::Start()
+{
+    m_bRunning = true;
+    pthread_create (&m_OnvifThread, NULL, OnvifThread, (void*)this);
+}
+
+void OnvifDevice::Stop()
+{
+    m_bRunning = false;
+}
+
+void OnvifDevice::PullPointThread() {
+   /* char* str = new char[m_sSubscriptionAddress.length()+1];
+    strcpy(str, m_sSubscriptionAddress.c_str());
+    while (m_bRunning) {
+        LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): PullPointThread: pulling messages:");
+        soap_wsse_add_UsernameTokenDigest(m_pPullPointProxy, NULL,  m_pAIPC->DATA_Get_AuthUser().c_str(), m_pAIPC->DATA_Get_AuthPassword().c_str());
+        _tev__PullMessages pm;
+        pm.Timeout = 60000; // 60 sec
+        pm.MessageLimit = 0;
+        const SOAP_ENV__Header* header = m_pPullPointProxy->soap_header();
+        m_pPullPointProxy->soap_header(header->wsse__Security, header->wsa5__MessageID, header->wsa5__RelatesTo,
+                                       header->wsa5__From, header->wsa5__ReplyTo, header->wsa5__FaultTo,
+                                       str, header->wsa5__Action, header->chan__ChannelInstance);
+        _tev__PullMessagesResponse pmr;
+#if GSOAP_VERSION >= 20822
+        if (m_pPullPointProxy->PullMessages(&pm, pmr) == SOAP_OK) {
+#else
+        if (m_pPullPointProxy->PullMessages(&pm, &pmr) == SOAP_OK) {
+#endif
+            LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): current time : %d", pmr.CurrentTime);
+            LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): messages : %d", pmr.wsnt__NotificationMessage.size());
+            //                    for (size_t i = 0; i < pmr.wsnt__NotificationMessage.size(); i++) {
+            //                      LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): ", pmr.wsnt__NotificationMessage[i].);
+            //                }
+        } else {
+            m_pPullPointProxy->soap_stream_fault(std::cerr);
+            LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Error pulling messages");
+        }
+    }
+    delete[] str;*/
 }
 
 bool OnvifDevice::PTZ(float panx,float pany, float zoomx)
@@ -338,4 +569,35 @@ bool OnvifDevice::ZoomIn(int step)
 bool OnvifDevice::ZoomOut(int step)
 {
   return PTZ(0, 0, (float)-step/10);
+}
+
+string OnvifDevice::GetStreamURI(string sMediaToken)
+{
+    LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): GetStreamURI %s", sMediaToken.c_str());
+    _trt__GetStreamUri gsu;
+    gsu.ProfileToken = sMediaToken;
+    tt__StreamSetup ss;
+    ss.Stream = tt__StreamType__RTP_Unicast;
+    tt__Transport transport;
+    transport.Protocol = tt__TransportProtocol__UDP;
+    ss.Transport = &transport;
+    gsu.StreamSetup = &ss;
+    _trt__GetStreamUriResponse gsur;
+    soap_wsse_add_Security(m_pMediaProxy);
+    soap_wsse_add_UsernameTokenDigest(m_pMediaProxy, NULL, m_sUser.c_str(), m_sPasswd.c_str());
+#if GSOAP_VERSION >= 20822
+    if (m_pMediaProxy->GetStreamUri(&gsu, gsur) == SOAP_OK) {
+#else
+    if (m_pMediaProxy->GetStreamUri(&gsu, &gsur) == SOAP_OK) {
+#endif
+        if (gsur.MediaUri) {
+            LoggerWrapper::GetInstance ()->Write (LV_WARNING, "OnvifDevice(): Stream URI: %s",
+                                                  gsur.MediaUri->Uri.c_str());
+            return gsur.MediaUri->Uri;
+        }
+    } else {
+        m_pMediaProxy->soap_stream_fault(std::cerr);
+        LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "OnvifDevice(): Error getting Stream URI");
+    }
+    return "";
 }
