@@ -5,7 +5,12 @@ export DISPLAY=:0
 OSD_Message()
 {
 	if [ -x /usr/bin/osd_cat ] ; then
-		osd_cat --pos=middle --align=center --age=10 < "$*"
+		if [[ -n "$(pidof osd_cat)" ]] || [[ "$*" == " " ]] ; then
+			killall -9 osd_cat
+		fi
+		if [[ "$*" != " " ]] ; then
+			osd_cat --pos=middle --align=center --age=10 <<<"$*" &
+		fi
 		return
 	else
 		 if [ -x /usr/bin/gnome-osd-client ] ; then
