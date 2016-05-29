@@ -597,7 +597,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 		tag->save();
 	}
 
-	// is it an ASF (wma) file? access pics like this
+	// TODO: is it an ASF (wma) file? access pics like this
 	else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
 	{
 
@@ -615,10 +615,36 @@ void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string s
 	std::vector<string> vsParameters;
 	stov(sParameters, vsParameters);
 
-	for (std::vector<string>::iterator it = vsParameters.begin(); it != vsParameters.end(); ++it)
+	TagLib::PropertyMap property_map = f->file()->properties();
+	TagLib::PropertyMap::Iterator property = property_map.find(sName);
+	if ( property != property_map.end() )
 	{
-		f->file()->properties().insert(sName, String(*it, String::UTF8));
+		for (std::vector<string>::iterator it = vsParameters.begin(); it != vsParameters.end(); ++it)
+		{
+			bool bFound = false;
+			TagLib::StringList property_value_list = property->second;
+			for(TagLib::StringList::ConstIterator property_value = property_value_list.begin(); property_value != property_value_list.end(); ++property_value)
+			{
+				if ( (*property_value) == (*it) )
+				{
+					cout << "Property " << (*property).first << " exists in file with value: " << (*property_value) << endl;
+					bFound = true;
+				}
+			}
+			if (bFound != true)
+			{
+				cout << "Property " << sName << " doesn't exist in file with value " << (*it) << ", adding" << endl;
+				property_value_list.append( (*it) );
+				property_map.replace( sName, property_value_list );
+			}
+		}
 	}
+	else
+	{
+		cout << "Property " << sName << " doesn't exist in file, adding" << endl;
+		property_map.insert( sName, String( sParameters, String::UTF8 ) );
+	}
+	f->file()->setProperties(property_map);
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures)
