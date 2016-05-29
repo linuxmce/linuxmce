@@ -193,7 +193,7 @@ string TagFileHandler::GetFileSourceForDB()
 {
 	if(!UpdateMediaVars::sUPnPMountPoint.empty() && StringUtils::StartsWith(m_sDirectory, UpdateMediaVars::sUPnPMountPoint))
 		return "U";
-	else 
+	else
 		return "F";
 }
 //-----------------------------------------------------------------------------------------------------
@@ -249,7 +249,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, const list<pair<char *,
 			{
 				TagLib::FLAC::Picture *pic = *it;
 
-//				if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
+				//if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
 				{
 					int iType = (int)pic->type();
 					cout << "Picture found of type: " << iType << endl;
@@ -291,8 +291,8 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, const list<pair<char *,
 					int iType = (int)picFrame->type();
 					cout << "Picture found of type: " << iType << ", string: " << picFrame->toString() << endl;
 
-//					if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover )
-				        {
+				//if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover )
+				{
 						if ( picFrame->mimeType() == "image/jpeg")
 						{
 							TagLib::ByteVector picData = picFrame->picture();
@@ -330,7 +330,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, const list<pair<char *,
 
 				cout << "Picture found of type: 'covr'" << endl;
 				if ( coverArt.format() == TagLib::MP4::CoverArt::JPEG )
-			        {
+			{
 					TagLib::ByteVector picData = coverArt.data();
 
 					size_t nBinSize = (size_t)picData.size();
@@ -362,8 +362,8 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, const list<pair<char *,
 				TagLib::ASF::Attribute attr = *it;
 				TagLib::ASF::Picture pic = attr.toPicture();
 
-//				if ( pic.type() == TagLib::ASF::Picture::FrontCover)
-			        {
+			//if ( pic.type() == TagLib::ASF::Picture::FrontCover)
+			{
 					TagLib::ByteVector picData = pic.picture();
 
 					size_t nBinSize = (size_t)picData.size();
@@ -690,7 +690,7 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		InsertTagValues(f, string("DATE"), sParameters);
 		f->tag()->setYear(atoi(sParameters.c_str()));
 
-		// TODO: picture storing in tag/file?
+		// Store pictures in file tag
 		InsertTagPictures(f, listPictures);
 
 		f->save();
@@ -700,14 +700,29 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, string sValue)
 {
-	TagLib::PropertyMap::Iterator tag = f->file()->properties().find(sName);
-	if ( tag != f->file()->properties().end() )
+	bool bFound = false;
+	TagLib::PropertyMap property_map = f->file()->properties();
+	TagLib::PropertyMap::Iterator property = property_map.find(sName);
+	if ( property != property_map.end() )
 	{
-		TagLib::StringList::Iterator value = tag->second.find(sValue);
-		if ( value != tag->second.end() )
+		TagLib::StringList property_value_list = property->second;
+		for(TagLib::StringList::Iterator property_value = property_value_list.begin(); property_value != property_value_list.end(); ++property_value)
 		{
-			*tag->second.erase( value );
+			if ( (*property_value) == sValue )
+			{
+				cout << "Property " << (*property).first << " exists in file with value: " << (*property_value) << ", erasing." << endl;
+				property_value_list.erase( property_value );
+			}
 		}
+	}
+	else
+	{
+		cout << "Property " << sName << " doesn't exist in file, adding" << endl;
+	}
+
+	if ( bFound )
+	{
+		f->file()->setProperties(property_map);
 	}
 }
 //-----------------------------------------------------------------------------------------------------
@@ -716,7 +731,7 @@ void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 #ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# DISABLED -- TagFileHandler::RemoveTag - failing for mpeg? so disabled atm");
 #endif
-/*
+
 	FileRef *f = new FileRef(sFilename.c_str());
 	if(NULL != f)
 	{
@@ -766,7 +781,6 @@ void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 		f->save();
 		delete f;
 	}
-*/
 }
 //-----------------------------------------------------------------------------------------------------
 string TagFileHandler::ExtractAttribute(const map<int,string>& mapAttributes, int key)
