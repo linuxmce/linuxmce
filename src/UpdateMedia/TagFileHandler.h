@@ -34,7 +34,7 @@ private:
 	//tag utils
 private:
 
-	void GetTagPictures(TagLib::FileRef *&f, const list<pair<char *, size_t> >& listPictures)
+	void GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_t> >& listPictures);
 	void GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);
 	void SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures);
 
