@@ -2,33 +2,35 @@
  include('include/adodb/adodb-errorhandler.inc.php');
  require('include/adodb/adodb.inc.php');
  include('include/adodb/tohtml.inc.php');
- 
- 
+
+global $dbPlutoMainType,$dbPlutoMainServer,$dbPlutoMainUser,$dbPlutoMainPass;
+global $dbPlutoMediaType,$dbPlutoMediaServer,$dbPlutoMediaUser,$dbPlutoMediaPass;
+global $dbPlutoSecurityType,$dbPlutoSecurityServer,$dbPlutoSecurityUser,$dbPlutoSecurityPass;
+
   $ADODB_COUNTRECS=true; //for speed up, set it to false, but it will return -1 for RecordCount()
-  
 
   //define('ADODB_ERROR_LOG_TYPE',3);
   //define('ADODB_ERROR_LOG_DEST','C:/mysql_errors.log');
 
 //  $dsn = $dbPlutoMainType.'://'.urlencode($dbPlutoMainUser).':'.urlencode($dbPlutoMainPass).'@'.$dbPlutoMainServer.'/'.urlencode($dbPlutoMainDatabase); 
 //  $dbADO = &ADONewConnection($dsn);
-  $dbADO = &ADONewConnection('mysql');
+  $dbADO = ADONewConnection($dbPlutoMainType);
   $dbADO->NConnect($dbPlutoMainServer,urlencode($dbPlutoMainUser),urlencode($dbPlutoMainPass),urlencode($dbPlutoMainDatabase)); 
-  
+
 //  $mediaDSN = $dbPlutoMediaType.'://'.urlencode($dbPlutoMediaUser).':'.urlencode($dbPlutoMediaPass).'@'.$dbPlutoMediaServer.'/'.urlencode($dbPlutoMediaDatabase); 
 //  $mediadbADO = &ADONewConnection($mediaDSN);
-  $mediadbADO = &ADONewConnection($dbPlutoMediaType);
+  $mediadbADO = ADONewConnection($dbPlutoMediaType);
   $mediadbADO->NConnect($dbPlutoMediaServer,urlencode($dbPlutoMediaUser),urlencode($dbPlutoMediaPass),urlencode($dbPlutoMediaDatabase)); 
 
-  
+
 //  $securityDSN = $dbPlutoSecurityType.'://'.urlencode($dbPlutoSecurityUser).':'.urlencode($dbPlutoSecurityPass).'@'.$dbPlutoSecurityServer.'/'.urlencode($dbPlutoSecurityDatabase); 
 //  $securityADO = &ADONewConnection($securityDSN);
-  $securityADO = &ADONewConnection($dbPlutoSecurityType);
+  $securityADO = ADONewConnection($dbPlutoSecurityType);
   $securityADO->NConnect($dbPlutoSecurityServer,urlencode($dbPlutoSecurityUser),urlencode($dbPlutoSecurityPass),urlencode($dbPlutoSecurityDatabase)); 
 
 	// TransmissionADO connection
-	$transmissionADO = &ADONewConnection($dbTransmissionType);
-	$transmissionADO->NConnect($dbTransmissionServer,urlencode($dbTransmissionUser),urlencode($dbTransmissionPass),urlencode($dbTransmissionDatabase));
+//	$transmissionADO = &ADONewConnection($dbTransmissionType);
+//	$transmissionADO->NConnect($dbTransmissionServer,urlencode($dbTransmissionUser),urlencode($dbTransmissionPass),urlencode($dbTransmissionDatabase));
 
   //for sqlite
   //$db = &ADONewConnection('sqlite');
