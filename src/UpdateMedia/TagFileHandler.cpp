@@ -690,6 +690,17 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		InsertTagValues(f, string("DATE"), sParameters);
 		f->tag()->setYear(atoi(sParameters.c_str()));
 
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Channel_CONST);
+		InsertTagValues(f, string("CHANNEL"), sParameters);
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Episode_CONST);
+		InsertTagValues(f, string("EPISODE"), sParameters);
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Program_CONST);
+		InsertTagValues(f, string("PROGRAM"), sParameters);
+
+
 		// Store pictures in file tag
 		InsertTagPictures(f, listPictures);
 
@@ -777,6 +788,17 @@ void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 				if(f->tag()->year() == atoi(sValue.c_str()))
 					f->tag()->setYear(0);
 				break;
+
+			case ATTRIBUTETYPE_Channel_CONST:
+				RemoveTagValue(f, "CHANNEL", sValue);
+				break;
+			case ATTRIBUTETYPE_Episode_CONST:
+				RemoveTagValue(f, "EPISODE", sValue);
+				break;
+			case ATTRIBUTETYPE_Program_CONST:
+				RemoveTagValue(f, "PROGRAM", sValue);
+				break;
+
 		}
 		f->save();
 		delete f;
