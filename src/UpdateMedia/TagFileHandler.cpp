@@ -234,7 +234,7 @@ string TagFileHandler::vtos(std::vector<string> v, const char cDelimiter /* = ';
 	return s;
 }
 //-----------------------------------------------------------------------------------------------------
-void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, const list<pair<char *, size_t> >& listPictures)
+void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_t> >& listPictures)
 {
 	// Pictures need to be handled differently depending on file type
 	// is it a FLAC file? access pics like this
@@ -378,33 +378,6 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, const list<pair<char *,
 			}
 		}
 	}
-
-	// get pic from a .jpg in the same directory
-	string coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/cover.jpg";
-	if ( !FileUtils::FileExists( coverfilename ) )
-		coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Cover.jpg";
-	if ( !FileUtils::FileExists( coverfilename ) )
-		coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/folder.jpg";
-	if ( !FileUtils::FileExists( coverfilename ) )
-		coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Folder.jpg";
-	if ( FileUtils::FileExists( coverfilename ) )
-	{
-		cout << "fetching cover: "<< coverfilename << "\n";
-		FILE *coverart = fopen(coverfilename.c_str(), "rb");
-		if (coverart != NULL)
-		{
-			fseek(coverart, 0, SEEK_END);
-			size_t nBinSize = (size_t)ftell(coverart);
-			if (nBinSize > 0)
-			{
-				rewind(coverart);
-				char *pPictureData = new char[nBinSize];
-				fread(pPictureData, 1,nBinSize,coverart);
-				listPictures.push_back(make_pair(pPictureData, nBinSize));
-			}
-		}
-	}
-
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
@@ -521,6 +494,32 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		mapAttributes[ATTRIBUTETYPE_Synopsis_CONST] = vtos( vsSynopsis );
 
 		GetTagPictures(f, listPictures);
+
+		// get pic from a .jpg in the same directory
+		string coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/cover.jpg";
+		if ( !FileUtils::FileExists( coverfilename ) )
+			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Cover.jpg";
+		if ( !FileUtils::FileExists( coverfilename ) )
+			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/folder.jpg";
+		if ( !FileUtils::FileExists( coverfilename ) )
+			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Folder.jpg";
+		if ( FileUtils::FileExists( coverfilename ) )
+		{
+			cout << "fetching cover: "<< coverfilename << "\n";
+			FILE *coverart = fopen(coverfilename.c_str(), "rb");
+			if (coverart != NULL)
+			{
+				fseek(coverart, 0, SEEK_END);
+				size_t nBinSize = (size_t)ftell(coverart);
+				if (nBinSize > 0)
+				{
+					rewind(coverart);
+					char *pPictureData = new char[nBinSize];
+					fread(pPictureData, 1,nBinSize,coverart);
+					listPictures.push_back(make_pair(pPictureData, nBinSize));
+				}
+			}
+		}
 
 		delete f;
 	}
