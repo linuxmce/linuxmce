@@ -234,6 +234,179 @@ string TagFileHandler::vtos(std::vector<string> v, const char cDelimiter /* = ';
 	return s;
 }
 //-----------------------------------------------------------------------------------------------------
+void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, const list<pair<char *, size_t> >& listPictures)
+{
+	// Pictures need to be handled differently depending on file type
+	// is it a FLAC file? access pics like this
+	if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
+	{
+		cout << "FLAC FLAC FLAC" << endl;
+
+		TagLib::List<TagLib::FLAC::Picture*> picList = flacFile->pictureList();
+		if ( !picList.isEmpty())
+		{
+			for (TagLib::List<TagLib::FLAC::Picture*>::ConstIterator it = picList.begin(); it != picList.end(); ++it)
+			{
+				TagLib::FLAC::Picture *pic = *it;
+
+//				if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
+				{
+					int iType = (int)pic->type();
+					cout << "Picture found of type: " << iType << endl;
+
+					if ( pic->mimeType() == "image/jpeg")
+					{
+						// get the image
+						TagLib::ByteVector picData = pic->data();
+
+						size_t nBinSize = (size_t)picData.size();
+						char *pPictureData = new char[nBinSize];
+						memcpy(pPictureData, picData.data(), nBinSize);
+
+						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+
+						// add this image to the lmce picture vector
+						listPictures.push_back(make_pair(pPictureData, nBinSize));
+					}
+				}
+			}
+		}
+	}
+
+	// is it an MPEG file? access pics like this
+	else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
+	{
+		cout << "MPEG MPEG MPEG" << endl;
+
+		TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag();
+		if ( id3v2tag )
+		{
+			// picture frame
+			TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["APIC"];
+			if (!frameList.isEmpty() )
+			{
+				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+				{
+					TagLib::ID3v2::AttachedPictureFrame *picFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
+					int iType = (int)picFrame->type();
+					cout << "Picture found of type: " << iType << ", string: " << picFrame->toString() << endl;
+
+//					if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover )
+				        {
+						if ( picFrame->mimeType() == "image/jpeg")
+						{
+							TagLib::ByteVector picData = picFrame->picture();
+
+							size_t nBinSize = (size_t)picData.size();
+							char *pPictureData = new char[nBinSize];
+							memcpy(pPictureData, picData.data(), nBinSize);
+
+							cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+
+							// the following adds this image to the lmce picture vector
+							listPictures.push_back(make_pair(pPictureData, nBinSize));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// is it an MP4 (AAC, ALAC, video) file? access pics like this
+	else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
+	{
+		cout << "MP4 MP4 MP4" << endl;
+
+		TagLib::MP4::Tag* tag = mp4File->tag();
+		TagLib::MP4::ItemListMap itemListMap = tag->itemListMap();
+		TagLib::MP4::Item coverItem = itemListMap["covr"];
+		TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
+
+		if ( !coverArtList.isEmpty() )
+		{
+			for(TagLib::MP4::CoverArtList::ConstIterator it = coverArtList.begin(); it != coverArtList.end(); ++it)
+			{
+				TagLib::MP4::CoverArt coverArt = *it;
+
+				cout << "Picture found of type: 'covr'" << endl;
+				if ( coverArt.format() == TagLib::MP4::CoverArt::JPEG )
+			        {
+					TagLib::ByteVector picData = coverArt.data();
+
+					size_t nBinSize = (size_t)picData.size();
+					char *pPictureData = new char[nBinSize];
+					memcpy(pPictureData, picData.data(), nBinSize);
+
+					cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+
+					// add this image to the lmce picture vector
+					listPictures.push_back(make_pair(pPictureData, nBinSize));
+				}
+			}
+		}
+	}
+
+	// is it an ASF (wma) file? access pics like this
+	else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
+	{
+		cout << "ASF ASF ASF" << endl;
+
+		TagLib::ASF::Tag* tag = asfFile->tag();
+		TagLib::ASF::AttributeListMap attrListMap = tag->attributeListMap();
+		TagLib::ASF::AttributeList attrList = attrListMap["WM/Picture"];
+
+		if ( !attrListMap.isEmpty() )
+		{
+			for(TagLib::ASF::AttributeList::ConstIterator it = attrList.begin(); it != attrList.end(); ++it)
+			{
+				TagLib::ASF::Attribute attr = *it;
+				TagLib::ASF::Picture pic = attr.toPicture();
+
+//				if ( pic.type() == TagLib::ASF::Picture::FrontCover)
+			        {
+					TagLib::ByteVector picData = pic.picture();
+
+					size_t nBinSize = (size_t)picData.size();
+					char *pPictureData = new char[nBinSize];
+					memcpy(pPictureData, picData.data(), nBinSize);
+
+					cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+
+					// add this image to the lmce picture vector
+					listPictures.push_back(make_pair(pPictureData, nBinSize));
+				}
+			}
+		}
+	}
+
+	// get pic from a .jpg in the same directory
+	string coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/cover.jpg";
+	if ( !FileUtils::FileExists( coverfilename ) )
+		coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Cover.jpg";
+	if ( !FileUtils::FileExists( coverfilename ) )
+		coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/folder.jpg";
+	if ( !FileUtils::FileExists( coverfilename ) )
+		coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Folder.jpg";
+	if ( FileUtils::FileExists( coverfilename ) )
+	{
+		cout << "fetching cover: "<< coverfilename << "\n";
+		FILE *coverart = fopen(coverfilename.c_str(), "rb");
+		if (coverart != NULL)
+		{
+			fseek(coverart, 0, SEEK_END);
+			size_t nBinSize = (size_t)ftell(coverart);
+			if (nBinSize > 0)
+			{
+				rewind(coverart);
+				char *pPictureData = new char[nBinSize];
+				fread(pPictureData, 1,nBinSize,coverart);
+				listPictures.push_back(make_pair(pPictureData, nBinSize));
+			}
+		}
+	}
+
+}
+//-----------------------------------------------------------------------------------------------------
 void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 	FileRef *f = new FileRef(sFilename.c_str());
@@ -347,176 +520,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		mapAttributes[ATTRIBUTETYPE_Disc_ID_CONST] = vtos( vsDisc );
 		mapAttributes[ATTRIBUTETYPE_Synopsis_CONST] = vtos( vsSynopsis );
 
-		// Pictures need to be handled differently depending on file type
-		// is it a FLAC file? access pics like this
-		if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
-		{
-			cout << "FLAC FLAC FLAC" << endl;
-
-			TagLib::List<TagLib::FLAC::Picture*> picList = flacFile->pictureList();
-			if ( !picList.isEmpty())
-			{
-				for (TagLib::List<TagLib::FLAC::Picture*>::ConstIterator it = picList.begin(); it != picList.end(); ++it)
-				{
-					TagLib::FLAC::Picture *pic = *it;
-
-//					if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
-					{
-						int iType = (int)pic->type();
-						cout << "Picture found of type: " << iType << endl;
-
-						if ( pic->mimeType() == "image/jpeg")
-						{
-							// get the image
-							TagLib::ByteVector picData = pic->data();
-
-							size_t nBinSize = (size_t)picData.size();
-							char *pPictureData = new char[nBinSize];
-							memcpy(pPictureData, picData.data(), nBinSize);
-
-							cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
-
-							// add this image to the lmce picture vector
-							listPictures.push_back(make_pair(pPictureData, nBinSize));
-						}
-					}
-				}
-			}
-		}
-
-		// is it an MPEG file? access pics like this
-		else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
-		{
-			cout << "MPEG MPEG MPEG" << endl;
-
-			TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag();
-			if ( id3v2tag )
-			{
-				// picture frame
-				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["APIC"];
-				if (!frameList.isEmpty() )
-				{
-					for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
-					{
-						TagLib::ID3v2::AttachedPictureFrame *picFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
-						int iType = (int)picFrame->type();
-						cout << "Picture found of type: " << iType << ", string: " << picFrame->toString() << endl;
-
-//						if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover )
-					        {
-							if ( picFrame->mimeType() == "image/jpeg")
-							{
-								TagLib::ByteVector picData = picFrame->picture();
-
-								size_t nBinSize = (size_t)picData.size();
-								char *pPictureData = new char[nBinSize];
-								memcpy(pPictureData, picData.data(), nBinSize);
-
-								cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
-
-								// the following adds this image to the lmce picture vector
-								listPictures.push_back(make_pair(pPictureData, nBinSize));
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// is it an MP4 (AAC, ALAC, video) file? access pics like this
-		else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
-		{
-			cout << "MP4 MP4 MP4" << endl;
-
-			TagLib::MP4::Tag* tag = mp4File->tag();
-			TagLib::MP4::ItemListMap itemListMap = tag->itemListMap();
-			TagLib::MP4::Item coverItem = itemListMap["covr"];
-			TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
-
-			if ( !coverArtList.isEmpty() )
-			{
-				for(TagLib::MP4::CoverArtList::ConstIterator it = coverArtList.begin(); it != coverArtList.end(); ++it)
-				{
-					TagLib::MP4::CoverArt coverArt = *it;
-
-					cout << "Picture found of type: 'covr'" << endl;
-					if ( coverArt.format() == TagLib::MP4::CoverArt::JPEG )
-				        {
-						TagLib::ByteVector picData = coverArt.data();
-
-						size_t nBinSize = (size_t)picData.size();
-						char *pPictureData = new char[nBinSize];
-						memcpy(pPictureData, picData.data(), nBinSize);
-
-						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
-
-						// add this image to the lmce picture vector
-						listPictures.push_back(make_pair(pPictureData, nBinSize));
-					}
-				}
-			}
-
-		}
-
-		// is it an ASF (wma) file? access pics like this
-		else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
-		{
-			cout << "ASF ASF ASF" << endl;
-
-			TagLib::ASF::Tag* tag = asfFile->tag();
-			TagLib::ASF::AttributeListMap attrListMap = tag->attributeListMap();
-			TagLib::ASF::AttributeList attrList = attrListMap["WM/Picture"];
-
-			if ( !attrListMap.isEmpty() )
-			{
-				for(TagLib::ASF::AttributeList::ConstIterator it = attrList.begin(); it != attrList.end(); ++it)
-				{
-					TagLib::ASF::Attribute attr = *it;
-					TagLib::ASF::Picture pic = attr.toPicture();
-
-//					if ( pic.type() == TagLib::ASF::Picture::FrontCover)
-				        {
-						TagLib::ByteVector picData = pic.picture();
-
-						size_t nBinSize = (size_t)picData.size();
-						char *pPictureData = new char[nBinSize];
-						memcpy(pPictureData, picData.data(), nBinSize);
-
-						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
-
-						// add this image to the lmce picture vector
-						listPictures.push_back(make_pair(pPictureData, nBinSize));
-					}
-				}
-			}
-		}
-
-
-		// get pic from a .jpg in the same directory
-		string coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/cover.jpg";
-		if ( !FileUtils::FileExists( coverfilename ) )
-			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Cover.jpg";
-		if ( !FileUtils::FileExists( coverfilename ) )
-			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/folder.jpg";
-		if ( !FileUtils::FileExists( coverfilename ) )
-			coverfilename = sFilename.substr(0,sFilename.find_last_of("/\\")) + "/Folder.jpg";
-		if ( FileUtils::FileExists( coverfilename ) )
-		{
-			cout << "fetching cover: "<< coverfilename << "\n";
-			FILE *coverart = fopen(coverfilename.c_str(), "rb");
-			if (coverart != NULL)
-			{
-				fseek(coverart, 0, SEEK_END);
-				size_t nBinSize = (size_t)ftell(coverart);
-				if (nBinSize > 0)
-				{
-					rewind(coverart);
-					char *pPictureData = new char[nBinSize];
-					fread(pPictureData, 1,nBinSize,coverart);
-					listPictures.push_back(make_pair(pPictureData, nBinSize));
-				}
-			}
-		}
+		GetTagPictures(f, listPictures);
 
 		delete f;
 	}
