@@ -277,7 +277,7 @@ function sqlcvs_diff($output,$dbADO) {
 					<tr>
 						<td colspan="5"><B>'.$TEXT_TABLE_CONST.': '.$lineTable.'</B></td>
 					</tr>';
-					$cols=array_values($sqlcvsADO->MetaColumnNames('`' . $lineTable . '`'));
+					$cols=array_values($sqlcvsADO->MetaColumnNames( $lineTable ));
 					$out.='
 					<tr>
 						<td width="20">&nbsp;</td>
@@ -286,7 +286,6 @@ function sqlcvs_diff($output,$dbADO) {
 						<td bgcolor="#F0F3F8">'.$cols[1].'</td>
 						<td bgcolor="#F0F3F8">'.$cols[2].'</td>
 					</tr>';
-					
 				}
 
 				$lineValues=getFieldsAsArray('`' . $lineTable . '`',$cols[0].','.$cols[1].','.$cols[2],$sqlcvsADO,str_replace('WHERE:','',$items[4]));
