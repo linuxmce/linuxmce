@@ -1373,6 +1373,8 @@ signals:
      * \param qml
      */
     void gotoQml(QString qml);
+    void gotoOsdQml(QString osdQml);
+    void setRemotePopup(int popup);
 
     /*!
      * \brief gotoScreen. Load the screen in question.
