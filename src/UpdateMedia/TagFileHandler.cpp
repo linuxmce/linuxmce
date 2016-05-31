@@ -401,6 +401,9 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		std::vector<string> vsTotalDiscs;
 		std::vector<string> vsDisc;
 		std::vector<string> vsSynopsis;
+		std::vector<string> vsChannel;
+		std::vector<string> vsEpisode;
+		std::vector<string> vsProgram;
 
 		// Get Album Artist, from file properties i==propertyname, j==propertyvalue
 		TagLib::PropertyMap tags = f->file()->properties();
@@ -461,6 +464,18 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					stov(sProperty, vsSynopsis, "");
 				}
+				else if ( i->first == "CHANNEL" )
+				{
+					stov(sProperty, vsChannel, "");
+				}
+				else if ( i->first == "EPISODE" )
+				{
+					stov(sProperty, vsEpisode, "");
+				}
+				else if ( i->first == "Program" )
+				{
+					stov(sProperty, vsSynopsis, "");
+				}
 			}
 		}
 		stov(f->tag()->artist().to8Bit(true), vsPerformer);
@@ -492,6 +507,9 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		mapAttributes[ATTRIBUTETYPE_Number_of_Discs_CONST] = vtos( vsTotalDiscs );
 		mapAttributes[ATTRIBUTETYPE_Disc_ID_CONST] = vtos( vsDisc );
 		mapAttributes[ATTRIBUTETYPE_Synopsis_CONST] = vtos( vsSynopsis );
+		mapAttributes[ATTRIBUTETYPE_Channel_CONST] = vtos( vsChannel );
+		mapAttributes[ATTRIBUTETYPE_Episode_CONST] = vtos( vsEpisode );
+		mapAttributes[ATTRIBUTETYPE_Program_CONST] = vtos( vsProgram );
 
 		GetTagPictures(f, listPictures);
 
