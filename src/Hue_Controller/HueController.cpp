@@ -1113,6 +1113,7 @@ void HueController::checkLightInformation()
             if(SendCommand(setType)){
               //  qDebug() <<"Set type";
             }
+            m_updateStatus = false;
         }
 
     }
