@@ -197,7 +197,10 @@ class qorbiterManager : public QObject
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief Used to track orientation \deprecated */
     Q_PROPERTY (bool isProfile READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief if the device is in profile or landscape mode */
+
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)/*!< \brief Contains string of current screen. \code manager.currentScreen \endcode  \ingroup qorbiter_properties */
+    Q_PROPERTY(QString currentOsdScreen READ currentOsdScreen /*WRITE setCurrentOsdScreen*/ NOTIFY currentOsdScreenChanged)
+    Q_PROPERTY(QString currentRemotePopup READ currentRemotePopup /*WRITE setCurrentRemotePopup*/ NOTIFY currentRemotePopupChanged)
 
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )/*!< \brief Contains the number of cells returned in media grid \code manager.media_pageSeperator \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged) /*!< \brief Contains the current page of the media grid is on. Starts at 0. \ingroup qorbiter_properties */
@@ -546,6 +549,8 @@ Param 10 - pk_attribute
     QStringList *sUserList;          //linked list of users in house
     QStringList *sCurr_Room_Devices; //linked list of current devices (experimental)
     QString currentScreen;
+    QString m_currentOsdScreen;
+    QString m_currentRemotePopup;
 
 
     //plugin variables
@@ -735,6 +740,10 @@ signals:
     void userChanged(int user);
     void locationChanged(int cRoom, int cEA);
     void screenChange(QString s);
+
+    void currentOsdScreenChanged(QString s);
+    void currentRemotePopupChanged(QString r);
+
     void screenRequest(QString s);
     void localConfigReady(bool b);
     void orbiterConfigReady(bool b);
@@ -1063,6 +1072,16 @@ public slots:
     //! Sets the current screen in string format.
     void setCurrentScreen(QString s, bool force=false);
     void setCurrentScreen(int s, bool force=false);
+
+    void setCurrentOsdScreen(int s, bool force=false);
+    void setCurrentOsdScreen(QString s, bool force=false);
+    void setCurrentOsd(QString b) ;
+
+    QString currentOsdScreen() {return m_currentOsdScreen;}
+
+    void setCurrentRemotePopup(int p);
+    QString currentRemotePopup(){return m_currentRemotePopup;}
+
     //security related
     Q_INVOKABLE void requestSingleView(int camera);
     /*!

@@ -2939,6 +2939,54 @@ void qorbiterManager::setCurrentScreen(int s, bool force)
     }
 }
 
+void qorbiterManager::setCurrentOsdScreen(int s, bool force)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QString i = QString("Screen_%1.qml").arg(QString::number(s));
+
+    if(i!=m_currentOsdScreen || force){
+        m_currentOsdScreen = i;
+        emit currentOsdScreenChanged(i);
+    }
+
+}
+
+void qorbiterManager::setCurrentOsdScreen(QString s, bool force )
+{
+
+    qDebug() << Q_FUNC_INFO;
+    if(!s.contains(".qml")){
+        setCurrentOsdScreen(s.toInt(), force);
+        return;
+    }
+
+    if(s=="Screen_1.qml"){
+        clearAllDataGrid();
+    }
+
+    if(s!=m_currentOsdScreen || force){
+        m_currentOsdScreen = s;
+        emit currentOsdScreenChanged(s);
+    }
+}
+
+void qorbiterManager::setCurrentOsd(QString b)
+{
+    {setCurrentOsdScreen(b, false); }
+}
+
+void qorbiterManager::setCurrentRemotePopup(int p)
+{
+    QString i = QString("Remote_%1.qml").arg(QString::number(p));
+
+    if(i!= m_currentRemotePopup){
+        m_currentRemotePopup = i;
+        emit currentRemotePopupChanged(i);
+    }
+}
+
+
 void qorbiterManager::requestSingleView(int camera)
 {
     emit getSingleCam(camera, 600,800, true);
@@ -3022,7 +3070,7 @@ void qorbiterManager::reloadQml()
         qDebug() << "New style failed application! " << filePath;
     }
 
-     m_appEngine->clearComponentCache();
+    m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
     setUiReady(true);
@@ -3145,7 +3193,8 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     //navigation
 
     QObject::connect(ptr, SIGNAL(gotoQml(QString)), this, SLOT(setCurrentScreen(QString)),Qt::QueuedConnection); //old style because its overloaded
-
+    QObject::connect(ptr, SIGNAL(gotoOsdQml(QString)), this, SLOT(setCurrentOsd(QString)), Qt::QueuedConnection);
+    QObject::connect(ptr, SIGNAL(setRemotePopup(int)), this, SLOT(setCurrentRemotePopup(int)), Qt::QueuedConnection);
     //floorplans
     QObject::connect(this, &qorbiterManager::floorplanTypeChanged, ptr, &qOrbiter::ShowFloorPlan, Qt::QueuedConnection); /*!< Should move into floorplan object */
     QObject::connect(ptr, &qOrbiter::floorPlanImageData, floorplans, &FloorPlanModel::setImageData, Qt::QueuedConnection);/*!< Should move into floorplan object */
