@@ -258,7 +258,7 @@ public:
 
 		void PurgeChannelList();
 		void BuildChannelList();
-		void UpdateEPGFromVDR(string channelId, string restrictParm);
+        void UpdateEPGFromVDR(string channelId, bool file);
 		void ScheduleEPGUpdate(int delay, int chanNo);
 		void RefreshBookmarks();
 		VDRSource *GetNewSource(string sSource);

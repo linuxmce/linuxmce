@@ -424,7 +424,7 @@ void VDRPlugin::CMD_Schedule_Recording(string sType,string sOptions,string sProg
 		return;
 	}
 	if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
-		UpdateEPGFromVDR(sChannelID, "");
+        UpdateEPGFromVDR(sChannelID, false);
 
 	PLUTO_SAFETY_LOCK(em,m_EPGMutex);
 	VDRProgramInstance *pVDRProgramInstance = pVDRChannel->m_pVDRProgramInstance_First;
@@ -526,7 +526,7 @@ class DataGridTable *VDRPlugin::CurrentShows(string GridID, string Parms, void *
   
 	// Refresh channel EPG if last time was more than X ago
 	if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
-		UpdateEPGFromVDR(sChanId, "");
+        UpdateEPGFromVDR(sChanId, false);
 
 	PLUTO_SAFETY_LOCK(em,m_EPGMutex);
 	VDRRecording vdrRecording;
@@ -811,8 +811,9 @@ class DataGridTable *VDRPlugin::EPGGrid(string GridID, string Parms, void *Extra
             }
 
             // Refresh channel EPG if last time was more than X ago
+            // This will only update once for each call as the check for channel 2 will return false as it just was updated
             if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval))
-                UpdateEPGFromVDR(pVDRChannel->m_sID, "");
+                UpdateEPGFromVDR(pVDRChannel->m_sID, true);
 
 	    PLUTO_SAFETY_LOCK(em,m_EPGMutex);
             VDRProgramInstance *pVDRProgramInstance = pVDRChannel->GetCurrentProgramInstance(startTime);
@@ -1303,24 +1304,26 @@ void VDRPlugin::BuildChannelList()
 /**
  * If non-empty the parameters will be used in the fetching of data
  */
-void VDRPlugin::UpdateEPGFromVDR(string channelId, string restrictParm)
+void VDRPlugin::UpdateEPGFromVDR(string channelId, bool file)
 {
 	string sVDRResponse="";
-	string cmd = "LSTE ";
-	if (!channelId.empty())
-		cmd += channelId + " ";
-	if (!restrictParm.empty())
-		cmd += restrictParm;
+    if (file) {
+        FileUtils::ReadTextFile("/var/cache/vdr/epg.data", sVDRResponse);
+    } else {
+        string cmd = "LSTE ";
+        if (!channelId.empty())
+            cmd += channelId + " ";
 
-	PLUTO_SAFETY_LOCK(vc, m_ConMutex);
-	bool result = m_VDRConnection.SendVDRCommand(cmd,sVDRResponse);
-	m_VDRConnection.Close();
-	if( !result )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::UpdateEPGFromVDR cannot get epg, cmd = %s", cmd.c_str());
-		return;
-	}
-	LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA,"VDRPlugin::UpdateEPGFromVDR received epg");
+        PLUTO_SAFETY_LOCK(vc, m_ConMutex);
+        bool result = m_VDRConnection.SendVDRCommand(cmd,sVDRResponse);
+        m_VDRConnection.Close();
+        if( !result )
+        {
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::UpdateEPGFromVDR cannot get epg, cmd = %s", cmd.c_str());
+            return;
+        }
+        LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA,"VDRPlugin::UpdateEPGFromVDR received epg");
+    }
 
 	clock_t startClock = clock();
 	VDRChannel *pVDRChannel = NULL;
@@ -1796,20 +1799,22 @@ void VDRPlugin::AlarmCallback(int id, void* param)
 			{
 				if (pVDRChannel->NeedsEPGUpdate(m_timeUpdateInterval)) // Might have been updated elsewhere
 				{
-					UpdateEPGFromVDR(pVDRChannel->m_sID, "");
+                    UpdateEPGFromVDR("", true);
 
 				}
 			}
 			PLUTO_SAFETY_LOCK(em,m_EPGMutex);
-			m_iEPGUpdateNo++;
+            // Comment code for now, will only ever do a full update by reading epg.data file
+            // when there is a scheduled update
+/*			m_iEPGUpdateNo++;
 			if (m_iEPGUpdateNo >= m_ListVDRChannel.size())
 			{
 				// Start over after the update interval has passed
-				m_iEPGUpdateNo = 0;
+                m_iEPGUpdateNo = 0;*/
 				m_pAlarmManager->AddRelativeAlarm(m_timeUpdateInterval,this,ALARM_UPDATE_EPG, NULL);
-			} else {
+/*			} else {
 				m_pAlarmManager->AddRelativeAlarm(4,this,ALARM_UPDATE_EPG, NULL); // 2 second between to allow some time off
-			}
+            }*/
 		}
 	}
 }

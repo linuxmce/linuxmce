@@ -16,6 +16,7 @@
 #include "onvif/soapDeviceBindingProxy.h"
 #include "onvif/soapPTZBindingProxy.h"
 #include "onvif/soapMediaBindingProxy.h"
+#include "onvif/soapPullPointSubscriptionBindingProxy.h"
 
 namespace DCE
 {
@@ -25,15 +26,24 @@ namespace DCE
 		DeviceBindingProxy* m_pDeviceProxy;
 		PTZBindingProxy* m_pPTZProxy;
 		MediaBindingProxy* m_pMediaProxy;
+        PullPointSubscriptionBindingProxy* m_pEventsProxy;
+        PullPointSubscriptionBindingProxy* m_pPullPointProxy;
 
         string m_sMediaProfileToken;
         string m_sImageURI;
+
+        string m_sSubscriptionAddress;
+        pthread_t m_OnvifThread;
+        bool m_bRunning;
+        void Start();
+        void Stop();
 
 		bool PTZ(float panx,float pany, float zoom);
 
     public:
         OnvifDevice(Advanced_IP_Camera* pAIPC, DeviceData_Impl* pData);
 		virtual ~OnvifDevice();
+        void PullPointThread();
         bool Get_Image(int iWidth, int iHeight, char **pData, int *iData_Size, string *sFormat);
         bool MoveLeft(int step);
 		bool MoveRight(int step);
@@ -43,7 +53,7 @@ namespace DCE
         bool ZoomOut(int step);
         void ReceiveCommandForChild(unsigned long pkDevice, string &sCMD_Result, Message* pMessage) {};
         bool ChangeOutput(OutputDevice* pDevice, bool newState) {}
-
+        string GetStreamURI(string sMediaToken);
     };
 }
 
