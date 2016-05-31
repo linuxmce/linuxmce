@@ -1129,14 +1129,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     if(m_dwPK_Device_CaptureCard != 0)   {emit monitorStatusChanged(true); }
 
 
-    QString scrn;
-    if(m_bIsOSD && m_iPK_Screen_RemoteOSD != 0){
-        scrn = QString::number(m_iPK_Screen_RemoteOSD);
-    } else {
-        scrn = QString::number(m_iPK_Screen_Remote);
-    }
-
-    qDebug() << "Is OSD?" << m_bIsOSD;
+    QString scrn =  QString::number(m_iPK_Screen_Remote);
+    QString osdScrn = "Screen_"+QString::number(m_iPK_Screen_RemoteOSD)+".qml";
 
     internal_streamID = iStreamID;
     emit np_playlistIndexChanged(iValue);
@@ -1144,6 +1138,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit resetNowPlaying();
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
+        emit gotoOsdQml("Screen_1.qml");
+        emit setRemotePopup(0);
         b_mediaPlaying = false;
 
         currentScreen = "Screen_1.qml";
@@ -1165,6 +1161,10 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         currentScreen = "Screen_"+scrn+".qml";
         emit gotoQml(currentScreen); /*!< \note This line set the command for the actual screen change */
         emit currentScreenChanged(currentScreen); /*!< \note This line sets the media return to screen */
+        emit gotoOsdQml(osdScrn);
+
+        qDebug() << "osd " << m_iPK_Screen_RemoteOSD;
+        emit setRemotePopup(m_iPK_DesignObj_Remote_Popup);
         internal_streamID = iStreamID;
 
         emit subtitleChanged((QString::fromStdString(sText)));
@@ -1664,6 +1664,7 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
     emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));
+
 
     //qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
 
