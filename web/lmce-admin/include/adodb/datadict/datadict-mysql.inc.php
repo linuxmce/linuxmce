@@ -1,13 +1,15 @@
 <?php
 
 /**
-  V4.52 10 Aug 2004  (c) 2000-2004 John Lim (jlim@natsoft.com.my). All rights reserved.
-  Released under both BSD license and Lesser GPL library license. 
-  Whenever there is any discrepancy between the two licenses, 
+  @version   v5.20.4  30-Mar-2016
+  @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
+  @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
+  Released under both BSD license and Lesser GPL library license.
+  Whenever there is any discrepancy between the two licenses,
   the BSD license will take precedence.
-	
+
   Set tabs to 4 for best viewing.
- 
+
 */
 
 // security - hide paths
@@ -18,9 +20,10 @@ class ADODB2_mysql extends ADODB_DataDict {
 	var $alterCol = ' MODIFY COLUMN';
 	var $alterTableAddIndex = true;
 	var $dropTable = 'DROP TABLE IF EXISTS %s'; // requires mysql 3.22 or later
-	
+
 	var $dropIndex = 'DROP INDEX %s ON %s';
-	
+	var $renameColumn = 'ALTER TABLE %s CHANGE COLUMN %s %s %s';	// needs column-definition!
+
 	function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
@@ -28,48 +31,49 @@ class ADODB2_mysql extends ADODB_DataDict {
 			$t = $fieldobj->type;
 			$len = $fieldobj->max_length;
 		}
-		
+		$is_serial = is_object($fieldobj) && $fieldobj->primary_key && $fieldobj->auto_increment;
+
 		$len = -1; // mysql max_length is not accurate
 		switch (strtoupper($t)) {
-		case 'STRING': 
+		case 'STRING':
 		case 'CHAR':
-		case 'VARCHAR': 
-		case 'TINYBLOB': 
-		case 'TINYTEXT': 
-		case 'ENUM': 
+		case 'VARCHAR':
+		case 'TINYBLOB':
+		case 'TINYTEXT':
+		case 'ENUM':
 		case 'SET':
 			if ($len <= $this->blobSize) return 'C';
-			
+
 		case 'TEXT':
-		case 'LONGTEXT': 
+		case 'LONGTEXT':
 		case 'MEDIUMTEXT':
 			return 'X';
-			
+
 		// php_mysql extension always returns 'blob' even if 'text'
 		// so we have to check whether binary...
 		case 'IMAGE':
-		case 'LONGBLOB': 
+		case 'LONGBLOB':
 		case 'BLOB':
 		case 'MEDIUMBLOB':
 			return !empty($fieldobj->binary) ? 'B' : 'X';
-			
+
 		case 'YEAR':
 		case 'DATE': return 'D';
-		
+
 		case 'TIME':
 		case 'DATETIME':
 		case 'TIMESTAMP': return 'T';
-		
+
 		case 'FLOAT':
 		case 'DOUBLE':
 			return 'F';
-			
-		case 'INT': 
-		case 'INTEGER': return (!empty($fieldobj->primary_key)) ? 'R' : 'I';
-		case 'TINYINT': return (!empty($fieldobj->primary_key)) ? 'R' : 'I1';
-		case 'SMALLINT': return (!empty($fieldobj->primary_key)) ? 'R' : 'I2';
-		case 'MEDIUMINT': return (!empty($fieldobj->primary_key)) ? 'R' : 'I4';
-		case 'BIGINT':  return (!empty($fieldobj->primary_key)) ? 'R' : 'I8';
+
+		case 'INT':
+		case 'INTEGER': return $is_serial ? 'R' : 'I';
+		case 'TINYINT': return $is_serial ? 'R' : 'I1';
+		case 'SMALLINT': return $is_serial ? 'R' : 'I2';
+		case 'MEDIUMINT': return $is_serial ? 'R' : 'I4';
+		case 'BIGINT':  return $is_serial ? 'R' : 'I8';
 		default: return 'N';
 		}
 	}
@@ -78,35 +82,36 @@ class ADODB2_mysql extends ADODB_DataDict {
 	{
 		switch(strtoupper($meta)) {
 		case 'C': return 'VARCHAR';
-		case 'XL':
-		case 'X': return 'LONGTEXT';
-		
+		case 'XL':return 'LONGTEXT';
+		case 'X': return 'TEXT';
+
 		case 'C2': return 'VARCHAR';
 		case 'X2': return 'LONGTEXT';
-		
+
 		case 'B': return 'LONGBLOB';
-			
+
 		case 'D': return 'DATE';
+		case 'TS':
 		case 'T': return 'DATETIME';
 		case 'L': return 'TINYINT';
-		
+
 		case 'R':
+		case 'I4':
 		case 'I': return 'INTEGER';
 		case 'I1': return 'TINYINT';
 		case 'I2': return 'SMALLINT';
-		case 'I4': return 'MEDIUMINT';
 		case 'I8': return 'BIGINT';
-		
+
 		case 'F': return 'DOUBLE';
 		case 'N': return 'NUMERIC';
 		default:
 			return $meta;
 		}
 	}
-	
+
 	// return string must begin with space
-	function _CreateSuffix($fname,$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
-	{	
+	function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	{
 		$suffix = '';
 		if ($funsigned) $suffix .= ' UNSIGNED';
 		if ($fnotnull) $suffix .= ' NOT NULL';
@@ -115,7 +120,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 		if ($fconstraint) $suffix .= ' '.$fconstraint;
 		return $suffix;
 	}
-	
+
 	/*
 	CREATE [TEMPORARY] TABLE [IF NOT EXISTS] tbl_name [(create_definition,...)]
 		[table_options] [select_statement]
@@ -131,16 +136,16 @@ class ADODB2_mysql extends ADODB_DataDict {
 		[reference_definition]
 		or CHECK (expr)
 	*/
-	
+
 	/*
 	CREATE [UNIQUE|FULLTEXT] INDEX index_name
 		ON tbl_name (col_name[(length)],... )
 	*/
-	
+
 	function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
 	{
 		$sql = array();
-		
+
 		if ( isset($idxoptions['REPLACE']) || isset($idxoptions['DROP']) ) {
 			if ($this->alterTableAddIndex) $sql[] = "ALTER TABLE $tabname DROP INDEX $idxname";
 			else $sql[] = sprintf($this->dropIndex, $idxname, $tabname);
@@ -148,11 +153,11 @@ class ADODB2_mysql extends ADODB_DataDict {
 			if ( isset($idxoptions['DROP']) )
 				return $sql;
 		}
-		
+
 		if ( empty ($flds) ) {
 			return $sql;
 		}
-		
+
 		if (isset($idxoptions['FULLTEXT'])) {
 			$unique = ' FULLTEXT';
 		} elseif (isset($idxoptions['UNIQUE'])) {
@@ -160,20 +165,19 @@ class ADODB2_mysql extends ADODB_DataDict {
 		} else {
 			$unique = '';
 		}
-		
+
 		if ( is_array($flds) ) $flds = implode(', ',$flds);
-		
+
 		if ($this->alterTableAddIndex) $s = "ALTER TABLE $tabname ADD $unique INDEX $idxname ";
 		else $s = 'CREATE' . $unique . ' INDEX ' . $idxname . ' ON ' . $tabname;
-		
+
 		$s .= ' (' . $flds . ')';
-		
+
 		if ( isset($idxoptions[$this->upperName]) )
 			$s .= $idxoptions[$this->upperName];
-		
+
 		$sql[] = $s;
-		
+
 		return $sql;
 	}
 }
-?>

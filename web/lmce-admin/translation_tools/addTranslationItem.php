@@ -1,10 +1,10 @@
 <?php
 function addTranslationItem($output,$dbADO) {
-	global $dbPlutoMainServer,$dbPlutoMainUser,$dbPlutoMainPass;
+	global $dbPlutoMainType,$dbPlutoMainServer,$dbPlutoMainUser,$dbPlutoMainPass;
 	
 	/* @var $dbADO ADOConnection */
 	// todo: move records in pluto_main database
-	$trADO = &ADONewConnection('mysql');
+	$trADO = &ADONewConnection($dbPlutoMainType);
 	$trADO->NConnect($dbPlutoMainServer,urlencode($dbPlutoMainUser),urlencode($dbPlutoMainPass),'translation'); 
 	
 	$selectedLang=(isset($_REQUEST['language']))?$_REQUEST['language']:0;

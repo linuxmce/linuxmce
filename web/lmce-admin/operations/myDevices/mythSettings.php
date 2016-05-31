@@ -15,9 +15,9 @@ function mythSettings($output,$dbADO) {
 	
 	$externalCommand='/usr/pluto/bin/TuneToChannel.sh ';
 	
-  	$mythADO= &ADONewConnection('mysql');
+  	$mythADO= &ADONewConnection('mysqli');
   	$mythADO->NConnect($dbMythServer,urlencode($dbMythUser),urlencode($dbMythPass),urlencode($dbMythDatabase));
-	$plutomythADO= &ADONewConnection('mysql');
+	$plutomythADO= &ADONewConnection('mysqli');
   	$plutomythADO->NConnect($dbMythServer,urlencode($dbMythUser),urlencode($dbMythPass),urlencode('pluto_myth'));
 	
   	

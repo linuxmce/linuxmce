@@ -13,7 +13,7 @@ function sqlcvs_checkin($output,$dbADO) {
 	if($database==$dbPlutoMainDatabase){
 		$sqlcvsADO=$dbADO;
 	}else{
-	  	$sqlcvsADO= &ADONewConnection('mysql');
+	  	$sqlcvsADO= &ADONewConnection('mysqli');
 	  	$sqlcvsADO->NConnect($dbMythServer,urlencode($dbMythUser),urlencode($dbMythPass),urlencode($dbPlutoMythDatabase));
 	}	
 	/* @var $dbADO ADOConnection */

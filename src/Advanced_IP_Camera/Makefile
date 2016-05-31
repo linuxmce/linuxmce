@@ -36,7 +36,7 @@ LDFLAGS +=
 XTRALDLIBS = -lcurl -lgsoap++ -lgsoapssl++ -lssl -lcrypto
 
 Gen_Dev_Files +=
-sources += EventMethod.cpp CameraDevice.cpp OnvifDevice.cpp URLAccessDevice.cpp onvif/soapDeviceBindingProxy.cpp onvif/soapPTZBindingProxy.cpp onvif/soapMediaBindingProxy.cpp onvif/soapC.cpp gsoap/duration.cpp gsoap/wsseapi.cpp gsoap/mecevp.cpp gsoap/wsaapi.cpp gsoap/smdevp.cpp
+sources += EventMethod.cpp CameraDevice.cpp OnvifDevice.cpp URLAccessDevice.cpp onvif/soapDeviceBindingProxy.cpp onvif/soapPTZBindingProxy.cpp onvif/soapMediaBindingProxy.cpp onvif/soapPullPointSubscriptionBindingProxy.cpp onvif/soapC.cpp gsoap/duration.cpp gsoap/wsseapi.cpp gsoap/mecevp.cpp gsoap/wsaapi.cpp gsoap/smdevp.cpp
 
 gsoap_dir:
 	mkdir -p gsoap
@@ -59,7 +59,7 @@ gsoap/smdevp.cpp:
 gsoap/%.o:
 	$(CXX) -c $(CPPFLAGS_SOAP) $(CXXFLAGS) $< -o $@ gsoap/$*.cpp
 
-bin: onvif
+bin: #onvif
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -99,7 +99,7 @@ endif
 
 # needs gsoap >=2.8.16
 onvif-get:
-	wsdl2h -P -x -I/usr/share/gsoap/WS -o onvif/onvif.h http://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl http://www.onvif.org/onvif/ver20/ptz/wsdl/ptz.wsdl http://www.onvif.org/onvif/ver10/media/wsdl/media.wsdl
+	wsdl2h -P -x -I/usr/share/gsoap/WS -o onvif/onvif.h http://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl http://www.onvif.org/onvif/ver20/ptz/wsdl/ptz.wsdl http://www.onvif.org/onvif/ver10/media/wsdl/media.wsdl http://www.onvif.org/onvif/ver10/events/wsdl/event.wsdl
 	sed -i '/#import "wsa5.h"/i#import "wsse.h"' onvif/onvif.h
 
 onvif-gen: onvif-get
