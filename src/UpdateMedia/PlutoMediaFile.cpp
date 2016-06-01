@@ -100,7 +100,7 @@ PlutoMediaFile::PlutoMediaFile(Database_pluto_media *pDatabase_pluto_media, int 
 	string sFilePath = sDirectory + "/" + sFile;
 	m_bIsDir = UpdateMediaFileUtils::IsDirectory(sFilePath.c_str());
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PlutoMediaFile STARTED: dir %s file %s", 
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PlutoMediaFile STARTED: dir %s file %s", 
 		m_sDirectory.c_str(), m_sFile.c_str());
 
 	LoadPlutoAttributes();
@@ -108,12 +108,10 @@ PlutoMediaFile::PlutoMediaFile(Database_pluto_media *pDatabase_pluto_media, int 
 	if(NULL == m_pPlutoMediaAttributes)
 		m_pPlutoMediaAttributes = new PlutoMediaAttributes();
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing path %s, file %s. "
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Processing path %s, file %s. "
 		"Found %d attributes, %d long attributes in file", 
 		m_sDirectory.c_str(), m_sFile.c_str(), m_pPlutoMediaAttributes->m_mapAttributes.size(),
 		m_pPlutoMediaAttributes->m_mapLongAttributes.size());
-#endif
 }
 //-----------------------------------------------------------------------------------------------------
 PlutoMediaFile::~PlutoMediaFile()
@@ -155,10 +153,8 @@ PlutoMediaFile::~PlutoMediaFile()
 
 	delete m_pPlutoMediaAttributes;
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PlutoMediaFile ENDED: dir %s file %s, sync mode %s", 
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PlutoMediaFile ENDED: dir %s file %s, sync mode %s", 
 		m_sDirectory.c_str(), m_sFile.c_str(), MediaSyncModeStr[m_MediaSyncMode]);
-#endif
 }
 //-----------------------------------------------------------------------------------------------------
 string PlutoMediaFile::AdjustLongAttributeForDisplay(string sText)
@@ -171,9 +167,8 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 {
 	m_nPK_MediaType = PK_MediaType;
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "HandleFileNotInDatabase media type %d", PK_MediaType);
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "HandleFileNotInDatabase media type %d", PK_MediaType);
+
 	int PK_File=0;
 	// See if the same INode is already in the database
 	int INode = FileUtils::GetInode(m_sDirectory + "/" + m_sFile);
@@ -207,17 +202,14 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 				pRow_File->Missing_set(0);
 				pRow_File->Table_File_get()->Commit();
 
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlutoMediaFile::HandleFileNotInDatabase %s/%s N db-attr: %d Inode: %d size %d mt %d/%d, md5 %s", 
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "PlutoMediaFile::HandleFileNotInDatabase %s/%s N db-attr: %d Inode: %d size %d mt %d/%d, md5 %s", 
 					m_sDirectory.c_str(), m_sFile.c_str(), pRow_File->PK_File_get(), INode, (int) vectRow_File.size(), PK_MediaType, pRow_File->EK_MediaType_get(),
 					pRow_File->MD5_get().c_str());
-#endif
 			}
 			else
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Won't reuse file record %d from db because md5 is different", pRow_File->PK_File_get());
-#endif
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Won't reuse file record %d from db because md5 is different", pRow_File->PK_File_get());
+
 				m_pPlutoMediaAttributes->m_nFileID = 0; 
 				m_pPlutoMediaAttributes->m_nInstallationID = 0;
 			}
@@ -228,9 +220,8 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 	if(!PK_File)
 		PK_File = GetFileIDFromDB();
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s/%s not IN db-attr: %d INode: %d", m_sDirectory.c_str(), m_sFile.c_str(), PK_File, INode);
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "%s/%s not IN db-attr: %d INode: %d", m_sDirectory.c_str(), m_sFile.c_str(), PK_File, INode);
+
 	// Is it a media file?
 	if(!PK_MediaType)
 	{
@@ -273,9 +264,8 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 		}
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media Type is: %d, is folder %d", PK_MediaType, m_bIsDir);
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Media Type is: %d, is folder %d", PK_MediaType, m_bIsDir);
+
 	if(!PK_File)
 	{
 		if(PK_MediaType || m_bIsDir)
@@ -284,25 +274,20 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 		}
 		else
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "not a media file");
-#endif
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "not a media file");
 			return 0;
 		}
 	}
 	else
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Reusing file, updating media type to %d", PK_MediaType);
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Reusing file, updating media type to %d", PK_MediaType);
 
 		Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(PK_File);
 		if( !pRow_File )
 		{
 			SetFileAttribute(0);  // The file doesn't exist.  Shouldn't really happen
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Huh??  not in db now");
-#endif
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Huh??  not in db now");
 			return 0;
 		}
 
@@ -326,9 +311,8 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::SaveEveryThingToDb()
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SyncDbAttributes: ready to sync db with attributes found in attribute file");
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SyncDbAttributes: ready to sync db with attributes found in attribute file");
+
 	// Is it a media file?
 	if(!m_nPK_MediaType)
 		m_nPK_MediaType = PlutoMediaIdentifier::Identify(m_sDirectory + "/" + m_sFile);
@@ -361,26 +345,22 @@ void PlutoMediaFile::SaveStartPosition()
 			Row_Bookmark *pRow_Bookmark = vectBookmarks[0];
 			if(pRow_Bookmark->Position_get() != m_pPlutoMediaAttributes->m_sStartPosition)
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SyncDbAttributes: got different start position. Updating to %s...",
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SyncDbAttributes: got different start position. Updating to %s...",
 					m_pPlutoMediaAttributes->m_sStartPosition.c_str());
-#endif
+
 				pRow_Bookmark->Position_set(m_pPlutoMediaAttributes->m_sStartPosition);
 				pRow_Bookmark->Table_Bookmark_get()->Commit();
 			}
 			else
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SyncDbAttributes: already got same start position. Ignoring...");
-#endif
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SyncDbAttributes: already got same start position. Ignoring...");
 			}
 		}
 		else
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SyncDbAttributes: No start position in the database for this file. "
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SyncDbAttributes: No start position in the database for this file. "
 				"Adding %s start position.", m_pPlutoMediaAttributes->m_sStartPosition.c_str());
-#endif
+
 			Row_Bookmark *pRow_Bookmark_New = m_pDatabase_pluto_media->Bookmark_get()->AddRow();
 			pRow_Bookmark_New->Position_set(m_pPlutoMediaAttributes->m_sStartPosition);
 			pRow_Bookmark_New->Description_set("START");
@@ -437,10 +417,9 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 		}
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SyncDbAttributes: attributes is db %d, total %d",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SyncDbAttributes: attributes is db %d, total %d",
 		mapPlutoMediaAttributes.size(), m_pPlutoMediaAttributes->m_mapAttributes.size());
-#endif
+
 	// For albums we don't want to add a new one for each media file.  All media from the same album
 	// should be grouped into a single album attribute.  However since different (Album Artists)[performers] could have
 	// albums of the same name we need to make a pass first to find the (Album Artist)[performer] and skip the album,
@@ -546,12 +525,10 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 						pRow_File_Attribute->Track_set(pPlutoMediaAttribute->m_nTrack);
 						pRow_File_Attribute->Table_File_Attribute_get()->Commit();
 
-#ifdef UPDATEMEDIA_STATUS
-						LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SyncDbAttributes: Adding attribute to database: "
+						LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SyncDbAttributes: Adding attribute to database: "
 							"for PK_File %d, AttrID %d, AttrType = %d with value %s, section %d, track %d", 
 							PK_File, pRow_Attribute->PK_Attribute_get(), pPlutoMediaAttribute->m_nType,
 							pPlutoMediaAttribute->m_sName.c_str(), pPlutoMediaAttribute->m_nSection, pPlutoMediaAttribute->m_nTrack); 
-#endif
 					}
 				}
 			}
@@ -606,10 +583,9 @@ void PlutoMediaFile::SaveLongAttributesInDb(bool bAddAllToDb)
 		}
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SyncDbAttributes: long attributes is db %d, total %d",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SyncDbAttributes: long attributes is db %d, total %d",
 		mapPlutoMediaAttributes.size(), m_pPlutoMediaAttributes->m_mapLongAttributes.size());
-#endif
+
 	//Save any new long attributes in the database
 	for(MapPlutoMediaAttributes::iterator it = m_pPlutoMediaAttributes->m_mapLongAttributes.begin(),
 		end = m_pPlutoMediaAttributes->m_mapLongAttributes.end(); it != end; ++it)
@@ -646,13 +622,12 @@ void PlutoMediaFile::SaveLongAttributesInDb(bool bAddAllToDb)
 				pRow_LongAttribute->Text_set(pPlutoMediaAttribute->m_sName);
 				pRow_LongAttribute->Table_LongAttribute_get()->Commit();
 
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SyncDbAttributes: Adding long attribute to database: "
+
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SyncDbAttributes: Adding long attribute to database: "
 					"for PK_File %d, long AttrID %d, AttrType = %d with value %s", 
 					PK_File, pRow_LongAttribute->PK_LongAttribute_get(), pPlutoMediaAttribute->m_nType,
 					AdjustLongAttributeForDisplay(pPlutoMediaAttribute->m_sName).c_str()
 				); 
-#endif
 			}
 		}
 	}
@@ -666,10 +641,10 @@ void PlutoMediaFile::SaveBookmarkPictures()
 	//got bookmarks in attribute file, but none in the database?
 	if(!m_pPlutoMediaAttributes->m_listBookmarks.empty() && !NumberOfBookmarksFromDB())
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "SaveBookmarkPictures: no bookmarks to db. Adding those from file %d",
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "SaveBookmarkPictures: no bookmarks to db. Adding those from file %d",
 			m_pPlutoMediaAttributes->m_listBookmarks.size());
-#endif
+
 
 		int nCounter = 0;
 		for(ListBookmarks::iterator it = m_pPlutoMediaAttributes->m_listBookmarks.begin(), 
@@ -713,10 +688,10 @@ void PlutoMediaFile::SaveBookmarkPictures()
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::SaveMiscInfo()
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SaveMiscInfo: FK_FileFormat %d, FK_MediaSubType %d", 
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SaveMiscInfo: FK_FileFormat %d, FK_MediaSubType %d", 
 		m_pPlutoMediaAttributes->m_nFileFormat, m_pPlutoMediaAttributes->m_nMediaSubType);
-#endif
+
 	Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(m_pPlutoMediaAttributes->m_nFileID);
 	if(NULL != pRow_File)
 	{
@@ -741,10 +716,10 @@ void PlutoMediaFile::SaveCoverarts()
 	list<string> listMd5Sums;
 	GenerateMd5SumsCoverartsFromDb(listMd5Sums);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SaveCoverarts: got %d coverarts in db. "
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "SaveCoverarts: got %d coverarts in db. "
 		"Merging with %d from file", listMd5Sums.size(), m_pPlutoMediaAttributes->m_mapCoverarts.size());
-#endif
+
 	MapPictures::iterator it = m_pPlutoMediaAttributes->m_mapCoverarts.begin();
 	MapPictures::iterator end = m_pPlutoMediaAttributes->m_mapCoverarts.end();
 
@@ -754,10 +729,10 @@ void PlutoMediaFile::SaveCoverarts()
 
 		if(listMd5Sums.end() == std::find(listMd5Sums.begin(), listMd5Sums.end(), sMd5Sum))
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "SaveCoverarts: adding picture with size %d, md5sum %s to db",
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "SaveCoverarts: adding picture with size %d, md5sum %s to db",
 				it->first, sMd5Sum.c_str());
-#endif
+
 			Row_Picture *pRow_Picture = m_pDatabase_pluto_media->Picture_get()->AddRow();
 			pRow_Picture->Extension_set("jpg");
 			pRow_Picture->Table_Picture_get()->Commit();
@@ -772,10 +747,10 @@ void PlutoMediaFile::SaveCoverarts()
 		}
 		else
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "SaveCoverarts: not adding picture with size %d, md5sum %s"
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "SaveCoverarts: not adding picture with size %d, md5sum %s"
 				" since is already in db", it->first, sMd5Sum.c_str());
-#endif
+
 		}
 	}
 }
@@ -796,10 +771,10 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 	//Any luck to reuse a missing file record?
 	if(vectRow_File.size())
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlutoMediaFile::AddFileToDatabase -> there is already "
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "PlutoMediaFile::AddFileToDatabase -> there is already "
 			"a record in the database marked as missing for %s - %s file", m_sDirectory.c_str(), m_sFile.c_str());
-#endif
+
 		//Get the first record and reuse it
 		pRow_File = vectRow_File[0];
 		pRow_File->Reload();
@@ -826,10 +801,10 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 		if(vectRow_File_Attribute.size())
 			m_pDatabase_pluto_media->File_Attribute_get()->Commit();
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlutoMediaFile::AddFileToDatabase -> reusing PK_File %d. "
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "PlutoMediaFile::AddFileToDatabase -> reusing PK_File %d. "
 			"Deleted children records.", pRow_File->PK_File_get());
-#endif
+
 	}
 	else
 	{
@@ -846,10 +821,10 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 		pRow_File->Missing_set(0);
 		pRow_File->Table_File_get()->Commit();
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write( LV_STATUS, "PlutoMediaFile::AddFileToDatabase new %s PK_File %d Inode %d",
+
+		LoggerWrapper::GetInstance()->Write( LV_MEDIA, "PlutoMediaFile::AddFileToDatabase new %s PK_File %d Inode %d",
 			(pRow_File->Path_get() + "/" + pRow_File->Filename_get()).c_str(), pRow_File->PK_File_get(), pRow_File->INode_get() );
-#endif
+
 	}
 
 	//These are our installation and our file
@@ -859,10 +834,10 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 	SaveShortAttributesInDb(true);
 	SaveLongAttributesInDb(true);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlutoMediaFile::AddFileToDatabase picture url %s",
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "PlutoMediaFile::AddFileToDatabase picture url %s",
 		m_pPlutoMediaAttributes->m_sPictureUrl.c_str());
-#endif
+
 	// Got a picture url? Let's download it if we don't have already coverarts saved
 	if(m_pPlutoMediaAttributes->m_mapCoverarts.empty())
 	{
@@ -885,23 +860,23 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 				pRow_Picture_File->FK_Picture_set(pRow_Picture->PK_Picture_get());
 				pRow_Picture_File->Table_Picture_File_get()->Commit();
 
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlutoMediaFile::AddFileToDatabase Added picture to file: PK_File %d, PK_Picture %d",
+
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "PlutoMediaFile::AddFileToDatabase Added picture to file: PK_File %d, PK_Picture %d",
 					pRow_File->PK_File_get(), m_pPlutoMediaAttributes->m_nPictureID);
-#endif
+
 			}
-#ifdef UPDATEMEDIA_STATUS
+
 			else
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlutoMediaFile::AddFileToDatabase Failed to add picture to file: PK_File %d, picture url: %s",
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "PlutoMediaFile::AddFileToDatabase Failed to add picture to file: PK_File %d, picture url: %s",
 					pRow_File->PK_File_get(), m_pPlutoMediaAttributes->m_sPictureUrl.c_str());
-#endif
+
 		}
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Added %s/%s to db with PK_File = %d", m_sDirectory.c_str(), m_sFile.c_str(),
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Added %s/%s to db with PK_File = %d", m_sDirectory.c_str(), m_sFile.c_str(),
 		pRow_File->PK_File_get());
-#endif
+
 	m_bNewFileToDb = true;
 	m_bNewFilesAdded = true;
 
@@ -910,9 +885,9 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 		string Output = m_sDirectory + "/" + m_sFile;
 		StringUtils::Replace(&Output,"\"","\\\"");
 		string sCmd = "convert \"" + Output + "\" -scale 256x256 -antialias \"jpeg:" + Output + ".tnj\"";
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Creating thumbnail %s",sCmd.c_str());
-#endif
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Creating thumbnail %s",sCmd.c_str());
+
 		system(sCmd.c_str());
 	}
 
@@ -930,10 +905,10 @@ void PlutoMediaFile::SetMediaType(int PK_File, int PK_MediaType)
 		pRow_File->EK_MediaType_set(PK_MediaType);
 		m_pDatabase_pluto_media->File_get()->Commit();
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "File %d has now media type %d",
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "File %d has now media type %d",
 			PK_File, PK_MediaType);
-#endif
+
 	}
 }
 //-----------------------------------------------------------------------------------------------------
@@ -952,9 +927,9 @@ void PlutoMediaFile::AssignPlutoDevice(Row_File *pRow_File)
 		MapMountedDevicesToPlutoDevices(listFiles, mapMountedDevices);
 		int nEK_Device = PlutoDeviceForFile(m_sDirectory + "/" + m_sFile, mapMountedDevices);
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "File %s/%s on pluto device %d", m_sDirectory.c_str(), m_sFile.c_str(), nEK_Device);
-#endif
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "File %s/%s on pluto device %d", m_sDirectory.c_str(), m_sFile.c_str(), nEK_Device);
+
 		if(nEK_Device != 0)
 			pRow_File->EK_Device_set(nEK_Device);
 		else
@@ -976,9 +951,9 @@ void PlutoMediaFile::AssignPlutoUser(Row_File *pRow_File)
 	{
 		int nEK_Users_Private = GetOwnerForPath(m_sDirectory);
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "File %s/%s assigned to user %d", m_sDirectory.c_str(), m_sFile.c_str(), nEK_Users_Private);
-#endif
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "File %s/%s assigned to user %d", m_sDirectory.c_str(), m_sFile.c_str(), nEK_Users_Private);
+
 		if(nEK_Users_Private != 0)
 			pRow_File->EK_Users_Private_set(nEK_Users_Private);
 		else
@@ -998,10 +973,10 @@ void PlutoMediaFile::UpdateMd5Field()
 	{
 		pRow_File->Reload();
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "File %s/%s, PK_File %d - midmd5 is %s", 
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "File %s/%s, PK_File %d - midmd5 is %s", 
 			m_sDirectory.c_str(), m_sFile.c_str(), m_pPlutoMediaAttributes->m_nFileID, sMidMd5.c_str());
-#endif
+
 		pRow_File->MD5_set(sMidMd5);
 		pRow_File->Table_File_get()->Commit();
 	}
@@ -1009,9 +984,9 @@ void PlutoMediaFile::UpdateMd5Field()
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::SetFileAttribute(int PK_File)
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SetFileAttribute %s/%s %d", m_sDirectory.c_str(), m_sFile.c_str(), PK_File);
-#endif
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "SetFileAttribute %s/%s %d", m_sDirectory.c_str(), m_sFile.c_str(), PK_File);
+
 	//make sure it's our installation and file
 	m_pPlutoMediaAttributes->m_nInstallationID = m_nOurInstallationID;
 	m_pPlutoMediaAttributes->m_nFileID = PK_File;
@@ -1027,30 +1002,30 @@ int PlutoMediaFile::GetFileAttribute()
 		Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(m_pPlutoMediaAttributes->m_nFileID);
 		if(NULL != pRow_File && pRow_File->Filename_get() == m_sFile)
 			return pRow_File->PK_File_get();
-#ifdef UPDATEMEDIA_STATUS
+
 		else
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetFileAttribute %s/%s installation %d/%d id %d doesn't match database %s", 
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "GetFileAttribute %s/%s installation %d/%d id %d doesn't match database %s", 
 				m_sDirectory.c_str(), m_sFile.c_str(),
 				m_pPlutoMediaAttributes->m_nInstallationID, m_nOurInstallationID, m_pPlutoMediaAttributes->m_nFileID,
 				pRow_File ? pRow_File->Filename_get().c_str() : "*NULL*");
-#endif
+
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetFileAttribute %s/%s not found installation %d/%d id %d", 
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "GetFileAttribute %s/%s not found installation %d/%d id %d", 
 		m_sDirectory.c_str(), m_sFile.c_str(),
 		m_pPlutoMediaAttributes->m_nInstallationID, m_nOurInstallationID, m_pPlutoMediaAttributes->m_nFileID);
-#endif
+
 return 0;
 }
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::SetPicAttribute(int PK_Picture, string sPictureUrl)
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SetPicAttribute %s/%s PK_Picture %d", m_sDirectory.c_str(), m_sFile.c_str(),
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "SetPicAttribute %s/%s PK_Picture %d", m_sDirectory.c_str(), m_sFile.c_str(),
 		PK_Picture);
-#endif
+
 	//set the right picture id and picture url
 	m_pPlutoMediaAttributes->m_nPictureID = PK_Picture;
 	m_pPlutoMediaAttributes->m_sPictureUrl = sPictureUrl;
@@ -1084,24 +1059,24 @@ int PlutoMediaFile::GetPicAttribute(int PK_File)
 		return 0;
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: file %d", PK_File);
-#endif
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# GetPicAttribute: file %d", PK_File);
+
 	//got any picture associated with the file?
 	vector<Row_Picture_File *> vectPicture_File;
 	m_pDatabase_pluto_media->Picture_File_get()->GetRows("FK_File=" + StringUtils::itos(PK_File),&vectPicture_File);
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Found %d pics for file", vectPicture_File.size());
-#endif
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Found %d pics for file", vectPicture_File.size());
+
 	if( vectPicture_File.size() )
 	{
 		long PK_Picture = vectPicture_File[0]->FK_Picture_get();
 		Row_Picture *pRow_Picture = m_pDatabase_pluto_media->Picture_get()->GetRow(PK_Picture);
 		string sPictureUrl = NULL != pRow_Picture ? pRow_Picture->URL_get() : "";
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: got picture %d associated to file %d", PK_Picture, PK_File);
-#endif
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# GetPicAttribute: got picture %d associated to file %d", PK_Picture, PK_File);
+
 		SetPicAttribute(PK_Picture, sPictureUrl);
 		return PK_Picture;  // The first pic for this directory
 	}
@@ -1116,18 +1091,18 @@ int PlutoMediaFile::GetPicAttribute(int PK_File)
 	StringUtils::itos(PK_File) +
 	" ORDER BY `PicPriority`",&vectPicture_Attribute);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Found %d pics for attribute", (int) vectPicture_Attribute.size());
-#endif
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Found %d pics for attribute", (int) vectPicture_Attribute.size());
+
 	if( vectPicture_Attribute.size())
 	{
 		long PK_Picture = vectPicture_Attribute[0]->FK_Picture_get();
 		Row_Picture *pRow_Picture = m_pDatabase_pluto_media->Picture_get()->GetRow(PK_Picture);
 		string sPictureUrl = NULL != pRow_Picture ? pRow_Picture->URL_get() : "";
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: got picture %d associated to attribute %d", PK_Picture, 
-#endif
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# GetPicAttribute: got picture %d associated to attribute %d", PK_Picture, 
+
 		vectPicture_Attribute[0]->FK_Attribute_get());
 		SetPicAttribute(PK_Picture, sPictureUrl);
 		return PK_Picture;  // The first pic for this directory
@@ -1137,10 +1112,10 @@ int PlutoMediaFile::GetPicAttribute(int PK_File)
 	{
 		if(m_pPlutoMediaAttributes->m_sPictureUrl != "")
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: got no picture in the db, but got picture URL %s",
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# GetPicAttribute: got no picture in the db, but got picture URL %s",
 				m_pPlutoMediaAttributes->m_sPictureUrl.c_str());
-#endif
+
 			//It's a "new" file, but we know the picture url
 			//we'll download the picture and record in Picture table
 			MediaAttributes_LowLevel mediaAttributes_LowLevel(m_pDatabase_pluto_media);
@@ -1158,26 +1133,26 @@ int PlutoMediaFile::GetPicAttribute(int PK_File)
 				pRow_Picture_File->FK_Picture_set(pRow_Picture->PK_Picture_get());
 				pRow_Picture_File->Table_Picture_File_get()->Commit();
 
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlutoMediaFile::GetPicAttribute Added picture to file: PK_File %d, PK_Picture %d",
+
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "PlutoMediaFile::GetPicAttribute Added picture to file: PK_File %d, PK_Picture %d",
 					PK_File, m_pPlutoMediaAttributes->m_nPictureID);
 
-#endif
+
 				return m_pPlutoMediaAttributes->m_nPictureID;
 			}
 			else
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Failed to add picture to file: PK_File %d, picture url: %s",
+
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to add picture to file: PK_File %d, picture url: %s",
 					PK_File, m_pPlutoMediaAttributes->m_sPictureUrl.c_str());
-#endif
+
 			}
 		}
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# GetPicAttribute: got no picture for file %d", PK_File);
-#endif
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# GetPicAttribute: got no picture for file %d", PK_File);
+
 	return 0;
 }
 //-----------------------------------------------------------------------------------------------------
@@ -1185,9 +1160,9 @@ void PlutoMediaFile::SavePlutoAttributes()
 {
 	if(m_MediaSyncMode == modeFileToDb)
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# NOT saving attributes in attribute files. Read only mode!");
-#endif
+
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# NOT saving attributes in attribute files. Read only mode!");
+
 	}
 	else
 	{
@@ -1214,10 +1189,10 @@ void PlutoMediaFile::CacheDVDKeys()
 		}
 		else
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Successfuly cached dvd keys from %s to %s", 
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Successfuly cached dvd keys from %s to %s", 
 				sKeysArchiveFile.c_str(), m_sDVDKeysCache.c_str());
-#endif
+
 		}
 	}
 	else
@@ -1238,10 +1213,10 @@ void PlutoMediaFile::LoadPlutoAttributes()
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::MergePictures()
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MergePictures: merging %d pictures from our tag with %d pictures from PIC tags",
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "MergePictures: merging %d pictures from our tag with %d pictures from PIC tags",
 		m_pPlutoMediaAttributes->m_mapCoverarts.size(), m_listPicturesForTags.size());
-#endif
+
 	//get the list with md5sums for coverarts and also remove the duplicates
 	list<string> listMD5SumsCoverarts;
 	m_pPlutoMediaAttributes->GenerateMd5SumsForCoverarts(listMD5SumsCoverarts, true);
@@ -1258,10 +1233,10 @@ void PlutoMediaFile::MergePictures()
 		}
 		else
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "LoadPlutoAttributes: loading picture with size %d from PIC tag - md5sum %s",
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "LoadPlutoAttributes: loading picture with size %d from PIC tag - md5sum %s",
 				nPictureSize, sMd5Sum.c_str());
-#endif
+
 			m_pPlutoMediaAttributes->m_mapCoverarts.insert(make_pair(static_cast<unsigned long>(nPictureSize), pPictureData));
 		}
 	}
@@ -1289,10 +1264,10 @@ void PlutoMediaFile::LoadStartPosition()
 		Row_Bookmark *pRow_Bookmark = vectBookmarks[0];	
 		m_pPlutoMediaAttributes->m_sStartPosition = pRow_Bookmark->Position_get();
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: read start position from db: %s",
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: read start position from db: %s",
 			m_pPlutoMediaAttributes->m_sStartPosition.c_str());
-#endif
+
 	}
 }
 //-----------------------------------------------------------------------------------------------------
@@ -1317,9 +1292,9 @@ void PlutoMediaFile::LoadShortAttributes()
 			int nTrack = NULL != row[3] ? atoi(row[3]) : 0;
 			int nSection = NULL != row[4] ? atoi(row[4]) : 0;
 
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Attr in db : type %d\t\tvalue %s", nFK_AttributeType, sName.c_str());
-#endif
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Attr in db : type %d\t\tvalue %s", nFK_AttributeType, sName.c_str());
+
 			bool bAttributeAlreadyAdded = false;
 
 			if(m_MediaSyncMode == modeDbToFile) 
@@ -1346,10 +1321,10 @@ void PlutoMediaFile::LoadShortAttributes()
 
 			if(!bAttributeAlreadyAdded)
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: (from db) new attributes to add in attribute file -  type %d, values %s",
+
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: (from db) new attributes to add in attribute file -  type %d, values %s",
 					nFK_AttributeType, sName.c_str());
-#endif
+
 				m_pPlutoMediaAttributes->m_mapAttributes.insert(
 					std::make_pair(
 						nFK_AttributeType, 
@@ -1370,10 +1345,10 @@ void PlutoMediaFile::LoadShortAttributes()
 			PlutoMediaAttribute *pPlutoMediaAttribute_File = it->second;
 			bool bAttributeFoundInDB = false;
 
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Attr in file : type %d\t\tvalue %s", 
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Attr in file : type %d\t\tvalue %s", 
 				pPlutoMediaAttribute_File->m_nType, pPlutoMediaAttribute_File->m_sName.c_str());
-#endif
+
 			for(MapPlutoMediaAttributes::iterator it_DbAttr = mapDBAttributes.begin(), end_DbAttr = mapDBAttributes.end(); 
 				it_DbAttr != end_DbAttr; ++it_DbAttr)
 			{
@@ -1395,10 +1370,10 @@ void PlutoMediaFile::LoadShortAttributes()
 				++it;
 		}
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "After sync'ing file %d, attr in db: %d, attr in file: %d", 
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "After sync'ing file %d, attr in db: %d, attr in file: %d", 
 			m_pPlutoMediaAttributes->m_nFileID, mapDBAttributes.size(), m_pPlutoMediaAttributes->m_mapAttributes.size());
-#endif
+
 		//cleanup
 		for(MapPlutoMediaAttributes::iterator it = mapDBAttributes.begin(), end = mapDBAttributes.end(); it != end; ++it)
 		{
@@ -1407,10 +1382,10 @@ void PlutoMediaFile::LoadShortAttributes()
 		}
 		mapDBAttributes.clear();
 	}
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: pluto attributes merged with those from database %d", 
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: pluto attributes merged with those from database %d", 
 		m_pPlutoMediaAttributes->m_mapAttributes.size());
-#endif
+
 }
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::LoadLongAttributes()
@@ -1431,9 +1406,9 @@ void PlutoMediaFile::LoadLongAttributes()
 			int nFK_AttributeType = atoi(row[0]);
 			string sName = row[1];
 
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Long attribute in db : type %d\t\tvalue %s", nFK_AttributeType, AdjustLongAttributeForDisplay(sName).c_str());
-#endif
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Long attribute in db : type %d\t\tvalue %s", nFK_AttributeType, AdjustLongAttributeForDisplay(sName).c_str());
+
 			bool bAttributeAlreadyAdded = false;
 			if(m_MediaSyncMode == modeDbToFile) 
 				mapDbLongAttributes.insert(std::make_pair(nFK_AttributeType, new PlutoMediaAttribute(0, nFK_AttributeType, sName)));
@@ -1451,10 +1426,10 @@ void PlutoMediaFile::LoadLongAttributes()
 
 			if(!bAttributeAlreadyAdded)
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: (from db) new long attributes to add in attribute file -  type %d, values %s",
+
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: (from db) new long attributes to add in attribute file -  type %d, values %s",
 					nFK_AttributeType, AdjustLongAttributeForDisplay(sName).c_str());
-#endif
+
 				m_pPlutoMediaAttributes->m_mapLongAttributes.insert(
 					std::make_pair(nFK_AttributeType, new PlutoMediaAttribute(0, nFK_AttributeType, sName))
 				);
@@ -1472,10 +1447,10 @@ void PlutoMediaFile::LoadLongAttributes()
 			PlutoMediaAttribute *pPlutoMediaAttribute_File = it->second;
 			bool bAttributeFoundInDB = false;
 
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Long attr in file : type %d\t\tvalue %s", 
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Long attr in file : type %d\t\tvalue %s", 
 				pPlutoMediaAttribute_File->m_nType, AdjustLongAttributeForDisplay(pPlutoMediaAttribute_File->m_sName).c_str());
-#endif
+
 			for(MapPlutoMediaAttributes::iterator it_DbAttr = mapDbLongAttributes.begin(), end_DbAttr = mapDbLongAttributes.end(); 
 				it_DbAttr != end_DbAttr; ++it_DbAttr)
 			{
@@ -1500,10 +1475,10 @@ void PlutoMediaFile::LoadLongAttributes()
 				++it;
 		}
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "After sync'ing file %d, long attr in db: %d, long attr in file: %d", 
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "After sync'ing file %d, long attr in db: %d, long attr in file: %d", 
 			m_pPlutoMediaAttributes->m_nFileID, mapDbLongAttributes.size(), m_pPlutoMediaAttributes->m_mapLongAttributes.size());
-#endif
+
 		//cleanup
 		for(MapPlutoMediaAttributes::iterator it = mapDbLongAttributes.begin(), end = mapDbLongAttributes.end(); it != end; ++it)
 		{
@@ -1513,10 +1488,10 @@ void PlutoMediaFile::LoadLongAttributes()
 		mapDbLongAttributes.clear();
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: pluto long attributes merged with those from database %d", 
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: pluto long attributes merged with those from database %d", 
 		m_pPlutoMediaAttributes->m_mapLongAttributes.size());
-#endif
+
 }
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::LoadBookmarkPictures()
@@ -1526,10 +1501,10 @@ void PlutoMediaFile::LoadBookmarkPictures()
 	//keep them in sync. clean bookmarks from file and use those from db if it's not a new file
 	if(!m_bNewFileToDb)
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "LoadBookmarkPictures: clear bookmarks from file."
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "LoadBookmarkPictures: clear bookmarks from file."
 			"We'll use those from db: %d", nNumBookmarksFromDB);
-#endif
+
 		m_pPlutoMediaAttributes->ClearBookmarks();
 	}
 
@@ -1552,10 +1527,10 @@ void PlutoMediaFile::LoadBookmarkPictures()
 			//skip start position
 			if(sDescription == "START")
 				continue;
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "LoadBookmarkPictures: Adding bookmark desc %s, pos %s", sDescription.c_str(),
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "LoadBookmarkPictures: Adding bookmark desc %s, pos %s", sDescription.c_str(),
 				sPosition.c_str());
-#endif
+
 			pair<unsigned long, char *> picture_data = LoadPicture(nFK_Picture);
 			pair<unsigned long, char *> thumb_picture_data = LoadPicture(nFK_Picture, true);
 
@@ -1593,10 +1568,10 @@ void PlutoMediaFile::LoadMiscInfo()
 		}
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# SaveMiscInfo: FK_FileFormat %d, FK_MediaSubType %d", 
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# SaveMiscInfo: FK_FileFormat %d, FK_MediaSubType %d", 
 		m_pPlutoMediaAttributes->m_nFileFormat, m_pPlutoMediaAttributes->m_nMediaSubType);
-#endif
+
 }
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::LoadCoverarts()
@@ -1605,15 +1580,15 @@ void PlutoMediaFile::LoadCoverarts()
 	list<string> listMD5SumsCoverarts;
 	m_pPlutoMediaAttributes->GenerateMd5SumsForCoverarts(listMD5SumsCoverarts, true);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "LoadCoverarts: loaded %d unique pictures from file",
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "LoadCoverarts: loaded %d unique pictures from file",
 		listMD5SumsCoverarts.size());
-#endif
+
 	if(m_MediaSyncMode == modeDbToFile)
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "LoadCoverarts: only the db has changed, so we'll purge coverarts from file and use only those from db");
-#endif
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "LoadCoverarts: only the db has changed, so we'll purge coverarts from file and use only those from db");
+
 		m_pPlutoMediaAttributes->ClearCoverarts();
 		listMD5SumsCoverarts.clear();
 	}
@@ -1636,11 +1611,11 @@ void PlutoMediaFile::LoadCoverarts()
 			//picture already in file attributes?
 			if(listMD5SumsCoverarts.end() != std::find(listMD5SumsCoverarts.begin(), listMD5SumsCoverarts.end(), sMd5Sum))
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "LoadCoverarts: not loading picture with size %d from database, "
+
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "LoadCoverarts: not loading picture with size %d from database, "
 					"because we already have it in file - md5sum %s", 
 					pairPicture.first, sMd5Sum.c_str());
-#endif
+
 				delete [] pairPicture.second;
 			}
 			else
@@ -1648,11 +1623,11 @@ void PlutoMediaFile::LoadCoverarts()
 				//we don't have it, add it to list
 				listMD5SumsCoverarts.push_back(sMd5Sum);
 
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "LoadCoverarts: Adding coverart, picture id %d, "
+
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "LoadCoverarts: Adding coverart, picture id %d, "
 					"size %d, md5sum %s", nFK_Picture, pairPicture.first, sMd5Sum.c_str());
 
-#endif
+
 				m_pPlutoMediaAttributes->m_mapCoverarts.insert(pairPicture);
 			}
 		}
@@ -1695,9 +1670,9 @@ void PlutoMediaFile::SavePicture(pair<unsigned long, char *> pairPicture, int nP
 
 				if(NULL != pPictureThumbData && nPictureThumbSize > 0)
 				{
-#ifdef UPDATEMEDIA_STATUS
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Thumbnail picture created with %s and returned %d", Cmd.c_str(), result);
-#endif
+
+					LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Thumbnail picture created with %s and returned %d", Cmd.c_str(), result);
+
 					FileUtils::WriteBufferIntoFile(sPictureFile, pPictureThumbData, nPictureThumbSize);
 
 					FileUtils::DelFile(sTempPictureName);
@@ -1724,10 +1699,10 @@ void PlutoMediaFile::SavePicture(pair<unsigned long, char *> pairPicture, int nP
 //-----------------------------------------------------------------------------------------------------
 void PlutoMediaFile::RenameAttribute(int Attribute_Type, string sOldValue, string sNewValue)
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# RenameAttribute : need to rename attribute type %d, value %s with %s", 
+
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# RenameAttribute : need to rename attribute type %d, value %s with %s", 
 		Attribute_Type, sOldValue.c_str(), sNewValue.c_str());
-#endif
+
 	for(MapPlutoMediaAttributes::iterator it = m_pPlutoMediaAttributes->m_mapAttributes.begin(), 
 		end = m_pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 	{
@@ -1806,9 +1781,9 @@ map<string,int> PlutoMediaIdentifier::m_mapExtensions;
 	if(m_mapExtensions.size()) //activate once
 		return;
 
-#ifdef UPDATEMEDIA_STATUS
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Activating Pluto Media Identifier...");
-#endif
+
 	vector<Row_MediaType *> vectRow_MediaType;
 	pDatabase_pluto_main->MediaType_get()->GetRows("1=1",&vectRow_MediaType);
 	for(size_t s=0;s<vectRow_MediaType.size();++s)
@@ -1831,9 +1806,9 @@ map<string,int> PlutoMediaIdentifier::m_mapExtensions;
 		m_mapExtensions[StringUtils::ToLower(StringUtils::Tokenize(sExtensions,",",pos))] = pRow_DeviceTemplate_MediaType->FK_MediaType_get();
 	}
 
-#ifdef UPDATEMEDIA_STATUS
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Pluto Media Identifier activated. Extensions %d", m_mapExtensions.size());
-#endif
+
 }
 //-----------------------------------------------------------------------------------------------------
 /*static*/ string PlutoMediaIdentifier::GetExtensions()

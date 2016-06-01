@@ -60,13 +60,13 @@ string PhotoFileHandler::AttributeToTag(int attribute) {
 }
 
 bool PhotoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes, list<pair<char *, size_t> >& listPicturesForTags) {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 			pPlutoMediaAttributes->m_mapAttributes.size(), m_sFullFilename.c_str());
 
 	multimap<int, string> mmappedAttributes;
 	getTagsFromFile(m_sFullFilename, mmappedAttributes, listPicturesForTags);
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::LoadAttributes: Mapped %d attributes", mmappedAttributes.size());
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::LoadAttributes: Mapped %d attributes", mmappedAttributes.size());
 
 	//merge attributes
 	for(multimap<int, string>::iterator it = mmappedAttributes.begin(), end = mmappedAttributes.end(); it != end; ++it) {
@@ -89,10 +89,9 @@ bool PhotoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribute
 
 bool PhotoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes) {
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), m_sFullFilename.c_str());
-#endif
+
 	if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 	{
 		try {
@@ -119,7 +118,7 @@ bool PhotoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttribute
 						{
 							string tag = AttributeToTag(it->first);
 							if (tag != "") {
-								LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::SaveAttributes: saving tag %s, value = %s", tag.c_str(), it->second->m_sName.c_str());
+								LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::SaveAttributes: saving tag %s, value = %s", tag.c_str(), it->second->m_sName.c_str());
 								if (setClearedTags.find(tag) == setClearedTags.end()) {
 									// Clear all tags of this key before starting to add new keys
 									if (StringUtils::StartsWith(tag, "Exif")) {
@@ -155,25 +154,22 @@ bool PhotoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttribute
 				image->setIptcData(iptcData);
 				image->writeMetadata();
 			} else {
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::SaveAttributes: unable to open file");
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::SaveAttributes: unable to open file");
 			}
 		} catch (Exiv2::AnyError& e) {
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::SaveAttributes() Exiv::AnyError: %s",  e.what());
 		}
 	}
 	else
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::SaveAttributes: No attributes to save");
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::SaveAttributes: No attributes to save");
 
 	return true;
 }
 
 bool PhotoFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttributes *pPlutoMediaAttributes) {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::RemoveAttributes: removing tag %d with value %s from file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::RemoveAttributes: removing tag %d with value %s from file %s",
 					    nTagType, sValue.c_str(), m_sFullFilename.c_str());
-#endif
+
 	if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 	{
 		try {
@@ -242,7 +238,7 @@ string PhotoFileHandler::GetFileSourceForDB() {
 
 void PhotoFileHandler::getTagsFromFile(string sFilename, multimap<int,string>& mmapAttributes, list<pair<char *, size_t> >& listPictures) {
 	// open file
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Processing file %s", sFilename.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::getTagsFromFile: Processing file %s", sFilename.c_str());
 	try {
 		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(sFilename);
 		// check if everything's okay and only proceed if there is some meta data
@@ -253,7 +249,7 @@ void PhotoFileHandler::getTagsFromFile(string sFilename, multimap<int,string>& m
 			Exiv2::IptcData &iptcData = image->iptcData();
 			
 			if(exifData.empty()) {
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: File %s does not contain any EXIF information",
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::getTagsFromFile: File %s does not contain any EXIF information",
 								    sFilename.c_str());
 			} else {
 				string sExifAttributesPlain = "";
@@ -341,10 +337,10 @@ void PhotoFileHandler::getTagsFromFile(string sFilename, multimap<int,string>& m
 					}
 					
 				}
-				//						LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found EXIF data \"%s\"", sExifAttributesPlain.c_str());
+				//						LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::getTagsFromFile: Found EXIF data \"%s\"", sExifAttributesPlain.c_str());
 			}
 			if (iptcData.empty()) {
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: File %s does not contain any IPTC information",
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::getTagsFromFile: File %s does not contain any IPTC information",
 								    sFilename.c_str());
 			} else {
 				string sIptcAttributesPlain = "";
@@ -353,10 +349,10 @@ void PhotoFileHandler::getTagsFromFile(string sFilename, multimap<int,string>& m
 				Exiv2::IptcData::iterator charSetIt = iptcData.findKey(Exiv2::IptcKey("Iptc.Envelope.CharacterSet"));
 				string sourceCharset = "ISO-8859-1"; // default to ISO-8859-1 if nothing found below (this is the same behaviour as exiftool)
 				if (charSetIt != end) {
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found IPTC charset \"%s\"", charSetIt->print().c_str());
+					LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::getTagsFromFile: Found IPTC charset \"%s\"", charSetIt->print().c_str());
 				}
 				for (Exiv2::IptcData::iterator i = iptcData.begin(); i != end; ++i) {
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found IPTC data '%s': '%s'",  i->key().c_str(), i->value().toString().c_str());
+					LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# PhotoFileHandler::getTagsFromFile: Found IPTC data '%s': '%s'",  i->key().c_str(), i->value().toString().c_str());
 					
 					// map some attributes to LMCE media attributes
 					switch(i->tag()) {
