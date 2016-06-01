@@ -120,17 +120,16 @@ void MediaState::LoadDbInfo(Database_pluto_media *pDatabase_pluto_media, string 
 
 	DB_ROW row;
 	PlutoSqlResult allresult;
-#ifdef UPDATEMEDIA_STATUS
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfo ready to run big query");
-#endif
+
 	//do you want to debug this big query? uncomment this:
 	//cout << endl << endl << sSql << endl << endl;
 
 	if(NULL != (allresult.r = pDatabase_pluto_media->db_wrapper_query_result(sSql)))
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfo got %d rows <- this is erroneously reporting 0", allresult.r->row_count);
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "MediaState::LoadDbInfo got %d rows <- this is erroneously reporting 0", allresult.r->row_count);
+
 		//reset current state, load fresh info
 		m_mapMediaState.clear();
 
@@ -175,21 +174,20 @@ MediaSyncMode MediaState::SyncModeNeeded(string sDirectory, string sFile)
 		//is this our file or not source defined?
 		if(item.m_cSource != 'F' && item.m_cSource != 'P' && item.m_cSource != 0)
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Not a valid file to get sync mode on.");
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Not a valid file to get sync mode on.");
 			return modeNone;
 		}
 
-LoggerWrapper::GetInstance()->Write(LV_WARNING, "%s/%s: old file date %s, current file date %s", 
+LoggerWrapper::GetInstance()->Write(LV_MEDIA, "%s/%s: old file date %s, current file date %s", 
 sDirectory.c_str(), sFile.c_str(), 
 item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
 
 		if(StringUtils::SQLDateTime(item.m_sOldFileDate) != StringUtils::SQLDateTime(sCurrentFileDate))
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update db for %s/%s: old file date %s, current file date %s",
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Need to update db for %s/%s: old file date %s, current file date %s",
 				sDirectory.c_str(), sFile.c_str(), 
 				item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
-#endif
+
 			bNeedToUpdateDb = true;
 		}
 
@@ -204,14 +202,13 @@ item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
 			//!UpdateMediaFileUtils::IsDirectory(sCurrentFullFilename.c_str())
 		)
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update file for %s/%s: "
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Need to update file for %s/%s: "
 				"old attr count %d, current attr count %d, "
 				"old attr date %s, current attr date %s",
 				sDirectory.c_str(), sFile.c_str(), 
 				item.m_sOldDbAttrCount, item.m_sCurrentDbAttrCount,
 				item.m_sOldDbAttrDate.c_str(), item.m_sCurrentDbAttrDate.c_str()); 
-#endif
+
 			bNeedtoUpdateFile = true;
 		}
 
@@ -225,12 +222,11 @@ item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
 			//!UpdateMediaFileUtils::IsDirectory(sCurrentFullFilename.c_str())
 		)
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update file for %s/%s: "
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Need to update file for %s/%s: "
 				"current attr date %s, file date %s, has attr %d",
 				sDirectory.c_str(), sFile.c_str(), 
 			        item.m_sCurrentDbAttrDate.c_str(), sCurrentFileDate.c_str(), item.m_bHasAttributes); 
-#endif
+
 			bNeedtoUpdateFile = true;
 		}
 
@@ -264,19 +260,17 @@ item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
 
                 if(INode_DBFile == INode && nDeviceID_DBFile == nDeviceID_CurrentFile && FileUtils::FileExists(sDBFullFilename))
                 {
-#ifdef UPDATEMEDIA_STATUS
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "File already in DB: modeNone for inode %d and device id %d: %s vs %s", 
+					LoggerWrapper::GetInstance()->Write(LV_MEDIA, "File already in DB: modeNone for inode %d and device id %d: %s vs %s", 
 						INode, nDeviceID_DBFile, sCurrentFullFilename.c_str(), sDBFullFilename.c_str());
-#endif
+
                     return modeNone;
                 }
             }
 		}
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update file because it's not in the database %s/%s",
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Need to update file because it's not in the database %s/%s",
 			sDirectory.c_str(), sFile.c_str());
-#endif
+
 		sync_mode = modeBoth;
 	}
 
@@ -398,14 +392,13 @@ MediaItemState MediaState::LoadDbInfoForFile(Database_pluto_media *pDatabase_plu
 
 	DB_ROW row;
 	PlutoSqlResult allresult;
-#ifdef UPDATEMEDIA_STATUS
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile ready to run big query");
-#endif
+
 	if(NULL != (allresult.r = pDatabase_pluto_media->db_wrapper_query_result(sSql)))
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile got %d rows <- this is erroneously reporting 0", allresult.r->row_count);
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "MediaState::LoadDbInfoForFile got %d rows <- this is erroneously reporting 0", allresult.r->row_count);
+
 		if(NULL != (row = db_wrapper_fetch_row(allresult.r)))
 		{
 			if(NULL != row[sfFileID] && NULL != row[sfPath] && NULL != row[sfFilename])

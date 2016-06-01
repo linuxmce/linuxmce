@@ -252,9 +252,8 @@ bool PlutoMediaAttributes::UnknownSerialize(ItemToSerialize *pItem,bool bWriting
 				{
 					ListBookmarks *pList = (ListBookmarks *) pItem->m_pItem;
 
-#ifdef UPDATEMEDIA_STATUS
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Serialize write bookmarks: %d", pList->size());
-#endif
+					LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Serialize write bookmarks: %d", pList->size());
+
 					Write_unsigned_long((unsigned long) pList->size());
 					for(ListBookmarks::iterator it = pList->begin(); it!=pList->end(); ++it)
 					{
@@ -303,9 +302,9 @@ bool PlutoMediaAttributes::UnknownSerialize(ItemToSerialize *pItem,bool bWriting
 				{
 					ListBookmarks *pList = (ListBookmarks *) pItem->m_pItem;
 					unsigned long count = Read_unsigned_long();
-#ifdef UPDATEMEDIA_STATUS
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Serialize read bookmarks: %d", count);
-#endif
+
+					LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Serialize read bookmarks: %d", count);
+
 					for(unsigned long i = 0; i<count; ++i)
 					{
 						PlutoMediaBookmark *pPlutoMediaBookmark = new PlutoMediaBookmark();
@@ -364,10 +363,8 @@ void PlutoMediaAttributes::DumpCoverarts()
 	{
 		string sMd5Sums = FileUtils::FileChecksum(it->second, it->first);
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "DumpCoverarts: picture size %d md5sum %s",
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "DumpCoverarts: picture size %d md5sum %s",
 			it->first, sMd5Sums.c_str());
-#endif
 	}
 }
 //-----------------------------------------------------------------------------------------------------

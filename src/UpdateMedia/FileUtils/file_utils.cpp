@@ -90,8 +90,9 @@ namespace UpdateMediaFileUtils
 				if(nPlutoDevice != 0)
 				{		
 					mapMountedDevices[nMountedDevice] = nPlutoDevice;
-
+#ifdef UPDATEMEDIA_DEBUG
 					cout << "Mapped file " << sFilePath << " : " << nMountedDevice << " -> " << nPlutoDevice << endl; 
+#endif
 				}
 			}
 		}

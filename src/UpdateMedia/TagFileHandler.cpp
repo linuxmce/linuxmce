@@ -54,25 +54,23 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 {
 	string sFileWithAttributes = m_sFullFilename;
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-#endif
-// FIXME: refactor this with a multi-map, so it's the same as MapPlutoMediaAttributes
+
+	// FIXME: refactor this with a multi-map, so it's the same as MapPlutoMediaAttributes
 	//get common tag attributes
 	map<int, string> mapAttributes;
 	GetTagInfo(sFileWithAttributes, mapAttributes, listPicturesForTags);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::LoadAttributes: tag attributes loaded (from tag file - common tags) %d", mapAttributes.size());
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::LoadAttributes: tag attributes loaded (from tag file - common tags) %d", mapAttributes.size());
+
 	//merge attributes into PlutoMediaAttributes
 	for(map<int, string>::iterator it = mapAttributes.begin(), end = mapAttributes.end(); it != end; ++it)
 	{
 		int nType = it->first;
 		string sValue = it->second;
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::LoadAttributes, from file: type %d: '%s'", nType, sValue.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::LoadAttributes, from file: type %d: '%s'", nType, sValue.c_str());
 
 		std::vector<string> vsValues;
 		stov(sValue, vsValues);
@@ -113,10 +111,9 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 {
 	string sFileWithAttributes = m_sFullFilename;
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-#endif
+
 	if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 	{
 		//Temporary map with attributes for common tags
@@ -131,28 +128,25 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 		}
 
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
 			pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
 
 		list<pair<char *, size_t> > listPictures;
 		for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin(); itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
-#endif
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
+
 			listPictures.push_back(make_pair(itc->second, itc->first));
 		}
 		//Save common tag tags
 		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: listPictures.clear()");
-#endif
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SaveAttributes: listPictures.clear()");
+
 		listPictures.clear();
 	}
 	else
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: No attributes to save");
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SaveAttributes: No attributes to save");
 
 	return true;
 }
@@ -160,10 +154,10 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 bool TagFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttributes *pPlutoMediaAttributes)
 {
 	string sFileWithAttributes = m_sFullFilename;
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
+
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
 		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
-#endif
+
 	RemoveTag(sFileWithAttributes, nTagType, sValue);
 	return true;
 }
@@ -385,10 +379,8 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 	FileRef *f = new FileRef(sFilename.c_str());
 	if(!f->isNull()) //ensure tag is present before trying to read and data.
 	{
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::GetTagInfo: tags present");
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::GetTagInfo: tags present");
-#endif
 		std::vector<string> vsAlbumArtist;
 		std::vector<string> vsPerformer;
 		std::vector<string> vsGenre;
@@ -548,9 +540,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 	if ( listPictures.empty() )
 		return;
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::InsertPictures: inserting");
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::InsertPictures: inserting");
 
 	// is it a FLAC file? access pics like this
 	if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
@@ -630,9 +620,8 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string sParameters)
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::InsertTagValues: - %s, %s", sName.c_str(), sParameters.c_str());
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::InsertTagValues: - %s, %s", sName.c_str(), sParameters.c_str());
+
 	std::vector<string> vsParameters;
 	stov(sParameters, vsParameters);
 
@@ -670,9 +659,7 @@ void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string s
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures)
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SetTagInfo for %s", sFilename.c_str());
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SetTagInfo for %s", sFilename.c_str());
 
 	FileRef *f = new FileRef(sFilename.c_str());
 	if(NULL != f)
@@ -681,41 +668,65 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		std::vector<string> vsParameters;
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_Artist_CONST);
-		InsertTagValues(f, string("ALBUMARTIST"), sParameters);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("ALBUMARTIST"), sParameters);
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Performer_CONST);
-		InsertTagValues(f, string("ARTIST"), sParameters);
-		f->tag()->setArtist(String(sParameters, String::UTF8));
+		if ( !sParameters.empty() )
+		{
+			InsertTagValues(f, string("ARTIST"), sParameters);
+			f->tag()->setArtist(String(sParameters, String::UTF8));
+		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Title_CONST);
-		InsertTagValues(f, string("TITLE"), sParameters);
-		f->tag()->setTitle(String(sParameters, String::UTF8));
-
-		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Genre_CONST);
-		InsertTagValues(f, string("GENRE"), sParameters);
-		f->tag()->setGenre(String(sParameters, String::UTF8));
-
-		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_CONST);
-		InsertTagValues(f, string("ALBUM"), sParameters);
-		f->tag()->setAlbum(String(sParameters, String::UTF8));
-
-		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Track_CONST);
-		InsertTagValues(f, string("TRACKNUMBER"), sParameters);
-		f->tag()->setTrack(atoi(sParameters.c_str()));
+		if ( !sParameters.empty() )
+		{
+			InsertTagValues(f, string("TITLE"), sParameters);
+			f->tag()->setTitle(String(sParameters, String::UTF8));
+		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Release_Date_CONST);
-		InsertTagValues(f, string("DATE"), sParameters);
-		f->tag()->setYear(atoi(sParameters.c_str()));
+		if ( !sParameters.empty() )
+		{
+			sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Genre_CONST);
+			InsertTagValues(f, string("GENRE"), sParameters);
+			f->tag()->setGenre(String(sParameters, String::UTF8));
+		}
 
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Release_Date_CONST);
+		if ( !sParameters.empty() )
+		{
+			sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_CONST);
+			InsertTagValues(f, string("ALBUM"), sParameters);
+			f->tag()->setAlbum(String(sParameters, String::UTF8));
+		}
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Release_Date_CONST);
+		if ( !sParameters.empty() )
+		{
+			sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Track_CONST);
+			InsertTagValues(f, string("TRACKNUMBER"), sParameters);
+			f->tag()->setTrack(atoi(sParameters.c_str()));
+		}
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Release_Date_CONST);
+		if ( !sParameters.empty() )
+		{
+			InsertTagValues(f, string("DATE"), sParameters);
+			f->tag()->setYear(atoi(sParameters.c_str()));
+		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Channel_CONST);
-		InsertTagValues(f, string("CHANNEL"), sParameters);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("CHANNEL"), sParameters);
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Episode_CONST);
-		InsertTagValues(f, string("EPISODE"), sParameters);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("EPISODE"), sParameters);
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Program_CONST);
-		InsertTagValues(f, string("PROGRAM"), sParameters);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("PROGRAM"), sParameters);
 
 
 		// Store pictures in file tag
@@ -756,9 +767,7 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 {
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# DISABLED -- TagFileHandler::RemoveTag - failing for mpeg? so disabled atm");
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "# TagFileHandler::RemoveTag");
 
 	FileRef *f = new FileRef(sFilename.c_str());
 	if(NULL != f)
