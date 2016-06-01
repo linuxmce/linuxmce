@@ -52,18 +52,16 @@ bool RomFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	string sFileWithAttributes = m_sFullFilename;
 	string sROMName = FileUtils::FilenameWithoutPath(sFileWithAttributes,false);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# RomFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# RomFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-#endif
+
 	//get common tag attributes
 	map<int, string> mapAttributes;
 	GetRomInfo(sROMName, mapAttributes, listPicturesForTags);	
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: tag attributes loaded (from tag file - common tags) %d", 
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: tag attributes loaded (from tag file - common tags) %d", 
 		mapAttributes.size());
-#endif
+
 	//merge attributes
 	for(map<int, string>::iterator it = mapAttributes.begin(), end = mapAttributes.end(); it != end; ++it)
 	{
@@ -344,7 +342,7 @@ void RomFileHandler::getSystem(string sFilename)
 	sFilename.find(".rpk") != string::npos)
 	  m_sROMSystem = "TI 99/4A";
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RomFileHandler::getSystem(%s) = %s",sFilename.c_str(),m_sROMSystem.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA,"RomFileHandler::getSystem(%s) = %s",sFilename.c_str(),m_sROMSystem.c_str());
 
 }
 //-----------------------------------------------------------------------------------------------------
@@ -504,7 +502,7 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 
   }
 
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "# RomFileHandler: Adding ROM Picture: %s",sSnapFilename.c_str());
+  LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# RomFileHandler: Adding ROM Picture: %s",sSnapFilename.c_str());
 
   size_t nSnapSize = 0;
   char *pSnapData;

@@ -95,7 +95,7 @@ void FileNotifier::Watch(string sDirectory)
 		//if (  sFileSystemType == "nfs\n" || sFileSystemType == "cifs\n" )
 		if ( sItem.find("NFS Share") != string::npos || sItem.find("SMB Share") != string::npos )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "FileNotifier::Watch Skipping notifier for file %s, cannot watch network share", sItem.c_str());
+			//LoggerWrapper::GetInstance()->Write(LV_MEDIA, "FileNotifier::Watch Skipping notifier for file %s, cannot watch network share", sItem.c_str());
 			continue;
 		}
 
@@ -109,12 +109,12 @@ void FileNotifier::Watch(string sDirectory)
 				m_sRootFolder = sDirectory;
 			}
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "FileNotifier::Watch Adding file to watch map: filename %s", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "FileNotifier::Watch Adding file to watch map: filename %s", sItem.c_str());
 			m_mapWatchedFiles[wd] = *it; 
 		}
 		catch(...)
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "FileNotifier::Watch Failed to add notifier for file %s", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "FileNotifier::Watch Failed to add notifier for file %s", sItem.c_str());
 		}
     }
 }
@@ -169,7 +169,7 @@ void *INotifyWorkerThread(void *p)
 
 		cpp_inotify_event event = pFileNotifier->m_inotify.get_event();
 
-		//LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got something: mask %d, name %s, wd %d, tostring %s",
+		//LoggerWrapper::GetInstance()->Write(LV_DEBUG, "We got something: mask %d, name %s, wd %d, tostring %s",
 		//	event.mask, event.name.c_str(), event.wd, event.tostring().c_str());
 
 		bool bCreateEvent = event.mask & IN_CREATE || event.mask & IN_MOVED_TO;
@@ -192,7 +192,7 @@ void *INotifyWorkerThread(void *p)
 			string sFilename = pFileNotifier->m_mapWatchedFiles_Find(event.wd) + "/" + event.name;
 			wfm.Release();
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "FileNotifier: INotifyWorkerThread inotify: New event for %s", sFilename.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "FileNotifier: INotifyWorkerThread inotify: New event for %s", sFilename.c_str());
 
 			bool bIsDir = (event.mask & IN_ISDIR) != 0;
 			list<string> listFiles;
