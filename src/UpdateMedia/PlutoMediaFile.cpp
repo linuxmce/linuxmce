@@ -202,7 +202,7 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 				pRow_File->Missing_set(0);
 				pRow_File->Table_File_get()->Commit();
 
-				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "PlutoMediaFile::HandleFileNotInDatabase %s/%s N db-attr: %d Inode: %d size %d mt %d/%d, md5 %s", 
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "PlutoMediaFile::HandleFileNotInDatabase %s/%s N db-attr: %d Inode: %d size %d mt %d/%d, md5 %s", 
 					m_sDirectory.c_str(), m_sFile.c_str(), pRow_File->PK_File_get(), INode, (int) vectRow_File.size(), PK_MediaType, pRow_File->EK_MediaType_get(),
 					pRow_File->MD5_get().c_str());
 			}
