@@ -231,7 +231,7 @@ string TagFileHandler::vtos(std::vector<string> v, const char cDelimiter /* = ';
 void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_t> >& listPictures)
 {
 	// Pictures need to be handled differently depending on file type
-	// is it a FLAC file? access pics like this
+	// is it a FLAC file? read pics like this
 	if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
 	{
 		cout << "FLAC FLAC FLAC - " << m_sFullFilename << endl;
@@ -267,7 +267,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 		}
 	}
 
-	// is it an MPEG file? access pics like this
+	// is it an MPEG file? read pics like this
 	else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
 	{
 		cout << "MPEG MPEG MPEG - " << m_sFullFilename << endl;
@@ -306,7 +306,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 		}
 	}
 
-	// is it an MP4 (AAC, ALAC, video) file? access pics like this
+	// is it an MP4 (AAC, ALAC, video) file? read pics like this
 	else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
 	{
 		cout << "MP4 MP4 MP4 - " << m_sFullFilename << endl;
@@ -340,7 +340,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 		}
 	}
 
-	// is it an ASF (wma) file? access pics like this
+	// is it an ASF (wma) file? read pics like this
 	else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
 	{
 		cout << "ASF ASF ASF - " << m_sFullFilename << endl;
@@ -539,7 +539,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::InsertPictures: inserting");
 
-	// is it a FLAC file? access pics like this
+	// is it a FLAC file? write pics like this
 	if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
 	{
 		flacFile->pictureList().clear();
@@ -556,34 +556,37 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 		}
 	}
 
-	// is it an MPEG file? access pics like this
+
+	// is it an MPEG file? write pics like this
 	else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
 	{
 		TagLib::ID3v2::Tag *tag = mpegFile->ID3v2Tag(true);
+
 		if ( tag )
 		{
-			// picture frame
+			// remove all pre-existing picture frames from the file?!?!
 			TagLib::ID3v2::FrameList frameList = tag->frameListMap()["APIC"];
 			if ( !frameList.isEmpty() )
 			{
 				for( TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
 				{
-cout << "InsertTagPictures - removeFrame( *it );" << endl;
+					cout << "InsertTagPictures - removeFrame( *it );" << endl;
 					tag->removeFrame( *it );
 				}
 			}
 
 			for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
 			{
-				TagLib::ByteVector picData( it->first, (unsigned int)it->second );
-
-				TagLib::ID3v2::AttachedPictureFrame *frame = new TagLib::ID3v2::AttachedPictureFrame( picData );
+				TagLib::ByteVector picData( (*it).first , (*it).second );
+				TagLib::ID3v2::AttachedPictureFrame *frame = new TagLib::ID3v2::AttachedPictureFrame;
 				frame->setType(TagLib::ID3v2::AttachedPictureFrame::FrontCover);
 				frame->setMimeType("image/jpeg");
+				frame->setPicture( picData );
 
-				tag->addFrame(frame);
-cout << "InsertTagPictures - addFrame(frame); - " << picData.size() << endl;
+				cout << "InsertTagPictures - addFrame( frame );" << endl;
+				tag->addFrame( frame );
 			}
+			mpegFile->save();
 		}
 	}
 
