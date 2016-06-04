@@ -9,6 +9,7 @@
 #include "DCE/Logger.h"
 #include <stdio.h>
 #include <sys/mount.h>
+#include "../pluto_main/Define_MediaType.h"
 
 #define MOUNT_PATH_PREFIX "/tmp/"
 
@@ -125,5 +126,5 @@ string IdentifierDVDBase::GetIdentityType()
 
 int IdentifierDVDBase::GetMediaType()
 {
-  return 3;
+  return MEDIATYPE_pluto_DVD_CONST;
 }
