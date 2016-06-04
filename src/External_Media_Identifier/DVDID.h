@@ -9,7 +9,11 @@
 #define CPPDVDID_H
 
 #include <string>
+
+// Explicitly enable STDC format macros for older GCCs.
+#define __STDC_FORMAT_MACROS 1
 #include <inttypes.h>
+
 #include <stdint.h>
 
 using namespace std;
