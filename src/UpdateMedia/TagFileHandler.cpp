@@ -414,7 +414,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				string sProperty = field_data.to8Bit( true );
 				sProperty = StringUtils::TrimSpaces(sProperty);
 
-				if ( (i->first == "ALBUMARTIST") || (i->first == "ALBUM ARTIST") )
+				if ( (i->first == "ALBUMARTIST") || (i->first == "ALBUM ARTIST") || (i->first == "ENSEMBLE") )
 				{
 					stov(sProperty, vsAlbumArtist);
 				}
@@ -594,21 +594,24 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 	else if ( TagLib::MP4::File* mp4File = dynamic_cast<TagLib::MP4::File*>( f->file()) )
 	{
 		TagLib::MP4::Tag *tag = mp4File->tag();
-		TagLib::MP4::ItemListMap itemsListMap = tag->itemListMap();
-		TagLib::MP4::CoverArtList coverArtList;
 
-		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
+		if ( tag )
 		{
-			TagLib::MP4::CoverArt coverArt = TagLib::MP4::CoverArt( TagLib::MP4::CoverArt::JPEG, *it->first);
-			coverArtList.append(coverArt);
+			TagLib::MP4::ItemListMap itemsListMap = tag->itemListMap();
+			TagLib::MP4::CoverArtList coverArtList;
+
+			for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
+			{
+				TagLib::MP4::CoverArt coverArt = TagLib::MP4::CoverArt( TagLib::MP4::CoverArt::JPEG, *it->first);
+				coverArtList.append(coverArt);
+			}
+
+			TagLib::MP4::Item coverItem(coverArtList);
+			itemsListMap.erase("covr");
+			itemsListMap.insert("covr", coverItem);
+			tag->save();
 		}
-
-		TagLib::MP4::Item coverItem(coverArtList);
-		itemsListMap.erase("covr");
-		itemsListMap.insert("covr", coverItem);
-		tag->save();
 	}
-
 /*
 	// TODO: is it an ASF (wma) file? access pics like this
 	else if ( TagLib::ASF::File* asfFile = dynamic_cast<TagLib::ASF::File*>( f->file()) )
@@ -623,7 +626,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string sParameters)
 {
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::InsertTagValues: - %s, %s", sName.c_str(), sParameters.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::InsertTagValues: - %s = %s", sName.c_str(), sParameters.c_str());
 
 	std::vector<string> vsParameters;
 	stov(sParameters, vsParameters);
@@ -644,7 +647,7 @@ void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string s
 
 				for(std::vector<string>::iterator value = vsPropertyValues.begin(); value != vsPropertyValues.end(); ++value)
 				{
-					//cout << "InsertTagValue - Comparing " << (*value) << " to " << (*parameter) << endl;
+					cout << "InsertTagValue - Comparing " << (*value) << " to " << (*parameter) << endl;
 
 					if ( (*value)  == (*parameter) )
 					{
@@ -684,7 +687,9 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		if ( !sParameters.empty() )
 		{
 			InsertTagValues(f, string("ALBUMARTIST"),  sParameters );
-cout << "SetTagInfo - set Album Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Album Artist set to: " << f->tag()->artist().to8Bit( true ) << endl;
+			InsertTagValues(f, string("ALBUM ARTIST"),  sParameters );
+			InsertTagValues(f, string("ENSEMBLE"),  sParameters );
+cout << "SetTagInfo - set Album Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << endl;
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Performer_CONST);
