@@ -72,11 +72,11 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 					if ( obj->description() == "" || obj->description() == "lmce-serialized" )
 					{
 						TagLib::ByteVector pGeneralData = obj->render();
-						size_t nBinSize = (size_t)pGeneralData.size();
-						pData = new char[nBinSize];
-						memcpy(pData, pGeneralData.data(), nBinSize);
+						Size = (size_t)pGeneralData.size();
+						pData = new char[Size];
+						memcpy(pData, pGeneralData.data(), Size);
 
-		cout << "GEOB GEOB GEOB -- " << "Size: " << nBinSize << " Desc: " << obj->description() << endl;
+		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << obj->description() << endl;
 						break;
 					}
 				}
@@ -96,11 +96,11 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 					if ( obj->description() == "" || obj->description() == "lmce-serialized" )
 					{
 						TagLib::ByteVector pGeneralData = obj->render();
-						size_t nBinSize = (size_t)pGeneralData.size();
-						pData = new char[nBinSize];
-						memcpy(pData, pGeneralData.data(), nBinSize);
+						Size = (size_t)pGeneralData.size();
+						pData = new char[Size];
+						memcpy(pData, pGeneralData.data(), Size);
 
-		cout << "GEOB GEOB GEOB -- " << "Size: " << nBinSize << " Desc: " << obj->description() << endl;
+		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << obj->description() << endl;
 						break;
 					}
 				}
@@ -109,6 +109,32 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 
 
 	}
+}
+//-----------------------------------------------------------------------------------------------------
+void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, size_t& Size)
+{
+/*
+        ID3_Tag tag;
+        tag.Link(sFilename.c_str());
+
+        ID3_Frame* frame = tag.Find(ID3FID_GENERALOBJECT);
+        if(NULL == frame)
+        {
+                frame = new ID3_Frame(ID3FID_GENERALOBJECT);
+                tag.AttachFrame(frame);
+        }
+
+        if(NULL != frame)
+        {
+                ID3_Field* fld = frame->GetField(ID3FN_DATA);
+                uchar *pFieldData = new uchar[Size];
+                memcpy(pFieldData, pData, Size);
+                fld->Set(pFieldData, Size);
+                delete []pFieldData;
+        }
+
+    tag.Update(ID3TT_ID3);
+*/
 }
 //-----------------------------------------------------------------------------------------------------
 bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
