@@ -176,7 +176,7 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 	{
 		vector<Row_File *> vectRow_File;
 		// Attempt to match against m_sDirectory to not cross match files, then check against INode only (file has moved).
-		m_pDatabase_pluto_media->File_get()->GetRows("INode=" + StringUtils::itos(INode) + " AND Path='" + m_sDirectory + "'",&vectRow_File);
+		m_pDatabase_pluto_media->File_get()->GetRows("INode=" + StringUtils::itos(INode) + " AND Path='" + StringUtils::SQLEscape(m_sDirectory) + "'",&vectRow_File);
 		if ( !vectRow_File.size() )
 		{
 			m_pDatabase_pluto_media->File_get()->GetRows("INode=" + StringUtils::itos(INode),&vectRow_File);
