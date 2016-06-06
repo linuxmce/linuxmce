@@ -144,8 +144,8 @@ void MediaState::LoadDbInfo(Database_pluto_media *pDatabase_pluto_media, string 
 
 				string sCurrentDbAttrDate = NULL != row[sfCurrentDbAttrDate] ? row[sfCurrentDbAttrDate] : string();
 				int sCurrentDbAttrCount = NULL != row[sfCurrentDbAttrCount] ? atoi(row[sfCurrentDbAttrCount]) : 0;
-				string sOldDbAttrDate = NULL != row[sfOldDbAttrDate] ? row[sfOldDbAttrDate] : sCurrentDbAttrDate; //string();
-				int sOldDbAttrCount = NULL != row[sfOldDbAttrCount] ? atoi(row[sfOldDbAttrCount]) : sCurrentDbAttrCount; //0;
+				string sOldDbAttrDate = NULL != row[sfOldDbAttrDate] ? row[sfOldDbAttrDate] : string();
+				int sOldDbAttrCount = NULL != row[sfOldDbAttrCount] ? atoi(row[sfOldDbAttrCount]) : 0;
 				string sOldFileDate = NULL != row[sfOldFileDate] ? row[sfOldFileDate] : string();
 				bool bHasAttributes = NULL != row[sfHasAttributes] ? atoi(row[sfHasAttributes]) > 0 : false;
 				char cSource = NULL != row[sfSource] ? row[sfSource][0] : 0;

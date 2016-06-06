@@ -843,7 +843,7 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Studio_CONST);
 		if ( !sParameters.empty() )
-			InsertTagValues(f, string("ORGANIZATION"), sParameters);
+			InsertTagValues(f, string("LABEL"), sParameters);
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Number_of_Discs_CONST);
 		if ( !sParameters.empty() )
