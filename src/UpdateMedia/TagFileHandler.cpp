@@ -446,7 +446,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					stov(sProperty, vsComposerWriter);
 				}
-				else if ( i->first == "LABEL" )
+				else if ( i->first == "LABEL" || (i->first == "ORGANIZATION") )
 				{
 					stov(sProperty, vsStudio);
 				}
@@ -686,18 +686,18 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_Artist_CONST);
 		if ( !sParameters.empty() )
 		{
-			InsertTagValues(f, string("ALBUMARTIST"),  sParameters );
-			InsertTagValues(f, string("ALBUM ARTIST"),  sParameters );
-			InsertTagValues(f, string("ENSEMBLE"),  sParameters );
-cout << "SetTagInfo - set Album Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << endl;
+			cout << "SetTagInfo - set Album Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << endl;
+			InsertTagValues(f, string("ALBUMARTIST"), sParameters );
+			InsertTagValues(f, string("ALBUM ARTIST"), sParameters );
+			InsertTagValues(f, string("ENSEMBLE"), sParameters );
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Performer_CONST);
 		if ( !sParameters.empty() )
 		{
+			cout << "SetTagInfo - set Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Artist set to: " << f->tag()->artist().to8Bit( true ) << endl;
 			f->tag()->setArtist( String(sParameters, String::UTF8 ));
 			//InsertTagValues(f, string("ARTIST"), sParameters);
-cout << "SetTagInfo - set Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Artist set to: " << f->tag()->artist().to8Bit( true ) << endl;
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Title_CONST);
@@ -734,6 +734,27 @@ cout << "SetTagInfo - set Artist to: " << String(sParameters, String::UTF8).to8B
 			f->tag()->setYear( atoi(sParameters.c_str()));
 			//InsertTagValues(f, string("DATE"), sParameters);
 		}
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_ComposerWriter_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("COMPOSER"), sParameters);
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Studio_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("ORGANIZATION"), sParameters);
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Number_of_Discs_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("TOTALDISCS"), sParameters);
+
+		// TODO: verify this parameter name
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Disc_ID_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("DISCNUMBER"), sParameters);
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Synopsis_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("COMMENT"), sParameters);
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Channel_CONST);
 		if ( !sParameters.empty() )
