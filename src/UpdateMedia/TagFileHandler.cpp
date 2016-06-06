@@ -71,12 +71,12 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 					TagLib::ID3v2::GeneralEncapsulatedObjectFrame *obj = (TagLib::ID3v2::GeneralEncapsulatedObjectFrame *)(*it);
 					if ( obj->description() == "" || obj->description() == "lmce-serialized" )
 					{
-		cout << "GEOB GEOB GEOB -- " << obj->description() << endl;
-
 						TagLib::ByteVector pGeneralData = obj->render();
 						size_t nBinSize = (size_t)pGeneralData.size();
 						pData = new char[nBinSize];
 						memcpy(pData, pGeneralData.data(), nBinSize);
+
+		cout << "GEOB GEOB GEOB -- " << "Size: " << nBinSize << " Desc: " << obj->description() << endl;
 						break;
 					}
 				}
@@ -95,12 +95,12 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 					TagLib::ID3v2::GeneralEncapsulatedObjectFrame *obj = (TagLib::ID3v2::GeneralEncapsulatedObjectFrame *)(*it);
 					if ( obj->description() == "" || obj->description() == "lmce-serialized" )
 					{
-		cout << "GEOB GEOB GEOB -- " << obj->description() << endl;
-
 						TagLib::ByteVector pGeneralData = obj->render();
 						size_t nBinSize = (size_t)pGeneralData.size();
 						pData = new char[nBinSize];
 						memcpy(pData, pGeneralData.data(), nBinSize);
+
+		cout << "GEOB GEOB GEOB -- " << "Size: " << nBinSize << " Desc: " << obj->description() << endl;
 						break;
 					}
 				}
@@ -324,9 +324,6 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 
 				//if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
 				{
-					int iType = (int)pic->type();
-					cout << "Picture found of type: " << iType << endl;
-
 					if ( pic->mimeType() == "image/jpeg")
 					{
 						// get the image
@@ -336,7 +333,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 						char *pPictureData = new char[nBinSize];
 						memcpy(pPictureData, picData.data(), nBinSize);
 
-						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+						cout << "Picture type: " << (int)pic->type() << ", mime:  '" << pic->mimeType() << "', Size: " << nBinSize << " bytes." << endl;
 
 						// add this image to the lmce picture vector
 						listPictures.push_back(make_pair(pPictureData, nBinSize));
@@ -361,8 +358,6 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
 				{
 					TagLib::ID3v2::AttachedPictureFrame *picFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
-					int iType = (int)picFrame->type();
-					cout << "Picture found of type: " << iType << ", string: " << picFrame->toString() << endl;
 
 					//if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover )
 					{
@@ -374,7 +369,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 							char *pPictureData = new char[nBinSize];
 							memcpy(pPictureData, picData.data(), nBinSize);
 
-							cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+							cout << "Picture type: " << (int)picFrame->type() << ", mime: '" << picFrame->mimeType() << "', Size: " << nBinSize << " bytes." << endl;
 
 							// the following adds this image to the lmce picture vector
 							listPictures.push_back(make_pair(pPictureData, nBinSize));
@@ -400,17 +395,15 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 			for(TagLib::MP4::CoverArtList::ConstIterator it = coverArtList.begin(); it != coverArtList.end(); ++it)
 			{
 				TagLib::MP4::CoverArt coverArt = *it;
-
-//				cout << "Picture found of type: 'covr'" << endl;
 				if ( coverArt.format() == TagLib::MP4::CoverArt::JPEG )
-			{
+				{
 					TagLib::ByteVector picData = coverArt.data();
 
 					size_t nBinSize = (size_t)picData.size();
 					char *pPictureData = new char[nBinSize];
 					memcpy(pPictureData, picData.data(), nBinSize);
 
-//					cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+					cout << "Picture type: covr, mime: 'image/jpeg', Size: " << nBinSize << " bytes." << endl;
 
 					// add this image to the lmce picture vector
 					listPictures.push_back(make_pair(pPictureData, nBinSize));
@@ -443,7 +436,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 					char *pPictureData = new char[nBinSize];
 					memcpy(pPictureData, picData.data(), nBinSize);
 
-//					cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+					cout << "Picture type: " << (int)pic.type() << ", mime: 'image/jpeg', Size: " << nBinSize << " bytes." << endl;
 
 					// add this image to the lmce picture vector
 					listPictures.push_back(make_pair(pPictureData, nBinSize));
