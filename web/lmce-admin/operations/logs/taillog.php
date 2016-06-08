@@ -1,7 +1,7 @@
 <?php
 $logname=$_REQUEST['log'];
 
-if(!ereg('/var/log/pluto/',$logname) || !is_readable($logname)){
+if(!preg_match('~/var/log/pluto/~',$logname) || !is_readable($logname)){
         die('<pre style="background:black;color:white;">Access denied to '.$logname.'</pre>');
 }
 

@@ -39,18 +39,14 @@ FileStatusObserver &FileStatusObserver::Instance()
 void FileStatusObserver::SetFileNotifier(FileNotifier *pFileNotifier)
 {
 	PLUTO_SAFETY_LOCK(ofm, m_ObservedFilesMutex);
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OBSERVER: using file notifier %p", pFileNotifier);
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "OBSERVER: using file notifier %p", pFileNotifier);
 	m_pFileNotifier = pFileNotifier;
 }
 //------------------------------------------------------------------------------------------
 void FileStatusObserver::UnsetFileNotifier()
 {
 	PLUTO_SAFETY_LOCK(ofm, m_ObservedFilesMutex);
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OBSERVER: not using any file notifier");
-#endif
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "OBSERVER: not using any file notifier");
 	m_pFileNotifier = NULL;
 }
 //------------------------------------------------------------------------------------------
@@ -60,9 +56,7 @@ void FileStatusObserver::Observe(string sFilename)
 	list<string>::iterator it = find(m_listFileToObserve.begin(), m_listFileToObserve.end(), sFilename);
 	if(it == m_listFileToObserve.end())
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "OBSERVER: File added to list with files to be observed: %s", sFilename.c_str());
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "OBSERVER: File added to list with files to be observed: %s", sFilename.c_str());
 		m_listFileToObserve.push_back(sFilename);
 
 		//start alarm if not already started
@@ -82,16 +76,12 @@ void FileStatusObserver::AlarmCallback(int id, void* /*param*/)
 
 			if(!FileUtils::FileExists(sFilename))
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "OBSERVER: The file was delete: %s", sFilename.c_str());
-#endif
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "OBSERVER: The file was delete: %s", sFilename.c_str());
 				m_listFileToObserve.erase(it++);
 			}
 			else if(!IsFileOpen(sFilename) && NULL != m_pFileNotifier)
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "OBSERVER: File not opened anymore: %s", sFilename.c_str());
-#endif
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "OBSERVER: File not opened anymore: %s", sFilename.c_str());
 
 				list<string> listFiles;
 				listFiles.push_back(sFilename);
@@ -159,10 +149,8 @@ bool FileStatusObserver::IsFileOpen(string sFilename)
 		int nPID = atoi(sOutput.c_str());
 		if(nPID != 0)
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "OBSERVER: File %s is used by process %d", 
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "OBSERVER: File %s is used by process %d", 
 				sFilename.c_str(), nPID);
-#endif
 			return true;
 		}
 	}
