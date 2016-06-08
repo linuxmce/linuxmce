@@ -33,7 +33,6 @@ private:
 
 	//tag utils
 private:
-
 	void GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_t> >& listPictures);
 	void GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);
 	void SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures);
@@ -50,7 +49,7 @@ private:
 	string ExtractAttribute(const map<int,string>& mapAttributes, int key);
 
 	void stov(string s, std::vector<string> &v, string acDelimiters = "|;/");
-	string vtos(std::vector<string> v, const char cDelimiter = ';');
+	string vtos(std::vector<string> v, const char cDelimiter = '/');
 };
 //-----------------------------------------------------------------------------------------------------
 #endif //__TAG_FILE_HANDLER_H__
