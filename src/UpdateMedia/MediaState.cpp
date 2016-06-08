@@ -150,6 +150,9 @@ void MediaState::LoadDbInfo(Database_pluto_media *pDatabase_pluto_media, string 
 				bool bHasAttributes = NULL != row[sfHasAttributes] ? atoi(row[sfHasAttributes]) > 0 : false;
 				char cSource = NULL != row[sfSource] ? row[sfSource][0] : 0;
 
+				sOldDbAttrDate = (sOldDbAttrDate.empty() ? sCurrentDbAttrDate : sOldDbAttrDate);
+				sOldDbAttrCount = (0 ? sCurrentDbAttrCount : sOldDbAttrCount);
+
 				m_mapMediaState[make_pair(sPath, sFilename)] = MediaItemState(nFileID, sPath, sFilename, nInode,
 					sCurrentDbAttrDate, sCurrentDbAttrCount, 
 					sOldDbAttrDate, sOldDbAttrCount, sOldFileDate, bHasAttributes, cSource);
@@ -393,7 +396,7 @@ MediaItemState MediaState::LoadDbInfoForFile(Database_pluto_media *pDatabase_plu
 	DB_ROW row;
 	PlutoSqlResult allresult;
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile ready to run big query");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile ready to run big query on FileID: %d", nFileID );
 
 	if(NULL != (allresult.r = pDatabase_pluto_media->db_wrapper_query_result(sSql)))
 	{

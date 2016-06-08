@@ -259,7 +259,7 @@ int UpdateMedia::ReadDirectory(string sDirectory)
 		return 0;
 	}
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::ReadDirectory %s", sDirectory.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "UpdateMedia::ReadDirectory %s", sDirectory.c_str());
 
 	if(!ScanFiles(sDirectory))
 		return 0;
@@ -620,6 +620,7 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 bool UpdateMedia::ScanSubfolders(string sDirectory, FolderType& folder_type)
 {
 	list<string> listSubDirectories;
+	sDirectory=FileUtils::IncludeTrailingSlash(sDirectory);
 
 #ifdef WIN32
 	FileUtils::FindDirectories(listSubDirectories,sDirectory,false,true,0,"");
@@ -773,7 +774,7 @@ int UpdateMedia::SetupDirectory(string sDirectory, FolderType folder_type)
 			{
 				PK_File = spPlutoMediaParentFolder->HandleFileNotInDatabase(nMediaType);
 
-				LoggerWrapper::GetInstance()->Write(LV_MEDIA,"UpdateMedia::ReadDirectory media type %d PlutoMediaFile_.HandleFileNotInDatabase %d",nMediaType, PK_File);
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"UpdateMedia::ReadDirectory media type %d PlutoMediaFile_.HandleFileNotInDatabase %d",nMediaType, PK_File);
 
 				Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(PK_File);
 				pRow_File->Reload();

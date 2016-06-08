@@ -20,6 +20,7 @@ using namespace DCE;
 #include <id3v2tag.h>
 #include <mpegfile.h>
 #include <attachedpictureframe.h>
+#include <generalencapsulatedobjectframe.h>
 
 // for MP4 files with Pics
 #include <mp4file.h>
@@ -49,6 +50,139 @@ TagFileHandler::~TagFileHandler(void)
 {
 }
 //-----------------------------------------------------------------------------------------------------
+void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, size_t& Size)
+{
+        pData = NULL;
+        Size = 0;
+
+	FileRef *f = new FileRef(sFilename.c_str());
+	if(!f->isNull()) //ensure tag is present before trying to read and data.
+	{
+		// Pictures need to be handled differently depending on file type
+		// is it a FLAC file? read pics like this
+		if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
+		{
+			TagLib::ID3v2::Tag *id3v2tag = flacFile->ID3v2Tag();
+			if ( id3v2tag )
+			{
+				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["GEOB"];
+				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+				{
+					TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geob = (TagLib::ID3v2::GeneralEncapsulatedObjectFrame *)(*it);
+					if ( geob->description() == "" || geob->description() == "lmce-serialized" )
+					{
+						TagLib::ByteVector pGeneralData = geob->object();
+						Size = (size_t)pGeneralData.size();
+						pData = new char[Size];
+						memcpy(pData, pGeneralData.data(), Size);
+
+		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->description() << endl;
+						break;
+					}
+				}
+			}
+		}
+
+		// is it an MPEG file? read pics like this
+		else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
+		{
+			TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag();
+			if ( id3v2tag )
+			{
+				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["GEOB"];
+				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+				{
+					TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geob = (TagLib::ID3v2::GeneralEncapsulatedObjectFrame *)(*it);
+					if ( geob->description() == "" || geob->description() == "lmce-serialized" )
+					{
+						TagLib::ByteVector pGeneralData = geob->object();
+						Size = (size_t)pGeneralData.size();
+						pData = new char[Size];
+						memcpy(pData, pGeneralData.data(), Size);
+
+		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->toString() << endl;
+						break;
+					}
+				}
+			}
+		}
+
+
+	}
+}
+//-----------------------------------------------------------------------------------------------------
+void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, size_t& Size)
+{
+        pData = NULL;
+        Size = 0;
+
+	FileRef *f = new FileRef(sFilename.c_str());
+	if(!f->isNull()) //ensure tag is present before trying to read and data.
+	{
+		// Pictures need to be handled differently depending on file type
+		// is it a FLAC file? read pics like this
+		if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
+		{
+			TagLib::ID3v2::Tag *id3v2tag = flacFile->ID3v2Tag( true ); // create if not present
+			if ( id3v2tag )
+			{
+				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["GEOB"];
+				if ( !frameList.isEmpty() )
+				{
+					for( TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+					{
+						cout << "SetUserDefinedData - removeFrame( *it );    [GEOB]" << endl;
+						id3v2tag->removeFrame( *it );
+					}
+				}
+
+				TagLib::ByteVector generalData( pData , Size );
+
+				TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geob = new TagLib::ID3v2::GeneralEncapsulatedObjectFrame;
+				geob->setDescription("lmce-serialized");
+				geob->setData( generalData );
+
+				cout << "SetUserDefinedData - addFrame( frame );     [GEOB]" << endl;
+
+				id3v2tag->addFrame( geob );
+
+				flacFile->save();
+			}
+		}
+
+		// is it an MPEG file? read pics like this
+		else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
+		{
+			TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag( true );
+			if ( id3v2tag )
+			{
+				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["GEOB"];
+				if ( !frameList.isEmpty() )
+				{
+					for( TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+					{
+						cout << "SetUserDefinedData - removeFrame( *it );    [GEOB]" << endl;
+						id3v2tag->removeFrame( *it );
+					}
+				}
+
+				TagLib::ByteVector generalData( pData , Size );
+
+				TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geob = new TagLib::ID3v2::GeneralEncapsulatedObjectFrame;
+				geob->setDescription("lmce-serialized");
+				geob->setData( generalData );
+
+				cout << "SetUserDefinedData - addFrame( frame );     [GEOB]" << endl;
+
+				id3v2tag->addFrame( geob );
+				mpegFile->save();
+			}
+		}
+	}
+
+	// TODO: MP4/ASF ?  may need external id3 files?
+}
+//-----------------------------------------------------------------------------------------------------
 bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 									list<pair<char *, size_t> >& listPicturesForTags)
 {
@@ -57,7 +191,23 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
 
-	// FIXME: refactor this with a multi-map, so it's the same as MapPlutoMediaAttributes
+
+	//deserialize data from user defined tag
+	char *pData = NULL;
+	size_t Size = 0;
+	GetUserDefinedInformation(sFileWithAttributes, pData, Size);
+
+	if(NULL != pData)
+	{
+		pPlutoMediaAttributes->SerializeRead((unsigned long)Size, pData);
+		delete []pData;
+		pData = NULL;
+
+	        LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d",
+	                pPlutoMediaAttributes->m_mapAttributes.size());
+	}
+
+	// TODO: refactor this with a multi-map, so it's the same as MapPlutoMediaAttributes
 	//get common tag attributes
 	map<int, string> mapAttributes;
 	GetTagInfo(sFileWithAttributes, mapAttributes, listPicturesForTags);
@@ -122,7 +272,7 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 			end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 		{
 			if ( !mapAttributes[it->first].empty() )
-				mapAttributes[it->first] += ";";
+				mapAttributes[it->first] += "/";
 			// create a map copy of the existing multi map
 			mapAttributes[it->first] += it->second->m_sName;
 		}
@@ -141,8 +291,20 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 		//Save common tag tags
 		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
 
-		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SaveAttributes: listPictures.clear()");
+		//Save user defined text
+		char *pDataStartPosition = NULL;
+		unsigned long ulSize = 0;
+		pPlutoMediaAttributes->SerializeWrite();
+		ulSize = pPlutoMediaAttributes->CurrentSize();
+		pDataStartPosition = pPlutoMediaAttributes->m_pcDataBlock;
+		size_t Size = ulSize;
 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SaveAttributes: saving into GEOB frame size %d", Size);
+
+		SetUserDefinedInformation(sFileWithAttributes, pDataStartPosition, Size);
+		pPlutoMediaAttributes->FreeSerializeMemory();
+
+		// clear our pictures vector
 		listPictures.clear();
 	}
 	else
@@ -211,7 +373,7 @@ void TagFileHandler::stov(string s, std::vector<string> &v, string acDelimiters 
 	}
 }
 //-----------------------------------------------------------------------------------------------------
-string TagFileHandler::vtos(std::vector<string> v, const char cDelimiter /* = ';' */ )
+string TagFileHandler::vtos(std::vector<string> v, const char cDelimiter /* = '/' */ )
 {
 	string s;
 
@@ -245,9 +407,6 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 
 				//if ( pic->type() == TagLib::FLAC::Picture::FrontCover)
 				{
-					int iType = (int)pic->type();
-					cout << "Picture found of type: " << iType << endl;
-
 					if ( pic->mimeType() == "image/jpeg")
 					{
 						// get the image
@@ -257,7 +416,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 						char *pPictureData = new char[nBinSize];
 						memcpy(pPictureData, picData.data(), nBinSize);
 
-						cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+						cout << "Picture type: " << (int)pic->type() << ", mime:  '" << pic->mimeType() << "', Size: " << nBinSize << " bytes." << endl;
 
 						// add this image to the lmce picture vector
 						listPictures.push_back(make_pair(pPictureData, nBinSize));
@@ -282,8 +441,6 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
 				{
 					TagLib::ID3v2::AttachedPictureFrame *picFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
-					int iType = (int)picFrame->type();
-					cout << "Picture found of type: " << iType << ", string: " << picFrame->toString() << endl;
 
 					//if ( picFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover )
 					{
@@ -295,7 +452,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 							char *pPictureData = new char[nBinSize];
 							memcpy(pPictureData, picData.data(), nBinSize);
 
-							cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+							cout << "Picture type: " << (int)picFrame->type() << ", mime: '" << picFrame->mimeType() << "', Size: " << nBinSize << " bytes." << endl;
 
 							// the following adds this image to the lmce picture vector
 							listPictures.push_back(make_pair(pPictureData, nBinSize));
@@ -321,17 +478,15 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 			for(TagLib::MP4::CoverArtList::ConstIterator it = coverArtList.begin(); it != coverArtList.end(); ++it)
 			{
 				TagLib::MP4::CoverArt coverArt = *it;
-
-//				cout << "Picture found of type: 'covr'" << endl;
 				if ( coverArt.format() == TagLib::MP4::CoverArt::JPEG )
-			{
+				{
 					TagLib::ByteVector picData = coverArt.data();
 
 					size_t nBinSize = (size_t)picData.size();
 					char *pPictureData = new char[nBinSize];
 					memcpy(pPictureData, picData.data(), nBinSize);
 
-//					cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+					cout << "Picture type: covr, mime: 'image/jpeg', Size: " << nBinSize << " bytes." << endl;
 
 					// add this image to the lmce picture vector
 					listPictures.push_back(make_pair(pPictureData, nBinSize));
@@ -364,7 +519,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 					char *pPictureData = new char[nBinSize];
 					memcpy(pPictureData, picData.data(), nBinSize);
 
-//					cout << "Picture is 'image/jpeg' and is " << nBinSize << " bytes in size." << endl;
+					cout << "Picture type: " << (int)pic.type() << ", mime: 'image/jpeg', Size: " << nBinSize << " bytes." << endl;
 
 					// add this image to the lmce picture vector
 					listPictures.push_back(make_pair(pPictureData, nBinSize));
@@ -397,13 +552,14 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		std::vector<string> vsEpisode;
 		std::vector<string> vsProgram;
 
+/*
 		stov( f->tag()->artist().to8Bit( true ), vsPerformer );
 		stov( f->tag()->title().to8Bit( true ) , vsTitle );
 		stov( f->tag()->genre().to8Bit( true ) , vsGenre );
 		stov( f->tag()->album().to8Bit( true ) , vsAlbum );
 		stov( StringUtils::ltos( f->tag()->track() ), vsTrack );
 		stov( StringUtils::ltos( f->tag()->year() ) , vsDate );
-
+*/
 		// Get Album Artist, from file properties i==propertyname, j==propertyvalue
 		TagLib::PropertyMap tags = f->file()->properties();
 		for(TagLib::PropertyMap::ConstIterator i = tags.begin(); i != tags.end(); ++i)
@@ -418,35 +574,35 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					stov(sProperty, vsAlbumArtist);
 				}
-//				else if ( i->first == "ARTIST" )
-//				{
-//					stov(sProperty, vsPerformer);
-//				}
-//				else if ( i->first == "GENRE" )
-//				{
-//					stov(sProperty, vsGenre);
-//				}
-//				else if ( i->first == "TITLE" )
-//				{
-//					stov(sProperty, vsTitle, "|");
-//				}
-//				else if ( i->first == "ALBUM" )
-//				{
-//					stov(sProperty, vsAlbum, "|");
-//				}
-//				else if ( i->first == "TRACKNUMBER" )
-//				{
-//					stov(sProperty, vsTrack, "|");
-//				}
-//				else if ( i->first == "DATE" )
-//				{
-//					stov(sProperty, vsDate, "|");
-//				}
+				else if ( i->first == "ARTIST" )
+				{
+					stov(sProperty, vsPerformer);
+				}
+				else if ( i->first == "GENRE" )
+				{
+					stov(sProperty, vsGenre);
+				}
+				else if ( i->first == "TITLE" )
+				{
+					stov(sProperty, vsTitle, "|");
+				}
+				else if ( i->first == "ALBUM" )
+				{
+					stov(sProperty, vsAlbum, "|");
+				}
+				else if ( i->first == "TRACKNUMBER" )
+				{
+					stov(sProperty, vsTrack, "|");
+				}
+				else if ( i->first == "DATE" )
+				{
+					stov(sProperty, vsDate, "|");
+				}
 				else if ( i->first == "COMPOSER" )
 				{
 					stov(sProperty, vsComposerWriter);
 				}
-				else if ( i->first == "LABEL" )
+				else if ( i->first == "LABEL" || (i->first == "ORGANIZATION") )
 				{
 					stov(sProperty, vsStudio);
 				}
@@ -471,7 +627,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 				{
 					stov(sProperty, vsEpisode);
 				}
-				else if ( i->first == "Program" )
+				else if ( i->first == "PROGRAM" )
 				{
 					stov(sProperty, vsSynopsis, "|");
 				}
@@ -542,6 +698,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 	// is it a FLAC file? write pics like this
 	if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
 	{
+		// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
 		flacFile->pictureList().clear();
 
 		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
@@ -564,7 +721,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 
 		if ( tag )
 		{
-			// remove all pre-existing picture frames from the file?!?!
+			// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
 			TagLib::ID3v2::FrameList frameList = tag->frameListMap()["APIC"];
 			if ( !frameList.isEmpty() )
 			{
@@ -600,6 +757,9 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 			TagLib::MP4::ItemListMap itemsListMap = tag->itemListMap();
 			TagLib::MP4::CoverArtList coverArtList;
 
+			// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
+			itemsListMap.erase("covr");
+
 			for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
 			{
 				TagLib::MP4::CoverArt coverArt = TagLib::MP4::CoverArt( TagLib::MP4::CoverArt::JPEG, *it->first);
@@ -607,7 +767,6 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 			}
 
 			TagLib::MP4::Item coverItem(coverArtList);
-			itemsListMap.erase("covr");
 			itemsListMap.insert("covr", coverItem);
 			tag->save();
 		}
@@ -686,54 +845,78 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_Artist_CONST);
 		if ( !sParameters.empty() )
 		{
-			InsertTagValues(f, string("ALBUMARTIST"),  sParameters );
-			InsertTagValues(f, string("ALBUM ARTIST"),  sParameters );
-			InsertTagValues(f, string("ENSEMBLE"),  sParameters );
-cout << "SetTagInfo - set Album Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << endl;
+			cout << "SetTagInfo - set Album Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << endl;
+			InsertTagValues(f, string("ALBUMARTIST"), sParameters );
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Performer_CONST);
 		if ( !sParameters.empty() )
 		{
-			f->tag()->setArtist( String(sParameters, String::UTF8 ));
-			//InsertTagValues(f, string("ARTIST"), sParameters);
-cout << "SetTagInfo - set Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Artist set to: " << f->tag()->artist().to8Bit( true ) << endl;
+			//f->tag()->setArtist( String(sParameters, String::UTF8 ));
+			InsertTagValues(f, string("ARTIST"), sParameters);
+			cout << "SetTagInfo - set Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Artist set to: " << f->tag()->artist().to8Bit( true ) << endl;
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Title_CONST);
 		if ( !sParameters.empty() )
 		{
-			f->tag()->setTitle( String(sParameters, String::UTF8));
-			//InsertTagValues(f, string("TITLE"), sParameters);
+			//f->tag()->setTitle( String(sParameters, String::UTF8));
+			InsertTagValues(f, string("TITLE"), sParameters);
+			cout << "SetTagInfo - set Title to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Title set to: " << f->tag()->title().to8Bit( true ) << endl;
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Genre_CONST);
 		if ( !sParameters.empty() )
 		{
-			f->tag()->setGenre( String(sParameters, String::UTF8));
-			//InsertTagValues(f, string("GENRE"), sParameters);
+			//f->tag()->setGenre( String(sParameters, String::UTF8));
+			InsertTagValues(f, string("GENRE"), sParameters);
+			cout << "SetTagInfo - set Genre to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Genreset to: " << f->tag()->genre().to8Bit( true ) << endl;
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_CONST);
 		if ( !sParameters.empty() )
 		{
-			f->tag()->setAlbum( String(sParameters, String::UTF8));
-			//InsertTagValues(f, string("ALBUM"), sParameters);
+			//f->tag()->setAlbum( String(sParameters, String::UTF8));
+			InsertTagValues(f, string("ALBUM"), sParameters);
+			cout << "SetTagInfo - set Album to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Album set to: " << f->tag()->album().to8Bit( true ) << endl;
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Track_CONST);
 		if ( !sParameters.empty() )
 		{
-			f->tag()->setTrack( atoi(sParameters.c_str()));
-			//InsertTagValues(f, string("TRACKNUMBER"), sParameters);
+			//f->tag()->setTrack( atoi(sParameters.c_str()));
+			InsertTagValues(f, string("TRACKNUMBER"), sParameters);
+			cout << "SetTagInfo - set Track to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Track set to: " << f->tag()->track() << endl;
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Release_Date_CONST);
 		if ( !sParameters.empty() )
 		{
-			f->tag()->setYear( atoi(sParameters.c_str()));
-			//InsertTagValues(f, string("DATE"), sParameters);
+			//f->tag()->setYear( atoi(sParameters.c_str()));
+			InsertTagValues(f, string("DATE"), sParameters);
+			cout << "SetTagInfo - set Date to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Date set to: " << f->tag()->year() << endl;
 		}
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_ComposerWriter_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("COMPOSER"), sParameters);
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Studio_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("LABEL"), sParameters);
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Number_of_Discs_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("TOTALDISCS"), sParameters);
+
+		// TODO: verify this parameter name
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Disc_ID_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("DISCNUMBER"), sParameters);
+
+		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Synopsis_CONST);
+		if ( !sParameters.empty() )
+			InsertTagValues(f, string("COMMENT"), sParameters);
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Channel_CONST);
 		if ( !sParameters.empty() )
@@ -808,42 +991,64 @@ void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 			case ATTRIBUTETYPE_Album_Artist_CONST:
 				RemoveTagValue(f, "ALBUMARTIST", sValue);
 				RemoveTagValue(f, "ALBUM ARTIST", sValue);
+				RemoveTagValue(f, "ENSEMBLE", sValue);
 				break;
 
 			case ATTRIBUTETYPE_Performer_CONST:
-//				RemoveTagValue(f, "ARTIST", sValue);
-				if(f->tag()->artist() == sValue)
-					f->tag()->setArtist("");
+				RemoveTagValue(f, "ARTIST", sValue);
+//				if(f->tag()->artist() == sValue)
+//					f->tag()->setArtist("");
 				break;
 
 			case ATTRIBUTETYPE_Title_CONST:
-//				RemoveTagValue(f, "TITLE", sValue);
-				if(f->tag()->title() == sValue)
-					f->tag()->setTitle("");
+				RemoveTagValue(f, "TITLE", sValue);
+//				if(f->tag()->title() == sValue)
+//					f->tag()->setTitle("");
 				break;
 
 			case ATTRIBUTETYPE_Genre_CONST:
-//				RemoveTagValue(f, "GENRE", sValue);
-				if(f->tag()->genre() == sValue)
-					f->tag()->setGenre("");
+				RemoveTagValue(f, "GENRE", sValue);
+//				if(f->tag()->genre() == sValue)
+//					f->tag()->setGenre("");
 				break;
 
 			case ATTRIBUTETYPE_Album_CONST:
-//				RemoveTagValue(f, "ALBUM", sValue);
-				if(f->tag()->album() == sValue)
-					f->tag()->setAlbum("");
+				RemoveTagValue(f, "ALBUM", sValue);
+//				if(f->tag()->album() == sValue)
+//					f->tag()->setAlbum("");
 				break;
 
 			case ATTRIBUTETYPE_Track_CONST:
-//				RemoveTagValue(f, "TRACKNUMBER", sValue);
-				if(f->tag()->track() == atoi(sValue.c_str()))
-					f->tag()->setTrack(0);
+				RemoveTagValue(f, "TRACKNUMBER", sValue);
+//				if(f->tag()->track() == atoi(sValue.c_str()))
+//					f->tag()->setTrack(0);
 				break;
 
 			case ATTRIBUTETYPE_Release_Date_CONST:
-//				RemoveTagValue(f, "DATE", sValue);
-				if(f->tag()->year() == atoi(sValue.c_str()))
-					f->tag()->setYear(0);
+				RemoveTagValue(f, "DATE", sValue);
+//				if(f->tag()->year() == atoi(sValue.c_str()))
+//					f->tag()->setYear(0);
+				break;
+
+			case ATTRIBUTETYPE_ComposerWriter_CONST:
+				RemoveTagValue(f, "COMPOSER", sValue);
+				break;
+
+			case ATTRIBUTETYPE_Studio_CONST:
+				RemoveTagValue(f, "LABEL", sValue);
+				RemoveTagValue(f, "ORGANIZATION", sValue);
+				break;
+
+			case ATTRIBUTETYPE_Number_of_Discs_CONST:
+				RemoveTagValue(f, "TOTALDISCS", sValue);
+				break;
+
+			case ATTRIBUTETYPE_Disc_ID_CONST:
+				RemoveTagValue(f, "DISCNUMBER", sValue);
+				break;
+
+			case ATTRIBUTETYPE_Synopsis_CONST:
+				RemoveTagValue(f, "COMMENT", sValue);
 				break;
 
 			case ATTRIBUTETYPE_Channel_CONST:

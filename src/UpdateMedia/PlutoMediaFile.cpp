@@ -883,12 +883,18 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 	if( PK_MediaType==MEDIATYPE_pluto_Pictures_CONST && !m_bIsDir)
 	{
 		string Output = m_sDirectory + "/" + m_sFile;
-		StringUtils::Replace(&Output,"\"","\\\"");
-		string sCmd = "convert \"" + Output + "\" -scale 256x256 -antialias \"jpeg:" + Output + ".tnj\"";
+		if ( !FileUtils::FileExists( Output + ".tnj" ) )
+		{
 
-		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Creating thumbnail %s",sCmd.c_str());
-
-		system(sCmd.c_str());
+			StringUtils::Replace(&Output,"\"","\\\"");
+			string sCmd = "convert \"" + Output + "\" -scale 256x256 -antialias \"jpeg:" + Output + ".tnj\"";
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Creating thumbnail %s",sCmd.c_str());
+			system(sCmd.c_str());
+		}
+		else
+		{
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Skip Creating thumbnail %s.tnj, it exists already.",Output.c_str());
+		}
 	}
 
 return pRow_File->PK_File_get();
