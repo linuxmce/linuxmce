@@ -290,7 +290,7 @@ public slots:
     }
 
     void qmlPlaybackEnded(bool ended){
-        mediaPlayer->EVENT_Playback_Completed(mediaPlayer->getCurrentMediaUrl().toStdString(),mediaPlayer->getStreamID(), ended);
+        mediaPlayer->EVENT_Playback_Completed(mediaPlayer->getInternalMediaUrl().toStdString(),mediaPlayer->getStreamID(), ended);
     }
 
 
@@ -599,13 +599,15 @@ public slots:
     void pluginNotifyStart(QString title, QString audioOptions="", QString videoOptions=""){
         startTimeCodeServer();
         mediaPlayer->EVENT_Playback_Started(
-                    this->fileReference.toStdString(),
+                   mediaPlayer->getInternalMediaUrl().toStdString(),
                     mediaPlayer->i_StreamId,
                     title.toStdString(),
                     audioOptions.toStdString(),
                     videoOptions.toStdString());
                                                                                            }
-    void pluginNotifyEnd(bool withError){mediaPlayer->EVENT_Playback_Completed(this->fileReference.toStdString(), mediaPlayer->i_StreamId, withError);}
+    void pluginNotifyEnd(bool withError){
+        mediaPlayer->EVENT_Playback_Completed(mediaPlayer->getInternalMediaUrl().toStdString(), mediaPlayer->i_StreamId, withError);
+    }
 
 #ifndef __ANDROID__
 #ifdef QT4
