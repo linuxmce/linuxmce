@@ -37,6 +37,7 @@ namespace DCE
     virtual string GetPictureData();
     virtual string GetPictureURL();
     virtual string GetIdentityType();
+    virtual int GetMediaType();
   };
 }
 

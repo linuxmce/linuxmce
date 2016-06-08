@@ -630,7 +630,11 @@ MD_Install_Packages () {
 			## If libdvdcss2 is installed on the hybrid/core
 			if [[ -d /usr/share/doc/libdvdcss2 ]] ;then
 				pushd $TEMP_DIR >/dev/null
-				LC_ALL=C chroot $TEMP_DIR apt-get -y install libdvdcss2 || :
+				if [[ "$TARGET_DISTRO_ID" -ge "22" ]] ; then
+					LC_ALL=C chroot $TEMP_DIR apt-get -y install libdvd-pkg || :
+				else
+					LC_ALL=C chroot $TEMP_DIR apt-get -y install libdvdcss2 || :
+				fi
 				popd >/dev/null
 			fi
 
