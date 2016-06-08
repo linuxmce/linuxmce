@@ -107,7 +107,8 @@ FileHandlerFactory::~FileHandlerFactory(void)
 #ifdef UPDATEMEDIA_DEBUG
 	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is id3 file!", sFile.c_str(),  sDirectory.c_str());
 #endif
-		type = fhtId3;
+//		type = fhtId3;
+		type = fhtTag;
         }     
 	return type;
 }	
