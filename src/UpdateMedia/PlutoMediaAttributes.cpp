@@ -339,7 +339,7 @@ void PlutoMediaAttributes::GenerateMd5SumsForCoverarts(list<string>& listMD5Sums
 
 		if(bRemoveDuplicates && std::find(listMD5SumsCoverarts.begin(), listMD5SumsCoverarts.end(), sMd5Sums) != listMD5SumsCoverarts.end())
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenerateMd5SumsForCoverarts: picture size %d md5sum %s duplicated. Removing...",
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenerateMd5SumsForCoverarts: picture size %d md5sum %s is a duplicate for this entry. Not adding...",
 					it->first, sMd5Sums.c_str());
 
 			delete [] it->second;
@@ -347,8 +347,10 @@ void PlutoMediaAttributes::GenerateMd5SumsForCoverarts(list<string>& listMD5Sums
 		}
 		else
 		{
-			listMD5SumsCoverarts.push_back(sMd5Sums);
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenerateMd5SumsForCoverarts: picture size %d md5sum %s is unique for this entry. Adding...",
+					it->first, sMd5Sums.c_str());
 
+			listMD5SumsCoverarts.push_back(sMd5Sums);
 			++it;
 		}
 	}
