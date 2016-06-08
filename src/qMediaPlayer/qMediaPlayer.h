@@ -1019,6 +1019,7 @@ public:
         void setCurrentMediaUrl(QString m) {currentMediaUrl = m; emit currentMediaUrlChanged(currentMediaUrl);}
         QString getCurrentMediaUrl(){return currentMediaUrl;}
 
+
         void setCommandResponse(QString r);
         QString getCommandResponse() {return commandResponse;}
 
@@ -1031,6 +1032,16 @@ public:
         int m_currentFkFileType;
         MediaManager * mp_manager;
         QString m_internalMediaUrl;
+
+        int m_iChapter =0;
+        int m_iTitle=0;
+        string s_totalTime;
+        string s_audioTracks;
+        string s_subTitleTracks;
+
+
+    private:
+        string getDcePosition();
 
     };
 
