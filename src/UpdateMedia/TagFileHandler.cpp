@@ -813,10 +813,11 @@ void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, string s
 						cout << "Property " << sName << " exists in file with value: " << (*parameter) << endl;
 						//cout << "Property " << (*property).first << " exists in file in StringList: " << (*property_values).to8Bit( true ) << endl;
 						bFound = true;
+						break;
 					}
 				}
 			}
-			if (bFound != true)
+			if (!bFound)
 			{
 				cout << "Property " << sName << " doesn't exist in file with value " << (*parameter) << ", adding" << endl;
 				property_value_list.append( String( (*parameter), String::UTF8) );
