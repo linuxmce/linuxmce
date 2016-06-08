@@ -885,17 +885,23 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Track_CONST);
 		if ( !sParameters.empty() )
 		{
-			//f->tag()->setTrack( atoi(sParameters.c_str()));
-			InsertTagValues(f, string("TRACKNUMBER"), sParameters);
-			cout << "SetTagInfo - set Track to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Track set to: " << f->tag()->track() << endl;
+			if (sParameters != "0" )
+			{
+				//f->tag()->setTrack( atoi(sParameters.c_str()));
+				InsertTagValues(f, string("TRACKNUMBER"), sParameters);
+				cout << "SetTagInfo - set Track to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Track set to: " << f->tag()->track() << endl;
+			}
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Release_Date_CONST);
 		if ( !sParameters.empty() )
 		{
-			//f->tag()->setYear( atoi(sParameters.c_str()));
-			InsertTagValues(f, string("DATE"), sParameters);
-			cout << "SetTagInfo - set Date to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Date set to: " << f->tag()->year() << endl;
+			if (sParameters != "0" )
+			{
+				//f->tag()->setYear( atoi(sParameters.c_str()));
+				InsertTagValues(f, string("DATE"), sParameters);
+				cout << "SetTagInfo - set Date to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Date set to: " << f->tag()->year() << endl;
+			}
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_ComposerWriter_CONST);
