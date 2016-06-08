@@ -60,40 +60,32 @@ QMAKE_POST_LINK= $${QMAKE_COPY} $${_PRO_FILE_PWD_}/qmldir $${DESTDIR}$$escape_ex
 
 }
 
+include (../../../../QtCommonIncludes/PlutoUtils.pri)
+
 OTHER_FILES = qmldir
 
 # Input
 SOURCES += \
 	audiovisual_plugin.cpp \   
 	mediamanager.cpp \
-	../../../../qMediaPlayer/qMediaPlayer.cpp \
-	../../../../PlutoUtils/uuencode.cpp \
-	../../../../PlutoUtils/ThreadedClass.cpp \
-	../../../../PlutoUtils/Other.cpp \
-	../../../../PlutoUtils/MultiThreadIncludes.cpp \
-	../../../../PlutoUtils/minilzo.cpp \
-	../../../../PlutoUtils/md5c.cpp \
-	../../../../PlutoUtils/FileUtils.cpp \
-	../../../../PlutoUtils/CommonIncludes.cpp \
-	../../../../SerializeClass/SerializeClass.cpp \
-	../../../../DCE/Virtual_Device_Translator.cpp \
-	../../../../DCE/Socket.cpp \
-	../../../../DCE/DCEConfig.cpp \
-	../../../../DCE/ServerLogger.cpp \
-	../../../../DCE/PlainClientSocket.cpp \
-	../../../../DCE/MessageBuffer.cpp \
-	../../../..//DCE/Message.cpp \
-	../../../../DCE/HandleRequestSocket.cpp \
-	../../../../DCE/Logger.cpp \
-	../../../../DCE/Event_Impl.cpp \
-	../../../../DCE/DataGrid.cpp \
-	../../../../DCE/Command_Impl.cpp \
-	../../../../DCE/AlarmManager.cpp \
-	../../../../PlutoUtils/StringUtils.cpp \
-	../../../../DCE/ClientSocket.cpp \
-	../../../../DCE/DeviceData_Base.cpp \
-	../../../../DCE/DeviceData_Impl.cpp \
-	../../../../PlutoUtils/getch.cpp \
+        ../../../../qMediaPlayer/qMediaPlayer.cpp \
+        ../../../../SerializeClass/SerializeClass.cpp \
+        ../../../../DCE/Virtual_Device_Translator.cpp \
+        ../../../../DCE/Socket.cpp \
+        ../../../../DCE/DCEConfig.cpp \
+        ../../../../DCE/ServerLogger.cpp \
+        ../../../../DCE/PlainClientSocket.cpp \
+        ../../../../DCE/MessageBuffer.cpp \
+        ../../../..//DCE/Message.cpp \
+        ../../../../DCE/HandleRequestSocket.cpp \
+        ../../../../DCE/Logger.cpp \
+        ../../../../DCE/Event_Impl.cpp \
+        ../../../../DCE/DataGrid.cpp \
+        ../../../../DCE/Command_Impl.cpp \
+        ../../../../DCE/AlarmManager.cpp \
+        ../../../../DCE/ClientSocket.cpp \
+        ../../../../DCE/DeviceData_Base.cpp \
+        ../../../../DCE/DeviceData_Impl.cpp \
 	../../../../Gen_Devices/qMediaPlayerBase.cpp \
         ../../../../Gen_Devices/qOrbiterBase.cpp
 	
@@ -101,14 +93,7 @@ HEADERS += \
 	audiovisual_plugin.h \  
 	colorfilterproxywidget.h \
 	mediamanager.h \
-	../../../../qMediaPlayer/qMediaPlayer.h \
-	../../../../PlutoUtils/ThreadedClass.h \
-	../../../../PlutoUtils/MultiThreadIncludes.h \
-	../../../../PlutoUtils/StringUtils.h \
-	../../../../PlutoUtils/CommonIncludes.h \
-	../../../../PlutoUtils/Other.h \
-	../../../../PlutoUtils/getch.h \
-	../../../../PlutoUtils/MyStl.h \
+        ../../../../qMediaPlayer/qMediaPlayer.h \
 	../../../../DCE/DeviceData_Base.h \
 	../../../../DCE/Message.h \
 	../../../../DCE/ServerLogger.h \
@@ -118,8 +103,7 @@ HEADERS += \
 	../../../../DCE/ClientSocket.h \
 	../../../../DCE/PlainClientSocket.h \
 	../../../../DCE/AlarmManager.h \
-	../../../../SerializeClass/SerializeClass.h \
-	../../../../PlutoUtils/FileUtils.h \
+        ../../../../SerializeClass/SerializeClass.h \
 	../../../../pluto_main/Define_DeviceCategory.h \
 	../../../../pluto_main/Define_DeviceTemplate.h \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
