@@ -374,7 +374,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     qWarning() << "Need to implement command #37 - Play Media" << endl;
     qWarning() << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
     qWarning() << "Parm #41 - StreamID=" << iStreamID << endl;
-    qWarning() << "Parm #42 - MediaPosition=" << sMediaPosition.c_str() << endl;
+    qWarning() << "Parm #42 - MediaPosition=" << QString::fromStdString(sMediaPosition) << endl;
     qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str() << endl;
 
     QString deviceNumber;
@@ -448,7 +448,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         QString mod = QString::fromStdString(sMediaURL);
 
         if(mod.contains("/home/public/data")){
-           mod = QString::fromStdString(sMediaURL).remove("/home/public/");
+            mod = QString::fromStdString(sMediaURL).remove("/home/public/");
         } else {
             //handle private/upnp media?
         }
@@ -477,11 +477,13 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
 {
     setCommandResponse("Need to implement command #38 - Stop Media");
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
-    cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+    //  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
 
     iStreamID = this->i_StreamId;
-    string endPosition = QString::number(mp_manager->currentTime).toStdString();
-    sMediaPosition =&endPosition;
+    string endPosition = getDcePosition();
+    *sMediaPosition =endPosition;
+    qDebug() << "Media end position " << endPosition.c_str();
     emit stopCurrentMedia();
     setCurrentMediaUrl("");
     sCMD_Result="OK";
@@ -1363,8 +1365,20 @@ void qMediaPlayer::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,st
     cout << "Need to implement command #412 - Set Media Position" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-    qDebug() << "Qmediaplayer::set_media_position::"<< sMediaPosition.c_str();
-    QString val = QString::fromStdString(sMediaPosition);
+
+    QStringList positionParams = QString::fromStdString(sMediaPosition).split(" ");
+    QMap<QString, QString> positionValues;
+
+    foreach (QString t, positionParams){
+        qDebug() << t;
+        QStringList tm = t.split(":");
+        if(tm.count()==2)
+            positionValues.insert(tm.at(0), tm.at(1));
+    }
+
+    QString val =positionValues.value("POS");
+    qDebug() << "Qmediaplayer::set_media_position::"<<val;
+
     emit newMediaPosition(val.toInt());
 }
 
@@ -1674,6 +1688,22 @@ void qMediaPlayer::CMD_Remove_Station_from_QuickMix(string sID,int iStreamID,str
 void qMediaPlayer::setCommandResponse(QString r)
 {
     {commandResponse = QTime::currentTime().toString()+"-QMediaPlayer:: "+ r; emit commandResponseChanged(commandResponse);}
+}
+
+string qMediaPlayer::getDcePosition()
+{
+    string dcePosition;
+
+    QString currentTime = QString::number( (mp_manager->currentTime /1000)  );
+    dcePosition+=" CHAPTER:0";
+    dcePosition+=" POS:"+currentTime.toStdString();
+    dcePosition+=" TITLE:0";
+    dcePosition+=" SUBTITLE:-1";
+    dcePosition+=" AUDIO:-1";
+    dcePosition+=" TOTAL:"+StringUtils::itos( (mp_manager->totalTime / 1000) );
+
+    return dcePosition;
+
 }
 int qMediaPlayer::getCurrentFkFileType() const
 {
@@ -1992,7 +2022,7 @@ void qMediaPlayer::updateMetadata(QString mediaTitle, QString mediaSubtitle, QSt
     string mst = mediaSubtitle.toStdString();
     string mt = mediaTitle.toStdString();
     string nm = name.toStdString()+"\t" +mt;
-    EVENT_Playback_Started(nm, i_StreamId, mst, "true", "true");
+    EVENT_Playback_Info_Changed(nm,mt,mst);
 
 }
 
@@ -2001,19 +2031,20 @@ void qMediaPlayer::confirmMediaStarted(QString description)
     string mrl = getInternalMediaUrl().toStdString();
     string desc = description.toStdString();
 
-    EVENT_Playback_Started(mrl, i_StreamId, desc, "true", "true");
+    EVENT_Playback_Started(m_internalMediaUrl.toStdString(), i_StreamId, desc, "true", "true");
 }
 
 void qMediaPlayer::confirmMediaEnded(bool witherror)
 {
+    qDebug() << Q_FUNC_INFO;
     string mrl = getInternalMediaUrl().toStdString();
-    EVENT_Playback_Completed(mrl, i_StreamId, witherror);
+    EVENT_Playback_Completed(m_internalMediaUrl.toStdString(), i_StreamId, witherror);
 }
 
 void qMediaPlayer::positionChanged(QString total, QString current)
 {
 
-    string mediaurl = getCurrentMediaUrl().toStdString();
+    string mediaurl = getInternalMediaUrl().toStdString();
     string media_id = getMediaId().toStdString();
     string tt = total.toStdString();
     string ct = current.toStdString();
