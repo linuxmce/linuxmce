@@ -68,15 +68,15 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["GEOB"];
 				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
 				{
-					TagLib::ID3v2::GeneralEncapsulatedObjectFrame *obj = (TagLib::ID3v2::GeneralEncapsulatedObjectFrame *)(*it);
-					if ( obj->description() == "" || obj->description() == "lmce-serialized" )
+					TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geob = (TagLib::ID3v2::GeneralEncapsulatedObjectFrame *)(*it);
+					if ( geob->description() == "" || geob->description() == "lmce-serialized" )
 					{
-						TagLib::ByteVector pGeneralData = obj->render();
+						TagLib::ByteVector pGeneralData = geob->object();
 						Size = (size_t)pGeneralData.size();
 						pData = new char[Size];
 						memcpy(pData, pGeneralData.data(), Size);
 
-		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << obj->description() << endl;
+		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->description() << endl;
 						break;
 					}
 				}
@@ -92,15 +92,15 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["GEOB"];
 				for(TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
 				{
-					TagLib::ID3v2::GeneralEncapsulatedObjectFrame *obj = (TagLib::ID3v2::GeneralEncapsulatedObjectFrame *)(*it);
-					if ( obj->description() == "" || obj->description() == "lmce-serialized" )
+					TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geob = (TagLib::ID3v2::GeneralEncapsulatedObjectFrame *)(*it);
+					if ( geob->description() == "" || geob->description() == "lmce-serialized" )
 					{
-						TagLib::ByteVector pGeneralData = obj->render();
+						TagLib::ByteVector pGeneralData = geob->object();
 						Size = (size_t)pGeneralData.size();
 						pData = new char[Size];
 						memcpy(pData, pGeneralData.data(), Size);
 
-		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << obj->description() << endl;
+		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->toString() << endl;
 						break;
 					}
 				}
@@ -113,28 +113,74 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, size_t& Size)
 {
-/*
-        ID3_Tag tag;
-        tag.Link(sFilename.c_str());
+        pData = NULL;
+        Size = 0;
 
-        ID3_Frame* frame = tag.Find(ID3FID_GENERALOBJECT);
-        if(NULL == frame)
-        {
-                frame = new ID3_Frame(ID3FID_GENERALOBJECT);
-                tag.AttachFrame(frame);
-        }
+	FileRef *f = new FileRef(sFilename.c_str());
+	if(!f->isNull()) //ensure tag is present before trying to read and data.
+	{
+		// Pictures need to be handled differently depending on file type
+		// is it a FLAC file? read pics like this
+		if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
+		{
+			TagLib::ID3v2::Tag *id3v2tag = flacFile->ID3v2Tag( true ); // create if not present
+			if ( id3v2tag )
+			{
+				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["GEOB"];
+				if ( !frameList.isEmpty() )
+				{
+					for( TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+					{
+						cout << "SetUserDefinedData - removeFrame( *it );    [GEOB]" << endl;
+						id3v2tag->removeFrame( *it );
+					}
+				}
 
-        if(NULL != frame)
-        {
-                ID3_Field* fld = frame->GetField(ID3FN_DATA);
-                uchar *pFieldData = new uchar[Size];
-                memcpy(pFieldData, pData, Size);
-                fld->Set(pFieldData, Size);
-                delete []pFieldData;
-        }
+				TagLib::ByteVector generalData( pData , Size );
 
-    tag.Update(ID3TT_ID3);
-*/
+				TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geob = new TagLib::ID3v2::GeneralEncapsulatedObjectFrame;
+				geob->setDescription("lmce-serialized");
+				geob->setData( generalData );
+
+				cout << "SetUserDefinedData - addFrame( frame );     [GEOB]" << endl;
+
+				id3v2tag->addFrame( geob );
+
+				flacFile->save();
+			}
+		}
+
+		// is it an MPEG file? read pics like this
+		else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
+		{
+			TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag( true );
+			if ( id3v2tag )
+			{
+				TagLib::ID3v2::FrameList frameList = id3v2tag->frameListMap()["GEOB"];
+				if ( !frameList.isEmpty() )
+				{
+					for( TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
+					{
+						cout << "SetUserDefinedData - removeFrame( *it );    [GEOB]" << endl;
+						id3v2tag->removeFrame( *it );
+					}
+				}
+
+				TagLib::ByteVector generalData( pData , Size );
+
+				TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geob = new TagLib::ID3v2::GeneralEncapsulatedObjectFrame;
+				geob->setDescription("lmce-serialized");
+				geob->setData( generalData );
+
+				cout << "SetUserDefinedData - addFrame( frame );     [GEOB]" << endl;
+
+				id3v2tag->addFrame( geob );
+				mpegFile->save();
+			}
+		}
+	}
+
+	// TODO: MP4/ASF ?  may need external id3 files?
 }
 //-----------------------------------------------------------------------------------------------------
 bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
@@ -156,12 +202,12 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		pPlutoMediaAttributes->SerializeRead((unsigned long)Size, pData);
 		delete []pData;
 		pData = NULL;
+
+	        LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d",
+	                pPlutoMediaAttributes->m_mapAttributes.size());
 	}
 
-        LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d",
-                pPlutoMediaAttributes->m_mapAttributes.size());
-
-	// FIXME: refactor this with a multi-map, so it's the same as MapPlutoMediaAttributes
+	// TODO: refactor this with a multi-map, so it's the same as MapPlutoMediaAttributes
 	//get common tag attributes
 	map<int, string> mapAttributes;
 	GetTagInfo(sFileWithAttributes, mapAttributes, listPicturesForTags);
@@ -245,9 +291,20 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 		//Save common tag tags
 		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
 
-// setTagGEOB()
+		//Save user defined text
+		char *pDataStartPosition = NULL;
+		unsigned long ulSize = 0;
+		pPlutoMediaAttributes->SerializeWrite();
+		ulSize = pPlutoMediaAttributes->CurrentSize();
+		pDataStartPosition = pPlutoMediaAttributes->m_pcDataBlock;
+		size_t Size = ulSize;
 
-		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SaveAttributes: listPictures.clear()");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SaveAttributes: saving into GEOB frame size %d", Size);
+
+		SetUserDefinedInformation(sFileWithAttributes, pDataStartPosition, Size);
+		pPlutoMediaAttributes->FreeSerializeMemory();
+
+		// clear our pictures vector
 		listPictures.clear();
 	}
 	else
@@ -641,6 +698,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 	// is it a FLAC file? write pics like this
 	if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
 	{
+		// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
 		flacFile->pictureList().clear();
 
 		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
@@ -663,7 +721,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 
 		if ( tag )
 		{
-			// remove all pre-existing picture frames from the file?!?!
+			// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
 			TagLib::ID3v2::FrameList frameList = tag->frameListMap()["APIC"];
 			if ( !frameList.isEmpty() )
 			{
@@ -699,6 +757,9 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 			TagLib::MP4::ItemListMap itemsListMap = tag->itemListMap();
 			TagLib::MP4::CoverArtList coverArtList;
 
+			// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
+			itemsListMap.erase("covr");
+
 			for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
 			{
 				TagLib::MP4::CoverArt coverArt = TagLib::MP4::CoverArt( TagLib::MP4::CoverArt::JPEG, *it->first);
@@ -706,7 +767,6 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 			}
 
 			TagLib::MP4::Item coverItem(coverArtList);
-			itemsListMap.erase("covr");
 			itemsListMap.insert("covr", coverItem);
 			tag->save();
 		}
@@ -834,7 +894,7 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 		{
 			//f->tag()->setYear( atoi(sParameters.c_str()));
 			InsertTagValues(f, string("DATE"), sParameters);
-			cout << "SetTagInfo - set Date to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Date set to: " << f->tag()->title().to8Bit( true ) << endl;
+			cout << "SetTagInfo - set Date to: " << String(sParameters, String::UTF8).to8Bit(true) << " -- Date set to: " << f->tag()->year() << endl;
 		}
 
 		sParameters=ExtractAttribute(mapAttributes, ATTRIBUTETYPE_ComposerWriter_CONST);
