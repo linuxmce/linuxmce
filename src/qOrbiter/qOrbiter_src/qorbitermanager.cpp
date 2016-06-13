@@ -1751,9 +1751,9 @@ void qorbiterManager::playMedia(QString FK_Media, bool queue =false) {
                 iPK_Device,                 //device from
                 iMediaPluginID,             //device to
                 0 ,
-                FK_Media.toStdString(),
-                0,
-                0,
+                FK_Media.toStdString(),     //media file name !FXX or !PXXX
+                0,                          //media type
+                0,                          //device template (why 0)
                 sEntertainArea,             //entertain area
                 false,                      //resume
                 false,                       //repeat
