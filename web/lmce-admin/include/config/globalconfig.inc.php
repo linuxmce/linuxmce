@@ -11,7 +11,7 @@
  	$wikiHost='http://wiki.linuxmce.org/';
  
 	// pluto_main
-	$dbPlutoMainType = 'mysql';
+	$dbPlutoMainType = "mysqli";
 	$dbPlutoMainUser = $DB_USER;
 	$dbPlutoMainPass = $DB_PASS;
 	$dbPlutoMainDatabase = $DB_NAME;
@@ -19,21 +19,21 @@
 	
 	
 	// pluto media
-	$dbPlutoMediaType = "mysql";
+	$dbPlutoMediaType = "mysqli";
 	$dbPlutoMediaUser = $DB_USER;
 	$dbPlutoMediaPass = $DB_PASS;
 	$dbPlutoMediaServer = $DB_HOST;
 	$dbPlutoMediaDatabase = "pluto_media";	
 	
 	// pluto security
-	$dbPlutoSecurityType = "mysql";
+	$dbPlutoSecurityType = "mysqli";
 	$dbPlutoSecurityUser = "plutosecurity";
 	$dbPlutoSecurityPass = "";
 	$dbPlutoSecurityServer = $DB_HOST;
 	$dbPlutoSecurityDatabase = "pluto_security";
 
 	// Transmission
-	$dbTransmissionType = "mysql";
+	$dbTransmissionType = "mysqli";
 	$dbTransmissionUser = "transmission";
 	$dbTransmissionPass = "";
 	$dbTransmissionServer = $DB_HOST;
