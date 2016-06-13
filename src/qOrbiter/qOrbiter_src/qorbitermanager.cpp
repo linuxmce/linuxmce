@@ -103,9 +103,9 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     currentScreen("Screen_1.qml"),
     m_skinOverridePath(overridePath),
     m_window(NULL),
-    m_dceRequestNo(1)
+    m_dceRequestNo(1),
+    m_useQueueInsteadOfInstantPlay(false), m_bIsOSD(isOsd)
 {
-    m_bIsOSD = isOsd;
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -1729,24 +1729,37 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
     storageDevices = p;
 }
 
-void qorbiterManager::playMedia(QString FK_Media) {
+void qorbiterManager::playMedia(QString FK_Media, bool queue =false) {
     if(FK_Media == "!G"){
         FK_Media.append(QString::number(iPK_Device));
     }
+
+    bool q;
+
+    if(queue){
+        q = queue;
+    } else {
+        if(!queue && m_useQueueInsteadOfInstantPlay ){
+            q = queue;
+        } else {
+            q = m_useQueueInsteadOfInstantPlay;
+        }
+    }
+
     //changed to remove media type as that is decided on by the media plugin and passed back
     CMD_MH_Play_Media cmd(
-                iPK_Device,
-                iMediaPluginID,
+                iPK_Device,                 //device from
+                iMediaPluginID,             //device to
                 0 ,
                 FK_Media.toStdString(),
                 0,
                 0,
-                sEntertainArea,
-                false,
-                false,
-                false,
-                false,
-                false
+                sEntertainArea,             //entertain area
+                false,                      //resume
+                false,                       //repeat
+                q,                          //queue
+                false,                      //bypass event
+                false                       //dont setupav
                 );
     emit sendDceCommand(cmd);
 }
@@ -2238,6 +2251,14 @@ DCECommand* qorbiterManager::getDCECommand()
     return new DCECommand(m_dceRequestNo.fetchAndAddAcquire(1));
 }
 
+void qorbiterManager::handleUseQueueChanged(bool useQueue)
+{
+
+    if(m_useQueueInsteadOfInstantPlay == useQueue) return;
+    m_useQueueInsteadOfInstantPlay = useQueue;
+
+}
+
 void qorbiterManager::jumpToAttributeGrid(int attributeType, int attribute)
 {
     mediaFilter.setFilterFromMediaGrid(attributeType,attribute);
@@ -2328,9 +2349,7 @@ void qorbiterManager::setHouseMode(QString pass, int mode, QString handling)
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
-#ifdef debug
     qDebug() << "Incoming user::" << inc_user;
-#endif
     sPK_User = userList->find(inc_user)->id();
     int user = inc_user.toInt();
     emit userChanged(user);
@@ -3322,6 +3341,10 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     QObject::connect(m_lRooms, &LocationModel::seekToTime, ptr, &qOrbiter::JogStream, Qt::QueuedConnection );
 
     QObject::connect(this, SIGNAL(ejectDiscDrive(long,int)), ptr, SLOT(ejectDisc(long,int)), Qt::QueuedConnection);
+
+    //config options
+
+    QObject::connect(ptr, &qOrbiter::useQueueInsteadOfInstantPlayChanged, this, &qorbiterManager::handleUseQueueChanged , Qt::QueuedConnection);
     return true;
 
 }

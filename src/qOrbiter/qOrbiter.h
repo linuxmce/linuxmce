@@ -1347,6 +1347,8 @@ light, climate, media, security, telecom */
 
 signals:
 
+    void useQueueInsteadOfInstantPlayChanged(bool useQueue);
+
     void showAlert(QString text, QString tokens, int timeout, int interruption);
 
     void timecodeEvent(QString ea, QMap<long, std::string> mp);
