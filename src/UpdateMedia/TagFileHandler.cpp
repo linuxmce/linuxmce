@@ -60,7 +60,8 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 	if(!f->isNull()) //ensure tag is present before trying to read and data.
 	{
 		// Pictures need to be handled differently depending on file type
-		// is it a FLAC file? read pics like this
+
+		// is it a FLAC file? get embedded id3v2 tag with potential GEOB data
 		if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
 		{
 			TagLib::ID3v2::Tag *id3v2tag = flacFile->ID3v2Tag();
@@ -77,14 +78,14 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 						pData = new char[Size];
 						memcpy(pData, pGeneralData.data(), Size);
 
-		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->description() << endl;
+						cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->description() << endl;
 						break;
 					}
 				}
 			}
 		}
 
-		// is it an MPEG file? read pics like this // TODO: need to extend TagLib::MPEG:File to know about .id3? or just tell it?
+		// is it an MPEG file? get embedded id3v2 tag with potential GEOB data
 		else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
 		{
 			TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag();
@@ -101,7 +102,7 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 						pData = new char[Size];
 						memcpy(pData, pGeneralData.data(), Size);
 
-		cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->toString() << endl;
+						cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->toString() << endl;
 						break;
 					}
 				}
