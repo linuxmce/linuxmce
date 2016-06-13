@@ -71,6 +71,12 @@ bool qOrbiter::GetConfig()
         return false;
     }
 
+    bool useQueue = DATA_Get_Queue_Instead_of_Instant_Play();
+
+    qDebug() << "Queue or instant play " << useQueue;
+
+    emit useQueueInsteadOfInstantPlayChanged(useQueue);
+
     int dt = m_pData->m_dwPK_DeviceTemplate;
     if( dt ==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
       //  m_bIsOSD=true;
@@ -1899,6 +1905,8 @@ bool DCE::qOrbiter::initialize(){
             exit(99);
         }
 
+        emit useQueueInsteadOfInstantPlayChanged(DATA_Get_Queue_Instead_of_Instant_Play() );
+
         registerDevice(i_user,QString(i_ea), i_room);
         CreateChildren();
         return true;
@@ -2364,13 +2372,12 @@ bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceDat
 
     if(pDeviceFrom->m_dwPK_DeviceTemplate==DEVICETEMPLATE_qMediaPlayer_CONST){
         deviceEa = QString::fromStdString(pDeviceFrom->GetTopMostDevice()->m_sDescription);
-
         emit timecodeEvent( deviceEa, p);
     } else {
         id=pDeviceFrom->m_dwPK_Room;
         emit timecodeEvent( id, p);
     }
-    //  qDebug() <<  Q_FUNC_INFO << "Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str() << "::"<< time.c_str();
+    //qDebug() <<  Q_FUNC_INFO << "Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str() << "::"<< time.c_str();
     return false;
 }
 
@@ -3782,21 +3789,28 @@ void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
     CMD_Set_Current_Room_DL set_current_room(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), location);
     SendCommand(set_current_room);
 
+    setUser(i_user);
+
 }
 
 void DCE::qOrbiter::setUser(int user)
 {
+    qDebug() << Q_FUNC_INFO << user;
+    if(user==0)
+        return;
+
     logDceMessage("SetUser() to " + QString::number(user));
-    CMD_Set_Device_Data userData(m_dwPK_Device, this->iPK_Device_GeneralInfoPlugin ,m_dwPK_Device,"1",3);
+
+    CMD_Set_Device_Data userData(m_dwPK_Device, this->iPK_Device_GeneralInfoPlugin ,m_dwPK_Device,StringUtils::itos(user),3);
     string cResp="";
-
-
     if(SendCommand(userData, &cResp)){
         logDceMessage("set user cmd " +QString::fromStdString(cResp.c_str()));
     }
     else{
         logDceMessage("Set user failed! " +QString::fromStdString(cResp.c_str()));
     }
+
+    i_user = user;
 }
 
 void DCE::qOrbiter::quickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.

@@ -240,6 +240,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (bool usingExternal READ getUsingExternal WRITE setUsingExternal NOTIFY usingExternalChanged) /*! \brief Used to indicate to the user and application if the external ip is in use */
     Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
 
+    Q_PROPERTY (bool useQueueInsteadOfInstantPlay READ useQueueInsteadOfInstantPlay NOTIFY useQueueInsteadOfInstantPlayChanged)
+
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -388,6 +390,7 @@ public:
     bool osdStatus;
     bool dvdMenuShowing;
     Q_INVOKABLE void refreshUI(QUrl url);
+
     void swapSkins(QString incSkin);
 
 
@@ -589,6 +592,7 @@ Param 10 - pk_attribute
     void setCurrentRouter( QString currentRouter) {if(m_currentRouter==currentRouter) return; m_currentRouter = currentRouter; emit currentRouterChanged();  }
 
 signals:
+    void useQueueInsteadOfInstantPlayChanged();
     void forceReloadRouter();
     void newDceAlert(QString text, QVariant tokens, int timeout, int interruption);
 
@@ -837,6 +841,8 @@ signals:
     void CMD_makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
 
 public slots:
+    bool useQueueInsteadOfInstantPlay(){ return m_useQueueInsteadOfInstantPlay;}
+    void handleUseQueueChanged(bool useQueue);
 
     void jumpToAttributeGrid(int attributeType, int attribute);
 
@@ -1315,7 +1321,7 @@ public slots:
 
     /*! @name Media Control Slots*/
     //{@
-    Q_INVOKABLE void playMedia(QString FK_Media);
+    Q_INVOKABLE void playMedia(QString FK_Media, bool queue);
     void playMediaFromDrive(int device, int disc, int ea);
     void mythTvPlay();
     void playResume();
@@ -1930,6 +1936,7 @@ private:
     QTranslator translator;
 
     bool mb_useNetworkSkins;
+    bool m_useQueueInsteadOfInstantPlay;
 
     QString m_remoteQmlPath;
 
