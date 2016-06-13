@@ -414,7 +414,8 @@ SOURCES += \
     contextobjects/screeninfo.cpp \
     contextobjects/settinginterface.cpp \
     contextobjects/entertainareatimecode.cpp \
-    datamodels/diskmediaitem.cpp
+    datamodels/diskmediaitem.cpp \
+    managerHelpers/taskshelper.cpp
 
 
 
@@ -522,7 +523,8 @@ HEADERS += \
     contextobjects/settinginterface.h \
     contextobjects/entertainareatimecode.h \
     DCECommand.h \
-    datamodels/diskmediaitem.h
+    datamodels/diskmediaitem.h \
+    managerHelpers/taskshelper.h
 
 
 
