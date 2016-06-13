@@ -330,6 +330,31 @@ public:
         return params;
     }
 
+    QString getQ_subType() const;
+    void setQ_subType(const QString &value);
+
+    QString getQ_fileFormat() const;
+    void setQ_fileFormat(const QString &value);
+
+    QString getQ_attribute_genres() const;
+    void setQ_attribute_genres(const QString &value);
+
+    QString getQ_mediaSources() const;
+    void setQ_mediaSources(const QString &value);
+
+    QString getQ_usersPrivate() const;
+
+    QString getQ_attributetype_sort() const;
+
+    QString getQ_pk_users() const;
+
+    QString getQ_last_viewed() const;
+
+    QString getQ_pk_attribute() const;
+    void setQ_pk_attribute(const QString &value);
+
+    int getQ_mediaType() const;
+
 public slots:
 
     void setGenericOptions(QString opt) {if(genericOptions != opt) { genericOptions=opt; emit genericOptionsChanged(dataGridId);} }
@@ -415,5 +440,58 @@ signals:
     void genericOptionsChanged(QString dataGridId);
     void backIndexChanged(int idx);
 };
+
+QString MediaFilter::getFileFormat() const
+{
+return q_fileFormat;
+}
+
+
+QString MediaFilter::getAttributeGenres() const
+{
+return q_attribute_genres;
+}
+
+QString MediaFilter::getMediaSources() const
+{
+return q_mediaSources;
+}
+
+QString MediaFilter::getUsersPrivate() const
+{
+return q_usersPrivate;
+}
+
+QString MediaFilter::getAttributetype_sort() const
+{
+return q_attributetype_sort;
+}
+
+QString MediaFilter::getPkUsers() const
+{
+return q_pk_users;
+}
+
+QString MediaFilter::getLastViewed() const
+{
+return q_last_viewed;
+}
+
+QString MediaFilter::getPKattribute() const
+{
+return q_pk_attribute;
+}
+
+QString MediaFilter::getSubType() const
+{
+return q_subType;
+}
+int MediaFilter::getMediaType() const
+{
+return q_mediaType;
+}
+
+
+
 }
 #endif
