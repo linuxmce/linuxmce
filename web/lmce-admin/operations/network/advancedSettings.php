@@ -1,5 +1,5 @@
 <?php
-function ipv6_save() {
+function ipv6_save($connection) {
   	// tokenize values to put in CORE device data
   	$token=$_REQUEST['ipv6_tunnelbroker'].",".$_REQUEST['ipv6_tunnelID'].",".$_REQUEST['ipv6_endpoint']
       .",".$_REQUEST['ipv6_localaddr'].",".$_REQUEST['ipv6_localaddrNetmask']
@@ -7,8 +7,8 @@ function ipv6_save() {
       .",".$_REQUEST['ipv6_userid'].",".$_REQUEST['ipv6_password']
       .",".$_REQUEST['ipv6_active'].",".$_REQUEST['ipv6_dynamicIPv4']
       .",".$_REQUEST['ipv6_RAenabled'];
- 	mysql_query("UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=292") 
- 		or die('ERROR: Invalid query: '.mysql_error());
+ 	mysqli_query($connection, "UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=292") 
+ 		or die('ERROR: Invalid query: '.mysqli_error($connection));
 	$_REQUEST['msg']="IPv6 Settings saved";
 
 	// disable firewall settings for now, will be next step
@@ -35,19 +35,19 @@ function advancedSettings($output, $dbADO) {
   	$action = @$_REQUEST['action'];
 	
 	// Connect to database and switch to main db
-	$connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to database server!");
-	mysql_select_db($mysqllmcedb, $connection) or die("ERROR: could not select LinuxMCE main database!");
+	$connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to database server!");
+	mysqli_select_db($connection, $mysqllmcedb) or die("ERROR: could not select LinuxMCE main database!");
 
   	if($action == 'ipv6_save') {
-    	ipv6_save();
+    	ipv6_save($connection);
     }
 	
 	// TODO: Update ipv6 endpoint: https://ipv4.tunnelbroker.net/ipv4_end.php?ipv4b=AUTO&pass=md5($pass)&user_id=$userID9&tunnel_id=$tunnelID
 	
 	// Query current IPv6 tunnel settings
-	$ipv6_query = mysql_query("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292") 
-      or die('ERROR: Invalid query: ' . mysql_error());
-	$ipv6_data=mysql_fetch_row($ipv6_query);
+	$ipv6_query = mysqli_query($connection, "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292") 
+      or die('ERROR: Invalid query: ' . mysqli_error($ipv6_query));
+	$ipv6_data=mysqli_fetch_row($ipv6_query);
 	$ipv6_data=explode(",", $ipv6_data[0]);
 	
 	$ipv6_tunnelBroker = $ipv6_data[0];

@@ -63,7 +63,12 @@ function includeLangFile($langFile)
     eval($evalt);
 
 	// include user language file to overwrite existing variables from fallback language
-    $file = APPROOT.'languages/'.$GLOBALS['userlang'].'/'.$langFile;
+    if(isset($GLOBALS['userlang'])) {
+        $file = APPROOT.'languages/'.$GLOBALS['userlang'].'/'.$langFile;        
+    } else {
+        $file = APPROOT.'languages/en/'.$langFile;
+    }
+
     if( file_exists($file))
     {
     	$evalt = "require_once '$file';";

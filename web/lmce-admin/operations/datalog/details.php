@@ -90,8 +90,7 @@ function datalogDetails($output,$dbADO){
      $mysqlpwd=""; // Password
      $mysqldb="lmce_datalog";
 
-     $connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
-     mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");
+     $connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd, $mysqldb) or die ("ERROR: could not connect to the database!");
 
      $device = $_REQUEST['device'];
      $unit = $_REQUEST['unit'];
