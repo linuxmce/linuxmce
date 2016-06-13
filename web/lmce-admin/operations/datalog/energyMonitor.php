@@ -36,8 +36,8 @@ function energyMonitor($output,$dbADO){
      $days=5;
 
 
-     $connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
-     mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");
+     $connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
+     mysqli_select_db($connection, $mysqldb) or die("ERROR: could not select database!");
 
 //	$PK_Datalogger = getDeviceFromDT($installationID,1949 /* DeviceTemplate_DataLogger_Plugin */,$dbADO);
 //	$deviceString = getDeviceData($PK_Datalogger,59 /* Configuration */,$dbADO); 
@@ -51,7 +51,7 @@ function energyMonitor($output,$dbADO){
           }
      }
 
-     $query = mysql_query('SELECT EK_Device, Description, IK_DeviceData FROM Datapoints, pluto_main.Device, pluto_main.Device_DeviceData 
+     $query = mysqli_query($connection, 'SELECT EK_Device, Description, IK_DeviceData FROM Datapoints, pluto_main.Device, pluto_main.Device_DeviceData 
           WHERE FK_Unit='.$unit.' AND EK_Device=PK_Device AND EK_Device=FK_Device AND FK_DeviceData=289 
           GROUP BY EK_Device ORDER BY FK_Room');
 
@@ -73,7 +73,7 @@ function energyMonitor($output,$dbADO){
 			</tr>';
 
 	$pos =0;		
-     while ($device=mysql_fetch_array($query)){
+     while ($device=mysqli_fetch_array($query)){
      ++$pos;
      $out.='<tr class="'.(($pos%2==0)?'alternate_back':'').'">
                <td align="left"><B>'.$device['Description'].' - '.$device['EK_Device'].'</B></td>
@@ -107,24 +107,24 @@ function energyMonitor($output,$dbADO){
 
 function getEnergyConsumption($device,$days){
 
-     $query = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
+     $query = mysqli_query($connection, 'SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
           WHERE EK_Device = '.$device.' AND timestamp > DATE_SUB(NOW(), INTERVAL '.$days.' DAY) ORDER BY timestamp');
      $prevON = strtotime('-'.$days.' day'); //Find time x days ago
      $ONtime = 0; // Initaiate Variable
      $t = 0;
-     $num = mysql_numrows($query); //find number off datapoints
+     $num = mysqli_num_rows($query); //find number off datapoints
 
-     while ($datapoint = mysql_fetch_array($query)){
+     while ($datapoint = mysqli_fetch_array($query)){
           //$out.= '<br>$datapoint[1] strtotime($datapoint[2]) - '.$datapoint[1].'  '.strtotime($datapoint[2]).'<br>';
           // find the state of the device at the start of the timeperiode
           if ($t==0){ 
-               $queryLast = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
+               $queryLast = mysqli_query($connection, 'SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
                     WHERE EK_Device = '.$device.' AND timestamp < DATE_SUB(NOW(), INTERVAL '.$days.' DAY) ORDER BY timestamp DESC LIMIT 1');
-               if (mysql_numrows($queryLast)==0){
+               if (mysqli_num_rows($queryLast)==0){
                    $lastState=0;
                }
                else {     
-                    $datapointLast = mysql_fetch_row($queryLast);
+                    $datapointLast = mysqli_fetch_row($queryLast);
                     $lastState=$datapointLast[1];
                     //$out.='$datapointLast = '.$datapointLast[0].' - '.$lastState.'<br>';
                }

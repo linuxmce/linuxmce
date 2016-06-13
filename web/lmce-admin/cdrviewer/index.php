@@ -7,12 +7,12 @@ include 'templates/header.tpl.php';
 include 'templates/form.tpl.php';
 
 // Connecting, selecting database
-$dbconn = mysql_connect( "$db_host:$db_port", $db_user, $db_pass ) or die('Could not connect: ' . mysql_error());
-mysql_select_db($db_name,$dbconn);
-		
+$dbconn = mysqli_connect( "$db_host", $db_user, $db_pass, $db_name, $db_port) or die('Could not connect to DB');
+
+	
 foreach ( array_keys($_REQUEST) as $key ) {
 	$_REQUEST[$key] = preg_replace('/;/', ' ', $_REQUEST[$key]);
-	$_REQUEST[$key] = mysql_real_escape_string($_REQUEST[$key]);
+	$_REQUEST[$key] = mysqli_real_escape_string($_REQUEST[$key]);
 }
 
 $startmonth = is_blank($_REQUEST['startmonth']) ? date('m') : $_REQUEST['startmonth'];
@@ -85,7 +85,7 @@ $mod_vars['accountcode'][] = empty($_REQUEST['accountcode_neg']) ? NULL : $_REQU
 $result_limit = is_blank($_REQUEST['limit']) ? $db_result_limit : $_REQUEST['limit'];
 
 if ( strlen($cdr_user_name) > 0 ) {
-	$cdr_user_name = asteriskregexp2sqllike( 'cdr_user_name', mysql_real_escape_string($cdr_user_name) );
+	$cdr_user_name = asteriskregexp2sqllike( 'cdr_user_name', mysqli_real_escape_string($cdr_user_name) );
 	if ( isset($mod_vars['cdr_user_name']) and $mod_vars['cdr_user_name'][2] == 'asterisk-regexp' ) {
 		$cdr_user_name = " AND ( dst RLIKE '$cdr_user_name' or src RLIKE '$cdr_user_name' )";
 	} else {
@@ -530,7 +530,7 @@ if ( isset($_REQUEST['need_minutes_report']) && $_REQUEST['need_minutes_report']
 			<th class="end_col">AVG Minutes</th>
 		</tr>';
 
-	while ($row = mysql_fetch_array($result2, MYSQL_NUM)) {
+	while ($row = mysqli_fetch_array($result2, MYSQL_NUM)) {
 			
 			$html_duration = sprintf('%02d', intval($row[3]/60)).':'.sprintf('%02d', intval($row[3]%60));
 			$html_duration_avg	= sprintf('%02d', intval(($row[3]/$row[1])/60)).':'.sprintf('%02d', intval(($row[3]/$row[1])%60));
@@ -550,7 +550,7 @@ if ( isset($_REQUEST['need_minutes_report']) && $_REQUEST['need_minutes_report']
 	echo "    <th class=\"chart_data\">Total</th><th class=\"chart_data\">$tot_calls</th><th class=\"chart_data\">$tot_duration</th><th class=\"chart_data\">$html_duration</th><th class=\"chart_data\">$html_duration_avg</th>\n";
 	echo "  </tr>\n";
 	echo "</table>";
-	mysql_free_result($result2);
+	mysqli_free_result($result2);
 }
 
 /* run Plugins */
@@ -566,7 +566,7 @@ foreach ( $plugins as &$p_key ) {
 
 <?php
 
-mysql_close($dbconn);
+mysqli_close($dbconn);
 
 include 'templates/footer.tpl.php';
 

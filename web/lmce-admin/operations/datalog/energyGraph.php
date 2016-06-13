@@ -6,11 +6,11 @@ $mysqluser="root"; // MySQL-User
 $mysqlpwd=""; // Password
 $mysqldb="lmce_datalog";
 
-$connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
-mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");     
+$connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
+mysqli_select_db($connection, $mysqldb) or die("ERROR: could not select database!");     
 
 
-$days = mysql_real_escape_string($_GET['days']);
+$days = mysqli_real_escape_string($_GET['days']);
 if (empty($days)) {
 	$days=7;
 }
@@ -50,16 +50,16 @@ $Graph->add(
 );
 $Legend->setPlotarea($Plotarea);        
 
-$deviceQuery = mysql_query('SELECT EK_Device, Description, IK_DeviceData FROM Datapoints, pluto_main.Device, pluto_main.Device_DeviceData 
+$deviceQuery = mysqli_query($connection, 'SELECT EK_Device, Description, IK_DeviceData FROM Datapoints, pluto_main.Device, pluto_main.Device_DeviceData 
 WHERE FK_Unit='.$unit.' AND EK_Device=PK_Device AND EK_Device=FK_Device AND FK_DeviceData=289 
 GROUP BY EK_Device ORDER BY FK_Room');
 
 $i=0;
-while ($device=mysql_fetch_array($deviceQuery)){
+while ($device=mysqli_fetch_array($deviceQuery)){
 	
-	$query = mysql_query('SELECT Datapoint, timestamp FROM Datapoints 
+	$query = mysqli_query($connection, 'SELECT Datapoint, timestamp FROM Datapoints 
 	WHERE EK_Device = '.$device['EK_Device'].' AND timestamp > DATE_SUB(NOW(), INTERVAL '.$days.' DAY) ORDER BY timestamp' );
-	$num=mysql_numrows($query);
+	$num=mysqli_num_rows($query);
 	// create the dataset
 	$Dataset[$i]=& Image_Graph::factory('dataset'); 
 	// set names for datasets (for legend)
@@ -69,13 +69,13 @@ while ($device=mysql_fetch_array($deviceQuery)){
 		$ONtime=0;
 		// find the state of the device at the start of the timeperiode
 		if ($t==0){ 
-			$queryPreTimeframe = mysql_query('SELECT Datapoint, timestamp FROM Datapoints 
+			$queryPreTimeframe = mysqli_query($connection, 'SELECT Datapoint, timestamp FROM Datapoints 
 			WHERE EK_Device = '.$device['EK_Device'].' AND timestamp < DATE_SUB(NOW(), INTERVAL '.$days.' DAY) ORDER BY timestamp DESC LIMIT 1');
-			if (mysql_numrows($queryPreTimeframe)==0){
+			if (mysqli_num_rows($queryPreTimeframe)==0){
 				$state=0;
 			}
 			else {     
-				$datapointPreTimeframe = mysql_fetch_row($queryPreTimeframe);
+				$datapointPreTimeframe = mysqli_fetch_row($queryPreTimeframe);
 				$state=$datapointPreTimeframe[0];
 			}
 			$datapoint=array('Datapoint'=>$state,'timestamp'=>date ("Y-m-d H:i:s", $startTime));
@@ -83,7 +83,7 @@ while ($device=mysql_fetch_array($deviceQuery)){
 				$nextDatapoint=$datapointPreTimeframe[0];
 			}
 			else{
-				$nextDatapoint=mysql_fetch_array($query);
+				$nextDatapoint=mysqli_fetch_array($query);
 			}    
 			$timestampMod=$prevTimestampMod;
 		}
@@ -98,7 +98,7 @@ while ($device=mysql_fetch_array($deviceQuery)){
 					$ONtime = $ONtime+($timestampMod-$prevTimestampMod);
 				}
 				$datapoint=$nextDatapoint;
-				$nextDatapoint=mysql_fetch_array($query) or 
+				$nextDatapoint=mysqli_fetch_array($query) or 
 				$nextDatapoint=array('timestamp' => date ("Y-m-d H:i:s", $endTime+1),'Datapoint' => $datapoint['Datapoint']);
 				$prevTimestampMod=$timestampMod;
 				$timestampMod=(strtotime($nextDatapoint['timestamp']))<($plotTime)?strtotime($nextDatapoint['timestamp']):$plotTime;
