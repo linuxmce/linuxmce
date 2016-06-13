@@ -702,7 +702,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 	// is it a FLAC file? write pics like this
 	if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
 	{
-		// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
+		// clear existing pics in file
 		flacFile->pictureList().clear();
 
 		for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
@@ -725,7 +725,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 
 		if ( tag )
 		{
-			// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
+			// clear existing pics in file
 			TagLib::ID3v2::FrameList frameList = tag->frameListMap()["APIC"];
 			if ( !frameList.isEmpty() )
 			{
@@ -761,7 +761,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 			TagLib::MP4::ItemListMap itemsListMap = tag->itemListMap();
 			TagLib::MP4::CoverArtList coverArtList;
 
-			// FIXME: check if pic exists, not : remove all pre-existing picture frames from the file?!?!
+			// clear existing pics in file
 			itemsListMap.erase("covr");
 
 			for( list<pair<char *, size_t> >::const_iterator it = listPictures.begin(); it != listPictures.end(); it++)
