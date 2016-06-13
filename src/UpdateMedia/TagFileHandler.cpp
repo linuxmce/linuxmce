@@ -59,7 +59,7 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 	FileRef *f = new FileRef(sFilename.c_str());
 	if(!f->isNull()) //ensure tag is present before trying to read and data.
 	{
-		// Pictures need to be handled differently depending on file type
+		// Binary data needs to be handled differently depending on file type
 
 		// is it a FLAC file? get embedded id3v2 tag with potential GEOB data
 		if ( TagLib::FLAC::File* flacFile = dynamic_cast<TagLib::FLAC::File*>( f->file()) )
@@ -102,7 +102,7 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 						pData = new char[Size];
 						memcpy(pData, pGeneralData.data(), Size);
 
-						cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->toString() << endl;
+						cout << "GEOB GEOB GEOB -- " << "Size: " << Size << " Desc: " << geob->description() << endl;
 						break;
 					}
 				}
@@ -115,9 +115,6 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, size_t& Size)
 {
-        pData = NULL;
-        Size = 0;
-
 	FileRef *f = new FileRef(sFilename.c_str());
 	if(!f->isNull()) //ensure tag is present before trying to read and data.
 	{
@@ -144,7 +141,7 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 				geob->setDescription("lmce-serialized");
 				geob->setObject( generalData );
 
-				cout << "SetUserDefinedData - addFrame( frame );     [GEOB]" << endl;
+				cout << "SetUserDefinedData - addFrame( frame );     [GEOB] -- Size: " << Size << endl;
 
 				id3v2tag->addFrame( geob );
 
@@ -174,7 +171,7 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 				geob->setDescription("lmce-serialized");
 				geob->setObject( generalData );
 
-				cout << "SetUserDefinedData - addFrame( frame );     [GEOB]" << endl;
+				cout << "SetUserDefinedData - addFrame( frame );     [GEOB] -- Size: " << Size << endl;
 
 				id3v2tag->addFrame( geob );
 				mpegFile->save();
@@ -585,14 +582,19 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 				TagLib::String field_data = *j;
 				string sProperty = field_data.to8Bit( true );
 				sProperty = StringUtils::TrimSpaces(sProperty);
+				std::vector<string> vsProperties;
 
 				if ( (i->first == "ALBUMARTIST") || (i->first == "ALBUM ARTIST") || (i->first == "ENSEMBLE") )
 				{
-					mapAttributes[ATTRIBUTETYPE_Album_Artist_CONST].push_back( sProperty );
+					stov( sProperty, vsProperties, "/;" );
+					for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
+						mapAttributes[ATTRIBUTETYPE_Album_Artist_CONST].push_back( *itProperty );
 				}
 				else if ( i->first == "ARTIST" )
 				{
-					mapAttributes[ATTRIBUTETYPE_Performer_CONST].push_back( sProperty );
+					stov( sProperty, vsProperties, "/;" );
+					for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
+						mapAttributes[ATTRIBUTETYPE_Performer_CONST].push_back( *itProperty );
 				}
 				else if ( i->first == "TITLE" )
 				{
@@ -600,7 +602,9 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 				}
 				else if ( i->first == "GENRE" )
 				{
-					mapAttributes[ATTRIBUTETYPE_Genre_CONST].push_back( sProperty );
+					stov( sProperty, vsProperties, "/;" );
+					for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
+						mapAttributes[ATTRIBUTETYPE_Genre_CONST].push_back( *itProperty );
 				}
 				else if ( i->first == "ALBUM" )
 				{
@@ -608,7 +612,8 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 				}
 				else if ( i->first == "TRACKNUMBER" )
 				{
-					mapAttributes[ATTRIBUTETYPE_Track_CONST].push_back( sProperty );
+					stov( sProperty, vsProperties, "/; " );
+					mapAttributes[ATTRIBUTETYPE_Track_CONST].push_back( vsProperties.front() );
 				}
 				else if ( i->first == "DATE" )
 				{
@@ -616,11 +621,15 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 				}
 				else if ( i->first == "COMPOSER" )
 				{
-					mapAttributes[ATTRIBUTETYPE_ComposerWriter_CONST].push_back( sProperty );
+					stov( sProperty, vsProperties, "/;" );
+					for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
+						mapAttributes[ATTRIBUTETYPE_ComposerWriter_CONST].push_back( *itProperty );
 				}
 				else if ( i->first == "LABEL" || (i->first == "ORGANIZATION") )
 				{
-					mapAttributes[ATTRIBUTETYPE_Studio_CONST].push_back( sProperty );
+					stov( sProperty, vsProperties, "/;" );
+					for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
+						mapAttributes[ATTRIBUTETYPE_Studio_CONST].push_back( *itProperty );
 				}
 				else if ( i->first == "TOTALDISCS" )
 				{
@@ -632,8 +641,12 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 					// Media_Plugin/Orbiter/DGs seem to cound Disc_ID as a Track #, *really* screws up track lists.
 					// The data shows properly in the database it is only once it is queried in the DGs
 					std::vector<string> vsDisc;
-					stov(sProperty, vsDisc, "; /");
+					stov(sProperty, vsDisc, "/; ");
 					mapAttributes[ATTRIBUTETYPE_Disc_ID_CONST].push_back( vsDisc.front() );
+					if ( vsDisc.size() > 1 )
+					{
+						mapAttributes[ATTRIBUTETYPE_Number_of_Discs_CONST].push_back( vsDisc.back() );
+					}
 				}
 				else if ( i->first == "COMMENT" )
 				{
