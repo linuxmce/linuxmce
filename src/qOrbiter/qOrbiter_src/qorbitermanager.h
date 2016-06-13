@@ -349,7 +349,6 @@ public:
     int screenSaverTimeout;
     int screenPowerOffTimeout;
 
-
     //ui
     QString currentSkin;
     QString currentSkinURL;
