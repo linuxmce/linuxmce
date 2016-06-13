@@ -141,7 +141,8 @@ function networkSettings($output,$dbADO) {
 	
 	$nonPlutoIP=0;
 	$oldCoreDHCP = $rowDHCP['IK_DeviceData'];
-	if(ereg(',',$oldCoreDHCP)){
+	
+	if(preg_match("/,/", $oldCoreDHCP)){
 		$nonPlutoIP=1;
 		$ipArray=explode(',',$oldCoreDHCP);
 		$coreDHCPArray=explode('-',$ipArray[0]);
@@ -338,6 +339,7 @@ function networkSettings($output,$dbADO) {
 			
 		}
 		$outsideIP = getOutsideIP();
+		
 		
 		$externalInterface=$externalInterfaceArray[0];
 		$internalInterface=$internalInterfaceArray[0];
@@ -1204,7 +1206,7 @@ function networkSettings($output,$dbADO) {
 		$PPPoEData[3]=($_POST['PPPoEIPv6Enabled']?'on':'off');
 		$token = join(',',$PPPoEData);
 	 	$dbADO->Execute("UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=".$GLOBALS['PPPoeData']) 
-	 		or die('ERROR: Invalid query: '.mysql_error());
+	 		or die('ERROR: Invalid query: '.mysqli_error($dbADO));
 
 		// tokenize IPv6 values to put in CORE device data
 		$resRA=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292');
@@ -1215,7 +1217,7 @@ function networkSettings($output,$dbADO) {
 		$ipv6_data[11]= $_POST['enableRA'];
 		$token = join(',',$ipv6_data);
 	 	$dbADO->Execute("UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=292") 
-	 		or die('ERROR: Invalid query: '.mysql_error());
+	 		or die('ERROR: Invalid query: '.mysqli_error($dbADO));
 
 		// tokenize VPN settings to put in CORE device data
 		$resVPN=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=295');
@@ -1231,7 +1233,7 @@ function networkSettings($output,$dbADO) {
 		$VPN_data[2]= $_POST['VPNPSK'];
 		$token = join(',',$VPN_data);
 	 	$dbADO->Execute("UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=295") 
-	 		or die('ERROR: Invalid query: '.mysql_error());
+	 		or die('ERROR: Invalid query: '.mysqli_error($dbADO));
 
 		// NOTE: Please don't reboot the computer before these commands have completed, OK?
 		// NOTE: Well, unless you like breaking /etc/network/interfaces randomly because the mysql server shutdown was faster than the scripts

@@ -1,13 +1,13 @@
 <?php
 
 $pass=""; $user="root"; $db="pluto_media";
- $con= mysql_connect("localhost", $user, $pass); 	 // connection
+$con= mysqli_connect("localhost", $user, $pass); 	 // connection
 
-	if (!$con) { die('Could not Connect'.mysql_error()); //error messaging
+	if (!$con) { die('Could not Connect'.mysqli_error($con)); //error messaging
 	$connMessage="Fail";
 print_r($connMessage);
 	};
-	if ($con) {mysql_select_db("pluto_media") or die(mysql_error()); //connect to media db or error out
+	if ($con) { mysqli_select_db($con, "pluto_media") or die(mysqli_error($con)); //connect to media db or error out
 	$connMessage="Conn Good";
 	};
 
@@ -65,10 +65,10 @@ $sql ="SELECT File_Attribute.FK_File, Picture.PK_Picture, Picture.Extension, Fil
     .$filemarker
     ." && Attribute.FK_AttributeType=".$type;
     
-$cleansql = mysql_real_escape_string($sql);
-$res=mysql_query($cleansql) or die("mysql error");
+$cleansql = mysqli_real_escape_string($sql);
+$res=mysqli_query($cleansql) or die("mysql error");
 
-	while($row = mysql_fetch_array($res)){
+	while($row = mysqli_fetch_array($res)){
 	$file=$row['PK_Picture'].".".$row['Extension'];
 
 	} 

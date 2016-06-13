@@ -6,17 +6,17 @@ $mysqluser="root"; // MySQL-User
 $mysqlpwd=""; // Password
 $mysqldb="lmce_datalog";
 
-$connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
-mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");
+$connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
+mysqli_select_db($connection, $mysqldb) or die("ERROR: could not select database!");
 
-$device = mysql_real_escape_string($_GET['device']);
-$days = mysql_real_escape_string($_GET['days']);
-$color = mysql_real_escape_string($_GET['color']);
-$name = mysql_real_escape_string($_GET['name']);
-$unit = mysql_real_escape_string($_GET['unit']); 
+$device = mysqli_real_escape_string($_GET['device']);
+$days = mysqli_real_escape_string($_GET['days']);
+$color = mysqli_real_escape_string($_GET['color']);
+$name = mysqli_real_escape_string($_GET['name']);
+$unit = mysqli_real_escape_string($_GET['unit']); 
 $keepValue = array(5,9,10); // Units that have the same value until new value i reported
-$startTime = mysql_real_escape_string($_GET['startTime']);
-$endTime = mysql_real_escape_string($_GET['endTime']);
+$startTime = mysqli_real_escape_string($_GET['startTime']);
+$endTime = mysqli_real_escape_string($_GET['endTime']);
 
 if (empty($days)) {
      $days=1;
@@ -51,9 +51,9 @@ if (isset($endTime)) {
      $sql.="AND timestamp < '".$endTime."' ";
 }
 $sql.=" order by timestamp";
-$query=mysql_query($sql);
+$query=mysqli_query($connection, $sql);
 
-$num = mysql_numrows($query); //find number off datapoints for the graph
+$num = mysqli_num_rows($query); //find number off datapoints for the graph
 
 
 // If there is not enough data in the db to create a graph 
@@ -86,7 +86,7 @@ $Dataset =& Image_Graph::factory('dataset');
 // Create the datapoints for the Dataset and the lables ofr x-axis
 $t=0; //Counter
 $skipFirst = ($unit == 10); // Some data require two value to start of (cumulated energy, for instance, where we display the diff between two values)
-while ($datapoint = mysql_fetch_array($query)){
+while ($datapoint = mysqli_fetch_array($query)){
      if ($AxisYName == "") {
           if ( $unit == 10 ) {
 	       $AxisYName = "kW";
@@ -97,13 +97,13 @@ while ($datapoint = mysql_fetch_array($query)){
      // Find previous data point (before the current one)
      if ($t==0){
           $firstDate=date ("Y-m-d H:i:s", strtotime('-'.$days.'days'));
-          $queryLast = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
+          $queryLast = mysqli_query($connection, 'SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
 	       WHERE EK_Device = '.$device.' AND timestamp < "'.$startTime.'" AND `FK_Unit` = '.$unit.' ORDER BY timestamp DESC LIMIT 1');
-	  if (mysql_numrows($queryLast)==0) {
+	  if (mysqli_num_rows($queryLast)==0) {
 	       $prevDatapoint = 0;
 	       $prevDataTime = $startTime;
 	  } else {     
-	       $datapointLast = mysql_fetch_row($queryLast);
+	       $datapointLast = mysqli_fetch_row($queryLast);
 	       $prevDatapoint = $datapointLast[1];
 
 	       $prevDataTime = $datapointLast[2];

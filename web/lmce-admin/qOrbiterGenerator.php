@@ -30,8 +30,8 @@ $mysqlUser = "root";
 $mysqlPass = "";
 $orbiterConfPath = "/var/tmp/" . $deviceID . "conf.xml";
 
-$conn = mysql_connect($server, $mysqlUser, $mysqlPass);
-mysql_select_db("pluto_main", $conn);
+$conn = mysqli_connect($server, $mysqlUser, $mysqlPass);
+mysqli_select_db($conn, "pluto_main");
 
 //installation variable area
 $userArray = array();
@@ -110,7 +110,7 @@ if (getFloorPlanDevices($conn, $doc, $orbiterData)) {
 	//	echo "....done!<br>";
 }
 
-if (mysql_close($conn)) {
+if (mysqli_close($conn)) {
 	//echo "DB closed";
 }
 
@@ -128,12 +128,12 @@ function getFloorplans($conn, $doc, $orbiterData) {
 
 	//	echo "Setting Floorplan...";
 
-	$result = mysql_query($sql, $conn) or die(mysql_error($conn));
+	$result = mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
 	$floorplanElement = $doc -> createElement("Floorplans");
 	$orbiterData -> appendChild($floorplanElement);
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysqli_fetch_array($result)) {
 		$t = $doc -> createElement("Floorplan");
 
 		$attrib2 = $t -> setAttribute("Page", $row['Page']);
@@ -147,25 +147,25 @@ function getFloorplans($conn, $doc, $orbiterData) {
 }
 
 function getFileFormats($conn, $doc, $orbiterData) {
-	if (mysql_select_db("pluto_media", $conn)) {
+	if (mysqli_select_db($conn, "pluto_media")) {
 
 		$sql = "SELECT * FROM `FileFormat` ";
 
 		//	echo "Setting FileFormats Sort List Up...";
 
-		$result = mysql_query($sql, $conn) or die(mysql_error($conn));
+		$result = mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
 		$genreElement = $doc -> createElement("FileFormats");
 		$orbiterData -> appendChild($genreElement);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysqli_fetch_array($result)) {
 			$t = $doc -> createElement("FileFormat");
 			$att1 = $t -> setAttribute("Name", $row['Description']);
 			$att1 = $t -> setAttribute("PK_FileFormat", $row['PK_FileFormat']);
 			$genreElement -> appendChild($t);
 		}
 
-		if (mysql_select_db("pluto_main", $conn)) {
+		if (mysqli_select_db($conn, "pluto_main")) {
 			return true;
 		}
 	}
@@ -174,25 +174,25 @@ function getFileFormats($conn, $doc, $orbiterData) {
 //-----media subtypes------------------------------
 
 function getMediaSubTypes($conn, $doc, $orbiterData) {
-	if (mysql_select_db("pluto_media", $conn)) {
+	if (mysqli_select_db($conn, "pluto_media")) {
 
 		$sql = "SELECT * FROM `MediaSubType` ";
 
 		//	echo "Setting Media SubTypes Sort List Up...";
 
-		$result = mysql_query($sql, $conn) or die(mysql_error($conn));
+		$result = mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
 		$genreElement = $doc -> createElement("MediaSubTypes");
 		$orbiterData -> appendChild($genreElement);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysqli_fetch_array($result)) {
 			$t = $doc -> createElement("MediaSubType");
 			$att1 = $t -> setAttribute("Name", $row['Description']);
 			$att1 = $t -> setAttribute("PK_MediaSubType", $row['PK_MediaSubType']);
 			$genreElement -> appendChild($t);
 		}
 
-		if (mysql_select_db("pluto_main", $conn)) {
+		if (mysqli_select_db($conn, "pluto_main")) {
 			return true;
 		}
 	}
@@ -206,12 +206,12 @@ function getUserArray($conn, $doc, $orbiterData) {
 	FROM  `Users` 
 	LIMIT 0 , 30";
 
-	$result = mysql_query($sql, $conn) or die(mysql_error($conn));
+	$result = mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
 	$uElement = $doc -> createElement("Users");
 	$orbiterData -> appendChild($uElement);
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysqli_fetch_array($result)) {
 		$b = $doc -> createElement($row['UserName']);
 		$attrib1 = $b -> setAttribute("PK_User", $row['PK_Users']);
 		$attrib2 = $b -> setAttribute("HasMailbox", $row['HasMailBox']);
@@ -249,8 +249,8 @@ function getDefaults($conn, $doc, $orbiterData) {
 	$defaultUserSql = "Select * from Device_DeviceData LEFT JOIN Users on 
 Device_DeviceData.IK_DeviceData = Users.PK_Users
  where FK_DeviceData = 3 and FK_Device =" . $_GET['d'];
-	$result = mysql_query($defaultUserSql, $conn) or die(mysql_error($conn));
-	if ($row = mysql_fetch_array($result)) {
+	$result = mysqli_query($conn, $defaultUserSql) or die(mysqli_error($conn));
+	if ($row = mysqli_fetch_array($result)) {
 		$attrib1 = $dElement -> setAttribute("PK_User", $row['IK_DeviceData']);
 		$attrib3 = $dElement -> setAttribute("sPK_User", $row['UserName']);
 
@@ -258,11 +258,11 @@ Device_DeviceData.IK_DeviceData = Users.PK_Users
 
 	//$defaultLocationSql = "Select * from Device_DeviceData where FK_DeviceData = 27 and FK_Device =".$_GET['d'];
 	$defaultLocationSql = "Select * from Device where PK_Device =" . $_GET['d'];
-	$result = mysql_query($defaultLocationSql, $conn) or die(mysql_error($conn));
-	if ($row = mysql_fetch_array($result)) {
+	$result = mysqli_query($conn, $defaultLocationSql) or die(mysqli_error($conn));
+	if ($row = mysqli_fetch_array($result)) {
 
-		$subResult = mysql_query("SELECT * from EntertainArea where FK_Room = '" . $row['FK_Room'] . "'", $conn);
-		$row2 = mysql_fetch_array($subResult);
+		$subResult = mysqli_query($conn, "SELECT * from EntertainArea where FK_Room = '" . $row['FK_Room'] . "'");
+		$row2 = mysqli_fetch_array($subResult);
 
 		$attrib2 = $dElement -> setAttribute("DefaultLocation", $row2['Description']);
 		$attrib2 = $dElement -> setAttribute("DefaultEA", $row2['PK_EntertainArea']);
@@ -283,12 +283,12 @@ function getRooms($conn, $doc, $orbiterData) {
 	        Left Join EntertainArea On Room.PK_Room = EntertainArea.FK_Room
                 Left Join Icon On FK_Icon = PK_Icon ";
 
-	$result = mysql_query($sql, $conn) or die(mysql_error($conn));
+	$result = mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
 	$rElement = $doc -> createElement("Rooms");
 	$orbiterData -> appendChild($rElement);
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysqli_fetch_array($result)) {
 		$desc = $row['PK_Description'];
 		$r = $doc -> createElement("node");
 
@@ -326,8 +326,8 @@ function getLightingScenarios($conn, $doc, $orbiterData) {
 	$lightingScenarioElement = $doc -> createElement("LightingScenarios");
 	$orbiterData -> appendChild($lightingScenarioElement);
 
-	$roomResult = mysql_query($locationSql);
-	while ($row = mysql_fetch_array($roomResult)) {
+	$roomResult = mysqli_query($conn, $locationSql);
+	while ($row = mysqli_fetch_array($roomResult)) {
 		$lightlocationitem = $doc -> createElement("Room");
 		$locationAttribute1 = $lightlocationitem -> setAttribute("int", $row['PK_Room']);
 		$locationAttribute2 = $lightlocationitem -> setAttribute("EAstring", $row['Description']);
@@ -347,9 +347,9 @@ function getLightingScenarios($conn, $doc, $orbiterData) {
      where CommandGroup.FK_Array = 1 and Room.PK_Room=" . $row['PK_Room'] . " and CommandGroup.Disabled = 0 
      Order By CommandGroup_Room.Sort";
 
-		$result = mysql_query($autoGeneratedSql);
+		$result = mysqli_query($conn, $autoGeneratedSql);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysqli_fetch_array($result)) {
 
 			$r = $doc -> createElement("LightingButton");
 
@@ -381,18 +381,18 @@ function getLightingScenarios($conn, $doc, $orbiterData) {
 
 //------------------===========================--------------------------------genres------------------
 function getGenres($conn, $doc, $orbiterData) {
-	if (mysql_select_db("pluto_media", $conn)) {
+	if (mysqli_select_db($conn, "pluto_media")) {
 
 		$sql = "SELECT * FROM `Attribute` WHERE FK_AttributeType = 8";
 
 		//	echo "Setting Genre List Up...";
 
-		$result = mysql_query($sql, $conn) or die(mysql_error($conn));
+		$result = mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
 		$genreElement = $doc -> createElement("GenreList");
 		$orbiterData -> appendChild($genreElement);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysqli_fetch_array($result)) {
 			$t = $doc -> createElement("GenreNode");
 			$att1 = $t -> setAttribute("Name", $row['Name']);
 			$att1 = $t -> setAttribute("FK_AttributeType", $row['FK_AttributeType']);
@@ -400,7 +400,7 @@ function getGenres($conn, $doc, $orbiterData) {
 			$genreElement -> appendChild($t);
 		}
 
-		if (mysql_select_db("pluto_main", $conn)) {
+		if (mysqli_select_db($conn, "pluto_main")) {
 			return true;
 		}
 	}
@@ -408,25 +408,25 @@ function getGenres($conn, $doc, $orbiterData) {
 
 //-----attributes for sort----------------------------------------------------------
 function getSortingViews($conn, $doc, $orbiterData) {
-	if (mysql_select_db("pluto_media", $conn)) {
+	if (mysqli_select_db($conn, "pluto_media")) {
 
 		$sql = "SELECT * FROM `AttributeType` ";
 
 		//	echo "Setting Attribute Sort List Up...";
 
-		$result = mysql_query($sql, $conn) or die(mysql_error($conn));
+		$result = mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
 		$genreElement = $doc -> createElement("AttributeList");
 		$orbiterData -> appendChild($genreElement);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysqli_fetch_array($result)) {
 			$t = $doc -> createElement("Attribute");
 			$att1 = $t -> setAttribute("Name", $row['Description']);
 			$att1 = $t -> setAttribute("PK_AttributeType", $row['PK_AttributeType']);
 			$genreElement -> appendChild($t);
 		}
 
-		if (mysql_select_db("pluto_main", $conn)) {
+		if (mysqli_select_db($conn, "pluto_main")) {
 			return true;
 		}
 	}
@@ -442,8 +442,8 @@ function getMediaScenarios($conn, $doc, $orbiterData) {
 
 	$orbiterData -> appendChild($mediaScenarioElement);
 
-	$roomResult = mysql_query($locationSql);
-	while ($row = mysql_fetch_array($roomResult)) {
+	$roomResult = mysqli_query($conn, $locationSql);
+	while ($row = mysqli_fetch_array($roomResult)) {
 		$mediaLocationItem = $doc -> createElement("Room");
 		$locationAttribute1 = $mediaLocationItem -> setAttribute("int", $row['FK_Room']);
 		$locationAttribute2 = $mediaLocationItem -> setAttribute("EAstring", $row['Description']);
@@ -459,9 +459,9 @@ function getMediaScenarios($conn, $doc, $orbiterData) {
      CommandGroup on CommandGroup_EntertainArea.FK_CommandGroup = CommandGroup.PK_CommandGroup      
      where CommandGroup.FK_Array =5 and CommandGroup.Disabled = 0 and FK_EntertainArea = " . $row['PK_EntertainArea'] . " Order By CommandGroup_EntertainArea.Sort";
 
-		$result = mysql_query($autoGeneratedSql);
+		$result = mysqli_query($conn, $autoGeneratedSql);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysqli_fetch_array($result)) {
 
 			$r = $doc -> createElement("MediaButton");
 
@@ -499,8 +499,8 @@ function getClimateScenarios($conn, $doc, $orbiterData) {
 	$climateScenarioElement = $doc -> createElement("ClimateScenarios");
 	$orbiterData -> appendChild($climateScenarioElement);
 
-	$climateresult = mysql_query($locationSql);
-	while ($row = mysql_fetch_array($climateresult)) {
+	$climateresult = mysqli_query($conn, $locationSql);
+	while ($row = mysqli_fetch_array($climateresult)) {
 		$climateLocationItem = $doc -> createElement("ClimateRoom");
 		$locationAttribute1 = $climateLocationItem -> setAttribute("int", $row['PK_Room']);
 		$locationAttribute2 = $climateLocationItem -> setAttribute("EAstring", $row['Description']);
@@ -516,9 +516,9 @@ function getClimateScenarios($conn, $doc, $orbiterData) {
      Room on CommandGroup_Room.FK_Room = Room.PK_Room 
      where CommandGroup.FK_Array = 2 and Room.PK_Room=" . $row['PK_Room'];
 
-		$result = mysql_query($autoGeneratedSql);
+		$result = mysqli_query($conn, $autoGeneratedSql);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysqli_fetch_array($result)) {
 
 			$r = $doc -> createElement("ClimateButton");
 			$att1 = $r -> setAttribute("FK_Room", $row['FK_Room']);
@@ -558,9 +558,9 @@ function getTelecomScenarios($conn, $doc, $orbiterData) {
 	$telecomScenarioElement = $doc -> createElement("TelecomScenarios");
 	$orbiterData -> appendChild($telecomScenarioElement);
 
-	$result = mysql_query($locationSql);
+	$result = mysqli_query($conn, $locationSql);
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysqli_fetch_array($result)) {
 		$telecomLocationItem = $doc -> createElement("TelecomRoom");
 		$locationAttribute1 = $telecomLocationItem -> setAttribute("int", $row['PK_Room']);
 		$locationAttribute2 = $telecomLocationItem -> setAttribute("EAstring", $row['Description']);
@@ -576,8 +576,8 @@ function getTelecomScenarios($conn, $doc, $orbiterData) {
      Room on CommandGroup_Room.FK_Room = Room.PK_Room 
      where CommandGroup.FK_Array = 4 and Room.PK_Room=" . $row['PK_Room'];
 
-		$result2 = mysql_query($autoGeneratedSql);
-		while ($row = mysql_fetch_array($result2)) {
+		$result2 = mysqli_query($conn, $autoGeneratedSql);
+		while ($row = mysqli_fetch_array($conn, $result2)) {
 			$r = $doc -> createElement("TelecomButton");
 			$att1 = $r -> setAttribute("FK_Room", $row['PK_Room']);
 			$att2 = $r -> setAttribute("FK_CommandGroup", $row['FK_CommandGroup']);
@@ -605,9 +605,9 @@ function getSecurityScenarios($conn, $doc, $orbiterData) {
 	$securityScenarioElement = $doc -> createElement("SecurityScenarios");
 	$orbiterData -> appendChild($securityScenarioElement);
 
-	$result = mysql_query($locationSql);
+	$result = mysqli_query($conn, $locationSql);
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysqli_fetch_array($result)) {
 		$securityLocationItem = $doc -> createElement("SecurityRoom");
 		$locationAttribute1 = $securityLocationItem -> setAttribute("int", $row['PK_Room']);
 		$locationAttribute2 = $securityLocationItem -> setAttribute("EAstring", $row['Description']);
@@ -623,8 +623,8 @@ function getSecurityScenarios($conn, $doc, $orbiterData) {
      Room on CommandGroup_Room.FK_Room = Room.PK_Room 
      where CommandGroup.FK_Array = 3 and Room.PK_Room=" . $row['PK_Room'];
 
-		$result2 = mysql_query($autoGeneratedSql);
-		while ($row = mysql_fetch_array($result2)) {
+		$result2 = mysqli_query($autoGeneratedSql);
+		while ($row = mysqli_fetch_array($result2)) {
 			$r = $doc -> createElement("SecurityButton");
 			$att1 = $r -> setAttribute("FK_Room", $row['PK_Room']);
 			$att2 = $r -> setAttribute("FK_CommandGroup", $row['FK_CommandGroup']);
@@ -661,9 +661,9 @@ function getFloorPlanDevices($conn, $doc, $orbiterData) {
 
         Where ddd1.FK_DeviceData = 10 and ddd2.FK_DeviceData = 11 ORDER BY FK_Room;  ";
 
-	$result = mysql_query($sql);
+	$result = mysqli_query($conn, $sql);
 	$i = 0;
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysqli_fetch_array($result)) {
 
 		$fp = $doc -> createElement("FPDevice");
 		$att1 = $fp -> setAttribute("Name", $row['Description']);
@@ -680,9 +680,9 @@ function getFloorPlanDevices($conn, $doc, $orbiterData) {
 	
 	$sql = "select PK_EntertainArea, Description, FloorplanInfo, FK_FloorplanObjectType 
 		       From EntertainArea where FloorplanInfo IS NOT NULL AND FK_FloorplanObjectType IS NOT NULL";
-	$result = mysql_query($sql);
+	$result = mysqli_query($conn, $sql);
 	$i = 0;
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysqli_fetch_array($result)) {
 		$fp = $doc -> createElement("FPDevice");
 		$att1 = $fp -> setAttribute("Name", $row['Description']);
 		$att2 = $fp -> setAttribute("Device", $row['PK_EntertainArea']);
@@ -702,21 +702,21 @@ function getMountPounts() {
 	$mysqlUser = "root";
 	$mysqlPass = "";
 
-	$conn = mysql_connect($server, $mysqlUser, $mysqlPass);
+	$conn = mysqli_connect($server, $mysqlUser, $mysqlPass);
 	if ($conn) {
 		//	echo "Connection!";
 	}
 
-	if (mysql_select_db("pluto_main", $conn)) {
+	if (mysqli_select_db($conn, "pluto_main")) {
 		//	echo "found db";
 	}
 
 	$query = 'select *from Device where FK_DeviceTemplate=-202 OR FK_DeviceTemplate=11 OR FK_DeviceTemplate=1850 OR FK_DeviceTemplate=1790 OR FK_DeviceTemplate=1768  OR FK_DeviceTemplate=1769;';
 	$deviceArray = array();
 
-	$res = mysql_query(mysql_real_escape_string($query), $conn) or die(mysql_error($conn));
+	$res = mysqli_query($conn, mysqli_real_escape_string($query)) or die(mysqli_error($conn));
 	$i = 0;
-	while ($row = mysql_fetch_array($res)) {
+	while ($row = mysqli_fetch_array($res)) {
 		$deviceArray[] = array("Description" => $row['Description'], "Device" => $row["PK_Device"]);
 	}
 
@@ -735,12 +735,12 @@ function getCommandParameters($commandNumber) {
 	$mysqlUser = "root";
 	$mysqlPass = "";
 
-	$conn = mysql_connect($server, $mysqlUser, $mysqlPass);
+	$conn = mysqli_connect($server, $mysqlUser, $mysqlPass);
 	if ($conn) {
 		//      echo "Connection!";
 	}
 
-	if (mysql_select_db("pluto_main", $conn)) {
+	if (mysqli_select_db($conn, "pluto_main")) {
 		//      echo "found db";
 	}
 
@@ -748,9 +748,9 @@ function getCommandParameters($commandNumber) {
 
 	$paramArray = array();
 	$paramArray["device"] = array("device" => $_GET["idx"]);
-	$res = mysql_query(mysql_real_escape_string($sql), $conn) or die(mysql_error($conn));
+	$res = mysqli_query($conn, mysqli_real_escape_string($sql)) or die(mysqli_error($conn));
 	$p1Array = array();
-	while ($row = mysql_fetch_array($res)) {
+	while ($row = mysqli_fetch_array($res)) {
 
 		$p1Array[] = array("type" => $row["ParamDesc"], "Command" => $row["FK_Command"], "CommandParameter" => $row["FK_CommandParameter"], "CommandHint" => $row["cptype"], "CommandDescription" => $row["Description"]);
 	}
