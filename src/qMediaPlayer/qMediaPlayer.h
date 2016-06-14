@@ -23,6 +23,7 @@
 //<-dceag-d-e->
 #include <QTime>
 #include <QString>
+class QTimer;
 
 class MediaManager;
 
@@ -991,6 +992,7 @@ public:
 
     public slots:
         //playback info changed event
+        void handleDelayedSeek(int seekTime);
         void updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen);
 
         void confirmMediaStarted(QString description );
@@ -1038,7 +1040,7 @@ public:
         string s_totalTime;
         string s_audioTracks;
         string s_subTitleTracks;
-
+        QTimer *seekDelayTimer;
 
     private:
         string getDcePosition();
