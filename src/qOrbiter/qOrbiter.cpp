@@ -2334,6 +2334,8 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     QVariantList d;
     DCE::DeviceData_Base * fpDevice = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(device);
 
+    if(!fpDevice)
+        return;
 
     for (map<int, string>::iterator it = fpDevice->m_mapCommands.begin(); it!=fpDevice->m_mapCommands.end(); ++it){
         QVariantMap l;
@@ -2990,20 +2992,6 @@ void DCE::qOrbiter::stop_AV()
     SendCommand(endMedia);
 }
 
-
-void DCE::qOrbiter::moveMedia(QString eas, int streamID)
-{
-    CMD_MH_Move_Media move_media(m_dwPK_Device, iMediaPluginID, streamID, eas.toStdString());
-    string pResponse;
-    if(SendCommand(move_media, &pResponse) && pResponse=="OK")
-    {
-        emit commandResponseChanged("Move media");
-    }
-    else
-    {
-        emit commandResponseChanged("Move media command failed");
-    }
-}
 
 
 void qOrbiter::checkTimeCode(int npDevice)

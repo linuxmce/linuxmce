@@ -1976,8 +1976,6 @@ public slots:
 
     void stop_AV();
 
-    void moveMedia(QString eas, int streamID);
-
     void checkTimeCode(int npDevice);
     void getStreamingVideo();
 
