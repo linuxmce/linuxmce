@@ -66,6 +66,7 @@ public slots:
     void setEaTimeCode(int room, QMap<long, std::string> data);
     bool addTimeCodeTrack(QString ea, int intEa, int room);
     Q_INVOKABLE QList<EntertainAreaTimeCode *> allTimeCode();
+    Q_INVOKABLE QVariantList eaList();
 
     void setCurrentItem(int i) {currentItem=i;emit locationChanged();}
     int getCurrentItem() {return currentItem;}

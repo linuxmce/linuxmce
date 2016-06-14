@@ -10,10 +10,17 @@ Panel{
     headerTitle:MediaHelper.translateType(manager.i_current_mediaType)
 
     Component{
+        id:transferMediaPrompt
+        NowPlayingTransferMedia {
+            id: transferMedia
+        }
+    }
+
+    Component{
         id:standardButtons
         Row{
-          width: children.length*Style.appButtonWidth
-          height:parent.height
+            width: children.length*Style.appButtonWidth
+            height:parent.height
             StyledButton{
                 id:resend
                 height:Style.appNavigation_panelHeight
@@ -58,14 +65,20 @@ Panel{
                     }
                 }
             }
+            StyledButton{
+                id:transfer
+                height:Style.appNavigation_panelHeight
+                buttonText: qsTr("Transfer", "Move media")
+                onActivated: qmlRoot.createPopup(transferMediaPrompt)
+            }
         }
     }
 
     Component{
         id:dvdMenuButtons
         Row{
-        height: parent.height
-        width: 400
+            height: parent.height
+            width: 400
             StyledButton{
                 id:resend
                 height:Style.appNavigation_panelHeight
@@ -103,53 +116,53 @@ Panel{
 
 
 
-//    buttonContent:[
+    //    buttonContent:[
 
-//        StyledButton{
-//            id:resend
-//            height:Style.appNavigation_panelHeight
+    //        StyledButton{
+    //            id:resend
+    //            height:Style.appNavigation_panelHeight
 
-//            buttonText: qsTr("Resend AV", "Resend AV Commands")
-//            onActivated: manager.currentScreen="Screen_38.qml"
-//        },
+    //            buttonText: qsTr("Resend AV", "Resend AV Commands")
+    //            onActivated: manager.currentScreen="Screen_38.qml"
+    //        },
 
-//        StyledButton{
-//            id:power_btn
-//            height:Style.appNavigation_panelHeight
-//            buttonText: qsTr("Power Off", "Turn off Device")
-//            onConfirm:{
-//                manager.exitMediaMenu()
-//                manager.stopMedia()
-//            }
-//        },
+    //        StyledButton{
+    //            id:power_btn
+    //            height:Style.appNavigation_panelHeight
+    //            buttonText: qsTr("Power Off", "Turn off Device")
+    //            onConfirm:{
+    //                manager.exitMediaMenu()
+    //                manager.stopMedia()
+    //            }
+    //        },
 
-//        StyledButton{
-//            id:options
-//            height:Style.appNavigation_panelHeight
-//            buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
-//            onActivated: {
-//                if(contentItem.state==="options"){
-//                    contentItem.resetState()
-//                } else {
-//                    contentItem.state="options"
-//                }
-//            }
-//        },
+    //        StyledButton{
+    //            id:options
+    //            height:Style.appNavigation_panelHeight
+    //            buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
+    //            onActivated: {
+    //                if(contentItem.state==="options"){
+    //                    contentItem.resetState()
+    //                } else {
+    //                    contentItem.state="options"
+    //                }
+    //            }
+    //        },
 
-//        StyledButton{
-//            id:btns
+    //        StyledButton{
+    //            id:btns
 
-//            height:Style.appNavigation_panelHeight
-//            buttonText: qsTr("Buttons", "Additional Media Buttons")
-//            onActivated: {
-//                if(contentItem.state=="buttongrid"){
-//                    contentItem.resetState()
-//                }else {
-//                    contentItem.state="buttongrid"
-//                }
-//            }
-//        }
-//    ]
+    //            height:Style.appNavigation_panelHeight
+    //            buttonText: qsTr("Buttons", "Additional Media Buttons")
+    //            onActivated: {
+    //                if(contentItem.state=="buttongrid"){
+    //                    contentItem.resetState()
+    //                }else {
+    //                    contentItem.state="buttongrid"
+    //                }
+    //            }
+    //        }
+    //    ]
 
     content: Item {
         id:contentItem
@@ -162,7 +175,7 @@ Panel{
             if(manager.currentScreen=="Screen_50.qml"){
                 generic_playback_panel.buttonControls = dvdMenuButtons
             } else {
-                 generic_playback_panel.buttonControls = standardButtons
+                generic_playback_panel.buttonControls = standardButtons
             }
 
             switch(manager.i_current_mediaType){

@@ -550,7 +550,8 @@ DISTFILES += \
     qml/skins/default/components/FloorplanSetTemp.qml \
     qml/skins/default/components/FloorplanHeatCool.qml \
     qml/skins/default/components/FloorplanDefaultControl.qml \
-    ../docs/RPI-Dev-Setup.txt
+    ../docs/RPI-Dev-Setup.txt \
+    qml/skins/default/components/NowPlayingTransferMedia.qml
 
 
 
