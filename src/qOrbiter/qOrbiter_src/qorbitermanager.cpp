@@ -106,6 +106,9 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_dceRequestNo(1),
     m_useQueueInsteadOfInstantPlay(false), m_bIsOSD(isOsd)
 {
+    m_mediaHelper = new DceMediaHelper(qOrbiter_ptr, this);
+    connect(m_mediaHelper, &DceMediaHelper::forwardDceCommand, this, &qorbiterManager::sendDceCommand);
+
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -2510,6 +2513,7 @@ void qorbiterManager::setupContextObjects()
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", mp_securityVideo);
     m_appEngine->rootContext()->setContextProperty("securityvideo", mp_securityVideo);
 
+    m_appEngine->rootContext()->setContextProperty("mediaHelper", m_mediaHelper);
 
 
 }

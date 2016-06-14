@@ -68,7 +68,7 @@
 #include "QKeyEvent"
 #include <QProcess>
 #include <QtXml/QDomDocument>
-
+#include "managerHelpers/dcemediahelper.h"
 
 
 #ifdef ANDROID
@@ -129,9 +129,9 @@
 
 #include <defineObjects/linuxmcedata.h>
 #include "Gen_Devices/AllCommandsRequests.h"
-
 #include <qOrbiter/qOrbiter_src/DCECommand.h>
 #include <qOrbiter/qOrbiter.h>
+
 class EPGChannelList;
 class basicImageProvider;
 
@@ -410,6 +410,9 @@ public:
 
     //floorplans
     FloorPlanModel *floorplans;
+
+    //Helper classes
+    DceMediaHelper *m_mediaHelper;
 
     /*
 datagrid variables
