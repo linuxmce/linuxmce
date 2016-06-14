@@ -24,38 +24,8 @@ StyledScreen {
 
     Component{
         id:moveFiles
-        GenericPopup{
-            id:moveFilesToBox
-            anchors.fill: parent
-            title:"Select location to move file to"
-            content:Item{
-                Rectangle{
-                    anchors.fill: parent
-                    color:"grey"
-                }
-
-                GenericListModel{
-                    id:dir_listing
-                    dataGrid: DataGrids.Directory_Listing
-                    dataGridLabel: "Directories"
-                    dataGridOptions: "/home/public/data"
-                    label: "Directories"
-                    anchors.fill: parent
-                    delegate: Rectangle{
-                        width: parent.width
-                        height: 50
-                        color:"black"
-                        StyledText{
-                            text:description
-                            color:"red"
-                        }
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {dir_listing.dataGridOptions=value; dir_listing.refresh() }
-                        }
-                    }
-                }
-            }
+        MoveFilesPrompt {
+            id: moveFilesToBox
         }
     }
 
