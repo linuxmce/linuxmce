@@ -5,13 +5,8 @@ Item{
     id:genericPopup
     anchors.fill: parent
     focus: true
-    Connections{
-        target:qmlRoot
-        onClearDialogs:{
-            close();
-        }
-    }
-
+    Connections{ target:qmlRoot ; onClearDialogs:{  close(); }  }
+    Connections{ target:manager; onScreenChange: { close();  } }
     function close(){
         layout.forceActiveFocus();
         genericPopup.destroy()

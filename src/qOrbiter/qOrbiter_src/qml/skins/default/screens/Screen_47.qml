@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.enums 1.0
+import org.linuxmce.grids 1.0
 import "../components"
 import "../."
 
@@ -10,7 +11,7 @@ StyledScreen {
         if(activeFocus) innerContent.forceActiveFocus();
     }
     onScreenOpening: {
-         manager.setStringParam(0, manager.q_mediaType)
+        manager.setStringParam(0, manager.q_mediaType)
     }
 
 
@@ -18,6 +19,43 @@ StyledScreen {
         id:filedetailscomp
         FileDetails {
             id: fileDetails
+        }
+    }
+
+    Component{
+        id:moveFiles
+        GenericPopup{
+            id:moveFilesToBox
+            anchors.fill: parent
+            title:"Select location to move file to"
+            content:Item{
+                Rectangle{
+                    anchors.fill: parent
+                    color:"grey"
+                }
+
+                GenericListModel{
+                    id:dir_listing
+                    dataGrid: DataGrids.Directory_Listing
+                    dataGridLabel: "Directories"
+                    dataGridOptions: "/home/public/data"
+                    label: "Directories"
+                    anchors.fill: parent
+                    delegate: Rectangle{
+                        width: parent.width
+                        height: 50
+                        color:"black"
+                        StyledText{
+                            text:description
+                            color:"red"
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {dir_listing.dataGridOptions=value; dir_listing.refresh() }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -61,6 +99,7 @@ StyledScreen {
                 right:parent.right
             }
         }
+
         MediaOptionRow {
             id: option_row
         }

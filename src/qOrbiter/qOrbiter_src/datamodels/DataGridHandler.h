@@ -90,6 +90,12 @@ public:
          return new EPGItemClass(parent);
         } else if(PK_DataGrid == DATAGRID_Discs_CONST){
             return new DiskMediaItem(parent);
+        } else if (PK_DataGrid == DATAGRID_Directory_Listing_CONST){
+
+            GenericModelItem* pItem = new GenericModelItem(parent);
+            pItem->setRoleNames(getRoleNames(PK_DataGrid));
+
+            return pItem;
         }
         else {
             // uses generic model item
@@ -111,17 +117,22 @@ public:
     {
 
         DataGridCell *pCell = pTable->GetData(col, row);
+
         if(!pCell) {
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "LoadDataFromTable() pCell == NULL ! row = %d, col = %d", row, col);
             return;
         }
         /*
+        qDebug() << "Get Text::" << pCell->GetText();
+        qDebug() << "Get Value::" << pCell->GetValue();
        qDebug() << "Cell Values-------------------------------------------";
+       qDebug() << "AttributeMap count " << pCell->m_AttributesLength;
         for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
+
             qDebug() << i->first.c_str() <<"::"<< i->second.c_str();
         }
-        qDebug() << "End Cell Values-------------------------------------------";
- */
+        qDebug() << "End Cell Values-------------------------------------------";*/
+
         if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
             const char *pPath = pCell->GetImagePath();
             QString fk_file;
@@ -239,7 +250,7 @@ public:
             // Default, get one cell use text and value
 
             pItem->setData(ValueRole, pCell->GetValue());
-            pItem->setData(DescriptionRole, QString::fromUtf8(pCell->GetText()));          
+            pItem->setData(DescriptionRole, QString::fromUtf8(pCell->GetText()));
         }
     }
 

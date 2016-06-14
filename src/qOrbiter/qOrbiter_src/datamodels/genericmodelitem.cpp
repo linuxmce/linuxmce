@@ -25,6 +25,7 @@ QVariant GenericModelItem::data(int role) const
         return m_data[role];
     } else {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericModelItem.data : no such data role");
+        qWarning () << 'invalid role';
         return QVariant();
     }
 }
@@ -33,7 +34,7 @@ bool GenericModelItem::setData(int role, const QVariant &value)
 {
   //    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericModelItem.setData");
     if(!m_roleNames.contains(role)){
-        qDebug() << "Data Role ";
+        qDebug() << "Data Role invalid ";
         return false;
     }
 

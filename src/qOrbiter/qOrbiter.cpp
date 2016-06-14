@@ -3017,8 +3017,6 @@ void qOrbiter::checkTimeCode(int npDevice)
     string sIPAddress =pDevice->m_sIPAddress;
     string defaultPort= m_pEvent->GetDeviceDataFromDatabase(pDevice->m_dwPK_Device, DEVICEDATA_Port_CONST);
 
-
-
     qWarning() << "1st pass result is ==>" << sIPAddress.c_str();
     if( sIPAddress.empty() )
     {
@@ -3096,8 +3094,6 @@ void qOrbiter::getStreamingVideo()
     int grabData_size=0;
     string sFormat ="png";
     string grabResponse="";
-
-    //QApplication::processEvents(QEventLoop::AllEvents);
 
     CMD_Get_Video_Frame grabVideoFrame( m_dwPK_Device, m_dwPK_Device_NowPlaying, "0", this->internal_streamID, 800, 800, &grabData, &grabData_size, &sFormat );
 
