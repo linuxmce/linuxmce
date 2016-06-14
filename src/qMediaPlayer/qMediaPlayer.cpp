@@ -31,6 +31,7 @@ using namespace DCE;
 #include <mediamanager.h>
 #include <QDebug>
 #include <QNetworkInterface>
+#include <QTimer>
 //<-dceag-const-b->
 
 // The primary constructor when the class is created as a stand-alone device
@@ -52,6 +53,10 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *man
         setConnectionStatus(false);
     }
     qWarning() << Q_FUNC_INFO << "end";
+    seekDelayTimer = new QTimer(this);
+    seekDelayTimer->setSingleShot(true);
+
+
 }
 
 //<-dceag-const2-b->
@@ -377,6 +382,12 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     qWarning() << "Parm #42 - MediaPosition=" << QString::fromStdString(sMediaPosition) << endl;
     qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str() << endl;
 
+
+    QString p1 = QString::fromStdString(sMediaPosition);
+    int posStart = p1.indexOf("POS:")+4;
+    int posEnd = p1.indexOf(" TITLE:");
+    QString p2 = p1.mid(posStart, posEnd-posStart);
+
     QString deviceNumber;
     QString path;
     QString finishedPath;
@@ -459,7 +470,17 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     }
 
     //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
-    emit startPlayback();
+    emit startPlayback();   
+
+    if(p2.toInt() != 0){
+
+         connect(seekDelayTimer, &QTimer::timeout, [=](){
+             handleDelayedSeek( p2.length() < 4 ? p2.toInt() :  p2.toInt()/1000 );
+         }  );
+      QMetaObject::invokeMethod(seekDelayTimer, "start");
+    }
+
+
     sCMD_Result="OK";
 }
 
@@ -1694,13 +1715,13 @@ string qMediaPlayer::getDcePosition()
 {
     string dcePosition;
 
-    QString currentTime = QString::number( (mp_manager->currentTime /1000)  );
+    QString currentTime = QString::number( (mp_manager->currentTime *1000)  );
     dcePosition+=" CHAPTER:0";
     dcePosition+=" POS:"+currentTime.toStdString();
     dcePosition+=" TITLE:0";
     dcePosition+=" SUBTITLE:-1";
     dcePosition+=" AUDIO:-1";
-    dcePosition+=" TOTAL:"+StringUtils::itos( (mp_manager->totalTime / 1000) );
+    dcePosition+=" TOTAL:"+StringUtils::itos( (mp_manager->totalTime * 1000) );
 
     return dcePosition;
 
@@ -1713,6 +1734,12 @@ int qMediaPlayer::getCurrentFkFileType() const
 void qMediaPlayer::setCurrentFkFileType(int currentFkFileType)
 {
     m_currentFkFileType = currentFkFileType;
+}
+
+void qMediaPlayer::handleDelayedSeek(int seekTime)
+{
+    qDebug() << Q_FUNC_INFO << seekTime;
+    jumpToStreamPosition(seekTime);
 }
 
 int qMediaPlayer::getCurrentSpeed() const
@@ -2018,6 +2045,7 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 
 void qMediaPlayer::updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen)
 {
+
 
     string mst = mediaSubtitle.toStdString();
     string mt = mediaTitle.toStdString();
