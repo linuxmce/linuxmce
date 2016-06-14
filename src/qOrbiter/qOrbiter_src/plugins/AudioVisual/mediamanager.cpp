@@ -457,7 +457,6 @@ void MediaManager::processSocketdata()
 void MediaManager::playbackInfoUpdated(QString mediaTitle, QString mediaSubTitle, QString name, int screen)
 {
     qDebug() << Q_FUNC_INFO ;
-
     //mediaPlayer->updateMetadata(playbackData);
     mediaPlayer->updateMetadata(mediaTitle, mediaSubTitle, name, screen);
 }

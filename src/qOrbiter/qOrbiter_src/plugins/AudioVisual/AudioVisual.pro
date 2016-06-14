@@ -1,6 +1,6 @@
 TEMPLATE = lib
 TARGET = AudioVisual
-
+CONFIG+= c++11
 CONFIG += qt plugin console
 CONFIG += warn_off
 CONFIG -= android_install

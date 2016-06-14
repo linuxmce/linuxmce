@@ -288,5 +288,7 @@
         <file>qml/skins/default/+medium/MainLayout.qml</file>
         <file>qml/skins/default/+xlarge/Main.qml</file>
         <file>qml/skins/default/components/StyledOSDScreen.qml</file>
+        <file>qml/skins/default/components/NowPlayingTransferMedia.qml</file>
+        <file>qml/skins/default/components/MoveFilesPrompt.qml</file>
     </qresource>
 </RCC>

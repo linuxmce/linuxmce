@@ -152,7 +152,7 @@ Item{
         autoPlay: true
         autoLoad: true
 
-        onBufferProgressChanged: console.log("Buffer progress "+bufferProgress)
+//        onBufferProgressChanged: console.log("Buffer progress "+bufferProgress)
         function checkMetaData(){
 
             console.log("Checking Metadata")
