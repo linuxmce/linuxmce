@@ -63,6 +63,10 @@ GenericPopup{
                 width: parent.width
                 height: 60
                 color:"black"
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {dir_listing.dataGridOptions=(value+"\n~MT"); dir_listing.refresh() }
+                }
                 Column{
                    height: parent.height
                    width: parent.width *.65
@@ -77,12 +81,13 @@ GenericPopup{
                        buttonText: qsTr("Select this directory")
                        height: parent.height/2
                        width: parent.width
+                       onActivated: {
+                           var target = filedetailsclass.path+filedetailsclass.file
+                           console.log("moving file "+ target)
+                           console.log("to "+value)
+                           mediaHelper.moveFile(target, value)
+                       }
                    }
-                }
-
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: {dir_listing.dataGridOptions=(value+"\n~MT"); dir_listing.refresh() }
                 }
             }
         }
