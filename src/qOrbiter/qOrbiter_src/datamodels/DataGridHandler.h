@@ -175,8 +175,6 @@ public:
             (static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
         } else if(PK_DataGrid == DATAGRID_EPG_Grid_CONST || PK_DataGrid == DATAGRID_EPG_All_Shows_CONST) {
 
-
-
             QString channelIndex = QString::fromStdString(pCell->m_mapAttributes_Find("Number"));
             QString timeSlot = QString::fromStdString(pCell->m_mapAttributes_Find("Time"));
             QString startTime = QString::fromStdString(pCell->m_mapAttributes_Find("StartTime"));
@@ -195,7 +193,6 @@ public:
                 sourceName = srcInfo.at(1);
 
             QString program;
-            int index = 0;
 
             QString tmp = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str());
             QString channelName;
