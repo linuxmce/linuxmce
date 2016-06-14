@@ -11,6 +11,11 @@ GenericPopup{
     content:Item{
         id:move_content
 
+         function moveUp(){
+            dir_listing.dataGridOptions=(getStartingDirectory()+"\n~MT");
+             dir_listing.refresh()
+         }
+
         function getStartingDirectory(){
             var ret="/"
             var t = Number(manager.q_mediaType)
@@ -31,7 +36,7 @@ GenericPopup{
 
             default: ret="/home/public/data/"; break;
             }
-
+            ret+="\n~MT"
             console.log( "Returning starting directory for mediatype ->"+ String(manager.q_mediaType) + ret)
             return ret;
         }
@@ -47,20 +52,50 @@ GenericPopup{
             dataGridLabel: "Directories"
             dataGridOptions: move_content.getStartingDirectory();
             label: "Directories"
-            anchors.fill: parent
+            anchors{
+                left:parent.left
+                right:parent.right
+                bottom:dir_up.top
+                top:parent.top
+            }
+
             delegate: Rectangle{
                 width: parent.width
                 height: 60
                 color:"black"
-                StyledText{
-                    text:value+"\n"+description
-                    color:"red"
+                Column{
+                   height: parent.height
+                   width: parent.width *.65
+                   anchors.left: parent.left
+
+                    StyledText{
+                        text:qsTr("Directory: ")+value
+                        color:"white"
+                    }
+
+                   StyledButton{
+                       buttonText: qsTr("Select this directory")
+                       height: parent.height/2
+                       width: parent.width
+                   }
                 }
+
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {dir_listing.dataGridOptions=value; dir_listing.refresh() }
+                    onClicked: {dir_listing.dataGridOptions=(value+"\n~MT"); dir_listing.refresh() }
                 }
             }
+        }
+        LargeStyledButton{
+            id:dir_up
+            anchors{
+                left:parent.left
+                right:parent.right
+                bottom:parent.bottom
+            }
+            height: 60
+            buttonText: qsTr("Move up one level")
+            onActivated:move_content.moveUp()
         }
     }
 }
