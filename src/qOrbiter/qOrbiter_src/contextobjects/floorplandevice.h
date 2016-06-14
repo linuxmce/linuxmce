@@ -67,7 +67,10 @@ class FloorplanDevice : public QObject
         TextRole = Qt::UserRole+12,
         ParamRole= Qt::EditRole+11,
         SelectedRole= Qt::EditRole+12,
-        RoomRole = Qt::EditRole+13
+        RoomRole = Qt::EditRole+13,
+        EntertainAreaRole = Qt::EditRole+14,
+        MediaDeviceRole = Qt::EditRole+15,
+        EntertainAreaNameRole = Qt::EditRole+16
     };
 
 public:
@@ -175,6 +178,15 @@ public:
     QString getRoom() const;
     void setRoom(const QString &room);
 
+    int getEntertainArea() const;
+    void setEntertainArea(int entertainArea);
+
+    QString getEntertainAreaDescription() const;
+    void setEntertainAreaDescription(const QString &entertainAreaDescription);
+
+    bool getIsMediaDevice() const;
+    void setIsMediaDevice(bool isMediaDevice);
+
 signals:
     void roomChanged();
     void statusChanged();
@@ -190,6 +202,7 @@ signals:
     void deviceStateChanged();
     void deviceLevelChanged();
     void selectedChanged();
+    void entertainAreaChanged();
 
 public slots:
     QVariantMap objectData();
@@ -248,6 +261,9 @@ private:
     QString m_alertStatus;
     bool m_selected;
     QString m_room;
+    QString m_entertainAreaDescription;
+    int m_entertainArea;
+    bool m_isMediaDevice;
 
 };
 Q_DECLARE_METATYPE(FloorplanDevice*)

@@ -47,6 +47,9 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
     names[ParamRole]="paramlist";
     names[SelectedRole]="selected";
     names[RoomRole]="room";
+    names[EntertainAreaRole]="ea";
+    names[MediaDeviceRole]="isMediaPlayer";
+    names[EntertainAreaNameRole]="eaDescription";
     return names;
 }
 
@@ -63,6 +66,7 @@ QVariantMap FloorplanDevice::objectData()
     ret.insert("xPos", xPosition());
     ret.insert("yPos", yPosition());
     ret.insert("commands", getDeviceCommands());
+
 qDebug() << ret;
     return ret;
 
@@ -100,6 +104,13 @@ QVariant FloorplanDevice::data(int role)
         return getText();
     case RoomRole:
         return getRoom();
+    case EntertainAreaNameRole:
+        return getEntertainAreaDescription();
+    case EntertainAreaRole:
+        return getEntertainArea();
+    case MediaDeviceRole:
+        return getIsMediaDevice();
+
     default:
         return QVariant();
     }
@@ -137,6 +148,36 @@ void FloorplanDevice::getCommandParameters()
     //  QString address = "http://"+manager.currentRouter+"/lmce-admin/qOrbiterGenerator.php?c=";
 
 }
+bool FloorplanDevice::getIsMediaDevice() const
+{
+    return m_isMediaDevice;
+}
+
+void FloorplanDevice::setIsMediaDevice(bool isMediaDevice)
+{
+    m_isMediaDevice = isMediaDevice;
+}
+
+QString FloorplanDevice::getEntertainAreaDescription() const
+{
+    return m_entertainAreaDescription;
+}
+
+void FloorplanDevice::setEntertainAreaDescription(const QString &entertainAreaDescription)
+{
+    m_entertainAreaDescription = entertainAreaDescription;
+}
+
+int FloorplanDevice::getEntertainArea() const
+{
+    return m_entertainArea;
+}
+
+void FloorplanDevice::setEntertainArea(int entertainArea)
+{
+    m_entertainArea = entertainArea;
+}
+
 QString FloorplanDevice::getRoom() const
 {
     return m_room;
