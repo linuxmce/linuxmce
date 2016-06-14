@@ -128,6 +128,9 @@ GenericPopup{
                 height: parent.height
                 width: parent.width/4
                 arrow: activeFocus
+                onActivated: {
+                    qmlRoot.createPopup(moveFiles)
+                }
             }
             LargeStyledButton{
                 buttonText: qsTr("Close", "Close orbiterWindow")
