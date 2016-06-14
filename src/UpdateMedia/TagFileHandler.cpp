@@ -10,6 +10,7 @@ using namespace DCE;
 #include <tag.h>
 #include <fileref.h>
 #include <tpropertymap.h>
+#include <audioproperties.h>
 
 /////////////////////////////////////////////
 // for FLAC files with Pics
@@ -35,6 +36,24 @@ const string acDelimiters = "|;/";
 const char cDelimiter = ';';
 
 using namespace TagLib;
+
+
+//-----------------------------------------------------------------------------------------------------
+// Resolver for .id3 files.
+class Id3FileTypeResolver : public TagLib::FileRef::FileTypeResolver
+{
+	TagLib::File *createFile(TagLib::FileName fileName, bool readProperties, TagLib::AudioProperties::ReadStyle propertiesStyle) const
+	{
+		if( "id3" == FileUtils::FindExtension( fileName ) )
+		{
+			readProperties = false;
+			propertiesStyle = propertiesStyle;
+			return new TagLib::MPEG::File( fileName, readProperties );
+		}
+		return 0;
+	}
+};
+
 //-----------------------------------------------------------------------------------------------------
 namespace UpdateMediaVars
 {
@@ -45,6 +64,7 @@ namespace UpdateMediaVars
 TagFileHandler::TagFileHandler(string sDirectory, string sFile) :
 	GenericFileHandler(sDirectory, sFile)
 {
+	TagLib::FileRef::addFileTypeResolver(new Id3FileTypeResolver);
 }
 //-----------------------------------------------------------------------------------------------------
 TagFileHandler::~TagFileHandler(void)
@@ -57,6 +77,7 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
         Size = 0;
 
 	FileRef *f = new FileRef(sFilename.c_str());
+
 	if(!f->isNull()) //ensure tag is present before trying to read and data.
 	{
 		// Binary data needs to be handled differently depending on file type
@@ -85,7 +106,7 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 			}
 		}
 
-		// is it an MPEG file? get embedded id3v2 tag with potential GEOB data
+		// is it an MPEG file? or .id3 file? get embedded id3v2 tag with potential GEOB data
 		else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
 		{
 			TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag();
@@ -149,7 +170,7 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 			}
 		}
 
-		// is it an MPEG file? read pics like this
+		// is it an MPEG file? or .id3 file? read pics like this
 		else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
 		{
 			TagLib::ID3v2::Tag *id3v2tag = mpegFile->ID3v2Tag( true );
@@ -464,7 +485,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 		}
 	}
 
-	// is it an MPEG file? read pics like this
+	// is it an MPEG file? or .id3 file? read pics like this
 	else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::GetTagPictures: MPEG" );
@@ -734,7 +755,7 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 	}
 
 
-	// is it an MPEG file? write pics like this
+	// is it an MPEG file? or .id3 file? write pics like this
 	else if ( TagLib::MPEG::File* mpegFile = dynamic_cast<TagLib::MPEG::File*>( f->file()) )
 	{
 		TagLib::ID3v2::Tag *tag = mpegFile->ID3v2Tag(true);
