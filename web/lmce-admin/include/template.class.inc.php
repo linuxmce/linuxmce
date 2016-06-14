@@ -66,7 +66,7 @@
   var $PageTitle = '';
   
   var $dbADO;
-  function Template($myDbADO) {
+  function __construct($myDbADO) {
   	$this->dbADO=$myDbADO;
   }
   

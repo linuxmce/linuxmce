@@ -34,11 +34,11 @@ private:
 	//tag utils
 private:
 	void GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_t> >& listPictures);
-	void GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);
-	void SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures);
+	void GetTagInfo(string sFilename, map<int, std::vector<string> >& mapAttributes, list<pair<char *, size_t> >& listPictures);
+	void SetTagInfo(string sFilename, const map<int, std::vector<string> >& mapAttributes, const list<pair<char *, size_t> >& listPictures);
 
 	void InsertTagPictures(TagLib::FileRef *&f, const list<pair<char *, size_t> >& listPictures);
-	void InsertTagValues(TagLib::FileRef *&f , string sName, string sParameters);
+	void InsertTagValues(TagLib::FileRef *&f , string sName, std::vector<string> vsParameters);
 
 	void RemoveTagValue(TagLib::FileRef *&f, const string sName, string sValue);
 	void RemoveTag(string sFilename, int nTagType, string sValue);
@@ -46,10 +46,11 @@ private:
 	void GetUserDefinedInformation(string sFilename, char *&pData, size_t& Size);
 	void SetUserDefinedInformation(string sFilename, char *pData, size_t& Size);
 
-	string ExtractAttribute(const map<int,string>& mapAttributes, int key);
+//	string ExtractAttribute(const  map<int, std::vector<string> >& mapAttributes, int key);
+	std::vector<string> ExtractAttribute(const  map<int, std::vector<string> >& mapAttributes, int key);
 
-	void stov(string s, std::vector<string> &v, string acDelimiters = "|;/");
-	string vtos(std::vector<string> v, const char cDelimiter = '/');
+	void stov(string s, std::vector<string> &v, string acDelimiters ); //= "|;/");
+	string vtos(std::vector<string> v, const char cDelimiter ); //= ';');
 };
 //-----------------------------------------------------------------------------------------------------
 #endif //__TAG_FILE_HANDLER_H__
