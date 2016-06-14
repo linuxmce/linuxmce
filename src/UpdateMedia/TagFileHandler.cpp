@@ -163,7 +163,7 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 				geob->setObject( generalData );
 				geob->setMimeType( "text/plain" );
 
-				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::GetUserDefinedInformation: GEOB FLAC -- Size: %d, Desc: %s", Size, geob->description().to8Bit().c_str() );
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SetUserDefinedInformation: GEOB FLAC -- Size: %d, Desc: %s", Size, geob->description().to8Bit().c_str() );
 
 				id3v2tag->addFrame( geob );
 				flacFile->save();
@@ -193,7 +193,7 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 				geob->setObject( generalData );
 				geob->setMimeType( "text/plain" );
 
-				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::GetUserDefinedInformation: GEOB FLAC -- Size: %d, Desc: %s", Size, geob->description().to8Bit().c_str() );
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SetUserDefinedInformation: GEOB FLAC -- Size: %d, Desc: %s", Size, geob->description().to8Bit().c_str() );
 
 				id3v2tag->addFrame( geob );
 				mpegFile->save();
