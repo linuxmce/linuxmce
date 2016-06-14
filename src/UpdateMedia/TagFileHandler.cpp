@@ -181,7 +181,7 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 				{
 					for( TagLib::ID3v2::FrameList::ConstIterator it = frameList.begin(); it != frameList.end(); ++it)
 					{
-						LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SetUserDefinedInformation: GEOB FLAC -- Remove" );
+						LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SetUserDefinedInformation: GEOB MPEG -- Remove" );
 						id3v2tag->removeFrame( *it );
 					}
 				}
@@ -193,7 +193,7 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 				geob->setObject( generalData );
 				geob->setMimeType( "text/plain" );
 
-				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SetUserDefinedInformation: GEOB FLAC -- Size: %d, Desc: %s", Size, geob->description().to8Bit().c_str() );
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SetUserDefinedInformation: GEOB MPEG -- Size: %d, Desc: %s", Size, geob->description().to8Bit().c_str() );
 
 				id3v2tag->addFrame( geob );
 				mpegFile->save();
