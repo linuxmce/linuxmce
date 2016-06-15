@@ -1715,13 +1715,13 @@ string qMediaPlayer::getDcePosition()
 {
     string dcePosition;
 
-    QString currentTime = QString::number( (mp_manager->currentTime *1000)  );
+    QString currentTime = QString::number( (mp_manager->currentTime )  );
     dcePosition+=" CHAPTER:0";
     dcePosition+=" POS:"+currentTime.toStdString();
     dcePosition+=" TITLE:0";
     dcePosition+=" SUBTITLE:-1";
     dcePosition+=" AUDIO:-1";
-    dcePosition+=" TOTAL:"+StringUtils::itos( (mp_manager->totalTime * 1000) );
+    dcePosition+=" TOTAL:"+StringUtils::itos( (mp_manager->totalTime ) );
 
     return dcePosition;
 
