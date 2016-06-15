@@ -225,7 +225,7 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		delete []pData;
 		pData = NULL;
 
-	        LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d",
+	        LoggerWrapper::GetInstance()->Write(LV_WARNING, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d",
 	                pPlutoMediaAttributes->m_mapAttributes.size());
 	}
 
