@@ -389,7 +389,7 @@ string TagFileHandler::GetFileAttribute()
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool TagFileHandler::IsSupported()
 {
-	const string csSupportedExtensions("mp3:ogg:flac:mp4:wv:wav::oga:mpc:spx:opus:tta:m4a:m4r:m4p:3g2:m4v:wma:asf:aif:aiff:afc:aifc:ape:s3m");
+	const string csSupportedExtensions("mp3:ogg:flac:wv:wav::oga:mpc:spx:opus:tta:m4a:m4r:m4p:3g2:wma:asf:aif:aiff:afc:aifc:ape:s3m");
 	string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFullFilename));
 
 	if(sExtension.empty())
