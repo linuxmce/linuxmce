@@ -9,6 +9,7 @@ Item{
 
     
     Column{
+        visible:!dcenowplaying.nowPlayingDiscreetAudio
         anchors{
             top:parent.top
             left:parent.left

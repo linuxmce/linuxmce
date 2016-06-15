@@ -1125,6 +1125,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     deviceMap.insert("Video Device", m_dwPK_Device_NowPlaying_Video);
     deviceMap.insert("Now Playing Audio", m_dwPK_Device_NowPlaying_Audio);
     deviceMap.insert("Capture Card", m_dwPK_Device_CaptureCard);
+    deviceMap.insert("Now Playing Discreet Audio", m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
 
     np_deviceList.append(deviceMap);
     np_deviceList.append(infoMap);
