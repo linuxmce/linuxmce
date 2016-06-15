@@ -79,6 +79,19 @@ void NowPlayingClass::resetData()
     setImageAspect("");
     //    setImage(QImage());
     //    setStreamImage(QImage());
+    setNowPlayingDiscreetAudio(false);
 
 }
+bool NowPlayingClass::nowPlayingDiscreetAudio() const
+{
+    return m_nowPlayingDiscreetAudio;
+}
+
+void NowPlayingClass::setNowPlayingDiscreetAudio(bool nowPlayingDiscreetAudio)
+{
+    if( m_nowPlayingDiscreetAudio == nowPlayingDiscreetAudio ) return;
+    m_nowPlayingDiscreetAudio = nowPlayingDiscreetAudio;
+    emit discreetAudioChanged();
+}
+
 

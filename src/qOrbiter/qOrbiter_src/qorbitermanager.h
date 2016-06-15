@@ -1338,18 +1338,21 @@ public slots:
     void fastForwardMedia() {CMD_Scan_FwdFast_Fwd cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void rewindMedia(){CMD_Scan_BackRewind cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void adjustVolume(int vol) {
-        if(discreteAudio) {
-            CMD_Set_Volume cmd(iPK_Device, iMediaPluginID, StringUtils::itos(vol));
+
+        if(vol > 0) {
+            DCE::CMD_Vol_Up cmd(iPK_Device, iMediaPluginID, vol);
             emit sendDceCommand(cmd);
         } else {
-            if(vol > 0) {
-                DCE::CMD_Vol_Up cmd(iPK_Device, iMediaPluginID, vol);
-                emit sendDceCommand(cmd);
-            } else {
-                DCE::CMD_Vol_Down cmd(iPK_Device, iMediaPluginID, vol);
-                sendDceCommand( cmd);
-            }
+            DCE::CMD_Vol_Down cmd(iPK_Device, iMediaPluginID, vol);
+            sendDceCommand( cmd);
         }
+//Commented out until proper discrete volume level can be handled
+//        if(discreteAudio) {
+//            CMD_Set_Volume cmd(iPK_Device, iMediaPluginID, StringUtils::itos(vol));
+//            emit sendDceCommand(cmd);
+//        } else {
+
+//        }
     }
     void newTrack(QString track) { emit changeTrack(track); }
     void jogPosition(QString jog) {emit jogToPosition(jog);}
