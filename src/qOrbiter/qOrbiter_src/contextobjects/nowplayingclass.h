@@ -126,6 +126,9 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY(QString releasedate READ getRelease WRITE setRelease NOTIFY rlsChanged)/*!< \brief Release date. \ingroup now_playing*/
     Q_PROPERTY(double imageAspectRatio READ getImageAspectRatio WRITE setImageAspectRatio NOTIFY imageAspectRatioChanged)
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo Change now playing aspect to enum. \ingroup now_playing*/
+
+    //device related
+    Q_PROPERTY(bool nowPlayingDiscreetAudio READ nowPlayingDiscreetAudio  NOTIFY discreetAudioChanged )
 public:
 #if (QT5)
     explicit NowPlayingClass(QObject *qOrbiter_ptr, QObject *parent = 0);
@@ -180,8 +183,12 @@ public:
     double imageAspectRatio;
 
 
+
+
+
 signals:
-   void nowPlayingDevicesChanged();
+    void discreetAudioChanged();
+    void nowPlayingDevicesChanged();
     void streamIdChanged();
     //general signals
     void storageDeviceChanged();
@@ -234,6 +241,8 @@ signals:
     void imageAspectChanged();
 
 public slots:
+
+    bool nowPlayingDiscreetAudio() const;
     void resetData();
 
     void setLocalPath(QString p) {localpath = p; emit localPathChanged();}
@@ -320,6 +329,7 @@ public slots:
      void setImageAspect(const QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
 
 private slots:
+     void setNowPlayingDiscreetAudio(bool nowPlayingDiscreetAudio);
     void setStreamID(int stream) {i_streamID = stream; emit streamIdChanged();}
     void setSynop(QString s) { synop = s;  emit synopChanged(); }
     void setRelease (QString inc_rls) {releasedate = inc_rls;  emit rlsChanged();}
@@ -403,6 +413,7 @@ private:
     long m_nowPlayingAudioDevice;
     long m_nowPlayingVideoDevice;
     long m_nowPlayingCaptureCard;
+    bool m_nowPlayingDiscreetAudio;
 };
 
 #endif // NOWPLAYINGCLASS_H
