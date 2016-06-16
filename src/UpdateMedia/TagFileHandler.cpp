@@ -329,8 +329,7 @@ bool TagFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttr
 	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
 	//string sFileWithAttributes = m_sFullFilename;
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
-		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveAttribute: removing Value: '%s', Type: '%d'", sValue.c_str(), nTagType);
 
 	RemoveTag(sFileWithAttributes, nTagType, sValue);
 	return true;
@@ -634,8 +633,9 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 				}
 				else if ( (i->first == "TRACKNUMBER") && mapAttributes[ATTRIBUTETYPE_Track_CONST].empty() )
 				{
-					stov( sProperty, vsProperties, "/; " );
-					mapAttributes[ATTRIBUTETYPE_Track_CONST].push_back( vsProperties.front() );
+					std::vector<string> vsTrack;
+					stov( sProperty, vsTrack, "/ " );
+					mapAttributes[ATTRIBUTETYPE_Track_CONST].push_back( vsTrack.front() );
 				}
 				else if ( (i->first == "DATE") && mapAttributes[ATTRIBUTETYPE_Release_Date_CONST].empty() )
 				{
@@ -826,6 +826,9 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, std::vector<string> vsParameters)
 {
+	if ( vsParameters.empty() )
+		return;
+
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::InsertTagValues: - %s = %s", sName.c_str(), vtos(vsParameters, ';').c_str());
 
 	TagLib::PropertyMap property_map = f->file()->properties();
@@ -984,7 +987,8 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 		{
 			if ( (*property_value) == sValue )
 			{
-				cout << "Property " << (*property).first << " exists in file with sName: " << (*property_value) << ", erasing" << endl;
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s, with value %s exists in file, removing", sName.c_str(), sValue.c_str() );
+				//cout << "Property " << (*property).first << " exists in file with sName: " << (*property_value) << ", erasing" << endl;
 				property_value = property_value_list.erase( property_value );
 				bFound = true;
 			}
@@ -996,25 +1000,25 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 			else
 				property_map.replace( (*property).first , property_value_list );
 
-//			cout << "Properties being writing to file" << endl;
+			//cout << "Properties being writing to file" << endl;
 			f->file()->setProperties(property_map);
 		}
 		else
 		{
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s, with value %s doesn't exist in file to remove", sName.c_str(), sValue.c_str() );
-//			cout << "Property " << sName << ", with value " << sValue << " doesn't exist in file to remove" << endl;;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s, with value %s doesn't exist in file to remove", sName.c_str(), sValue.c_str() );
+			//cout << "Property " << sName << ", with value " << sValue << " doesn't exist in file to remove" << endl;;
 		}
 	}
 	else
 	{
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s doesn't exist in file to remove", sName.c_str(), sValue.c_str() );
-//		cout << "Property " << sName << " doesn't exist in file to remove" << endl;
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s doesn't exist in file to remove", sName.c_str(), sValue.c_str() );
+		//cout << "Property " << sName << " doesn't exist in file to remove" << endl;
 	}
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "# TagFileHandler::RemoveTag");
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTag -- Type: %d, Value: %s", nTagType, sValue.c_str() );
 
 	FileRef *f = new FileRef(sFilename.c_str());
 	if(NULL != f)
