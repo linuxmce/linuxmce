@@ -2192,6 +2192,11 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
 
         QVariantMap b;
         b.insert("commands", t["commands"]);
+
+        if(t.contains("media")){
+            b.insert("media", t["media"]);
+        }
+
         p->setDeviceCommand(b);
         //       foreach(QVariant cmd , t["commands"].toMap()){
         //           QVariantMap l = cmd.toMap();

@@ -66,8 +66,6 @@ QVariantMap FloorplanDevice::objectData()
     ret.insert("xPos", xPosition());
     ret.insert("yPos", yPosition());
     ret.insert("commands", getDeviceCommands());
-
-qDebug() << ret;
     return ret;
 
 }

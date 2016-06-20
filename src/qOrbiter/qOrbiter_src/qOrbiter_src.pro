@@ -416,7 +416,8 @@ SOURCES += \
     contextobjects/entertainareatimecode.cpp \
     datamodels/diskmediaitem.cpp \
     managerHelpers/taskshelper.cpp \
-    managerHelpers/dcemediahelper.cpp
+    managerHelpers/dcemediahelper.cpp \
+    managerHelpers/routerhelper.cpp
 
 
 
@@ -526,7 +527,8 @@ HEADERS += \
     DCECommand.h \
     datamodels/diskmediaitem.h \
     managerHelpers/taskshelper.h \
-    managerHelpers/dcemediahelper.h
+    managerHelpers/dcemediahelper.h \
+    managerHelpers/routerhelper.h
 
 
 
