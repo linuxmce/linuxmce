@@ -200,10 +200,11 @@ QString deviceName;
     int iPK_Device_GeneralInfoPlugin;   /*!< \brief GeneralInfoPlugin id. */
     int  iPK_Device_SecurityPlugin;     /*!< \brief SecurityPlugin id. */
     int  iPK_Device_LightingPlugin;     /*!< \brief LightingPlugin id. */
-    int  m_dwIDataGridRequestCounter;   /*!< \brief Datagrid request counter. Incremented per dg request for identifying the current grid. */
-    int iOrbiterPluginID;
-    int  iMediaPluginID;
+    int iPK_Device_ClimatePlugin;
+    int  iPK_Device_MediaPlugin;
     int iPK_Device_eventPlugin;
+    int  m_dwIDataGridRequestCounter;   /*!< \brief Datagrid request counter. Incremented per dg request for identifying the current grid. */
+
     int m_pOrbiterCat;
     QMap<int, QString> childrenDeviceList;
 #if !defined(QT5) && !defined(Q_OS_ANDROID)
@@ -1347,6 +1348,7 @@ light, climate, media, security, telecom */
 
 signals:
 
+    void coreDevicesChanged( QMap<long, long> cd);
     void useQueueInsteadOfInstantPlayChanged(bool useQueue);
 
     void showAlert(QString text, QString tokens, int timeout, int interruption);
@@ -1981,7 +1983,7 @@ public slots:
 
     void changedPlaylistPosition(QString pos);
     void ShowFloorPlan(int floorplantype);
-    void updateFloorPlan(QString p);
+    void updateFloorPlan(QString p, int t);
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
     void jumpToPlaylistPosition(QString pos);
@@ -2036,6 +2038,8 @@ public slots:
     bool timeCodeInterceptor(class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo);
 
 private:
+
+    bool sendCoreDeviceNumbers();
 
 
 protected:
