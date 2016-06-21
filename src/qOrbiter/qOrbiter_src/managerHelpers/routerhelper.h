@@ -42,8 +42,28 @@ public:
     int dceRouterId() const;
     void setDceRouterId(int dceRouterId);
 
+    int securityPluginId() const;
+    void setSecurityPluginId(int securityPluginId);
+
+    int eventPluginId() const;
+    void setEventPluginId(int eventPluginId);
+
+    int telecomPluginId() const;
+    void setTelecomPluginId(int telecomPluginId);
+
 signals:
 
+    void generalInfoPluginIdChanged();
+    void climatePluginIdChanged();
+    void dataGridPluginIdChanged();
+    void infraredPluginIdChanged();
+    void lightingPluginIdChanged();
+    void securityPluginIdChanged();
+    void eventPluginIdChanged();
+    void orbiterPluginIdChanged();
+    void mediaPluginIdChanged();
+    void dceRouterIdChanged();
+    void telecomPluginIdChanged();
 public slots:
 
     void handleCoreDevicesChanged(QMap<long, long> cd);
@@ -55,6 +75,9 @@ private:
     int m_dataGridPluginId;
     int m_infraredPluginId;
     int m_lightingPluginId;
+    int m_securityPluginId;
+    int m_eventPluginId;
+    int m_telecomPluginId;
     int m_orbiterPluginId;
     int m_mediaPluginId;
     int m_mythTvPluginId;

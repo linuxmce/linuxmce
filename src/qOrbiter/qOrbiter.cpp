@@ -2432,19 +2432,22 @@ bool qOrbiter::sendCoreDeviceNumbers()
     iPK_Device_GeneralInfoPlugin =  this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_General_Info_Plugin_CONST)->m_dwPK_Device;
     iPK_Device_SecurityPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Security_Plugin_CONST)->m_dwPK_Device;
     iPK_Device_LightingPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Lighting_Plugin_CONST)->m_dwPK_Device;
-    m_dwIDataGridRequestCounter = 0;
     iPK_Device_MediaPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST)->m_dwPK_Device;
-    iPK_Device_eventPlugin = 12;
+    iPK_Device_eventPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Event_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_TelecomPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Telecom_Plugin_CONST)->m_dwPK_Device;
+    m_dwIDataGridRequestCounter = 0;
 
-    coreDeviceList.insert(DEVICETEMPLATE_Media_Plugin_CONST,         iPK_Device_MediaPlugin );
-    coreDeviceList.insert(DEVICETEMPLATE_Lighting_Plugin_CONST,      iPK_Device_LightingPlugin);
-    coreDeviceList.insert(DEVICETEMPLATE_General_Info_Plugin_CONST,  iPK_Device_GeneralInfoPlugin);
-    coreDeviceList.insert(DEVICETEMPLATE_Climate_Plugin_CONST,       iPK_Device_ClimatePlugin);
-    coreDeviceList.insert(DEVICETEMPLATE_Orbiter_Plugin_CONST,       iPK_Device_OrbiterPlugin);
-     coreDeviceList.insert(DEVICETEMPLATE_Security_Plugin_CONST,     iPK_Device_SecurityPlugin);
-    coreDeviceList.insert(DEVICETEMPLATE_Datagrid_Plugin_CONST,      iPK_Device_DatagridPlugIn );
-    coreDeviceList.insert(DEVICETEMPLATE_Infrared_Plugin_CONST , this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Infrared_Plugin_CONST)->m_dwPK_Device);
-    coreDeviceList.insert(DEVICETEMPLATE_DCERouter_CONST , this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_DCERouter_CONST)->m_dwPK_Device);
+    coreDeviceList.insert(DEVICETEMPLATE_Media_Plugin_CONST,        iPK_Device_MediaPlugin );
+    coreDeviceList.insert(DEVICETEMPLATE_Lighting_Plugin_CONST,     iPK_Device_LightingPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_General_Info_Plugin_CONST, iPK_Device_GeneralInfoPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Climate_Plugin_CONST,      iPK_Device_ClimatePlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Orbiter_Plugin_CONST,      iPK_Device_OrbiterPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Security_Plugin_CONST,     iPK_Device_SecurityPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Datagrid_Plugin_CONST,     iPK_Device_DatagridPlugIn );
+    coreDeviceList.insert(DEVICETEMPLATE_Infrared_Plugin_CONST ,    this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Infrared_Plugin_CONST)->m_dwPK_Device);
+    coreDeviceList.insert(DEVICETEMPLATE_DCERouter_CONST ,          this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_DCERouter_CONST)->m_dwPK_Device);
+    coreDeviceList.insert(DEVICETEMPLATE_Event_Plugin_CONST,        iPK_Device_eventPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Telecom_Plugin_CONST,      iPK_Device_TelecomPlugin);
 
     emit coreDevicesChanged(coreDeviceList);
 }

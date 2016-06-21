@@ -95,14 +95,16 @@ TRANSLATIONS += app_de.ts
     ../../contextobjects/settinginterface.h \
     ../../datamodels/diskmediaitem.h \
     ../../managerHelpers/taskshelper.h \
-    ../../managerHelpers/dcemediahelper.h
+    ../../managerHelpers/dcemediahelper.h \
+    ../../managerHelpers/routerhelper.h
         SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
     ../../defineObjects/mediatypehelper.cpp \
     ../../defineObjects/datagrids.cpp \
     ../../contextobjects/settinginterface.cpp \
     ../../datamodels/diskmediaitem.cpp \
     ../../managerHelpers/taskshelper.cpp \
-    ../../managerHelpers/dcemediahelper.cpp
+    ../../managerHelpers/dcemediahelper.cpp \
+    ../../managerHelpers/routerhelper.cpp
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH = imports

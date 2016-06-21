@@ -200,6 +200,7 @@ QString deviceName;
     int iPK_Device_GeneralInfoPlugin;   /*!< \brief GeneralInfoPlugin id. */
     int  iPK_Device_SecurityPlugin;     /*!< \brief SecurityPlugin id. */
     int  iPK_Device_LightingPlugin;     /*!< \brief LightingPlugin id. */
+    int iPK_Device_TelecomPlugin;
     int iPK_Device_ClimatePlugin;
     int  iPK_Device_MediaPlugin;
     int iPK_Device_eventPlugin;
