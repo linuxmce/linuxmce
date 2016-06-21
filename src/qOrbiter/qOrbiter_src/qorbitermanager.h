@@ -69,6 +69,7 @@
 #include <QProcess>
 #include <QtXml/QDomDocument>
 #include "managerHelpers/dcemediahelper.h"
+#include "managerHelpers/routerhelper.h"
 
 
 #ifdef ANDROID
@@ -412,7 +413,8 @@ public:
     FloorPlanModel *floorplans;
 
     //Helper classes
-    DceMediaHelper *m_mediaHelper;
+    DceMediaHelper  *m_mediaHelper;
+    RouterHelper    *m_routerHelper;
 
     /*
 datagrid variables

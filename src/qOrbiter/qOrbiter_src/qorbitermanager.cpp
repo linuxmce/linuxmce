@@ -109,6 +109,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_mediaHelper = new DceMediaHelper(qOrbiter_ptr, this);
     connect(m_mediaHelper, &DceMediaHelper::forwardDceCommand, this, &qorbiterManager::sendDceCommand);
 
+    m_routerHelper = new RouterHelper(qOrbiter_ptr);
+
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -2207,7 +2209,7 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
 void qorbiterManager::getDeviceState(int PK_Device, string* data)
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::getDeviceState");
-    CMD_Get_Device_State getDeviceState(iPK_Device, iPK_Device_GeneralInfoPlugin, PK_Device, data);
+    CMD_Get_Device_State getDeviceState(iPK_Device, m_routerHelper->generalInfoPluginId() , PK_Device, data);
     sendDceCommand(getDeviceState);
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::getDeviceState done");
 }
