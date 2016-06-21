@@ -106,10 +106,12 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_dceRequestNo(1),
     m_useQueueInsteadOfInstantPlay(false), m_bIsOSD(isOsd)
 {
-    m_mediaHelper = new DceMediaHelper(qOrbiter_ptr, this);
+    m_routerHelper = new RouterHelper(qOrbiter_ptr);
+
+    m_mediaHelper = new DceMediaHelper(qOrbiter_ptr, m_routerHelper,this);
     connect(m_mediaHelper, &DceMediaHelper::forwardDceCommand, this, &qorbiterManager::sendDceCommand);
 
-    m_routerHelper = new RouterHelper(qOrbiter_ptr);
+
 
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
@@ -401,17 +403,8 @@ void qorbiterManager::refreshUI(QUrl url){
 void qorbiterManager::processConfig(QNetworkReply *config)
 {
 
-    if(!alreadyConfigured){
-        iPK_Device_DatagridPlugIn =  long(6);
-        iPK_Device_OrbiterPlugin = long(9);
-        iPK_Device_GeneralInfoPlugin = long(4);
-        iPK_Device_SecurityPlugin = long(13);
-        iPK_Device_LightingPlugin = long(8);
-        iPK_Device_TelecomPlugin = long(11);
-        m_dwIDataGridRequestCounter = 0;
-        iOrbiterPluginID = 9;
-        iMediaPluginID = 10;
-        iPK_Device_eventPlugin = 12;
+    if(!alreadyConfigured){     
+        m_dwIDataGridRequestCounter = 0;       
         iSize = 0;
         m_pOrbiterCat = 5;
         s_onOFF = "1";
@@ -1368,16 +1361,7 @@ void qorbiterManager::regenComplete(QNetworkReply*r)
 {
 
     if(!alreadyConfigured){
-        iPK_Device_DatagridPlugIn =  long(6);
-        iPK_Device_OrbiterPlugin = long(9);
-        iPK_Device_GeneralInfoPlugin = long(4);
-        iPK_Device_SecurityPlugin = long(13);
-        iPK_Device_LightingPlugin = long(8);
-        iPK_Device_TelecomPlugin = long(11);
         m_dwIDataGridRequestCounter = 0;
-        iOrbiterPluginID = 9;
-        iMediaPluginID = 10;
-        iPK_Device_eventPlugin = 12;
         iSize = 0;
         m_pOrbiterCat = 5;
         s_onOFF = "1";
@@ -1754,7 +1738,7 @@ void qorbiterManager::playMedia(QString FK_Media, bool queue =false) {
     //changed to remove media type as that is decided on by the media plugin and passed back
     CMD_MH_Play_Media cmd(
                 iPK_Device,                 //device from
-                iMediaPluginID,             //device to
+                m_routerHelper->mediaPluginId(),             //device to
                 0 ,
                 FK_Media.toStdString(),     //media file name !FXX or !PXXX
                 0,                          //media type
@@ -1775,7 +1759,7 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
 
     CMD_MH_Play_Media playDisc(
                 iPK_Device,
-                iMediaPluginID,
+               m_routerHelper->mediaPluginId() ,
                 0,
                 fkFile.toStdString(), // see MediaAttributes_LowLevel::TransformFilenameToDeque
                 0,
@@ -1792,7 +1776,7 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
 }
 
 void qorbiterManager::mythTvPlay(){
-    CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, this->nowPlayingButton->getStreamID() , 1000, true);
+    CMD_Change_Playback_Speed cmd(iPK_Device, m_routerHelper->mediaPluginId(), this->nowPlayingButton->getStreamID() , 1000, true);
     emit sendDceCommand(cmd);
 }
 
@@ -1804,7 +1788,7 @@ void qorbiterManager::playResume(){
 }
 
 void qorbiterManager::stopMedia() {/*emit stopPlayback();*/
-    CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,sEntertainArea,false);
+    CMD_MH_Stop_Media endMedia(iPK_Device, m_routerHelper->mediaPluginId(),0,i_current_mediaType ,0,sEntertainArea,false);
     string response;
     emit sendDceCommand(endMedia);
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Response: %s", response.c_str());
@@ -1814,7 +1798,7 @@ void qorbiterManager::stopMedia() {/*emit stopPlayback();*/
 void qorbiterManager::stop_AV() {
     // sends a Stop command, which is normally routed to an actual AV device through IR, CEC or other means
     // this does not stop the "lmce activity"
-    CMD_Stop avStop(iPK_Device, iMediaPluginID, 0,false);
+    CMD_Stop avStop(iPK_Device, m_routerHelper->mediaPluginId(), 0,false);
     emit sendDceCommand(avStop);
 }
 
@@ -3043,7 +3027,7 @@ void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text)
 }
 
 void qorbiterManager::makeCall(int iPK_Users, QString sPhoneExtension, QString sPK_Device_From,int iPK_Device_To) {
-    CMD_Make_Call makeCall(iPK_Device, iPK_Device_TelecomPlugin, iPK_Users, sPhoneExtension.toStdString(), sPK_Device_From.toStdString(), iPK_Device_To);
+    CMD_Make_Call makeCall(iPK_Device, m_routerHelper->telecomPluginId(), iPK_Users, sPhoneExtension.toStdString(), sPK_Device_From.toStdString(), iPK_Device_To);
     sendDceCommand(makeCall);
 }
 
