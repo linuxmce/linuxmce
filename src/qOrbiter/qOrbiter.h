@@ -287,11 +287,7 @@ public:
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
     virtual void CreateChildren();
-  virtual void CannotReloadRouter();
-
-
-
-
+    virtual void CannotReloadRouter();
     //<-dceag-const-e->
 
     //<-dceag-const2-b->

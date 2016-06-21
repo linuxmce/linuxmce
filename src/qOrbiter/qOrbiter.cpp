@@ -1677,7 +1677,7 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));
 
 
-    //qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
+    qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
 
     map<long, string >::const_iterator end = pMessage->m_mapParameters.end();
     for (map<long, string >::const_iterator it = pMessage->m_mapParameters.begin(); it != end; ++it)
@@ -1687,6 +1687,7 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
         // ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
         emit addScreenParam(QString::fromStdString(dparam2), dparam );
     }
+    sCMD_Result="OK";
 }
 
 //<-dceag-c795-b->
@@ -3858,6 +3859,7 @@ void DCE::qOrbiter::quickReload() //experimental function. checkConnection is go
 {
     qDebug() << Q_FUNC_INFO;
     string sResponse;
+
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
     event_Impl.m_pClientSocket->SendString( "RELOAD" );
     if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
@@ -4925,8 +4927,12 @@ void qOrbiter::CreateChildren(){
 void qOrbiter::CannotReloadRouter()
 {
     qDebug() << Q_FUNC_INFO;
-    QString reload_screen= QString("Screen_%1.qml").arg(QString::number(283));
-    emit gotoQml(reload_screen);
+    string sMsg = "Cannot Reload Router right now";
+    DCE::CMD_Goto_Screen showNoReload(m_dwPK_Device, m_dwPK_Device, sMsg, 283 , 0, 1, false);
+    if(SendCommand(showNoReload)){
+
+    }
+
 
 }
 

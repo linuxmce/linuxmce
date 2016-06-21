@@ -13,20 +13,36 @@ StyledScreen{
 //        183 /* Cannot Go Back */
 //    ]
 
-    Row{
-        width: parent.width/2
-        height: 200
-        anchors.centerIn: parent
+    Panel{
+       headerTitle:screen
+        content:Item {
+            anchors.fill: parent
 
-        StyledButton{
-            buttonText: qsTr("Force Reload")
-            onActivated:  manager.forceReload()
-        }
+            Column{
+                anchors.centerIn: parent
+                height: Style.scaleY(20)
+                width: parent.width
+                id:msg
+                StyledText{
+                    text:screenparams.getParam(10)
+                    anchors.centerIn: parent
+                }
+            }
 
-        StyledButton{
-            buttonText: qsTr("Home")
+            Row{
+                width: parent.width/2
+                height: 200
+                anchors{horizontalCenter: parent.horizontalCenter; top:msg.bottom}
+
+                StyledButton{
+                    buttonText: qsTr("Force Reload")
+                    onActivated:  manager.forceReload()
+                }
+            }
         }
     }
+
+
 
 
 }
