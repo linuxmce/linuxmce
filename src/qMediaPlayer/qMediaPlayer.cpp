@@ -56,7 +56,11 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *man
     seekDelayTimer = new QTimer(this);
     seekDelayTimer->setSingleShot(true);
 
-
+    m_iTitle = 0;
+    m_iChapter =0;
+    s_totalTime="";
+    s_audioTracks="";
+    s_subTitleTracks ="";
 }
 
 //<-dceag-const2-b->
