@@ -7,14 +7,15 @@ import "../."
 GenericPopup{
     id:moveFilesToBox
     anchors.fill: parent
-    title:"Select location to move file to"
+    title:qsTr("Select Directory. Tap  name to navigate down")
     content:Item{
         id:move_content
 
-         function moveUp(){
+        function moveUp(){
+            dir_listing.currentLocation = getStartingDirectory()
             dir_listing.dataGridOptions=(getStartingDirectory()+"\n~MT");
-             dir_listing.refresh()
-         }
+            dir_listing.refresh()
+        }
 
         function getStartingDirectory(){
             var ret="/"
@@ -49,9 +50,10 @@ GenericPopup{
         GenericListModel{
             id:dir_listing
             dataGrid: DataGrids.Directory_Listing
-            dataGridLabel: "Directories"
+            dataGridLabel: "directory_listing"
             dataGridOptions: move_content.getStartingDirectory();
-            label: "Directories"
+            label: qsTr("Current Directory: %1").arg(currentLocation)
+            property string currentLocation:move_content.getStartingDirectory()
             anchors{
                 left:parent.left
                 right:parent.right
@@ -61,36 +63,54 @@ GenericPopup{
 
             delegate: Rectangle{
                 width: parent.width
-                height: 60
+                height: Style.listViewItemHeight
                 color:"black"
+
+
+                StyledText{
+                    text:qsTr("Directory: ")+value
+                    color:"white"
+                    anchors.topMargin: 5
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                }
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {dir_listing.dataGridOptions=(value+"\n~MT"); dir_listing.refresh() }
+                    onClicked: {dir_listing.currentLocation=value ;dir_listing.dataGridOptions=(value+"\n~MT"); dir_listing.refresh(); }
                 }
-                Column{
-                   height: parent.height
-                   width: parent.width *.65
-                   anchors.left: parent.left
 
-                    StyledText{
-                        text:qsTr("Directory: ")+value
-                        color:"white"
+                StyledButton{
+                    buttonText: qsTr("Select this directory")
+                    height: parent.height/2
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 5
+                    width: Style.appButtonWidth
+                    onActivated: {
+                        var target = filedetailsclass.path+filedetailsclass.file
+                        console.log("moving file "+ target)
+                        console.log("to "+value)
+                        mediaHelper.moveFile(target, value)
                     }
-
-                   StyledButton{
-                       buttonText: qsTr("Select this directory")
-                       height: parent.height/2
-                       width: parent.width
-                       onActivated: {
-                           var target = filedetailsclass.path+filedetailsclass.file
-                           console.log("moving file "+ target)
-                           console.log("to "+value)
-                           mediaHelper.moveFile(target, value)
-                       }
-                   }
                 }
+
             }
         }
+        LargeStyledButton{
+            id:this_dir
+           anchors.centerIn: dir_listing
+           width: Style.appButtonLargeWidth
+            height: Style.appButtonHeight
+            buttonText: qsTr("Select this directory.")
+            onActivated: {
+                var target = filedetailsclass.path+filedetailsclass.file
+                console.log("moving file "+ target)
+                console.log("to "+dir_listing.currentLocation )
+                mediaHelper.moveFile(target, dir_listing.currentLocation)
+            }
+            visible: dir_listing.modelCount===0
+        }
+
         LargeStyledButton{
             id:dir_up
             anchors{
@@ -98,7 +118,7 @@ GenericPopup{
                 right:parent.right
                 bottom:parent.bottom
             }
-            height: 60
+            height: Style.appButtonHeight
             buttonText: qsTr("Move up one level")
             onActivated:move_content.moveUp()
         }
