@@ -42,10 +42,8 @@ Item {
 
         onDeviceChanged:{
           //  console.log("Item "+deviceNum+" handling deviceChanged( )"+device)
-            if(device==Number(deviceNum)){
-              console.log("many welps!")
+            if(device==Number(deviceNum)){              
                 var d =  floorplan_devices.getDeviceData(deviceNum);
-
                 deviceNum=d.deviceNumber;
                 deviceStatus=d.deviceStatus;
                 deviceState=d.deviceState;

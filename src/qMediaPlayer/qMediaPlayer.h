@@ -1035,8 +1035,8 @@ public:
         MediaManager * mp_manager;
         QString m_internalMediaUrl;
 
-        int m_iChapter =0;
-        int m_iTitle=0;
+        int m_iChapter ;
+        int m_iTitle;
         string s_totalTime;
         string s_audioTracks;
         string s_subTitleTracks;

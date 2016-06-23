@@ -122,16 +122,17 @@ public:
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "LoadDataFromTable() pCell == NULL ! row = %d, col = %d", row, col);
             return;
         }
-        /*
-        qDebug() << "Get Text::" << pCell->GetText();
-        qDebug() << "Get Value::" << pCell->GetValue();
-       qDebug() << "Cell Values-------------------------------------------";
-       qDebug() << "AttributeMap count " << pCell->m_AttributesLength;
-        for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
 
-            qDebug() << i->first.c_str() <<"::"<< i->second.c_str();
-        }
-        qDebug() << "End Cell Values-------------------------------------------";*/
+//        qDebug() << "Get Text::" << pCell->GetText();
+//        qDebug() << "Get Value::" << pCell->GetValue();
+//       qDebug() << "Cell Values-------------------------------------------";
+//       qDebug() << "AttributeMap count " << pCell->m_AttributesLength;
+//        for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
+
+//            qDebug() << i->first.c_str() <<"::"<< i->second.c_str();
+//        }
+//        qDebug() << "End Cell Values-------------------------------------------";
+
 
         if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
             const char *pPath = pCell->GetImagePath();
@@ -242,16 +243,19 @@ public:
             qDebug() << pCell->m_Value;
 
         } else if(PK_DataGrid == DATAGRID_Directory_Listing_CONST){
-
-            QString test = QString::fromUtf8(pCell->GetText());
-            qDebug() << test;
             pItem->setData(ValueRole, pCell->GetValue());
-            pItem->setData(DescriptionRole, QVariant(test));
-        } else {
+            pItem->setData(DescriptionRole, QVariant(pCell->GetText()));
+        } else if(PK_DataGrid == DATAGRID_Pending_Tasks_CONST ){
+
+            pItem->setData(DescriptionRole, QString::fromStdString(pCell->m_mapAttributes_Find("Title")));
+            pItem->setData(ValueRole, QString::fromStdString(pCell->m_mapAttributes_Find("Status") ));
+        }
+        else {
 
             // Default, get one cell use text and value
             pItem->setData(ValueRole, pCell->GetValue());
             pItem->setData(DescriptionRole, QString::fromUtf8(pCell->GetText()));
+
         }
     }
 

@@ -2,6 +2,7 @@
 #define DCEMEDIAHELPER_H
 
 #include <QObject>
+#include "routerhelper.h"
 #include "Gen_Devices/AllCommandsRequests.h"
 #include "qhash.h"
 #include "qvariant.h"
@@ -27,7 +28,7 @@ public:
      * \param qorbiter_ptr
      * \param parent
      */
-    explicit DceMediaHelper(QObject * qorbiter_ptr,QObject *parent = 0);
+    explicit DceMediaHelper(QObject * qorbiter_ptr, RouterHelper * helper, QObject *parent = 0);
 
 signals:
     /*!
@@ -58,6 +59,7 @@ public slots:
 
 private:
       qorbiterManager *m_manager; /*!< Pointer to qorbiter manager to obtain variables needed for sending commands. */
+      RouterHelper *m_routerHelper;
 };
 
 }
