@@ -78,7 +78,7 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 
 	FileRef *f = new FileRef(sFilename.c_str());
 
-	if(!f->isNull()) //ensure tag is present before trying to read and data.
+	if(NULL != f && !f->isNull()) //ensure tag is present before trying to read and data.
 	{
 		// Binary data needs to be handled differently depending on file type
 
@@ -129,15 +129,15 @@ void TagFileHandler::GetUserDefinedInformation(string sFilename, char *&pData, s
 				}
 			}
 		}
-
-	delete f;
 	}
+	if ( NULL != f )
+		delete f;
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, size_t& Size)
 {
 	FileRef *f = new FileRef(sFilename.c_str());
-	if(!f->isNull()) //ensure tag is present before trying to read and data.
+	if(NULL != f && !f->isNull()) //ensure tag is present before trying to read and data.
 	{
 		// Pictures need to be handled differently depending on file type
 		// is it a FLAC file? read pics like this
@@ -200,8 +200,9 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 			}
 		}
 		// TODO: MP4/ASF ?  may need external id3 files?
-		delete f;
 	}
+	if ( NULL != f )
+		delete f;
 }
 //-----------------------------------------------------------------------------------------------------
 bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
@@ -329,8 +330,7 @@ bool TagFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttr
 	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
 	//string sFileWithAttributes = m_sFullFilename;
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
-		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveAttribute: removing Value: '%s', Type: '%d'", sValue.c_str(), nTagType);
 
 	RemoveTag(sFileWithAttributes, nTagType, sValue);
 	return true;
@@ -389,7 +389,7 @@ string TagFileHandler::GetFileAttribute()
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool TagFileHandler::IsSupported()
 {
-	const string csSupportedExtensions("mp3:ogg:flac:mp4:wv:wav::oga:mpc:spx:opus:tta:m4a:m4r:m4p:3g2:m4v:wma:asf:aif:aiff:afc:aifc:ape:s3m");
+	const string csSupportedExtensions("mp3:ogg:flac:wv:wav::oga:mpc:spx:opus:tta:m4a:m4r:m4p:3g2:wma:asf:aif:aiff:afc:aifc:ape:s3m");
 	string sExtension = StringUtils::ToLower(FileUtils::FindExtension(m_sFullFilename));
 
 	if(sExtension.empty())
@@ -591,7 +591,7 @@ void TagFileHandler::GetTagPictures(TagLib::FileRef *&f, list<pair<char *, size_
 void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 	FileRef *f = new FileRef(sFilename.c_str());
-	if(!f->isNull()) //ensure tag is present before trying to read and data.
+	if(NULL != f && !f->isNull()) //ensure tag is present before trying to read and data.
 	{
 		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::GetTagInfo: tags present");
 
@@ -634,8 +634,9 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 				}
 				else if ( (i->first == "TRACKNUMBER") && mapAttributes[ATTRIBUTETYPE_Track_CONST].empty() )
 				{
-					stov( sProperty, vsProperties, "/; " );
-					mapAttributes[ATTRIBUTETYPE_Track_CONST].push_back( vsProperties.front() );
+					std::vector<string> vsTrack;
+					stov( sProperty, vsTrack, "/ " );
+					mapAttributes[ATTRIBUTETYPE_Track_CONST].push_back( vsTrack.front() );
 				}
 				else if ( (i->first == "DATE") && mapAttributes[ATTRIBUTETYPE_Release_Date_CONST].empty() )
 				{
@@ -724,9 +725,9 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 				}
 			}
 		}
-
-		delete f;
 	}
+	if ( NULL != f )
+		delete f;
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char *, size_t> >& listPictures)
@@ -826,6 +827,9 @@ void TagFileHandler::InsertTagPictures(TagLib::FileRef *&f, const list<pair<char
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::InsertTagValues(TagLib::FileRef *&f, string sName, std::vector<string> vsParameters)
 {
+	if ( vsParameters.empty() )
+		return;
+
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::InsertTagValues: - %s = %s", sName.c_str(), vtos(vsParameters, ';').c_str());
 
 	TagLib::PropertyMap property_map = f->file()->properties();
@@ -848,7 +852,7 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int, std::vector<str
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SetTagInfo for %s", sFilename.c_str());
 
 	FileRef *f = new FileRef(sFilename.c_str());
-	if(NULL != f)
+	if(NULL != f && !f->isNull()) //ensure tag is present before trying to read and data.
 	{
 		std::vector<string> vsParameters;
 
@@ -961,13 +965,12 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int, std::vector<str
 		if ( !vsParameters.empty() )
 			InsertTagValues(f, string("PROGRAM"), vsParameters);
 
-// */
 		// Store pictures in file tag
 		InsertTagPictures(f, listPictures);
-
 		f->save();
-		delete f;
 	}
+	if ( NULL != f )
+		delete f;
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, string sValue)
@@ -984,7 +987,8 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 		{
 			if ( (*property_value) == sValue )
 			{
-				cout << "Property " << (*property).first << " exists in file with sName: " << (*property_value) << ", erasing" << endl;
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s, with value %s exists in file, removing", sName.c_str(), sValue.c_str() );
+				//cout << "Property " << (*property).first << " exists in file with sName: " << (*property_value) << ", erasing" << endl;
 				property_value = property_value_list.erase( property_value );
 				bFound = true;
 			}
@@ -996,28 +1000,28 @@ void TagFileHandler::RemoveTagValue(TagLib::FileRef *&f, const string sName, str
 			else
 				property_map.replace( (*property).first , property_value_list );
 
-//			cout << "Properties being writing to file" << endl;
+			//cout << "Properties being writing to file" << endl;
 			f->file()->setProperties(property_map);
 		}
 		else
 		{
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s, with value %s doesn't exist in file to remove", sName.c_str(), sValue.c_str() );
-//			cout << "Property " << sName << ", with value " << sValue << " doesn't exist in file to remove" << endl;;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s, with value %s doesn't exist in file to remove", sName.c_str(), sValue.c_str() );
+			//cout << "Property " << sName << ", with value " << sValue << " doesn't exist in file to remove" << endl;;
 		}
 	}
 	else
 	{
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s doesn't exist in file to remove", sName.c_str(), sValue.c_str() );
-//		cout << "Property " << sName << " doesn't exist in file to remove" << endl;
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTagValue: Property %s doesn't exist in file to remove", sName.c_str(), sValue.c_str() );
+		//cout << "Property " << sName << " doesn't exist in file to remove" << endl;
 	}
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "# TagFileHandler::RemoveTag");
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveTag -- Type: %d, Value: %s", nTagType, sValue.c_str() );
 
 	FileRef *f = new FileRef(sFilename.c_str());
-	if(NULL != f)
+	if(NULL != f && !f->isNull()) //ensure tag is present before trying to read and data.
 	{
 		switch(nTagType)
 		{
@@ -1084,8 +1088,9 @@ void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 
 		}
 		f->save();
-		delete f;
 	}
+	if ( NULL != f )
+		delete f;
 }
 //-----------------------------------------------------------------------------------------------------
 std::vector<string> TagFileHandler::ExtractAttribute(const map<int, std::vector<string> >& mapAttributes, int key)
