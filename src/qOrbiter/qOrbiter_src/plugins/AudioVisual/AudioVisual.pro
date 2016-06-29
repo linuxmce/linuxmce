@@ -28,13 +28,13 @@ linux-g++{
 linux-rasp-pi-g++{
     DESTDIR=../../imports/AudioVisual
     DEFINES+=RPI
-    RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/
+    RASP_INSTALL_TARGET=/usr/local/qt5pi/qml/
 }
 
 linux-rasp-pi-g++{
     DESTDIR=../../imports/AudioVisual
     DEFINES+=RPI
-    RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/
+    RASP_INSTALL_TARGET=/usr/local/qt5pi/qml/
 }
 
 android-g++{
