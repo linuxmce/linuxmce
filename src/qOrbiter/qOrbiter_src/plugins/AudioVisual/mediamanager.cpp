@@ -38,7 +38,6 @@ using namespace DCE;
 MediaManager::MediaManager(QQuickItem *parent): QQuickItem(parent)
 
 {
-
     serverAddress = "";
     deviceNumber = -1;
     timeCodeServer = new QTcpServer();
@@ -321,63 +320,6 @@ void MediaManager::processTimeCode(qint64 f)
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
 
-void MediaManager::processSocketdata()
-{
-#ifdef QT5
-    return;
-#endif
-
-    QString tmp;
-    while(lastClient->bytesAvailable()!=0){
-        tmp.append(lastClient->read(1));
-    }
-
-    if(!tmp.contains("\n{")){
-        tmp="";
-        return ;
-    }
-
-    QString f = QString::fromLocal8Bit(tmp.toLocal8Bit());
-    int front = f.indexOf("\n{");
-    int back  = f.indexOf("}\n");
-    QString final=f.remove(0, front);
-    final.remove("\n{"); final.remove("}\n");
-    qWarning() << "Socket Data!! " <<final;
-
-
-    QStringList cmdList = final.split(":");
-    QString cmd = cmdList.at(0);
-
-    if(cmd=="time"){
-        int i = QString(cmdList.last()).toInt();
-        setQmlTotalTime(i);
-    }
-
-    if(cmd=="currenttime"){
-        processTimeCode( QString(cmdList.last()).toInt());
-    }
-
-    if(cmd=="error"){
-        stopPluginMedia();
-        mediaPlayer->mediaEnded(false);
-    }
-
-    else if(cmd=="event"){
-        QString eventT = cmdList.last();
-        qDebug() << eventT;
-        if(eventT=="stop"){
-            setMediaPlaying(false);
-
-        }else if(eventT=="play"){
-            qmlPlaybackEnded(false);
-        }
-        else if(eventT=="completed"){
-            qmlPlaybackEnded(true);
-
-        }
-    }
-    lastClient->disconnectFromHost();
-}
 
 void MediaManager::playbackInfoUpdated(QString mediaTitle, QString mediaSubTitle, QString name, int screen)
 {
@@ -471,73 +413,6 @@ bool MediaManager::mountDrive(long device){
     */
 }
 
-void MediaManager::infoConnectHandler()
-{
-#ifndef QT5
-    if(infoSocket->hasPendingConnections()){
-        lastClient=infoSocket->nextPendingConnection();
-        setCurrentStatus("IPC Client Connected::"+lastClient->localAddress().toString());
-        if(lastClient->isValid()){
-            QObject::connect(lastClient,SIGNAL(readyRead()), this, SLOT(processSocketdata()));
-        }
-    }
-#endif
-}
-
-void MediaManager::connectInfoSocket()
-{
-#ifndef QT5
-    if(!tcCallback){
-        tcCallback = new QTcpServer();
-        QObject::connect(tcCallback, SIGNAL(newConnection()), this, SLOT(callBackClientConnected()), Qt::QueuedConnection);
-    }
-    tcCallback->listen(QHostAddress::Any,12002);
-    setCurrentStatus("Opening callback port 12002::"+QString::number(tcCallback->serverPort()));
-
-    if(!infoSocket){
-        infoSocket = new QTcpServer();
-    }
-
-    infoSocket->listen(QHostAddress::Any, 12001);
-    QObject::connect(infoSocket, SIGNAL(newConnection()), this, SLOT(infoConnectHandler()));
-#endif
-
-}
-
-void MediaManager::disconnectInfoSocket()
-{
-    // infoSocket->disconnect();
-    // infoSocket->deleteLater();
-}
-
-
-
-bool MediaManager::initViews(bool flipped)
-{
-#if defined (QT4) && ! defined (__ANDROID__)
-
-
-    filterProxy = new ColorFilterProxyWidget(this);
-
-    if(flipColors){
-        filterProxy->invert = true;
-    }
-    else{
-        filterProxy->invert = false;
-    }
-
-    if(!useInvertTrick){
-        filterProxy->enable=false;
-    }
-
-    videoSurface->installEventFilter(filterProxy);
-    filterProxy->setWidget(videoSurface);
-    filterProxy->setAutoFillBackground(false);
-    filterProxy->hide();
-#endif
-    return true;
-
-}
 
 void MediaManager::setupDirectories()
 {

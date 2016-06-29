@@ -104,7 +104,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_skinOverridePath(overridePath),
     m_window(NULL),
     m_dceRequestNo(1),
-    m_useQueueInsteadOfInstantPlay(false), m_bIsOSD(isOsd)
+    m_useQueueInsteadOfInstantPlay(false), m_bIsOSD(isOsd),
+    usingExternal(false)
 {
     m_routerHelper = new RouterHelper(qOrbiter_ptr);
 

@@ -55,7 +55,7 @@ qOrbiter::qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnec
     : qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
     //<-dceag-const-e->
 {
-    deviceName = name;
+    deviceName = name; m_bOrbiterConnected =false;
 
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
     QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);

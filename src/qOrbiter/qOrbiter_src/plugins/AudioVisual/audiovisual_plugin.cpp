@@ -17,10 +17,12 @@
 */
 #include "audiovisual_plugin.h"
 #include "mediamanager.h"
-
-#ifndef QT5
-#include <qdeclarative.h>
+#ifdef RPI
+#include "mediamanager.h"
+#else
+#include "mediamanager.h"
 #endif
+
 
 void AudioVisualPlugin::registerTypes(const char *uri)
 {
