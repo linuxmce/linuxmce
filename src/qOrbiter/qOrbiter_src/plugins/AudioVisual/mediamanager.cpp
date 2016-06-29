@@ -20,16 +20,10 @@
 #include <QTcpSocket>
 #include <QProcess>
 #include <QDir>
-#ifndef Q_OS_ANDROID
-#ifdef QT4
-#include <QGraphicsScene>
-#include <QtOpenGL/QGLWidget>
-#include <QGraphicsView>
-#elif QT5
 #include <QQuickItem>
 #include <QImage>
-#endif
-#endif
+
+
 
 
 using namespace DCE;
@@ -40,25 +34,11 @@ using namespace DCE;
  * \param parent
  * \ingroup audio_visual
  */
-#ifdef QT4
-MediaManager::MediaManager(QDeclarativeItem *parent) :
-    QDeclarativeItem(parent)
-  #elif defined (QT5)
-MediaManager::MediaManager(QQuickItem *parent):
-    QQuickItem(parent)
-  #endif
+
+MediaManager::MediaManager(QQuickItem *parent): QQuickItem(parent)
+
 {
-#ifdef ANDROID
 
-#ifdef QT4
-    setFlag(ItemHasNoContents, false);
-
-
-#elif QT5
-    setFlag(QQuickItem::ItemHasContents, false);
-#endif
-
-#endif
     serverAddress = "";
     deviceNumber = -1;
     timeCodeServer = new QTcpServer();
@@ -66,37 +46,6 @@ MediaManager::MediaManager(QQuickItem *parent):
     lastTick = "";
     mediaPlayer = NULL;
     setCurrentStatus("Media Manager defaults set, initializing media engines");
-#ifdef QT4
-
-#ifndef ANDROID
-    // setAvailibleOutputs(Phonon::BackendCapabilities::availableAudioOutputDevices());
-    qDebug() << outputs;
-    qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
-
-    mediaObject = new Phonon::MediaObject();
-    videoSurface = new Phonon::VideoWidget();
-
-    audioSink = new Phonon::AudioOutput();
-    discController = new Phonon::MediaController(mediaObject);
-    QObject::connect(discController, SIGNAL(availableTitlesChanged(int)), this, SLOT(setAvailTitles(int)));
-    QObject::connect(discController, SIGNAL(availableSubtitlesChanged()), this, SLOT(setSubtitles()));
-    QObject::connect(discController, SIGNAL(availableMenusChanged(QList<NavigationMenu>)), this, SLOT(setMenus(QList<NavigationMenu>)));
-    QObject::connect(mediaObject, SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
-
-
-    Phonon::createPath(mediaObject, audioSink);
-    setCurrentStatus("Audio Sink Initialized");
-    Phonon::createPath(mediaObject, videoSurface);
-    setCurrentStatus("Video Player Initialized");
-
-    videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
-    videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
-    if(initViews(true))
-        setCurrentStatus("Color Filter Applied.");
-#endif
-    setCurrentStatus("Window Initialized");
-#endif
-
     totalTime=0;
     setMediaBuffer(0);
     setMediaPlaying(false);
@@ -126,31 +75,7 @@ void MediaManager::initializeConnections()
 
 
     /*From Dce MediaPlayer*/
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(QT5)
 
-    #if defined (QT4) && !defined(Q_OS_ANDROID)
-    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
-    QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
-    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()));  QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState()));
-    QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()));
-    QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)));
-    QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()));
-    QObject::connect(mediaObject, SIGNAL(totalTimeChanged(qint64)), this, SLOT(setTotalTime(qint64)));
-    QObject::connect(mediaObject, SIGNAL(bufferStatus(int)), this, SLOT(setMediaBuffer(int)));
-    QObject::connect(mediaObject, SIGNAL(aboutToFinish()), this, SIGNAL(mediaAboutToFinish()));
-    QObject::connect(mediaObject, SIGNAL(prefinishMarkReached(qint32)), this ,SLOT(setPrefinishMarkHit(qint32)));
-    QObject::connect(mediaObject,SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
-    QObject::connect(mediaObject, SIGNAL(hasVideoChanged(bool)), this , SLOT(setVideoStream(bool)));
-    /*internals*/
-    QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setDisplayVolume(qreal)));
-    QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
-    mediaObject->setTickInterval(quint32(1000));
-    #elif QT5
-    QObject::connect(this, SIGNAL(incomingTick(quint64)), this, SLOT(processTimeCode(qint64)));
-    #endif
-#elif  ( defined ANDROID || defined(Q_OS_IOS) ) && defined(QT5) || defined(QT5)
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
@@ -161,7 +86,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));    
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
-#endif
+
 
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
     QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));

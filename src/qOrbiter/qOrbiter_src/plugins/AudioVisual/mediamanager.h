@@ -19,27 +19,8 @@
 #define MEDIAMANAGER_H
 
 
-
-
-#ifdef QT4
-#include <qdeclarative.h>
-#include <QDeclarativeItem>
-#include <QGLWidget>
-
-#ifndef Q_OS_ANDROID && !defined(Q_OS_IOS)
-#include <QBoxLayout>
-#include <phonon>
-#include <QHBoxLayout>
-#include <colorfilterproxywidget.h>
-#include <phonon/mediacontroller.h>
-#endif
-
-#elif QT5
 #include <QQuickItem>
 #include <QImage>
-
-#endif
-
 #include <QKeyEvent>
 #include <QObject>
 
@@ -57,12 +38,7 @@ using namespace Qt;
  * This class represents a network media player embedded into the application. It runs as a plugin
  * as opposed to being directly instantiated by the Application to allow for modularity.
  */
-class MediaManager :
-        #ifdef QT4
-        public QDeclarativeItem
-        #elif QT5
-        public QQuickItem
-        #endif
+class MediaManager : public QQuickItem
 {
 
 
@@ -79,32 +55,14 @@ class MediaManager :
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
     Q_PROPERTY(QString fileUrl READ getMediaUrl NOTIFY fileUrlChanged)
     Q_PROPERTY(int incomingTime READ getIncomingTime WRITE setIncomingTime NOTIFY incomingTimeChanged)
-    Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
-#ifdef QT4
-#ifndef ANDROID
-    Q_PROPERTY(bool useInvertTrick READ getInvertTrick WRITE setInvertTrick  NOTIFY useInvertTrickChanged)
-#endif
-#endif
     Q_PROPERTY(bool videoStream READ getVideoStream WRITE setVideoStream NOTIFY videoStreamChanged)
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
 
-#ifndef Q_OS_ANDROID
-
-#ifndef QT5
-    Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
-#endif
-
-#endif
-
     Q_OBJECT
 
 public:
-#ifdef QT4
-    explicit MediaManager(QDeclarativeItem *parent = 0);
-#elif QT5
     explicit MediaManager(QQuickItem *parent = 0);
-#endif
 
     //media info
     int currentTime;
@@ -128,54 +86,19 @@ public:
     qreal displayVolume;
     bool muted;
 
-#ifdef NECESSITAS
-
-    long callbackAddress;
-#endif
-
-#ifdef __ANDROID__
-#ifdef QT4
-
-#endif
-#endif
-
     QString currentStatus;
     QString qs_totalTime;
 
 
     QTcpServer *timeCodeServer;
-#ifndef QT5
-    QTcpServer *infoSocket;
-    QTcpServer *tcCallback;
-#endif
-
     QString current_position;
     int iCurrent_Position;
-
-
-
-#ifndef Q_OS_ANDROID
-#ifdef QT4
-    QWidget *window;
-    QList <Phonon::AudioOutputDevice> outputs;
-    QVBoxLayout *layout;
-    ColorFilterProxyWidget *filterProxy;
-#elif QT5
-    /*
-     *In Qt5
-     *We dont need to do any painting of the operations normally
-     *This may change with raspberry pi
-     */
-#endif
-#endif
 
     qMediaPlayer *mediaPlayer;
 
     QList<QTcpSocket*> clientList;
     QTcpSocket*lastClient;
     QTcpSocket*callbackClient;
-
-
 
     QString serverAddress;
     int deviceNumber;
@@ -193,19 +116,6 @@ public:
     int incomingTime;
     long currentDevice;
     bool videoStream;
-
-#ifdef QT4
-
-#ifndef ANDROID
-    Phonon::VideoWidget *videoSurface;
-    Phonon::AudioOutput *audioSink;
-    Phonon::MediaObject *mediaObject;
-    Phonon::MediaController * discController;
-    QGLWidget *accel;
-    QWidget *surf;
-#endif
-
-#endif
 
 signals:
     void useInvertTrickChanged();
@@ -253,28 +163,13 @@ signals:
     void pluginVolumeDown();
 
 public slots:
-#ifdef QT4
-#ifndef ANDROID
-    void setInvertTrick(bool i){ if(i!=useInvertTrick){useInvertTrick=i; if(filterProxy){filterProxy->enable=useInvertTrick;} emit useInvertTrickChanged();} }
-    bool getInvertTrick() {return useInvertTrick;}
-#endif
-#endif
     void setVideoStream(bool b ){
-#ifdef QT4
-#ifndef ANDROID
 
-        videoStream = mediaObject->hasVideo(); emit videoStreamChanged();
-        qDebug() << "qMediaPlayer::setVideoStream("<<videoStream<<")";
-
-#endif
-#else
         if(videoStream != b){
             videoStream = b;
             emit videoStreamChanged();
         }
         qDebug() << "Item has video::"<<videoStream;
-#endif
-
     }
     bool getVideoStream(){return videoStream;}
 
@@ -293,28 +188,6 @@ public slots:
         mediaPlayer->EVENT_Playback_Completed(mediaPlayer->getInternalMediaUrl().toStdString(),mediaPlayer->getStreamID(), ended);
     }
 
-
-    void setColorFlip(bool f){
-        flipColors = f;
-#ifndef Q_OS_ANDROID
-#ifndef QT5
-
-        if(filterProxy)
-            filterProxy->invert = f;
-
-#endif
-#endif
-        emit colorFlipChanged();
-    }
-    bool getColorFlip() { return flipColors;}
-
-#ifndef Q_OS_ANDROID
-#ifndef QT5
-    void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
-    QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
-#endif
-#endif
-
     void setMuted(bool m){muted = m; emit mutedChanged();}
     bool getMuted(){ return muted;}
 
@@ -328,13 +201,6 @@ public slots:
     }
 
     void setVolume(qreal vol){
-#ifdef QT4
-#ifndef Q_OS_ANDROID
-        audioSink->setVolume(vol);
-#else
-        setPluginVolume((double)vol);
-#endif
-#endif
         volume = vol;
         displayVolume=vol;
         qWarning() << "Vol level :: " << vol;
@@ -359,21 +225,6 @@ public slots:
     void setDeviceNumber(int d) { if(deviceNumber !=d) {deviceNumber = d; emit deviceNumberChanged();}}
     int getDeviceNumber() {return deviceNumber;}
 
-    void updateMetaData(){
-#ifndef __ANDROID__
-#ifndef QT5
-        qDebug() <<"Artist::"<< mediaObject->metaData(Phonon::ArtistMetaData);
-        qDebug() <<"Album::"<< mediaObject->metaData(Phonon::AlbumMetaData);
-        qDebug() <<"Title::"<< mediaObject->metaData(Phonon::TitleMetaData);
-        qDebug() <<"Date::"<< mediaObject->metaData(Phonon::DateMetaData);
-        qDebug() <<"Genre::"<< mediaObject->metaData(Phonon::GenreMetaData);
-        qDebug() <<"Track::"<< mediaObject->metaData(Phonon::TracknumberMetaData);
-        qDebug() <<"Description::"<< mediaObject->metaData(Phonon::DescriptionMetaData);
-#endif
-#endif
-
-    }
-
     void setPrefinishMarkHit(qint32 t ) {}
 
     void setMediaBuffer(int b) {mediaBuffer = b; emit mediaBufferChanged();}
@@ -386,44 +237,21 @@ public slots:
     bool getErrorStatus() {return hasError;}
 
     void setMediaPlaying(bool s) {
+        if(mediaPlaying == s) return;
         mediaPlaying = s;
         qDebug() << "media playback changed in plugin!" << s;
-        setVideoStream(false);
-
-        if (mediaPlaying==false)
-        {
-#ifndef Q_OS_ANDROID
-#ifndef QT5
-            if(filterProxy)
-                filterProxy->hide();
-#endif
-#endif
-        }
-        else
-        {
-#ifndef Q_OS_ANDROID
-#ifdef QT4
-            if(filterProxy)
-                filterProxy->show();
-#endif
-#endif
-        }
         emit mediaPlayingChanged();
-
     }
+
     bool getMediaPlaying() {return mediaPlaying;}
 
     void setFileReference(QString f){
         qDebug() << "Updating file url.";
         fileReference = f;
         pluginUrl = fileReference;
-#if defined(ANDROID) || defined(Q_OS_IOS) || defined(QT5)
         emit pluginUrlUpdated();
-        connectInfoSocket();
         startTimeCodeServer();
         qDebug() << "CPP Url Updated";
-
-#endif
         emit fileReferenceChanged();
     }
     QString getFileReference() {return fileReference; }
@@ -445,14 +273,8 @@ public slots:
     bool getConnectionStatus(){return connected;}
 
     void setWindowSize(int h, int w) {
-
-#ifdef QT4
-#ifndef __ANDROID__
-        videoSurface->setFixedSize(w, h);
-#endif
-#elif QT5
-
-#endif
+        Q_UNUSED(h);
+        Q_UNUSED(w);
     }
 
     void newClientConnected();
@@ -463,74 +285,19 @@ public slots:
     }
     void forwardCallbackData();
 
-    void setState(){
-#ifndef __ANDROID__
-#ifdef QT4
-        qDebug() << mediaObject->state();
-        int i =  mediaObject->errorType();
-        if(i==0){
-            setCurrentStatus("Media Player Loading");
-#ifndef __ANDROID__
-#ifdef QT4
-            qDebug() << "Titles: \t" << discController->availableTitles();
-            qDebug() << "Chapters: \t" << discController->availableChapters();
-            qDebug() << "SubTitles: \t" << discController->availableSubtitles();
-            qDebug() << "Angles: \t" << discController->availableAngles();
-            qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();
-            qDebug() << "Features: \t" << discController->supportedFeatures();
-
-
-#endif
-#endif
-        } else if( i== 1){
-            setCurrentStatus("Media Player Stopped");
-        } else if( i ==2) {
-            setCurrentStatus("Media is playing.");
-        } else if (i == 3) {
-            setCurrentStatus("Media is buffering");
-        } else if ( i == 4 ){
-            setCurrentStatus("Media is paused.");
-        }
-        else if (i == 5 ){
-            setCurrentStatus("Media Error.");
-            mediaPlayer->EVENT_Playback_Completed(mediaPlayer->currentMediaUrl.toStdString(), mediaPlayer->i_StreamId, false);
-            qWarning("Media could not start.");
-        }
-#endif
-#endif
-    }
-
     void setMediaPosition(int msec) {
         qDebug() << "Seeking to " << msec << " msec";
-#ifdef QT4
-
-#ifndef __ANDROID__
-        mediaObject->seek((qint64)msec);
-#endif
-
-#if defined ANDROID
         updatePluginSeek(msec);
-#endif
-
-
-#elif QT5
-        updatePluginSeek(msec);
-#endif
-
     }
+
     void setZoomLevel(QString zoom);
     void setAspectRatio(QString aspect);
 
     QImage getScreenShot();
 
     void setVideoSize(int h, int w) {
-#ifdef QT4
-#ifndef __ANDROID__
-        videoSurface->setFixedSize(w, h);
-#endif
-#elif QT5
-
-#endif
+        Q_UNUSED(h);
+        Q_UNUSED(w);
     }
 
     void setQmlTotalTime(int inSec){
@@ -599,34 +366,24 @@ public slots:
     void pluginNotifyStart(QString title, QString audioOptions="", QString videoOptions=""){
         startTimeCodeServer();
         mediaPlayer->EVENT_Playback_Started(
-                   mediaPlayer->getInternalMediaUrl().toStdString(),
+                    mediaPlayer->getInternalMediaUrl().toStdString(),
                     mediaPlayer->i_StreamId,
                     title.toStdString(),
                     audioOptions.toStdString(),
                     videoOptions.toStdString());
-                                                                                           }
+    }
     void pluginNotifyEnd(bool withError){
         mediaPlayer->EVENT_Playback_Completed(mediaPlayer->getInternalMediaUrl().toStdString(), mediaPlayer->i_StreamId, withError);
     }
 
-#ifndef __ANDROID__
-#ifdef QT4
-
-#endif
-#endif
-
     //Event slots
     void playbackInfoUpdated(QString mediaTitle, QString mediaSubTitle, QString name, int screen);
-
 
 private:
     void initializePlayer();
     void initializeConnections();
     void shutdownDevice();
     bool mountDrive(long device);
-
-
-
 
 private slots:
     void infoConnectHandler();
@@ -636,17 +393,6 @@ private slots:
 
     bool initViews(bool flipped);
     void setupDirectories();
-#ifdef QT4
-#ifndef Q_OS_ANDROID
-    void setSubtitles(){      qDebug() << "SubTitles: \t" << discController->availableSubtitles(); }
-    void setAvailTitles(int t){ qDebug() << "Titles: \t" << discController->availableTitles(); }
-    void setChapters(int c){qDebug() << "Chapters: \t" << discController->availableChapters(); }
-    void setAngles(int a) {qDebug() << "Angles: \t" << discController->availableAngles(); }
-    void setAudioChannels(){ qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();}
-    void setMenus(QList<NavigationMenu> *menus){ qDebug()<< "Menus\t" << menus;}
-
-#endif
-#endif
 };
 
 
