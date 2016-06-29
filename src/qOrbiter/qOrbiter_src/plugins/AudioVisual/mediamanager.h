@@ -355,7 +355,6 @@ public slots:
     QString getTotalTime() {return qs_totalTime;}
 
     void processTimeCode(qint64 f);
-    void processSocketdata();
 
     void reInit(){
         setConnectionStatus(false);

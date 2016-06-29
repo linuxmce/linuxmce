@@ -15,6 +15,21 @@ uri = AudioVisual
 URI = AudioVisual #$$TARGET
 #TARGET = $$qtLibraryTarget($$TARGET)
 
+    linux-rasp-pi-g++{
+SOURCES += \
+         omx/mediamanager.cpp
+
+HEADERS+= \
+        omx/mediamanager.h
+} else {
+
+SOURCES += \
+         mediamanager.cpp
+
+HEADERS+= \
+        mediamanager.h
+}
+
 
 
 linux-g++{
@@ -66,8 +81,7 @@ OTHER_FILES = qmldir
 
 # Input
 SOURCES += \
-	audiovisual_plugin.cpp \   
-	mediamanager.cpp \
+        audiovisual_plugin.cpp \
         ../../../../qMediaPlayer/qMediaPlayer.cpp \
         ../../../../SerializeClass/SerializeClass.cpp \
         ../../../../DCE/Virtual_Device_Translator.cpp \
@@ -87,12 +101,11 @@ SOURCES += \
         ../../../../DCE/DeviceData_Base.cpp \
         ../../../../DCE/DeviceData_Impl.cpp \
 	../../../../Gen_Devices/qMediaPlayerBase.cpp \
-        ../../../../Gen_Devices/qOrbiterBase.cpp
+        ../../../../Gen_Devices/qOrbiterBase.cpp \
+    mediabase/mediamanagerbase.cpp
 	
 HEADERS += \
-	audiovisual_plugin.h \  
-	colorfilterproxywidget.h \
-	mediamanager.h \
+        audiovisual_plugin.h \
         ../../../../qMediaPlayer/qMediaPlayer.h \
 	../../../../DCE/DeviceData_Base.h \
 	../../../../DCE/Message.h \
@@ -107,7 +120,8 @@ HEADERS += \
 	../../../../pluto_main/Define_DeviceCategory.h \
 	../../../../pluto_main/Define_DeviceTemplate.h \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
-        ../../../../Gen_Devices/qOrbiterBase.h
+        ../../../../Gen_Devices/qOrbiterBase.h \
+    mediabase/mediamanagerbase.h
 
 
 
