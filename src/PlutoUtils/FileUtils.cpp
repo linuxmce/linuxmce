@@ -190,8 +190,14 @@ bool FileUtils::ReadTextFile(string sFileName, string& sData)
     char *pData = FileUtils::ReadFileIntoBuffer(sFileName, nSize);
     bool bResult = NULL != pData;
 
+    if (nSize<=0)
+        {
+            sData="";
+            return false;
+        }
+
     if(pData)
-        sData = string(pData);
+        sData = string(pData, nSize);
 
     delete [] pData;
     pData = NULL;
