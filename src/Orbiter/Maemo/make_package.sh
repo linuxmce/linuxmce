@@ -1,8 +1,8 @@
 #!/bin/bash
 
-VERSION=0810
-PACKAGE_VERSION=beta02
-OS=os2008
+VERSION=1404
+PACKAGE_VERSION=$(date +%Y%m%d%H%M)
+OS=fremantle
 HOME=Maemo
 DEST=build
 SRC=src
@@ -14,14 +14,16 @@ cp -r ${SRC}/share ${DEST}/usr
 cp ${SRC}/debian/* ${DEST}
 
 
-export SNR_CPPFLAGS="-DMAEMO_NOKIA770"
+export SNR_CPPFLAGS="-DMAEMO_NOKIA770 -DPADORBITER"
 export SNR_LDFLAGS=""
 
 cd ../../		
+mkdir -p lib/ bin/
+
 echo "Cleaning previous build"
 rm -f lib/* bin/*
 
-for TARGET in PlutoUtils SerializeClass SDL_Helpers DCE
+for TARGET in SerializeClass SDL_Helpers DCE PlutoUtils
 do
 	echo "== Building ${TARGET} ... =="
 	cd ${TARGET}

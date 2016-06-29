@@ -1,7 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -MAEMO_NOKIA770 -DKDE_LMCE -DPADORBITER -DUSE_GTK
+SNR_CPPFLAGS ?= -DMAEMO_NOKIA770 -DPADORBITER
 SNR_LDFLAGS ?= 
 
 ROOT = ..
@@ -11,9 +11,19 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	BASELDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	BASELDLIBS += -lmysqlclient_r
+endif
+
 MYNAME = Orbiter
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 8mplateID
+MYDEVTEMPLATEID = 8
 
 Gen_Dev_Files = $(GENDEV)/OrbiterBase.cpp
 sources = Main.cpp Orbiter.cpp $(Gen_Dev_Files)
@@ -42,13 +52,17 @@ XTRALDLIBS += -lX11 -lXmu -lglib-2.0
 
 Gen_Dev_Files +=
 sources += \
+	Linux/X3DWindow.cpp \
+	Linux/X3DButton.cpp \
+	Linux/XPromptUser.cpp \
+	Linux/XProgressWnd.cpp \
 	../utilities/linux/window_manager/WMController/WMController.cpp \
 	../utilities/linux/window_manager/wmctrl/wmctrl.cpp \
 	../utilities/linux/wrapper/wrapper_x11.cpp \
 	../utilities/linux/wrapper/image_file.cpp \
 	Linux/win_list_manager.cpp \
 	Linux/OrbiterRenderer_Linux.cpp \
-        Linux/WindowContext.cpp \
+	Linux/WindowContext.cpp \
 	DesignObj_Data.cpp \
 	DesignObj_Orbiter.cpp \
 	DesignObj_DataGrid.cpp \
