@@ -25,7 +25,7 @@
 #include <QString>
 class QTimer;
 
-class MediaManager;
+class MediaManagerBase;
 
 //<-dceag-decl-b->
 namespace DCE
@@ -59,7 +59,7 @@ public:
 //<-dceag-const-b->
 public:
         // Constructors/Destructor
-        qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *manager,bool bConnectEventHandler=true,bool bLocalMode=false, class Router *pRouter=NULL);
+        qMediaPlayer(int DeviceID, string ServerAddress, MediaManagerBase *manager,bool bConnectEventHandler=true,bool bLocalMode=false, class Router *pRouter=NULL);
         virtual ~qMediaPlayer();
         virtual bool GetConfig();
         virtual bool Register();
@@ -1032,7 +1032,7 @@ public:
     private:
         int m_currentSpeed;
         int m_currentFkFileType;
-        MediaManager * mp_manager;
+        MediaManagerBase * mp_manager;
         QString m_internalMediaUrl;
 
         int m_iChapter ;
