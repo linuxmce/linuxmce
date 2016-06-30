@@ -617,23 +617,55 @@ if [[ ! -z "$RULE" ]]; then
   if [[ "$ACTION" = "Del" ]]; then
 	echo "Delete rule"
 	IPVersion="$(echo $PROTOCOL | cut -d- -f2)"
-	
+	PROTOCOLv="$(echo $PROTOCOL | cut -d- -f1)"
 	if [[ "$IPVersion" = "ipv4" ]]; then
-	if [[ "$TABLE" = "nat" ]]; then
-		CHAIN="nat-$CHAIN"
-		#Delete the forward rule matched by the nat-PREROUTING rule.
-		sql="DELETE FROM Firewall WHERE RuleType='FORWARD' AND Protocol='$PROTOCOL'"
-		$(RunSQL "$sql")
-    fi
-		sql="DELETE FROM Firewall WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL' AND Place='$PLACE'"
-		$(RunSQL "$sql")
-		sql="BEGIN;
-			UPDATE Firewall SET Place = Place - 1 WHERE RuleType='$CHAIN' AND Place > '$PLACE' AND Protocol='$PROTOCOL' order by Place ASC;
-			COMMIT;"
-		$(RunSQL "$sql")
-		echo "IPTABLES -D $CHAIN $PLACE"
-		CHAIN=${CHAIN^^}
-		$IPTABLES -D $CHAIN $PLACE
+		if [[ "$TABLE" = "nat" ]]; then
+			#Get the data to find the matching forward rule to delete
+			Q="SELECT SourcePort, DestinationPort FROM Firewall WHERE RuleType='nat-$CHAIN' AND PROTOCOL='$PROTOCOL' AND Place='$PLACE'"
+			echo $Q
+			R=$(RunSQL "$Q")
+			for Port in $R; do
+				SOURCEPORT=$(Field 1 "$Port")
+				DESTINATIONPORT=$(Field 2 "$Port")
+				echo $DESTINATIONPORT $SOURCEPORT
+			done
+			Q="SELECT Place FROM Firewall WHERE RuleType='FORWARD' AND PROTOCOL='$PROTOCOL' AND SourcePort='$SOURCEPORT' AND DestinationPort='$DESTINATIONPORT'"
+			echo $Q
+			R=$(RunSQL "$Q")
+			for Port in $R; do
+				PLACEFOREWARD=$(Field 1 "$Port")
+				echo $PLACEFOREWARD
+				echo "1"
+			done
+			#Delete the nat rule
+			sql="DELETE FROM Firewall WHERE RuleType='nat-$CHAIN' AND Protocol='$PROTOCOL' AND Place=$PLACE"
+			echo $sql
+			$(RunSQL "$sql")
+			sql="BEGIN;
+				UPDATE Firewall SET Place = Place - 1 WHERE RuleType='nat-$CHAIN' AND Place > '$PLACE' AND Protocol='$PROTOCOL' order by Place ASC;
+				COMMIT;"
+			$(RunSQL "$sql")
+			$IPTABLES -t nat -D $CHAIN $PLACE
+			#Delete the forward rule matched by the nat rule.
+			sql="DELETE FROM Firewall WHERE RuleType='FORWARD' AND Protocol='$PROTOCOL' AND Place=$PLACEFOREWARD"
+			echo $sql
+			$(RunSQL "$sql")
+			sql="BEGIN;
+				UPDATE Firewall SET Place = Place - 1 WHERE RuleType='FORWARD' AND Place > '$PLACEFOREWARD' AND Protocol='$PROTOCOL' order by Place ASC;
+				COMMIT;"
+			$(RunSQL "$sql")
+			$IPTABLES -D FORWARD $PLACEFOREWARD
+		else
+			sql="DELETE FROM Firewall WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL' AND Place='$PLACE'"
+			$(RunSQL "$sql")
+			sql="BEGIN;
+				UPDATE Firewall SET Place = Place - 1 WHERE RuleType='$CHAIN' AND Place > '$PLACE' AND Protocol='$PROTOCOL' order by Place ASC;
+				COMMIT;"
+			$(RunSQL "$sql")
+			echo "IPTABLES -D $CHAIN $PLACE"
+			CHAIN=${CHAIN^^}
+			$IPTABLES -D $CHAIN $PLACE
+		fi
 	else
 		sql="DELETE FROM Firewall WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL' AND Place='$PLACE'"
 		echo "$sql"
