@@ -322,7 +322,7 @@ function outsideAccess($output,$dbADO) {
 			$WebId1=(int)$_POST['WebId1'];
 			$allow443=(int)@$_POST['allow443'];
 			$oldAllow443=(int)@$_POST['oldAllow443'];
-			$WebId2=(int)$_POST['SslId1'];
+			$SslId1=(int)$_POST['SslId1'];
 			$allow22=(int)@$_POST['allow22'];
 			$oldAllow22=(int)@$_POST['oldAllow22'];
 			$SshId1=(int)$_POST['SshId1'];
@@ -377,7 +377,7 @@ function outsideAccess($output,$dbADO) {
 				}
 			}else{
 				if($allow443==0){
-					$options='-L Rule -H local -t filter -A Del -p '.$SslId1.' -C AUTO -P tcp-ipv4';
+					$options='-L Rule -H local -t filter -A Del -p '.$SslId1.' -C INPUT -P tcp-ipv4';
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}
@@ -424,6 +424,7 @@ function outsideAccess($output,$dbADO) {
 					exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh '.$options);
 				}
 			}
+			echo $options;
 
 			if(isset($_POST['RAport'])){
 				if(@$RAport!=22){
