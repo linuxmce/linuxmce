@@ -15,23 +15,6 @@ uri = AudioVisual
 URI = AudioVisual #$$TARGET
 #TARGET = $$qtLibraryTarget($$TARGET)
 
-    linux-rasp-pi-g++{
-SOURCES += \
-         omx/mediamanager.cpp
-
-HEADERS+= \
-        omx/mediamanager.h
-} else {
-
-SOURCES += \
-         mediamanager.cpp
-
-HEADERS+= \
-        mediamanager.h
-}
-
-
-
 linux-g++{
 
     !RPI{
