@@ -102,7 +102,9 @@ SOURCES += \
         ../../../../DCE/DeviceData_Impl.cpp \
 	../../../../Gen_Devices/qMediaPlayerBase.cpp \
         ../../../../Gen_Devices/qOrbiterBase.cpp \
-    mediabase/mediamanagerbase.cpp
+    mediabase/mediamanagerbase.cpp \
+    playerInterfaces/defaultplayerinterface.cpp \
+    playerInterfaces/omxdbusplayerinterface.cpp
 	
 HEADERS += \
         audiovisual_plugin.h \
@@ -121,7 +123,9 @@ HEADERS += \
 	../../../../pluto_main/Define_DeviceTemplate.h \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
         ../../../../Gen_Devices/qOrbiterBase.h \
-    mediabase/mediamanagerbase.h
+    mediabase/mediamanagerbase.h \
+    playerInterfaces/defaultplayerinterface.h \
+    playerInterfaces/omxdbusplayerinterface.h
 
 
 

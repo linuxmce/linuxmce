@@ -70,8 +70,8 @@ Item{
 
         /* TODO Add reconnect handler in cpp and here */
         /* TODO Change android url to streaming url, generic for other devices. */
-        onPluginUrlUpdated:{
-            console.log("New QML media Url ==>"+pluginUrl)
+        onPluginUrlChanged:{
+            console.log("New QML media Url ==>"+lmceData.pluginUrl)
             if(pluginUrl.length > 4){
                 console.log("URL ok!")
                 prepareMedia(lmceData.pluginUrl)
@@ -109,7 +109,7 @@ Item{
 
 
 
-        onPauseMedia:{
+        onPauseChanged:{
             console.log("dceplayer::pause")
             if(qmlPlayer.playbackState == MediaPlayer.PausedState)
                 qmlPlayer.play()
