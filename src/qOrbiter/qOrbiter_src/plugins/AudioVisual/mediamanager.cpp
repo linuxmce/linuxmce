@@ -62,7 +62,7 @@ void MediaManager::initializePlayer()
     setCurrentStatus("Initializing Media Player "+ QString::number(deviceNumber));
 
     if(!mediaPlayer){
-        mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
+      //  mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
     }
 
     initializeConnections();

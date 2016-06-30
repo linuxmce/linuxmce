@@ -385,12 +385,7 @@ private:
     bool mountDrive(long device);
 
 private slots:
-    void infoConnectHandler();
-    void connectInfoSocket();
-    void disconnectInfoSocket();
 
-
-    bool initViews(bool flipped);
     void setupDirectories();
 };
 

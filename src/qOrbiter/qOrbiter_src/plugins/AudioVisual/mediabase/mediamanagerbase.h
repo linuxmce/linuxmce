@@ -36,6 +36,7 @@ class MediaManagerBase : public QQuickItem
     Q_PROPERTY(bool muted READ muted WRITE setMuted NOTIFY mutedChanged)
     Q_PROPERTY(bool mediaPlaying READ mediaPlaying WRITE setMediaPlaying NOTIFY mediaPlayingChanged)
     Q_PROPERTY(bool hasVideoStream READ hasVideoStream WRITE setHasVideoStream NOTIFY hasVideoStreamChanged)
+    Q_PROPERTY(bool pause READ pause WRITE setPause NOTIFY pauseChanged)
 
     Q_OBJECT
 public:
@@ -45,13 +46,13 @@ public:
     void setDeviceNumber(int deviceNumber);
 
     int streamId() const;
-    void setStreamId(int streamId);
+
 
     int fileNo() const;
     void setFileNo(int fileNo);
 
-    QString fileReference() const;
-    void setFileReference(const QString &fileReference);
+
+
 
     QString filePath() const;
     void setFilePath(const QString &filePath);
@@ -78,7 +79,7 @@ public:
     void setMuted(bool muted);
 
     QString currentStatus() const;
-    void setCurrentStatus(const QString &currentStatus);
+
 
     bool hasError() const;
     void setHasError(bool hasError);
@@ -105,10 +106,10 @@ public:
     void setServerAddress(const QString &serverAddress);
 
     QString pluginUrl() const;
-    void setPluginUrl(const QString &pluginUrl);
+
 
     bool connected() const;
-    void setConnected(bool connected);
+
 
     int videoHeight() const;
     void setVideoHeight(int videoHeight);
@@ -118,6 +119,14 @@ public:
 
     bool hasVideoStream() const;
     void setHasVideoStream(bool hasVideoStream);
+
+
+
+    long getCurrentStorageDevice() const;
+    void setCurrentStorageDevice(long currentStorageDevice);
+
+    bool pause() const;
+
 
 signals:
     void deviceNumberChanged();
@@ -140,6 +149,8 @@ signals:
     void currentPositionChanged();
     void currentPositionNumericChanged();
     void totalTimeNumericChanged();
+    void pauseChanged();
+    void zoomLevelChanged();
 
     void serverAddressChanged();
     void pluginUrlChanged();
@@ -149,10 +160,29 @@ signals:
     void videoWidthChanged();
     void hasVideoStreamChanged();
 
+    void pluginVolumeUp();
+    void pluginVolumeDown();
+    void pauseMedia();
+    void updatePluginSeek(int pos);
 
 public slots:
-   virtual void qmlPlaybackEnded(bool ended) = 0;
-   virtual QImage getScreenShot() = 0;
+    void setPluginUrl(const QString &pluginUrl);
+    QString fileReference() const;
+    void setCurrentStatus(const QString &currentStatus);
+    void stopPluginMedia();
+    void mediaStarted();
+    void setConnected(bool connected);
+    void setStreamId(int streamId);
+    void setFileReference(const QString &fileReference);
+
+    void setPause(bool paused);
+    void setMediaPosition(int msec);
+    void setZoomLevel(QString zoom);
+
+
+    void setConnectionDetails(int device, QString routerAdd);
+    void qmlPlaybackEnded(bool ended) ;
+    virtual QImage getScreenShot() = 0;
 
     void setQmlTotalTime(int inSeconds);
     void setTotalTimeFromPlugin(quint64 inSeconds);
@@ -160,16 +190,21 @@ public slots:
 
     void pluginNotifyStart(QString title, QString audioOptions="", QString videoOptions="");
     void pluginNotifyEnd(bool withError);
+    void playbackInfoUpdated(QString mediaTitle, QString mediaSubTitle, QString name, int screen);
 
-protected:
-    void processTimeCode(quint64 time);
+    void stopTimeCodeServer();
     void startTimeCodeServer();
+
+    void onNewClientConnected();
+    void processTimeCode(quint64 time);
+protected:
+
     void initializePlayer();
     void initializeConnections();
 
 private:
     void transmit(QString msg);
-    void onNewClientConnected();
+
 
 
 
@@ -180,14 +215,17 @@ private:
     QString m_fileReference;
     QString m_filePath;
 
-
     int     m_playbackSpeed;
     int     m_mediaBuffer;
     bool    m_mediaPlaying;
+    bool    m_paused;
     QString m_lastTick;
     qreal   m_volume;
     qreal   m_displayVolume;
     bool    m_muted;
+
+    QString m_zoomLevel;
+    QString m_aspectRatio;
 
 
     QString m_currentStatus;
@@ -215,6 +253,8 @@ private:
     int m_videoHeight;
     int m_videoWidth;
     bool m_hasVideoStream;
+
+    long m_currentStorageDevice;
 
 };
 

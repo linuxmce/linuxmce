@@ -16,11 +16,11 @@
     along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "audiovisual_plugin.h"
-#include "mediamanager.h"
+
 #ifdef RPI
-#include "mediamanager.h"
+#include "playerInterfaces/omxdbusplayerinterface.h"
 #else
-#include "mediamanager.h"
+#include "playerInterfaces/defaultplayerinterface.h"
 #endif
 
 
@@ -30,7 +30,12 @@ void AudioVisualPlugin::registerTypes(const char *uri)
     // @uri AudioVisual
 #endif
     Q_ASSERT(uri==QLatin1String("AudioVisual"));
-    qmlRegisterType<MediaManager>(uri, 1, 0, "MediaManager");
+#ifdef RPI
+    qmlRegisterType<omxdbusplayerinterface>(uri, 1, 0, "MediaManager");
+#else
+    qmlRegisterType<DefaultPlayerInterface>(uri, 1, 0, "MediaManager");
+#endif
+
 }
 #if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(AudioVisual, AudioVisualPlugin)
