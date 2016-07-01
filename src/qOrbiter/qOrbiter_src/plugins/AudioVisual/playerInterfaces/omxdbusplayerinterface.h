@@ -10,6 +10,7 @@ public:
 
   public slots:
     QImage getScreenShot();
+    void modifypath(QString file);
 
 private slots:
     void setConnections();

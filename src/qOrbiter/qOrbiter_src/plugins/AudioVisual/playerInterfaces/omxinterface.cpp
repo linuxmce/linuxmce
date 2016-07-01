@@ -36,16 +36,22 @@ bool OmxInterface::omxConnected() const
 
 void OmxInterface::setOmxConnected(bool omxConnected)
 {
+
+
     if(m_omxConnected && omxConnected){
         QMetaObject::invokeMethod(dbusOmxProperties, "PlaybackStatus", Qt::QueuedConnection);
       //  QMetaObject::invokeMethod(dbusOmxProperties, "Position", Qt::QueuedConnection);
     }
-    qDebug () << Q_FUNC_INFO << m_omxConnected;
 
     if(m_omxConnected == omxConnected) return;
 
     if(!m_omxConnected && omxConnected){
+        qDebug()<< Q_FUNC_INFO << "registering callbacks";
         QMetaObject::invokeMethod(dbusOmxProperties, "Duration", Qt::QueuedConnection);
+    }
+
+    if(m_omxConnected){
+        dbusOmxProperties->Position();
     }
 
     m_omxConnected = omxConnected;
@@ -81,7 +87,7 @@ long OmxInterface::getPosition() const
 void OmxInterface::setPosition(qlonglong position)
 {
     m_position = position;
-    emit positionChanged();
+    emit positionChanged(m_position/1000);
 }
 
 void OmxInterface::pause()
@@ -120,6 +126,7 @@ void OmxInterface::timerEvent(QTimerEvent *event)
     Q_UNUSED(event);
    // qDebug() << Q_FUNC_INFO << dbusOmxProperties->connection().interface()->registeredServiceNames().value();
     setOmxConnected(dbusOmxPlayer->connection().isConnected());
+
 }
 
 bool OmxInterface::getOmxDbusInfo()
@@ -189,8 +196,6 @@ void OmxInterface::doSetup()
     connect(dbusOmxProperties, &OmxDbusProxy::positionChanged, this, &OmxInterface::setPosition);
     connect(dbusOmxProperties, &OmxDbusProxy::durationChanged, this, &OmxInterface::setDuration);
 
-    QDBusConnection::sessionBus().connect(m_dbusName, "/org/mpris/MediaPlayer2", dbusOmxPlayer->interface(), "Position", this, SLOT(handleTimecodeTick(qlonglong)) );
-
     qDebug() <<  " Omx is setup";
     qDebug() << Q_FUNC_INFO << dbusOmxPlayer->connection().interface()->registeredServiceNames().value();
 }
@@ -214,6 +219,7 @@ void OmxInterface::runOmxWithFile(QString file)
         if(m_omxProcess->state()==QProcess::Running){
             return;
         } else {
+
             qDebug() << Q_FUNC_INFO << "arg " << file;
             m_omxProcess->setArguments(QStringList()<<file);
             m_omxProcess->start();
@@ -237,6 +243,11 @@ void OmxInterface::seekToPosition(int position)
 void OmxInterface::handleTimecodeTick(qlonglong tick)
 {
     qDebug() << Q_FUNC_INFO << tick;
+}
+
+void OmxInterface::handleStateChanged(QString s, QDBusVariant v)
+{
+    qDebug() << Q_FUNC_INFO << s;
 }
 
 

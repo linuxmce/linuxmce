@@ -88,6 +88,14 @@ Item {
 
     QmlPictureFrame {
         id: qmlPictureFrame
+        visible:!dcenowplaying.b_mediaPlaying
+        onVisibleChanged: {
+            if(!visible)
+                stopScreenSaver()
+            else
+                startScreenSaver()
+        }
+
         MouseArea{
             anchors.fill: parent
             onClicked: uiOn=!uiOn

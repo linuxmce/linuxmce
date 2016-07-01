@@ -120,7 +120,7 @@ public:
 
 
     long getCurrentStorageDevice() const;
-    void setCurrentStorageDevice(long currentStorageDevice);
+
 
     bool pause() const;
 
@@ -167,9 +167,10 @@ signals:
     void pluginVolumeDown();
     void pauseMedia();
     void updatePluginSeek(int pos);
+    void currentStorageDeviceChanged();
 
 public slots:
-
+    void setCurrentStorageDevice(long currentStorageDevice);
     void setPluginUrl(const QString &pluginUrl);
     QString fileReference() const;
     void setCurrentStatus(const QString &currentStatus);

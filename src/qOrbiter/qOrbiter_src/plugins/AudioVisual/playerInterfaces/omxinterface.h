@@ -22,7 +22,7 @@ signals:
     void omxConnectedChanged();
     void playbackStatusChanged();
     void durationChanged();
-    void positionChanged();
+    void positionChanged(quint64 time);
 
 
 public slots:
@@ -30,6 +30,7 @@ public slots:
     void stopPlayer();
     void seekToPosition(int position);
     void handleTimecodeTick(qlonglong tick);
+    void handleStateChanged(QString s, QDBusVariant v);
 
 public:
     QString dbusAddress() const;

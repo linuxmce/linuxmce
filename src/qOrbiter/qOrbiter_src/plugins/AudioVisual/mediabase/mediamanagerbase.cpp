@@ -27,6 +27,7 @@ int MediaManagerBase::deviceNumber() const
 
 void MediaManagerBase::setDeviceNumber(int deviceNumber)
 {
+    qDebug() << Q_FUNC_INFO << deviceNumber;
     m_deviceNumber = deviceNumber;
     emit deviceNumberChanged();
 }
@@ -614,7 +615,9 @@ long MediaManagerBase::getCurrentStorageDevice() const
 
 void MediaManagerBase::setCurrentStorageDevice(long currentStorageDevice)
 {
+    qDebug() << Q_FUNC_INFO << currentStorageDevice;
     m_currentStorageDevice = currentStorageDevice;
+    emit currentStorageDeviceChanged();
 }
 
 
