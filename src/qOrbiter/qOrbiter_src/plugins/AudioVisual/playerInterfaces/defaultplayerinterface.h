@@ -2,6 +2,7 @@
 #define DEFAULTPLAYERINTERFACE_H
 #include "../mediabase/mediamanagerbase.h"
 
+
 class DefaultPlayerInterface : public MediaManagerBase
 {
 public:

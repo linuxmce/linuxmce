@@ -26,14 +26,21 @@ linux-g++{
 linux-rasp-pi-g++{
     DESTDIR=../../imports/AudioVisual
     DEFINES+=RPI
-    RASP_INSTALL_TARGET=/usr/local/qt5pi/qml/
+    RASP_INSTALL_TARGET=/usr/pluto/bin/imports/
+    QT+= dbus
+
+    SOURCES += \
+    playerInterfaces/omxdbusplayerinterface.cpp \
+    playerInterfaces/omxinterface.cpp \
+    playerInterfaces/OmxDbusProxy.cpp
+
+    HEADERS += \
+    playerInterfaces/omxdbusplayerinterface.h \
+    playerInterfaces/omxinterface.h \
+    playerInterfaces/OmxDbusProxy.h
 }
 
-linux-rasp-pi-g++{
-    DESTDIR=../../imports/AudioVisual
-    DEFINES+=RPI
-    RASP_INSTALL_TARGET=/usr/local/qt5pi/qml/
-}
+
 
 android-g++{
     DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
@@ -85,9 +92,10 @@ SOURCES += \
         ../../../../DCE/DeviceData_Impl.cpp \
 	../../../../Gen_Devices/qMediaPlayerBase.cpp \
         ../../../../Gen_Devices/qOrbiterBase.cpp \
-    mediabase/mediamanagerbase.cpp \
-    playerInterfaces/defaultplayerinterface.cpp \
-    playerInterfaces/omxdbusplayerinterface.cpp
+        mediabase/mediamanagerbase.cpp \
+        playerInterfaces/defaultplayerinterface.cpp
+
+
 	
 HEADERS += \
         audiovisual_plugin.h \
@@ -106,9 +114,10 @@ HEADERS += \
 	../../../../pluto_main/Define_DeviceTemplate.h \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
         ../../../../Gen_Devices/qOrbiterBase.h \
-    mediabase/mediamanagerbase.h \
-    playerInterfaces/defaultplayerinterface.h \
-    playerInterfaces/omxdbusplayerinterface.h
+        mediabase/mediamanagerbase.h \
+        playerInterfaces/defaultplayerinterface.h
+
+
 
 
 

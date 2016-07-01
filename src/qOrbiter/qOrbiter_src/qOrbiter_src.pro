@@ -121,7 +121,9 @@ linux-rasp-pi-g++ || pi{
         DESTDIR=""
         target.path=/usr/pluto/bin
         INSTALLS+=target
-
+                runner.source=../buildScripts/rpi/runSingleQorbiter.sh
+                runner.path=/usr/pluto/bin
+                DEPLOYMENTFOLDERS+=runner
         plugins_folder.source = imports
         plugins_folder.target = $$DESTDIR
 
@@ -138,7 +140,6 @@ linux-g++{
                 folder_01.source = qml
                 folder_01.target = $$DESTDIR/qml
                 target.path=/usr/pluto/bin
-
         }
 
         contains(QT_VERSION,5.*.*){
@@ -148,6 +149,7 @@ linux-g++{
                # folder_01.target = $$DESTDIR/qml/
                 DEFINES += for_desktop GLENABLED
                 glmsg=scenegraph
+
         }
 !RPI{
       # DEPLOYMENTFOLDERS+= plugins_folder
@@ -231,6 +233,7 @@ folder_04.target=$$DESTDIR
 DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
 
 linux-rasp-pi-g++{
+
         DEPLOYMENTFOLDERS -= plugins_folder
 }
 
@@ -553,7 +556,8 @@ DISTFILES += \
     qml/skins/default/components/FloorplanHeatCool.qml \
     qml/skins/default/components/FloorplanDefaultControl.qml \
     ../docs/RPI-Dev-Setup.txt \
-    qml/skins/default/components/NowPlayingTransferMedia.qml
+    qml/skins/default/components/NowPlayingTransferMedia.qml \
+    ../buildScripts/rpi/runSingleQorbiter.sh
 
 
 
