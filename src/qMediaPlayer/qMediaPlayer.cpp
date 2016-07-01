@@ -397,55 +397,60 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     QString finishedPath;
     QString localPath;
 
-//#ifdef NULL
-//    if(iPK_MediaType==5)
-//    {
-//        path = "/public/data/videos/";
-//    }
-//    else if(iPK_MediaType ==4){
-//        path = "/public/data/audio/";
-//    }
+    QRegExp deviceNo("(\\\[\\\d+\\\]/)");
+    int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
 
-//    if(QString::fromStdString(sMediaURL).contains("http")){
-//        finishedPath = QString::fromStdString(sMediaURL);
-//    }else if(iPK_MediaType==43){
-//        if(QString::fromStdString(sMediaURL).contains("http://")){
-//            finishedPath = QString::fromStdString(sMediaURL);
-//        }else{
-//            finishedPath = "http://"+QString::fromStdString(sMediaURL);
-//        }
-//    }
-//    else
-//    {
-//        //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
-//        QRegExp deviceNo("(\\\[\\\d+\\\]/)");
-//        int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
+    if (l ==-1){
+        setCommandResponse("Stored in /mediaType");
+    } else {
+        if(!deviceNo.isEmpty()){
+            qDebug() << deviceNo.capturedTexts();
+            QString f = deviceNo.cap(0);
+            f.remove("["); f.remove("/"); f.remove("]");
+            deviceNumber = f;
 
-//        if (l ==-1){
-//            setCommandResponse("Stored in /mediaType");
-//        } else {
-//            if(!deviceNo.isEmpty()){
-//                qDebug() << deviceNo.capturedTexts();
-//                QString f = deviceNo.cap(0);
-//                f.remove("["); f.remove("/"); f.remove("]");
-//                deviceNumber = f;
-//                localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
-//#if !defined(ANDROID) || !defined(Q_OS_IOS)
-//                mp_manager->setCurrentDevice(f.toLong());
-//#endif
-//            }
-//            else
-//            {
+            localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
+            setCurrentStorageDevice(f.toInt());
+            qDebug() << localPath;
+        }
+    }
 
-//            }
-//        }
-//        //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
-//        //the first match as that will be the first indexed by the regex engine.
-//        QString adjPath = QString::fromStdString(sMediaURL).remove("//home");
-//        finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
-//    }
 
-//#endif
+    //#ifdef NULL
+    //    if(iPK_MediaType==5)
+    //    {
+    //        path = "/public/data/videos/";
+    //    }
+    //    else if(iPK_MediaType ==4){
+    //        path = "/public/data/audio/";
+    //    }
+
+    //    if(QString::fromStdString(sMediaURL).contains("http")){
+    //        finishedPath = QString::fromStdString(sMediaURL);
+    //    }else if(iPK_MediaType==43){
+    //        if(QString::fromStdString(sMediaURL).contains("http://")){
+    //            finishedPath = QString::fromStdString(sMediaURL);
+    //        }else{
+    //            finishedPath = "http://"+QString::fromStdString(sMediaURL);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
+
+    //            }
+    //            else
+    //            {
+
+    //            }
+    //        }
+    //        //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
+    //        //the first match as that will be the first indexed by the regex engine.
+    //        QString adjPath = QString::fromStdString(sMediaURL).remove("//home");
+    //        finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
+    //    }
+
+    //#endif
 
     QString cmp = QString::fromStdString(sMediaURL.c_str());
 
@@ -472,20 +477,21 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         qWarning() << "Sending plugin modified original MRL==>" << externalPlayerPath;
         setCurrentMediaUrl(externalPlayerPath);
     }
+    emit currentMediaFileChanged(cmp);
 
     //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
-    emit startPlayback();   
+    emit startPlayback();
 
     if(p2.toInt() != 0){
 
-         connect(seekDelayTimer, &QTimer::timeout, [=](){
-             handleDelayedSeek( p2.length() < 4 ? p2.toInt() :  p2.toInt()/1000 );
-         }  );
-      QMetaObject::invokeMethod(seekDelayTimer, "start");
+        connect(seekDelayTimer, &QTimer::timeout, [=](){
+            handleDelayedSeek( p2.length() < 4 ? p2.toInt() :  p2.toInt()/1000 );
+        }  );
+        QMetaObject::invokeMethod(seekDelayTimer, "start");
     }
-
-
     sCMD_Result="OK";
+
+
 }
 
 //<-dceag-c38-b->
@@ -1714,6 +1720,17 @@ void qMediaPlayer::setCommandResponse(QString r)
 {
     {commandResponse = QTime::currentTime().toString()+"-QMediaPlayer:: "+ r; emit commandResponseChanged(commandResponse);}
 }
+long qMediaPlayer::getCurrentStorageDevice() const
+{
+    return m_currentStorageDevice;
+}
+
+void qMediaPlayer::setCurrentStorageDevice(long currentStorageDevice)
+{
+    m_currentStorageDevice = currentStorageDevice;
+    emit currentStorageDeviceChanged(currentStorageDevice);
+}
+
 
 string qMediaPlayer::getDcePosition()
 {
