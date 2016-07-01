@@ -51,9 +51,6 @@ public:
     int fileNo() const;
     void setFileNo(int fileNo);
 
-
-
-
     QString filePath() const;
     void setFilePath(const QString &filePath);
 
@@ -128,7 +125,13 @@ public:
     bool pause() const;
 
 
+    bool getUsingExternalMediaPlayer() const;
+
+
 signals:
+    void readyForConnections();
+
+    void usingExternalMediaPlayerChanged();
     void deviceNumberChanged();
     void streamIdChanged();
     void fileNoChanged();
@@ -166,6 +169,7 @@ signals:
     void updatePluginSeek(int pos);
 
 public slots:
+
     void setPluginUrl(const QString &pluginUrl);
     QString fileReference() const;
     void setCurrentStatus(const QString &currentStatus);
@@ -175,6 +179,7 @@ public slots:
     void setStreamId(int streamId);
     void setFileReference(const QString &fileReference);
 
+    void togglePause();
     void setPause(bool paused);
     void setMediaPosition(int msec);
     void setZoomLevel(QString zoom);
@@ -197,10 +202,17 @@ public slots:
 
     void onNewClientConnected();
     void processTimeCode(quint64 time);
+
 protected:
 
     void initializePlayer();
     void initializeConnections();
+    void breakConnections();
+
+      qMediaPlayer *mediaPlayer;
+
+protected slots:
+    void setUsingExternalMediaPlayer(bool value);
 
 private:
     void transmit(QString msg);
@@ -238,7 +250,7 @@ private:
     int     m_currentTimeNumeric;
     quint64 m_totalTimeNumeric;
 
-    qMediaPlayer *mediaPlayer;
+
 
     QTcpServer *timeCodeServer;
     QList<QTcpSocket*> clientList;
@@ -255,6 +267,8 @@ private:
     bool m_hasVideoStream;
 
     long m_currentStorageDevice;
+
+    bool usingExternalMediaPlayer;
 
 };
 

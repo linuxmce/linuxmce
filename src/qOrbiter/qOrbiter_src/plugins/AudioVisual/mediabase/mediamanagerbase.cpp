@@ -9,6 +9,7 @@
 
 MediaManagerBase::MediaManagerBase()
 {
+    usingExternalMediaPlayer = false;
     m_serverAddress = "";
     m_deviceNumber = -1;
     timeCodeServer = new QTcpServer();
@@ -68,7 +69,14 @@ void MediaManagerBase::setFileReference(const QString &fileReference)
 {
     m_fileReference = fileReference;
     emit fileReferenceChanged();
-    emit pluginUrlChanged();
+
+}
+
+void MediaManagerBase::togglePause()
+{
+    m_paused = !m_paused;
+    emit pauseChanged();
+
 }
 QString MediaManagerBase::filePath() const
 {
@@ -247,8 +255,7 @@ QString MediaManagerBase::pluginUrl() const
 }
 
 void MediaManagerBase::setPluginUrl(const QString &pluginUrl)
-{
-    qDebug() << Q_FUNC_INFO;
+{   
     m_pluginUrl = pluginUrl;
     emit pluginUrlChanged();
 }
@@ -300,8 +307,8 @@ void MediaManagerBase::setMediaPosition(int msec)
 
 void MediaManagerBase::setZoomLevel(QString zoom)
 {
- m_zoomLevel = zoom;
- emit zoomLevelChanged();
+    m_zoomLevel = zoom;
+    emit zoomLevelChanged();
 }
 
 void MediaManagerBase::setConnectionDetails(int device, QString routerAdd)
@@ -419,7 +426,7 @@ void MediaManagerBase::stopTimeCodeServer()
     }
     timeCodeServer->close();
     setMediaPlaying(false);
-   // incomingTime=0;
+    // incomingTime=0;
 }
 
 void MediaManagerBase::startTimeCodeServer()
@@ -497,7 +504,7 @@ void MediaManagerBase::initializePlayer()
     setCurrentStatus("Initializing Media Player "+ QString::number(m_deviceNumber));
 
     if(!mediaPlayer){
-       mediaPlayer = new qMediaPlayer(m_deviceNumber, m_serverAddress.toStdString(), this, true, false);
+        mediaPlayer = new qMediaPlayer(m_deviceNumber, m_serverAddress.toStdString(), this, true, false);
     }
 
     initializeConnections();
@@ -507,16 +514,20 @@ void MediaManagerBase::initializeConnections()
 {
     /*setup*/
 
+    if(usingExternalMediaPlayer){
+     emit readyForConnections();
+        return;
+    }
 
     /*From Dce MediaPlayer*/
 
-  QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setPluginUrl(QString))); //effectively play for android.
- //  QObject::connect(mediaPlayer, &qMediaPlayer::currentMediaUrlChanged, this, &MediaManagerBase::setFileReference );
+    QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setPluginUrl(QString))); //effectively play for android.
+    QObject::connect(mediaPlayer, &qMediaPlayer::currentMediaFileChanged, this, &MediaManagerBase::setFileReference );
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPause(bool)));
 
 
-   // QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
+    // QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
 
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));
@@ -534,6 +545,11 @@ void MediaManagerBase::initializeConnections()
     QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
     setCurrentStatus("Connections initialized.");
+}
+
+void MediaManagerBase::breakConnections()
+{
+
 }
 
 void MediaManagerBase::transmit(QString msg)
@@ -555,6 +571,17 @@ void MediaManagerBase::transmit(QString msg)
         }
     }
 }
+bool MediaManagerBase::getUsingExternalMediaPlayer() const
+{
+    return usingExternalMediaPlayer;
+}
+
+void MediaManagerBase::setUsingExternalMediaPlayer(bool value)
+{
+    usingExternalMediaPlayer = value;
+    emit usingExternalMediaPlayerChanged();
+}
+
 
 void MediaManagerBase::onNewClientConnected()
 {
@@ -575,7 +602,7 @@ void MediaManagerBase::setPause(bool paused)
 {
     if(m_paused = true)
         m_paused = false;
-              else
+    else
         m_paused = true;
     emit pauseChanged();
 }
