@@ -960,10 +960,14 @@ public:
         int getCurrentFkFileType() const;
         void setCurrentFkFileType(int currentFkFileType);
 
+        long getCurrentStorageDevice() const;
+        void setCurrentStorageDevice(long currentStorageDevice);
+
     signals:
         void commandResponseChanged(QString);
         void mediaResponseChanged(QString);
         void currentMediaUrlChanged(QString);
+        void currentMediaFileChanged(QString file);
 
         void streamIdChanged(int);
         void mediaIdChanged(QString);
@@ -988,6 +992,7 @@ public:
         void audioLevelChanged(QString lvl);
         void trackUp();
         void trackDown();
+        void currentStorageDeviceChanged(long device);
 
 
     public slots:
@@ -1041,6 +1046,7 @@ public:
         string s_audioTracks;
         string s_subTitleTracks;
         QTimer *seekDelayTimer;
+        long m_currentStorageDevice;
 
     private:
         string getDcePosition();
