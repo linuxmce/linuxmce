@@ -20,8 +20,15 @@ Loader {
             qmlRoot.resetTimeout();
             console.log( "Manager screen::"+ manager.currentScreen)
             console.log("Current PageLoader Screen::"+currentScreen)
+
             nextScreen=manager.currentScreen
             qmlRoot.clearDialogs();
+        }
+        onCurrentOsdScreenChanged:{
+            console.log("current Osd screen ::"+manager.currentOsdScreen)
+        }
+        onCurrentRemotePopupChanged:{
+            console.log("The remote popup for this component is " + manager.currentRemotePopup)
         }
     }
 

@@ -63,7 +63,12 @@ function includeLangFile($langFile)
     eval($evalt);
 
 	// include user language file to overwrite existing variables from fallback language
-    $file = APPROOT.'languages/'.$GLOBALS['userlang'].'/'.$langFile;
+    if(isset($GLOBALS['userlang'])) {
+        $file = APPROOT.'languages/'.$GLOBALS['userlang'].'/'.$langFile;        
+    } else {
+        $file = APPROOT.'languages/en/'.$langFile;
+    }
+
     if( file_exists($file))
     {
     	$evalt = "require_once '$file';";
@@ -6618,12 +6623,19 @@ if($rowSelectParameters['C_CP_Description']=="") {
 							$out.="
 							<tr>
 								<td>#{$row['PK_CommandParameter']} <span title=\"{$row['TitleLong']}\">{$row['Description']}</span> ({$row['PT_Description']})</td>
-								<td><input type='text' name=\"CommandParameterValue_{$rowCommandAssigned['PK_CommandGroup_Command']}_{$row['PK_CommandParameter']}\" value=\"{$row['IK_CommandParameter']}\" >
+								<td><input type='text' name=\"CommandParameterValue_{$rowCommandAssigned['PK_CommandGroup_Command']}_{$row['PK_CommandParameter']}\"  id=\"CommandParameterValue_{$rowCommandAssigned['PK_CommandGroup_Command']}_{$row['PK_CommandParameter']}\" value=\"{$row['IK_CommandParameter']}\" >
 								</td>
 							</tr>";
+							if(count($devicesToSend)>0){
+								foreach ($devicesToSend AS $deviceID){
+									$commandsToSend[$deviceID] .= "+escape(((document.getElementById('CommandParameterValue_".$rowCommandAssigned['PK_CommandGroup_Command']."_".$row['PK_CommandParameter']."').value!='')?' ".$row['PK_CommandParameter']." \''+document.getElementById('CommandParameterValue_".$rowCommandAssigned['PK_CommandGroup_Command']."_".$row['PK_CommandParameter']."').value+'\'':''))";
+								}					
+							}
 						}
 					}
+
 				}
+
 				$out.='</table>';
 			}
 			

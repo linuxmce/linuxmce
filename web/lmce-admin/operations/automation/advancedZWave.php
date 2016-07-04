@@ -522,7 +522,7 @@ p.status {
 	    $cmd='/usr/pluto/bin/MessageSend localhost -targetType template -o 0 1754 1 870';
 	    $ret=exec_batch_command($cmd,1);
 	    $retArray=explode("\n",$ret);
-	    if ($retArray[0].strrpos("OK") >= 0) {
+	    if (strrpos($retArray[0], "OK") >= 0) {
 	        $floorplanInfo=getDeviceData($pkZWave,10,$dbADO);
 	        if ($floorplanInfo == "") {
 	            $floorplanInfo = "{\"nodes\": []}";

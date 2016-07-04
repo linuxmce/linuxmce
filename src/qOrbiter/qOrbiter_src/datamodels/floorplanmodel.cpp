@@ -122,7 +122,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
     {
         setStatus(false);
     }
-    qDebug()<< selectedDevices.count();
+    qDebug()<<" Devices selected:" <<selectedDevices.count();
     emit selectedDevicesChanged();
     emit selectedDeviceChanged();
 }
@@ -151,9 +151,9 @@ void FloorPlanModel::executeDeviceCommand(int deviceId, int cmdId)
 
     FloorplanDevice *bellWeather = find(deviceId);
     if(bellWeather){
-        qDebug() << bellWeather->getDeviceCommands();
+      //  qDebug() << bellWeather->getDeviceCommands();
         QVariantMap t=bellWeather->getDeviceCommands();
-        qDebug() << t;
+      //  qDebug() << t;
     }
 
 

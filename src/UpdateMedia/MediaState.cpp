@@ -55,68 +55,53 @@ void MediaState::LoadDbInfo(Database_pluto_media *pDatabase_pluto_media, string 
 
 	sWhere += " ) ";
 
-	string sSql = 
-		"SELECT PK_File, Path, Filename, INode, \n"
-		"MAX(PSC_MOD) As CurrentDbAttrDate, \n"
-		"(1000000 * SUM(BOOKMARKS) + 10000 * SUM(ATTRIBUTES) + 100 * SUM(LONG_ATTRIBUTES) + SUM(PICTURES)) AS CurrentDbAttrCount, \n"
-		"(SUM(ATTRIBUTES) + SUM(LONG_ATTRIBUTES)) AS HasAttributes, \n"
-		"AttrDate AS OldDbAttrDate, AttrCount AS OldDbAttrCount, ModificationDate AS OldFileDate, \n"
-		"Source \n"
+	string sSql =
+		"SELECT \n"
+		"  File.PK_File, \n"
+		"  File.Path, \n"
+		"  File.Filename, \n"
+		"  File.INode, \n"
+		"  s.CurrentDbAttrDate, \n"
+		"  s.CurrentDbAttrCount, \n"
+		"  s.HasAttributes, \n"
+		"  File.AttrDate AS OldDbAttrDate, \n"
+		"  File.AttrCount AS OldDbAttrCount, \n"
+		"  File.ModificationDate AS OldFileDate, \n"
+		"  File.Source \n"
 		"FROM \n"
-		"( \n"
-		"	( \n"
-		"		SELECT PK_File, Path, Filename, INode, Source, Missing, \n"
-		"			AttrDate, AttrCount, ModificationDate, \n"
-		"			MAX(IF(Bookmark.psc_mod IS NULL,CAST('0000-00-00 00:00:00' AS DATE), Bookmark.psc_mod)) AS PSC_MOD, \n"
-		"			COUNT(Bookmark.PK_Bookmark) AS BOOKMARKS, \n"
-		"			0 AS ATTRIBUTES, 0 AS LONG_ATTRIBUTES, 0 AS PICTURES \n"
-		"		FROM File \n"
-		"		LEFT JOIN Bookmark ON Bookmark.FK_File = PK_File \n"
-		"		WHERE " + sWhere + " AND Missing = 0 \n"
-		"		GROUP BY PK_File, Path, Filename, INode,  AttrDate, AttrCount, ModificationDate \n"
-		"	) \n"
-		"UNION \n"
-		"	( \n"
-		"		SELECT PK_File, Path, Filename, INode, Source, Missing, \n"
-		"			AttrDate, AttrCount, ModificationDate, \n"
-		"			MAX(IF(Attribute.psc_mod IS NULL,CAST('0000-00-00 00:00:00' AS DATE), Attribute.psc_mod)) AS PSC_MOD, \n"
-		"			0 AS BOOKMARKS, \n"
-		"			COUNT(PK_Attribute) AS ATTRIBUTES, \n"
-		"			0 AS LONG_ATTRIBUTES, 0 AS PICTURES \n"
-		"		FROM File \n"
-		"		LEFT JOIN File_Attribute ON File_Attribute.FK_File = PK_File \n"
-		"		LEFT JOIN Attribute ON File_Attribute.FK_Attribute = PK_Attribute \n"
-		"		WHERE " + sWhere + " AND Missing = 0 \n"
-		"		GROUP BY PK_File, Path, Filename, INode,  AttrDate, AttrCount, ModificationDate \n"
-		"	) \n"
-		"UNION \n"
-		"	( \n"
-		"		SELECT PK_File, Path, Filename, INode, Source, Missing, \n"
-		"			AttrDate, AttrCount, ModificationDate, \n"
-		"			MAX(IF(LongAttribute.psc_mod IS NULL,CAST('0000-00-00 00:00:00' AS DATE), LongAttribute.psc_mod)) AS PSC_MOD, \n"
-		"			0 AS BOOKMARKS, 0 AS ATTRIBUTES, \n"
-		"			COUNT(PK_LongAttribute) AS LONG_ATTRIBUTES, \n"
-		"			0 AS PICTURES \n"
-		"		FROM File \n"
-		"		LEFT JOIN LongAttribute ON LongAttribute.FK_File = PK_File \n"
-		"		WHERE " + sWhere + " AND Missing = 0 \n"
-		"		GROUP BY PK_File, Path, Filename, INode,  AttrDate, AttrCount, ModificationDate \n"
-		"	) \n"
-		"UNION \n"
-		"	( \n"
-		"		SELECT PK_File, Path, Filename, INode, Source, Missing, \n"
-		"			AttrDate, AttrCount, ModificationDate, \n"
-		"			MAX(IF(Picture_File.psc_mod IS NULL,CAST('0000-00-00 00:00:00' AS DATE), Picture_File.psc_mod)) AS PSC_MOD, \n"
-		"			0 AS BOOKMARKS, 0 AS ATTRIBUTES, 0 AS LONG_ATTRIBUTES, \n"
-		"			COUNT(FK_Picture) AS PICTURES \n"
-		"		FROM File \n"
-		"		LEFT JOIN Picture_File ON Picture_File.FK_File = PK_File \n"
-		"		WHERE " + sWhere + " AND Missing = 0 \n"
-		"		GROUP BY PK_File, Path, Filename, INode, AttrDate, AttrCount, ModificationDate \n"
-		"	) \n"
-		") AS FILE_UNION \n"
-		"WHERE " + sWhere + " AND Missing = 0 \n"
-		"GROUP BY PK_File, Path, Filename, INode, AttrDate, AttrCount, ModificationDate";
+		"  ( \n"
+		"    SELECT \n"
+		"      PK_File, \n"
+		"      greatest( \n"
+		"        (SELECT IFNULL( MAX( Bookmark.psc_mod), CAST('0000-00-00 00:00:00' AS DATE)) FROM Bookmark WHERE FK_File=PK_File), \n"
+		"        (SELECT IFNULL( MAX( Attribute.psc_mod), CAST('0000-00-00 00:00:00' AS DATE)) FROM Attribute RIGHT JOIN File_Attribute ON PK_Attribute=FK_Attribute WHERE FK_File=PK_File), \n"
+		"        (SELECT IFNULL( MAX( LongAttribute.psc_mod), CAST('0000-00-00 00:00:00' AS DATE)) FROM LongAttribute WHERE FK_File=PK_File), \n"
+		"        (SELECT IFNULL( MAX( Picture_File.psc_mod), CAST('0000-00-00 00:00:00' AS DATE)) FROM Picture_File WHERE FK_File=PK_File) \n"
+		"      ) AS CurrentDbAttrDate, \n"
+		"      (select count(*) from Bookmark where FK_File=PK_File) as BOOKMARKCOUNT, \n"
+		"      (select count(*) from File_Attribute where FK_File=PK_File) as ACOUNT, \n"
+		"      (select count(*) from LongAttribute where FK_File=PK_File) as LONGATTRCOUNT, \n"
+		"      (select count(*) from Picture_File where FK_File=PK_File) as IMGCOUNT, \n"
+		"      ( \n"
+		"        (1000000 * (select BOOKMARKCOUNT)) + \n"
+		"        (10000 * (select ACOUNT)) + \n"
+		"        (100 * (select LONGATTRCOUNT)) + \n"
+		"        (select IMGCOUNT) \n"
+		"      ) as CurrentDbAttrCount, \n"
+		"      ( \n"
+		"        (select ACOUNT) + \n"
+		"        (select LONGATTRCOUNT) \n"
+		"      ) as HasAttributes \n"
+		"    FROM \n"
+		"      File \n"
+		"    LEFT JOIN Bookmark ON Bookmark.FK_File = PK_File \n"
+		"    LEFT JOIN File_Attribute ON File_Attribute.FK_File = PK_File \n"
+		"    LEFT JOIN Attribute ON File_Attribute.FK_Attribute = PK_Attribute \n"
+		"    LEFT JOIN LongAttribute ON LongAttribute.FK_File = PK_File \n"
+		"    LEFT JOIN Picture_File ON Picture_File.FK_File = PK_File \n"
+		"    WHERE " + sWhere + " AND Missing = 0 \n"
+		"    GROUP BY PK_File \n"
+		"  ) s INNER JOIN File ON s.PK_File=File.PK_File \n";
 
 	enum SqlFields
 	{
@@ -135,17 +120,16 @@ void MediaState::LoadDbInfo(Database_pluto_media *pDatabase_pluto_media, string 
 
 	DB_ROW row;
 	PlutoSqlResult allresult;
-#ifdef UPDATEMEDIA_STATUS
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfo ready to run big query");
-#endif
+
 	//do you want to debug this big query? uncomment this:
 	//cout << endl << endl << sSql << endl << endl;
 
 	if(NULL != (allresult.r = pDatabase_pluto_media->db_wrapper_query_result(sSql)))
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfo got %d rows", allresult.r->row_count);
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "MediaState::LoadDbInfo got %d rows <- this is erroneously reporting 0", allresult.r->row_count);
+
 		//reset current state, load fresh info
 		m_mapMediaState.clear();
 
@@ -165,6 +149,9 @@ void MediaState::LoadDbInfo(Database_pluto_media *pDatabase_pluto_media, string 
 				string sOldFileDate = NULL != row[sfOldFileDate] ? row[sfOldFileDate] : string();
 				bool bHasAttributes = NULL != row[sfHasAttributes] ? atoi(row[sfHasAttributes]) > 0 : false;
 				char cSource = NULL != row[sfSource] ? row[sfSource][0] : 0;
+
+				sOldDbAttrDate = (sOldDbAttrDate.empty() ? sCurrentDbAttrDate : sOldDbAttrDate);
+				sOldDbAttrCount = (0 ? sCurrentDbAttrCount : sOldDbAttrCount);
 
 				m_mapMediaState[make_pair(sPath, sFilename)] = MediaItemState(nFileID, sPath, sFilename, nInode,
 					sCurrentDbAttrDate, sCurrentDbAttrCount, 
@@ -189,15 +176,21 @@ MediaSyncMode MediaState::SyncModeNeeded(string sDirectory, string sFile)
 
 		//is this our file or not source defined?
 		if(item.m_cSource != 'F' && item.m_cSource != 'P' && item.m_cSource != 0)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Not a valid file to get sync mode on.");
 			return modeNone;
+		}
+
+LoggerWrapper::GetInstance()->Write(LV_MEDIA, "%s/%s: old file date %s, current file date %s", 
+sDirectory.c_str(), sFile.c_str(), 
+item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
 
 		if(StringUtils::SQLDateTime(item.m_sOldFileDate) != StringUtils::SQLDateTime(sCurrentFileDate))
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update db for %s/%s: old file data %s, current file date %s", 
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Need to update db for %s/%s: old file date %s, current file date %s",
 				sDirectory.c_str(), sFile.c_str(), 
-				item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str()); 
-#endif
+				item.m_sOldFileDate.c_str(), sCurrentFileDate.c_str());
+
 			bNeedToUpdateDb = true;
 		}
 
@@ -212,14 +205,13 @@ MediaSyncMode MediaState::SyncModeNeeded(string sDirectory, string sFile)
 			//!UpdateMediaFileUtils::IsDirectory(sCurrentFullFilename.c_str())
 		)
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update file for %s/%s: "
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Need to update file for %s/%s: "
 				"old attr count %d, current attr count %d, "
 				"old attr date %s, current attr date %s",
 				sDirectory.c_str(), sFile.c_str(), 
 				item.m_sOldDbAttrCount, item.m_sCurrentDbAttrCount,
 				item.m_sOldDbAttrDate.c_str(), item.m_sCurrentDbAttrDate.c_str()); 
-#endif
+
 			bNeedtoUpdateFile = true;
 		}
 
@@ -233,12 +225,11 @@ MediaSyncMode MediaState::SyncModeNeeded(string sDirectory, string sFile)
 			//!UpdateMediaFileUtils::IsDirectory(sCurrentFullFilename.c_str())
 		)
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update file for %s/%s: "
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Need to update file for %s/%s: "
 				"current attr date %s, file date %s, has attr %d",
 				sDirectory.c_str(), sFile.c_str(), 
 			        item.m_sCurrentDbAttrDate.c_str(), sCurrentFileDate.c_str(), item.m_bHasAttributes); 
-#endif
+
 			bNeedtoUpdateFile = true;
 		}
 
@@ -272,19 +263,17 @@ MediaSyncMode MediaState::SyncModeNeeded(string sDirectory, string sFile)
 
                 if(INode_DBFile == INode && nDeviceID_DBFile == nDeviceID_CurrentFile && FileUtils::FileExists(sDBFullFilename))
                 {
-#ifdef UPDATEMEDIA_STATUS
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "File already in DB: modeNone for inode %d and device id %d: %s vs %s", 
+					LoggerWrapper::GetInstance()->Write(LV_MEDIA, "File already in DB: modeNone for inode %d and device id %d: %s vs %s", 
 						INode, nDeviceID_DBFile, sCurrentFullFilename.c_str(), sDBFullFilename.c_str());
-#endif
+
                     return modeNone;
                 }
             }
 		}
 
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update file because it's not in the database %s/%s",
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Need to update file because it's not in the database %s/%s",
 			sDirectory.c_str(), sFile.c_str());
-#endif
+
 		sync_mode = modeBoth;
 	}
 
@@ -320,14 +309,13 @@ void MediaState::FileSynchronized(Database_pluto_media *pDatabase_pluto_media, s
 //-----------------------------------------------------------------------------------------------------
 string MediaState::ReadMediaFileInfo(string sDirectory, string sFile)
 {
+	string sFilePath = sDirectory + "/" + sFile;
+
 #ifdef WIN32
 	struct __stat64 buf;
 #else
 	struct stat64 buf;
 #endif
-
-	auto_ptr<GenericFileHandler> spFileHandler(FileHandlerFactory::CreateFileHandler(sDirectory, sFile));
-	string sFilePath = sDirectory + "/" + spFileHandler->GetFileAttribute();
 
 #ifdef WIN32
 	if(!_stat64(sFilePath.c_str(), &buf))
@@ -343,68 +331,52 @@ string MediaState::ReadMediaFileInfo(string sDirectory, string sFile)
 //-----------------------------------------------------------------------------------------------------
 MediaItemState MediaState::LoadDbInfoForFile(Database_pluto_media *pDatabase_pluto_media, int nFileID)
 {
-	string sSql = 
-		"SELECT PK_File, Path, Filename, INode, \n"
-		"MAX(PSC_MOD) As CurrentDbAttrDate, \n"
-		"(1000000 * SUM(BOOKMARKS) + 10000 * SUM(ATTRIBUTES) + 100 * SUM(LONG_ATTRIBUTES) + SUM(PICTURES)) AS CurrentDbAttrCount, \n"
-		"(SUM(ATTRIBUTES) + SUM(LONG_ATTRIBUTES)) AS HasAttributes, \n"
-		"AttrDate AS OldDbAttrDate, AttrCount AS OldDbAttrCount, ModificationDate AS OldFileDate, \n"
-		"Source \n"
+	string sSql =
+		"SELECT \n"
+		"  File.PK_File, \n"
+		"  File.Path, \n"
+		"  File.Filename, \n"
+		"  File.INode, \n"
+		"  s.CurrentDbAttrDate, \n"
+		"  s.CurrentDbAttrCount, \n"
+		"  s.HasAttributes, \n"
+		"  File.AttrDate AS OldDbAttrDate, \n"
+		"  File.AttrCount AS OldDbAttrCount, \n"
+		"  File.ModificationDate AS OldFileDate, \n"
+		"  File.Source \n"
 		"FROM \n"
-		"( \n"
-		"	( \n"
-		"		SELECT PK_File, Path, Filename, INode, Source, Missing, \n"
-		"			AttrDate, AttrCount, ModificationDate, \n"
-		"			MAX(IF(Bookmark.psc_mod IS NULL,CAST('0000-00-00 00:00:00' AS DATE), Bookmark.psc_mod)) AS PSC_MOD, \n"
-		"			COUNT(Bookmark.PK_Bookmark) AS BOOKMARKS, \n"
-		"			0 AS ATTRIBUTES, 0 AS LONG_ATTRIBUTES, 0 AS PICTURES \n"
-		"		FROM File \n"
-		"		LEFT JOIN Bookmark ON Bookmark.FK_File = PK_File \n"
-		"		WHERE PK_File = " + StringUtils::ltos(nFileID) + " "
-		"		GROUP BY PK_File, Path, Filename, INode,  AttrDate, AttrCount, ModificationDate \n"
-		"	) \n"
-		"UNION \n"
-		"	( \n"
-		"		SELECT PK_File, Path, Filename, INode, Source, Missing, \n"
-		"			AttrDate, AttrCount, ModificationDate, \n"
-		"			MAX(IF(Attribute.psc_mod IS NULL,CAST('0000-00-00 00:00:00' AS DATE), Attribute.psc_mod)) AS PSC_MOD, \n"
-		"			0 AS BOOKMARKS, \n"
-		"			COUNT(PK_Attribute) AS ATTRIBUTES, \n"
-		"			0 AS LONG_ATTRIBUTES, 0 AS PICTURES \n"
-		"		FROM File \n"
-		"		LEFT JOIN File_Attribute ON File_Attribute.FK_File = PK_File \n"
-		"		LEFT JOIN Attribute ON File_Attribute.FK_Attribute = PK_Attribute \n"
-		"		WHERE PK_File = " + StringUtils::ltos(nFileID) + " "
-		"		GROUP BY PK_File, Path, Filename, INode,  AttrDate, AttrCount, ModificationDate \n"
-		"	) \n"
-		"UNION \n"
-		"	( \n"
-		"		SELECT PK_File, Path, Filename, INode, Source, Missing, \n"
-		"			AttrDate, AttrCount, ModificationDate, \n"
-		"			MAX(IF(LongAttribute.psc_mod IS NULL,CAST('0000-00-00 00:00:00' AS DATE), LongAttribute.psc_mod)) AS PSC_MOD, \n"
-		"			0 AS BOOKMARKS, 0 AS ATTRIBUTES, \n"
-		"			COUNT(PK_LongAttribute) AS LONG_ATTRIBUTES, \n"
-		"			0 AS PICTURES \n"
-		"		FROM File \n"
-		"		LEFT JOIN LongAttribute ON LongAttribute.FK_File = PK_File \n"
-		"		WHERE PK_File = " + StringUtils::ltos(nFileID) + " "
-		"		GROUP BY PK_File, Path, Filename, INode,  AttrDate, AttrCount, ModificationDate \n"
-		"	) \n"
-		"UNION \n"
-		"	( \n"
-		"		SELECT PK_File, Path, Filename, INode, Source, Missing, \n"
-		"			AttrDate, AttrCount, ModificationDate, \n"
-		"			MAX(IF(Picture_File.psc_mod IS NULL,CAST('0000-00-00 00:00:00' AS DATE), Picture_File.psc_mod)) AS PSC_MOD, \n"
-		"			0 AS BOOKMARKS, 0 AS ATTRIBUTES, 0 AS LONG_ATTRIBUTES, \n"
-		"			COUNT(FK_Picture) AS PICTURES \n"
-		"		FROM File \n"
-		"		LEFT JOIN Picture_File ON Picture_File.FK_File = PK_File \n"
-		"		WHERE PK_File = " + StringUtils::ltos(nFileID) + " "
-		"		GROUP BY PK_File, Path, Filename, INode, AttrDate, AttrCount, ModificationDate \n"
-		"	) \n"
-		") AS FILE_UNION \n"
-		"WHERE PK_File = " + StringUtils::ltos(nFileID) + " AND Missing = 0 \n"
-		"GROUP BY PK_File, Path, Filename, INode, AttrDate, AttrCount, ModificationDate";
+		"  ( \n"
+		"    SELECT \n"
+		"      PK_File, \n"
+		"      greatest( \n"
+		"        (SELECT IFNULL( MAX( Bookmark.psc_mod), CAST('0000-00-00 00:00:00' AS DATE)) FROM Bookmark WHERE FK_File=PK_File), \n"
+		"        (SELECT IFNULL( MAX( Attribute.psc_mod), CAST('0000-00-00 00:00:00' AS DATE)) FROM Attribute RIGHT JOIN File_Attribute ON PK_Attribute=FK_Attribute WHERE FK_File=PK_File), \n"
+		"        (SELECT IFNULL( MAX( LongAttribute.psc_mod), CAST('0000-00-00 00:00:00' AS DATE)) FROM LongAttribute WHERE FK_File=PK_File), \n"
+		"        (SELECT IFNULL( MAX( Picture_File.psc_mod), CAST('0000-00-00 00:00:00' AS DATE)) FROM Picture_File WHERE FK_File=PK_File) \n"
+		"      ) AS CurrentDbAttrDate, \n"
+		"      (select count(*) from Bookmark where FK_File=PK_File) as BOOKMARKCOUNT, \n"
+		"      (select count(*) from File_Attribute where FK_File=PK_File) as ACOUNT, \n"
+		"      (select count(*) from LongAttribute where FK_File=PK_File) as LONGATTRCOUNT, \n"
+		"      (select count(*) from Picture_File where FK_File=PK_File) as IMGCOUNT, \n"
+		"      ( \n"
+		"        (1000000 * (select BOOKMARKCOUNT)) + \n"
+		"        (10000 * (select ACOUNT)) + \n"
+		"        (100 * (select LONGATTRCOUNT)) + \n"
+		"        (select IMGCOUNT) \n"
+		"      ) as CurrentDbAttrCount, \n"
+		"      ( \n"
+		"        (select ACOUNT) + \n"
+		"        (select LONGATTRCOUNT) \n"
+		"      ) as HasAttributes \n"
+		"    FROM \n"
+		"      File \n"
+		"    LEFT JOIN Bookmark ON Bookmark.FK_File = PK_File \n"
+		"    LEFT JOIN File_Attribute ON File_Attribute.FK_File = PK_File \n"
+		"    LEFT JOIN Attribute ON File_Attribute.FK_Attribute = PK_Attribute \n"
+		"    LEFT JOIN LongAttribute ON LongAttribute.FK_File = PK_File \n"
+		"    LEFT JOIN Picture_File ON Picture_File.FK_File = PK_File \n"
+		"    WHERE PK_File = " + StringUtils::ltos(nFileID) + " AND Missing = 0 \n"
+		"  ) s INNER JOIN File ON s.PK_File=File.PK_File \n";
 
 	enum SqlFields
 	{
@@ -423,14 +395,13 @@ MediaItemState MediaState::LoadDbInfoForFile(Database_pluto_media *pDatabase_plu
 
 	DB_ROW row;
 	PlutoSqlResult allresult;
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile ready to run big query");
-#endif
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile ready to run big query on FileID: %d", nFileID );
+
 	if(NULL != (allresult.r = pDatabase_pluto_media->db_wrapper_query_result(sSql)))
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaState::LoadDbInfoForFile got %d rows", allresult.r->row_count);
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "MediaState::LoadDbInfoForFile got %d rows <- this is erroneously reporting 0", allresult.r->row_count);
+
 		if(NULL != (row = db_wrapper_fetch_row(allresult.r)))
 		{
 			if(NULL != row[sfFileID] && NULL != row[sfPath] && NULL != row[sfFilename])

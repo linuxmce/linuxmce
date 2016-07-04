@@ -18,7 +18,14 @@ DEVID_FILE="/etc/Disked_DeviceID"
 INSTALL_KUBUNTU_DESKTOP="no"
 
 # Get the Core's IP Address using the locator
-CORE_IP=$(${BASE_DIR}/bin/core-locator)
+CORE_IP=""
+while [ -z "$CORE_IP" ] ; do
+	CORE_IP="$(${BASE_DIR}/bin/core-locator)"
+	if [ -z "$CORE_IP" ] ; then
+		echo "Firstboot: Waiting to locate core..."
+		sleep 1
+	fi
+done
 
 ###########################################################
 ### Config setup fns.
@@ -29,10 +36,10 @@ MD_Setup_Fstab() {
 	check=$(grep "${CORE_IP}" "${FSTAB_FILE}" || :)
 	if [ -z "$check" ] ; then
 		cat <<-EOF >> "${FSTAB_FILE}"
-			${CORE_IP}:${BASE_DIR}/var/		${BASE_DIR}/var/		nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:${BASE_DIR}/var/		${BASE_DIR}/var/	nfs4 retrans=10,timeo=50 1 1
 			${CORE_IP}:${BASE_DIR}/orbiter		${BASE_DIR}/orbiter	nfs4 retrans=10,timeo=50 1 1
-			${CORE_IP}:${BASE_DIR}/keys		${BASE_DIR}/keys		nfs4 retrans=10,timeo=50 1 1
-			${CORE_IP}:${BASE_DIR}/deb-cache		${BASE_DIR}/deb-cache    nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:${BASE_DIR}/keys		${BASE_DIR}/keys	nfs4 retrans=10,timeo=50 1 1
+			${CORE_IP}:${BASE_DIR}/deb-cache	${BASE_DIR}/deb-cache   nfs4 retrans=10,timeo=50 1 1
 			${CORE_IP}:/var/spool/asterisk		/var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
 			${CORE_IP}:/home			/home			nfs4 retrans=10,timeo=50 1 1
 			${CORE_IP}:/home/cameras		/home/cameras		nfs4 retrans=10,timeo=50 1 1
@@ -51,7 +58,15 @@ MD_Setup_Plutoconf() {
 	. ${BASE_DIR}/bin/Config_Ops.sh
 
 	# get PK_Device from "$DEVID_FILE", created by interactor
-	DEVICE=$(cat "$DEVID_FILE")
+	# Get the Core's IP Address using the locator
+	DEVICE=""
+	while [ -z "$DEVICE" ] ; do
+		DEVICE=$(cat "$DEVID_FILE" 2>/dev/null)
+		if [ -z "$DEVICE" ] ; then
+			echo "Firstboot: Waiting for PK_Device from $DEVID+FILE..."
+			sleep 1
+		fi
+	done
 
 	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "${CORE_IP}"
 	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
@@ -162,8 +177,8 @@ MD_Config_NTP_Client()
 {
 	. ${BASE_DIR}/bin/Config_Ops.sh
 	if [[ "$AutostartCore" != "1" ]] && [[ "$DCERouter" != "localhost" ]] ; then
-	        sed -i 's/^#disable auth/disable auth/' /etc/ntp.conf
-	        sed -i 's/^#broadcastclient/broadcastclient/' /etc/ntp.conf
+		sed -i 's/^#disable auth/disable auth/' /etc/ntp.conf
+		sed -i 's/^#broadcastclient/broadcastclient/' /etc/ntp.conf
 		service ntp restart || :
 	fi
 }

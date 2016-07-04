@@ -160,18 +160,18 @@ Item{
         property color clockColor:"white"
         property bool boldClock:false
 
-        width:parent.width/1.5
+        width:parent.width
         height: 50
-        opacity: qmlRoot.screensaverActive ? 1 : 0
+        opacity: qmlRoot.screensaverActive ? .75 : 0
         function getDate(){
             if(!longDate)
                 return  new Date().toTimeString()
             else
-                return Qt.formatDateTime(new Date(), "dddd ,MMMM d yyyy \n hh:mm:ss ");
+                return Qt.formatDateTime(new Date(), "dddd ,MMMM d yyyy \t hh:mm:ss ");
         }
         anchors{
             bottom:parent.bottom
-            bottomMargin: Style.scaleX(10)
+            bottomMargin: Style.scaleX(5)
             left:parent.left
         }
 
@@ -182,21 +182,30 @@ Item{
         }
 
         Timer { // Update the clock element periodically
-            interval: 1000; running: clock.opacity==1; repeat: true
+            interval: 1000; running: clock.opacity!==0; repeat: true
             onTriggered: txtDate.text = clock.getDate()
         }
 
 
         StyledText{
-            id: txtDate
-            text: clock.getDate()
-            color: clock.clockColor
+            id: txtDate            
+            color: "white" //clock.clockColor
             font.letterSpacing: 2
             smooth: true
             width: parent.width
             anchors.centerIn: parent
-            font.pointSize: 32
+            font.pointSize: 64
             horizontalAlignment: Text.AlignHCenter
+            opacity: .55
+        }
+
+        InnerShadow{
+           color:"black"
+           source: txtDate
+           anchors.fill: txtDate
+           radius: 6
+           samples: 16
+           spread: 0.0
         }
     }
 

@@ -30,7 +30,7 @@ linux-g++{
 linux-rasp-pi-g++{
     DESTDIR=../../imports/DceScreenSaver
     DEFINES+=RPI
-    RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/DceScreenSaver
+    RASP_INSTALL_TARGET=/usr/local/qt5pi/qml/DceScreenSaver
 }
 
 macx-clang{

@@ -1,6 +1,6 @@
 TEMPLATE = lib
 TARGET = AudioVisual
-
+CONFIG+= c++11
 CONFIG += qt plugin console
 CONFIG += warn_off
 CONFIG -= android_install
@@ -15,8 +15,6 @@ uri = AudioVisual
 URI = AudioVisual #$$TARGET
 #TARGET = $$qtLibraryTarget($$TARGET)
 
-
-
 linux-g++{
 
     !RPI{
@@ -28,14 +26,21 @@ linux-g++{
 linux-rasp-pi-g++{
     DESTDIR=../../imports/AudioVisual
     DEFINES+=RPI
-    RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/
+    RASP_INSTALL_TARGET=/usr/pluto/bin/imports/
+    QT+= dbus
+
+    SOURCES += \
+    playerInterfaces/omxdbusplayerinterface.cpp \
+    playerInterfaces/omxinterface.cpp \
+    playerInterfaces/OmxDbusProxy.cpp
+
+    HEADERS += \
+    playerInterfaces/omxdbusplayerinterface.h \
+    playerInterfaces/omxinterface.h \
+    playerInterfaces/OmxDbusProxy.h
 }
 
-linux-rasp-pi-g++{
-    DESTDIR=../../imports/AudioVisual
-    DEFINES+=RPI
-    RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/
-}
+
 
 android-g++{
     DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
@@ -60,55 +65,41 @@ QMAKE_POST_LINK= $${QMAKE_COPY} $${_PRO_FILE_PWD_}/qmldir $${DESTDIR}$$escape_ex
 
 }
 
+include (../../../../QtCommonIncludes/PlutoUtils.pri)
+
 OTHER_FILES = qmldir
 
 # Input
 SOURCES += \
-	audiovisual_plugin.cpp \   
-	mediamanager.cpp \
-	../../../../qMediaPlayer/qMediaPlayer.cpp \
-	../../../../PlutoUtils/uuencode.cpp \
-	../../../../PlutoUtils/ThreadedClass.cpp \
-	../../../../PlutoUtils/Other.cpp \
-	../../../../PlutoUtils/MultiThreadIncludes.cpp \
-	../../../../PlutoUtils/minilzo.cpp \
-	../../../../PlutoUtils/md5c.cpp \
-	../../../../PlutoUtils/FileUtils.cpp \
-	../../../../PlutoUtils/CommonIncludes.cpp \
-	../../../../SerializeClass/SerializeClass.cpp \
-	../../../../DCE/Virtual_Device_Translator.cpp \
-	../../../../DCE/Socket.cpp \
-	../../../../DCE/DCEConfig.cpp \
-	../../../../DCE/ServerLogger.cpp \
-	../../../../DCE/PlainClientSocket.cpp \
-	../../../../DCE/MessageBuffer.cpp \
-	../../../..//DCE/Message.cpp \
-	../../../../DCE/HandleRequestSocket.cpp \
-	../../../../DCE/Logger.cpp \
-	../../../../DCE/Event_Impl.cpp \
-	../../../../DCE/DataGrid.cpp \
-	../../../../DCE/Command_Impl.cpp \
-	../../../../DCE/AlarmManager.cpp \
-	../../../../PlutoUtils/StringUtils.cpp \
-	../../../../DCE/ClientSocket.cpp \
-	../../../../DCE/DeviceData_Base.cpp \
-	../../../../DCE/DeviceData_Impl.cpp \
-	../../../../PlutoUtils/getch.cpp \
+        audiovisual_plugin.cpp \
+        ../../../../qMediaPlayer/qMediaPlayer.cpp \
+        ../../../../SerializeClass/SerializeClass.cpp \
+        ../../../../DCE/Virtual_Device_Translator.cpp \
+        ../../../../DCE/Socket.cpp \
+        ../../../../DCE/DCEConfig.cpp \
+        ../../../../DCE/ServerLogger.cpp \
+        ../../../../DCE/PlainClientSocket.cpp \
+        ../../../../DCE/MessageBuffer.cpp \
+        ../../../..//DCE/Message.cpp \
+        ../../../../DCE/HandleRequestSocket.cpp \
+        ../../../../DCE/Logger.cpp \
+        ../../../../DCE/Event_Impl.cpp \
+        ../../../../DCE/DataGrid.cpp \
+        ../../../../DCE/Command_Impl.cpp \
+        ../../../../DCE/AlarmManager.cpp \
+        ../../../../DCE/ClientSocket.cpp \
+        ../../../../DCE/DeviceData_Base.cpp \
+        ../../../../DCE/DeviceData_Impl.cpp \
 	../../../../Gen_Devices/qMediaPlayerBase.cpp \
-        ../../../../Gen_Devices/qOrbiterBase.cpp
+        ../../../../Gen_Devices/qOrbiterBase.cpp \
+        mediabase/mediamanagerbase.cpp \
+        playerInterfaces/defaultplayerinterface.cpp
+
+
 	
 HEADERS += \
-	audiovisual_plugin.h \  
-	colorfilterproxywidget.h \
-	mediamanager.h \
-	../../../../qMediaPlayer/qMediaPlayer.h \
-	../../../../PlutoUtils/ThreadedClass.h \
-	../../../../PlutoUtils/MultiThreadIncludes.h \
-	../../../../PlutoUtils/StringUtils.h \
-	../../../../PlutoUtils/CommonIncludes.h \
-	../../../../PlutoUtils/Other.h \
-	../../../../PlutoUtils/getch.h \
-	../../../../PlutoUtils/MyStl.h \
+        audiovisual_plugin.h \
+        ../../../../qMediaPlayer/qMediaPlayer.h \
 	../../../../DCE/DeviceData_Base.h \
 	../../../../DCE/Message.h \
 	../../../../DCE/ServerLogger.h \
@@ -118,12 +109,15 @@ HEADERS += \
 	../../../../DCE/ClientSocket.h \
 	../../../../DCE/PlainClientSocket.h \
 	../../../../DCE/AlarmManager.h \
-	../../../../SerializeClass/SerializeClass.h \
-	../../../../PlutoUtils/FileUtils.h \
+        ../../../../SerializeClass/SerializeClass.h \
 	../../../../pluto_main/Define_DeviceCategory.h \
 	../../../../pluto_main/Define_DeviceTemplate.h \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
-        ../../../../Gen_Devices/qOrbiterBase.h
+        ../../../../Gen_Devices/qOrbiterBase.h \
+        mediabase/mediamanagerbase.h \
+        playerInterfaces/defaultplayerinterface.h
+
+
 
 
 

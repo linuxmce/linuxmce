@@ -1,7 +1,7 @@
 #!/bin/dash
 ### BEGIN INIT INFO
 # Provides:          interactor
-# Required-Start:    $remote_fs $syslog
+# Required-Start:    $remote_fs $syslog $network
 # Required-Stop:     $remote_fs $syslog
 # Should-Start:      
 # Should-Stop:       
@@ -17,7 +17,7 @@ COMMAND_FILE="/etc/pluto/Disked_Command"
 DEVDATA_FILE="/etc/pluto/Disked_DevData"
 
 if [ -f "$DEVICEID_FILE" ]; then
-	echo "Skipping interactor - we have a DeviceID already."
+	echo "Interactor: Skipping - we have a DeviceID already."
 	exit 0
 fi
 
@@ -25,8 +25,9 @@ MyIP=""
 while [ -z "$MyIP" ] ; do
 	MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
 	MyIP=$(/sbin/ifconfig $MyIF | awk 'NR==2 { print substr($2, index($2, ":") + 1) }')
-	if [ -z "$MyIP" ] ; then
-		echo "Waiting for network configuration to complete..."
+	if [ -z "$MyIP" ] || [ "$MyIP" = "127.0.0.1" ] ; then
+		MyIP=""
+		echo "Interactor: Waiting for network configuration to complete..."
 		sleep 1
 	fi
 done

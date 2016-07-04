@@ -84,10 +84,10 @@ using namespace UpdateMediaVars;
 
 /*
  * This method syncs the pictures for attributes and files. 
- * It updates pictures for attributes of type performer, album and title where there exists no pictures.
- * It finds pictures to assign to this by looking at pictures assigned to the file that has these attributes.
+ * It updates pictures for attributes of type performer, album and title where there is no currently assigned picture attribute.
+ * It finds pictures to assign to this by looking at pictures assigned to the file that has these attributes (Album Artist/Performer/Album).
  *
- * - Attibute (PK_Attribute)
+ * - Attribute (PK_Attribute)
  *     |  FK_Attribute
  *     \- File_Attribute
  *     |   \ FK_File
@@ -97,10 +97,11 @@ using namespace UpdateMediaVars;
  */
 void SyncAttributes()
 {
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Synchronizing pictures for attributes... "); 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronizing pictures for attributes... "); 
 
 	// Assign all file pictures to the corresponding title attribute
-	string sqlTitle = "SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, File.Filename, File.Path FROM Attribute "
+	string sqlTitle =
+		"SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, File.Filename, File.Path FROM Attribute "
 		"JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
 		"JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
 		"JOIN File ON File_Attribute.FK_File=PK_File "
@@ -116,7 +117,7 @@ void SyncAttributes()
 	{
 		while((row = db_wrapper_fetch_row(result.r)))
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Assigning Picture PK=%d from File '%s/%s' to Title Attribute '%s'(%s)",
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Assigning Picture PK=%d from File '%s/%s' to Title Attribute '%s'(%s)",
 							    row[1], row[5], row[4], row[2], row[3]);
 		}
 	}
@@ -124,15 +125,21 @@ void SyncAttributes()
 	int nAffectedRecords = 0;
 	if (!bDryRun) {
 		int rows = g_pDatabase_pluto_media->threaded_db_wrapper_query(
-		"INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
-		"SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture FROM Attribute "
-		"JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
-		"JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
-		"LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
-		"WHERE Picture_Attribute.FK_Picture is NULL AND FK_AttributeType IN (" 
-		TOSTRING(ATTRIBUTETYPE_Title_CONST) ") "
-		"GROUP BY PK_Attribute"
+			"INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
+			"    SELECT "
+			"        PK_Attribute, "
+			"        MIN( Picture_File.FK_Picture) AS FK_Picture "
+			"    FROM Attribute "
+			"        JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
+			"        JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
+			"        LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
+			"            WHERE "
+			"                Picture_Attribute.FK_Picture IS NULL "
+			"            AND "
+			"                FK_AttributeType= " TOSTRING(ATTRIBUTETYPE_Title_CONST)
+			"    GROUP BY PK_Attribute"
 		);
+
 		if (rows == -1) {
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attributes sync failed!"); 
 		} else {
@@ -140,14 +147,16 @@ void SyncAttributes()
 		}
 	}
 
-        // Find all performer and album attributes that does not have a picture, but that have files with pictures
-	string sqlPerformer = "SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, f.Filename, f.Path, f.PK_File, AttributeType.PK_AttributeType FROM Attribute "
+        // Find all Album Artist, Performer and Album attributes that do not have a picture, but that have files with pictures
+	string sqlPerformer =
+		"SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, f.Filename, f.Path, f.PK_File, AttributeType.PK_AttributeType FROM Attribute "
 		"JOIN File_Attribute tfa ON tfa.FK_Attribute=PK_Attribute "
 		"JOIN Picture_File ON Picture_File.FK_File=tfa.FK_File "
 		"JOIN File f ON tfa.FK_File=f.PK_File "
 		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
 		"LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
 		"WHERE Picture_Attribute.FK_Picture is NULL AND FK_AttributeType IN (" 
+		TOSTRING(ATTRIBUTETYPE_Album_Artist_CONST) ", "
 		TOSTRING(ATTRIBUTETYPE_Performer_CONST) ", "
 		TOSTRING(ATTRIBUTETYPE_Album_CONST) ") " 
 		"AND f.EK_MediaType IN (4) "
@@ -157,24 +166,54 @@ void SyncAttributes()
 	{
 		while((row = db_wrapper_fetch_row(result.r)))
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Attribute '%s'(%s)(PK=%s) is missing picture...",
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Attribute '%s'(%s)(PK=%s) is missing picture...",
 							    row[2], row[3], row[0]);
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "  - File '%s/%s' has one, checking..",
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "  - File '%s/%s' has one, checking..",
 							    row[5], row[4]);
 			string sqlCheck;
-			if (atoi(row[7]) == 2)
+			if (atoi(row[7]) == ATTRIBUTETYPE_Album_Artist_CONST || atoi(row[7]) == ATTRIBUTETYPE_Performer_CONST)
 			{
-				// Performer
-				// If assigning to performer, make sure all songs on this album have the same performer
-				// SQL will return number of songs on album - number of songs on album with same performer
-				sqlCheck = "SELECT (SELECT count(fa.FK_File) FROM File_Attribute fa " 
-					"JOIN Attribute albumAttr ON albumAttr.PK_Attribute = fa.FK_Attribute AND albumAttr.FK_AttributeType = 3 " 
-					"JOIN File_Attribute f2 ON f2.FK_Attribute = albumAttr.PK_Attribute WHERE f2.FK_File = "+string(row[6])+ " " 
-					") - (SELECT count(f.PK_File) FROM File f "
-					"JOIN File_Attribute pfa ON pfa.FK_File = f.PK_File AND pfa.FK_Attribute = "+string(row[0])+" " 
-					"JOIN File_Attribute afa ON afa.FK_File = "+string(row[6])+" " 
-					"JOIN Attribute albumAttr ON albumAttr.PK_Attribute = afa.FK_Attribute AND albumAttr.FK_AttributeType = 3) AS fileCount ";
-			} else if (atoi(row[7]) == 3)
+				// Album Artist
+				// If assigning to Album Artist/Performer, make sure all songs on this album have the same
+				// Album Artist/Performer before assigning the albume picture to the Album Artist/Performer
+				// SQL will return ((# of songs on album) - (# of songs on album with same Album Artist/Performer))
+				// If *all* tracks match the Album Artist/Performer the picture be added to the Album Artist/Performer
+				sqlCheck =
+					"SELECT "
+					"( "
+					"  SELECT "
+					"      count(fa.FK_File) "
+					"  FROM File_Attribute fa "
+					"  JOIN Attribute albumAttr ON "
+					"      albumAttr.PK_Attribute = fa.FK_Attribute AND "
+					"      albumAttr.FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					"  JOIN File_Attribute f2 ON "
+					"      f2.FK_Attribute = albumAttr.PK_Attribute "
+					"  WHERE f2.FK_File = "+string(row[6])+ " "
+					") - ( "
+					"  SELECT COUNT(FK_File) "
+					"    FROM File_Attribute "
+					"    INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
+					"  WHERE FK_AttributeType= " + string(row[7]) + " "
+					"    AND PK_Attribute= " + string(row[0]) + " "
+					"    AND FK_File IN "
+					"    ( "
+					"      SELECT FK_File "
+					"        FROM File_Attribute "
+					"        INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
+					"      WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					"        AND PK_Attribute = "
+					"        ( "
+					"          SELECT PK_Attribute "
+					"            FROM File_Attribute "
+					"            INNER JOIN Attribute ON FK_Attribute=PK_Attribute "
+					"          WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST)
+					"            AND FK_File = " + string(row[6]) + " "
+					"        ) "
+					"    ) "
+					") AS fileCount ";
+			}
+			else if (atoi(row[7]) == ATTRIBUTETYPE_Album_CONST)
 			{
 				// Album
 				// If assigning to album, make sure all files have the same picture
@@ -182,7 +221,7 @@ void SyncAttributes()
 			  //					"JOIN File_Attribute f2 ON f2.FK_File = pf.FK_File WHERE f2.FK_Attribute = "+string(row[0])+ " "
 			  //		") - 1";
 			}
-			
+
 			PlutoSqlResult result2;
 			DB_ROW row2;
 			if((result2.r = g_pDatabase_pluto_media->db_wrapper_query_result(sqlCheck)))
@@ -190,34 +229,30 @@ void SyncAttributes()
 				if ((row2 = db_wrapper_fetch_row(result2.r)))
 				{
 
-					LoggerWrapper::GetInstance()->Write(LV_WARNING, "  - Result '%s'",
+					LoggerWrapper::GetInstance()->Write(LV_MEDIA, "  - Result '%s'",
 							    row2[0]);
 					if (atoi(row2[0]) == 0) {
-						LoggerWrapper::GetInstance()->Write(LV_WARNING, "  - Assigning picture to attriute",
+						LoggerWrapper::GetInstance()->Write(LV_MEDIA, "  - Assigning picture to attribute",
 							    row2[0]);
 						if (!bDryRun) {
-							string sqlInsert = "INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) "
-								"VALUES("+string(row[0])+","+string(row[1])+")";
+							string sqlInsert = "INSERT INTO Picture_Attribute(FK_Attribute,FK_Picture) VALUES("+string(row[0])+","+string(row[1])+")";
 							int rows = g_pDatabase_pluto_media->threaded_db_wrapper_query(sqlInsert);
 							if(rows == -1)
-								LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Update failed!");
+								LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Assign picture to attribute - Update failed!");
 							else
-								nAffectedRecords++;
+								++nAffectedRecords;
 						}
 
 					}
 				}
 			}
-				
 		}
 	}
-
-
 
 	if(nAffectedRecords == -1)
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attributes sync failed!"); 
 	else
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Attributes sync succeeded! Records affected %d", nAffectedRecords); 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Attributes sync succeeded! Records affected %d", nAffectedRecords); 
 }
 
 void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
@@ -226,19 +261,19 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 
 	//char *AffectedTables[] =
 	//{
-	//	"File_Attribute", 
-	//	"Attribute_Settings", 
-	//	"CoverArtScan", 
-	//	"Disc_Attribute", 
-	//	"Download_Attribute", 
-	//	"LongAttribute", 
-	//	"Picture_Attribute", 
+	//	"File_Attribute",
+	//	"Attribute_Settings",
+	//	"CoverArtScan",
+	//	"Disc_Attribute",
+	//	"Download_Attribute",
+	//	"LongAttribute",
+	//	"Picture_Attribute",
 	//	"SearchToken_Attribute"
 	//};
-	
+
 	//for(int i = 0; i < sizeof(AffectedTables) / sizeof(char *); ++i)
 	//{
-	//	string sSqlMoveRowsFromDuplicates = 
+	//	string sSqlMoveRowsFromDuplicates =
 	//		"UPDATE Attribute JOIN File_Attribute ON FK_Attribute = PK_Attribute\n"
 	//		"SET FK_Attribute = " + string(row[dafAttribute]) + "\n"
 	//		"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
@@ -246,41 +281,49 @@ void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
 	//		"AND PK_Attribute <> " + row[dafAttribute];
 	//	g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlMoveRowsFromDuplicates);
 	//}
-	
-	//string sSqlDeleteDuplicates = 
+
+	//string sSqlDeleteDuplicates =
 	//	"DELETE FROM Attribute\n"
 	//	"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
 	//	"AND Name = '" + StringUtils::SQLEscape(row[dafName]) + "'\n"
 	//	"AND PK_Attribute <> " + row[dafAttribute];
-	
+
 	//            int nAffectedRecords = g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlDeleteDuplicates);
 	//if(nAffectedRecords == -1)
 	//{
-	//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to remove duplicated attributes! Query: %s",
+	//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Main:CombineAttributes Failed to remove duplicated attributes! Query: %s",
 	//		sSqlDeleteDuplicates.c_str());
 	//}
 	//else
 	//{
-	//	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Removed %d duplicated attributes for '%s'", 
+	//	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Main:CombineAttributes Removed %d duplicated attributes for '%s'", 
 	//		nAffectedRecords, row[dafName]); 
 	//}
 
 }
 void RemoveDuplicatedAttributes()
 {
-	string sSqlDuplicatedAttributes = 
-		"SELECT Name, FK_AttributeType, PK_Attribute FROM Attribute\n"
-		"GROUP BY Name, FK_AttributeType\n"
-		"HAVING Count(PK_Attribute) > 1";
+	string sSqlDuplicatedAttributes =
+		"SELECT "
+		"    FK_AttributeType, "
+		"    Name, "
+		"    PK_Attribute "
+		"FROM "
+		"    Attribute "
+		"GROUP BY "
+		"    FK_AttributeType, "
+		"    Name "
+		"HAVING "
+		"    Count(PK_Attribute) > 1";
 
 	enum DuplicatedAttributesFields
 	{
-		dafName,
 		dafAttributerType,
+		dafName,
 		dafAttribute
 	};
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Removing duplicated attributes..."); 
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Main:RemoveDuplicatedAttributes Removing duplicated attributes..."); 
 
 	PlutoSqlResult result;
 	DB_ROW row;
@@ -295,7 +338,7 @@ void RemoveDuplicatedAttributes()
 		}
 	}
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Finished removing duplicated attributes!"); 
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- RemoveDuplicatedAttributes Finished removing duplicated attributes!"); 
 }
 
 void *UpdateMediaThread(void *)
@@ -306,21 +349,20 @@ void *UpdateMediaThread(void *)
 	PlutoMediaIdentifier::Activate(g_pDatabase_pluto_main);
 
 	vector<string> vsUPnPDevices;
-	
+
 	while(true)
 	{
 		//load info about ModificationData, AttrCount, AttrDate, attributes, timestamp for all files
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loading fresh data from db...");
-#endif
-		MediaState::Instance().LoadDbInfo(g_pDatabase_pluto_media, UpdateMediaVars::sDirectory);
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded fresh data from db");
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Worker thread: \"I'm wake!\"");        
-#endif		
-		//UPnP changes: as UPnP mount share doesn't work with inotify (?? 
-		//at least I don't see it firing any expected events, we are manually 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Loading fresh data from db...");
+
+		MediaState::Instance().LoadDbInfo(g_pDatabase_pluto_media, UpdateMediaVars::sDirectory);
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Loaded fresh data from db");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Worker thread: \"I'm wake!\"");
+
+		//UPnP changes: as UPnP mount share doesn't work with inotify (??
+		//at least I don't see it firing any expected events, we are manually
 		//checking contents of 'devices' list for any changes
 		//FIXME if UPnP server went down and up with new content within 2 mins sleep
 		//changes in it's contents can go unnoticed
@@ -329,13 +371,13 @@ void *UpdateMediaThread(void *)
 			vector<string> vsNewDevices;
 			FileUtils::ReadFileIntoVector(sUPnPMountPoint+"/devices", vsNewDevices);
 			sort(vsNewDevices.begin(), vsNewDevices.end());
-			
+
 			vector<string> vsChanges;
 			set_symmetric_difference(vsNewDevices.begin(), vsNewDevices.end(), vsUPnPDevices.begin(), vsUPnPDevices.end(), back_inserter(vsChanges));
-			
+
 			if (!vsChanges.empty())
 			{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "UPnP mount point devices list changed, adding %s for processing", sUPnPMountPoint.c_str());	
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:UpdateMediaThread UPnP mount point devices list changed, adding %s for processing", sUPnPMountPoint.c_str());
 				vsUPnPDevices = vsNewDevices;
 				vectModifiedFolders.push_back(sUPnPMountPoint);
 			}
@@ -343,7 +385,7 @@ void *UpdateMediaThread(void *)
 			{
 				//TODO process list if devices list appear to be same - see fixme note above
 			}
-		}		
+		}
 
 		PLUTO_SAFETY_LOCK(flm, g_FoldersListMutex);
 		while(vectModifiedFolders.size())
@@ -351,13 +393,11 @@ void *UpdateMediaThread(void *)
 			string sItem = vectModifiedFolders.front();
 			flm.Release();
 
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Folder to process: %s", sItem.c_str());	
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Folder to process: %s", sItem.c_str());
 			PLUTO_SAFETY_LOCK(cm, g_ConnectionMutex );
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronizing '%s'...", sItem.c_str());	
-#endif
+
 			PlutoMediaFile::ResetNewFilesAddedStatus();
-				
+
 			UpdateMedia engine(g_pDatabase_pluto_media, g_pDatabase_pluto_main, sItem);
 			engine.LoadExtensions();
 			engine.DoIt();
@@ -367,19 +407,19 @@ void *UpdateMediaThread(void *)
 
 			if( bUpdateThumbnails )
 				engine.UpdateThumbnails();
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronized '%s'.", sItem.c_str());
-#endif
+
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Synchronized '%s'.", sItem.c_str());
+
 			if(PlutoMediaFile::NewFilesAdded())
 			{
-#ifdef UPDATEMEDIA_STATUS
+
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "New files were added to db for '%s'.", sItem.c_str());
-#endif
+
 				SyncAttributes();
 
-#ifdef UPDATEMEDIA_STATUS
+
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending \"Check for new files\" command to Media_Plugin...");
-#endif
+
 				Event_Impl *pEvent = new Event_Impl(DEVICEID_MESSAGESEND, 0, "dcerouter");
 				Message* pMessage = new Message(0, DEVICETEMPLATE_Media_Plugin_CONST, BL_SameHouse, 
 					MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
@@ -389,24 +429,25 @@ void *UpdateMediaThread(void *)
 				pEvent = NULL;
 
 				RemoveDuplicatedAttributes();
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command \"Check for new files\" sent!");
-#endif
+
+				LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Main:UpdateMediaThread Command \"Check for new files\" sent!");
+
 			}
 
 			flm.Relock();
 			vectModifiedFolders.erase(vectModifiedFolders.begin());
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Nothing to process, sleeping 2 minute...");        
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:UpdateMediaThread Nothing to process, sleeping 2 minute...");
 		timespec abstime;
 		abstime.tv_sec = (long) (time(NULL) + 120);  //2 minutes
 		abstime.tv_nsec = 0;
-		flm.TimedCondWait(abstime);		
+		flm.TimedCondWait(abstime);
 	}
+	return NULL;
 }
 
-void OnModify(list<string> &listFiles) 
+void OnModify(list<string> &listFiles)
 {
 	for(list<string>::iterator it = listFiles.begin(); it != listFiles.end(); it++)
 	{
@@ -415,18 +456,18 @@ void OnModify(list<string> &listFiles)
 		struct stat st;
 		if(0 != stat(sItem.c_str(), &st))
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "stat failed for %s. We'll try to parent!", sItem.c_str());
-#endif			
+
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Main:OnModify stat failed for %s. We'll try to parent!", sItem.c_str());
+
 			size_t nPos = sItem.rfind("/");
 			if(nPos != string::npos)
 				sItem = sItem.substr(0, nPos);
 
 			if(0 != stat(sItem.c_str(), &st))
 			{
-#ifdef UPDATEMEDIA_STATUS
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "stat failed for %s. We'll skip it!", sItem.c_str());
-#endif
+
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Main:OnModify stat failed for %s. We'll skip it!", sItem.c_str());
+
 				continue;
 			}
 		}
@@ -438,9 +479,9 @@ void OnModify(list<string> &listFiles)
 			if(nPos != string::npos)
 				sItem = sItem.substr(0, nPos);
 		}
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "New folder %s to sync...", sItem.c_str());        
-#endif
+
+		LoggerWrapper::GetInstance()->Write(LV_MEDIA, "Main:OnModify New folder %s to sync...", sItem.c_str());        
+
 		PLUTO_SAFETY_LOCK(flm, g_FoldersListMutex);
 
 		bool bFound = false;
@@ -468,14 +509,14 @@ int connectToDataBase(string sDBHost, string sDBUser, string sDBPassword, string
         g_pDatabase_pluto_media = new Database_pluto_media(LoggerWrapper::GetInstance());
         if( !g_pDatabase_pluto_media->Connect(sDBHost,sDBUser,sDBPassword,sPlutoMediaDbName,iDBPort) )
         {
-            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database!" );
+            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Main:connectToDataBase Cannot connect to database!" );
             return 1;
         }
 
         g_pDatabase_pluto_main = new Database_pluto_main(LoggerWrapper::GetInstance());
         if( !g_pDatabase_pluto_main->Connect(sDBHost,sDBUser,sDBPassword, sPlutoMainDbName,iDBPort) )
         {
-            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database!" );
+            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Main:connectToDataBase Cannot connect to database!" );
             return 2;
         }
 	return 0;
@@ -620,7 +661,7 @@ int main(int argc, char *argv[])
 		//FIXME add real detection here
 		sLocalUPnPServerName = "LinuxMCE";
 	}
-	
+
 	if(!bRunAsDaemon)
 	{
 		vector<string> vectFolders;
@@ -631,19 +672,19 @@ int main(int argc, char *argv[])
 			for(vector<string>::iterator it = vectFolders.begin(); it != vectFolders.end(); ++it)
 			{
 				string sFolder = *it;
-				
+
 				UpdateMedia UpdateMedia(sDBHost,sDBUser,sDBPassword,iDBPort,sFolder,bSyncFilesOnly);
 				if(!sFolder.empty())
 					UpdateMedia.DoIt();
-				
+
 				if( bUpdateSearchTokens )
 					UpdateMedia.UpdateSearchTokens();
-				
+
 				if( bUpdateThumbnails )
 					UpdateMedia.UpdateThumbnails();
 			}
 		}
-		
+
 		if (bSyncAttributes) {
 
 			int res = connectToDataBase(sDBHost,sDBUser,sDBPassword,sPlutoMediaDbName, sPlutoMainDbName, iDBPort);
@@ -673,7 +714,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Running as daemon... ");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:main Running as daemon... ");
 
 		pthread_cond_init(&g_ActionCond, NULL);
 		g_ConnectionMutex.Init(NULL);
@@ -690,9 +731,12 @@ int main(int argc, char *argv[])
 			return res;
 		}
 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:main Creating FileNotifier... ");
+
 		FileNotifier fileNotifier(g_pDatabase_pluto_media);
 		fileNotifier.RegisterCallbacks(OnModify, OnModify); //we'll use the same callback for OnCreate and OnDelete events
 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:main Setting FileNotifier.Watch(es)... ");
 		vector<string> vectFolders;
 		StringUtils::Tokenize(sDirectory, "|", vectFolders);
 		for(vector<string>::iterator it = vectFolders.begin(); it != vectFolders.end(); ++it)
@@ -701,11 +745,14 @@ int main(int argc, char *argv[])
 			vectModifiedFolders.push_back(*it);
 		}
 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:main Creating UpdateMediaThread... ");
 		pthread_t UpdateMediaThreadId;
 		pthread_create(&UpdateMediaThreadId, NULL, UpdateMediaThread, NULL);
 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:main Creating FileStatusObserver(fileNotifier)... ");
 		FileStatusObserver::Instance().SetFileNotifier(&fileNotifier);
 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Main:main Starting FileNotifier... ");
 		fileNotifier.Run();//it waits for worker thread to exit; the user must press CTRL+C to finish it
 
 		FileStatusObserver::Instance().UnsetFileNotifier();
@@ -715,7 +762,7 @@ int main(int argc, char *argv[])
 
 	FileStatusObserver::Instance().Finalize();
 	MutexTracking::Delete();
-	
+
 	return 0;
 }
 

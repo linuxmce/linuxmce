@@ -740,15 +740,15 @@ return $guessArray ;
 //======================================synopsis============================================================
 function insertSynopsis($episodeData, $fileID, $mediadbADO, $dbADO, $output, $con)
 {	$SfileIdent = $fileID;
-	$synopsis=mysql_real_escape_string($episodeData['synopsis']);
+	$synopsis=mysqli_real_escape_string($episodeData['synopsis']);
 	$Ssql = "SELECT * FROM `LongAttribute` WHERE `Text` = \"$synopsis\" AND FK_File=\"$SfileIdent\" ";
-	$Sresult = mysql_query($Ssql)or die (mysql_error());
-	$Scount = mysql_num_rows($Sresult);
+	$Sresult = mysqli_query($mediadbADO, $Ssql)or die (mysqli_error($mediadbADO));
+	$Scount = mysqli_num_rows($Sresult);
 
 	if ($Scount == 0)
 	{
 			$SfileIdent = $_POST['fileID'];
-			mysql_query("INSERT INTO LongAttribute VALUES (\"\" , 37 ,NULL, \"$SfileIdent\", NULL, \"$synopsis\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )")or die (mysql_error());
+			mysqli_query($mediadbADO, "INSERT INTO LongAttribute VALUES (\"\" , 37 ,NULL, \"$SfileIdent\", NULL, \"$synopsis\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )")or die (mysqli_error($mediadbADO));
 			}
 		return ;
 }
@@ -762,22 +762,22 @@ $ATotal = count($actorArray);
 	$fileIdent = $fileID; $attribType = 2;														//file id for reference
 	while ($i < $ATotal)																				//looping through actors in array
 	{
-	$content=mysql_real_escape_string($actorArray[$i]);
+	$content=mysqli_real_escape_string($actorArray[$i]);
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$content\" AND FK_AttributeType = $attribType";	//checking to see if the performer exists
-	$result = mysql_query($sql);
-	$count = mysql_num_rows($result);
-	$row = mysql_fetch_assoc($result);
+	$result = mysqli_query($mediadbADO, $sql);
+	$count = mysqli_num_rows($result);
+	$row = mysqli_fetch_assoc($result);
 	//print_r($row);
 	$attrib = $row['PK_Attribute'];
 																		//if it exists, used later for ref
 	if ($count < 1)																						//catch to see if we got a result
 	{
 			$iQuery = "INSERT INTO Attribute VALUES (\"\" , $attribType , \"$content\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
-			mysql_query($iQuery) or die (mysql_error());
-			$insertRes= (int)mysql_insert_id()  or die (mysql_error());									//getting the new attribute number for use
+			mysqli_query($mediadbADO, $iQuery) or die (mysqli_error($mediadbADO));
+			$insertRes= (int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));									//getting the new attribute number for use
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-			mysql_query($idQuery)  or die (mysql_error());
+			mysqli_query($mediadbADO, $idQuery)  or die (mysqli_error($mediadbADO));
 			//add images in case of new actor
 			$currPerf = trim($content);
 	$currUrl = $aImgArray[$currPerf];
@@ -796,11 +796,11 @@ $ATotal = count($actorArray);
 	//associate with this file
 
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;	//check to see if associated
-	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
+	$chkResult = mysqli_query($fileChk) or die (mysqli_error($mediadbADO)); $chkCount = mysqli_num_rows($chkResult); $chk = mysqli_fetch_assoc($chkResult);
 	if ( $chkCount == 0)
 	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-		mysql_query($idQuery2)  or die (mysql_error());
+		mysqli_query($mediadbADO, $idQuery2)  or die (mysqli_error($mediadbADO));
 	} else
 	{
 	}
@@ -820,31 +820,31 @@ function addDirectors($directorArray, $fileID, $mediadbADO, $dbADO, $output, $co
 	$fileIdent = $fileID; $attribType = 1;
 	while ($i < $dTotal)
 	{
-	$content=mysql_real_escape_string($directorArray[$i]);
+	$content=mysqli_real_escape_string($directorArray[$i]);
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$content\" AND FK_AttributeType = $attribType";
-	$result = mysql_query($sql);
-	$count = mysql_num_rows($result);
-	$row = mysql_fetch_assoc($result);
+	$result = mysqli_query($mediadbADO, $sql);
+	$count = mysqli_num_rows($result);
+	$row = mysqli_fetch_assoc($result);
 	//print_r($row);
 	$attrib = $row['PK_Attribute'];
 	if ($count < 1)
 	{
 			$iQuery = "INSERT INTO Attribute VALUES (\"\" , $attribType , \"$content\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
-			mysql_query($iQuery) or die (mysql_error());
-			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
+			mysqli_query($mediadbADO, $iQuery) or die (mysqli_error($mediadbADO));
+			$insertRes= (int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-			mysql_query($idQuery)  or die (mysql_error());
+			mysqli_query($mediadbADO, $idQuery)  or die (mysqli_error($mediadbADO));
 	}
 	else
 	{
 	$fileIdent = $fileID;
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
-	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
+	$chkResult = mysqli_query($mediadbADO, $fileChk) or die (mysqli_error($mediadbADO)); $chkCount = mysqli_num_rows($chkResult); $chk = mysqli_fetch_assoc($chkResult);
 	if ( $chkCount == 0)
 	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-		mysql_query($idQuery2)  or die (mysql_error());
+		mysqli_query($mediadbADO, $idQuery2)  or die (mysqli_error($mediadbADO));
 	} else
 	{
 	}
@@ -855,12 +855,12 @@ function addDirectors($directorArray, $fileID, $mediadbADO, $dbADO, $output, $co
 function addEpTitle($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 {	
 //print_r($episodeData);
-	$epTitle=mysql_real_escape_string($episodeData['title']);
+	$epTitle=mysqli_real_escape_string($episodeData['title']);
 	
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$epTitle\" AND FK_AttributeType = 11"; 
-	$result = mysql_query($sql);
-	$count = mysql_num_rows($result);	 
-	$row = mysql_fetch_assoc($result);	
+	$result = mysqli_query($mediadbADO, $sql);
+	$count = mysqli_num_rows($result);	 
+	$row = mysqli_fetch_assoc($result);	
 	$attrib = $row['PK_Attribute'];	
 	
 	$fileIdent = $episodeData['fileID'];
@@ -869,20 +869,20 @@ function addEpTitle($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 	{
 	$out.= 'Show title not found...' ;
 			$iQuery = "INSERT INTO Attribute VALUES (\"\" , 11 , \"$epTitle\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;  	
-			mysql_query($iQuery) or die (mysql_error());	
-			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
+			mysqli_query($mediadbADO, $iQuery) or die (mysqli_error($mediadbADO));	
+			$insertRes= (int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-			 mysql_query($idQuery)  or die (mysql_error());
+			 mysqli_query($mediadbADO, $idQuery)  or die (mysqli_error($mediadbADO));
 	}
 	else
 	{	
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File = $fileIdent";
-	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult); 
+	$chkResult = mysqli_query($mediadbADO, $fileChk) or die (mysqli_error($mediadbADO)); $chkCount = mysqli_num_rows($chkResult); $chk = mysqli_fetch_assoc($chkResult); 
 	if ($chkCount < 1)
 	{				
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-	mysql_query($idQuery2)  or die (mysql_error());
+	mysqli_query($mediadbADO, $idQuery2)  or die (mysqli_error($mediadbADO));
 	} else
 	{ 
 	$out.='already in ep, skipping';}
@@ -894,8 +894,8 @@ function episodeImage ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output
 {
 $fileIdent=$episodeData['fileID'];
 //print_r($fileIdent);
-$test=mysql_query("SELECT * FROM Picture_File WHERE FK_File=\"$fileIdent\" ") or die (mysql_error());
-$fileCount = mysql_num_rows($test); 
+$test=mysqli_query($mediadbADO, "SELECT * FROM Picture_File WHERE FK_File=\"$fileIdent\" ") or die (mysqli_error($mediadbADO));
+$fileCount = mysqli_num_rows($test); 
 //echo $fileCount; 
 if ($fileCount < 1)
 {
@@ -910,9 +910,9 @@ $import_cover_art='http://www.thetvdb.com/banners/'.$episodeData['epImg'];
 $extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));	
 
 	if($import_cover_art!=''){
-		mysql_query("INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
-		$picID=(int)mysql_insert_id()  or die (mysql_error());
-		mysql_query("INSERT INTO Picture_File (FK_Picture,FK_File) VALUES (\"$picID\",\"$fileIdent\")");
+		mysqli_query($mediadbADO, "INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
+		$picID=(int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
+		mysqli_query($mediadbADO, "INSERT INTO Picture_File (FK_Picture,FK_File) VALUES (\"$picID\",\"$fileIdent\")");
 
 		// create the file and the thumbnail
 		$extension=($extension=='jpeg')?'jpg':$extension;
@@ -946,8 +946,8 @@ function addViginetteImg ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $out
 {
 $fileIdent = $fileID;
 
-$test=mysql_query("SELECT * FROM Picture_Attribute WHERE FK_Attribute=\"$attrib\" ") or die (mysql_error());
-$fileCount = mysql_num_rows($test);
+$test=mysqli_query($mediadbADO, "SELECT * FROM Picture_Attribute WHERE FK_Attribute=\"$attrib\" ") or die (mysqli_error($mediadbADO));
+$fileCount = mysqli_num_rows($test);
 //echo $fileCount;
 if ($fileCount < 1)
 {
@@ -962,9 +962,9 @@ $import_cover_art='http://www.thetvdb.com/banners/'.$episodeData['series']['seri
 $extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));
 
 	if($import_cover_art!=''){
-		mysql_query("INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
-		$picID=(int)mysql_insert_id()  or die (mysql_error());
-		mysql_query("INSERT INTO Picture_Attribute (FK_Picture,FK_Attribute) VALUES (\"$picID\",\"$attrib\")");
+		mysqli_query($mediadbADO, "INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
+		$picID=(int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
+		mysqli_query($mediadbADO, "INSERT INTO Picture_Attribute (FK_Picture,FK_Attribute) VALUES (\"$picID\",\"$attrib\")");
 
 		// create the file and the thumbnail
 		$extension=($extension=='jpeg')?'jpg':$extension;
@@ -1004,30 +1004,30 @@ function addGenre($genreArray, $con ,$fileID, $mediadbADO, $dbADO, $output)
 	$attribType = 8;
 	while ($i < $gTotal)
 	{
-	$content=mysql_real_escape_string($genreArray[$i]);
+	$content=mysqli_real_escape_string($genreArray[$i]);
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$content\" AND FK_AttributeType = $attribType";
-	$result = mysql_query($sql);
-	$count = mysql_num_rows($result);
-	$row = mysql_fetch_assoc($result);
+	$result = mysqli_query($mediadbADO, $sql);
+	$count = mysqli_num_rows($result);
+	$row = mysqli_fetch_assoc($result);
 	$attrib = $row['PK_Attribute'];
 	if ($count < 1)
 	{
 			$iQuery = "INSERT INTO Attribute VALUES (\"\" , $attribType , \"$content\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
-			mysql_query($iQuery) or die (mysql_error());
-			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
+			mysqli_query($mediadbADO, $iQuery) or die (mysqli_error($mediadbADO));
+			$insertRes= (int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-			mysql_query($idQuery)  or die (mysql_error());
+			mysqli_query($mediadbADO, $idQuery)  or die (mysqli_error($mediadbADO));
 		}
 	else
 	{
 	$fileIdent = $fileID;
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
-	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
+	$chkResult = mysqli_query($mediadbADO, $fileChk) or die (mysqli_error($mediadbADO)); $chkCount = mysqli_num_rows($chkResult); $chk = mysqli_fetch_assoc($chkResult);
 	if ( $chkCount == 0)
 	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-		mysql_query($idQuery2)  or die (mysql_error());
+		mysqli_query($mediadbADO, $idQuery2)  or die (mysqli_error($mediadbADO));
 	} 
 	else
 	{
@@ -1044,41 +1044,41 @@ $format=$_POST['rezOver'];
 	
 $fileIdent = $fileID;
 //print_r($format);
-mysql_query("UPDATE File SET FK_FileFormat=\"$format\" WHERE `PK_File`=\"$fileIdent\" ")or die (mysql_error()); 
-mysql_query("UPDATE File SET FK_MediaSubType=1 WHERE `PK_File`=\"$fileIdent\" ")or die (mysql_error()); 
+mysqli_query($mediadbADO, "UPDATE File SET FK_FileFormat=\"$format\" WHERE `PK_File`=\"$fileIdent\" ")or die (mysqli_error($mediadbADO)); 
+mysqli_query($mediadbADO, "UPDATE File SET FK_MediaSubType=1 WHERE `PK_File`=\"$fileIdent\" ")or die (mysqli_error($mediadbADO)); 
 return "Subtypes Complete";
 
 }
 //=================program title================================================================================
 function addProgTitle ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 {
-	$program=mysql_real_escape_string($episodeData['series']['series']);
+	$program=mysqli_real_escape_string($episodeData['series']['series']);
 	//print_r($program);
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$program\" AND FK_AttributeType = 12";
-	$result = mysql_query($sql) or die(mysql_error());
-	$row = mysql_fetch_assoc($result);
+	$result = mysqli_query($mediadbADO, $sql) or die(mysqli_error($mediadbADO));
+	$row = mysqli_fetch_assoc($result);
 	$attrib = $row['PK_Attribute'];
-	$count = mysql_num_rows($result);
+	$count = mysqli_num_rows($result);
 	$attrib = $row['PK_Attribute'];
 	$fileIdent = $fileID;
 	if ($count < 1 )
 	{
 			$iQuery = "INSERT INTO Attribute VALUES (\"\" , 12 , \"$program\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
-			mysql_query($iQuery) or die (mysql_error());
-			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
+			mysqli_query($mediadbADO, $iQuery) or die (mysqli_error($mediadbADO));
+			$insertRes= (int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-			 mysql_query($idQuery)  or die (mysql_error());
+			 mysqli_query($mediadbADO, $idQuery)  or die (mysqli_error($mediadbADO));
 			 return "New Title:".$program." added to database <br>";
 	}
 	else
 	{
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File = $fileID";
-	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
+	$chkResult = mysqli_query($mediadbADO, $fileChk) or die (mysqli_error($mediadbADO)); $chkCount = mysqli_num_rows($chkResult); $chk = mysqli_fetch_assoc($chkResult);
 	if ($chkCount < 1)
 	{
 	$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileID\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-	mysql_query($idQuery2)  or die (mysql_error());
+	mysqli_query($mediadbADO, $idQuery2)  or die (mysqli_error($mediadbADO));
 	return "Title:".$program." associated to file. <br>";
 	}
 	else {return "Already Associated <br>";}
@@ -1091,33 +1091,33 @@ function addProgTitle ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output
 //=================title================================================================================
 function addTitle ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 {
-        $program=mysql_real_escape_string($episodeData['title']);
+        $program=mysqli_real_escape_string($episodeData['title']);
 	
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$program\" AND FK_AttributeType = 13";
-	$result = mysql_query($sql) or die(mysql_error());
-	$row = mysql_fetch_assoc($result);
+	$result = mysqli_query($mediadbADO, $sql) or die(mysqli_error($mediadbADO));
+	$row = mysqli_fetch_assoc($result);
 	$attrib = $row['PK_Attribute'];
-	$count = mysql_num_rows($result);
+	$count = mysqli_num_rows($result);
 	$attrib = $row['PK_Attribute'];
 	$fileIdent = $fileID;
 	if ($count < 1)
 	{
 			$iQuery = "INSERT INTO Attribute VALUES (\"\" , 13 , \"$program\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
-			mysql_query($iQuery) or die (mysql_error());
-			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
+			mysqli_query($mediadbADO, $iQuery) or die (mysqli_error($mediadbADO));
+			$insertRes= (int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-			 mysql_query($idQuery)  or die (mysql_error());
+			 mysqli_query($mediadbADO, $idQuery)  or die (mysqli_error($mediadbADO));
 			 return "New Title:".$program." added to database <br>";
 	}
 	else
 	{
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File = $fileID";
-	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
+	$chkResult = mysqli_query($fileChk) or die (mysqli_error($mediadbADO)); $chkCount = mysqli_num_rows($chkResult); $chk = mysqli_fetch_assoc($chkResult);
 	if ($chkCount < 1)
 	{
 	$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileID\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-	mysql_query($idQuery2)  or die (mysql_error());
+	mysqli_query($mediadbADO, $idQuery2)  or die (mysqli_error($mediadbADO));
 	return "Title:".$program." associated to file. <br>";
 	}
 	else {return "Already Associated <br>";}
@@ -1147,29 +1147,29 @@ while ($i < $counter)
 	
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$content\" AND FK_AttributeType = \"$attribType\" ";
 		
-	$result = mysql_query($sql) or die (mysql_error($content));
-	$count = mysql_num_rows($result);
-	$row = mysql_fetch_assoc($result);
+	$result = mysqli_query($mediadbADO, $sql) or die (mysqli_error($content));
+	$count = mysqli_num_rows($result);
+	$row = mysqli_fetch_assoc($result);
 	$attrib = $row['PK_Attribute'];
 
 	if ($count < 1)
 	{
 			$iQuery = "INSERT INTO Attribute VALUES (\"\" , $attribType , \"$content\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
-			mysql_query($iQuery) or die (mysql_error());
-			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
+			mysqli_query($mediadbADO, $iQuery) or die (mysqli_error($mediadbADO));
+			$insertRes= (int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
 			//echo $insertRes;
 			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"'.$insertRes.'\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-			mysql_query($idQuery)  or die (mysql_error());
+			mysqli_query($mediadbADO, $idQuery)  or die (mysqli_error($mediadbADO));
 		}
 	else
 	{
 	$fileIdent = $fileID;
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
-	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
+	$chkResult = mysqli_query($mediadbADO, $fileChk) or die (mysqli_error($mediadbADO)); $chkCount = mysqli_num_rows($chkResult); $chk = mysqli_fetch_assoc($chkResult);
 	if ( $chkCount < 1)
 	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
-		mysql_query($idQuery2)  or die (mysql_error());
+		mysqli_query($mediadbADO, $idQuery2)  or die (mysqli_error($mediadbADO));
 	} else
 	{
 	}
@@ -1206,11 +1206,11 @@ function insertAttributes($fileID, $mediadbADO, $dbADO, $output, $episodeData)
  * This function is called when a file is confirmed and attributes need to be added. It then gathers data to then feed
  * the various smaller insert functions.
  */
-	$pass=""; $user="root"; $db="pluto_media"; $con= mysql_connect("localhost", $user, $pass); 	 // connection
-	if (!$con) { die('Could not Connect'.mysql_error()); //error messaging
+	$pass=""; $user="root"; $db="pluto_media"; $con= mysqli_connect("localhost", $user, $pass); 	 // connection
+	if (!$con) { die('Could not Connect'.mysqli_error($con)); //error messaging
 	$connMessage="Fail";
 	};
-	if ($con) {mysql_select_db("pluto_media") or die(mysql_error()); //connect to media db or error out
+	if ($con) {mysqli_select_db("pluto_media") or die(mysqli_error($con)); //connect to media db or error out
 	$connMessage="Conn Good";
 	};
 $seasonNo = $episodeData['seasonNo'];
@@ -1220,7 +1220,7 @@ $fileFormatEnum = array (1 => "Low Res",2 => "DVD",3 => "Standard Def", 4 => "HD
 
 //dynamic array to deal with changes to attribute types
 $query = "SELECT PK_AttributeType, Description from AttributeType";
-$result = mysql_query($query);
+$result = mysqli_query($con, $query);
 $attributeType=array(1=>"Director",
 2=>"Performer",
 3=>"Album",
@@ -1595,9 +1595,9 @@ function addActorImages($currUrl, $attrNo, $currPerf, $con , $mediadbADO, $dbADO
  * Experimental function to add actor images. Will see use if i ever implement a character table.
  */
 	//check for image
-	$resulta = mysql_query("SELECT * FROM Picture_Attribute WHERE FK_Attribute=\"$attrNo\"");
-	$resultb= mysql_fetch_assoc($resulta);
-	$rowsA = mysql_num_rows($resultb);
+	$resulta = mysqli_query($mediadbADO, "SELECT * FROM Picture_Attribute WHERE FK_Attribute=\"$attrNo\"");
+	$resultb= mysqli_fetch_assoc($resulta);
+	$rowsA = mysqli_num_rows($resultb);
 	//print_r($resultb);
 	$existingPic= $resultb['FK_Picture'];
 	//echo $existingPic ;
@@ -1621,10 +1621,10 @@ function addActorImages($currUrl, $attrNo, $currPerf, $con , $mediadbADO, $dbADO
 		//echo 'ext: '.$extension.'<br>';
 		if($import_cover_art!='')
 			{
-			mysql_query("INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
-			$picID=(int)mysql_insert_id()  or die (mysql_error());
-			mysql_query("INSERT INTO Picture_Attribute (FK_Picture,FK_Attribute) VALUES (\"$picID\",\"$attrNo\")");
-			mysql_query("DELETE * FROM Picture_Attribute WHERE FK_Picture =\"$existingPic\" AND FK_Attribute=\"$attrNo\"");
+			mysqli_query($mediadbADO, "INSERT INTO Picture (Extension,URL) VALUES (\"$extension\", \"$import_cover_art\")");
+			$picID=(int)mysqli_insert_id()  or die (mysqli_error($mediadbADO));
+			mysqli_query($mediadbADO, "INSERT INTO Picture_Attribute (FK_Picture,FK_Attribute) VALUES (\"$picID\",\"$attrNo\")");
+			mysqli_query($mediadbADO, "DELETE * FROM Picture_Attribute WHERE FK_Picture =\"$existingPic\" AND FK_Attribute=\"$attrNo\"");
 			echo $existingPic.' deleted';
 
 			// create the file and the thumbnail

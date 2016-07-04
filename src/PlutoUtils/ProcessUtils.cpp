@@ -32,13 +32,17 @@
 #else
 	#include <fcntl.h>
 	#include <sys/ipc.h>
+
+#ifndef ANDROID
 	#include <sys/sem.h>
+    extern int errno;
+#endif
 	#include <unistd.h>
 	#include <sys/wait.h>
 	#include <errno.h>
 	#include <sys/select.h>
 
-	extern int errno;
+
 #endif
 using namespace std;
 using namespace DCE;
@@ -79,6 +83,7 @@ int ProcessUtils::SpawnApplication(string sCmdExecutable, string sCmdParams, str
         return 0;
     }
 
+#ifndef ANDROID
 #ifndef WIN32
     //parse the args
     const int MaxArgs = 32;
@@ -207,6 +212,8 @@ LoggerWrapper::GetInstance()->Write(LV_PROCESSUTILS,"dupped arg %d %s",i,ps);
 */
 	return 1;
 #endif
+#endif
+
 }
 
 bool ProcessUtils::KillApplication(string sAppIdentifier, vector<void *> &associatedData)

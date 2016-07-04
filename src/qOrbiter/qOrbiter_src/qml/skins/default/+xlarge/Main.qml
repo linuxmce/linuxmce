@@ -89,15 +89,12 @@ Item{
 
         default:console.log("qmlRoot::Key "+event.key+" is unhandled."); qmlRoot.unhandledKey( event.key ); break;
         }
-
     }
 
     MainLayout{
         id:layout
         anchors.centerIn: parent
     }
-
-
 
     MouseArea{
         anchors.fill: parent

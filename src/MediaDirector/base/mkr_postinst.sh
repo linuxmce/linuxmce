@@ -14,8 +14,6 @@ StatsMessage () {
 	printf "$(date) - $* \n"
 }
 
-. /usr/pluto/install/install-md.sh
-
 ###########################################################
 ### Main execution area
 ###########################################################
@@ -34,17 +32,5 @@ if [[ ! -f /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz ]] ; then
 	touch /usr/pluto/deb-cache/$DEB_CACHE/Packages
 	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
 fi
-
-case "$TARGET_DISTRO" in
-	raspbian)
-		# raspbian doesn't come with lsb-release by default???
-		cat <<-EOF > /etc/lsb-release
-			DISTRIB_ID=Raspbian
-			DISTRIB_CODENAME=$TARGET_RELEASE
-			EOF
-		;;
-esac
-
-MD_Config_NTP_Client
 
 exit 0

@@ -1,5 +1,5 @@
 <?php
-function saveSchedule($deviceid, $version, $MAX_TIMES_PER_DAY){
+function saveSchedule($deviceid, $version, $MAX_TIMES_PER_DAY, $connection){
 	//increment version number so thermostat will request update
 	$version++;
 	// build array out of form fields
@@ -18,7 +18,7 @@ function saveSchedule($deviceid, $version, $MAX_TIMES_PER_DAY){
 	}
 	//tokenize and insert into deviceData
 	$scheduleParameter=implode(";",$schedule);
-	mysql_query("UPDATE Device_DeviceData SET IK_DeviceData='".$scheduleParameter."' WHERE FK_Device=".$deviceid." AND FK_DeviceData=291") or die('ERROR: Invalid query: ' . mysql_error());
+	mysqli_query($connection, "UPDATE Device_DeviceData SET IK_DeviceData='".$scheduleParameter."' WHERE FK_Device=".$deviceid." AND FK_DeviceData=291") or die('ERROR: Invalid query: ' . mysqli_error($connection));
 }
 
 function editSchedules($output,$dbADO){
@@ -39,21 +39,21 @@ function editSchedules($output,$dbADO){
 	$action=$_REQUEST['action'];
 
 	// connect to database and switch to main db
-	$connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to database server!");
-	mysql_select_db($mysqllmcedb, $connection) or die("ERROR: could not select LinuxMCE main database!");
+	$connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd, $mysqllmcedb) or die ("ERROR: could not connect to database server!");
+//	mysql_select_db($mysqllmcedb, $connection) or die("ERROR: could not select LinuxMCE main database!");
 
 	if($action == 'saveSchedule') {
 		$version=$_REQUEST['version'];
-		saveSchedule($deviceid, $version, $MAX_TIMES_PER_DAY);
+		saveSchedule($deviceid, $version, $MAX_TIMES_PER_DAY, $connection);
 	}
 
 	// Query for thermostat device list with schedule capabilities
-	$device_query = mysql_query("SELECT Device.PK_Device, Device.Description AS DeviceName,Room.Description AS RoomName
+	$device_query = mysqli_query($connection, "SELECT Device.PK_Device, Device.Description AS DeviceName,Room.Description AS RoomName
 				FROM Device, Room, Device_DeviceData
 				WHERE ((Device.FK_DeviceTemplate = 4)
 				AND (Device.FK_Room = Room.PK_Room) AND (Device_DeviceData.FK_Device = Device.PK_Device)
 				AND (Device_DeviceData.FK_DeviceData = 207) AND (Device_DeviceData.IK_DeviceData LIKE '%71%') )
-				ORDER BY Device.FK_Room, Device.Description") or die('ERROR: Invalid query: ' . mysql_error());
+				ORDER BY Device.FK_Room, Device.Description") or die('ERROR: Invalid query: ' . mysqli_error($connection));
 
 	// Create device selection HTML form
 	$out.='<form action="index.php" method="POST" name="deviceSelect">
@@ -62,7 +62,7 @@ function editSchedules($output,$dbADO){
 
 	// create devices select box
 	$out.=$TEXT_DEVICE_CONST.': <select name="device" style="width: 300px" onchange="document.deviceSelect.submit();">';
-	while ($device=mysql_fetch_array($device_query)){
+	while ($device=mysqli_fetch_array($device_query)){
 		if($deviceid == 0) $deviceid = $device['PK_Device'];
 		$out.='<option value = "'.$device['PK_Device'].'"';
 		if($device['PK_Device'] == $deviceid) $out.=' selected="selected"';
@@ -71,9 +71,9 @@ function editSchedules($output,$dbADO){
 	$out.='</select></form><br />';
 
 	// Query schedule data for selected thermostat
-	$schedule_query = mysql_query("SELECT IK_DeviceData FROM Device_DeviceData
-  		WHERE FK_Device = ".$deviceid." AND FK_DeviceData=291") or die('ERROR: Invalid query: ' . mysql_error());
-	$scheduleData=mysql_fetch_row($schedule_query);
+	$schedule_query = mysqli_query($connection, "SELECT IK_DeviceData FROM Device_DeviceData
+  		WHERE FK_Device = ".$deviceid." AND FK_DeviceData=291") or die('ERROR: Invalid query: ' . mysqli_error($connection));
+	$scheduleData=mysqli_fetch_row($schedule_query);
 	$scheduleData=explode(";", $scheduleData[0]);
 
 	// deserialize and create cache of schedule data

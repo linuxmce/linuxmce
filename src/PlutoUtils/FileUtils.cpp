@@ -16,6 +16,7 @@
 
 #include "FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
+#include "PlutoUtils/ProcessUtils.h"
 #include "PlutoUtils/Other.h"
 
 #ifndef WIN32
@@ -189,8 +190,14 @@ bool FileUtils::ReadTextFile(string sFileName, string& sData)
     char *pData = FileUtils::ReadFileIntoBuffer(sFileName, nSize);
     bool bResult = NULL != pData;
 
+    if (nSize<=0)
+        {
+            sData="";
+            return false;
+        }
+
     if(pData)
-        sData = string(pData);
+        sData = string(pData, nSize);
 
     delete [] pData;
     pData = NULL;
@@ -239,6 +246,17 @@ bool FileUtils::WriteVectorToFile( string sFileName, vector<string> &vectString 
     }
     fclose(file);
     return true;
+}
+
+string FileUtils::FileSystemType( string sFile )
+{
+	string sCommandLine = "df --output='fstype' \"" + sFile + "\" | tail -n+2";
+	string sOutput;
+
+	if(ProcessUtils::RunApplicationAndGetOutput(sCommandLine, sOutput))
+	{
+		return sOutput;
+	}
 }
 
 bool FileUtils::FileExists( string sFile )

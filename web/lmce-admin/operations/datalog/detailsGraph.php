@@ -1,7 +1,7 @@
 <?php 
 require_once 'Image/Graph.php'; 
 
-function createDataSet($device, $startTime, $endTime, $points, $unit, $keepValue) {
+function createDataSet($device, $startTime, $endTime, $points, $unit, $keepValue, $connection) {
 
     $sql = "select Description,timestamp,Datapoint,Unit from Datapoints,Unit
          WHERE FK_Unit=PK_unit AND PK_unit LIKE ".$unit." and EK_Device= ".$device." ";
@@ -11,9 +11,9 @@ function createDataSet($device, $startTime, $endTime, $points, $unit, $keepValue
         $sql.="AND timestamp < '".$endTime."' ";
     }
     $sql.=" order by timestamp";
-    $query=mysql_query($sql);
+    $query=mysqli_query($sql);
 
-    $num = mysql_numrows($query); //find number off datapoints for the graph
+    $num = mysqli_num_rows($query); //find number off datapoints for the graph
     if ($num == 0) {
         return null;
     }
@@ -28,14 +28,14 @@ function createDataSet($device, $startTime, $endTime, $points, $unit, $keepValue
     $lastTime = $startTime;
     // TODO: cannot use counter on X axis, because devices may report status with different intervals, thus we
     // can skew one graph in relation to another
-    while ($datapoint = mysql_fetch_array($query)){
+    while ($datapoint = mysqli_fetch_array($query)){
         if ($t==0){
-	    $queryLast = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
+	    $queryLast = mysqli_query($connection, 'SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
 	           WHERE EK_Device = '.$device.' AND timestamp < "'.$startTime.'" AND `FK_Unit` = '.$unit.' ORDER BY timestamp DESC LIMIT 1');
-	    if (mysql_numrows($queryLast)==0){
+	    if (mysqli_num_rows($queryLast)==0){
 	        $prevDatapoint=0;
             } else {     
-	        $datapointLast = mysql_fetch_row($queryLast);
+	        $datapointLast = mysqli_fetch_row($queryLast);
 	        $prevDatapoint=$datapointLast[1];
             }
 	    $Dataset->addPoint(floor($t*$adjustFactor)/*strtotime($startTime)*//*strtotime('-'.$days.'days')*/, $datapointLast[1]);
@@ -65,22 +65,22 @@ $mysqlhost="localhost"; // MySQL-Host
 $mysqluser="root"; // MySQL-User
 $mysqlpwd=""; // Password
 $mysqldb="lmce_datalog";
-$connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
-mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");
+$connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
+mysqli_select_db($connection, $mysqldb) or die("ERROR: could not select database!");
 
-$device = mysql_real_escape_string($_GET['device']);
-$days = mysql_real_escape_string($_GET['days']);
-$color = mysql_real_escape_string($_GET['color']);
-$name = mysql_real_escape_string($_GET['name']);
-$unit = mysql_real_escape_string($_GET['unit']); 
+$device = mysqli_real_escape_string($_GET['device']);
+$days = mysqli_real_escape_string($_GET['days']);
+$color = mysqli_real_escape_string($_GET['color']);
+$name = mysqli_real_escape_string($_GET['name']);
+$unit = mysqli_real_escape_string($_GET['unit']); 
 $keepValue = array(5,9); // Units that have the same value until new value is reported
-$startTime[0] = mysql_real_escape_string($_GET['startTime']);
-$endTime = mysql_real_escape_string($_GET['endTime']);
+$startTime[0] = mysqli_real_escape_string($_GET['startTime']);
+$endTime = mysqli_real_escape_string($_GET['endTime']);
 
 // Get all graphs start time
 $i = 1;
 while (!empty($_REQUEST['startTime'.$i])) {
-    $startTime[$i] = mysql_real_escape_string($_REQUEST['startTime'.$i]);
+    $startTime[$i] = mysqli_real_escape_string($_REQUEST['startTime'.$i]);
     $i++;
 }
 $numGraphs = $i;
@@ -116,9 +116,9 @@ if (isset($endTime)) {
      $sql.="AND timestamp < '".$endTime."' ";
 }
 $sql.=" order by timestamp";
-$query=mysql_query($sql);
+$query=mysqli_query($connection, $sql);
 
-$num = mysql_numrows($query); //find number off datapoints for the graph
+$num = mysqli_num_rows($query); //find number off datapoints for the graph
 
 
 // If there is not enough data in the db to create a graph 
@@ -151,19 +151,19 @@ $Dataset =& Image_Graph::factory('dataset');
 $t=0; //Counter
 $avgValue=0;
 $lastTime = $startTime[0];
-while ($datapoint = mysql_fetch_array($query)){
+while ($datapoint = mysqli_fetch_array($query)){
      if ($AxisYName == "") {
           $AxisYName = $datapoint[3];
      }
      if ($t==0){
           $firstDate=date ("Y-m-d H:i:s", strtotime('-'.$days.'days'));
-          $queryLast = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
+          $queryLast = mysqli_query($connection, 'SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
 	       WHERE EK_Device = '.$device.' AND timestamp < DATE_SUB(NOW(), INTERVAL '.$days.' DAY) AND `FK_Unit` = '.$unit.' ORDER BY timestamp DESC LIMIT 1');
-	  if (mysql_numrows($queryLast)==0){
+	  if (mysqli_num_rows($queryLast)==0){
 	       $prevDatapoint=0;
 	  }
 	  else {     
-	       $datapointLast = mysql_fetch_row($queryLast);
+	       $datapointLast = mysqli_fetch_row($queryLast);
 	       $prevDatapoint=$datapointLast[1];
 	  }
 	  $Dataset->addPoint($t/*strtotime($startTime[0])*//*strtotime('-'.$days.'days')*/, $datapointLast[1]);
@@ -253,7 +253,7 @@ $period = strtotime($endTime)-strtotime($startTime[0]);
 for ($i =  1; $i < count($startTime); $i++) {
     if (!empty($startTime[$i])) {
         $endTime = date('Y-m-d H:i:s',strtotime($startTime[$i]) + $period);
-        $Dataset2 =& createDataSet($device, $startTime[$i], $endTime, $points, $unit, $keepValue);
+        $Dataset2 =& createDataSet($device, $startTime[$i], $endTime, $points, $unit, $keepValue, $connection);
         if ($Dataset2 != null) {
             $Plot[$i] =& $Plotarea->addNew('line', $Dataset2); 
             $Plot[$i]->setLineColor($colorArray[$i-1]);

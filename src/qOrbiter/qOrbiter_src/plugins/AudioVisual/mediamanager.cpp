@@ -20,16 +20,10 @@
 #include <QTcpSocket>
 #include <QProcess>
 #include <QDir>
-#ifndef Q_OS_ANDROID
-#ifdef QT4
-#include <QGraphicsScene>
-#include <QtOpenGL/QGLWidget>
-#include <QGraphicsView>
-#elif QT5
 #include <QQuickItem>
 #include <QImage>
-#endif
-#endif
+
+
 
 
 using namespace DCE;
@@ -40,25 +34,10 @@ using namespace DCE;
  * \param parent
  * \ingroup audio_visual
  */
-#ifdef QT4
-MediaManager::MediaManager(QDeclarativeItem *parent) :
-    QDeclarativeItem(parent)
-  #elif defined (QT5)
-MediaManager::MediaManager(QQuickItem *parent):
-    QQuickItem(parent)
-  #endif
+
+MediaManager::MediaManager(QQuickItem *parent): QQuickItem(parent)
+
 {
-#ifdef ANDROID
-
-#ifdef QT4
-    setFlag(ItemHasNoContents, false);
-
-
-#elif QT5
-    setFlag(QQuickItem::ItemHasContents, false);
-#endif
-
-#endif
     serverAddress = "";
     deviceNumber = -1;
     timeCodeServer = new QTcpServer();
@@ -66,37 +45,6 @@ MediaManager::MediaManager(QQuickItem *parent):
     lastTick = "";
     mediaPlayer = NULL;
     setCurrentStatus("Media Manager defaults set, initializing media engines");
-#ifdef QT4
-
-#ifndef ANDROID
-    // setAvailibleOutputs(Phonon::BackendCapabilities::availableAudioOutputDevices());
-    qDebug() << outputs;
-    qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
-
-    mediaObject = new Phonon::MediaObject();
-    videoSurface = new Phonon::VideoWidget();
-
-    audioSink = new Phonon::AudioOutput();
-    discController = new Phonon::MediaController(mediaObject);
-    QObject::connect(discController, SIGNAL(availableTitlesChanged(int)), this, SLOT(setAvailTitles(int)));
-    QObject::connect(discController, SIGNAL(availableSubtitlesChanged()), this, SLOT(setSubtitles()));
-    QObject::connect(discController, SIGNAL(availableMenusChanged(QList<NavigationMenu>)), this, SLOT(setMenus(QList<NavigationMenu>)));
-    QObject::connect(mediaObject, SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
-
-
-    Phonon::createPath(mediaObject, audioSink);
-    setCurrentStatus("Audio Sink Initialized");
-    Phonon::createPath(mediaObject, videoSurface);
-    setCurrentStatus("Video Player Initialized");
-
-    videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
-    videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
-    if(initViews(true))
-        setCurrentStatus("Color Filter Applied.");
-#endif
-    setCurrentStatus("Window Initialized");
-#endif
-
     totalTime=0;
     setMediaBuffer(0);
     setMediaPlaying(false);
@@ -114,7 +62,7 @@ void MediaManager::initializePlayer()
     setCurrentStatus("Initializing Media Player "+ QString::number(deviceNumber));
 
     if(!mediaPlayer){
-        mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
+      //  mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
     }
 
     initializeConnections();
@@ -126,31 +74,7 @@ void MediaManager::initializeConnections()
 
 
     /*From Dce MediaPlayer*/
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(QT5)
 
-    #if defined (QT4) && !defined(Q_OS_ANDROID)
-    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
-    QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
-    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()));  QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState()));
-    QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()));
-    QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)));
-    QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()));
-    QObject::connect(mediaObject, SIGNAL(totalTimeChanged(qint64)), this, SLOT(setTotalTime(qint64)));
-    QObject::connect(mediaObject, SIGNAL(bufferStatus(int)), this, SLOT(setMediaBuffer(int)));
-    QObject::connect(mediaObject, SIGNAL(aboutToFinish()), this, SIGNAL(mediaAboutToFinish()));
-    QObject::connect(mediaObject, SIGNAL(prefinishMarkReached(qint32)), this ,SLOT(setPrefinishMarkHit(qint32)));
-    QObject::connect(mediaObject,SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
-    QObject::connect(mediaObject, SIGNAL(hasVideoChanged(bool)), this , SLOT(setVideoStream(bool)));
-    /*internals*/
-    QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setDisplayVolume(qreal)));
-    QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
-    mediaObject->setTickInterval(quint32(1000));
-    #elif QT5
-    QObject::connect(this, SIGNAL(incomingTick(quint64)), this, SLOT(processTimeCode(qint64)));
-    #endif
-#elif  ( defined ANDROID || defined(Q_OS_IOS) ) && defined(QT5) || defined(QT5)
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
@@ -161,7 +85,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));    
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
-#endif
+
 
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
     QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
@@ -396,68 +320,10 @@ void MediaManager::processTimeCode(qint64 f)
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
 
-void MediaManager::processSocketdata()
-{
-#ifdef QT5
-    return;
-#endif
-
-    QString tmp;
-    while(lastClient->bytesAvailable()!=0){
-        tmp.append(lastClient->read(1));
-    }
-
-    if(!tmp.contains("\n{")){
-        tmp="";
-        return ;
-    }
-
-    QString f = QString::fromLocal8Bit(tmp.toLocal8Bit());
-    int front = f.indexOf("\n{");
-    int back  = f.indexOf("}\n");
-    QString final=f.remove(0, front);
-    final.remove("\n{"); final.remove("}\n");
-    qWarning() << "Socket Data!! " <<final;
-
-
-    QStringList cmdList = final.split(":");
-    QString cmd = cmdList.at(0);
-
-    if(cmd=="time"){
-        int i = QString(cmdList.last()).toInt();
-        setQmlTotalTime(i);
-    }
-
-    if(cmd=="currenttime"){
-        processTimeCode( QString(cmdList.last()).toInt());
-    }
-
-    if(cmd=="error"){
-        stopPluginMedia();
-        mediaPlayer->mediaEnded(false);
-    }
-
-    else if(cmd=="event"){
-        QString eventT = cmdList.last();
-        qDebug() << eventT;
-        if(eventT=="stop"){
-            setMediaPlaying(false);
-
-        }else if(eventT=="play"){
-            qmlPlaybackEnded(false);
-        }
-        else if(eventT=="completed"){
-            qmlPlaybackEnded(true);
-
-        }
-    }
-    lastClient->disconnectFromHost();
-}
 
 void MediaManager::playbackInfoUpdated(QString mediaTitle, QString mediaSubTitle, QString name, int screen)
 {
     qDebug() << Q_FUNC_INFO ;
-
     //mediaPlayer->updateMetadata(playbackData);
     mediaPlayer->updateMetadata(mediaTitle, mediaSubTitle, name, screen);
 }
@@ -547,73 +413,6 @@ bool MediaManager::mountDrive(long device){
     */
 }
 
-void MediaManager::infoConnectHandler()
-{
-#ifndef QT5
-    if(infoSocket->hasPendingConnections()){
-        lastClient=infoSocket->nextPendingConnection();
-        setCurrentStatus("IPC Client Connected::"+lastClient->localAddress().toString());
-        if(lastClient->isValid()){
-            QObject::connect(lastClient,SIGNAL(readyRead()), this, SLOT(processSocketdata()));
-        }
-    }
-#endif
-}
-
-void MediaManager::connectInfoSocket()
-{
-#ifndef QT5
-    if(!tcCallback){
-        tcCallback = new QTcpServer();
-        QObject::connect(tcCallback, SIGNAL(newConnection()), this, SLOT(callBackClientConnected()), Qt::QueuedConnection);
-    }
-    tcCallback->listen(QHostAddress::Any,12002);
-    setCurrentStatus("Opening callback port 12002::"+QString::number(tcCallback->serverPort()));
-
-    if(!infoSocket){
-        infoSocket = new QTcpServer();
-    }
-
-    infoSocket->listen(QHostAddress::Any, 12001);
-    QObject::connect(infoSocket, SIGNAL(newConnection()), this, SLOT(infoConnectHandler()));
-#endif
-
-}
-
-void MediaManager::disconnectInfoSocket()
-{
-    // infoSocket->disconnect();
-    // infoSocket->deleteLater();
-}
-
-
-
-bool MediaManager::initViews(bool flipped)
-{
-#if defined (QT4) && ! defined (__ANDROID__)
-
-
-    filterProxy = new ColorFilterProxyWidget(this);
-
-    if(flipColors){
-        filterProxy->invert = true;
-    }
-    else{
-        filterProxy->invert = false;
-    }
-
-    if(!useInvertTrick){
-        filterProxy->enable=false;
-    }
-
-    videoSurface->installEventFilter(filterProxy);
-    filterProxy->setWidget(videoSurface);
-    filterProxy->setAutoFillBackground(false);
-    filterProxy->hide();
-#endif
-    return true;
-
-}
 
 void MediaManager::setupDirectories()
 {

@@ -85,7 +85,7 @@ public:
         q_mediaSources ="1,2";         //5 need comma delineation
         q_usersPrivate = "0";        //6
         q_attributetype_sort="";  //7
-        q_pk_users="0";             //8
+        q_pk_users="1";             //8
         q_last_viewed=" 2 ";        //9
         q_pk_attribute="";        //10
         qs_seek ="";
@@ -116,7 +116,7 @@ public:
         q_mediaSources ="1,2";                            //5 need comma delineation
         q_usersPrivate = "0";                             //6
         q_attributetype_sort="";                          //7
-        q_pk_users="0";                                   //8
+        q_pk_users="";                                   //8 should always be empty other wise it will show a users private files by default.
         q_last_viewed=" 2 ";                              //9
         q_pk_attribute=QString::number(attribute);        //10
         qs_seek ="";
@@ -332,6 +332,16 @@ public:
 
 public slots:
 
+    QString getFileFormat()         { return q_fileFormat; }
+    QString getAttributeGenres()    { return q_attribute_genres; }
+    QString getMediaSources()       { return q_mediaSources; }
+    QString getUsersPrivate()       { return q_usersPrivate; }
+    QString getAttributetypeSort()  { return q_attributetype_sort; }
+    QString getPkUsers()            { return q_pk_users; }
+    QString getLastViewed()         {return q_last_viewed; }
+    QString getPttribute()          { return q_pk_attribute; }
+    QString getSubType()            { return q_subType; }
+
     void setGenericOptions(QString opt) {if(genericOptions != opt) { genericOptions=opt; emit genericOptionsChanged(dataGridId);} }
     QString getGenericOptions(){return genericOptions;}
 
@@ -415,5 +425,8 @@ signals:
     void genericOptionsChanged(QString dataGridId);
     void backIndexChanged(int idx);
 };
+
+
+
 }
 #endif

@@ -2,7 +2,7 @@
 #define DCECOMMAND_H
 
 #include <DCE/PreformedCommand.h>
-
+#include "DCE/Logger.h"
 namespace DCE
 {
 

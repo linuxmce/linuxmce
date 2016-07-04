@@ -8,7 +8,7 @@ NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
   #endif
 {
-
+    //TODO init class members
     qOrbiter * ptr = qobject_cast<qOrbiter*>(qOrbiter_ptr);
     QObject::connect(ptr, &qOrbiter::np_storageDeviceChanged, this, &NowPlayingClass::setStorageDevice, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::np_pathChanged, this, &NowPlayingClass::setPath, Qt::QueuedConnection);
@@ -79,6 +79,19 @@ void NowPlayingClass::resetData()
     setImageAspect("");
     //    setImage(QImage());
     //    setStreamImage(QImage());
+    setNowPlayingDiscreetAudio(false);
 
 }
+bool NowPlayingClass::nowPlayingDiscreetAudio() const
+{
+    return m_nowPlayingDiscreetAudio;
+}
+
+void NowPlayingClass::setNowPlayingDiscreetAudio(bool nowPlayingDiscreetAudio)
+{
+    if( m_nowPlayingDiscreetAudio == nowPlayingDiscreetAudio ) return;
+    m_nowPlayingDiscreetAudio = nowPlayingDiscreetAudio;
+    emit discreetAudioChanged();
+}
+
 

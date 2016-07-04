@@ -28,13 +28,14 @@ using namespace DCE;
 //<-dceag-d-e->
 #include <QRegExp>
 #include <QStringList>
-#include <mediamanager.h>
+#include "mediabase/mediamanagerbase.h"
 #include <QDebug>
 #include <QNetworkInterface>
+#include <QTimer>
 //<-dceag-const-b->
 
 // The primary constructor when the class is created as a stand-alone device
-qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *manager, bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManagerBase *manager, bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
     : qMediaPlayer_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
     //<-dceag-const-e->
 {
@@ -52,6 +53,14 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *man
         setConnectionStatus(false);
     }
     qWarning() << Q_FUNC_INFO << "end";
+    seekDelayTimer = new QTimer(this);
+    seekDelayTimer->setSingleShot(true);
+
+    m_iTitle = 0;
+    m_iChapter =0;
+    s_totalTime="";
+    s_audioTracks="";
+    s_subTitleTracks ="";
 }
 
 //<-dceag-const2-b->
@@ -169,25 +178,25 @@ void qMediaPlayer::restart()
         setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number "+QString::number(m_dwPK_Device));
 
     }
-    mp_manager->setConnectionStatus(connected);
+    mp_manager->setConnected(connected);
 }
 
 void qMediaPlayer::OnDisconnect()
 {
     connected= false;
-    mp_manager->setConnectionStatus(connected);
+    mp_manager->setConnected(connected);
 }
 
 void qMediaPlayer::onReload()
 {
     connected=false;
-    mp_manager->setConnectionStatus(connected);
+    mp_manager->setConnected(connected);
 }
 
 void qMediaPlayer::OnUnexpectedDisconnect()
 {
     connected=false;
-    mp_manager->setConnectionStatus(connected);
+    mp_manager->setConnected(connected);
 }
 
 
@@ -374,63 +383,74 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     qWarning() << "Need to implement command #37 - Play Media" << endl;
     qWarning() << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
     qWarning() << "Parm #41 - StreamID=" << iStreamID << endl;
-    qWarning() << "Parm #42 - MediaPosition=" << sMediaPosition.c_str() << endl;
+    qWarning() << "Parm #42 - MediaPosition=" << QString::fromStdString(sMediaPosition) << endl;
     qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str() << endl;
+
+
+    QString p1 = QString::fromStdString(sMediaPosition);
+    int posStart = p1.indexOf("POS:")+4;
+    int posEnd = p1.indexOf(" TITLE:");
+    QString p2 = p1.mid(posStart, posEnd-posStart);
 
     QString deviceNumber;
     QString path;
     QString finishedPath;
     QString localPath;
 
-#ifdef NULL
-    if(iPK_MediaType==5)
-    {
-        path = "/public/data/videos/";
-    }
-    else if(iPK_MediaType ==4){
-        path = "/public/data/audio/";
-    }
+    QRegExp deviceNo("(\\\[\\\d+\\\]/)");
+    int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
 
-    if(QString::fromStdString(sMediaURL).contains("http")){
-        finishedPath = QString::fromStdString(sMediaURL);
-    }else if(iPK_MediaType==43){
-        if(QString::fromStdString(sMediaURL).contains("http://")){
-            finishedPath = QString::fromStdString(sMediaURL);
-        }else{
-            finishedPath = "http://"+QString::fromStdString(sMediaURL);
+    if (l ==-1){
+        setCommandResponse("Stored in /mediaType");
+    } else {
+        if(!deviceNo.isEmpty()){
+            qDebug() << deviceNo.capturedTexts();
+            QString f = deviceNo.cap(0);
+            f.remove("["); f.remove("/"); f.remove("]");
+            deviceNumber = f;
+
+            localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
+            setCurrentStorageDevice(f.toInt());
+            qDebug() << localPath;
         }
     }
-    else
-    {
-        //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
-        QRegExp deviceNo("(\\\[\\\d+\\\]/)");
-        int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
 
-        if (l ==-1){
-            setCommandResponse("Stored in /mediaType");
-        } else {
-            if(!deviceNo.isEmpty()){
-                qDebug() << deviceNo.capturedTexts();
-                QString f = deviceNo.cap(0);
-                f.remove("["); f.remove("/"); f.remove("]");
-                deviceNumber = f;
-                localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
-#if !defined(ANDROID) || !defined(Q_OS_IOS)
-                mp_manager->setCurrentDevice(f.toLong());
-#endif
-            }
-            else
-            {
 
-            }
-        }
-        //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
-        //the first match as that will be the first indexed by the regex engine.
-        QString adjPath = QString::fromStdString(sMediaURL).remove("//home");
-        finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
-    }
+    //#ifdef NULL
+    //    if(iPK_MediaType==5)
+    //    {
+    //        path = "/public/data/videos/";
+    //    }
+    //    else if(iPK_MediaType ==4){
+    //        path = "/public/data/audio/";
+    //    }
 
-#endif
+    //    if(QString::fromStdString(sMediaURL).contains("http")){
+    //        finishedPath = QString::fromStdString(sMediaURL);
+    //    }else if(iPK_MediaType==43){
+    //        if(QString::fromStdString(sMediaURL).contains("http://")){
+    //            finishedPath = QString::fromStdString(sMediaURL);
+    //        }else{
+    //            finishedPath = "http://"+QString::fromStdString(sMediaURL);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
+
+    //            }
+    //            else
+    //            {
+
+    //            }
+    //        }
+    //        //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
+    //        //the first match as that will be the first indexed by the regex engine.
+    //        QString adjPath = QString::fromStdString(sMediaURL).remove("//home");
+    //        finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
+    //    }
+
+    //#endif
 
     QString cmp = QString::fromStdString(sMediaURL.c_str());
 
@@ -445,14 +465,33 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         setCurrentMediaUrl(QString::fromStdString(sMediaURL));
 
     }else{
-        QString externalPlayerPath = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?id="+QString::fromStdString(sMediaURL);
+        QString mod = QString::fromStdString(sMediaURL);
+
+        if(mod.contains("/home/public/data")){
+            mod = QString::fromStdString(sMediaURL).remove("/home/public/");
+        } else {
+            //handle private/upnp media?
+        }
+
+        QString externalPlayerPath = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/"+mod;
         qWarning() << "Sending plugin modified original MRL==>" << externalPlayerPath;
         setCurrentMediaUrl(externalPlayerPath);
     }
+    emit currentMediaFileChanged(cmp);
 
     //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
     emit startPlayback();
+
+    if(p2.toInt() != 0){
+
+        connect(seekDelayTimer, &QTimer::timeout, [=](){
+            handleDelayedSeek( p2.length() < 4 ? p2.toInt() :  p2.toInt()/1000 );
+        }  );
+        QMetaObject::invokeMethod(seekDelayTimer, "start");
+    }
     sCMD_Result="OK";
+
+
 }
 
 //<-dceag-c38-b->
@@ -469,11 +508,13 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
 {
     setCommandResponse("Need to implement command #38 - Stop Media");
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
-    cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+    //  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
 
     iStreamID = this->i_StreamId;
-    string endPosition = QString::number(mp_manager->currentTime).toStdString();
-    sMediaPosition =&endPosition;
+    string endPosition = getDcePosition();
+    *sMediaPosition =endPosition;
+    qDebug() << "Media end position " << endPosition.c_str();
     emit stopCurrentMedia();
     setCurrentMediaUrl("");
     sCMD_Result="OK";
@@ -1226,7 +1267,7 @@ void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sM
                 deviceNumber = f;
                 localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
 #ifndef ANDROID
-                mp_manager->setCurrentDevice(f.toLong());
+                mp_manager->setCurrentStorageDevice(f.toLong());
 #endif
             }
             else
@@ -1289,9 +1330,9 @@ void qMediaPlayer::CMD_Report_Playback_Position(int iStreamID,string *sText,stri
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
     if(iStreamID==this->i_StreamId){
-        string sTextReturn=mp_manager->current_position.toStdString().c_str();
+        string sTextReturn=mp_manager->currentPosition().toStdString().c_str();
         sText= &sTextReturn;
-        string returnString = mp_manager->current_position.toStdString().c_str();
+        string returnString = mp_manager->currentPosition().toStdString().c_str();
         sMediaPosition = &returnString;
     }
 
@@ -1355,8 +1396,20 @@ void qMediaPlayer::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,st
     cout << "Need to implement command #412 - Set Media Position" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-    qDebug() << "Qmediaplayer::set_media_position::"<< sMediaPosition.c_str();
-    QString val = QString::fromStdString(sMediaPosition);
+
+    QStringList positionParams = QString::fromStdString(sMediaPosition).split(" ");
+    QMap<QString, QString> positionValues;
+
+    foreach (QString t, positionParams){
+        qDebug() << t;
+        QStringList tm = t.split(":");
+        if(tm.count()==2)
+            positionValues.insert(tm.at(0), tm.at(1));
+    }
+
+    QString val =positionValues.value("POS");
+    qDebug() << "Qmediaplayer::set_media_position::"<<val;
+
     emit newMediaPosition(val.toInt());
 }
 
@@ -1667,6 +1720,33 @@ void qMediaPlayer::setCommandResponse(QString r)
 {
     {commandResponse = QTime::currentTime().toString()+"-QMediaPlayer:: "+ r; emit commandResponseChanged(commandResponse);}
 }
+long qMediaPlayer::getCurrentStorageDevice() const
+{
+    return m_currentStorageDevice;
+}
+
+void qMediaPlayer::setCurrentStorageDevice(long currentStorageDevice)
+{
+    m_currentStorageDevice = currentStorageDevice;
+    emit currentStorageDeviceChanged(currentStorageDevice);
+}
+
+
+string qMediaPlayer::getDcePosition()
+{
+    string dcePosition;
+
+    QString currentTime = QString::number( (mp_manager->currentPositionNumeric() )  );
+    dcePosition+=" CHAPTER:0";
+    dcePosition+=" POS:"+currentTime.toStdString();
+    dcePosition+=" TITLE:0";
+    dcePosition+=" SUBTITLE:-1";
+    dcePosition+=" AUDIO:-1";
+    dcePosition+=" TOTAL:"+StringUtils::itos( (mp_manager->totalTimeNumeric() ) );
+
+    return dcePosition;
+
+}
 int qMediaPlayer::getCurrentFkFileType() const
 {
     return m_currentFkFileType;
@@ -1675,6 +1755,12 @@ int qMediaPlayer::getCurrentFkFileType() const
 void qMediaPlayer::setCurrentFkFileType(int currentFkFileType)
 {
     m_currentFkFileType = currentFkFileType;
+}
+
+void qMediaPlayer::handleDelayedSeek(int seekTime)
+{
+    qDebug() << Q_FUNC_INFO << seekTime;
+    jumpToStreamPosition(seekTime);
 }
 
 int qMediaPlayer::getCurrentSpeed() const
@@ -1981,10 +2067,11 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 void qMediaPlayer::updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen)
 {
 
+
     string mst = mediaSubtitle.toStdString();
     string mt = mediaTitle.toStdString();
     string nm = name.toStdString()+"\t" +mt;
-    EVENT_Playback_Started(nm, i_StreamId, mst, "true", "true");
+    EVENT_Playback_Info_Changed(nm,mt,mst);
 
 }
 
@@ -1993,19 +2080,20 @@ void qMediaPlayer::confirmMediaStarted(QString description)
     string mrl = getInternalMediaUrl().toStdString();
     string desc = description.toStdString();
 
-    EVENT_Playback_Started(mrl, i_StreamId, desc, "true", "true");
+    EVENT_Playback_Started(m_internalMediaUrl.toStdString(), i_StreamId, desc, "true", "true");
 }
 
 void qMediaPlayer::confirmMediaEnded(bool witherror)
 {
+    qDebug() << Q_FUNC_INFO;
     string mrl = getInternalMediaUrl().toStdString();
-    EVENT_Playback_Completed(mrl, i_StreamId, witherror);
+    EVENT_Playback_Completed(m_internalMediaUrl.toStdString(), i_StreamId, witherror);
 }
 
 void qMediaPlayer::positionChanged(QString total, QString current)
 {
 
-    string mediaurl = getCurrentMediaUrl().toStdString();
+    string mediaurl = getInternalMediaUrl().toStdString();
     string media_id = getMediaId().toStdString();
     string tt = total.toStdString();
     string ct = current.toStdString();

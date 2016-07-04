@@ -614,7 +614,8 @@ void Media_Plugin::PopulateFileBrowserInfoForPlayList(MediaListGrid *pMediaListG
 	if( sPK_Users_Private.size() )
 		sPK_Users_Private = "," + sPK_Users_Private;  // So the syntax is right below
 
-    string SQL = "SELECT PK_Playlist, Name, FK_Picture from Playlist where EK_User IS Null OR EK_User IN ( 0 " + sPK_Users_Private + " ) ORDER BY Name";
+//    string SQL = "SELECT PK_Playlist, Name, FK_Picture from Playlist where EK_User IS Null OR EK_User IN ( 0 " + sPK_Users_Private + " ) ORDER BY Name";
+    string SQL = "SELECT PK_Playlist, IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name) AS Name, FK_Picture from Playlist where EK_User IS Null OR EK_User IN ( 0 " + sPK_Users_Private + " ) ORDER BY Name";
 
     PlutoSqlResult result;
     DB_ROW row;
@@ -633,7 +634,8 @@ void Media_Plugin::PopulateFileBrowserInfoForPlayList(MediaListGrid *pMediaListG
 
 void Media_Plugin::PopulateFileBrowserInfoForDisc(MediaListGrid *pMediaListGrid,int PK_AttributeType_Sort,string &sPK_Disk,map<int,int> &mapDisk_To_Pic)
 {
-	string sSQL_Sort = "SELECT PK_Disc,Name,FK_FileFormat,Track,DateLastViewed FROM Disc JOIN Disc_Attribute ON FK_Disc=PK_Disc JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE PK_Disc in (" + sPK_Disk + ")";
+//	string sSQL_Sort = "SELECT PK_Disc,Name,FK_FileFormat,Track,DateLastViewed FROM Disc JOIN Disc_Attribute ON FK_Disc=PK_Disc JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE PK_Disc in (" + sPK_Disk + ")";
+	string sSQL_Sort = "SELECT PK_Disc,IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name,FK_FileFormat,Track,DateLastViewed FROM Disc JOIN Disc_Attribute ON FK_Disc=PK_Disc JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE PK_Disc in (" + sPK_Disk + ")";
 
     PlutoSqlResult result;
     DB_ROW row;
@@ -656,6 +658,8 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "PopulateFileBrowserInfoForFile : attrtype_sort %d, "
 		" subdir %d", PK_AttributeType_Sort, bSubDirectory);
 
+	bool bArticleMove = ( PK_AttributeType_Sort==2 ) || ( PK_AttributeType_Sort==3 ) || ( PK_AttributeType_Sort==13 ) || ( PK_AttributeType_Sort==57 );
+
 	string sSQL_Sort;
 	if( PK_AttributeType_Sort==0 || PK_AttributeType_Sort==-1 )
 		sSQL_Sort = "SELECT PK_File,Path,Filename,IsDirectory,FK_FileFormat,Filename,DateLastViewed FROM File WHERE PK_File in (" + sPK_File + ")";
@@ -664,10 +668,15 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 		// TODO EVEN FURTHER, I'm using a subselect to get episode names, This just makes me feel all dirty inside..
 
 		if ( PK_AttributeType_Sort==13 )
-			sSQL_Sort = "SELECT PK_File,'',IFNULL(GROUP_CONCAT(Name ORDER BY FK_AttributeType DESC SEPARATOR '-'),Filename) As Name,0,FK_FileFormat,Filename,DateLastViewed FROM File F1 LEFT JOIN File_Attribute ON FK_File = PK_FILE LEFT JOIN Attribute ON FK_Attribute = PK_Attribute AND FK_AttributeType IN (11," + StringUtils::itos(PK_AttributeType_Sort) + ") Where  IsDirectory = 0 AND PK_File in ( " + sPK_File + " ) GROUP BY PK_File ORDER BY Name ASC";
+//			sSQL_Sort = "SELECT PK_File,'',IFNULL(GROUP_CONCAT(Name ORDER BY FK_AttributeType DESC SEPARATOR '-'),Filename) As Name,0,FK_FileFormat,Filename,DateLastViewed FROM File F1 LEFT JOIN File_Attribute ON FK_File = PK_FILE LEFT JOIN Attribute ON FK_Attribute = PK_Attribute AND FK_AttributeType IN (11," + StringUtils::itos(PK_AttributeType_Sort) + ") Where  IsDirectory = 0 AND PK_File in ( " + sPK_File + " ) GROUP BY PK_File ORDER BY Name ASC";
+			sSQL_Sort = "SELECT PK_File,'',IFNULL(GROUP_CONCAT(IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name) ORDER BY FK_AttributeType DESC SEPARATOR '-'),Filename) As Name,0,FK_FileFormat,Filename,DateLastViewed FROM File F1 LEFT JOIN File_Attribute ON FK_File = PK_FILE LEFT JOIN Attribute ON FK_Attribute = PK_Attribute AND FK_AttributeType IN (11," + StringUtils::itos(PK_AttributeType_Sort) + ") Where  IsDirectory = 0 AND PK_File in ( " + sPK_File + " ) GROUP BY PK_File ORDER BY Name ASC";
 		else
-			sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed FROM File LEFT JOIN File_Attribute ON FK_File=PK_File LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND (FK_AttributeType IS NULL OR FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + ") ORDER BY PK_File,PK_Attribute DESC";
-
+		{
+			if ( !bArticleMove)
+				sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed FROM File LEFT JOIN File_Attribute ON FK_File=PK_File LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND (FK_AttributeType IS NULL OR FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + ") ORDER BY PK_File,PK_Attribute DESC";
+			else
+				sSQL_Sort = "SELECT PK_File,'',IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name) AS Name,0,FK_FileFormat,Filename,DateLastViewed FROM File LEFT JOIN File_Attribute ON FK_File=PK_File LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND (FK_AttributeType IS NULL OR FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + ") ORDER BY PK_File,PK_Attribute DESC";
+		}
     PlutoSqlResult result;
     DB_ROW row;
 	map<int,int>::iterator it;
@@ -720,12 +729,29 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 
 void Media_Plugin::PopulateFileBrowserInfoForAttribute(MediaListGrid *pMediaListGrid,int PK_AttributeType_Sort, int PK_Attribute, string &sPK_File_Or_Disc,string sTable)
 {
-	string sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + 
-		sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + 
-		sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + 
-		" LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE " + 
-		(sTable=="File" ? "IsDirectory=0 AND " : "") +
-		"PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,IF(SUBSTRING(Name,1,4)='The ',SUBSTRING(Name,5),Name)";
+	bool bArticleMove = ( PK_AttributeType_Sort==2 ) || ( PK_AttributeType_Sort==3 ) || ( PK_AttributeType_Sort==13 ) || ( PK_AttributeType_Sort==57 );
+	string sSQL_Sort;
+
+	if ( !bArticleMove)
+	{
+		sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + 
+			sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + 
+			sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + 
+			" LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE " + 
+			(sTable=="File" ? "IsDirectory=0 AND " : "") +
+			"PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,IF(SUBSTRING(Name,1,4)='The ',SUBSTRING(Name,5),Name)";
+	}
+	else
+	{
+		sSQL_Sort = "SELECT PK_Attribute,"
+			"IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name) AS Name,"
+			"min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + 
+			sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + 
+			sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + 
+			" LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE " + 
+			(sTable=="File" ? "IsDirectory=0 AND " : "") +
+			"PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,Name";
+	}
 
     PlutoSqlResult result;
     DB_ROW row;
@@ -736,7 +762,9 @@ void Media_Plugin::PopulateFileBrowserInfoForAttribute(MediaListGrid *pMediaList
 		if( result.r->row_count==0 && PK_AttributeType_Sort==ATTRIBUTETYPE_Album_CONST )
 		{
 			result.ClearResults();
-			sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Track_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ") LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE IsDirectory=0 AND PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,Name";
+//				sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Track_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ") LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE IsDirectory=0 AND PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,Name";
+				sSQL_Sort = "SELECT PK_Attribute,IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name) AS Name,min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Track_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ") LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE IsDirectory=0 AND PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,Name";
+
 			if( (result.r=m_pDatabase_pluto_media->db_wrapper_query_result( sSQL_Sort ))==NULL )
 				return;
 		}
@@ -763,8 +791,18 @@ void Media_Plugin::PopulateFileBrowserInfoForBookmark(MediaListGrid *pMediaListG
 {
 	if( sPK_File.empty()==false )
 	{
-		string sSQL = 
+/*		string sSQL = 
 			"SELECT PK_Bookmark,Bookmark.FK_File,Description,Name,FK_Picture,FK_FileFormat "
+			"FROM Bookmark "
+			"LEFT JOIN File ON Bookmark.FK_File=PK_File "
+			"LEFT JOIN File_Attribute ON PK_File=File_Attribute.FK_File "
+			"LEFT JOIN Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
+			"WHERE (FK_AttributeType IS NULL OR FK_AttributeType =" TOSTRING(ATTRIBUTETYPE_Title_CONST) ") AND IsAutoResume=0 "
+			"AND Bookmark.FK_File IN (" + sPK_File + ") "
+			"ORDER BY PK_Bookmark";
+*/
+		string sSQL = 
+			"SELECT PK_Bookmark,Bookmark.FK_File,Description,IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name,FK_Picture,FK_FileFormat "
 			"FROM Bookmark "
 			"LEFT JOIN File ON Bookmark.FK_File=PK_File "
 			"LEFT JOIN File_Attribute ON PK_File=File_Attribute.FK_File "
@@ -1188,14 +1226,20 @@ class DataGridTable *Media_Plugin::CDTracks( string GridID, string Parms, void *
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::CDTracks - media file has disc id %d", pMediaFile->m_dwPK_Disk);
 
-			sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
+/*			sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
+				" AND FK_Disc=" + StringUtils::itos(pMediaFile->m_dwPK_Disk);
+*/
+			sSQL = "select Track,IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
 				" AND FK_Disc=" + StringUtils::itos(pMediaFile->m_dwPK_Disk);
 		}
 		else
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::CDTracks - media stream has disc id %d", pEntertainArea->m_pMediaStream->m_dwPK_Disc);
 
-			sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
+/*			sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
+				" AND FK_Disc=" + StringUtils::itos(pEntertainArea->m_pMediaStream->m_dwPK_Disc);
+*/
+			sSQL = "select Track,IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
 				" AND FK_Disc=" + StringUtils::itos(pEntertainArea->m_pMediaStream->m_dwPK_Disc);
 		}
 	}
@@ -1203,7 +1247,8 @@ class DataGridTable *Media_Plugin::CDTracks( string GridID, string Parms, void *
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::CDTracks - using disc id from parms %s", Parms.c_str());
 
-		sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) " AND FK_Disc=" + Parms;
+//		sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) " AND FK_Disc=" + Parms;
+		sSQL = "select Track,IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) " AND FK_Disc=" + Parms;
 	}
 
 	PlutoSqlResult result;
@@ -1296,8 +1341,17 @@ class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string P
         }
     }
 
-    SQL = 
+/*    SQL = 
 		"select DISTINCT PK_Attribute, Name, Description, FK_Picture FROM Attribute "
+		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
+		"JOIN MediaType_AttributeType ON MediaType_AttributeType.FK_AttributeType=PK_AttributeType "
+		"LEFT JOIN Picture_Attribute ON FK_Attribute=PK_Attribute "
+		"WHERE Name Like '" + StringUtils::SQLEscape(AC) + "%' AND Identifier>0 "
+		"AND MediaType_AttributeType.EK_MediaType=" + StringUtils::itos(PK_MediaType) + " "
+		"ORDER BY Name limit 30";
+*/
+    SQL = 
+		"select DISTINCT PK_Attribute, IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name, Description, FK_Picture FROM Attribute "
 		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
 		"JOIN MediaType_AttributeType ON MediaType_AttributeType.FK_AttributeType=PK_AttributeType "
 		"LEFT JOIN Picture_Attribute ON FK_Attribute=PK_Attribute "
@@ -1339,8 +1393,22 @@ class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string P
 	if( result.r->row_count> 4 )
 		return pDataGrid;
 
-    SQL = 
+/*    SQL = 
 		"select DISTINCT PK_Attribute, Name, Description, FK_Picture FROM SearchToken "
+		"JOIN SearchToken_Attribute ON PK_SearchToken=FK_SearchToken "
+		"JOIN Attribute ON SearchToken_Attribute.FK_Attribute=PK_Attribute "
+		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
+		"JOIN MediaType_AttributeType ON MediaType_AttributeType.FK_AttributeType=PK_AttributeType "
+		"LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
+		+ (AttributesFirstSearch.length() ? "AND PK_Attribute NOT IN (" + StringUtils::SQLEscape(AttributesFirstSearch) + ") " : "") +
+		"WHERE Token like '" + StringUtils::SQLEscape(AC) + "%' "
+		"AND MediaType_AttributeType.EK_MediaType=" + StringUtils::itos(PK_MediaType) + " "
+		"AND Identifier>0 "
+		"ORDER BY Name "
+		"limit 30";
+*/
+    SQL = 
+		"select DISTINCT PK_Attribute, IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name, Description, FK_Picture FROM SearchToken "
 		"JOIN SearchToken_Attribute ON PK_SearchToken=FK_SearchToken "
 		"JOIN Attribute ON SearchToken_Attribute.FK_Attribute=PK_Attribute "
 		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
@@ -1398,7 +1466,18 @@ class DataGridTable *Media_Plugin::MediaAttrFiles( string GridID, string Parms, 
         return new DataGridTable();;
     }
 
-    string SQL="select DISTINCT Dest.FK_File, Attribute.Name, AttributeType.Description "\
+/*    string SQL="select DISTINCT Dest.FK_File, Attribute.Name, AttributeType.Description "\
+        "FROM File_Attribute As Source "\
+        "JOIN File_Attribute As Dest "\
+		"ON Source.FK_File=Dest.FK_File AND Source.FK_Attribute=" + StringUtils::itos(atoi(PK_Attribute.c_str())) +
+        " JOIN File ON Dest.FK_File=PK_File "\
+        "JOIN Attribute ON Dest.FK_Attribute=PK_Attribute "\
+        "JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "\
+        "JOIN MediaType_AttributeType ON File.EK_MediaType=MediaType_AttributeType.EK_MediaType "\
+        "AND MediaType_AttributeType.FK_AttributeType=Attribute.FK_AttributeType "\
+        "WHERE Identifier=1 ORDER BY Name limit 200;";
+*/
+    string SQL="select DISTINCT Dest.FK_File, IF(FK_AttributeType IN (2,3,13,57), IF(Attribute.Name LIKE 'the %', CONCAT(SUBSTR(Attribute.Name, 5), ', The'), Attribute.Name), Attribute.Name ) AS Name, AttributeType.Description "\
         "FROM File_Attribute As Source "\
         "JOIN File_Attribute As Dest "\
 		"ON Source.FK_File=Dest.FK_File AND Source.FK_Attribute=" + StringUtils::itos(atoi(PK_Attribute.c_str())) +
@@ -1448,7 +1527,18 @@ class DataGridTable *Media_Plugin::MediaAttrCollections( string GridID, string P
         return new DataGridTable();
     }
 
-    string SQL="select DISTINCT Dest.FK_Attribute, Attribute.Name, AttributeType.Description "\
+/*    string SQL="select DISTINCT Dest.FK_Attribute, Attribute.Name, AttributeType.Description "\
+        "FROM File_Attribute As Source "\
+        "JOIN File_Attribute As Dest "\
+        "ON Source.FK_File=Dest.FK_File AND Source.FK_Attribute='" + StringUtils::itos(atoi(PK_Attribute.c_str())) +
+        "' JOIN File ON Dest.FK_File=PK_File "\
+        "JOIN Attribute ON Dest.FK_Attribute=PK_Attribute "\
+        "JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "\
+        "JOIN MediaType_AttributeType ON File.EK_MediaType=MediaType_AttributeType.EK_MediaType "\
+        "AND MediaType_AttributeType.FK_AttributeType=Attribute.FK_AttributeType "\
+        "WHERE Identifier=2 ORDER BY Name limit 100;";
+*/
+    string SQL="select DISTINCT Dest.FK_Attribute, IF(FK_AttributeType IN (2,3,13,57), IF(Attribute.Name LIKE 'the %', CONCAT(SUBSTR(Attribute.Name, 5), ', The'), Attribute.Name), Attribute.Name ) AS Name, AttributeType.Description "\
         "FROM File_Attribute As Source "\
         "JOIN File_Attribute As Dest "\
         "ON Source.FK_File=Dest.FK_File AND Source.FK_Attribute='" + StringUtils::itos(atoi(PK_Attribute.c_str())) +
@@ -1505,7 +1595,18 @@ class DataGridTable *Media_Plugin::MediaAttrXref( string GridID, string Parms, v
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Transformed PK_Attributte: %s", PK_Attribute.c_str());
 
-    string SQL="select DISTINCT Dest.FK_Attribute, Attribute.Name, AttributeType.Description "\
+/*    string SQL="select DISTINCT Dest.FK_Attribute, Attribute.Name, AttributeType.Description "\
+        "FROM File_Attribute As Source "\
+        "JOIN File_Attribute As Dest "\
+        "ON Source.FK_File=Dest.FK_File AND Source.FK_Attribute=" + PK_Attribute +
+        " JOIN File ON Dest.FK_File=PK_File "\
+        "JOIN Attribute ON Dest.FK_Attribute=PK_Attribute "\
+        "JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "\
+        "JOIN MediaType_AttributeType ON File.EK_MediaType=MediaType_AttributeType.EK_MediaType "\
+        "AND MediaType_AttributeType.FK_AttributeType=Attribute.FK_AttributeType "\
+        "WHERE Identifier>=2 ORDER BY AttributeType.Description limit 30;";
+*/
+    string SQL="select DISTINCT Dest.FK_Attribute, IF(FK_AttributeType IN (2,3,13,57), IF(Attribute.Name LIKE 'the %', CONCAT(SUBSTR(Attribute.Name, 5), ', The'), Attribute.Name), Attribute.Name ) AS Name, AttributeType.Description "\
         "FROM File_Attribute As Source "\
         "JOIN File_Attribute As Dest "\
         "ON Source.FK_File=Dest.FK_File AND Source.FK_Attribute=" + PK_Attribute +
@@ -1573,7 +1674,16 @@ class DataGridTable *Media_Plugin::MediaItemAttr( string GridID, string Parms, v
         if( !PK_File )
         {
             // They chose an attribute other than a file, like an album
-            SQL = "select DISTINCT PK_Attribute,Description,Name FROM File_Attribute AS Source "\
+/*            SQL = "select DISTINCT PK_Attribute,Description,Name FROM File_Attribute AS Source "\
+                "JOIN File_Attribute As Dest ON Source.FK_File=Dest.FK_File "\
+                "JOIN Attribute ON Dest.FK_Attribute=PK_Attribute  "\
+                "JOIN C_AttributeType ON Attribute.FK_C_AttributeType=PK_C_AttributeType  "\
+                "JOIN File ON Dest.FK_File=PK_File "\
+                "JOIN C_Type_C_AttributeType ON C_Type_C_AttributeType.FK_C_Type=File.FK_C_Type "\
+                "AND C_Type_C_AttributeType.FK_C_AttributeType=Attribute.FK_C_AttributeType "\
+                "WHERE Identifier>2 AND Source.FK_Attribute=" + StringUtils::itos(atoi(PK_Attribute.c_str())) + " ORDER BY Description";
+*/
+            SQL = "select DISTINCT PK_Attribute,Description,IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name FROM File_Attribute AS Source "\
                 "JOIN File_Attribute As Dest ON Source.FK_File=Dest.FK_File "\
                 "JOIN Attribute ON Dest.FK_Attribute=PK_Attribute  "\
                 "JOIN C_AttributeType ON Attribute.FK_C_AttributeType=PK_C_AttributeType  "\
@@ -1607,7 +1717,14 @@ class DataGridTable *Media_Plugin::MediaItemAttr( string GridID, string Parms, v
     // We may have already built the sql statement
     if( SQL.length()==0 )
     {
+/*
         SQL="SELECT PK_Attribute,Description,Name FROM File "\
+        "JOIN File_Attribute ON FK_File=PK_File "\
+        "JOIN Attribute ON FK_Attribute=PK_Attribute "\
+        "JOIN C_AttributeType ON FK_C_AttributeType=PK_C_AttributeType "\
+        "WHERE PK_File=" + StringUtils::itos(PK_File) + " ORDER By Description";
+*/
+        SQL="SELECT PK_Attribute,Description,IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name FROM File "\
         "JOIN File_Attribute ON FK_File=PK_File "\
         "JOIN Attribute ON FK_Attribute=PK_Attribute "\
         "JOIN C_AttributeType ON FK_C_AttributeType=PK_C_AttributeType "\
@@ -1722,7 +1839,17 @@ class DataGridTable *Media_Plugin::MediaAttrFile( string GridID, string Parms, v
 		return pDataGrid; // This shouldn't happen
 
 	string sDiscOrFile = Parms[1]=='F' ? "File" : "Disc";
+/*
 	string sSQL = "SELECT DISTINCT PK_Attribute,Name,Description FROM " + sDiscOrFile + " "
+		"JOIN " + sDiscOrFile + "_Attribute ON FK_" + sDiscOrFile + "=PK_" + sDiscOrFile + " "
+		"JOIN Attribute ON FK_Attribute=PK_Attribute "
+		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
+		"LEFT JOIN MediaType_AttributeType ON MediaType_AttributeType.FK_AttributeType = PK_AttributeType AND MediaType_AttributeType.EK_MediaType=" + sDiscOrFile + ".EK_MediaType "
+		"WHERE FK_" + sDiscOrFile + "=" + Parms.substr(2) +
+		" AND Identifier>0 "
+		" ORDER BY MediaSortOption IS NULL,MediaSortOption";
+*/
+	string sSQL = "SELECT DISTINCT PK_Attribute,IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name,Description FROM " + sDiscOrFile + " "
 		"JOIN " + sDiscOrFile + "_Attribute ON FK_" + sDiscOrFile + "=PK_" + sDiscOrFile + " "
 		"JOIN Attribute ON FK_Attribute=PK_Attribute "
 		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
@@ -1934,7 +2061,8 @@ class DataGridTable *Media_Plugin::AvailablePlaylists( string GridID, string Par
 
     int userID = atoi(Parms.c_str());
 
-    string SQL = "SELECT PK_Playlist, Name from Playlist where EK_User IS NULL OR EK_User IN ( 0, " + StringUtils::itos(userID) + " ) ORDER BY NAME LIMIT 30";
+//    string SQL = "SELECT PK_Playlist, Name from Playlist where EK_User IS NULL OR EK_User IN ( 0, " + StringUtils::itos(userID) + " ) ORDER BY NAME LIMIT 30";
+    string SQL = "SELECT PK_Playlist, IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name) AS Name from Playlist where EK_User IS NULL OR EK_User IN ( 0, " + StringUtils::itos(userID) + " ) ORDER BY NAME LIMIT 30";
 
     PlutoSqlResult result;
     DB_ROW row;
@@ -2585,6 +2713,7 @@ bool Media_Plugin::CanThumbnail(int PK_AttributeType)
 	case ATTRIBUTETYPE_Chapter_CONST:
 	case ATTRIBUTETYPE_Producer_CONST:
 	case ATTRIBUTETYPE_Executive_Producer_CONST:
+	case ATTRIBUTETYPE_Album_Artist_CONST:
 		return true;
 	default:
 		return false;

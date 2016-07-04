@@ -26,10 +26,9 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 {
 	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, false);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# ID3FileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-#endif
+
 	//deserialize data from user defined tag
 	char *pData = NULL;
 	size_t Size = 0;
@@ -42,25 +41,22 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		pData = NULL;
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d", 
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d", 
 		pPlutoMediaAttributes->m_mapAttributes.size());
-#endif
+
 	//get common id3 attributes
 	map<int, string> mapAttributes;
 	GetId3Info(sFileWithAttributes, mapAttributes, listPicturesForTags);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: id3 attributes loaded (from id3 file - common tags) %d", 
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# LoadPlutoAttributes: id3 attributes loaded (from id3 file - common tags) %d", 
 		mapAttributes.size());
-#endif
+
 	//merge attributes
 	for(map<int, string>::iterator it = mapAttributes.begin(), end = mapAttributes.end(); it != end; ++it)
 	{
 		int nType = it->first;
 		string sValue = it->second;
 
-// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 		MapPlutoMediaAttributes::iterator itm = pPlutoMediaAttributes->m_mapAttributes.find(nType);
 		if(itm == pPlutoMediaAttributes->m_mapAttributes.end())
 			pPlutoMediaAttributes->m_mapAttributes.insert(
@@ -80,29 +76,25 @@ bool ID3FileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 {
 	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# ID3FileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-#endif
+
 	//Temporary map with attributes for common tags
-// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 	map<int, string> mapAttributes;
 	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
 		end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 	{
-// FIXME: need to de-tokenize (sValue) as this attribute for comparasin(if) and, if required, re-tokenize(else) for saving
 		mapAttributes[it->first] = it->second->m_sName;
 	}
 
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# ID3FileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# ID3FileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
 		pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
-#endif
+
 	list<pair<char *, size_t> > listPictures;
 	for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin();
 		itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
 	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# ID3FileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
 		listPictures.push_back(make_pair(itc->second, itc->first));
 	}
 
@@ -129,12 +121,9 @@ bool ID3FileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 bool ID3FileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttributes *pPlutoMediaAttributes)
 {
 	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
-#ifdef UPDATEMEDIA_STATUS
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
+	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# ID3FileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
 		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
-#endif
 
-// FIXME: need to de-tokenize/tokenize as this attribute can contain multiple values
 	RemoveId3Tag(sFileWithAttributes, nTagType, sValue);
 	return true;
 }
@@ -145,9 +134,7 @@ string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttri
 	//no id3 file if the media file doesn't exist anymore.
 	if(!FileUtils::FileExists(m_sFullFilename))
 	{
-#ifdef UPDATEMEDIA_STATUS
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# No id3 file. The media file doesn't exist anymore.");
-#endif
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# No id3 file. The media file doesn't exist anymore.");
 		return "";
 	}
 
@@ -176,14 +163,12 @@ string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttri
 			pPlutoMediaAttributes->m_sStartPosition == ""
 		)
 		{
-#ifdef UPDATEMEDIA_STATUS
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# Won't create id3 file (the media file doesn't have attributes)");
-#endif
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# Won't create id3 file (the media file doesn't have attributes)");
 			return "";
 		}
 
 		if(!FileUtils::DirExists(m_sDirectory + "/" + sFileWithAttributes))
-			FileUtils::WriteTextFile(m_sDirectory + "/" + sFileWithAttributes, ""); //touch it
+			FileUtils::WriteTextFile(m_sDirectory + "/" + sFileWithAttributes, ""); //touch it/create .id3 file
 	}
 
 	return sFileWithAttributes;
