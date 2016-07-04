@@ -1046,7 +1046,7 @@ function firewall($output,$dbADO) {
 			} else {
 				$Protocol=@$_POST['protocol'].'-'.$_POST['IPVersion'];
 			}
-			$SourcePort=isset($_POST['SourcePort'])? mysql_real_escape_string($_POST['SourcePort']):'0';
+			$SourcePort=isset($_POST['SourcePort'])? mysql_real_escape_string($_POST['SourcePort']):'NULL';
 			if ( $SourcePort == '') {
 				$SourcePort='NULL';
 			}
