@@ -1057,7 +1057,6 @@ void HueController::checkLightInformation()
 
     QString urlBulder=QString("http://%1/api/%2/lights/").arg(hueControllers.first()->getIpAddress()).arg(authUser);
     QUrl initUrl(urlBulder);
-    // qDebug() << Q_FUNC_INFO << urlBulder;
 
     QNetworkRequest init(initUrl);
     QNetworkReply * rt = poller->get(QNetworkRequest(init));
@@ -1065,23 +1064,16 @@ void HueController::checkLightInformation()
     QEventLoop respWait;
     QObject::connect(poller, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
     respWait.exec();
-    // qDebug() << Q_FUNC_INFO;
+
    qDebug() << Q_FUNC_INFO <<  QDateTime::currentDateTime() << " processing status " ;
     QJson::Parser parser;
     bool ok=false;
     QVariantMap p = parser.parse(rt->readAll(), &ok).toMap();
-    //  qDebug() << p.keys();
+
     foreach(HueBulb*b, hueBulbs){
 
         b->proccessStateInformation(p.value(QString::number(b->id())).toMap());
         if(m_updateStatus){
-
-//            CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4,b->linuxmceId(),StringUtils::itos(b->id()),DEVICEDATA_UnitNo_CONST);
-//            string pResonseA = "";
-//            if(SendCommand(setUnit, &pResonseA)){
-//                qDebug() << "Set internal id";
-//            }
-
 
             QString chanaddress = b->getController()->getIpAddress()+":"+QString::number(b->id());
            // qDebug()<< chanaddress;
@@ -1113,6 +1105,7 @@ void HueController::checkLightInformation()
             if(SendCommand(setType)){
               //  qDebug() <<"Set type";
             }
+            m_updateStatus = false;
         }
 
     }

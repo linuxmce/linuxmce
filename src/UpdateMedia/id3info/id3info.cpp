@@ -539,7 +539,7 @@ void SetId3Info(string sFilename, const map<int,string>& mapAttributes,
 
     for(map<int,string>::const_iterator it = mapAttributes.begin(); it != mapAttributes.end(); it++)
     {
-        cout << "Writing: PK_Attr = " << (*it).first << "\t\t" << (*it).second << endl;
+        cout << "***** Writing: PK_Attr = " << (*it).first << "\t\t" << (*it).second << endl;
 
         int PK_Attr = (*it).first;
         string sValue = (*it).second;
@@ -578,9 +578,8 @@ void SetId3Info(string sFilename, const map<int,string>& mapAttributes,
             case ATTRIBUTETYPE_ComposerWriter_CONST:
                 ID3_AddComposer(&myTag, sValue.c_str(), true);
 				break;
-			
             default:
-                cout << "Don't know yet how to save tag with PK_Attr = " << PK_Attr << " and value " << sValue << endl;
+                cout << "Don't know how to save to id3tag with PK_Attr = " << PK_Attr << " and value " << sValue << ", but it will be saved in the id3 GEOB block for LinuxMCE" << endl;
         }
     }
 
@@ -596,6 +595,7 @@ void RemoveId3Tag(string sFilename, int nTagType, string sValue)
 	ID3_Tag myTag; 
 	myTag.Link(sFilename.c_str());
 
+        cout << "***** Removing: nTagType = " << nTagType << ", value = " << sValue << endl;
 	switch(nTagType)
 	{
 	    // TODO: deal with ATTRIBUTETYPE_Album_Artist_CONST, no generalized function??

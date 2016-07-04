@@ -1,13 +1,11 @@
 <?php
 	// pluto Asterisk
-	$dbPlutoAsteriskType = "MySQL";
+	$dbPlutoAsteriskType = "mysqli";
 	$dbPlutoAsteriskUser = "root";
 	$dbPlutoAsteriskPass = "";
 	$dbPlutoAsteriskServer = "localhost";
 	$dbPlutoAsteriskDatabase = "asterisk";
 
-	
-
-	$asteriskADO = &ADONewConnection('mysql');
+	$asteriskADO = &ADONewConnection($dbPlutoAsteriskType);
 	$asteriskADO->NConnect($dbPlutoAsteriskServer,urlencode($dbPlutoAsteriskUser),urlencode($dbPlutoAsteriskPass),urlencode($dbPlutoAsteriskDatabase)); 
 ?>

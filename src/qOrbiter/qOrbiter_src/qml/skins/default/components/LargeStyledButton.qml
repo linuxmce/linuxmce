@@ -12,9 +12,54 @@ Item {
     property string buttonText:"ipsum"
     property bool currentSelection:false
     property alias fontSize:rowLabel.font.pointSize
+    property alias phil:filler
     property int buttonRadius:5
+    property bool useAnimation:true
     signal activated()
     focus: true
+
+    onActivated: {
+        if(useAnimation){
+            confirm_animation.start()
+        }
+    }
+
+    SequentialAnimation{
+            id:confirm_animation
+
+        ParallelAnimation{
+            PropertyAnimation{
+          target:phil
+                property: "opacity"
+                to:1
+                duration: Style.transition_animationTime
+            }
+
+            PropertyAnimation {
+                target:phil
+                property:"color"
+                to: Style.appbutton_confirm_color
+                duration: Style.transition_animationTime
+            }
+        }
+
+        ParallelAnimation{
+
+            PropertyAnimation{
+                target:phil
+                property: "opacity"
+                to:Style.appList_opacity
+                duration: Style.transition_animationTime
+            }
+
+            PropertyAnimation {
+                target:phil
+                property:"color"
+                to: Style.appcolor_background_list
+                duration: Style.transition_animationTime
+            }
+        }
+    }
     onActiveFocusChanged: {
         if(activeFocus){
             currentSelection=true
@@ -34,8 +79,9 @@ Item {
     }
 
     Rectangle{
+        id:filler
         anchors.fill: parent
-        color:Style.appcolor_background_list
+        color:  Style.appcolor_background_list
         opacity: Style.appList_opacity
         radius: buttonRadius
         border.color: "white"

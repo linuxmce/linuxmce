@@ -27,8 +27,10 @@
 #include "PlutoUtils/FileUtils.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/Other.h"
+
 #include "pluto_media/Database_pluto_media.h"
 #include "pluto_media/Table_File.h"
+
 using namespace DCE;
 //-----------------------------------------------------------------------------------------------------
 #ifdef WIN32
@@ -52,14 +54,14 @@ bool operator > (string s1, string s2)
 FileNotifier::FileNotifier(class Database_pluto_media *pDatabase_pluto_media) : 
 	m_WatchedFilesMutex("watched files")
 {
-    m_bCallbacksRegistered = false;
-    m_bCancelThread = false;
+	m_bCallbacksRegistered = false;
+	m_bCancelThread = false;
 
-    m_pfOnCreate = NULL;
+	m_pfOnCreate = NULL;
 	m_pfOnDelete = NULL;
 
 	m_wdRootFolder = 0;
-    m_WatchedFilesMutex.Init(NULL);
+	m_WatchedFilesMutex.Init(NULL);
 
 	m_pDatabase_pluto_media = pDatabase_pluto_media;
 }
@@ -79,15 +81,24 @@ void FileNotifier::Watch(string sDirectory)
 	}
 #endif
 
-    list<string> listFilesOnDisk;
-    FileUtils::FindDirectories(listFilesOnDisk,sDirectory,true,false,0,sDirectory + "/");  
+	list<string> listFilesOnDisk;
+	FileUtils::FindDirectories(listFilesOnDisk,sDirectory,true,false,0,sDirectory + "/");
 	listFilesOnDisk.push_back(sDirectory);
-		
+
 	PLUTO_SAFETY_LOCK(wfm, m_WatchedFilesMutex);
-    for(list<string>::iterator it = listFilesOnDisk.begin(); it != listFilesOnDisk.end(); it++)
+	for(list<string>::iterator it = listFilesOnDisk.begin(); it != listFilesOnDisk.end(); it++)
 	{
-        string sItem = *it;
-			
+	        string sItem = *it;
+
+		// Cannot add inotifier notifiers for files on network shares
+		//string sFileSystemType = FileUtils::FileSystemType( StringUtils::Escape( sItem ) );
+		//if (  sFileSystemType == "nfs\n" || sFileSystemType == "cifs\n" )
+		if ( sItem.find("NFS Share") != string::npos || sItem.find("SMB Share") != string::npos )
+		{
+			//LoggerWrapper::GetInstance()->Write(LV_MEDIA, "FileNotifier::Watch Skipping notifier for file %s, cannot watch network share", sItem.c_str());
+			continue;
+		}
+
 		try
 		{
 			int wd = m_inotify.watch(*it, IN_ALL_EVENTS);
@@ -98,12 +109,12 @@ void FileNotifier::Watch(string sDirectory)
 				m_sRootFolder = sDirectory;
 			}
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Adding file to watch map: filename %s", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "FileNotifier::Watch Adding file to watch map: filename %s", sItem.c_str());
 			m_mapWatchedFiles[wd] = *it; 
 		}
 		catch(...)
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to add notifier for file %s", sItem.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "FileNotifier::Watch Failed to add notifier for file %s", sItem.c_str());
 		}
     }
 }
@@ -128,16 +139,19 @@ void *BackgroundWorkerThread(void *p)
 			continue;
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Background thread waking up...");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "FileNotifier: BackgroundWorkerThread waking up...");
 
 		string sRootFolder = pFileNotifier->m_sRootFolder;
 		sRootFolder = FileUtils::ExcludeTrailingSlash(sRootFolder);
-		
+
+		// This does one thing only, that is adds the root directory to the list of changed files
 		list<string> listFiles;
 		listFiles.push_back(sRootFolder);
 		pFileNotifier->FireOnCreate(listFiles);
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Background thread going to sleep...");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "FileNotifier: BackgroundWorkerThread thread going to sleep...");
+
+		// TODO: Make this value configurable from webadmin 'How often to manually scan files that cannot be notified.'
 		Sleep(120 * 1000); //2 minutes
 	}
 
@@ -150,12 +164,12 @@ void *INotifyWorkerThread(void *p)
 
     while(!pFileNotifier->m_bCancelThread)
     {
-		while(!pFileNotifier->m_inotify.pending_events()) 
-			Sleep(100); 
-		
-        cpp_inotify_event event = pFileNotifier->m_inotify.get_event();
+		while(!pFileNotifier->m_inotify.pending_events())
+			Sleep(100);
 
-		//LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got something: mask %d, name %s, wd %d, tostring %s",
+		cpp_inotify_event event = pFileNotifier->m_inotify.get_event();
+
+		//LoggerWrapper::GetInstance()->Write(LV_DEBUG, "We got something: mask %d, name %s, wd %d, tostring %s",
 		//	event.mask, event.name.c_str(), event.wd, event.tostring().c_str());
 
 		bool bCreateEvent = event.mask & IN_CREATE || event.mask & IN_MOVED_TO;
@@ -166,51 +180,50 @@ void *INotifyWorkerThread(void *p)
 			if(pFileNotifier->m_wdRootFolder == event.wd)
 			{
 				string sRootFolder = pFileNotifier->m_sRootFolder;
-				pFileNotifier->ResetWatches(); 
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Voodoo with the root folder; someone reseted our watches. Reinitializing.");
+				pFileNotifier->ResetWatches();
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "FileNotifier: INotifyWorkerThread Voodoo with the root folder; someone reseted our watches. Reinitializing.");
 				pFileNotifier->Watch(sRootFolder);
 			}
 		}
-		
+
 		if(bCreateEvent || bDeleteEvent)
-        {
-            PLUTO_SAFETY_LOCK(wfm, pFileNotifier->m_WatchedFilesMutex);
-            string sFilename = pFileNotifier->m_mapWatchedFiles_Find(event.wd) + "/" + event.name;
-            wfm.Release();
+	        {
+			PLUTO_SAFETY_LOCK(wfm, pFileNotifier->m_WatchedFilesMutex);
+			string sFilename = pFileNotifier->m_mapWatchedFiles_Find(event.wd) + "/" + event.name;
+			wfm.Release();
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "inotify: New event for %s", sFilename.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_MEDIA, "FileNotifier: INotifyWorkerThread inotify: New event for %s", sFilename.c_str());
 
-            bool bIsDir = (event.mask & IN_ISDIR) != 0;
+			bool bIsDir = (event.mask & IN_ISDIR) != 0;
 			list<string> listFiles;
 
-            if(bIsDir && bCreateEvent)
+			if(bIsDir && bCreateEvent)
 				pFileNotifier->Watch(sFilename);
-			
+
 			listFiles.push_back(sFilename);
 
 			if(bCreateEvent)
 				pFileNotifier->FireOnCreate(listFiles);
 			else
 				pFileNotifier->FireOnDelete(listFiles);
-        }
-    }
-        
-    return NULL;
+	        }
+	}
+	return NULL;
 }
 //-----------------------------------------------------------------------------------------------------
 void FileNotifier::RegisterCallbacks(FileNotifierCallback pfOnCreate, FileNotifierCallback pfOnDelete)
 {
-    if(!m_bCallbacksRegistered)
-    {
-        m_pfOnCreate = pfOnCreate;
-        m_pfOnDelete = pfOnDelete;
+	if(!m_bCallbacksRegistered)
+	{
+		m_pfOnCreate = pfOnCreate;
+		m_pfOnDelete = pfOnDelete;
 		m_bCallbacksRegistered = true;
 
-	    m_bCancelThread = false;
+		m_bCancelThread = false;
 
-	    pthread_create(&m_INotifyWorkerThreadID, NULL, INotifyWorkerThread, (void *)this);
+		pthread_create(&m_INotifyWorkerThreadID, NULL, INotifyWorkerThread, (void *)this);
 
-		if(m_pDatabase_pluto_media)
+//		if(m_pDatabase_pluto_media)
 			pthread_create(&m_BackgroundWorkerThreadID, NULL, BackgroundWorkerThread, (void *)this);
     }
 }

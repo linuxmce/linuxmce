@@ -92,7 +92,11 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		update-pciids
 
 		## Handle libdvdcss2
-		dpkg -l libdvdcss2 | grep ^ii || find /usr/pluto/deb-cache/ -iname 'libdvdcss*' -exec dpkg -i {} \;
+		if [ "PK_Distro" -ge "22" ] ; then
+			apt-get -f install libdvd-pkg || :
+		else
+			apt-get -f install libdvdcss2 || :
+		fi
 
 		## Install video driver
 		. /usr/pluto/bin/Utils.sh

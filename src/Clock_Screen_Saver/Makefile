@@ -31,8 +31,8 @@ sources = Main.cpp Clock_Screen_Saver.cpp $(Gen_Dev_Files)
 
 
 CXXFLAGS += -std=c++11
-CPPFLAGS += `pkg-config --cflags glib-2.0`
-LDFLAGS += `pkg-config --libs glib-2.0`
+CPPFLAGS += $(shell pkg-config --cflags glib-2.0)
+LDFLAGS += $(shell pkg-config --libs glib-2.0)
 XTRALDLIBS = -lSDL2 -lSDL2_ttf -lSDL2_image -lX11 -lXmu
 
 Gen_Dev_Files +=

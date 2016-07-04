@@ -428,12 +428,14 @@ sub delete_old {
 				print TEST "$test_date Removing file: $_ \n";
 				`rm -f $_`;
 				`rm -f $_.id3` if (-e "$_.id3");
+				`rm -f $_.tnj` if (-e "$_.tnj");
 				markFileAsDelete($dbh,$_);
 			}else {
 				my $test_date = `date`;
 				print TEST "$test_date Removing file: $_ \n";
 				`rm -f $_`;
 				`rm -f $_.id3` if (-e "$_.id3");
+				`rm -f $_.tnj` if (-e "$_.tnj");
 				markFileAsDelete($dbh,$_);
 				$count--;
 				last if ($count <= 0);

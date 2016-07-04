@@ -88,6 +88,14 @@ Item {
 
     QmlPictureFrame {
         id: qmlPictureFrame
+        visible:!dcenowplaying.b_mediaPlaying
+        onVisibleChanged: {
+            if(!visible)
+                stopScreenSaver()
+            else
+                startScreenSaver()
+        }
+
         MouseArea{
             anchors.fill: parent
             onClicked: uiOn=!uiOn
@@ -195,10 +203,9 @@ Item {
                 focus:true
                 onCurrentSelectionChanged:{
                     current_scenarios.commandToExecute=params
-
                 }
 
-                function execute(){
+                function execute(){          
                     console.log(title+" is executing")
                     manager.execGrp(params)
                 }
@@ -207,10 +214,15 @@ Item {
                 buttonText:title
                 height:Style.scaleY(13)
                 width:Style.scaleX(15)
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: execute()
+                onActivated: {
+                    current_scenarios.currentIndex= index;
+                    execute();
                 }
+
+//                MouseArea{
+//                    anchors.fill: parent
+//                    onClicked: { scenario_delegate.acivated()}
+//                }
             }
         }
     }
@@ -261,7 +273,7 @@ Item {
             Keys.onPressed: {
                 switch(event.key){
                 case Qt.Key_Enter: console.log("enter ");
-                case Qt.Key_Return:console.log("return key"); current_scenarios.currentItem.execute(); event.accepted=true; console.log("command executed") ;break;
+                case Qt.Key_Return:console.log("return key"); current_scenarios.currentItem.activated(); event.accepted=true; console.log("command executed") ;break;
                 case Qt.Key_1: current_scenarios.currentItem.execute(); event.accepted=true; console.log("command executed") ;break;
                 case Qt.Key_Down: console.log("down key"); event.accepted=true;current_scenarios.incrementCurrentIndex();break;
                 case Qt.Key_Up: console.log("up arrow"); event.accepted=true;  current_scenarios.decrementCurrentIndex(); break;
@@ -285,6 +297,7 @@ Item {
                 buttonText:name
                 arrow:false
 
+
                 Keys.forwardTo: [ scenarioList ]
 
                 onActiveFocusChanged:{
@@ -293,7 +306,7 @@ Item {
                         centralScenarios.x = x
                     }
                 }
-                onActivated:{
+                onActivated:{               
                     forceActiveFocus()
                     if(floorplantype===-1)
                         manager.currentScreen="Screen_44.qml";scenarioList.currentIndex=0;

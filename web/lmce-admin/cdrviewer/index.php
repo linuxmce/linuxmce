@@ -7,12 +7,12 @@ include 'templates/header.tpl.php';
 include 'templates/form.tpl.php';
 
 // Connecting, selecting database
-$dbconn = mysql_connect( "$db_host:$db_port", $db_user, $db_pass ) or die('Could not connect: ' . mysql_error());
-mysql_select_db($db_name,$dbconn);
-		
+$dbconn = mysqli_connect( "$db_host", $db_user, $db_pass, $db_name, $db_port) or die('Could not connect to DB');
+
+	
 foreach ( array_keys($_REQUEST) as $key ) {
 	$_REQUEST[$key] = preg_replace('/;/', ' ', $_REQUEST[$key]);
-	$_REQUEST[$key] = mysql_real_escape_string($_REQUEST[$key]);
+	$_REQUEST[$key] = mysqli_real_escape_string($_REQUEST[$key]);
 }
 
 $startmonth = is_blank($_REQUEST['startmonth']) ? date('m') : $_REQUEST['startmonth'];
@@ -85,7 +85,7 @@ $mod_vars['accountcode'][] = empty($_REQUEST['accountcode_neg']) ? NULL : $_REQU
 $result_limit = is_blank($_REQUEST['limit']) ? $db_result_limit : $_REQUEST['limit'];
 
 if ( strlen($cdr_user_name) > 0 ) {
-	$cdr_user_name = asteriskregexp2sqllike( 'cdr_user_name', mysql_real_escape_string($cdr_user_name) );
+	$cdr_user_name = asteriskregexp2sqllike( 'cdr_user_name', mysqli_real_escape_string($cdr_user_name) );
 	if ( isset($mod_vars['cdr_user_name']) and $mod_vars['cdr_user_name'][2] == 'asterisk-regexp' ) {
 		$cdr_user_name = " AND ( dst RLIKE '$cdr_user_name' or src RLIKE '$cdr_user_name' )";
 	} else {
@@ -184,18 +184,18 @@ if ( isset($_REQUEST['need_csv']) && $_REQUEST['need_csv'] == 'true' ) {
 	$csv_file = md5(time() .'-'. $where ).'.csv';
 	if (! file_exists("$system_tmp_dir/$csv_file")) {
 		$query = "(SELECT 'calldate', 'clid', 'src', 'dst','dcontext', 'channel', 'dstchannel', 'lastapp', 'lastdata', 'duration', 'billsec', 'disposition', 'amaflags', 'accountcode', 'uniqueid', 'userfield') union (SELECT calldate, clid, src, dst, dcontext, channel, dstchannel, lastapp, lastdata, duration, billsec, disposition, amaflags, accountcode, uniqueid, userfield into outfile '$system_tmp_dir/$csv_file' FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' FROM $db_name.$db_table_name $where $order $sort LIMIT $result_limit)";
-		$result = mysql_query($query) or die("Query failed: [$query] " . (mysql_error()));
+		$result = mysqli_query($dbconn, $query) or die("Query failed: [$query] " . (mysqli_error($dbconn)));
 	}
 	echo "<p class='right title'><a href='download.php?csv=$csv_file'>Click here to download CSV file</a></p>";
 }
 
 if ( isset($_REQUEST['need_html']) && $_REQUEST['need_html'] == 'true' ) {
 	$query = "SELECT calldate, clid, src, dst, dcontext, channel, dstchannel, lastapp, lastdata, duration, billsec, disposition, amaflags, accountcode, uniqueid, userfield, unix_timestamp(calldate) as call_timestamp FROM $db_name.$db_table_name $where $order $sort LIMIT $result_limit";
-	$result = mysql_query($query) or die("Query failed: [$query] " . (mysql_error()));
+	$result = mysqli_query($dbconn, $query) or die("Query failed: [$query] " . (mysqli_error($dbconn)));
 }
 
 if ( isset($result) ) {
-	$tot_calls_raw = mysql_num_rows($result);
+	$tot_calls_raw = mysqli_num_rows($result);
 } else {
 	$tot_calls_raw = 0;
 }
@@ -204,7 +204,7 @@ if ( $tot_calls_raw ) {
 	echo '<p class="center title">Call Detail Record - Search Returned '. $tot_calls_raw .' Calls </p><table class="cdr">';
 	
 	$i = $h_step - 1;
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
 		++$i;
 		if ($i == $h_step) {
 		?>
@@ -270,7 +270,7 @@ if ( $tot_calls_raw ) {
 }
 
 if ( isset($result) ) {
-	mysql_free_result($result);
+	mysqli_free_result($result);
 }
 ?>
 
@@ -360,7 +360,7 @@ switch ($group) {
 
 if ( isset($_REQUEST['need_chart']) && $_REQUEST['need_chart'] == 'true' ) {
 	$query2 = "SELECT $group_by_field AS group_by_field, count(*) AS total_calls, sum(duration) AS total_duration FROM $db_name.$db_table_name $where GROUP BY group_by_field ORDER BY group_by_field ASC LIMIT $result_limit";
-	$result2 = mysql_query($query2) or die('Query failed: ' . mysql_error());
+	$result2 = mysqli_query($dbconn, $query2) or die('Query failed: ' . mysqli_error($dbconn));
 
 	$tot_calls = 0;
 	$tot_duration = 0;
@@ -369,7 +369,7 @@ if ( isset($_REQUEST['need_chart']) && $_REQUEST['need_chart'] == 'true' ) {
 	$tot_duration_secs = 0;
 	$result_array = array();
 
-	while ($row = mysql_fetch_array($result2, MYSQL_NUM)) {
+	while ($row = mysqli_fetch_array($result2, MYSQL_NUM)) {
 		$tot_duration_secs += $row[2];
 		$tot_calls += $row[1];
 		if ( $row[1] > $max_calls ) {
@@ -407,7 +407,7 @@ if ( isset($_REQUEST['need_chart']) && $_REQUEST['need_chart'] == 'true' ) {
 		}
 		echo "</table>";
 	}
-	mysql_free_result($result2);
+	mysqli_free_result($result2);
 }
 if ( isset($_REQUEST['need_chart_cc']) && $_REQUEST['need_chart_cc'] == 'true' ) {
 	$date_range = "( (calldate BETWEEN $startdate AND $enddate) or (calldate + interval duration second  BETWEEN $startdate AND $enddate) or ( calldate + interval duration second >= $enddate AND calldate <= $startdate ) )";
@@ -427,9 +427,9 @@ if ( isset($_REQUEST['need_chart_cc']) && $_REQUEST['need_chart_cc'] == 'true' )
 		/* not date time fields */
 		$query3 = "SELECT $group_by_field AS group_by_field, count(*) AS total_calls, unix_timestamp(calldate) AS ts, duration FROM $db_name.$db_table_name $where GROUP BY group_by_field, unix_timestamp(calldate) ORDER BY group_by_field ASC LIMIT $result_limit";
 
-		$result3 = mysql_query($query3) or die("Query failed[ $query3 ]: " . mysql_error());
+		$result3 = mysqli_query($query3) or die("Query failed[ $query3 ]: " . mysqli_error($dbconn));
 		$group_by_str = '';
-		while ($row = mysql_fetch_array($result3, MYSQL_NUM)) {
+		while ($row = mysqli_fetch_array($result3, MYSQL_NUM)) {
 			if ( $group_by_str != $row[0] ) {
 				$group_by_str = $row[0];
 				$result_array = array();
@@ -453,9 +453,9 @@ if ( isset($_REQUEST['need_chart_cc']) && $_REQUEST['need_chart_cc'] == 'true' )
 	} else {
 		/* data fields */
 		$query3 = "SELECT unix_timestamp(calldate) AS ts, duration FROM $db_name.$db_table_name $where ORDER BY unix_timestamp(calldate) ASC LIMIT $result_limit";
-		$result3 = mysql_query($query3) or die("Query failed[ $query3 ]: " . mysql_error());
+		$result3 = mysqli_query($dbconn, $query3) or die("Query failed[ $query3 ]: " . mysqli_error($dbconn));
 		$group_by_str = '';
-		while ($row = mysql_fetch_array($result3, MYSQL_NUM)) {
+		while ($row = mysqli_fetch_array($result3, MYSQL_NUM)) {
 			$group_by_str_cur = substr(strftime($group_by_field_php[0],$row[0]),0,$group_by_field_php[1]) . $group_by_field_php[2];
 			if ( $group_by_str_cur != $group_by_str ) {
 				if ( $group_by_str ) {
@@ -511,12 +511,12 @@ if ( isset($_REQUEST['need_chart_cc']) && $_REQUEST['need_chart_cc'] == 'true' )
 
 		echo "</table>";
 	}
-	mysql_free_result($result3);
+	mysqli_free_result($result3);
 }
 
 if ( isset($_REQUEST['need_minutes_report']) && $_REQUEST['need_minutes_report'] == 'true' ) {
 	$query2 = "SELECT $group_by_field AS group_by_field, count(*) AS total_calls, sum(duration), sum(billsec) AS total_duration FROM $db_name.$db_table_name $where GROUP BY group_by_field ORDER BY group_by_field ASC LIMIT $result_limit";
-	$result2 = mysql_query($query2) or die('Query failed: ' . mysql_error());
+	$result2 = mysqli_query($dbconn, $query2) or die('Query failed: ' . mysqli_error($dbconn));
 
 	$tot_calls = 0;
 	$tot_duration = 0;
@@ -530,7 +530,7 @@ if ( isset($_REQUEST['need_minutes_report']) && $_REQUEST['need_minutes_report']
 			<th class="end_col">AVG Minutes</th>
 		</tr>';
 
-	while ($row = mysql_fetch_array($result2, MYSQL_NUM)) {
+	while ($row = mysqli_fetch_array($result2, MYSQL_NUM)) {
 			
 			$html_duration = sprintf('%02d', intval($row[3]/60)).':'.sprintf('%02d', intval($row[3]%60));
 			$html_duration_avg	= sprintf('%02d', intval(($row[3]/$row[1])/60)).':'.sprintf('%02d', intval(($row[3]/$row[1])%60));
@@ -550,7 +550,7 @@ if ( isset($_REQUEST['need_minutes_report']) && $_REQUEST['need_minutes_report']
 	echo "    <th class=\"chart_data\">Total</th><th class=\"chart_data\">$tot_calls</th><th class=\"chart_data\">$tot_duration</th><th class=\"chart_data\">$html_duration</th><th class=\"chart_data\">$html_duration_avg</th>\n";
 	echo "  </tr>\n";
 	echo "</table>";
-	mysql_free_result($result2);
+	mysqli_free_result($result2);
 }
 
 /* run Plugins */
@@ -566,7 +566,7 @@ foreach ( $plugins as &$p_key ) {
 
 <?php
 
-mysql_close($dbconn);
+mysqli_close($dbconn);
 
 include 'templates/footer.tpl.php';
 

@@ -57,18 +57,18 @@ public:
             names[gridItem::FKRole]= "id";
             break;
 
-//        case DATAGRID_EPG_All_Shows_CONST:
-//            names[EPGItemClass::NameRole] = "name";                 /** Maps to channel name */
-//            names[EPGItemClass::ProgramRole] = "program";           /** Maps to program on channel */
-//            names[EPGItemClass::ChannelRole] = "channel";           /** Numeric channel number, user facing */
-//            names[EPGItemClass::ChannelIdRole] = "channelid";       /** Numeric number, internal representation. It has the source number prepended to the actual string of digits. Ie. the last three are the tunable digits */
-//            names[EPGItemClass::TimeSlotRole] = "timeslot";         /** String representation of the time slot data */
-//            names[EPGItemClass::ProgramIdRole] = "programid";       /** Experimental */
-//            names[EPGItemClass::SeriesIdRole] = "seriesid";         /** Experimental */
-//            names[EPGItemClass::BroadcastSourceRole] = "sourceid";  /** The current source being used */
-//            names[EPGItemClass::BroadcastSourceNameRole] = "source";/** The Source name */
-//            names[EPGItemClass::IdRole] = "id";
-//            break;
+            //        case DATAGRID_EPG_All_Shows_CONST:
+            //            names[EPGItemClass::NameRole] = "name";                 /** Maps to channel name */
+            //            names[EPGItemClass::ProgramRole] = "program";           /** Maps to program on channel */
+            //            names[EPGItemClass::ChannelRole] = "channel";           /** Numeric channel number, user facing */
+            //            names[EPGItemClass::ChannelIdRole] = "channelid";       /** Numeric number, internal representation. It has the source number prepended to the actual string of digits. Ie. the last three are the tunable digits */
+            //            names[EPGItemClass::TimeSlotRole] = "timeslot";         /** String representation of the time slot data */
+            //            names[EPGItemClass::ProgramIdRole] = "programid";       /** Experimental */
+            //            names[EPGItemClass::SeriesIdRole] = "seriesid";         /** Experimental */
+            //            names[EPGItemClass::BroadcastSourceRole] = "sourceid";  /** The current source being used */
+            //            names[EPGItemClass::BroadcastSourceNameRole] = "source";/** The Source name */
+            //            names[EPGItemClass::IdRole] = "id";
+            //            break;
 
         default: /*!< Generic Roles */
             names[DescriptionRole] = "description";
@@ -87,9 +87,15 @@ public:
             return new SleepingAlarm(parent);
         } else if (PK_DataGrid  == DATAGRID_EPG_All_Shows_CONST ||
                    PK_DataGrid  == DATAGRID_EPG_Grid_CONST){
-         return new EPGItemClass(parent);
+            return new EPGItemClass(parent);
         } else if(PK_DataGrid == DATAGRID_Discs_CONST){
             return new DiskMediaItem(parent);
+        } else if (PK_DataGrid == DATAGRID_Directory_Listing_CONST){
+
+            GenericModelItem* pItem = new GenericModelItem(parent);
+            pItem->setRoleNames(getRoleNames(PK_DataGrid));
+
+            return pItem;
         }
         else {
             // uses generic model item
@@ -111,17 +117,23 @@ public:
     {
 
         DataGridCell *pCell = pTable->GetData(col, row);
+
         if(!pCell) {
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "LoadDataFromTable() pCell == NULL ! row = %d, col = %d", row, col);
             return;
         }
-        /*
-       qDebug() << "Cell Values-------------------------------------------";
-        for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
-            qDebug() << i->first.c_str() <<"::"<< i->second.c_str();
-        }
-        qDebug() << "End Cell Values-------------------------------------------";
- */
+
+//        qDebug() << "Get Text::" << pCell->GetText();
+//        qDebug() << "Get Value::" << pCell->GetValue();
+//       qDebug() << "Cell Values-------------------------------------------";
+//       qDebug() << "AttributeMap count " << pCell->m_AttributesLength;
+//        for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
+
+//            qDebug() << i->first.c_str() <<"::"<< i->second.c_str();
+//        }
+//        qDebug() << "End Cell Values-------------------------------------------";
+
+
         if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
             const char *pPath = pCell->GetImagePath();
             QString fk_file;
@@ -164,8 +176,6 @@ public:
             (static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
         } else if(PK_DataGrid == DATAGRID_EPG_Grid_CONST || PK_DataGrid == DATAGRID_EPG_All_Shows_CONST) {
 
-
-
             QString channelIndex = QString::fromStdString(pCell->m_mapAttributes_Find("Number"));
             QString timeSlot = QString::fromStdString(pCell->m_mapAttributes_Find("Time"));
             QString startTime = QString::fromStdString(pCell->m_mapAttributes_Find("StartTime"));
@@ -184,17 +194,16 @@ public:
                 sourceName = srcInfo.at(1);
 
             QString program;
-            int index = 0;
 
             QString tmp = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str());
             QString channelName;
             int channelNumber = -1;
             if (tmp.indexOf(" ") > 0) {
-                 channelNumber = tmp.left(tmp.indexOf(" ")).toInt();
-                 channelName = tmp.right(tmp.length()-tmp.indexOf(" "));
+                channelNumber = tmp.left(tmp.indexOf(" ")).toInt();
+                channelName = tmp.right(tmp.length()-tmp.indexOf(" "));
             }
-//            qDebug() << pCell->GetText();
-//            qDebug() << pCell->GetValue();
+            //            qDebug() << pCell->GetText();
+            //            qDebug() << pCell->GetValue();
             channelIndex = pCell->GetValue();
             program = QString::fromStdString(pCell->m_mapAttributes_Find("Info"));
 
@@ -219,27 +228,34 @@ public:
             (static_cast<DiskMediaItem*>(pItem))->setDiscData(
                         QString::fromStdString(pCell->GetValue()).toInt(),
                         QString::fromStdString(pCell->m_mapAttributes["PK_File"]).toInt(),
-                        !pCell->m_mapAttributes_Find("EK_Device_Ripping").empty(),
-                        QString::fromStdString(pCell->m_mapAttributes["PK_Disc"]).toInt(),
-                        pCell->m_mapAttributes_Find("PK_File").empty() ? false : true ,
-                        QString::fromStdString(pCell->m_mapAttributes_Find("PK_Disc")).toInt(),
-                        QString::fromUtf8(pCell->GetText()),
-                        QString::fromUtf8(pCell->m_mapAttributes_Find("Room").c_str())
-                        );
+                    !pCell->m_mapAttributes_Find("EK_Device_Ripping").empty(),
+                    QString::fromStdString(pCell->m_mapAttributes["PK_Disc"]).toInt(),
+                    pCell->m_mapAttributes_Find("PK_File").empty() ? false : true ,
+                    QString::fromStdString(pCell->m_mapAttributes_Find("PK_Disc")).toInt(),
+                    QString::fromUtf8(pCell->GetText()),
+                    QString::fromUtf8(pCell->m_mapAttributes_Find("Room").c_str())
+                    );
 
-        qDebug()<< "Device is ripping ?" << !pCell->m_mapAttributes_Find("EK_Device_Ripping").empty();
-        qDebug() << "Disc ID " << QString::fromStdString(pCell->m_mapAttributes["PK_Disc"]);
-        qDebug() << "File " << QString::fromStdString(pCell->m_mapAttributes["PK_File"]);
-        qDebug() << "Description " << pCell->GetText();
-        qDebug() << pCell->m_Value;
+            qDebug()<< "Device is ripping ?" << !pCell->m_mapAttributes_Find("EK_Device_Ripping").empty();
+            qDebug() << "Disc ID " << QString::fromStdString(pCell->m_mapAttributes["PK_Disc"]);
+            qDebug() << "File " << QString::fromStdString(pCell->m_mapAttributes["PK_File"]);
+            qDebug() << "Description " << pCell->GetText();
+            qDebug() << pCell->m_Value;
 
+        } else if(PK_DataGrid == DATAGRID_Directory_Listing_CONST){
+            pItem->setData(ValueRole, pCell->GetValue());
+            pItem->setData(DescriptionRole, QVariant(pCell->GetText()));
+        } else if(PK_DataGrid == DATAGRID_Pending_Tasks_CONST ){
+
+            pItem->setData(DescriptionRole, QString::fromStdString(pCell->m_mapAttributes_Find("Title")));
+            pItem->setData(ValueRole, QString::fromStdString(pCell->m_mapAttributes_Find("Status") ));
         }
         else {
 
             // Default, get one cell use text and value
-
             pItem->setData(ValueRole, pCell->GetValue());
-            pItem->setData(DescriptionRole, QString::fromUtf8(pCell->GetText()));          
+            pItem->setData(DescriptionRole, QString::fromUtf8(pCell->GetText()));
+
         }
     }
 

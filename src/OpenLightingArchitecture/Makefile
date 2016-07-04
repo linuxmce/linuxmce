@@ -30,10 +30,9 @@ sources = Main.cpp OpenLightingArchitecture.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += `pkg-config --cflags libola`
+CPPFLAGS += $(shell pkg-config --cflags libola)
 LDFLAGS +=
-XTRALDLIBS = -lprotobuf `pkg-config --libs libola`
-
+XTRALDLIBS = -lprotobuf $(shell pkg-config --libs libola)
 
 Gen_Dev_Files +=
 sources +=

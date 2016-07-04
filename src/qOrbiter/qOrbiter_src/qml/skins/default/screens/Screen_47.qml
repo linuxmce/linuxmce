@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.enums 1.0
+import org.linuxmce.grids 1.0
 import "../components"
 import "../."
 
@@ -10,7 +11,7 @@ StyledScreen {
         if(activeFocus) innerContent.forceActiveFocus();
     }
     onScreenOpening: {
-         manager.setStringParam(0, manager.q_mediaType)
+        manager.setStringParam(0, manager.q_mediaType)
     }
 
 
@@ -18,6 +19,13 @@ StyledScreen {
         id:filedetailscomp
         FileDetails {
             id: fileDetails
+        }
+    }
+
+    Component{
+        id:moveFiles
+        MoveFilesPrompt {
+            id: moveFilesToBox
         }
     }
 
@@ -61,6 +69,7 @@ StyledScreen {
                 right:parent.right
             }
         }
+
         MediaOptionRow {
             id: option_row
         }

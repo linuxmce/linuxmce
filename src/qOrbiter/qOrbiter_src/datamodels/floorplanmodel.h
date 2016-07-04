@@ -102,7 +102,7 @@ signals:
     void pageChanged(QString s);
     void floorPlanImageChanged();
     void floorPlanStatus(QString s);
-    void requestNewFloorPlanData(QString p);
+    void requestNewFloorPlanData(QString p, int t);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     void changePage(int p);
     void addFloorplanSprite(int x, int y, int device, bool status);
@@ -149,7 +149,7 @@ public slots:
     QImage getPageImage(QString &id);
 
     void setImageData(const uchar *data, int iData_size);
-    void setImage(QImage fp) {  currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage); }
+    void setImage(QImage fp) {  currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage, currentFloorPlanType); }
 
     int getDeviceX(int device);
     int getDeviceY(int device);

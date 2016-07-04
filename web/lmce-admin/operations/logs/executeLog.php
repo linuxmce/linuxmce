@@ -1,7 +1,8 @@
 <?php
 require('../../include/utils.inc.php');
-
 $scriptID=$_REQUEST['script'];
+
+$end='';
 switch($scriptID){
 	case 1:
 		$command[]='sudo -u root /usr/pluto/bin/Diskless_Setup.sh';

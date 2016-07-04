@@ -160,8 +160,14 @@ QString deviceName;
     bool b_mediaPlaying;                                /**< set by the media engine   */
     int internal_streamID;
     int internal_playback_speed;
-    string m_sNowPlayingWindow;
+    string m_sNowPlayingWindow;    
     //@}
+
+    /*! \name Remotes for the current media */
+    int m_iPK_Screen_Remote,m_iPK_DesignObj_Remote_Popup,m_iPK_Screen_FileList,m_iPK_Screen_RemoteOSD,m_iPK_Screen_OSD_Speed,m_iPK_Screen_OSD_Track;
+    string m_sNowPlaying_MediaType,m_sNowPlaying,m_sNowPlaying_Section,m_sNowPlaying_TimeShort,m_sNowPlaying_TimeLong,m_sNowPlaying_Speed,m_sNowPlaying_Angle,m_sNowPlaying_Audio,m_sNowPlaying_Subtitle,m_sDefaultRippingName,m_sApplicationName,m_sNowPlaying_Window; /** < set by the media engine, this is whatever media is currently playing */
+    int m_nDefaultStorageDeviceForRipping;
+    string m_sDefaultStorageDeviceForRippingName;
 
     /*! @name Datagrid Member Variables. */
     //@{
@@ -194,10 +200,12 @@ QString deviceName;
     int iPK_Device_GeneralInfoPlugin;   /*!< \brief GeneralInfoPlugin id. */
     int  iPK_Device_SecurityPlugin;     /*!< \brief SecurityPlugin id. */
     int  iPK_Device_LightingPlugin;     /*!< \brief LightingPlugin id. */
-    int  m_dwIDataGridRequestCounter;   /*!< \brief Datagrid request counter. Incremented per dg request for identifying the current grid. */
-    int iOrbiterPluginID;
-    int  iMediaPluginID;
+    int iPK_Device_TelecomPlugin;
+    int iPK_Device_ClimatePlugin;
+    int  iPK_Device_MediaPlugin;
     int iPK_Device_eventPlugin;
+    int  m_dwIDataGridRequestCounter;   /*!< \brief Datagrid request counter. Incremented per dg request for identifying the current grid. */
+
     int m_pOrbiterCat;
     QMap<int, QString> childrenDeviceList;
 #if !defined(QT5) && !defined(Q_OS_ANDROID)
@@ -280,11 +288,7 @@ public:
     virtual int DeviceIdInvalid();
     virtual int SetupNewOrbiter();
     virtual void CreateChildren();
-  virtual void CannotReloadRouter();
-
-
-
-
+    virtual void CannotReloadRouter();
     //<-dceag-const-e->
 
     //<-dceag-const2-b->
@@ -1341,6 +1345,9 @@ light, climate, media, security, telecom */
 
 signals:
 
+    void coreDevicesChanged( QMap<long, long> cd);
+    void useQueueInsteadOfInstantPlayChanged(bool useQueue);
+
     void showAlert(QString text, QString tokens, int timeout, int interruption);
 
     void timecodeEvent(QString ea, QMap<long, std::string> mp);
@@ -1367,6 +1374,8 @@ signals:
      * \param qml
      */
     void gotoQml(QString qml);
+    void gotoOsdQml(QString osdQml);
+    void setRemotePopup(int popup);
 
     /*!
      * \brief gotoScreen. Load the screen in question.
@@ -1966,14 +1975,12 @@ public slots:
 
     void stop_AV();
 
-    void moveMedia(QString eas, int streamID);
-
     void checkTimeCode(int npDevice);
     void getStreamingVideo();
 
     void changedPlaylistPosition(QString pos);
     void ShowFloorPlan(int floorplantype);
-    void updateFloorPlan(QString p);
+    void updateFloorPlan(QString p, int t);
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
     void jumpToPlaylistPosition(QString pos);
@@ -2028,6 +2035,8 @@ public slots:
     bool timeCodeInterceptor(class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo);
 
 private:
+
+    bool sendCoreDeviceNumbers();
 
 
 protected:

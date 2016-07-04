@@ -103,9 +103,17 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     currentScreen("Screen_1.qml"),
     m_skinOverridePath(overridePath),
     m_window(NULL),
-    m_dceRequestNo(1)
+    m_dceRequestNo(1),
+    m_useQueueInsteadOfInstantPlay(false), m_bIsOSD(isOsd),
+    usingExternal(false)
 {
-    m_bIsOSD = isOsd;
+    m_routerHelper = new RouterHelper(qOrbiter_ptr);
+
+    m_mediaHelper = new DceMediaHelper(qOrbiter_ptr, m_routerHelper,this);
+    connect(m_mediaHelper, &DceMediaHelper::forwardDceCommand, this, &qorbiterManager::sendDceCommand);
+
+
+
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -396,17 +404,8 @@ void qorbiterManager::refreshUI(QUrl url){
 void qorbiterManager::processConfig(QNetworkReply *config)
 {
 
-    if(!alreadyConfigured){
-        iPK_Device_DatagridPlugIn =  long(6);
-        iPK_Device_OrbiterPlugin = long(9);
-        iPK_Device_GeneralInfoPlugin = long(4);
-        iPK_Device_SecurityPlugin = long(13);
-        iPK_Device_LightingPlugin = long(8);
-        iPK_Device_TelecomPlugin = long(11);
-        m_dwIDataGridRequestCounter = 0;
-        iOrbiterPluginID = 9;
-        iMediaPluginID = 10;
-        iPK_Device_eventPlugin = 12;
+    if(!alreadyConfigured){     
+        m_dwIDataGridRequestCounter = 0;       
         iSize = 0;
         m_pOrbiterCat = 5;
         s_onOFF = "1";
@@ -1363,16 +1362,7 @@ void qorbiterManager::regenComplete(QNetworkReply*r)
 {
 
     if(!alreadyConfigured){
-        iPK_Device_DatagridPlugIn =  long(6);
-        iPK_Device_OrbiterPlugin = long(9);
-        iPK_Device_GeneralInfoPlugin = long(4);
-        iPK_Device_SecurityPlugin = long(13);
-        iPK_Device_LightingPlugin = long(8);
-        iPK_Device_TelecomPlugin = long(11);
         m_dwIDataGridRequestCounter = 0;
-        iOrbiterPluginID = 9;
-        iMediaPluginID = 10;
-        iPK_Device_eventPlugin = 12;
         iSize = 0;
         m_pOrbiterCat = 5;
         s_onOFF = "1";
@@ -1729,24 +1719,37 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
     storageDevices = p;
 }
 
-void qorbiterManager::playMedia(QString FK_Media) {
+void qorbiterManager::playMedia(QString FK_Media, bool queue =false) {
     if(FK_Media == "!G"){
         FK_Media.append(QString::number(iPK_Device));
     }
+
+    bool q;
+
+    if(queue){
+        q = queue;
+    } else {
+        if(!queue && m_useQueueInsteadOfInstantPlay ){
+            q = queue;
+        } else {
+            q = m_useQueueInsteadOfInstantPlay;
+        }
+    }
+
     //changed to remove media type as that is decided on by the media plugin and passed back
     CMD_MH_Play_Media cmd(
-                iPK_Device,
-                iMediaPluginID,
+                iPK_Device,                 //device from
+                m_routerHelper->mediaPluginId(),             //device to
                 0 ,
-                FK_Media.toStdString(),
-                0,
-                0,
-                sEntertainArea,
-                false,
-                false,
-                false,
-                false,
-                false
+                FK_Media.toStdString(),     //media file name !FXX or !PXXX
+                0,                          //media type
+                0,                          //device template (why 0)
+                sEntertainArea,             //entertain area
+                false,                      //resume
+                false,                       //repeat
+                q,                          //queue
+                false,                      //bypass event
+                false                       //dont setupav
                 );
     emit sendDceCommand(cmd);
 }
@@ -1757,7 +1760,7 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
 
     CMD_MH_Play_Media playDisc(
                 iPK_Device,
-                iMediaPluginID,
+               m_routerHelper->mediaPluginId() ,
                 0,
                 fkFile.toStdString(), // see MediaAttributes_LowLevel::TransformFilenameToDeque
                 0,
@@ -1774,7 +1777,7 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
 }
 
 void qorbiterManager::mythTvPlay(){
-    CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, this->nowPlayingButton->getStreamID() , 1000, true);
+    CMD_Change_Playback_Speed cmd(iPK_Device, m_routerHelper->mediaPluginId(), this->nowPlayingButton->getStreamID() , 1000, true);
     emit sendDceCommand(cmd);
 }
 
@@ -1786,7 +1789,7 @@ void qorbiterManager::playResume(){
 }
 
 void qorbiterManager::stopMedia() {/*emit stopPlayback();*/
-    CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,sEntertainArea,false);
+    CMD_MH_Stop_Media endMedia(iPK_Device, m_routerHelper->mediaPluginId(),0,i_current_mediaType ,0,sEntertainArea,false);
     string response;
     emit sendDceCommand(endMedia);
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Response: %s", response.c_str());
@@ -1796,7 +1799,7 @@ void qorbiterManager::stopMedia() {/*emit stopPlayback();*/
 void qorbiterManager::stop_AV() {
     // sends a Stop command, which is normally routed to an actual AV device through IR, CEC or other means
     // this does not stop the "lmce activity"
-    CMD_Stop avStop(iPK_Device, iMediaPluginID, 0,false);
+    CMD_Stop avStop(iPK_Device, m_routerHelper->mediaPluginId(), 0,false);
     emit sendDceCommand(avStop);
 }
 
@@ -2176,6 +2179,11 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
 
         QVariantMap b;
         b.insert("commands", t["commands"]);
+
+        if(t.contains("media")){
+            b.insert("media", t["media"]);
+        }
+
         p->setDeviceCommand(b);
         //       foreach(QVariant cmd , t["commands"].toMap()){
         //           QVariantMap l = cmd.toMap();
@@ -2186,7 +2194,7 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
 void qorbiterManager::getDeviceState(int PK_Device, string* data)
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::getDeviceState");
-    CMD_Get_Device_State getDeviceState(iPK_Device, iPK_Device_GeneralInfoPlugin, PK_Device, data);
+    CMD_Get_Device_State getDeviceState(iPK_Device, m_routerHelper->generalInfoPluginId() , PK_Device, data);
     sendDceCommand(getDeviceState);
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::getDeviceState done");
 }
@@ -2236,6 +2244,14 @@ void qorbiterManager::updatePlaylist()
 DCECommand* qorbiterManager::getDCECommand()
 {
     return new DCECommand(m_dceRequestNo.fetchAndAddAcquire(1));
+}
+
+void qorbiterManager::handleUseQueueChanged(bool useQueue)
+{
+
+    if(m_useQueueInsteadOfInstantPlay == useQueue) return;
+    m_useQueueInsteadOfInstantPlay = useQueue;
+
 }
 
 void qorbiterManager::jumpToAttributeGrid(int attributeType, int attribute)
@@ -2328,9 +2344,7 @@ void qorbiterManager::setHouseMode(QString pass, int mode, QString handling)
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
-#ifdef debug
     qDebug() << "Incoming user::" << inc_user;
-#endif
     sPK_User = userList->find(inc_user)->id();
     int user = inc_user.toInt();
     emit userChanged(user);
@@ -2491,6 +2505,7 @@ void qorbiterManager::setupContextObjects()
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", mp_securityVideo);
     m_appEngine->rootContext()->setContextProperty("securityvideo", mp_securityVideo);
 
+    m_appEngine->rootContext()->setContextProperty("mediaHelper", m_mediaHelper);
 
 
 }
@@ -2939,6 +2954,54 @@ void qorbiterManager::setCurrentScreen(int s, bool force)
     }
 }
 
+void qorbiterManager::setCurrentOsdScreen(int s, bool force)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QString i = QString("Screen_%1.qml").arg(QString::number(s));
+
+    if(i!=m_currentOsdScreen || force){
+        m_currentOsdScreen = i;
+        emit currentOsdScreenChanged(i);
+    }
+
+}
+
+void qorbiterManager::setCurrentOsdScreen(QString s, bool force )
+{
+
+    qDebug() << Q_FUNC_INFO;
+    if(!s.contains(".qml")){
+        setCurrentOsdScreen(s.toInt(), force);
+        return;
+    }
+
+    if(s=="Screen_1.qml"){
+        clearAllDataGrid();
+    }
+
+    if(s!=m_currentOsdScreen || force){
+        m_currentOsdScreen = s;
+        emit currentOsdScreenChanged(s);
+    }
+}
+
+void qorbiterManager::setCurrentOsd(QString b)
+{
+    {setCurrentOsdScreen(b, false); }
+}
+
+void qorbiterManager::setCurrentRemotePopup(int p)
+{
+    QString i = QString("Remote_%1.qml").arg(QString::number(p));
+
+    if(i!= m_currentRemotePopup){
+        m_currentRemotePopup = i;
+        emit currentRemotePopupChanged(i);
+    }
+}
+
+
 void qorbiterManager::requestSingleView(int camera)
 {
     emit getSingleCam(camera, 600,800, true);
@@ -2965,7 +3028,7 @@ void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text)
 }
 
 void qorbiterManager::makeCall(int iPK_Users, QString sPhoneExtension, QString sPK_Device_From,int iPK_Device_To) {
-    CMD_Make_Call makeCall(iPK_Device, iPK_Device_TelecomPlugin, iPK_Users, sPhoneExtension.toStdString(), sPK_Device_From.toStdString(), iPK_Device_To);
+    CMD_Make_Call makeCall(iPK_Device, m_routerHelper->telecomPluginId(), iPK_Users, sPhoneExtension.toStdString(), sPK_Device_From.toStdString(), iPK_Device_To);
     sendDceCommand(makeCall);
 }
 
@@ -3022,7 +3085,7 @@ void qorbiterManager::reloadQml()
         qDebug() << "New style failed application! " << filePath;
     }
 
-     m_appEngine->clearComponentCache();
+    m_appEngine->clearComponentCache();
     m_appEngine->rootContext()->setContextProperty("Style", m_style);
 
     setUiReady(true);
@@ -3145,7 +3208,8 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     //navigation
 
     QObject::connect(ptr, SIGNAL(gotoQml(QString)), this, SLOT(setCurrentScreen(QString)),Qt::QueuedConnection); //old style because its overloaded
-
+    QObject::connect(ptr, SIGNAL(gotoOsdQml(QString)), this, SLOT(setCurrentOsd(QString)), Qt::QueuedConnection);
+    QObject::connect(ptr, SIGNAL(setRemotePopup(int)), this, SLOT(setCurrentRemotePopup(int)), Qt::QueuedConnection);
     //floorplans
     QObject::connect(this, &qorbiterManager::floorplanTypeChanged, ptr, &qOrbiter::ShowFloorPlan, Qt::QueuedConnection); /*!< Should move into floorplan object */
     QObject::connect(ptr, &qOrbiter::floorPlanImageData, floorplans, &FloorPlanModel::setImageData, Qt::QueuedConnection);/*!< Should move into floorplan object */
@@ -3273,6 +3337,10 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     QObject::connect(m_lRooms, &LocationModel::seekToTime, ptr, &qOrbiter::JogStream, Qt::QueuedConnection );
 
     QObject::connect(this, SIGNAL(ejectDiscDrive(long,int)), ptr, SLOT(ejectDisc(long,int)), Qt::QueuedConnection);
+
+    //config options
+
+    QObject::connect(ptr, &qOrbiter::useQueueInsteadOfInstantPlayChanged, this, &qorbiterManager::handleUseQueueChanged , Qt::QueuedConnection);
     return true;
 
 }

@@ -110,13 +110,27 @@ GenericPopup{
                 height: parent.height
                 width: parent.width/4
                 arrow: activeFocus
-                onActivated: {manager.playMedia(filedetailsclass.file); fileDetails.close()}
+                onActivated: {
+                    manager.playMedia(filedetailsclass.file, false); fileDetails.close()}
             }
+            LargeStyledButton{
+                buttonText: qsTr("Queue", "Play Media Selection")
+                height: parent.height
+                width: parent.width/4
+                arrow: activeFocus
+                onActivated: {
+                    manager.playMedia(filedetailsclass.file, true); fileDetails.close()
+                }
+            }
+
             LargeStyledButton{
                 buttonText: qsTr("Move", "Move Media Selection")
                 height: parent.height
                 width: parent.width/4
                 arrow: activeFocus
+                onActivated: {
+                    qmlRoot.createPopup(moveFiles)
+                }
             }
             LargeStyledButton{
                 buttonText: qsTr("Close", "Close orbiterWindow")

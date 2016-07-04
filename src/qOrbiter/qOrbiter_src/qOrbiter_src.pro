@@ -24,7 +24,7 @@
 
 CONFIG += thread c++11
 # define deployment destination and target executable name
-
+include (../../QtCommonIncludes/PlutoUtils.pri)
 local-development{
     android-g++{ DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION }
      else  {
@@ -121,7 +121,9 @@ linux-rasp-pi-g++ || pi{
         DESTDIR=""
         target.path=/usr/pluto/bin
         INSTALLS+=target
-
+                runner.source=../buildScripts/rpi/runSingleQorbiter.sh
+                runner.path=/usr/pluto/bin
+                DEPLOYMENTFOLDERS+=runner
         plugins_folder.source = imports
         plugins_folder.target = $$DESTDIR
 
@@ -138,7 +140,6 @@ linux-g++{
                 folder_01.source = qml
                 folder_01.target = $$DESTDIR/qml
                 target.path=/usr/pluto/bin
-
         }
 
         contains(QT_VERSION,5.*.*){
@@ -148,6 +149,7 @@ linux-g++{
                # folder_01.target = $$DESTDIR/qml/
                 DEFINES += for_desktop GLENABLED
                 glmsg=scenegraph
+
         }
 !RPI{
       # DEPLOYMENTFOLDERS+= plugins_folder
@@ -231,6 +233,7 @@ folder_04.target=$$DESTDIR
 DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
 
 linux-rasp-pi-g++{
+
         DEPLOYMENTFOLDERS -= plugins_folder
 }
 
@@ -321,8 +324,10 @@ message (Build Type: $$DEFINES)
 message( Opengl Status: $$glmsg )
 message( Output Path $$DESTDIR )
 message(Deploying folders $$DEPLOYMENTFOLDERS)
-SOURCES += main.cpp \
-        ../qOrbiter.cpp \
+
+SOURCES += \
+        main.cpp \
+         ../qOrbiter.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
         qorbitermanager.cpp \
         datamodels/listModel.cpp \
@@ -344,14 +349,6 @@ SOURCES += main.cpp \
         datamodels/securityscenarioitem.cpp \
         datamodels/telecomscenarioitem.cpp \
         screensaver/screensavermodule.cpp \
-        ../../PlutoUtils/uuencode.cpp \
-        ../../PlutoUtils/ThreadedClass.cpp \
-        ../../PlutoUtils/Other.cpp \
-        ../../PlutoUtils/MultiThreadIncludes.cpp \
-        ../../PlutoUtils/minilzo.cpp \
-        ../../PlutoUtils/md5c.cpp \
-        ../../PlutoUtils/FileUtils.cpp \
-        ../../PlutoUtils/CommonIncludes.cpp \
         ../../SerializeClass/SerializeClass.cpp \
         ../../DCE/Virtual_Device_Translator.cpp \
         ../../DCE/Socket.cpp \
@@ -366,11 +363,9 @@ SOURCES += main.cpp \
         ../../DCE/DataGrid.cpp \
         ../../DCE/Command_Impl.cpp \
         ../../DCE/AlarmManager.cpp \
-        ../../PlutoUtils/StringUtils.cpp \
         ../../DCE/ClientSocket.cpp \
         ../../DCE/DeviceData_Base.cpp \
         ../../DCE/DeviceData_Impl.cpp \
-        ../../PlutoUtils/getch.cpp \
         datamodels/skindatamodel.cpp \
         datamodels/skindataitem.cpp \
         datamodels/DataModelItems/filtermodelitem.cpp \
@@ -422,7 +417,11 @@ SOURCES += main.cpp \
     contextobjects/screeninfo.cpp \
     contextobjects/settinginterface.cpp \
     contextobjects/entertainareatimecode.cpp \
-    datamodels/diskmediaitem.cpp
+    datamodels/diskmediaitem.cpp \
+    managerHelpers/taskshelper.cpp \
+    managerHelpers/dcemediahelper.cpp \
+    managerHelpers/routerhelper.cpp
+
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -438,13 +437,6 @@ SOURCES += main.cpp \
 
 
 HEADERS += \
-        ../../PlutoUtils/ThreadedClass.h \
-        ../../PlutoUtils/MultiThreadIncludes.h \
-        ../../PlutoUtils/StringUtils.h \
-        ../../PlutoUtils/CommonIncludes.h \
-        ../../PlutoUtils/Other.h \
-        ../../PlutoUtils/getch.h \
-        ../../PlutoUtils/MyStl.h \
         ../../DCE/DeviceData_Base.h \
         ../../DCE/Message.h \
         ../../DCE/ServerLogger.h \
@@ -455,7 +447,6 @@ HEADERS += \
         ../../DCE/PlainClientSocket.h \
         ../../DCE/AlarmManager.h \
         ../../SerializeClass/SerializeClass.h \
-        ../../PlutoUtils/FileUtils.h \
         ../../pluto_main/Define_DeviceCategory.h \
         ../../pluto_main/Define_DeviceTemplate.h \
         ../qOrbiter.h \
@@ -537,7 +528,10 @@ HEADERS += \
     contextobjects/settinginterface.h \
     contextobjects/entertainareatimecode.h \
     DCECommand.h \
-    datamodels/diskmediaitem.h
+    datamodels/diskmediaitem.h \
+    managerHelpers/taskshelper.h \
+    managerHelpers/dcemediahelper.h \
+    managerHelpers/routerhelper.h
 
 
 
@@ -561,7 +555,9 @@ DISTFILES += \
     qml/skins/default/components/FloorplanSetTemp.qml \
     qml/skins/default/components/FloorplanHeatCool.qml \
     qml/skins/default/components/FloorplanDefaultControl.qml \
-    ../docs/RPI-Dev-Setup.txt
+    ../docs/RPI-Dev-Setup.txt \
+    qml/skins/default/components/NowPlayingTransferMedia.qml \
+    ../buildScripts/rpi/runSingleQorbiter.sh
 
 
 

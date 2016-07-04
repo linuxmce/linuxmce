@@ -10,8 +10,8 @@ LDFLAGS =
 LDFLAGS += -L$(ROOT)/lib
 LDLIBS = -lpthread -lSerializeClass
 
-MYSQL_FLAGS = `pkg-config --cflags mysqlclient`
-MYSQL_LIBS = `pkg-config --libs mysqlclient`
+MYSQL_FLAGS = $(shell pkg-config --cflags mysqlclient)
+MYSQL_LIBS = $(shell pkg-config --libs mysqlclient)
 ifneq (($(MYSQL_FLAGS)),)
 	CPPFLAGS += $(MYSQL_FLAGS)
 	LDLIBS += $(MYSQL_LIBS)

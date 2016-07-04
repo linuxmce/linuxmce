@@ -23,8 +23,9 @@
 //<-dceag-d-e->
 #include <QTime>
 #include <QString>
+class QTimer;
 
-class MediaManager;
+class MediaManagerBase;
 
 //<-dceag-decl-b->
 namespace DCE
@@ -58,7 +59,7 @@ public:
 //<-dceag-const-b->
 public:
         // Constructors/Destructor
-        qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *manager,bool bConnectEventHandler=true,bool bLocalMode=false, class Router *pRouter=NULL);
+        qMediaPlayer(int DeviceID, string ServerAddress, MediaManagerBase *manager,bool bConnectEventHandler=true,bool bLocalMode=false, class Router *pRouter=NULL);
         virtual ~qMediaPlayer();
         virtual bool GetConfig();
         virtual bool Register();
@@ -959,10 +960,14 @@ public:
         int getCurrentFkFileType() const;
         void setCurrentFkFileType(int currentFkFileType);
 
+        long getCurrentStorageDevice() const;
+        void setCurrentStorageDevice(long currentStorageDevice);
+
     signals:
         void commandResponseChanged(QString);
         void mediaResponseChanged(QString);
         void currentMediaUrlChanged(QString);
+        void currentMediaFileChanged(QString file);
 
         void streamIdChanged(int);
         void mediaIdChanged(QString);
@@ -987,10 +992,12 @@ public:
         void audioLevelChanged(QString lvl);
         void trackUp();
         void trackDown();
+        void currentStorageDeviceChanged(long device);
 
 
     public slots:
         //playback info changed event
+        void handleDelayedSeek(int seekTime);
         void updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen);
 
         void confirmMediaStarted(QString description );
@@ -1019,6 +1026,7 @@ public:
         void setCurrentMediaUrl(QString m) {currentMediaUrl = m; emit currentMediaUrlChanged(currentMediaUrl);}
         QString getCurrentMediaUrl(){return currentMediaUrl;}
 
+
         void setCommandResponse(QString r);
         QString getCommandResponse() {return commandResponse;}
 
@@ -1029,8 +1037,19 @@ public:
     private:
         int m_currentSpeed;
         int m_currentFkFileType;
-        MediaManager * mp_manager;
+        MediaManagerBase * mp_manager;
         QString m_internalMediaUrl;
+
+        int m_iChapter ;
+        int m_iTitle;
+        string s_totalTime;
+        string s_audioTracks;
+        string s_subTitleTracks;
+        QTimer *seekDelayTimer;
+        long m_currentStorageDevice;
+
+    private:
+        string getDcePosition();
 
     };
 

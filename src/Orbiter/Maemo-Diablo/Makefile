@@ -16,7 +16,9 @@ libs:
 	cd $(LINUXMCE_SRC)/DCE; $(MAKE) clean; $(MAKE) SNR_CPPFLAGS="-DMAEMO_NOKIA770"
 
 Orbiter: .libs-timestamp
-	cd $(LINUXMCE_SRC)/Orbiter; $(MAKE) clean; $(MAKE) SNR_CPPFLAGS='-DMAEMO_NOKIA770 -DVERSION="\"'"$(COMPILE_VERSION)"'\"" -DCOMPILE_DATE="\"'"$(COMPILE_DATE)"'\""' LIBGPGME= bin
+	cd $(LINUXMCE_SRC)/Orbiter; $(MAKE) clean; $(MAKE) bin
+SNR_CPPFLAGS='-DMAEMO_NOKIA770 -DPADORBITER -DVERSION="\"'"$(COMPILE_VERSION)"'\"" 
+-DCOMPILE_DATE="\"'"$(COMPILE_DATE)"'\""' LIBGPGME=bin
 
 orbiter-launcher: orbiter.c
 	$(CC) -DOS2008 $(shell pkg-config --cflags $(LauncherPackages)) -o $@ $< $(shell pkg-config --libs $(LauncherPackages))

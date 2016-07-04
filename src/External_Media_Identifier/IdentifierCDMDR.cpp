@@ -10,6 +10,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "DCE/Logger.h"
 #include "../pluto_media/Define_AttributeType.h"
+#include "../pluto_main/Define_MediaType.h"
 #include "OutputMiscTab.h"
 #include "HTTPPicture.h"
 
@@ -163,3 +164,10 @@ string IdentifierCDMDR::GetIdentityType()
 {
   return "MISC-TAB";
 }
+
+int IdentifierCDMDR::GetMediaType()
+{
+  return MEDIATYPE_pluto_CD_CONST;
+}
+
+

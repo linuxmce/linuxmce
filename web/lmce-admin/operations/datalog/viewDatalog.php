@@ -54,8 +54,8 @@ function viewDatalog($output,$dbADO){
      $mysqlpwd=""; // Password
      $mysqldb="lmce_datalog";
 
-     $connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
-     mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");
+     $connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
+     mysqli_select_db($connection, $mysqldb) or die("ERROR: could not select database!");
 
 	$PK_Datalogger = getDeviceFromDT($installationID,1949 /* DeviceTemplate_DataLogger_Plugin */,$dbADO);
 	$deviceString = getDeviceData($PK_Datalogger,59 /* Configuration */,$dbADO); 
@@ -87,12 +87,12 @@ function viewDatalog($output,$dbADO){
     	<select id="addDevice" name="addDevice"><option value="0">-Sensor-</option>';
 
 // Create list of devices that have data in lmce_datalog
-     $query = mysql_query('SELECT  DISTINCT EK_Device,FK_Unit FROM Datapoints WHERE timestamp > DATE_SUB(NOW(), INTERVAL 7 DAY) ORDER BY EK_Device');
-     while ($devices = mysql_fetch_array($query)){
+     $query = mysqli_query($connection, 'SELECT  DISTINCT EK_Device,FK_Unit FROM Datapoints WHERE timestamp > DATE_SUB(NOW(), INTERVAL 7 DAY) ORDER BY EK_Device');
+     while ($devices = mysqli_fetch_array($query)){
           $queryDescription = "SELECT `Description` FROM `Device` where `PK_Device` = ".$devices['EK_Device'];
           $resGP = $dbADO->Execute($queryDescription);
           $row=$resGP->FetchRow();
-          $rowUnit = mysql_fetch_row(mysql_query('SELECT Description FROM Unit WHERE PK_Unit ='.$devices['FK_Unit']));
+          $rowUnit = mysqli_fetch_row(mysqli_query($connection, 'SELECT Description FROM Unit WHERE PK_Unit ='.$devices['FK_Unit']));
          	$out.= '<option value="'.$devices['EK_Device'].','.$devices['FK_Unit'].'">'.$devices['EK_Device'].' - '.$row['Description'].' ('.$rowUnit[0].')</option>';
      }
 

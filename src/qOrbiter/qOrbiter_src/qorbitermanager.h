@@ -68,7 +68,8 @@
 #include "QKeyEvent"
 #include <QProcess>
 #include <QtXml/QDomDocument>
-
+#include "managerHelpers/dcemediahelper.h"
+#include "managerHelpers/routerhelper.h"
 
 
 #ifdef ANDROID
@@ -129,9 +130,9 @@
 
 #include <defineObjects/linuxmcedata.h>
 #include "Gen_Devices/AllCommandsRequests.h"
-
 #include <qOrbiter/qOrbiter_src/DCECommand.h>
 #include <qOrbiter/qOrbiter.h>
+
 class EPGChannelList;
 class basicImageProvider;
 
@@ -197,7 +198,10 @@ class qorbiterManager : public QObject
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief Used to track orientation \deprecated */
     Q_PROPERTY (bool isProfile READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief if the device is in profile or landscape mode */
+
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)/*!< \brief Contains string of current screen. \code manager.currentScreen \endcode  \ingroup qorbiter_properties */
+    Q_PROPERTY(QString currentOsdScreen READ currentOsdScreen /*WRITE setCurrentOsdScreen*/ NOTIFY currentOsdScreenChanged)
+    Q_PROPERTY(QString currentRemotePopup READ currentRemotePopup /*WRITE setCurrentRemotePopup*/ NOTIFY currentRemotePopupChanged)
 
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )/*!< \brief Contains the number of cells returned in media grid \code manager.media_pageSeperator \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged) /*!< \brief Contains the current page of the media grid is on. Starts at 0. \ingroup qorbiter_properties */
@@ -236,6 +240,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString externalip READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
     Q_PROPERTY (bool usingExternal READ getUsingExternal WRITE setUsingExternal NOTIFY usingExternalChanged) /*! \brief Used to indicate to the user and application if the external ip is in use */
     Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
+
+    Q_PROPERTY (bool useQueueInsteadOfInstantPlay READ useQueueInsteadOfInstantPlay NOTIFY useQueueInsteadOfInstantPlayChanged)
 
 
     /*!
@@ -344,7 +350,6 @@ public:
     int screenSaverTimeout;
     int screenPowerOffTimeout;
 
-
     //ui
     QString currentSkin;
     QString currentSkinURL;
@@ -385,6 +390,7 @@ public:
     bool osdStatus;
     bool dvdMenuShowing;
     Q_INVOKABLE void refreshUI(QUrl url);
+
     void swapSkins(QString incSkin);
 
 
@@ -405,6 +411,10 @@ public:
 
     //floorplans
     FloorPlanModel *floorplans;
+
+    //Helper classes
+    DceMediaHelper  *m_mediaHelper;
+    RouterHelper    *m_routerHelper;
 
     /*
 datagrid variables
@@ -546,18 +556,13 @@ Param 10 - pk_attribute
     QStringList *sUserList;          //linked list of users in house
     QStringList *sCurr_Room_Devices; //linked list of current devices (experimental)
     QString currentScreen;
+    QString m_currentOsdScreen;
+    QString m_currentRemotePopup;
 
 
     //plugin variables
-    long iOrbiterPluginID;           //the orbiter plugin id for future use
-    long iPK_Device_DatagridPlugIn;
-    long iPK_Device_OrbiterPlugin;
-    long iPK_Device_GeneralInfoPlugin;
-    long iPK_Device_SecurityPlugin;
-    long iPK_Device_LightingPlugin;
-    long iPK_Device_TelecomPlugin;
-    long iPK_Device_eventPlugin;
-    long iMediaPluginID;
+
+
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
     int i_currentFloorplanType;
@@ -584,6 +589,7 @@ Param 10 - pk_attribute
     void setCurrentRouter( QString currentRouter) {if(m_currentRouter==currentRouter) return; m_currentRouter = currentRouter; emit currentRouterChanged();  }
 
 signals:
+    void useQueueInsteadOfInstantPlayChanged();
     void forceReloadRouter();
     void newDceAlert(QString text, QVariant tokens, int timeout, int interruption);
 
@@ -735,6 +741,10 @@ signals:
     void userChanged(int user);
     void locationChanged(int cRoom, int cEA);
     void screenChange(QString s);
+
+    void currentOsdScreenChanged(QString s);
+    void currentRemotePopupChanged(QString r);
+
     void screenRequest(QString s);
     void localConfigReady(bool b);
     void orbiterConfigReady(bool b);
@@ -828,6 +838,8 @@ signals:
     void CMD_makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
 
 public slots:
+    bool useQueueInsteadOfInstantPlay(){ return m_useQueueInsteadOfInstantPlay;}
+    void handleUseQueueChanged(bool useQueue);
 
     void jumpToAttributeGrid(int attributeType, int attribute);
 
@@ -1063,6 +1075,16 @@ public slots:
     //! Sets the current screen in string format.
     void setCurrentScreen(QString s, bool force=false);
     void setCurrentScreen(int s, bool force=false);
+
+    void setCurrentOsdScreen(int s, bool force=false);
+    void setCurrentOsdScreen(QString s, bool force=false);
+    void setCurrentOsd(QString b) ;
+
+    QString currentOsdScreen() {return m_currentOsdScreen;}
+
+    void setCurrentRemotePopup(int p);
+    QString currentRemotePopup(){return m_currentRemotePopup;}
+
     //security related
     Q_INVOKABLE void requestSingleView(int camera);
     /*!
@@ -1118,7 +1140,7 @@ public slots:
      * \param b
      */
     void setBoundStatus(bool b) {
-        CMD_Bind_to_Media_Remote cmd(iPK_Device, iMediaPluginID, iPK_Device,string("2355") ,b ? "1" :"0", string(""), sEntertainArea, 0, 0);
+        CMD_Bind_to_Media_Remote cmd(iPK_Device, m_routerHelper->mediaPluginId(), iPK_Device,string("2355") ,b ? "1" :"0", string(""), sEntertainArea, 0, 0);
         emit sendDceCommand(cmd);
     }
 
@@ -1183,7 +1205,7 @@ public slots:
     bool getLiveAvPath() { return usingLiveAvPath;}
 
     void setDirectAv(bool avState){
-        CMD_Live_AV_Path cmd(iPK_Device, iMediaPluginID, sEntertainArea, avState);
+        CMD_Live_AV_Path cmd(iPK_Device, m_routerHelper->mediaPluginId(), sEntertainArea, avState);
         emit sendDceCommand( cmd );
         if(usingLiveAvPath !=avState)
             setLiveAvPath(avState);
@@ -1296,33 +1318,36 @@ public slots:
 
     /*! @name Media Control Slots*/
     //{@
-    Q_INVOKABLE void playMedia(QString FK_Media);
+    Q_INVOKABLE void playMedia(QString FK_Media, bool queue);
     void playMediaFromDrive(int device, int disc, int ea);
     void mythTvPlay();
     void playResume();
     void stopMedia();
     void stop_AV();
 
-    void tvChannelUp(){CMD_Channel_up cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
-    void tvChannelDown(){CMD_Channel_down cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
-    void stopMediaOtherLocation(int PK_EntertainArea){ CMD_MH_Stop_Media cmd(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(PK_EntertainArea),false); emit sendDceCommand(cmd);}
-    void setPlaybackSpeed(int s) { CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, nowPlayingButton->getStreamID() , s<0 ? -2 : +2, true); emit sendDceCommand(cmd);  }
-    void pauseMedia() { CMD_Pause_Media cmd(iPK_Device, iMediaPluginID ,nowPlayingButton->getStreamID()); sendDceCommand( cmd); }
-    void fastForwardMedia() {CMD_Scan_FwdFast_Fwd cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
-    void rewindMedia(){CMD_Scan_BackRewind cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
+    void tvChannelUp(){CMD_Channel_up cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
+    void tvChannelDown(){CMD_Channel_down cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
+    void stopMediaOtherLocation(int PK_EntertainArea){ CMD_MH_Stop_Media cmd(iPK_Device, m_routerHelper->mediaPluginId(),0,i_current_mediaType ,0,StringUtils::itos(PK_EntertainArea),false); emit sendDceCommand(cmd);}
+    void setPlaybackSpeed(int s) { CMD_Change_Playback_Speed cmd(iPK_Device, m_routerHelper->mediaPluginId(), nowPlayingButton->getStreamID() , s<0 ? -2 : +2, true); emit sendDceCommand(cmd);  }
+    void pauseMedia() { CMD_Pause_Media cmd(iPK_Device, m_routerHelper->mediaPluginId() ,nowPlayingButton->getStreamID()); sendDceCommand( cmd); }
+    void fastForwardMedia() {CMD_Scan_FwdFast_Fwd cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
+    void rewindMedia(){CMD_Scan_BackRewind cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
     void adjustVolume(int vol) {
-        if(discreteAudio) {
-            CMD_Set_Volume cmd(iPK_Device, iMediaPluginID, StringUtils::itos(vol));
+
+        if(vol > 0) {
+            DCE::CMD_Vol_Up cmd(iPK_Device, m_routerHelper->mediaPluginId(), vol);
             emit sendDceCommand(cmd);
         } else {
-            if(vol > 0) {
-                DCE::CMD_Vol_Up cmd(iPK_Device, iMediaPluginID, vol);
-                emit sendDceCommand(cmd);
-            } else {
-                DCE::CMD_Vol_Down cmd(iPK_Device, iMediaPluginID, vol);
-                sendDceCommand( cmd);
-            }
+            DCE::CMD_Vol_Down cmd(iPK_Device, m_routerHelper->mediaPluginId(), vol);
+            sendDceCommand( cmd);
         }
+//Commented out until proper discrete volume level can be handled
+//        if(discreteAudio) {
+//            CMD_Set_Volume cmd(iPK_Device, m_routerHelper->mediaPluginId(), StringUtils::itos(vol));
+//            emit sendDceCommand(cmd);
+//        } else {
+
+//        }
     }
     void newTrack(QString track) { emit changeTrack(track); }
     void jogPosition(QString jog) {emit jogToPosition(jog);}
@@ -1344,20 +1369,20 @@ public slots:
     void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu();}
     void showLinuxmceMenu(){emit show_linuxmce_menu();}
 
-    void exitMediaMenu(){CMD_Exit cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
+    void exitMediaMenu(){CMD_Exit cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
     void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
     void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
     void getVideoFrame() { emit requestVideoFrame();}
-    void redButtonPress(){CMD_Red cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
-    void blueButtonPress(){ CMD_Blue cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
-    void greenButtonPress(){  CMD_Green cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
-    void yellowButtonPress(){ CMD_Yellow cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
-    void startRecordingPress(){CMD_Record cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
+    void redButtonPress(){CMD_Red cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd); }
+    void blueButtonPress(){ CMD_Blue cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
+    void greenButtonPress(){  CMD_Green cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
+    void yellowButtonPress(){ CMD_Yellow cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
+    void startRecordingPress(){CMD_Record cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd); }
     int scheduleRecording(QString sType, QString sProgramID);
     int cancelRecording(QString sID, QString sProgramID);
-    void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, iMediaPluginID); sendDceCommand( cmd);}
-    void mute(){DCE::CMD_Mute cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
-    void doMoveMedia(QString eas, int streamID) {CMD_MH_Move_Media cmd(iPK_Device, iMediaPluginID, streamID, eas.toStdString()); sendDceCommand( cmd);}
+    void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, m_routerHelper->mediaPluginId()); sendDceCommand( cmd);}
+    void mute(){DCE::CMD_Mute cmd(iPK_Device, m_routerHelper->mediaPluginId()); emit sendDceCommand(cmd);}
+    void doMoveMedia(QString eas, int streamID) {CMD_MH_Move_Media cmd(iPK_Device, m_routerHelper->mediaPluginId(), streamID, eas.toStdString()); sendDceCommand( cmd);}
     void ejectDisc(int discDrive, int slot=0);
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
@@ -1911,6 +1936,7 @@ private:
     QTranslator translator;
 
     bool mb_useNetworkSkins;
+    bool m_useQueueInsteadOfInstantPlay;
 
     QString m_remoteQmlPath;
 

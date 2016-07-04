@@ -55,13 +55,13 @@ qOrbiter::qOrbiter(QString name, int DeviceID, string ServerAddress,bool bConnec
     : qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
     //<-dceag-const-e->
 {
-    deviceName = name;
+    deviceName = name; m_bOrbiterConnected =false;
 
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
     QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);
     QObject::connect(this, SIGNAL(transmitDceCommandResp(DCECommand*)), this, SLOT(sendDCECommandResp(DCECommand*)), Qt::DirectConnection);
-
     qRegisterMetaType< QMap<long, std::string> >("QMap<long, std::string>");
+    qRegisterMetaType< QMap<long,long> >("QMap<long, long>");
 
 }
 
@@ -71,17 +71,28 @@ bool qOrbiter::GetConfig()
         return false;
     }
 
+    bool useQueue = DATA_Get_Queue_Instead_of_Instant_Play();
+
+    emit useQueueInsteadOfInstantPlayChanged(useQueue);
+
     int dt = m_pData->m_dwPK_DeviceTemplate;
     if( dt ==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
-        m_bIsOSD=true;
+        //  m_bIsOSD=true;
     } else{
-        m_bIsOSD = false;
+        // m_bIsOSD = false;
     }
+
+    QMap<long, long> coreDevices;
+    coreDevices.insert(DEVICETEMPLATE_General_Info_Plugin_CONST, this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_General_Info_Plugin_CONST)->m_dwPK_Device );
+
+    emit coreDevicesChanged(coreDevices);
+    qDebug() << "Sending core device numbers ";
 
     emit deviceTemplateChanged(dt);
     PurgeInterceptors();
+#ifndef Q_OS_IOS
     RegisterMsgInterceptor((MessageInterceptorFn) (&qOrbiter::timeCodeInterceptor), 0,0,0,0,MESSAGETYPE_EVENT, EVENT_Media_Position_Changed_CONST );
-
+#endif
     return true;
 
 }
@@ -1066,25 +1077,45 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 
+    m_bPK_Device_NowPlaying_Audio_DiscreteVolume = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    emit discreteAudioChanged(m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
+
+    m_bContainsVideo = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    emit containsVideo(m_bContainsVideo);
+
+    m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
+    emit liveAvPath(m_bUsingLiveAVPath);
+    getVolume();
+
+    pos=0;
+    m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_DesignObj_Remote_Popup=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());  // ON UI2 the leftmost popup menu on the main menu
+    m_iPK_Screen_FileList=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_RemoteOSD=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_OSD_Speed=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+    m_iPK_Screen_OSD_Track=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
+
     DeviceData_Base *npd = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device_NowPlaying);
 
     QVariantMap infoMap;
-
-
     if(npd && iPK_MediaType != 0){
         QVariantMap cmdMap;
         for(std::map<int, std::string>::iterator cmd_it  =npd->m_mapCommands.begin(); cmd_it!=npd->m_mapCommands.end(); cmd_it++){
             cmdMap.insert(QString::fromStdString(cmd_it->second), cmd_it->first);
         }
-        qDebug() << cmdMap;
+
         int dt = npd->m_dwPK_DeviceTemplate;
         int cat = npd->m_dwPK_DeviceCategory;
         int dv = npd->m_dwPK_Device;
         infoMap.insert("device", dv);
         infoMap.insert("isEmbedded", npd->m_bIsEmbedded);
         infoMap.insert("device_template", dt);
-        infoMap.insert("category", cat);
+        infoMap.insert("device_category", cat);
         infoMap.insert("name", QString::fromStdString(npd->m_sDescription));
+        infoMap.insert("screen_remote", m_iPK_Screen_Remote);
+        infoMap.insert("screen_remote_osd", m_iPK_Screen_RemoteOSD);
+        infoMap.insert("remote_popup_designobj", m_iPK_DesignObj_Remote_Popup );
+        infoMap.insert("screen_file_list", m_iPK_Screen_FileList);
     } else {
         infoMap.insert("isEmbedded",false);
         infoMap.insert("device_template", -1);
@@ -1098,43 +1129,19 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     deviceMap.insert("Video Device", m_dwPK_Device_NowPlaying_Video);
     deviceMap.insert("Now Playing Audio", m_dwPK_Device_NowPlaying_Audio);
     deviceMap.insert("Capture Card", m_dwPK_Device_CaptureCard);
+    deviceMap.insert("Now Playing Discreet Audio", m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
 
     np_deviceList.append(deviceMap);
     np_deviceList.append(infoMap);
     emit nowPlayingDeviceListChanged(np_deviceList);
 
-    if(this->m_bIsOSD ){
+    qDebug() << np_deviceList;
 
-    }
-
-    if(m_dwPK_Device_CaptureCard != 0)
-    {
-        emit monitorStatusChanged(true);
-    }
-
-    m_bPK_Device_NowPlaying_Audio_DiscreteVolume = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    emit discreteAudioChanged(m_bPK_Device_NowPlaying_Audio_DiscreteVolume);
-
-    m_bContainsVideo = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    emit containsVideo(m_bContainsVideo);
+    if(m_dwPK_Device_CaptureCard != 0)   {emit monitorStatusChanged(true); }
 
 
-    m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
-    emit liveAvPath(m_bUsingLiveAVPath);
-    getVolume();
-    pos=0;
-    /*
-    m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    m_iPK_DesignObj_Remote_Popup=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());  // ON UI2 the leftmost popup menu on the main menu
-    m_iPK_Screen_FileList=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    m_iPK_Screen_RemoteOSD=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    m_iPK_Screen_OSD_Speed=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    m_iPK_Screen_OSD_Track=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
-    */
-
-    QString scrn = sPK_DesignObj.c_str();
-    int pos1 = scrn.indexOf(",");
-    scrn.remove(pos1, scrn.length());
+    QString scrn =  QString::number(m_iPK_Screen_Remote);
+    QString osdScrn = "Screen_"+QString::number(m_iPK_Screen_RemoteOSD)+".qml";
 
     internal_streamID = iStreamID;
     emit np_playlistIndexChanged(iValue);
@@ -1142,6 +1149,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit resetNowPlaying();
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
+        emit gotoOsdQml("Screen_1.qml");
+        emit setRemotePopup(0);
         b_mediaPlaying = false;
 
         currentScreen = "Screen_1.qml";
@@ -1153,11 +1162,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit clearTVplaylist();
     } else {
 
-
-
         if(iPK_MediaType ==4|| iPK_MediaType==5){
             QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
-
             checkTimeCode(m_dwPK_Device_NowPlaying);
             emit newTCport(port.toInt());
         }
@@ -1166,6 +1172,10 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         currentScreen = "Screen_"+scrn+".qml";
         emit gotoQml(currentScreen); /*!< \note This line set the command for the actual screen change */
         emit currentScreenChanged(currentScreen); /*!< \note This line sets the media return to screen */
+        emit gotoOsdQml(osdScrn);
+
+        qDebug() << "osd " << m_iPK_Screen_RemoteOSD;
+        emit setRemotePopup(m_iPK_DesignObj_Remote_Popup);
         internal_streamID = iStreamID;
 
         emit subtitleChanged((QString::fromStdString(sText)));
@@ -1666,7 +1676,8 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "scmdresult" << sCMD_Result << endl;
     emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));
 
-    //qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
+
+    qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
 
     map<long, string >::const_iterator end = pMessage->m_mapParameters.end();
     for (map<long, string >::const_iterator it = pMessage->m_mapParameters.begin(); it != end; ++it)
@@ -1676,6 +1687,7 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
         // ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
         emit addScreenParam(QString::fromStdString(dparam2), dparam );
     }
+    sCMD_Result="OK";
 }
 
 //<-dceag-c795-b->
@@ -1890,6 +1902,10 @@ bool DCE::qOrbiter::initialize(){
         m_bReload = false;
         m_bOrbiterConnected = true;
 
+        if(sendCoreDeviceNumbers()){
+
+        }
+
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
         qDebug() << "Starting Manager for qorbiter with device template " << PK_DeviceTemplate_get();
@@ -1898,6 +1914,8 @@ bool DCE::qOrbiter::initialize(){
         if(!getConfiguration()){
             exit(99);
         }
+
+        emit useQueueInsteadOfInstantPlayChanged(DATA_Get_Queue_Instead_of_Instant_Play() );
 
         registerDevice(i_user,QString(i_ea), i_room);
         CreateChildren();
@@ -2007,7 +2025,7 @@ void DCE::qOrbiter::deinitialize()
     iSize = 0;
 
     BindMediaRemote(false);
-    DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
+    DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iPK_Device_OrbiterPlugin, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_OrbiterUnRegistered);
     emit routerConnectionChanged(false);
     Disconnect();
@@ -2073,7 +2091,7 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     string pResponse ="";
     //on-off  PkUsers -int entArea -string  int room
 
-    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iOrbiterPluginID,  StringUtils::itos(i_room) ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(m_dwPK_Device, iPK_Device_OrbiterPlugin,  StringUtils::itos(i_room) ,      i_user,         StringUtils::itos(i_ea),          i_room,           &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
         emit commandResponseChanged("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
@@ -2187,7 +2205,7 @@ void qOrbiter::requestAttributeTypes(int type)
     string sName="";
     emit commandResponseChanged("Requesting Subtypes");
     string pResponse;
-    CMD_Get_Attributes_For_Type reqSubtype(m_dwPK_Device, iMediaPluginID, type, &sName );
+    CMD_Get_Attributes_For_Type reqSubtype(m_dwPK_Device, iPK_Device_MediaPlugin, type, &sName );
 
     if(SendCommand(reqSubtype, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got subtype for media");
@@ -2208,7 +2226,7 @@ void qOrbiter::requestMediaSubtypes(int type)
     string pResponse = "";
     string sText = "";
 
-    CMD_Get_Media_Sub_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, type, &sText);
+    CMD_Get_Media_Sub_Type getTypesCmd(m_dwPK_Device, iPK_Device_MediaPlugin, type, &sText);
     // CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, 3 , &sText );
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got subtypes for attribute");
@@ -2234,7 +2252,7 @@ void qOrbiter::requestTypes(int type)
 {
     string pResponse = "";  string sText = "";
 
-    CMD_Get_Attribute_Types getTypesCmd(m_dwPK_Device, iMediaPluginID, type, &sText);
+    CMD_Get_Attribute_Types getTypesCmd(m_dwPK_Device, iPK_Device_MediaPlugin, type, &sText);
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for attribute");
         emit newAttributeSort( new AttributeSortItem( "Recently Viewed","-1", "",false,  0));
@@ -2267,7 +2285,7 @@ void qOrbiter::requestGenres(int type)
     string pResponse = "";
     string sText = "";
 
-    CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID,type , &sText);
+    CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iPK_Device_MediaPlugin,type , &sText);
     // CMD_Get_Attributes_For_Type getTypesCmd(m_dwPK_Device, iMediaPluginID, 3 , &sText );
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for genres");
@@ -2293,7 +2311,7 @@ void qOrbiter::requestFileFormats(int type)
     string pResponse = "";
     string sText = "";
 
-    CMD_Get_File_Formats getTypesCmd(m_dwPK_Device, iMediaPluginID,type , &sText);
+    CMD_Get_File_Formats getTypesCmd(m_dwPK_Device, iPK_Device_MediaPlugin,type , &sText);
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got File Formats for attribute");
         QStringList data;
@@ -2320,12 +2338,42 @@ void qOrbiter::requestFileFormats(int type)
 
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
-
+    qDebug() << Q_FUNC_INFO;
     //todo - add code to dce router get the info back. directly.
     QVariantMap t;
     QVariantList d;
     DCE::DeviceData_Base * fpDevice = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(device);
 
+    if(!fpDevice)
+        return;
+
+    if(fpDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qOrbiter_CONST){
+        qDebug() << " need child stream information";
+
+        DCE::DeviceData_Base * tm= fpDevice->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_qMediaPlayer_CONST);
+        if(tm){
+            fpDevice=tm;
+            QVariantMap media;
+            string ea = "";
+
+            CMD_Get_EntAreas_For_Device getEnt(m_dwPK_Device , this->iPK_Device_MediaPlugin  , tm->m_dwPK_Device, &ea);
+            string pResp ="";
+            if(SendCommand(getEnt, &pResp) && pResp=="OK" ){
+                qDebug() << "EA for device " << ea.c_str();
+            } else {
+                qDebug() << "Failed to send command CMD_Get_EntAreas_For_Device"   ;
+            }
+
+            media.insert("streamid", QString::fromStdString(tm->m_pcCurrentPosition));
+            media.insert("streamtitle", "foo");
+            t.insert("media", media);
+
+            qDebug() << media;
+        } else {
+            qDebug() << "Could not find qMediaPlayer";
+        }
+
+    }
 
     for (map<int, string>::iterator it = fpDevice->m_mapCommands.begin(); it!=fpDevice->m_mapCommands.end(); ++it){
         QVariantMap l;
@@ -2334,6 +2382,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
         d.append(l);
 
     }
+
     t.insert("commands",d);
     t.insert("device", device);
 
@@ -2364,30 +2413,49 @@ bool qOrbiter::timeCodeInterceptor(Socket *pSocket, Message *pMessage, DeviceDat
 
     if(pDeviceFrom->m_dwPK_DeviceTemplate==DEVICETEMPLATE_qMediaPlayer_CONST){
         deviceEa = QString::fromStdString(pDeviceFrom->GetTopMostDevice()->m_sDescription);
-
         emit timecodeEvent( deviceEa, p);
     } else {
         id=pDeviceFrom->m_dwPK_Room;
         emit timecodeEvent( id, p);
     }
-    //  qDebug() <<  Q_FUNC_INFO << "Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str() << "::"<< time.c_str();
+    //qDebug() <<  Q_FUNC_INFO << "Recieved Timecode Message " << pDeviceFrom->GetTopMostDevice()->m_sDescription.c_str() << "::"<< time.c_str();
     return false;
+}
+
+bool qOrbiter::sendCoreDeviceNumbers()
+{
+    QMap<long, long> coreDeviceList;
+
+    iPK_Device_DatagridPlugIn =  this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Datagrid_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_ClimatePlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Climate_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_OrbiterPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_GeneralInfoPlugin =  this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_General_Info_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_SecurityPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Security_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_LightingPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Lighting_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_MediaPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_eventPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Event_Plugin_CONST)->m_dwPK_Device;
+    iPK_Device_TelecomPlugin = this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Telecom_Plugin_CONST)->m_dwPK_Device;
+    m_dwIDataGridRequestCounter = 0;
+
+    coreDeviceList.insert(DEVICETEMPLATE_Media_Plugin_CONST,        iPK_Device_MediaPlugin );
+    coreDeviceList.insert(DEVICETEMPLATE_Lighting_Plugin_CONST,     iPK_Device_LightingPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_General_Info_Plugin_CONST, iPK_Device_GeneralInfoPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Climate_Plugin_CONST,      iPK_Device_ClimatePlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Orbiter_Plugin_CONST,      iPK_Device_OrbiterPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Security_Plugin_CONST,     iPK_Device_SecurityPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Datagrid_Plugin_CONST,     iPK_Device_DatagridPlugIn );
+    coreDeviceList.insert(DEVICETEMPLATE_Infrared_Plugin_CONST ,    this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Infrared_Plugin_CONST)->m_dwPK_Device);
+    coreDeviceList.insert(DEVICETEMPLATE_DCERouter_CONST ,          this->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_DCERouter_CONST)->m_dwPK_Device);
+    coreDeviceList.insert(DEVICETEMPLATE_Event_Plugin_CONST,        iPK_Device_eventPlugin);
+    coreDeviceList.insert(DEVICETEMPLATE_Telecom_Plugin_CONST,      iPK_Device_TelecomPlugin);
+
+    emit coreDevicesChanged(coreDeviceList);
 }
 
 void qOrbiter::beginSetup()
 {
-    i_ea = 0;
-    i_room = 0;
-    i_user = 0;
-    iPK_Device_DatagridPlugIn =  long(6);
-    iPK_Device_OrbiterPlugin = long(9);
-    iPK_Device_GeneralInfoPlugin = long(4);
-    iPK_Device_SecurityPlugin = long(13);
-    iPK_Device_LightingPlugin = long(8);
-    m_dwIDataGridRequestCounter = 0;
-    iOrbiterPluginID = 9;
-    iMediaPluginID = 10;
-    iPK_Device_eventPlugin = 12;
+    i_ea = 0; i_room = 0; i_user = 0;
+
     m_pOrbiterCat = 5;
     internal_streamID = 0;
     i_current_mediaType = 0;
@@ -2594,13 +2662,13 @@ void qOrbiter::seekToGridPosition(QString s)
 
 void qOrbiter::getContextImage(int attributeNumber)
 {
-    CMD_Get_Attribute_Image contextImgGrab(m_dwPK_Device, iMediaPluginID);
+    CMD_Get_Attribute_Image contextImgGrab(m_dwPK_Device, iPK_Device_MediaPlugin);
 
 }
 
 void qOrbiter::removePlaylistItem(int index)
 {
-    CMD_Remove_playlist_entry strikeItem( m_dwPK_Device, iMediaPluginID, index);
+    CMD_Remove_playlist_entry strikeItem( m_dwPK_Device, iPK_Device_MediaPlugin, index);
     string cmd_resp = "";
     if(SendCommand(strikeItem, &cmd_resp) && cmd_resp =="OK")
     {
@@ -2611,7 +2679,7 @@ void qOrbiter::removePlaylistItem(int index)
 void qOrbiter::saveCurrentPlaylist( QString name, bool SaveAsNew)
 {
     emit mediaResponseChanged("Saving playlist-"+name);
-    CMD_Save_playlist savePlaylist(m_dwPK_Device, iMediaPluginID, i_user, StringUtils::itos(this->i_ea), name.toStdString(), SaveAsNew);
+    CMD_Save_playlist savePlaylist(m_dwPK_Device, iPK_Device_MediaPlugin, i_user, StringUtils::itos(this->i_ea), name.toStdString(), SaveAsNew);
     string saveResp = "";
     if(SendCommand(savePlaylist, & saveResp) && saveResp == "OK")
     {
@@ -2669,7 +2737,7 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 {
     string s_value_assignment;
 
-    CMD_Get_Attributes_For_Media cmd_file_info(m_dwPK_Device, iMediaPluginID , qs_file_reference.toStdString(), "", &s_value_assignment);
+    CMD_Get_Attributes_For_Media cmd_file_info(m_dwPK_Device, iPK_Device_MediaPlugin , qs_file_reference.toStdString(), "", &s_value_assignment);
     string pResponse="";
 
     if (SendCommand(cmd_file_info, &pResponse) && pResponse == "OK")
@@ -2830,7 +2898,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     m_dwIDataGridRequestCounter++;
 
     string s_val;
-    CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iMediaPluginID,  qs_fk_fileno.toStdString(), " ",&s_val );
+    CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iPK_Device_MediaPlugin,  qs_fk_fileno.toStdString(), " ",&s_val );
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
 
@@ -2979,24 +3047,10 @@ void DCE::qOrbiter::GetSecurityCam(int i_inc_pkdevice, bool showScreen)
 
 void DCE::qOrbiter::stop_AV()
 {
-    CMD_Stop endMedia(m_dwPK_Device, iMediaPluginID,false,0/*stream id*/);
+    CMD_Stop endMedia(m_dwPK_Device, iPK_Device_MediaPlugin,false,0/*stream id*/);
     SendCommand(endMedia);
 }
 
-
-void DCE::qOrbiter::moveMedia(QString eas, int streamID)
-{
-    CMD_MH_Move_Media move_media(m_dwPK_Device, iMediaPluginID, streamID, eas.toStdString());
-    string pResponse;
-    if(SendCommand(move_media, &pResponse) && pResponse=="OK")
-    {
-        emit commandResponseChanged("Move media");
-    }
-    else
-    {
-        emit commandResponseChanged("Move media command failed");
-    }
-}
 
 
 void qOrbiter::checkTimeCode(int npDevice)
@@ -3009,8 +3063,6 @@ void qOrbiter::checkTimeCode(int npDevice)
     qWarning() << pDevice->m_dwPK_DeviceTemplate;
     string sIPAddress =pDevice->m_sIPAddress;
     string defaultPort= m_pEvent->GetDeviceDataFromDatabase(pDevice->m_dwPK_Device, DEVICEDATA_Port_CONST);
-
-
 
     qWarning() << "1st pass result is ==>" << sIPAddress.c_str();
     if( sIPAddress.empty() )
@@ -3090,8 +3142,6 @@ void qOrbiter::getStreamingVideo()
     string sFormat ="png";
     string grabResponse="";
 
-    //QApplication::processEvents(QEventLoop::AllEvents);
-
     CMD_Get_Video_Frame grabVideoFrame( m_dwPK_Device, m_dwPK_Device_NowPlaying, "0", this->internal_streamID, 800, 800, &grabData, &grabData_size, &sFormat );
 
     if(SendCommand(grabVideoFrame, &grabResponse) && grabResponse =="OK")
@@ -3143,15 +3193,17 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
   String - device status with level
   design obj number (legacy)
   */
-void qOrbiter::updateFloorPlan(QString p)
+void qOrbiter::updateFloorPlan(QString p, int t)
 {
     string sval = "";
     p.remove(0, p.length() - 1);
-    CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iOrbiterPluginID, p.toStdString(), i_current_floorplanType , &sval);
+
+    CMD_Get_Current_Floorplan getFloorPlan(m_dwPK_Device, iPK_Device_OrbiterPlugin, p.toStdString(), t , &sval);
     string pResponse="";
     if(SendCommand(getFloorPlan, &pResponse) && pResponse=="OK")
     {
         emit commandResponseChanged("Got floorplan for page "+p);
+        qDebug() << "Floorplan Data::" << sval.c_str();
     }
     // qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
 }
@@ -3185,14 +3237,14 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
         status = "0";
     }
     int killer;
-    CMD_Bind_to_Media_Remote bind_remote(m_dwPK_Device, iMediaPluginID, this->m_dwPK_Device,string("2355") ,status, string(""), StringUtils::itos(i_ea), 0, 0);
+    CMD_Bind_to_Media_Remote bind_remote(m_dwPK_Device, iPK_Device_MediaPlugin, this->m_dwPK_Device,string("2355") ,status, string(""), StringUtils::itos(i_ea), 0, 0);
     SendCommand(bind_remote);
 }
 
 void DCE::qOrbiter::jumpToPlaylistPosition(QString pos)
 {
     //qDebug("jumping to playlist item");
-    CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, pos.toStdString(), internal_streamID);
+    CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iPK_Device_MediaPlugin, pos.toStdString(), internal_streamID);
     SendCommand(jump_playlist);
 }
 
@@ -3258,7 +3310,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
     int p = 0;
     string s_val;
     string pResponse="";
-    CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iMediaPluginID, "" , StringUtils::itos(i_ea),&s_val );
+    CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iPK_Device_MediaPlugin, "" , StringUtils::itos(i_ea),&s_val );
     if (SendCommand(attribute_detail_get, &pResponse) && pResponse == "OK")
     {
         emit commandResponseChanged("Getting Media Attributes");
@@ -3575,7 +3627,7 @@ void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to ch
     if(i_current_mediaType = 11)
     {
         emit mediaResponseChanged("Setting Channel! " + channel);
-        CMD_Tune_to_channel changeChannel(m_dwPK_Device, iMediaPluginID, channel.toStdString(), channel.toStdString());
+        CMD_Tune_to_channel changeChannel(m_dwPK_Device, iPK_Device_MediaPlugin, channel.toStdString(), channel.toStdString());
         SendCommand(changeChannel);
         emit np_channel(chanid);
         emit liveTvUpdate(chanid);
@@ -3586,7 +3638,7 @@ void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to ch
 
         if(channel.contains("i"))
         {
-            CMD_Tune_to_channel mythChannel(m_dwPK_Device, iMediaPluginID, channel.toStdString(), channel.toStdString());
+            CMD_Tune_to_channel mythChannel(m_dwPK_Device, iPK_Device_MediaPlugin, channel.toStdString(), channel.toStdString());
             SendCommand(mythChannel);
         }
         else
@@ -3604,7 +3656,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
     {
         if(direction == "+1")
         {
-            CMD_Channel_up tvChanUp(m_dwPK_Device, iMediaPluginID );
+            CMD_Channel_up tvChanUp(m_dwPK_Device, iPK_Device_MediaPlugin );
             if(SendCommand(tvChanUp, &pResponse) && pResponse =="OK")
             {
                 emit mediaResponseChanged("Channel Up sent");
@@ -3612,7 +3664,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
         }
         else
         {
-            CMD_Channel_up tvChanDwn(m_dwPK_Device, iMediaPluginID );
+            CMD_Channel_up tvChanDwn(m_dwPK_Device, iPK_Device_MediaPlugin );
             if(SendCommand(tvChanDwn, &pResponse) && pResponse =="OK")
             {
                 emit mediaResponseChanged("Channel down sent");
@@ -3625,7 +3677,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
     {
         emit commandResponseChanged("Changing tracks");
 
-        CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, direction.toStdString(), internal_streamID );
+        CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iPK_Device_MediaPlugin, direction.toStdString(), internal_streamID );
         string sResponse = "";
         if(SendCommand(jump_playlist, &sResponse) && sResponse=="OK")
         {
@@ -3776,33 +3828,41 @@ void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
 
     DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea));
 
-    CMD_Set_Entertainment_Area_DL set_entertain_area(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), StringUtils::itos(ea));
+    CMD_Set_Entertainment_Area_DL set_entertain_area(m_dwPK_Device, StringUtils::itos(iPK_Device_OrbiterPlugin), StringUtils::itos(ea));
     SendCommand(set_entertain_area);
 
-    CMD_Set_Current_Room_DL set_current_room(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), location);
+    CMD_Set_Current_Room_DL set_current_room(m_dwPK_Device, StringUtils::itos(iPK_Device_OrbiterPlugin), location);
     SendCommand(set_current_room);
+
+    setUser(i_user);
 
 }
 
 void DCE::qOrbiter::setUser(int user)
 {
+    qDebug() << Q_FUNC_INFO << user;
+    if(user==0)
+        return;
+
     logDceMessage("SetUser() to " + QString::number(user));
-    CMD_Set_Device_Data userData(m_dwPK_Device, this->iPK_Device_GeneralInfoPlugin ,m_dwPK_Device,"1",3);
+
+    CMD_Set_Device_Data userData(m_dwPK_Device, this->iPK_Device_GeneralInfoPlugin ,m_dwPK_Device,StringUtils::itos(user),3);
     string cResp="";
-
-
     if(SendCommand(userData, &cResp)){
         logDceMessage("set user cmd " +QString::fromStdString(cResp.c_str()));
     }
     else{
         logDceMessage("Set user failed! " +QString::fromStdString(cResp.c_str()));
     }
+
+    i_user = user;
 }
 
 void DCE::qOrbiter::quickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.
 {
     qDebug() << Q_FUNC_INFO;
     string sResponse;
+
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
     event_Impl.m_pClientSocket->SendString( "RELOAD" );
     if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
@@ -3891,7 +3951,7 @@ void DCE::qOrbiter::setZoom(QString zoomLevel)
 {
 
     string sResponse="";
-    CMD_Set_Zoom setMediaZoom(m_dwPK_Device, iMediaPluginID, internal_streamID, zoomLevel.toStdString());
+    CMD_Set_Zoom setMediaZoom(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID, zoomLevel.toStdString());
     if (SendCommand(setMediaZoom, &sResponse) && sResponse=="OK")
     {
         emit commandResponseChanged(QString::fromStdString(sResponse));
@@ -3906,7 +3966,7 @@ void DCE::qOrbiter::setZoom(QString zoomLevel)
 void DCE::qOrbiter::setAspect(QString ratio) //set aspect ratio for current media player
 {
     string sResponse = "";
-    CMD_Set_Aspect_Ratio setMediaAspect(m_dwPK_Device, iMediaPluginID, internal_streamID, ratio.toStdString());
+    CMD_Set_Aspect_Ratio setMediaAspect(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID, ratio.toStdString());
     if (SendCommand(setMediaAspect, &sResponse) && sResponse=="OK")
     {
 
@@ -3962,7 +4022,7 @@ void qOrbiter::setPosition(int position)
 
 void DCE::qOrbiter::showMenu() //show the dvd menu
 {
-    CMD_Goto_Media_Menu showDVDmenu(m_dwPK_Device, iMediaPluginID, internal_streamID, i_current_mediaType );
+    CMD_Goto_Media_Menu showDVDmenu(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID, i_current_mediaType );
     if(!SendCommand(showDVDmenu))
     {
 
@@ -3972,7 +4032,7 @@ void DCE::qOrbiter::showMenu() //show the dvd menu
 
 void DCE::qOrbiter::osdBack() // connects the Go back action.
 {
-    DCE::CMD_Back_Prior_Menu goBack(m_dwPK_Device, iMediaPluginID, internal_streamID);
+    DCE::CMD_Back_Prior_Menu goBack(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID);
     if (!SendCommand(goBack))
     {
 
@@ -3982,19 +4042,19 @@ void DCE::qOrbiter::osdBack() // connects the Go back action.
 void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
 {
     if(d==1){
-        DCE::CMD_Move_Up moveUp(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_Move_Up moveUp(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID);
         if(!SendCommand(moveUp)) { }
     } else if(d==2) {
-        DCE::CMD_Move_Down moveDown(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_Move_Down moveDown(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID);
         if(!SendCommand(moveDown)) { }
     } else if(d==3){
-        DCE::CMD_Move_Left moveLeft(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_Move_Left moveLeft(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID);
         if(!SendCommand(moveLeft)) { }
     } else if(d==4){
-        DCE::CMD_Move_Right move(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_Move_Right move(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID);
         if(!SendCommand(move)) { }
     } else if(d==5){
-        DCE::CMD_EnterGo enter(m_dwPK_Device, iMediaPluginID, internal_streamID);
+        DCE::CMD_EnterGo enter(m_dwPK_Device, iPK_Device_MediaPlugin, internal_streamID);
         if(SendCommand(enter)) { }
     }
 
@@ -4090,12 +4150,12 @@ void DCE::qOrbiter::movePlaylistEntry(QString pos, int index)
 
     if (pos == "+")
     {
-        CMD_Move_Playlist_entry_Up move_entry_up(m_dwPK_Device, iMediaPluginID, index);
+        CMD_Move_Playlist_entry_Up move_entry_up(m_dwPK_Device, iPK_Device_MediaPlugin, index);
         SendCommand(move_entry_up);
     }
     else
     {
-        CMD_Move_Playlist_entry_Down move_entry_down(m_dwPK_Device, iMediaPluginID, index);
+        CMD_Move_Playlist_entry_Down move_entry_down(m_dwPK_Device, iPK_Device_MediaPlugin, index);
         SendCommand(move_entry_down);
     }
 }
@@ -4178,7 +4238,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 
         int iEK_File = 0;
 
-        CMD_Get_ID_from_Filename getFileID(m_dwPK_Device, iMediaPluginID, fileWithPath.toStdString(), &iEK_File);
+        CMD_Get_ID_from_Filename getFileID(m_dwPK_Device, iPK_Device_MediaPlugin, fileWithPath.toStdString(), &iEK_File);
         string fResp = "";
         if(SendCommand(getFileID, &fResp) && fResp == "OK" && iEK_File !=0)
         {
@@ -4341,7 +4401,7 @@ void qOrbiter::OnReload()
     int iSize;
     pData = NULL;
     iSize = 0;
-    DCE::CMD_Orbiter_Registered unregister(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
+    DCE::CMD_Orbiter_Registered unregister(m_dwPK_Device, iPK_Device_OrbiterPlugin, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(unregister);
     pthread_cond_broadcast( &m_listMessageQueueCond );
 
@@ -4388,7 +4448,7 @@ void DCE::qOrbiter::extraButtons(QString button){
     if(button.toLower()=="enter/go"){
 
     }else if(button.toLower() == "livetv"){
-        CMD_Live_AV_Path selectLiveTvPath(m_dwPK_Device, iMediaPluginID, StringUtils::itos(i_ea), true);
+        CMD_Live_AV_Path selectLiveTvPath(m_dwPK_Device, iPK_Device_MediaPlugin, StringUtils::itos(i_ea), true);
         SendCommand(selectLiveTvPath);
     } else if(button.toLower() == "schedule"){
 
@@ -4434,7 +4494,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     } else if(button.toLower()=="l1"){
-        CMD_L1 ps3_l1(this->m_dwPK_Device, iMediaPluginID);
+        CMD_L1 ps3_l1(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(ps3_l1, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4442,7 +4502,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="l3"){
-        CMD_L3 ps3_l3(this->m_dwPK_Device, iMediaPluginID);
+        CMD_L3 ps3_l3(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(ps3_l3, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4450,7 +4510,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="r1"){
-        CMD_R1 ps3_r1(this->m_dwPK_Device, iMediaPluginID);
+        CMD_R1 ps3_r1(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(ps3_r1, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4458,7 +4518,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="r2"){
-        CMD_R2 ps3_r2(this->m_dwPK_Device, iMediaPluginID);
+        CMD_R2 ps3_r2(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(ps3_r2, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4466,7 +4526,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="r3"){
-        CMD_R3 ps3_r3(this->m_dwPK_Device, iMediaPluginID);
+        CMD_R3 ps3_r3(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(ps3_r3, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4474,7 +4534,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="psbutton"){
-        CMD_PS_Playstation ps3_btn(this->m_dwPK_Device, iMediaPluginID);
+        CMD_PS_Playstation ps3_btn(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(ps3_btn, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4482,7 +4542,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="start"){
-        CMD_Start start(this->m_dwPK_Device, iMediaPluginID);
+        CMD_Start start(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(start, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4490,7 +4550,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="select"){
-        CMD_Select select_cmd(this->m_dwPK_Device, iMediaPluginID);
+        CMD_Select select_cmd(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(select_cmd, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4498,7 +4558,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="triangle"){
-        CMD_Triangle triangle (this->m_dwPK_Device, iMediaPluginID);
+        CMD_Triangle triangle (this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(triangle, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4506,7 +4566,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="square"){
-        CMD_Square square(this->m_dwPK_Device, iMediaPluginID);
+        CMD_Square square(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(square, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4514,7 +4574,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="x"){
-        CMD_X x(this->m_dwPK_Device, iMediaPluginID);
+        CMD_X x(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(x, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4522,7 +4582,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="circle"){
-        CMD_Circle circle(this->m_dwPK_Device, iMediaPluginID);
+        CMD_Circle circle(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(circle, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4530,7 +4590,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="home"){
-        CMD_Home home(this->m_dwPK_Device, iMediaPluginID);
+        CMD_Home home(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(home, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4538,7 +4598,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="y"){
-        CMD_Yellow y(this->m_dwPK_Device, iMediaPluginID);
+        CMD_Yellow y(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(y, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4546,7 +4606,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="a"){
-        CMD_A a(this->m_dwPK_Device, iMediaPluginID);
+        CMD_A a(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(a, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4554,7 +4614,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="b"){
-        CMD_B b(this->m_dwPK_Device, iMediaPluginID);
+        CMD_B b(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(b, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4562,7 +4622,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     }else if(button.toLower()=="xbox"){
-        CMD_Home xbox_home(this->m_dwPK_Device, iMediaPluginID);
+        CMD_Home xbox_home(this->m_dwPK_Device, iPK_Device_MediaPlugin);
         if(SendCommand(xbox_home, &cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4570,7 +4630,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         }
         return;
     } else if (button.toLower()=="p1"){
-        CMD_Game_1P_Start CMD_Game_1P_Start(this->m_dwPK_Device,iMediaPluginID);
+        CMD_Game_1P_Start CMD_Game_1P_Start(this->m_dwPK_Device,iPK_Device_MediaPlugin);
         if(SendCommand(CMD_Game_1P_Start,&cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4579,7 +4639,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         return;
 
     }else if (button.toLower()=="p2"){
-        CMD_Game_2P_Start CMD_Game_2P_Start(this->m_dwPK_Device,iMediaPluginID);
+        CMD_Game_2P_Start CMD_Game_2P_Start(this->m_dwPK_Device,iPK_Device_MediaPlugin);
         if(SendCommand(CMD_Game_2P_Start,&cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4588,7 +4648,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         return;
 
     }else if (button.toLower()=="p3"){
-        CMD_Game_3P_Start CMD_Game_3P_Start(this->m_dwPK_Device,iMediaPluginID);
+        CMD_Game_3P_Start CMD_Game_3P_Start(this->m_dwPK_Device,iPK_Device_MediaPlugin);
         if(SendCommand(CMD_Game_3P_Start,&cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4597,7 +4657,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         return;
 
     }else if (button.toLower()=="p4"){
-        CMD_Game_4P_Start CMD_Game_4P_Start(this->m_dwPK_Device,iMediaPluginID);
+        CMD_Game_4P_Start CMD_Game_4P_Start(this->m_dwPK_Device,iPK_Device_MediaPlugin);
         if(SendCommand(CMD_Game_4P_Start,&cResp) && cResp=="OK"){
             emit commandComplete();
         } else {
@@ -4613,7 +4673,7 @@ void DCE::qOrbiter::saveScreenAttribute(QString attribute)
 
     emit mediaResponseChanged("Saving Screenshot for attribute: "+attribute);
     string sAttribute = attribute.toStdString();
-    DCE::CMD_Make_Thumbnail thumb(m_dwPK_Device, iMediaPluginID, sAttribute, screenieData,screenieDataSize );
+    DCE::CMD_Make_Thumbnail thumb(m_dwPK_Device, iPK_Device_MediaPlugin, sAttribute, screenieData,screenieDataSize );
     string cResp = "";
     if(SendCommand(thumb))
         cleanupScreenshotData();
@@ -4870,8 +4930,12 @@ void qOrbiter::CreateChildren(){
 void qOrbiter::CannotReloadRouter()
 {
     qDebug() << Q_FUNC_INFO;
-    QString reload_screen= QString("Screen_%1.qml").arg(QString::number(283));
-    emit gotoQml(reload_screen);
+    string sMsg = "Cannot Reload Router right now";
+    DCE::CMD_Goto_Screen showNoReload(m_dwPK_Device, m_dwPK_Device, sMsg, 283 , 0, 1, false);
+    if(SendCommand(showNoReload)){
+
+    }
+
 
 }
 
@@ -5415,7 +5479,7 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 
 void qOrbiter::getAttributeImage(QString param)
 {
-    CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iMediaPluginID );
+    CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iPK_Device_MediaPlugin );
 
 }
 
@@ -5453,7 +5517,7 @@ void qOrbiter::getVolume()
     //DeviceData_Base *aDevice = m_dwPK_Device_NowPlaying_Audio;
     string level="";
     string pResp="";
-    CMD_Get_Device_Data getAudioLevel(m_dwPK_Device,iMediaPluginID, m_dwPK_Device_NowPlaying, DEVICEDATA_Volume_Level_CONST, true, &level );
+    CMD_Get_Device_Data getAudioLevel(m_dwPK_Device,iPK_Device_MediaPlugin, m_dwPK_Device_NowPlaying, DEVICEDATA_Volume_Level_CONST, true, &level );
     if(SendCommand(getAudioLevel, &pResp) && pResp=="OK")
     {
         emit deviceAudioLevelChanged(QString::fromStdString(level).toInt());
@@ -5468,8 +5532,6 @@ void qOrbiter::getVolume()
 
 void qOrbiter::executeMessageSend(QVariantMap outGoing)
 {
-
-
     QVariant l = outGoing["to"].toMap();
     QVariantList paramList = outGoing["params"].toList();
     QMap<long, string> map_params;

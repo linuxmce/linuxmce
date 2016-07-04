@@ -319,7 +319,7 @@ Item{
                     top:parent.top
                     bottom:parent.bottom
                 }
-                onActivated: manager.playMedia("!G")
+                onActivated: manager.playMedia("!G", true)
             }
             LargeStyledButton{
                 buttonText: qsTr("A - Z", "Aplhabet")
