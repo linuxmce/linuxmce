@@ -965,7 +965,7 @@ function firewall($output,$dbADO) {
 					}
 				}
 			$out.='</select></td>
-			<td align="center" width="120"><input type="text" name="SourcePort" size="4" /> to <input type="text" name="SourcePortEnd" size="2" /></td>
+			<td align="center" width="120"><input type="text" name="SourcePort" size="4" disabled /> to <input type="text" name="SourcePortEnd" size="2" disabled /></td>
 			<td align="center"><input type="text" name="DestinationPort" size="4" /></td>
 			<td align="center"><select name="DestinationIP" onChange="enableDestinationIP()">
 								<option value="'.$coreIPv4.'">CORE WAN IP</option>';
@@ -1046,7 +1046,7 @@ function firewall($output,$dbADO) {
 			} else {
 				$Protocol=@$_POST['protocol'].'-'.$_POST['IPVersion'];
 			}
-			$SourcePort=isset($_POST['SourcePort'])? mysql_real_escape_string($_POST['SourcePort']):'0';
+			$SourcePort=isset($_POST['SourcePort'])? mysql_real_escape_string($_POST['SourcePort']):'NULL';
 			if ( $SourcePort == '') {
 				$SourcePort='NULL';
 			}
@@ -1062,7 +1062,7 @@ function firewall($output,$dbADO) {
 				$DestinationPortarr=explode(':', $_POST['DestinationPort']);
 				$DestinationPort=$DestinationPortarr[0];
 				if (!isset($DestinationPortarr[1])) {
-					$DestinationPortEnd=':0';
+					$DestinationPortEnd='0';
 				} else {
 					$DestinationPortEnd=$DestinationPortarr[1];
 				}
