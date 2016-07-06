@@ -5,6 +5,7 @@
 
 class omxdbusplayerinterface : public MediaManagerBase
 {
+    Q_OBJECT
 public:
     omxdbusplayerinterface();
 
@@ -14,6 +15,7 @@ public:
 
 private slots:
     void setConnections();
+
 
 private:
     OmxInterface *m_omxProxy;

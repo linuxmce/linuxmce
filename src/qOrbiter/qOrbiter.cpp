@@ -2735,6 +2735,8 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
 
 void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 {
+
+    this->thread()->sleep(2);
     string s_value_assignment;
 
     CMD_Get_Attributes_For_Media cmd_file_info(m_dwPK_Device, iPK_Device_MediaPlugin , qs_file_reference.toStdString(), "", &s_value_assignment);
@@ -2742,7 +2744,8 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
     if (SendCommand(cmd_file_info, &pResponse) && pResponse == "OK")
     {
-        GetMediaAttributeGrid(qs_file_reference);
+        QMetaObject::invokeMethod(this, "GetMediaAttributeGrid", Qt::QueuedConnection, Q_ARG(QString, qs_file_reference));
+        //GetMediaAttributeGrid(qs_file_reference);
         emit commandResponseChanged("Requesting file information for "+ qs_file_reference );
 
     }
@@ -2999,7 +3002,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-
+                /*! \todo - add way to cancel out of this if user closes ui */
                 pCell = it->second;
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
@@ -3025,7 +3028,8 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 else {
                 }
 #ifdef RPI
-                QThread::msleep(100);
+                  qApp->processEvents(QEventLoop::AllEvents,350);
+                QThread::msleep(350);
 #endif
             }
 

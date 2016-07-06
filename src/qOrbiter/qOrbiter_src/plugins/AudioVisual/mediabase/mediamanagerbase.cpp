@@ -156,8 +156,9 @@ bool MediaManagerBase::muted() const
 
 void MediaManagerBase::setMuted(bool muted)
 {
-    m_muted = muted;
-    emit mutedChanged();
+    Q_UNUSED(muted);
+    m_muted = !m_muted;
+    emit mutedChanged(m_muted);
 }
 QString MediaManagerBase::currentStatus() const
 {
@@ -239,6 +240,7 @@ void MediaManagerBase::setTotalTimeNumeric(const quint64 &totalTimeNumeric)
 {
     m_totalTimeNumeric = totalTimeNumeric;
     emit totalTimeNumericChanged();
+    setTotalTimeFromPlugin(m_totalTimeNumeric);
 }
 QString MediaManagerBase::serverAddress() const
 {
@@ -384,7 +386,7 @@ void MediaManagerBase::setTotalTimeFromPlugin(quint64 inSeconds)
 
     m_totalTime =hrs + ":" + min + ":" +sec;
     m_totalTimeNumeric = s;
-    qDebug() << Q_FUNC_INFO << m_totalTime;
+   // qDebug() << Q_FUNC_INFO << m_totalTime;
     emit totalTimeChanged();
 
 }
@@ -493,7 +495,7 @@ void MediaManagerBase::processTimeCode(quint64 time)
     transmit(timeCodeTick);
     m_currentPosition=timeCodeTick;
     mediaPlayer->positionChanged(m_totalTime, t);
-
+    //qDebug() << timeCodeTick;
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
 
