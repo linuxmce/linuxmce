@@ -84,17 +84,23 @@ Item {
         }
     }
 
+    Connections{
+        target: dcenowplaying
+        onMediaStatusChanged:{
+            console.log("Media Status changed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Status is "+dcenowplaying.b_mediaPlaying)
+            if(dcenowplaying.b_mediaPlaying){
+                qmlPictureFrame.stopScreenSaver();
+            } else {
+                qmlPictureFrame.startScreenSaver()
+                qmlPictureFrame.getNextImage()
+            }
 
+
+        }
+    }
 
     QmlPictureFrame {
         id: qmlPictureFrame
-        visible:!dcenowplaying.b_mediaPlaying
-        onVisibleChanged: {
-            if(!visible)
-                stopScreenSaver()
-            else
-                startScreenSaver()
-        }
 
         MouseArea{
             anchors.fill: parent
@@ -205,7 +211,7 @@ Item {
                     current_scenarios.commandToExecute=params
                 }
 
-                function execute(){          
+                function execute(){
                     console.log(title+" is executing")
                     manager.execGrp(params)
                 }
@@ -219,10 +225,10 @@ Item {
                     execute();
                 }
 
-//                MouseArea{
-//                    anchors.fill: parent
-//                    onClicked: { scenario_delegate.acivated()}
-//                }
+                //                MouseArea{
+                //                    anchors.fill: parent
+                //                    onClicked: { scenario_delegate.acivated()}
+                //                }
             }
         }
     }
@@ -306,7 +312,7 @@ Item {
                         centralScenarios.x = x
                     }
                 }
-                onActivated:{               
+                onActivated:{
                     forceActiveFocus()
                     if(floorplantype===-1)
                         manager.currentScreen="Screen_44.qml";scenarioList.currentIndex=0;

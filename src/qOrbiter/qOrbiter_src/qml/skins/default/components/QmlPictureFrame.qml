@@ -113,8 +113,6 @@ Item{
     }
 
     function loadNextImage(){
-        if(manager.currentScreen !=="Screen_1.qml")
-            return;
 
         if (!settings.isScreenSaverEnabled()) {
             console.log("Orbiter screensaver not enabled")
@@ -132,11 +130,15 @@ Item{
 
     function startScreenSaver(){
         screenSaverTimer.start()
-        visible=true
+        qmlPictureFrame.visible=true
+        console.log("Screensaver Started")
     }
     function stopScreenSaver(){
         screenSaverTimer.stop()
-        visible=false
+        qmlPictureFrame.visible=false
+        img1.source=""
+        img2.source=""
+        console.log("Screen Saver Stopped")
     }
 
     FadeImage {
@@ -169,6 +171,16 @@ Item{
             else
                 return Qt.formatDateTime(new Date(), "dddd ,MMMM d yyyy \t hh:mm:ss ");
         }
+
+
+        function getTime(){
+            return Qt.formatDateTime(new Date(), "hh:mm:ss");
+        }
+
+        function getShortDate(){
+            return Qt.formatDateTime(new Date(), "dddd ,MMMM d yyyy");
+        }
+
         anchors{
             bottom:parent.bottom
             bottomMargin: Style.scaleX(5)
@@ -183,31 +195,68 @@ Item{
 
         Timer { // Update the clock element periodically
             interval: 1000; running: clock.opacity!==0; repeat: true
-            onTriggered: txtDate.text = clock.getDate()
+            onTriggered:{ txtDate.text = clock.getShortDate(); txtTime.text = clock.getTime(); }
+        }
+
+        Column{
+            id:temporalid
+            height:childrenRect.height
+            width:parent.width/2
+
+            anchors{
+                right:parent.right
+                bottom:parent.bottom
+            }
+
+                StyledText{
+                    id: txtDate
+                    color: clock.clockColor
+                    font.letterSpacing: 2
+                    smooth: true
+                    width: parent.width
+                    font.pointSize: 42
+                    horizontalAlignment: Text.AlignHCenter
+                    opacity: .55
+                    font.weight: Font.Bold
+                }
+
+                StyledText{
+                    id: txtTime
+                    color: clock.clockColor
+                    font.letterSpacing: 2
+                    smooth: true
+                    width: parent.width
+                    font.pointSize: 42
+                    font.weight: Font.Light
+                    horizontalAlignment: Text.AlignHCenter
+                    opacity: .55
+                }
+
+            }
         }
 
 
-        StyledText{
-            id: txtDate            
-            color: "white" //clock.clockColor
-            font.letterSpacing: 2
-            smooth: true
-            width: parent.width
-            anchors.centerIn: parent
-            font.pointSize: 64
-            horizontalAlignment: Text.AlignHCenter
-            opacity: .55
-        }
+//        StyledText{
+//            id: txtDate
+//            color: clock.clockColor
+//            font.letterSpacing: 2
+//            smooth: true
+//            width: parent.width
+//            anchors.centerIn: parent
+//            font.pointSize: Style.appFontSize_header
+//            horizontalAlignment: Text.AlignHCenter
+//            opacity: .55
+//        }
 
-        InnerShadow{
-           color:"black"
-           source: txtDate
-           anchors.fill: txtDate
-           radius: 6
-           samples: 16
-           spread: 0.0
-        }
-    }
+//        InnerShadow{
+//           color:"black"
+//           source: txtDate
+//           anchors.fill: txtDate
+//           radius: 6
+//           samples: 16
+//           spread: 0.0
+//        }
+
 
     states: [
         State {

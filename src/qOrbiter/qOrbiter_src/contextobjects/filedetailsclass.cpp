@@ -59,7 +59,6 @@ void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QSt
         qDebug() << " No handler for attribute " << attribute << " value:: " << val;
         break;
     }
-
 }
 
 

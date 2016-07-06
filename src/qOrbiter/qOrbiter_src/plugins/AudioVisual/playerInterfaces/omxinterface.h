@@ -5,6 +5,7 @@
 #include "qprocess.h"
 #include "OmxDbusProxy.h"
 
+class omxdbusplayerinterface;
 
 class OmxInterface : public QObject
 {
@@ -19,10 +20,14 @@ public:
 signals:
     void dbusAddressChanged();
     void dbusPidChanged();
-    void omxConnectedChanged();
-    void playbackStatusChanged();
-    void durationChanged();
+    void omxConnectedChanged(bool isConnected);
+    void playbackStatusChanged(QString status);
+    void durationChanged(quint64 totalTime);
     void positionChanged(quint64 time);
+    void volumeChanged(double vol);
+
+    void mediaEnded(bool withError);
+    void mediaStarted();
 
 
 public slots:
@@ -31,6 +36,8 @@ public slots:
     void seekToPosition(int position);
     void handleTimecodeTick(qlonglong tick);
     void handleStateChanged(QString s, QDBusVariant v);
+    void setOmxVolume(double vol);
+    void handleMediaStopped();
 
 public:
     QString dbusAddress() const;
@@ -52,6 +59,14 @@ public:
     void setPosition(qlonglong position);
 
     void pause();
+
+    void handleMute(bool mute);
+
+    void handleVolumeUp();
+    void handleVolumeDown();
+    void requestVolume();
+
+    void fileIdentity(QString identity);
 
 private: //controller members
     bool                                m_omxConnected;
@@ -76,7 +91,11 @@ private://members for Omx properties
     bool m_canRaise;
     bool m_canSeek;
     bool m_canSetFullScreen;
+    double m_omxVolume;
 
+    QList<QVariant> m_subtitleList;
+    QList<QVariant> m_audioTrackList;
+    QList<QVariant> m_videoTrackList;
 
     bool m_isFullscreen;
     QList<QVariant> m_hasTrackList;
@@ -84,12 +103,20 @@ private://members for Omx properties
     long m_position;
     long m_duration;
 
+    QString m_currentMediaLink;
+
 private: //private functions
     void timerEvent(QTimerEvent *event);
     bool getOmxDbusInfo();
     void doSetup();
 
     void runOmxOnce();
+
+    int m_checkTimer;
+    bool interrupt;
+
+    omxdbusplayerinterface *m_parentInterface;
+
 
 
 };

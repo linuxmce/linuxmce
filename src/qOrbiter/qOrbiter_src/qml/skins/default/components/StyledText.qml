@@ -10,13 +10,12 @@ Text {
     property double largeFontSize:Style.appFontSize_title
     property double cellFontSize: Style.appFontSize_list
     horizontalAlignment: Text.AlignHCenter
-    onVisibleChanged: if(!visible)height=0
+   // onVisibleChanged: if(!visible)height=0
     id:labelelement
     text: textLabel
-    font.pointSize: fontSize
+    font.pointSize: fontSize    
     verticalAlignment:Text.AlignVCenter
    // font.family: appFont.name
     color:Style.apptext_color_active
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-
 }
