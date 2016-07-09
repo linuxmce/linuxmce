@@ -349,18 +349,25 @@ int OrbiterGenerator::DoIt()
 	}
 	else
 		m_pRow_Orbiter->Reload();
-
+        /*! \todo Allow regular qorbiters to continue git ticket #2688 */
 	if ( m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_qOrbiter_CONST || m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_OnScreen_qOrbiter_CONST )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d is a qOrbiter, no regen required.",m_iPK_Orbiter);
-		DatabaseUtils::UnLockTables(m_spDatabase_pluto_main.get());
-		if( !m_bNewOrbiter )
-		{
-			// Don't reset the psc_mod so this doesn't result in a 'new devices' messages
-			string sql = "UPDATE Device SET NeedConfigure=0,psc_mod=psc_mod WHERE PK_Device=" + StringUtils::itos(m_pRow_Device->PK_Device_get());
-			m_spDatabase_pluto_main->threaded_db_wrapper_query(sql);
-		}
-		return 0;
+
+            if(  m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_qOrbiter_CONST ){
+
+            } else {
+
+                LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d is a qOrbiter, no regen required.",m_iPK_Orbiter);
+                DatabaseUtils::UnLockTables(m_spDatabase_pluto_main.get());
+                if( !m_bNewOrbiter )
+                {
+                        // Don't reset the psc_mod so this doesn't result in a 'new devices' messages
+                        string sql = "UPDATE Device SET NeedConfigure=0,psc_mod=psc_mod WHERE PK_Device=" + StringUtils::itos(m_pRow_Device->PK_Device_get());
+                        m_spDatabase_pluto_main->threaded_db_wrapper_query(sql);
+                }
+                return 0;
+            }
+
 	}
 
 	if( m_pRow_Orbiter->RegenInProgress_get() )
@@ -1592,7 +1599,8 @@ loop_to_keep_looking_for_objs_to_include:
 		}
 	}
 
-	// Now include all the media sort options if this it UI version 2
+        // Now include all the media sort options if this it UI version 2
+        /*! \todo qorbiter should be included in this somewhere refs#2268 */
 	Row_DesignObj *pRow_DesignObj_Array[5] = { NULL, NULL, NULL, NULL, NULL };
 	if( m_pRow_UI->PK_UI_get()==UI_V2_Normal_Horizontal_16_9_CONST )
 	{
