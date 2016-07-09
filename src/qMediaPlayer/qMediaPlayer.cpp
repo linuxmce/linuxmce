@@ -838,22 +838,9 @@ void qMediaPlayer::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
 {
     cout << "Need to implement command #97 - Mute" << endl;
-#ifndef RPI
-#if defined (QT4) && ! defined (ANDROID)
-    qreal c = mp_manager->audioSink->volume();
-    qWarning() << "Current volume" << c;
-
-    if(mp_manager->audioSink->isMuted()){
-        mp_manager->audioSink->setMuted(false);
-    } else {
-        mp_manager->audioSink->setMuted(true);
-    }
-#else
     mp_manager->setMuted(true);
-#endif
-
-#endif
-    qWarning("Toggled Mute");
+   // emit mutedChanged(true);
+    sCMD_Result = "OK";
 }
 
 //<-dceag-c123-b->

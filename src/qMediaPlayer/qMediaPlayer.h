@@ -987,6 +987,7 @@ public:
         void jumpToStreamPosition(int);
         void volumeUp(int repeat);
         void volumeDown(int repeat);
+        void mutedChanged(bool muted);
         void pluginVolumeUp();
         void pluginVolumeDown();
         void audioLevelChanged(QString lvl);
