@@ -1600,7 +1600,7 @@ loop_to_keep_looking_for_objs_to_include:
 	}
 
         // Now include all the media sort options if this it UI version 2
-        /*! \todo qorbiter should be included in this somewhere refs#2268 */
+        /*! \todo qorbiter should be included in this somewhere refs #2268 */
 	Row_DesignObj *pRow_DesignObj_Array[5] = { NULL, NULL, NULL, NULL, NULL };
 	if( m_pRow_UI->PK_UI_get()==UI_V2_Normal_Horizontal_16_9_CONST )
 	{
@@ -1615,6 +1615,7 @@ loop_to_keep_looking_for_objs_to_include:
 		pRow_DesignObj_Array[0] = m_spDatabase_pluto_main->DesignObj_get()->GetRow(DESIGNOBJ_mnuFileList_SortOptions_CONST);
 	}
 
+        /*! \todo qorbiter should be including these */
 	int iPK_MediaType_Searchable[] = {MEDIATYPE_pluto_LiveTV_CONST,MEDIATYPE_pluto_StoredAudio_CONST,MEDIATYPE_pluto_StoredVideo_CONST,MEDIATYPE_pluto_Pictures_CONST,MEDIATYPE_np_Game_CONST,MEDIATYPE_misc_DocViewer_CONST,MEDIATYPE_misc_Playlist_CONST,MEDIATYPE_lmce_Game_CONST, MEDIATYPE_lmce_StreamedAudio_CONST};
 	for(int i=0;i<9;++i)
 	{
