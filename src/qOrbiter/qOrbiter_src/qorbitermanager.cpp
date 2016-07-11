@@ -3327,6 +3327,7 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     QObject::connect(ptr, &qOrbiter::addScreenShotVar, this, &qorbiterManager::setScreenShotVariables, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::screenShotReady, this, &qorbiterManager::setMediaScreenShot,Qt::QueuedConnection);
     QObject::connect (this, &qorbiterManager::saveMediaScreenShot, ptr, &qOrbiter::saveScreenAttribute,Qt::QueuedConnection);
+    QObject::connect(this, &qorbiterManager::isOsd, ptr, &qOrbiter::handleOSDstatusChanged, Qt::QueuedConnection);
 
     /*Remote command signal */
     QObject::connect(ptr, SIGNAL(dceGuiCommand(int)), this, SLOT(handleDceGuiCommand(int)), Qt::QueuedConnection);

@@ -827,7 +827,7 @@ signals:
     void liveAvPath(int f );
     void usingLiveAvPathChanged();
     void containsVideo( );
-    void isOsd( );
+    void isOsd( bool isOsd );
     void monitorStatusChanged( );
 
 #ifdef ANDROID
@@ -1226,7 +1226,7 @@ public slots:
      * \brief setOsd
      * \param osd
      */
-    void setOsd(bool osd) { m_bIsOSD = osd; emit isOsd();}
+    void setOsd(bool osd) { if(m_bIsOSD == osd) return;  m_bIsOSD = osd; emit isOsd(m_bIsOSD);}
 
     /*!
      * \brief getOsd

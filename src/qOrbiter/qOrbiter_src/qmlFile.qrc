@@ -291,5 +291,7 @@
         <file>qml/skins/default/components/NowPlayingTransferMedia.qml</file>
         <file>qml/skins/default/components/MoveFilesPrompt.qml</file>
         <file>qml/skins/default/screens/Screen_140.qml</file>
+        <file>qml/skins/default/screens/Screen_244.qml</file>
+        <file>qml/skins/default/components/GenericOsdRemote.qml</file>
     </qresource>
 </RCC>
