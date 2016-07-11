@@ -15,7 +15,7 @@
 class AttributeTypeHelper : public QObject
 {
     Q_OBJECT
-     Q_ENUMS(Attributes)
+    Q_ENUMS(Attributes)
 public:
     AttributeTypeHelper(){}
     virtual ~AttributeTypeHelper(){}
@@ -75,7 +75,7 @@ public:
 
 
 public slots:
-  Q_INVOKABLE static const QString translateType(int t){
+    Q_INVOKABLE static const QString translateType(int t){
         switch (t) {
         case Director: return tr("Director", "Movie Director"); break;
         case Performer: return tr("Performer");                 break;
@@ -122,7 +122,7 @@ public:
 
 
 public slots:
- Q_INVOKABLE static const QString translateType(int t){
+    Q_INVOKABLE static const QString translateType(int t){
         switch (t) {
         case TVSHOWS: return tr("Tv Shows");            break;
         case MOVIES: return tr("Movies");               break;
@@ -231,115 +231,45 @@ public:
 
 
 public slots:
- Q_INVOKABLE int getInt(){return 1;}
+    Q_INVOKABLE int getInt(){return 1;}
 
- Q_INVOKABLE QString translateType(int m){
+    Q_INVOKABLE QString translateType(int m){
         switch(m){
-        case LMCE_LiveTV:
-            return tr("LinuxMCE LiveTV");
-            break;
-        case LMCE_CD:
-            return tr("LinuxMCE CD");
-            break;
-        case LMCE_DVD:
-            return tr("LinuxMCE DVD");
-            break;
-        case LMCE_StoredAudio:
-            return tr("LinuxMCE Stored Audio");
-            break;
-        case LMCE_StoredVideo:
-            return tr("LinuxMCE Stored Video");
-            break;
-        case LMCE_LiveRadio:
-            return tr("LinuxMCE Live Radio");
-            break;
-        case LMCE_Pictures:
-            return tr("LinuxMCE Pictures");
-            break;
-        case NP_LiveTV:
-            return tr("LiveTv");
-            break;
-        case NP_DVD:
-            return "DVD";
-            break;
-        case NP_OTARadio:
-            return "OTA-Radio";
-            break;
-        case NP_SatelliteRadio:
-            return tr("Satellite Radio");
-            break;
-        case NP_CableRadio:
-            return "Cable Raio";
-            break;
-        case NP_VideoTape:
-            return "VideoTape";
-            break;
-        case NP_LaserDisc:
-            return "LaserDisc";
-            break;
-        case NP_Game:
-            return "Game";
-            break;
-        case NP_CD:
-            return "CD";
-            break;
-        case MISC_Burning:
-            return "Burning";
-            break;
-        case MISC_Playlist:
-            return tr("Playlist");
-            break;
-        case MISC_EditPlaylist:
-            return tr("Edit Playlist");
-            break;
-        case MISC_BlankMedia:
-            return tr("Blank Media");
-            break;
-        case MISC_DocViewer:
-            return "Doc Viewer";
-            break;
-        case NP_Cassette:
-            return "Cassette";
-            break;
-        case NP_Picture:
-            return "Pictures";
-            break;
-        case LMCE_HDDVD:
-            return "LinuxMCE HD-DVD";
-            break;
-        case LMCE_BD:
-            return tr("LinuxMCE Blu-ray Disc");
-            break;
-        case LMCE_Game:
-            return tr("LinuxMCE Game");
-            break;
-        case 30:
-            return "Atari 2600";
-            break;
-        case NP_BluRay:
-            return tr("Blu-Ray");
-            break;
-        case 32:
-            return "LinuxMCE Atari 5200";
-            break;
-        case 33:
-            return "LinuxMCE Atari 7800";
-            break;
-        case 63:
-            return "YouTube";
-            break;
-        case 64:
-            return tr("Internet Media");
-            break;
-        case LMCE_StreamedAudio:
-            return tr("Streaming Audio");
-            break;
-        case NP_Playstation:
-            return tr("Playstation");
-            break;
-        default:
-            return tr("Unknown.");
-            break;
+        case LMCE_LiveTV: return tr("LinuxMCE LiveTV");  break;
+        case LMCE_CD:     return tr("LinuxMCE CD");      break;
+        case LMCE_DVD:    return tr("LinuxMCE DVD");     break;
+        case LMCE_StoredAudio:  return tr("LinuxMCE Stored Audio");      break;
+        case LMCE_StoredVideo:  return tr("LinuxMCE Stored Video");      break;
+        case LMCE_LiveRadio:    return tr("LinuxMCE Live Radio");        break;
+        case LMCE_Pictures:     return tr("LinuxMCE Pictures");          break;
+        case NP_LiveTV:         return tr("LiveTv");                     break;
+        case NP_DVD:            return "DVD";                            break;
+        case NP_OTARadio:       return "OTA-Radio";                      break;
+        case NP_SatelliteRadio: return tr("Satellite Radio");            break;
+        case NP_CableRadio:     return "Cable Raio";                     break;
+        case NP_VideoTape:      return "VideoTape";                      break;
+        case NP_LaserDisc:      return "LaserDisc";                      break;
+        case NP_Game:           return "Game";                           break;
+        case NP_CD:             return "CD";                           break;
+        case MISC_Burning:      return "Burning";                      break;
+        case MISC_Playlist:     return tr("Playlist");                 break;
+        case MISC_EditPlaylist: return tr("Edit Playlist");            break;
+        case MISC_BlankMedia:   return tr("Blank Media");               break;
+        case MISC_DocViewer:    return "Doc Viewer";                    break;
+        case NP_Cassette:       return "Cassette";                      break;
+        case NP_Picture:        return "Pictures";                      break;
+        case LMCE_HDDVD:        return "LinuxMCE HD-DVD";               break;
+        case LMCE_BD:           return tr("LinuxMCE Blu-ray Disc");     break;
+        case LMCE_Game:         return tr("LinuxMCE Game");             break;
+        case 30:                return "Atari 2600";                    break;
+        case NP_BluRay:         return tr("Blu-Ray");                   break;
+        case 32:                return "LinuxMCE Atari 5200";           break;
+        case 33:                return "LinuxMCE Atari 7800";           break;
+        case 63:                return "YouTube";                       break;
+        case 64:                return tr("Internet Media");            break;
+        case LMCE_StreamedAudio:return tr("Streaming Audio");           break;
+        case NP_Playstation:    return tr("Playstation");               break;
+        default:                return tr("Unknown.");                  break;
         }
     }
 };
