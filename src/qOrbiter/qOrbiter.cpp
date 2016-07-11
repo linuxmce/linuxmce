@@ -1148,11 +1148,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     if (iPK_MediaType == 0){                            //Tell the gui media has stopped on our side.
         emit resetNowPlaying();
         emit setNowPlaying(false);
-        emit gotoQml("Screen_1.qml");
-        emit gotoOsdQml("Screen_1.qml");
+        emit gotoQml("Screen_1.qml");        
         emit setRemotePopup(0);
         b_mediaPlaying = false;
-
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
         emit streamIdChanged(iStreamID);
@@ -1169,12 +1167,10 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
 
         emit setNowPlaying(true);
-        currentScreen = "Screen_"+scrn+".qml";
+        currentScreen = m_bIsOSD ? osdScrn : "Screen_"+scrn+".qml";
         emit gotoQml(currentScreen); /*!< \note This line set the command for the actual screen change */
         emit currentScreenChanged(currentScreen); /*!< \note This line sets the media return to screen */
-        emit gotoOsdQml(osdScrn);
 
-        qDebug() << "osd " << m_iPK_Screen_RemoteOSD;
         emit setRemotePopup(m_iPK_DesignObj_Remote_Popup);
         internal_streamID = iStreamID;
 
@@ -1873,6 +1869,11 @@ void qOrbiter::forceReloadRouter()
 void qOrbiter::getHouseState()
 {
 
+}
+
+void qOrbiter::handleOSDstatusChanged(bool isOsd)
+{
+    m_bIsOSD = isOsd;
 }
 
 bool DCE::qOrbiter::initDceVars(){

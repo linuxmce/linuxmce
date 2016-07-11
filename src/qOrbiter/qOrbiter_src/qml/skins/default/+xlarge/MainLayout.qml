@@ -17,6 +17,7 @@ Item {
     focus:true
     activeFocusOnTab: false
 
+
     //    onUiOnChanged: {
     //        if(uiOn)
     //           // qmlRoot.resetTimeout()
@@ -60,6 +61,7 @@ Item {
 
     Component.onCompleted:{
         forceActiveFocus()
+        manager.m_bIsOSD = true
 
     }
     onActiveFocusChanged: {
@@ -245,6 +247,21 @@ Item {
 
         }
 
+        LargeStyledButton{
+            id:npButton
+            buttonText:dcenowplaying.qs_mainTitle
+            arrow:false
+            visible: dcenowplaying.b_mediaPlaying
+           anchors.left: parent.left
+           anchors.leftMargin: visible ? 0 : width*-1
+
+            onActivated:{
+                console.log("blip")
+              manager.currentScreen = dcenowplaying.qs_screen
+
+            }
+        }
+
         ListView{
             id:scenarioList
             Keys.priority:Keys.BeforeItem
@@ -271,7 +288,7 @@ Item {
 
             anchors{
                 top:parent.top
-                left:parent.left
+                left:npButton.right
                 right:parent.right
                 bottom:parent.bottom
                 margins: 5
