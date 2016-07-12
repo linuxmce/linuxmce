@@ -1,8 +1,15 @@
 import QtQuick 2.2
 
-QtObject{
+Item{
     id:applicationStyle
     objectName: "style"
+    Connections{
+        target:settings
+        onFontSizeModChanged:{
+            console.log(settings.fontSizeMod)
+        }
+    }
+
     function scaleX(w){
         return w/100*manager.appWidth
     }
@@ -56,18 +63,19 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:20*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_header:24*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_description:18*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_title:28*dpRatio+settings.fontSizeMod
+     property int appFontSize_list:20*dpRatio
+     property int appFontSize_header:24*dpRatio
+     property int appFontSize_description:18*dpRatio
+     property int appFontSize_title:28*dpRatio
+    onAppFontSize_titleChanged: console.log("foo changed "+appFontSize_title)
 
-    property int fontSize_small:18*dpRatio+settings.fontSizeMod
-    property int fontSize_medium:22*dpRatio+settings.fontSizeMod
-    property int fontSize_large:appFontSize_title+settings.fontSizeMod
+    property int fontSize_small:18*dpRatio
+    property int fontSize_medium:22*dpRatio
+    property int fontSize_large:appFontSize_title
 
-    property int fontSize_listItem:appFontSize_list+settings.fontSizeMod
-    property int fontSize_listTitle:appFontSize_title+settings.fontSizeMod
-    property int fontSize_listAccent:20*dpRatio+settings.fontSizeMod
+    property int fontSize_listItem:appFontSize_list
+    property int fontSize_listTitle:appFontSize_title
+    property int fontSize_listAccent:20*dpRatio
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)

@@ -112,8 +112,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_mediaHelper = new DceMediaHelper(qOrbiter_ptr, m_routerHelper,this);
     connect(m_mediaHelper, &DceMediaHelper::forwardDceCommand, this, &qorbiterManager::sendDceCommand);
 
-
-
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, true, this);
     mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, false, this);
     genreFilter = new AttributeSortModel(new AttributeSortItem,3, true, this);
@@ -166,7 +164,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
     m_testScreenSize =testSize;
 
-    m_fontDir.setPath(QStandardPaths::standardLocations(QStandardPaths::FontsLocation).first());
+    m_fontsHelper = new FontsHelper();
+
 
     QString mlocale = QLocale::system().name().append(".qm");
 
@@ -287,8 +286,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
 qorbiterManager::~qorbiterManager(){
     // clear any generic datagrids
-    clearAllDataGrid();
-    cleanupData();
+    // clearAllDataGrid();
+    //  cleanupData();
 }
 
 void qorbiterManager::gotoQScreen(QString s){
@@ -404,8 +403,8 @@ void qorbiterManager::refreshUI(QUrl url){
 void qorbiterManager::processConfig(QNetworkReply *config)
 {
 
-    if(!alreadyConfigured){     
-        m_dwIDataGridRequestCounter = 0;       
+    if(!alreadyConfigured){
+        m_dwIDataGridRequestCounter = 0;
         iSize = 0;
         m_pOrbiterCat = 5;
         s_onOFF = "1";
@@ -890,14 +889,14 @@ void qorbiterManager::updateSelectedAttributes(QString attributes)
 //takes care of un-registering the orbiter from the DCERouter and then shutting down
 void qorbiterManager::closeOrbiter()
 {
+    qDebug() << Q_FUNC_INFO;
     if(writeConfig()){
         setDceResponse("Shutting Down");
     }
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
-    //  emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
+    // emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
 
-    emit orbiterClosing();
-    QApplication::quit();
+    m_window->close();
 }
 
 /*
@@ -1760,7 +1759,7 @@ void qorbiterManager::playMediaFromDrive(int device, int disc, int ea)
 
     CMD_MH_Play_Media playDisc(
                 iPK_Device,
-               m_routerHelper->mediaPluginId() ,
+                m_routerHelper->mediaPluginId() ,
                 0,
                 fkFile.toStdString(), // see MediaAttributes_LowLevel::TransformFilenameToDeque
                 0,
@@ -2529,6 +2528,7 @@ void qorbiterManager::setupEarlyContexts()
     m_appEngine->rootContext()->setContextProperty("orbiterList", myOrbiters);
     m_appEngine->rootContext()->setContextProperty("deviceList", devices);
     m_appEngine->rootContext()->setContextProperty("deviceCommands", deviceCommands);
+    m_appEngine->rootContext()->setContextProperty("fontsHelper", m_fontsHelper);
 
     //Resize to view as opposed to the root item
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)

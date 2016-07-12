@@ -6,6 +6,9 @@ Item {
     anchors.fill: parent
     focus:true
 
+    Component.onCompleted: {
+        manager.setBoundStatus(true);
+    }
 
    Keys.onPressed: {
        switch(event.key){

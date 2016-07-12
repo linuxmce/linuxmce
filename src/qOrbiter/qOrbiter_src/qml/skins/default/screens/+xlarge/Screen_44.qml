@@ -115,7 +115,7 @@ StyledScreen {
             id:exitBtn
             height:Style.scaleY(15)
             buttonText: qsTr("Exit QOrbiter")
-            onActivated: manager.exitApp()
+            onActivated: manager.closeOrbiter()
         }
     }
 

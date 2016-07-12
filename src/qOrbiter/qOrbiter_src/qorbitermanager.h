@@ -70,6 +70,7 @@
 #include <QtXml/QDomDocument>
 #include "managerHelpers/dcemediahelper.h"
 #include "managerHelpers/routerhelper.h"
+#include "managerHelpers/fontshelper.h"
 
 
 #ifdef ANDROID
@@ -415,6 +416,7 @@ public:
     //Helper classes
     DceMediaHelper  *m_mediaHelper;
     RouterHelper    *m_routerHelper;
+    FontsHelper     *m_fontsHelper;
 
     /*
 datagrid variables
@@ -838,6 +840,7 @@ signals:
     void CMD_makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
 
 public slots:
+
     bool useQueueInsteadOfInstantPlay(){ return m_useQueueInsteadOfInstantPlay;}
     void handleUseQueueChanged(bool useQueue);
 
@@ -1693,7 +1696,7 @@ public slots:
     //@{
     void execGrp(int grp);        //for command groups
     void closeOrbiter();
-    void exitApp() { qorbiterUIwin->close();}
+    void exitApp() { /*qorbiterUIwin->close();*/ closeOrbiter(); }
     void reloadHandler();
     void disconnectHandler();
     void replaceHandler();
