@@ -244,6 +244,8 @@ int main(int argc, char* argv[])
     QCoreApplication::setOrganizationName("LinuxMCE");
 
     SettingInterface settings;
+    QString f = settings.getOption(SettingsInterfaceType::Settings_Text, SettingsKeyType::Setting_Text_font).toString();
+    a.setFont(QFont(f));
 
 #ifdef __ANDROID__
     AndroidSystem androidHelper;
@@ -524,9 +526,10 @@ int main(int argc, char* argv[])
 
         //connect font stuff because qApp->setFont() crashes elsewhere
 
-        QObject::connect(w.m_fontsHelper, &FontsHelper::currentFontChanged, [&a, &w](QString newFont){
+        QObject::connect(w.m_fontsHelper, &FontsHelper::currentFontChanged, [&a, &w, &settings](QString newFont){
             qDebug() << Q_FUNC_INFO << newFont;
             a.setFont(QFont(newFont));
+            settings.setOption(SettingsInterfaceType::Settings_Text, SettingsKeyType::Setting_Text_font, newFont);
           w.qmlReload();
         });
 

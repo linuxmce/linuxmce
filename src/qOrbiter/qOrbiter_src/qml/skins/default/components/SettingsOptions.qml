@@ -14,6 +14,7 @@ Item{
         id:fontsView
         ListView{
             id:fontView
+            clip:true
             model:fontsHelper.fontList
             anchors.fill: parent
             delegate: Item{
@@ -30,6 +31,7 @@ Item{
                     anchors.centerIn: parent
                     color: "white"
                     text:model.modelData.familyName
+                    font.family: model.modelData.familyName
                 }
 
                 MouseArea{
@@ -120,7 +122,7 @@ Item{
                 id: font_option
                 cat:SettingsType.Settings_Text
                 val:SettingsKey.Setting_Text_font
-                settingName: qsTr("Font Option")
+                settingName: qsTr("Font Options")
                 onActivated: {
                     viewHolder.sourceComponent = fontsView
                     settingsOption.state="extended"

@@ -11,6 +11,7 @@ class SystemFontItem : public QObject
     Q_PROPERTY(QString familyName READ familyName NOTIFY familyNameChanged)
     Q_PROPERTY(QStringList styles READ styles  NOTIFY stylesChanged)
 
+
     Q_OBJECT
 public:
     SystemFontItem() {}
