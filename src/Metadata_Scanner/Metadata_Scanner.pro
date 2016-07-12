@@ -32,3 +32,7 @@ HEADERS += \
     databaseinteractor.h \
     services/tmdbservice.h \
     services/tvdbservice.h
+
+
+target.path=/tmp
+INSTALLS+=target
