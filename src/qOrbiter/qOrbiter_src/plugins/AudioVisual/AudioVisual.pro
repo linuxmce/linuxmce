@@ -40,8 +40,6 @@ linux-rasp-pi-g++{
     playerInterfaces/OmxDbusProxy.h
 }
 
-
-
 android-g++{
     DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
   }

@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.screens 1.0
+
 import "../components"
 StyledScreen {
     id:advancedScreen

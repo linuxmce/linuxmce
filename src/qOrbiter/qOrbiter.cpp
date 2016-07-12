@@ -1167,6 +1167,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
 
         emit setNowPlaying(true);
+        qDebug() << "This orbiter's osd setting is set to " << m_bIsOSD;
         currentScreen = m_bIsOSD ? osdScrn : "Screen_"+scrn+".qml";
         emit gotoQml(currentScreen); /*!< \note This line set the command for the actual screen change */
         emit currentScreenChanged(currentScreen); /*!< \note This line sets the media return to screen */
@@ -1670,8 +1671,21 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #252 - Turn_On=" << bTurn_On << endl;
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
-    emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));
+    cout << "sID"       << sID << endl;
 
+    if(m_bIsOSD){
+
+        switch (iPK_Screen) {
+        case 70:
+        case 54:
+        case 49: break;
+        case 48: break;
+        default:   emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));  break;
+        }
+
+    } else {
+      emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));
+    }
 
     qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
 
@@ -2029,9 +2043,8 @@ void DCE::qOrbiter::deinitialize()
     DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iPK_Device_OrbiterPlugin, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_OrbiterUnRegistered);
     emit routerConnectionChanged(false);
-    Disconnect();
+    Disconnect();   
     emit closeOrbiter();
-
 }
 
 
