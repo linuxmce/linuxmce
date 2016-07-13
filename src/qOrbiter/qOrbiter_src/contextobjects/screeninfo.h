@@ -76,6 +76,7 @@ class ScreenObject : public QObject
     Q_PROPERTY(int width READ width() NOTIFY sizeChanged)
     Q_PROPERTY(int height READ height() NOTIFY sizeChanged)
     Q_PROPERTY(double pixelRatio READ pixelRatio NOTIFY pixelRatioChanged)
+    Q_PROPERTY(QString pixelDensityString READ pixelDensityString NOTIFY pixelRatioChanged)
 
 public:
     ScreenObject():

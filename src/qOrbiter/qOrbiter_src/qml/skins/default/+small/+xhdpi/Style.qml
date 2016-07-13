@@ -31,7 +31,7 @@ QtObject{
     readonly property int transitionFadeTime:350
 
     /* Application Colors */
-    readonly property color appcolor_background:"red" // "#0588ff"
+    readonly property color appcolor_background:  "#0588ff"
     readonly property color appcolor_background_light:  "#80c4ff"
     readonly property color appcolor_background_medium:"#43acff"
     readonly property color appcolor_background_list:"#222222"
@@ -57,18 +57,18 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:12*dpRatio
-    readonly property int appFontSize_header:15*dpRatio
-    readonly property int appFontSize_description:11*dpRatio
-    readonly property int appFontSize_title:14*dpRatio
+    readonly property int appFontSize_list:42*dpRatio
+    readonly property int appFontSize_header:36*dpRatio
+    readonly property int appFontSize_description:28*dpRatio
+    readonly property int appFontSize_title:64*dpRatio
 
-    property int fontSize_small:10*dpRatio
-    property int fontSize_medium:12*dpRatio
+    property int fontSize_small:appFontSize_list
+    property int fontSize_medium:appFontSize_description
     property int fontSize_large:appFontSize_title
 
-    property int fontSize_listItem:appFontSize_list
-    property int fontSize_listTitle:appFontSize_title
-    property int fontSize_listAccent:10*dpRatio
+    property int fontSize_listItem:28*dpRatio
+    property int fontSize_listTitle:36*dpRatio
+    property int fontSize_listAccent:24*dpRatio
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)

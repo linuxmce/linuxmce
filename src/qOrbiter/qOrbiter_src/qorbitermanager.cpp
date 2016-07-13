@@ -2714,7 +2714,7 @@ bool qorbiterManager::createThemeStyle()
     QString fp;
 #ifdef NOQRC
     qDebug() << "Using local path for NOQRC flag";
-    fp =m_localQmlPath+"skins/"+currentSkin+"/Style.qml";
+    fp =m_localQmlPath+"skins/"+currentSkin+"/+"+m_screenInfo->primaryScreen()->deviceSizeString()+"/Style.qml";
 #else
     if(m_bIsOSD)
         fp ="skins/"+currentSkin+"/+md/Style.qml";
@@ -3059,7 +3059,7 @@ void qorbiterManager::reloadQml()
     qDebug() << m_appEngine->baseUrl();
 
     qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
-    QString fp ="skins/"+currentSkin+"/Style.qml";
+    QString fp ="skins/"+currentSkin+"/+"+m_screenInfo->primaryScreen()->deviceSizeString()+"/Style.qml";
     qDebug () << Q_FUNC_INFO << selectPath(fp);
     QString filePath = m_selector->select(fp);
 
