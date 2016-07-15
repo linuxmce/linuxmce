@@ -106,27 +106,7 @@ class Leases{
 			}
 			if(preg_match("/^(})/", $line))
 			{
-				$newleases = array();
-				$lease = $this->parseLease($entry);
-				// We want to remove any duplicates, leaving only the newest lease
-				$insert = true;
-				foreach ($this->leases as $templease) {
-					if ($lease['ip_addr'] == $templease['ip_addr']) {
-						$insert = false;
-					}
-				}
-				if ($insert) {
-					$this->leases[] = $lease;
-				} else {
-					foreach ($this->leases as $templease) {
-						if ($lease['ip_addr'] == $templease['ip_addr'] && $lease['ends'] > $templease['ends']) {
-							$newleases[] = $lease;
-						} else {
-							$newleases[] = $templease;
-						}
-					}
-					$this->leases = $newleases;
-				}
+				$this->leases[] = $this->parseLease($entry);
 				unset($entry);
 				continue;
 			}
