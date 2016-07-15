@@ -31,7 +31,7 @@ QtObject{
     readonly property int transitionFadeTime:350
 
     /* Application Colors */
-    readonly property color appcolor_background:"#0588ff"
+    readonly property color appcolor_background:"red" // "#0588ff"
     readonly property color appcolor_background_light:  "#80c4ff"
     readonly property color appcolor_background_medium:"#43acff"
     readonly property color appcolor_background_list:"#222222"
@@ -57,18 +57,18 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:12*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_header:15*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_description:11*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_title:14*dpRatio+settings.fontSizeMod
+    readonly property int appFontSize_list:12*dpRatio
+    readonly property int appFontSize_header:15*dpRatio
+    readonly property int appFontSize_description:11*dpRatio
+    readonly property int appFontSize_title:14*dpRatio
 
-    property int fontSize_small:10*dpRatio+settings.fontSizeMod
-    property int fontSize_medium:12*dpRatio+settings.fontSizeMod
-    property int fontSize_large:appFontSize_title+settings.fontSizeMod
+    property int fontSize_small:10*dpRatio
+    property int fontSize_medium:12*dpRatio
+    property int fontSize_large:appFontSize_title
 
-    property int fontSize_listItem:appFontSize_list+settings.fontSizeMod
-    property int fontSize_listTitle:appFontSize_title+settings.fontSizeMod
-    property int fontSize_listAccent:10*dpRatio+settings.fontSizeMod
+    property int fontSize_listItem:appFontSize_list
+    property int fontSize_listTitle:appFontSize_title
+    property int fontSize_listAccent:10*dpRatio
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)

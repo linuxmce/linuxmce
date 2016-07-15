@@ -73,7 +73,7 @@ public:
     void setDisplayVolume(const qreal &displayVolume);
 
     bool muted() const;
-    void setMuted(bool muted);
+
 
     QString currentStatus() const;
 
@@ -144,7 +144,7 @@ signals:
     void lastTickChanged();
     void volumeChanged();
     void displayVolumeChanged();
-    void mutedChanged();
+    void mutedChanged(bool mute);
     void currentStatusChanged();
     void hasErrorChanged();
     void lastErrorChanged();
@@ -170,6 +170,8 @@ signals:
     void currentStorageDeviceChanged();
 
 public slots:
+
+    void setMuted(bool muted);
     void setCurrentStorageDevice(long currentStorageDevice);
     void setPluginUrl(const QString &pluginUrl);
     QString fileReference() const;

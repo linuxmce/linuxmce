@@ -290,5 +290,10 @@
         <file>qml/skins/default/components/StyledOSDScreen.qml</file>
         <file>qml/skins/default/components/NowPlayingTransferMedia.qml</file>
         <file>qml/skins/default/components/MoveFilesPrompt.qml</file>
+        <file>qml/skins/default/screens/Screen_140.qml</file>
+        <file>qml/skins/default/screens/Screen_244.qml</file>
+        <file>qml/skins/default/components/GenericOsdRemote.qml</file>
+        <file>qml/skins/default/+small/+xhdpi/Style.qml</file>
+        <file>qml/skins/default/images/Screen_Reload.jpg</file>
     </qresource>
 </RCC>

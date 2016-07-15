@@ -38,10 +38,8 @@ QVariant FloorPlanModel::data(const QModelIndex &index, int role) const
 }
 
 void FloorPlanModel::appendRow( FloorplanDevice *item)
-{
-    qDebug() << Q_FUNC_INFO << item->floorplanType();
+{   
     appendRows(QList<FloorplanDevice*>() << item);
-
 }
 
 void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)

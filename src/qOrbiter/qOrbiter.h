@@ -1789,6 +1789,8 @@ public slots:
     void setGridPause(bool g){ gridPaused =g; emit gridPauseChanged(gridPaused); if(!gridPaused){populateAdditionalMedia();} qDebug() << "Grid is paused ::" << gridPaused; }
     bool getGridPause(){ return gridPaused;}
 
+    void handleOSDstatusChanged(bool isOsd);
+
     /*!
      * \brief authorizePrivateMedia
      * \param mediaType

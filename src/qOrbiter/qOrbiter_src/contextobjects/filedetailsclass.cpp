@@ -33,8 +33,6 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     QObject::connect(ptr, &qOrbiter::fd_pathChanged,this, &FileDetailsClass::setPath,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_fileChanged,this, &FileDetailsClass::setFile,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_fileNameChanged,this, &FileDetailsClass::setFilename,Qt::QueuedConnection);
-
-
     clear();
 }
 
@@ -59,7 +57,6 @@ void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QSt
         qDebug() << " No handler for attribute " << attribute << " value:: " << val;
         break;
     }
-
 }
 
 
@@ -73,11 +70,9 @@ void FileDetailsClass::clear(){
     m_attributeMap.clear();
     m_performerMap.clear();
     m_performerList.clear();
+    m_composerWriterList.clear();
     m_studioList.clear();
-    setScreenshot("");
-
-
-    emit screenShotChanged();
+    m_directorList.clear();
     directors.clear();
     composers.clear();
     composerlist.clear();
@@ -99,17 +94,19 @@ void FileDetailsClass::clear(){
     rating.clear();
     synop.clear();
 
+    setScreenshot("");
+    setFile("");
+    setFilename("");
+    setSynop("");
+    setTitle("");
+    setTitle2("");
+    setMediaTitle("");
+    setAlbum("");
+    setTrack("");
 
 
-    emit synopChanged();
     emit objectChanged();
-    emit synopChanged();
-    emit titleImageChanged();
-    emit mediaTitleChanged();
-
-    emit screenTypeChanged();
-    emit titleChanged();
-    emit titleChanged2();
+    emit screenTypeChanged();  
     emit genreChanged();
     emit albumChanged();
     emit trackChanged();

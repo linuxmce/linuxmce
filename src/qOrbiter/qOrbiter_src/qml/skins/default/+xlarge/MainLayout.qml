@@ -17,6 +17,7 @@ Item {
     focus:true
     activeFocusOnTab: false
 
+
     //    onUiOnChanged: {
     //        if(uiOn)
     //           // qmlRoot.resetTimeout()
@@ -60,6 +61,7 @@ Item {
 
     Component.onCompleted:{
         forceActiveFocus()
+        manager.m_bIsOSD = true
 
     }
     onActiveFocusChanged: {
@@ -84,17 +86,23 @@ Item {
         }
     }
 
+    Connections{
+        target: dcenowplaying
+        onMediaStatusChanged:{
+            console.log("Media Status changed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Status is "+dcenowplaying.b_mediaPlaying)
+            if(dcenowplaying.b_mediaPlaying){
+                qmlPictureFrame.stopScreenSaver();
+            } else {
+                qmlPictureFrame.startScreenSaver()
+                qmlPictureFrame.getNextImage()
+            }
 
+
+        }
+    }
 
     QmlPictureFrame {
         id: qmlPictureFrame
-        visible:!dcenowplaying.b_mediaPlaying
-        onVisibleChanged: {
-            if(!visible)
-                stopScreenSaver()
-            else
-                startScreenSaver()
-        }
 
         MouseArea{
             anchors.fill: parent
@@ -205,7 +213,7 @@ Item {
                     current_scenarios.commandToExecute=params
                 }
 
-                function execute(){          
+                function execute(){
                     console.log(title+" is executing")
                     manager.execGrp(params)
                 }
@@ -219,10 +227,10 @@ Item {
                     execute();
                 }
 
-//                MouseArea{
-//                    anchors.fill: parent
-//                    onClicked: { scenario_delegate.acivated()}
-//                }
+                //                MouseArea{
+                //                    anchors.fill: parent
+                //                    onClicked: { scenario_delegate.acivated()}
+                //                }
             }
         }
     }
@@ -237,6 +245,21 @@ Item {
                 if(activeFocus)scenarioList.forceActiveFocus()
             }
 
+        }
+
+        LargeStyledButton{
+            id:npButton
+            buttonText:dcenowplaying.qs_mainTitle
+            arrow:false
+            visible: dcenowplaying.b_mediaPlaying
+           anchors.left: parent.left
+           anchors.leftMargin: visible ? 0 : width*-1
+
+            onActivated:{
+                console.log("blip")
+              manager.currentScreen = dcenowplaying.qs_screen
+
+            }
         }
 
         ListView{
@@ -265,7 +288,7 @@ Item {
 
             anchors{
                 top:parent.top
-                left:parent.left
+                left:npButton.right
                 right:parent.right
                 bottom:parent.bottom
                 margins: 5
@@ -306,7 +329,7 @@ Item {
                         centralScenarios.x = x
                     }
                 }
-                onActivated:{               
+                onActivated:{
                     forceActiveFocus()
                     if(floorplantype===-1)
                         manager.currentScreen="Screen_44.qml";scenarioList.currentIndex=0;

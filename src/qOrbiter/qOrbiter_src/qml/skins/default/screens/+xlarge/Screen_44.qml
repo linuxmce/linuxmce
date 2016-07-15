@@ -115,7 +115,7 @@ StyledScreen {
             id:exitBtn
             height:Style.scaleY(15)
             buttonText: qsTr("Exit QOrbiter")
-            onActivated: manager.exitApp()
+            onActivated: manager.closeOrbiter()
         }
     }
 
@@ -147,13 +147,87 @@ StyledScreen {
         GenericPopup{
             title:qsTr("Screen Information")
             content:Item{
-
                 Column{
                     anchors.fill: parent
+                    anchors.margins: 10
+                    spacing:10
+                    StyledText{
+
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Screen Name: %1").arg(screenInfo.primaryScreen.screenName)
+                    }
+                    StyledText{
+
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Current Orientation: %1").arg(screenInfo.primaryScreen.orientation)
+                    }
+                    StyledText{
+
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Native Orientation: %1").arg(screenInfo.primaryScreen.nativeOrientation)
+                    }
+                    StyledText{
+
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Logical DPI: %1").arg(screenInfo.primaryScreen.logicalDpi)
+                    }
+                    StyledText{
+
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Physical DPI: %1").arg(screenInfo.primaryScreen.physicalDpi)
+                    }
+                    StyledText{
+
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Height: %1 mm").arg(screenInfo.primaryScreen.heightMM)
+                    }
+                    StyledText{
+
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Width: %1 mm").arg(screenInfo.primaryScreen.widthMM)
+                    }
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Diagonal Size: %1 (in) Screen Size:: %2").arg(screenInfo.primaryScreen.diagonalInches).arg(screenInfo.primaryScreen.stringDeviceSize)
+                    }
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Pixel Density Rating: %1 ").arg(screenInfo.primaryScreen.pixelDensityString)
+                    }
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Width: %1 (px)").arg(screenInfo.primaryScreen.width)
+                    }
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Height: %1 (px)").arg(screenInfo.primaryScreen.height)
+                    }
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Pixel Ratio: %1").arg(screenInfo.primaryScreen.pixelRatio)
+                    }
 
                     StyledText{
+                        fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text:screenInfo.primaryScreen.orientation
+                        text:qsTr("Version %1").arg(orbiterVersion)
+                    }
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Compile Date %1").arg(buildDate)
                     }
                 }
             }

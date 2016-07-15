@@ -244,6 +244,8 @@ int main(int argc, char* argv[])
     QCoreApplication::setOrganizationName("LinuxMCE");
 
     SettingInterface settings;
+    QString f = settings.getOption(SettingsInterfaceType::Settings_Text, SettingsKeyType::Setting_Text_font).toString();
+    a.setFont(QFont(f));
 
 #ifdef __ANDROID__
     AndroidSystem androidHelper;
@@ -409,8 +411,8 @@ int main(int argc, char* argv[])
             if(iface.addressEntries().size() > 0 && iface.addressEntries().at(0).ip().toString().contains(badMatch)){
                 qDebug() << "!!!!!!!!!!!!!!!!!!!USING HOME NETWORK!!!!!!!!!!!!!";
                 isHomeNetwork = true;
-               // pqOrbiter.m_sMacAddress=iface.hardwareAddress().toStdString();
-               // qDebug() << QString("Mac Address Set to %1").arg(iface.hardwareAddress());
+                // pqOrbiter.m_sMacAddress=iface.hardwareAddress().toStdString();
+                // qDebug() << QString("Mac Address Set to %1").arg(iface.hardwareAddress());
                 break;
             }
 
@@ -445,6 +447,8 @@ int main(int argc, char* argv[])
         qRegisterMetaType<DCE::PreformedCommand>("DCE::PreformedCommand");
         qRegisterMetaType<QHash<int, string*> >("QHash<int, string*>");
         qmlRegisterType<GenericFlatListModel>();
+        qRegisterMetaType<QList<SystemFontItem*>>();
+        qmlRegisterType<SystemFontItem>("org.linuxmce.fonts", 1,0, "SystemFontItem");
 
         QQmlApplicationEngine engine;
 
@@ -520,12 +524,31 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(mobileStorageChanged(QString)), &localLogger, SLOT(setLogLocation(QString)));
 #endif
 
-        //shutdown signals
-        QObject::connect(&w, SIGNAL(destroyed()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &w, SLOT(closeOrbiter()));
-        QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
-        QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
+        //connect font stuff because qApp->setFont() crashes elsewhere
+
+        QObject::connect(w.m_fontsHelper, &FontsHelper::currentFontChanged, [&a, &w, &settings](QString newFont){
+            qDebug() << Q_FUNC_INFO << newFont;
+            a.setFont(QFont(newFont));
+            settings.setOption(SettingsInterfaceType::Settings_Text, SettingsKeyType::Setting_Text_font, newFont);
+          w.qmlReload();
+        });
+
+        //shutdown signals order is important to prevent crashes on close
+
+        //all 'exit' functions point to qOrbiterManager::closeOrbiter, which closes the window. This emits a signal to stop tell the dce object to cleanly exit.
+        QObject::connect(&a, SIGNAL(lastWindowClosed()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
+        //When dce object emits destroyed (handy qt feature!) it then tells its parent thread to stop. We wait for that thread to properly shut down, then exit the event loop allows other automatic destructors to run
+        QObject::connect(&pqOrbiter, SIGNAL(destroyed(QObject*)), &dceThread, SLOT(quit()));
+        //Thread finished, a, the event loop quits and bobs your uncle.
+        QObject::connect(&dceThread, SIGNAL(finished()), &a, SLOT(quit()));
+
+        // QObject::connect(&w, SIGNAL(destroyed()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
+        //  QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &w, SLOT(closeOrbiter()));
+        //  QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
+        //  QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
+
+
         // Generic DCE command sending signal/slots
         QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(handleDceCommand(DCE::PreformedCommand)), Qt::QueuedConnection); //this somehow still blocks btw. this is why i had a painful but explict bridge. the must be a middle ground. possibly look at posting the event instead of connections.
         QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCECommand*)), &pqOrbiter, SLOT(handleDceCommandResp(DCECommand*)), Qt::QueuedConnection); //this somehow still blocks btw. this is why i had a painful but explict bridge. the must be a middle ground. possibly look at posting the event instead of connections.

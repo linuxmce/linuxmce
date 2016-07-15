@@ -12,11 +12,9 @@ Text {
     horizontalAlignment: Text.AlignHCenter
     onVisibleChanged: if(!visible)height=0
     id:labelelement
-    text: textLabel
-    font.pointSize: fontSize
-    verticalAlignment:Text.AlignVCenter
-   // font.family: appFont.name
+    text: textLabel   
+    font.pointSize: fontSize+settings.fontSizeMod
+    verticalAlignment:Text.AlignVCenter   
     color:Style.apptext_color_active
-    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-
+    wrapMode: Text.WrapAtWordBoundaryOrAnywhere 
 }

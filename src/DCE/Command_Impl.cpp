@@ -343,7 +343,7 @@ bool Command_Impl::SpawnChildDevice( int PK_Device, string sCommand, string sDis
 		sPrefix = "./";
 		if( !FileUtils::FileExists( sPrefix + "Spawn_Device.sh" ) )
 		{
-			sPrefix = "/usr/bin/pluto";
+            sPrefix = "/usr/pluto/bin";
 			if( !FileUtils::FileExists( sPrefix + "Spawn_Device.sh" ) )
 			{
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find Spawn_Device.sh");

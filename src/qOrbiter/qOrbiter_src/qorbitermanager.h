@@ -70,6 +70,7 @@
 #include <QtXml/QDomDocument>
 #include "managerHelpers/dcemediahelper.h"
 #include "managerHelpers/routerhelper.h"
+#include "managerHelpers/fontshelper.h"
 
 
 #ifdef ANDROID
@@ -415,6 +416,7 @@ public:
     //Helper classes
     DceMediaHelper  *m_mediaHelper;
     RouterHelper    *m_routerHelper;
+    FontsHelper     *m_fontsHelper;
 
     /*
 datagrid variables
@@ -827,7 +829,7 @@ signals:
     void liveAvPath(int f );
     void usingLiveAvPathChanged();
     void containsVideo( );
-    void isOsd( );
+    void isOsd( bool isOsd );
     void monitorStatusChanged( );
 
 #ifdef ANDROID
@@ -838,6 +840,7 @@ signals:
     void CMD_makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
 
 public slots:
+
     bool useQueueInsteadOfInstantPlay(){ return m_useQueueInsteadOfInstantPlay;}
     void handleUseQueueChanged(bool useQueue);
 
@@ -1226,7 +1229,7 @@ public slots:
      * \brief setOsd
      * \param osd
      */
-    void setOsd(bool osd) { m_bIsOSD = osd; emit isOsd();}
+    void setOsd(bool osd) { if(m_bIsOSD == osd) return;  m_bIsOSD = osd; emit isOsd(m_bIsOSD);}
 
     /*!
      * \brief getOsd
@@ -1693,7 +1696,7 @@ public slots:
     //@{
     void execGrp(int grp);        //for command groups
     void closeOrbiter();
-    void exitApp() { qorbiterUIwin->close();}
+    void exitApp() { /*qorbiterUIwin->close();*/ closeOrbiter(); }
     void reloadHandler();
     void disconnectHandler();
     void replaceHandler();
@@ -1809,7 +1812,9 @@ public slots:
 #ifndef simulate
         m_testScreenSize = -1;
         resetScreenSize();
+        qDebug() << "Using non simulated values";
 #else
+        qDebug() << "Using non test values for device.";
         int tH = qorbiterUIwin->height();
         int tW = qorbiterUIwin->width() ;
         double diag= (((sqrt( pow( (double)tH,2.0)+pow((double)tW, 2.0) )) *0.0393701) / m_screenInfo->primaryScreen()->physicalDpi()) *10;
@@ -1927,6 +1932,7 @@ private slots:
 private:
     QString m_currentRouter;
     QString m_skinSelector;
+    QString m_currentSizeSelector;
     QQmlFileSelector *selector;
     QFileSelector *m_selector;
     ScreenData::DeviceRange m_deviceSize;

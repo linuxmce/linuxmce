@@ -107,7 +107,7 @@ Item {
                 height:footer.height
 
                 StyledButton{
-                    buttonText: roomList.currentRoom
+                    buttonText: roomList.currentEA
                     anchors{
                         top:parent.top
                         bottom:parent.bottom

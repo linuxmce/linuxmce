@@ -40,7 +40,9 @@
 #include "qmap.h"
 #include "../pluto_media/Define_AttributeType.h"
 
-
+/*!
+ * \brief The FileDetailsObject class. Used to represent a single Attribute object
+ */
 class FileDetailsObject : public QObject
 {
     Q_OBJECT
@@ -121,7 +123,7 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QQmlListProperty<FileDetailsObject> albumArtistList READ albumArtistList NOTIFY albumArtistChanged)
     Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged) /*!< Composer  \ingroup file_details*/
     Q_PROPERTY (QStringList composers READ getComposerList) /*!< \brief List of composers \warning Experimental  \ingroup file_details*/
-
+    Q_PROPERTY (QQmlListProperty<FileDetailsObject> writerList READ writerList NOTIFY composersChanged)
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo change to enum.  \ingroup file_details*/
     Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged)
     Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged)
@@ -313,6 +315,10 @@ public slots:
         return QQmlListProperty<FileDetailsObject>(this, m_albumArtistList);
     }
 
+    QQmlListProperty<FileDetailsObject> writerList(){
+        return QQmlListProperty<FileDetailsObject>(this, m_composerWriterList);
+    }
+
     void setComposers (const QString inc_composer) {composers << inc_composer;  emit composersChanged();}
     QString getComposers() {composerlist = composers.join(" | "); return composerlist;}
     QStringList getComposerList() {return composers;}
@@ -320,9 +326,8 @@ public slots:
     void setDirector (const QString inc_director) {directors << inc_director;  emit directorChanged();}
     QString getDirector() {director = directors.join(" | "); return director;}
 
-    QQmlListProperty <FileDetailsObject> directorList() {
-       QList<FileDetailsObject*> t =  m_attributeMap.value(ATTRIBUTETYPE_Director_CONST);
-        return QQmlListProperty<FileDetailsObject>(this,t);
+    QQmlListProperty <FileDetailsObject> directorList() {      
+        return QQmlListProperty<FileDetailsObject>(this,m_directorList);
     }
 
     void setGenre (const QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}

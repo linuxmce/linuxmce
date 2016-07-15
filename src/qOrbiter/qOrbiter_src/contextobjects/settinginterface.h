@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QSettings>
+#include "qdebug.h"
 
 class SettingsInterfaceType : public QObject
 {
@@ -81,6 +82,11 @@ signals://for 'live properties'
     void fontSizeModChanged();
 
 public slots:
+
+    void setLastLocation(int room, int entArea);
+    int getLastRoom();
+    int getLastEa();
+
     void log(QString message);
 
     void destroySettingsData();
@@ -97,6 +103,7 @@ public slots:
         setSimpleOption(SettingsKeyType::Setting_Text_sizemod, m);
         m_fontSizeMod = m;
         emit fontSizeModChanged();
+        qDebug() << Q_FUNC_INFO << m;
     }
     Q_INVOKABLE bool isScreenSaverEnabled() {
         return getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_ScreenSaver).toBool();

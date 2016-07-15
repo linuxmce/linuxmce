@@ -79,9 +79,6 @@ void EntertainAreaTimeCode::setTotalTimeCode(const QString &totalTimeCode)
     setTimecodeLength(totalSeconds);
     emit totalTimeCodeChanged();
 
-
-
-
 }
 int EntertainAreaTimeCode::getI_roomId() const
 {
@@ -101,6 +98,16 @@ int EntertainAreaTimeCode::dragTime() const
 void EntertainAreaTimeCode::setDragTime(int dragTime)
 {
     m_dragTime = dragTime;
+
+    emit dragTimeChanged();
+
+    int displayHours = dragTime / (3600);
+    int remainder = dragTime % 3600;
+    int minutes = remainder / 60;
+    int forseconds = remainder % 60;
+
+    setDragString(QString::number(displayHours)+":"+QString::number(minutes)+":"+QString::number(forseconds) );
+
 }
 
 QString EntertainAreaTimeCode::dragString() const
@@ -111,6 +118,7 @@ QString EntertainAreaTimeCode::dragString() const
 void EntertainAreaTimeCode::setDragString(const QString &dragString)
 {
     m_dragString = dragString;
+    emit dragStringChanged();
 }
 
 int EntertainAreaTimeCode::timecodePosition() const

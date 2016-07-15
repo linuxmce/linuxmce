@@ -77,6 +77,8 @@ Item{
 
     Component.onCompleted: {
         manager.writeConfig()
+//         manager.setActiveRoom(manager.room , manager.entertainArea);
+//        console.log( String("Setting Ea to %1 and Room to %2").arg(manager.room).arg(manager.entertainArea) )
     }
 
     Keys.onPressed: {

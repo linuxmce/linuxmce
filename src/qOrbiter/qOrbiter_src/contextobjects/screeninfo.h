@@ -60,22 +60,23 @@ public:
 class ScreenObject : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(double logicalDpi READ logicalDpi()  NOTIFY logicalDpiChanged)
-    Q_PROPERTY(double physicalDpi READ physicalDpi() NOTIFY physicalDpiChanged)
-    Q_PROPERTY(QString orientation READ orientation()  NOTIFY orientationChanged)
-    Q_PROPERTY(QString screenName READ screenName()  NOTIFY screenNameChanged)
+    Q_PROPERTY(double logicalDpi READ logicalDpi  NOTIFY logicalDpiChanged)
+    Q_PROPERTY(double physicalDpi READ physicalDpi NOTIFY physicalDpiChanged)
+    Q_PROPERTY(QString orientation READ orientation  NOTIFY orientationChanged)
+    Q_PROPERTY(QString screenName READ screenName  NOTIFY screenNameChanged)
     Q_PROPERTY(QString primaryOrientation READ primaryOrientation NOTIFY primaryOrientationChanged)
-    Q_PROPERTY(QString nativeOrientation READ nativeOrientation() NOTIFY nativeOrientationChanged)
-    Q_PROPERTY(int heightMM READ heightMM() NOTIFY measurementChanged  )
-    Q_PROPERTY(int widthMM READ widthMM() NOTIFY measurementChanged)
+    Q_PROPERTY(QString nativeOrientation READ nativeOrientation NOTIFY nativeOrientationChanged)
+    Q_PROPERTY(int heightMM READ heightMM NOTIFY measurementChanged  )
+    Q_PROPERTY(int widthMM READ widthMM NOTIFY measurementChanged)
     Q_PROPERTY(int heightInches READ heightInches() NOTIFY measurementChanged  )
-    Q_PROPERTY(int widthInches READ widthInches() NOTIFY measurementChanged  )
+    Q_PROPERTY(int widthInches READ widthInches NOTIFY measurementChanged  )
     Q_PROPERTY(QString stringDeviceSize READ stringDeviceSize()  NOTIFY diagonalSizeChanged)
-    Q_PROPERTY(double diagonalSize READ diagonalSize() NOTIFY diagonalSizeChanged)
-    Q_PROPERTY(double diagonalInches READ diagonalInches() NOTIFY diagonalSizeChanged)
-    Q_PROPERTY(int width READ width() NOTIFY sizeChanged)
-    Q_PROPERTY(int height READ height() NOTIFY sizeChanged)
+    Q_PROPERTY(double diagonalSize READ diagonalSize NOTIFY diagonalSizeChanged)
+    Q_PROPERTY(double diagonalInches READ diagonalInches NOTIFY diagonalSizeChanged)
+    Q_PROPERTY(int width READ width NOTIFY sizeChanged)
+    Q_PROPERTY(int height READ height NOTIFY sizeChanged)
     Q_PROPERTY(double pixelRatio READ pixelRatio NOTIFY pixelRatioChanged)
+    Q_PROPERTY(QString pixelDensityString READ pixelDensityString NOTIFY pixelRatioChanged)
 
 public:
     ScreenObject():
@@ -320,8 +321,8 @@ private:
 class ScreenInfo : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(ScreenObject* primaryScreen READ primaryScreen() NOTIFY primaryScreenChanged)
-    Q_PROPERTY(QString screenName READ screenName() NOTIFY primaryScreenChanged)
+    Q_PROPERTY(ScreenObject* primaryScreen READ primaryScreen NOTIFY primaryScreenChanged)
+    Q_PROPERTY(QString screenName READ screenName NOTIFY primaryScreenChanged)
 public:
     explicit ScreenInfo(QObject *parent = 0);
 

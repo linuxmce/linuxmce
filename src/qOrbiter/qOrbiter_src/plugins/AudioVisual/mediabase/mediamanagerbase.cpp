@@ -10,6 +10,7 @@
 MediaManagerBase::MediaManagerBase()
 {
     usingExternalMediaPlayer = false;
+    m_paused = false;
     m_serverAddress = "";
     m_deviceNumber = -1;
     timeCodeServer = new QTcpServer();
@@ -156,8 +157,9 @@ bool MediaManagerBase::muted() const
 
 void MediaManagerBase::setMuted(bool muted)
 {
-    m_muted = muted;
-    emit mutedChanged();
+    Q_UNUSED(muted);
+    m_muted = !m_muted;
+    emit mutedChanged(m_muted);
 }
 QString MediaManagerBase::currentStatus() const
 {
@@ -239,6 +241,7 @@ void MediaManagerBase::setTotalTimeNumeric(const quint64 &totalTimeNumeric)
 {
     m_totalTimeNumeric = totalTimeNumeric;
     emit totalTimeNumericChanged();
+    setTotalTimeFromPlugin(m_totalTimeNumeric);
 }
 QString MediaManagerBase::serverAddress() const
 {
@@ -384,7 +387,7 @@ void MediaManagerBase::setTotalTimeFromPlugin(quint64 inSeconds)
 
     m_totalTime =hrs + ":" + min + ":" +sec;
     m_totalTimeNumeric = s;
-    qDebug() << Q_FUNC_INFO << m_totalTime;
+   // qDebug() << Q_FUNC_INFO << m_totalTime;
     emit totalTimeChanged();
 
 }
@@ -493,7 +496,7 @@ void MediaManagerBase::processTimeCode(quint64 time)
     transmit(timeCodeTick);
     m_currentPosition=timeCodeTick;
     mediaPlayer->positionChanged(m_totalTime, t);
-
+    //qDebug() << timeCodeTick;
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
 
@@ -525,7 +528,7 @@ void MediaManagerBase::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setPluginUrl(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, &qMediaPlayer::currentMediaFileChanged, this, &MediaManagerBase::setFileReference );
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPause(bool)));
+    QObject::connect(mediaPlayer, SIGNAL(pausePlayback(bool)), this, SLOT(setPause(bool)));
 
 
     // QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
@@ -599,7 +602,7 @@ bool MediaManagerBase::pause() const
     return m_paused;
 }
 
-void MediaManagerBase::setPause(bool paused)
+void MediaManagerBase::setPause(bool paused )
 {
     if(m_paused = true)
         m_paused = false;

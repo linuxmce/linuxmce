@@ -28,7 +28,7 @@ Image{
 
     onStatusChanged:{
         if(fade_img.status==Image.Ready){
-                readyToShow()
+                readyToShow()           
 
         } else if (fade_img.status==Image.Error){
             badImageError()

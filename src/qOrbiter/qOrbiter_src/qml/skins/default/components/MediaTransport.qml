@@ -26,7 +26,7 @@ Item{
     Item{
         id:drag_indicator
         height: width
-        width: Style.scaleX(16*2)
+        width: Style.scaleX(8)
         opacity: 0
         //  headerTitle: "Seeking to"
         // useHeader: false
@@ -39,7 +39,7 @@ Item{
 
         StyledText {
             id: drag_label
-            text: roomList.currentEaTimecode.timecodeLength
+            text: roomList.currentEaTimecode.dragString
             anchors.centerIn: parent
             font.pixelSize: Style.scaleY(4)
         }
@@ -55,6 +55,7 @@ Item{
         width: height
         radius: height
         x: dg.drag.active ? dg.x : ( roomList.currentEaTimecode.timecodePosition / roomList.currentEaTimecode.timecodeLength) * bg.width
+
         MouseArea{
             id:dg
             anchors.fill: parent
@@ -64,14 +65,14 @@ Item{
             drag.maximumX:  bg.width
             onPositionChanged: if(drag.active){
                                    drag_indicator.opacity = 1
-                                   roomList.currentEaTimecode.setDragTime(slidertimer)
+                                 roomList.currentEaTimecode.dragTime = slidertimer
                                } else{
                                    drag_indicator.opacity = 0
                                }
             onReleased: {
                 drag_indicator.opacity =0
-                roomList.currentEaTimecode.finishDragging(value);
-                // dceTimecode.finishDragging()
+                roomList.currentEaTimecode.finishDragging(slidertimer);
+
             }
         }
     }

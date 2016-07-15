@@ -59,7 +59,7 @@ Item {
                 onActivated: manager.currentScreen="Screen_1.qml"
             }
             StyledButton{
-                buttonText: roomList.currentRoom
+                buttonText: roomList.currentEA
                 anchors{
                     top:parent.top
                     bottom:parent.bottom

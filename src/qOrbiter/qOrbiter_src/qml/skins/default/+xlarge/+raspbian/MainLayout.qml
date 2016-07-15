@@ -147,7 +147,7 @@ Item {
 
             LargeStyledButton{
                 id:room_display
-                buttonText: roomList.currentRoom
+                buttonText: roomList.currentEA
                 onActivated:{
                     qmlRoot.createPopup(compList)
                 }

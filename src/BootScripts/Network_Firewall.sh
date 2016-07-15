@@ -1166,7 +1166,16 @@ echo "Setting default Policy"
                         fi
                 fi
         done
+		
+	echo "1"
+#If DisableIPv4Firewall = true then add postrouting masquarading to let internal client's connect to the internet.
+	if [[ "$DisableIPv4Firewall" == 1 ]]; then
+		echo "2"
+		echo $IPTABLES -t nat -A POSTROUTING -o $ExtIf -s $IntNet/$IntBitmask ! -d $IntNet/$IntBitmask -j MASQUERADE
+		$IPTABLES -t nat -A POSTROUTING -o $ExtIf -s $IntNet/$IntBitmask ! -d $IntNet/$IntBitmask -j MASQUERADE
+	fi
 
+	
 #Create all the chains manual defined created.
 #ipv4
 if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
