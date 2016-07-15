@@ -16,6 +16,7 @@ GenericPopup{
         Image{
             id:imdb_background
             anchors.fill: parent
+            asynchronous: true
             // onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
         }
 
@@ -24,8 +25,9 @@ GenericPopup{
             property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
             width:profile ? Style.scaleX(25) : Style.scaleX(45)
             height:profile ? Style.scaleY(65) : Style.scaleY(58)
-            source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
+            source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot: ""
             smooth: true
+            asynchronous: true
 
         }
         Rectangle{
@@ -44,25 +46,25 @@ GenericPopup{
             width:  parent.width /2 //Style.listViewWidth_large
             height: parent.height
             anchors.right: content_item.right
-            StyledText{
+            Text{
                 width: parent.width
                 id:title
                 text:qsTr("Title: ")+filedetailsclass.mediatitle
-                fontSize: largeFontSize
+               // fontSize: largeFontSize
             }
-            StyledText{
+            Text{
                 width: parent.width
                 id:album
                 text:qsTr("Album: ")+filedetailsclass.album
             }
 
-            StyledText{
+            Text{
                 width: parent.width
                 id:director
                 text:qsTr("Director: ")+filedetailsclass.director
             }
 
-            StyledText{
+            Text{
                 width: parent.width
                 id:compwriter
                 text:qsTr("Composer/Writer: ")+filedetailsclass.composerlist
@@ -75,7 +77,7 @@ GenericPopup{
                 clip:true
 
                 model:filedetailsclass.performersList
-                delegate: StyledText{
+                delegate: Text{
                     width: parent.width
                     text:modelData.attribute
                 }
@@ -89,31 +91,31 @@ GenericPopup{
             //                text:manager.q_mediaType == 5 ? qsTr("Starring: ")+filedetailsclass.performerlist : qsTr("Artist: ")+filedetailsclass.performerlist
             //            }
 
-            StyledText{
+            Text{
                 width: parent.width
                 id:program
                 text:qsTr("Program: ")+filedetailsclass.program
             }
 
-            StyledText{
+            Text{
                 width: parent.width
                 id:episode
                 text:qsTr("Episode: ")+filedetailsclass.episode
             }
 
-            StyledText{
+            Text{
                 width: parent.width
                 id:description
                 text:qsTr("Synopsis:\n")+filedetailsclass.synop
             }
 
-            StyledText{
+            Text{
                 width: parent.width
                 id:studio
                 text:qsTr("Studio: ")+filedetailsclass.studio
             }
 
-            StyledText{
+            Text{
                 width: parent.width
                 id:release
                 text:qsTr("Filename: ")+filedetailsclass.filename
@@ -147,15 +149,15 @@ GenericPopup{
                     left:parent.left
                 }
 
-                StyledText{
+                Text{
                     id:title2
                     property bool current:false
                     text:qsTr("Title: ")+filedetailsclass.mediatitle
-                    fontSize: largeFontSize
+                   // fontSize: largeFontSize
                    font.bold:current
                 }
 
-                StyledText{
+                Text{
                     width: parent.width
                     property bool current:false
                     id:album2
@@ -163,7 +165,7 @@ GenericPopup{
                     font.bold:current
                 }
 
-                StyledText{
+                Text{
                     id:director2
                     property bool current:false
                     text:qsTr("Director: ")+filedetailsclass.director
@@ -204,7 +206,7 @@ GenericPopup{
                         border.color: "white"
                         border.width: current ? 1 : 0
                     }
-                    StyledText{
+                    Text{
                         width:parent.width
                         height:parent.height
                         text:modelData.attribute
@@ -227,7 +229,7 @@ GenericPopup{
                     right:parent.right
                     top:parent.top
                 }
-                delegate:StyledText{
+                delegate:Text{
                     text:modelData.attribute
                     MouseArea{
                         anchors.fill: parent
@@ -245,8 +247,6 @@ GenericPopup{
                 width: parent.width
                 text:filedetailsclass.synop
             }
-
-
 
         }
         Row{
@@ -272,13 +272,26 @@ GenericPopup{
                 height: parent.height
                 width: parent.width/4
                 arrow: activeFocus
-                onActivated: {manager.playMedia(filedetailsclass.file); fileDetails.close()}
+                onActivated: {
+                    manager.playMedia(filedetailsclass.file, false); fileDetails.close()}
+            }
+            LargeStyledButton{
+                buttonText: qsTr("Queue", "Play Media Selection")
+                height: parent.height
+                width: parent.width/4
+                arrow: activeFocus
+                onActivated: {
+                    manager.playMedia(filedetailsclass.file, true); fileDetails.close()
+                }
             }
             LargeStyledButton{
                 buttonText: qsTr("Move", "Move Media Selection")
                 height: parent.height
                 width: parent.width/4
                 arrow: activeFocus
+                onActivated: {
+                    qmlRoot.createPopup(moveFiles)
+                }
             }
             LargeStyledButton{
                 buttonText: qsTr("Close", "Close window")

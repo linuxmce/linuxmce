@@ -65,13 +65,13 @@ Item{
         }
     }
 
-    Connections {
-        target: manager
-        onScrollToItem: {
-            console.log("scroll to item : " + item+ " of "+media_grid.count);
-            media_grid.positionViewAtIndex(item, ListView.Beginning);
-        }
-    }
+//    Connections {
+//        target: manager
+//        onScrollToItem: {
+//            console.log("scroll to item : " + item+ " of "+media_grid.count);
+//            media_grid.positionViewAtIndex(item, ListView.Beginning);
+//        }
+//    }
 
         Component{
             id:audioItem

@@ -533,21 +533,8 @@ void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pM
     qDebug() << "qMediaPlayer::CMD_Pause_Media";
     setCommandResponse("Need to implement command #39 - Pause Media");
 
-#if defined (QT4) && ! defined (ANDROID)
-    if(mp_manager->mediaObject->state()==Phonon::PausedState){
-        mp_manager->mediaObject->play();
-        m_bPaused=false;
-    } else {
-        mp_manager->mediaObject->pause();
-        m_bPaused=true;
-    }
-
-
-
-#else
-    emit pausePlayback();
+    emit pausePlayback(!mp_manager->pause());
     setCommandResponse("Need to implement command #39 - Pause Media");
-#endif
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     sCMD_Result="OK";
 
@@ -596,9 +583,9 @@ void qMediaPlayer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpe
     cout << "Parm #220 - Report=" << bReport << endl;
     if(iStreamID==i_StreamId){
         if(iMediaPlaybackSpeed==0){
-            pausePlayback();
+            pausePlayback(true);
         } else if(iMediaPlaybackSpeed==1000) {
-            pausePlayback();
+            pausePlayback(false);
         }
     }
     sCMD_Result="OK";
@@ -776,37 +763,8 @@ void qMediaPlayer::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage
 {
     qDebug() << "qMediaPlayer::CMD_Pause";
     setCommandResponse("Need to implement command #92 - Pause");
-
-
-#if defined (QT4) && ! defined (ANDROID)
-    if(mp_manager->mediaObject->state()==Phonon::PausedState){
-        mp_manager->mediaObject->play();
-        m_bPaused=false;
-    } else {
-        mp_manager->mediaObject->pause();
-        m_bPaused=true;
-    }
-
-
-
-#else
-    if(!m_bPaused){
-        emit pausePlayback();
-        setCommandResponse("Need to implement command #39 - Pause Media");
-    }
-    else
-    {
-        emit startPlayback();
-
-    }
-
-    m_bPaused = !m_bPaused;
-#endif
+    emit pausePlayback(!mp_manager->pause());
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-#ifdef __ANDROID__
-    emit pausePlayback();
-#endif
     sCMD_Result="OK";
 }
 
@@ -838,22 +796,9 @@ void qMediaPlayer::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
 {
     cout << "Need to implement command #97 - Mute" << endl;
-#ifndef RPI
-#if defined (QT4) && ! defined (ANDROID)
-    qreal c = mp_manager->audioSink->volume();
-    qWarning() << "Current volume" << c;
-
-    if(mp_manager->audioSink->isMuted()){
-        mp_manager->audioSink->setMuted(false);
-    } else {
-        mp_manager->audioSink->setMuted(true);
-    }
-#else
     mp_manager->setMuted(true);
-#endif
-
-#endif
-    qWarning("Toggled Mute");
+   // emit mutedChanged(true);
+    sCMD_Result = "OK";
 }
 
 //<-dceag-c123-b->

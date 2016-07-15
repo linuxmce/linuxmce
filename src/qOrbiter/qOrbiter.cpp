@@ -1148,11 +1148,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     if (iPK_MediaType == 0){                            //Tell the gui media has stopped on our side.
         emit resetNowPlaying();
         emit setNowPlaying(false);
-        emit gotoQml("Screen_1.qml");
-        emit gotoOsdQml("Screen_1.qml");
+        emit gotoQml("Screen_1.qml");        
         emit setRemotePopup(0);
         b_mediaPlaying = false;
-
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
         emit streamIdChanged(iStreamID);
@@ -1169,12 +1167,11 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
 
         emit setNowPlaying(true);
-        currentScreen = "Screen_"+scrn+".qml";
+        qDebug() << "This orbiter's osd setting is set to " << m_bIsOSD;
+        currentScreen = m_bIsOSD ? osdScrn : "Screen_"+scrn+".qml";
         emit gotoQml(currentScreen); /*!< \note This line set the command for the actual screen change */
         emit currentScreenChanged(currentScreen); /*!< \note This line sets the media return to screen */
-        emit gotoOsdQml(osdScrn);
 
-        qDebug() << "osd " << m_iPK_Screen_RemoteOSD;
         emit setRemotePopup(m_iPK_DesignObj_Remote_Popup);
         internal_streamID = iStreamID;
 
@@ -1674,8 +1671,21 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #252 - Turn_On=" << bTurn_On << endl;
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
-    emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));
+    cout << "sID"       << sID << endl;
 
+    if(m_bIsOSD){
+
+        switch (iPK_Screen) {
+        case 70:
+        case 54:
+        case 49: break;
+        case 48: break;
+        default:   emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));  break;
+        }
+
+    } else {
+      emit gotoQml(QString("Screen_"+QString::number(iPK_Screen)+".qml"));
+    }
 
     qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
 
@@ -1875,6 +1885,11 @@ void qOrbiter::getHouseState()
 
 }
 
+void qOrbiter::handleOSDstatusChanged(bool isOsd)
+{
+    m_bIsOSD = isOsd;
+}
+
 bool DCE::qOrbiter::initDceVars(){
 
 
@@ -2028,9 +2043,8 @@ void DCE::qOrbiter::deinitialize()
     DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iPK_Device_OrbiterPlugin, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(CMD_OrbiterUnRegistered);
     emit routerConnectionChanged(false);
-    Disconnect();
+    Disconnect();   
     emit closeOrbiter();
-
 }
 
 
@@ -2735,6 +2749,8 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
 
 void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 {
+
+    this->thread()->sleep(2);
     string s_value_assignment;
 
     CMD_Get_Attributes_For_Media cmd_file_info(m_dwPK_Device, iPK_Device_MediaPlugin , qs_file_reference.toStdString(), "", &s_value_assignment);
@@ -2742,7 +2758,8 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
     if (SendCommand(cmd_file_info, &pResponse) && pResponse == "OK")
     {
-        GetMediaAttributeGrid(qs_file_reference);
+        QMetaObject::invokeMethod(this, "GetMediaAttributeGrid", Qt::QueuedConnection, Q_ARG(QString, qs_file_reference));
+        //GetMediaAttributeGrid(qs_file_reference);
         emit commandResponseChanged("Requesting file information for "+ qs_file_reference );
 
     }
@@ -2999,7 +3016,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-
+                /*! \todo - add way to cancel out of this if user closes ui */
                 pCell = it->second;
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
@@ -3024,9 +3041,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 else if(attributeType == "Rating") { emit fd_ratingChanged(attribute);              emit newFileDetailAttribute(ATTRIBUTETYPE_Rated_CONST, at,attribute ); }
                 else {
                 }
-#ifdef RPI
-                QThread::msleep(100);
-#endif
+
             }
 
             delete []pData;
@@ -3835,7 +3850,6 @@ void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
     SendCommand(set_current_room);
 
     setUser(i_user);
-
 }
 
 void DCE::qOrbiter::setUser(int user)

@@ -1,10 +1,47 @@
 import QtQuick 2.2
 import org.linuxmce.settings 1.0
 import org.linuxmce.enums 1.0
+import org.linuxmce.fonts 1.0
+
 import "../"
 Item{
     id:settingsOption
     state:"basic"
+
+
+
+    Component{
+        id:fontsView
+        ListView{
+            id:fontView
+            clip:true
+            model:fontsHelper.fontList
+            anchors.fill: parent
+            delegate: Item{
+                height: Style.listViewItemHeight
+                width: parent.width
+                Rectangle{
+                    anchors.fill: parent
+                    color:"transparent"
+                    border.color: "white"
+                    border.width: 2
+                }
+
+                StyledText{
+                    anchors.centerIn: parent
+                    color: "white"
+                    text:model.modelData.familyName
+                    font.family: model.modelData.familyName
+                }
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: fontsHelper.currentFont = model.modelData.familyName
+                }
+            }
+        }
+    }
+
     Flickable{
         id:basicOptions
         anchors.fill: parent
@@ -85,9 +122,11 @@ Item{
                 id: font_option
                 cat:SettingsType.Settings_Text
                 val:SettingsKey.Setting_Text_font
-                settingName: qsTr("Font Option")
-                onActivated: {extendedView.model=manager.systemFontList();
-                    settingsOption.state="extended"}
+                settingName: qsTr("Font Options")
+                onActivated: {
+                    viewHolder.sourceComponent = fontsView
+                    settingsOption.state="extended"
+                }
             }
             SettingsOption {
                 id: lang_option
@@ -106,43 +145,15 @@ Item{
         }
     }
 
-    ListModel{
-        id:fonts
-        ListElement{
-            name:"Times"
-        }
-        ListElement{
-            name:"Times"
-        }
-        ListElement{
-            name:"Times"
-        }
-        ListElement{
-            name:"Times"
-        }
-        ListElement{
-            name:"Times"
-        }
-    }
-
     Item{
         id:extendedOptions
         anchors.fill: parent
-
-        ListView{
-            id:extendedView
-            model:10
+        Loader{
+            id:viewHolder
             anchors.fill: parent
-            delegate: Item{
-                height: Style.listViewItemHeight
-                width: parent.width
-                StyledText{
-                    anchors.centerIn: parent
-                    color: "white"
-                    text:index
-                }
-            }
         }
+
+
     }
 
     states: [

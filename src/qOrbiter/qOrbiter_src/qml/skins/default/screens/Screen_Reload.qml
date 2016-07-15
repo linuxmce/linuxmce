@@ -1,8 +1,9 @@
 import QtQuick 2.2
 import "../components"
+import "../."
 StyledScreen {
     anchors.fill: parent
-    screen: qsTr("Regenerate Configuration")
+    screen: qsTr("Router Reloading")
 
 
 
@@ -10,21 +11,11 @@ StyledScreen {
         useHeader: false
         anchors.centerIn: parent
 
-        Component.onCompleted: {
-            manager.regenOrbiter()
-        }
-
-        Connections{
-            target:manager
-            onConfigurationChanged:{
-                manager.currentScreen="Screen_1.qml"
-            }
-        }
-
-
         StyledText{
             anchors.centerIn: parent
-            text:"Regenerating Configuration \n please be patient."
+            text:"The LinuxMCE Core is reloading. Please be patient and it will retart in a moment"
+            width: parent.width
+            fontSize: Style.appFontSize_title
         }
     }
 

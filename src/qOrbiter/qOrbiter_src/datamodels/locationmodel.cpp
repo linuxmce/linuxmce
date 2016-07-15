@@ -184,22 +184,27 @@ void LocationModel::clear()
 
 void LocationModel::setLocation(int ea, int room)
 {
-
+qDebug() << Q_FUNC_INFO;
     foreach(LocationItem* item, m_list) {
         if(item->roomVal()== room )
         {
             QVariantList l = item->entertainAreas();
             foreach(QVariant t, l){
                 QVariantMap tl = t.toMap();
+                qDebug() << "Searching EA " << ea ;
                 if(tl["ea_number"].toInt()==ea){
                     i_currentEA = ea;
                     i_currentRoom= room;
-                    setCurrentEA(tl["ea_name"].toString());
+                    if(tl["ea_number"].toInt()==0){
+                         setCurrentEA(item->id());
+                    } else {
+                        setCurrentEA(tl["ea_name"].toString());
+                    }
+                    qDebug() << Q_FUNC_INFO << "Current EA "<< currentEA;
                     setCurrentRoom(item->id());
                     //setCurrentItem(indexFromItem(item).row());                          .
                 }
             }
-
         }
     }
 

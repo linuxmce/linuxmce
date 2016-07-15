@@ -22,7 +22,7 @@ public:
 
     inline QString id() const {  return ident; }
     QHash<int, QByteArray> roleNames() const { return m_roleNames; }
-    void setRoleNames(QHash<int, QByteArray> roleNames) { m_roleNames = roleNames; qDebug() <<roleNames; }
+    void setRoleNames(QHash<int, QByteArray> roleNames) { m_roleNames = roleNames;/* qDebug() <<roleNames;*/ }
 
     QString ident;
     

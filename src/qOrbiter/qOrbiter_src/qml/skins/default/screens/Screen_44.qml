@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.screens 1.0
+
 import "../components"
 StyledScreen {
     id:advancedScreen
@@ -205,13 +206,16 @@ StyledScreen {
                         text:qsTr("Width: %1 mm").arg(screenInfo.primaryScreen.widthMM)
                     }
                     StyledText{
-
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Diagonal Size: %1 (in) Screen Size:: %2").arg(screenInfo.primaryScreen.diagonalInches).arg(screenInfo.primaryScreen.stringDeviceSize)
                     }
                     StyledText{
-
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Pixel Density Rating: %1 ").arg(screenInfo.primaryScreen.pixelDensityString)
+                    }
+                    StyledText{
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Width: %1 (px)").arg(screenInfo.primaryScreen.width)

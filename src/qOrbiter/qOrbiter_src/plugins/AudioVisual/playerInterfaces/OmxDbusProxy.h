@@ -99,7 +99,9 @@ public Q_SLOTS: // METHODS
     {
         QList<QVariant> argumentList;
         QDBusPendingReply<qlonglong> d = asyncCallWithArgumentList(QLatin1String("Duration"), argumentList);
-       emit durationChanged(d.value());
+        d.waitForFinished();
+      //  qDebug() << Q_FUNC_INFO << d.value() /1000;
+        emit durationChanged(d.value() /1000);
     }
 
     inline QDBusPendingReply<bool> Fullscreen()
@@ -114,10 +116,13 @@ public Q_SLOTS: // METHODS
         return asyncCallWithArgumentList(QLatin1String("HasTrackList"), argumentList);
     }
 
-    inline QDBusPendingReply<QString> Identity()
+    inline /*QDBusPendingReply<QString>*/ void Identity()
     {
         QList<QVariant> argumentList;
-        return asyncCallWithArgumentList(QLatin1String("Identity"), argumentList);
+        QDBusPendingReply<QString>i = asyncCallWithArgumentList(QLatin1String("Identity"), argumentList);
+        i.waitForFinished();
+      //  qDebug() << Q_FUNC_INFO << i.value();
+        emit identityChanged(i.value());
     }
 
     inline QDBusPendingReply<double> MaximumRate()
@@ -132,10 +137,10 @@ public Q_SLOTS: // METHODS
         return asyncCallWithArgumentList(QLatin1String("MinimumRate"), argumentList);
     }
 
-    inline QDBusPendingReply<> Mute()
+    inline /*QDBusPendingReply<>*/ void Mute()
     {
         QList<QVariant> argumentList;
-        return asyncCallWithArgumentList(QLatin1String("Mute"), argumentList);
+        asyncCallWithArgumentList(QLatin1String("Mute"), argumentList);
     }
 
     inline /*QDBusPendingReply<QString>*/ void PlaybackStatus()
@@ -151,8 +156,7 @@ public Q_SLOTS: // METHODS
         QList<QVariant> argumentList;
         QDBusPendingReply<qlonglong> p = asyncCallWithArgumentList(QLatin1String("Position"), argumentList);
         p.waitForFinished();
-        qDebug() << Q_FUNC_INFO << p.value();
-        emit positionChanged(p.value());
+        emit positionChanged(p.value() /1000);
 
     }
 
@@ -168,26 +172,28 @@ public Q_SLOTS: // METHODS
         return asyncCallWithArgumentList(QLatin1String("SupportedUriSchemes"), argumentList);
     }
 
-    inline QDBusPendingReply<> Unmute()
+    inline /*QDBusPendingReply<>*/ void Unmute()
     {
         QList<QVariant> argumentList;
-        return asyncCallWithArgumentList(QLatin1String("Unmute"), argumentList);
+        asyncCallWithArgumentList(QLatin1String("Unmute"), argumentList);
     }
 
-    inline QDBusPendingReply<double> Volume(double volume)
+    inline /*QDBusPendingReply<double>*/ void Volume(double volume)
     {
         QList<QVariant> argumentList;
         argumentList << QVariant::fromValue(volume);
-        return asyncCallWithArgumentList(QLatin1String("Volume"), argumentList);
+        asyncCallWithArgumentList(QLatin1String("Volume"), argumentList);
     }
 
     inline QDBusPendingReply<double> Volume()
     {
         QList<QVariant> argumentList;
-        return asyncCallWithArgumentList(QLatin1String("Volume"), argumentList);
+        QDBusPendingReply<double> v  = asyncCallWithArgumentList(QLatin1String("Volume"), argumentList);
+        v.waitForFinished();
+        emit volumeChanged(v.value());
     }
 
- signals: // SIGNALS
+signals: // SIGNALS
     void playbackStatusChanged(QString status);
     void durationChanged(qlonglong duration);
     void volumeChanged(double volume);
@@ -195,6 +201,8 @@ public Q_SLOTS: // METHODS
     bool canControlChanged(bool controlAllowed);
     bool canGoNextChanged(bool allowFwd);
     bool canGoPreviousChanged(bool allowBack);
+    void stopped();
+    void identityChanged(QString ident);
 
 
 
@@ -256,7 +264,7 @@ public Q_SLOTS: // METHODS
     inline /*QDBusPendingReply<>*/ void Pause()
     {
         QList<QVariant> argumentList;
-         asyncCallWithArgumentList(QLatin1String("Pause"), argumentList);
+        asyncCallWithArgumentList(QLatin1String("Pause"), argumentList);
     }
 
     inline /*QDBusPendingReply<>*/ void Previous()
@@ -267,16 +275,19 @@ public Q_SLOTS: // METHODS
 
     inline /*QDBusPendingReply<qlonglong>*/ void Seek(qlonglong microseconds)
     {
+       // qDebug() << Q_FUNC_INFO << microseconds;
         QList<QVariant> argumentList;
-        argumentList << QVariant::fromValue(microseconds);
-         asyncCallWithArgumentList(QLatin1String("Seek"), argumentList);
+        argumentList << QVariant::fromValue(microseconds);       
+        QDBusPendingReply<qlonglong> s= asyncCallWithArgumentList(QLatin1String("Seek"), argumentList);
+        s.waitForFinished();
+       // qDebug() << s.value();
     }
 
     inline /*QDBusPendingReply<bool>*/ void SelectAudio(int index)
     {
         QList<QVariant> argumentList;
         argumentList << QVariant::fromValue(index);
-         asyncCallWithArgumentList(QLatin1String("SelectAudio"), argumentList);
+        asyncCallWithArgumentList(QLatin1String("SelectAudio"), argumentList);
     }
 
     inline QDBusPendingReply<bool> SelectSubtitle(int index)
@@ -288,6 +299,7 @@ public Q_SLOTS: // METHODS
 
     inline /* QDBusPendingReply<qlonglong>*/ void SetPosition(const QString &path, qlonglong position)
     {
+        qDebug() << Q_FUNC_INFO << position;
         QList<QVariant> argumentList;
         argumentList << QVariant::fromValue(path) << QVariant::fromValue(position);
         QDBusPendingReply<qlonglong> r = asyncCallWithArgumentList(QLatin1String("SetPosition"), argumentList);
@@ -303,7 +315,15 @@ public Q_SLOTS: // METHODS
     inline /*QDBusPendingReply<>*/ void Stop()
     {
         QList<QVariant> argumentList;
-         asyncCallWithArgumentList(QLatin1String("Stop"), argumentList);
+        asyncCallWithArgumentList(QLatin1String("Stop"), argumentList);
+    }
+
+    inline /*QDBusPendingReply<>*/ bool StopWithConfirmation()
+    {
+        QList<QVariant> argumentList;
+       QDBusPendingReply<> r= asyncCallWithArgumentList(QLatin1String("Stop"), argumentList);
+        r.waitForFinished();
+       return true;
     }
 
 Q_SIGNALS: // SIGNALS
@@ -335,16 +355,16 @@ Q_SIGNALS: // SIGNALS
 };
 
 namespace org {
-  namespace freedesktop {
-    namespace DBus {
-      typedef ::OmxDbusProxy Properties;
-    }
-  }
-  namespace mpris {
-    namespace MediaPlayer2 {
-      typedef ::OmxDbusProxy Player;
-      typedef ::OmxDbusProxy Root;
-    }
-  }
+namespace freedesktop {
+namespace DBus {
+typedef ::OmxDbusProxy Properties;
+}
+}
+namespace mpris {
+namespace MediaPlayer2 {
+typedef ::OmxDbusProxy Player;
+typedef ::OmxDbusProxy Root;
+}
+}
 }
 #endif

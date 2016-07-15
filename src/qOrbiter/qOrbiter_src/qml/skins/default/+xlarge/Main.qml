@@ -78,6 +78,7 @@ Item{
 
     Component.onCompleted: {
         manager.writeConfig()
+         manager.m_bIsOSD = true
     }
 
     Keys.onPressed: {

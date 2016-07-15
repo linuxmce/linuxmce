@@ -420,7 +420,8 @@ SOURCES += \
     datamodels/diskmediaitem.cpp \
     managerHelpers/taskshelper.cpp \
     managerHelpers/dcemediahelper.cpp \
-    managerHelpers/routerhelper.cpp
+    managerHelpers/routerhelper.cpp \
+    managerHelpers/fontshelper.cpp
 
 
 
@@ -531,7 +532,8 @@ HEADERS += \
     datamodels/diskmediaitem.h \
     managerHelpers/taskshelper.h \
     managerHelpers/dcemediahelper.h \
-    managerHelpers/routerhelper.h
+    managerHelpers/routerhelper.h \
+    managerHelpers/fontshelper.h
 
 
 

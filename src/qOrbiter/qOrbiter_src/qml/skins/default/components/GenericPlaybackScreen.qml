@@ -326,28 +326,28 @@ Panel{
             }
         }
 
-        Slider{
-            id:altTransport
-            height: parent.height *.04
-            width: parent.width *.75
-            visible:mediaScrollerTarget.visible
-            updateValueWhileDragging: false
-            tickmarksEnabled: true
+//        Slider{
+//            id:altTransport
+//            height: parent.height *.04
+//            width: parent.width *.75
+//            visible:mediaScrollerTarget.visible
+//            updateValueWhileDragging: false
+//            tickmarksEnabled: true
 
-            minimumValue: 0
-            maximumValue: roomList.currentEaTimecode.timecodeLength
-            value:roomList.currentEaTimecode.timecodePosition
-            onPressedChanged: {
-                if(!pressed)
-                    roomList.currentEaTimecode.finishDragging(value);
-            }
+//            minimumValue: 0
+//            maximumValue: roomList.currentEaTimecode.timecodeLength
+//            value:roomList.currentEaTimecode.timecodePosition
+//            onPressedChanged: {
+//                if(!pressed)
+//                    roomList.currentEaTimecode.finishDragging(value);
+//            }
 
-            anchors{
-                bottom:transport_buttons.top
-                horizontalCenter: parent.horizontalCenter
-                bottomMargin:10
-            }
-        }
+//            anchors{
+//                bottom:transport_buttons.top
+//                horizontalCenter: parent.horizontalCenter
+//                bottomMargin:10
+//            }
+//        }
 
         PlaylistPanel {
             id: playlistPanel
