@@ -40,7 +40,9 @@
 #include "qmap.h"
 #include "../pluto_media/Define_AttributeType.h"
 
-
+/*!
+ * \brief The FileDetailsObject class. Used to represent a single Attribute object
+ */
 class FileDetailsObject : public QObject
 {
     Q_OBJECT
