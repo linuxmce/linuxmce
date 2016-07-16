@@ -4,7 +4,7 @@ import "../components"
 import "../"
 GenericPopup{
     id:fileDetails
-    title: qsTr("Media Information", "File Details")
+    title: qsTr("Media Information for %1", "File Details").arg(filedetailsclass.filename)
     content: Item{
         id:content_item
         property int bgImageProp:manager.q_subType ===("1"||"13") ? 43 : manager.q_attributetype_sort===53 ? 43 :36
@@ -18,75 +18,155 @@ GenericPopup{
             // onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
         }
 
-        Image {
-            id: filedetailsimage
-            property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
-            width:profile ? Style.scaleX(25) : Style.scaleX(45)
-            height:profile ? Style.scaleY(65) : Style.scaleY(58)
-            source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
-            smooth: true
+//        Image {
+//            id: filedetailsimage
+//            property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
+//            width:profile ? Style.scaleX(25) : Style.scaleX(45)
+//            height:profile ? Style.scaleY(65) : Style.scaleY(58)
+//            source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
+//            smooth: true
+//        }
+
+        StyledText{
+            id:title
+            text:qsTr("Title: ")+filedetailsclass.mediatitle
+            fontSize: Style.appFontSize_title
+            anchors{
+                left:parent.left
+                top:parent.top
+            }
         }
 
         Column{
            id:metadata
            spacing: 5
-           width: Style.listViewWidth_large
+           width: Style.listViewWidth_medium
            height: parent.height
            anchors.right: content_item.right
-           StyledText{
-               width: parent.width
-               id:title
-               text:qsTr("Title: ")+filedetailsclass.mediatitle
-           }
+
            StyledText{
                 width: parent.width
                id:album
                text:qsTr("Album: ")+filedetailsclass.album
+               visible: filedetailsclass.album !== ""
            }
-           StyledText{
-                width: parent.width
-               id:director
-               text:qsTr("Director: ")+filedetailsclass.director
+           GenericListModel{
+               id:directors
+                height: extended ? parent.height*.30 : parent.height*.10
+                 extended: false
+               width: parent.width
+               clip:true
+               label:"Director"
+               model:filedetailsclass.directorList
+               delegate: StyledText{
+                   color:"white"
+                   width: parent.width
+                   text:modelData.attribute
+                   MouseArea{
+                       anchors.fill: parent
+                       onClicked:{
+                           manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                           fileDetails.close()
+                       }
+                   }
+               }
            }
-           StyledText{
-                width: parent.width
-               id:compwriter
-               text:qsTr("Composer/Writer: ")+filedetailsclass.composerlist
+           GenericListModel{
+               id:comps
+                height: extended ? parent.height*.30 : parent.height*.10
+                 extended: false
+               width: parent.width
+               clip:true
+               label:"Writers"
+               model:filedetailsclass.writersList
+               delegate: StyledText{
+                   color:"white"
+                   width: parent.width
+                   text:modelData.attribute
+                   MouseArea{
+                       anchors.fill: parent
+                       onClicked:{
+                           manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                           fileDetails.close()
+                       }
+                   }
+               }
            }
-           StyledText{
-                width: parent.width
-                height:manager.q_mediaType == 5 ? 0 : parent.height *.15
-               id:artists
-               text:manager.q_mediaType == 5 ? "" : qsTr("Artist: ")+filedetailsclass.performerlist
+           GenericListModel{
+               id:perfs
+              height: extended ? parent.height*.30 : parent.height*.10
+               width: parent.width
+               clip:true
+               label:"Performers"
+               extended: true
+               model:filedetailsclass.performersList
+               delegate: StyledText{
+                   color:"white"
+                   width: parent.width
+                   text:modelData.attribute
+
+                   MouseArea{
+                       anchors.fill: parent
+                       onClicked:{
+                           manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                           fileDetails.close()
+                       }
+                   }
+               }
            }
            StyledText{
                width: parent.width
                id:program
                text:qsTr("Program: ")+filedetailsclass.program
+               visible: filedetailsclass.program !== ""
            }
            StyledText{
                 width: parent.width
                id:episode
                text:qsTr("Episode: ")+filedetailsclass.episode
+                 visible: filedetailsclass.episode !== ""
            }
-           StyledText{
-                width: parent.width
-               id:description
-               text:qsTr("Synopsis:\n")+filedetailsclass.synop
 
-           }
-           StyledText{
-                width: parent.width
-               id:studio
-               text:qsTr("Studio: ")+filedetailsclass.studio
-           }
-           StyledText{
-                width: parent.width
-               id:release
-               text:qsTr("Filename: ")+filedetailsclass.filename
+           GenericListModel{
+               id:studios
+               height: extended ? parent.height*.30 : parent.height*.10
+               width: parent.width
+               clip:true
+                extended: true
+               label:qsTr("Studios")
+               model:filedetailsclass.studioList
+               delegate: StyledText{
+                   color:"white"
+                   width: parent.width
+                   text:modelData.attribute
+                   MouseArea{
+                       anchors.fill: parent
+                       onClicked:{
+                           manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                           fileDetails.close()
+                       }
+                   }
+               }
            }
 
         }
+
+
+        Rectangle{
+            anchors.fill: description
+            color: "black"
+            opacity: .65
+        }
+
+
+        StyledText{
+            width: parent.width
+           id:description
+           text:qsTr("Synopsis:\n")+filedetailsclass.synop
+           anchors{
+               bottom:media_options.top
+           }
+       }
 
         Row{
             id:media_options

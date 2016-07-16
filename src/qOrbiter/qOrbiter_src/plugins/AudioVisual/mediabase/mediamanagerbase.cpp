@@ -10,6 +10,7 @@
 MediaManagerBase::MediaManagerBase()
 {
     usingExternalMediaPlayer = false;
+    m_paused = false;
     m_serverAddress = "";
     m_deviceNumber = -1;
     timeCodeServer = new QTcpServer();
@@ -527,7 +528,7 @@ void MediaManagerBase::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setPluginUrl(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, &qMediaPlayer::currentMediaFileChanged, this, &MediaManagerBase::setFileReference );
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPause(bool)));
+    QObject::connect(mediaPlayer, SIGNAL(pausePlayback(bool)), this, SLOT(setPause(bool)));
 
 
     // QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
@@ -601,7 +602,7 @@ bool MediaManagerBase::pause() const
     return m_paused;
 }
 
-void MediaManagerBase::setPause(bool paused)
+void MediaManagerBase::setPause(bool paused )
 {
     if(m_paused = true)
         m_paused = false;

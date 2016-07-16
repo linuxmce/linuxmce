@@ -70,7 +70,9 @@ void FileDetailsClass::clear(){
     m_attributeMap.clear();
     m_performerMap.clear();
     m_performerList.clear();
+    m_composerWriterList.clear();
     m_studioList.clear();
+    m_directorList.clear();
     directors.clear();
     composers.clear();
     composerlist.clear();
@@ -94,6 +96,7 @@ void FileDetailsClass::clear(){
 
     setScreenshot("");
     setFile("");
+    setFilename("");
     setSynop("");
     setTitle("");
     setTitle2("");
