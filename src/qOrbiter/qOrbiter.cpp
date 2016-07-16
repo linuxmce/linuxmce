@@ -3041,10 +3041,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 else if(attributeType == "Rating") { emit fd_ratingChanged(attribute);              emit newFileDetailAttribute(ATTRIBUTETYPE_Rated_CONST, at,attribute ); }
                 else {
                 }
-#ifdef RPI
-                  qApp->processEvents(QEventLoop::AllEvents,350);
-                QThread::msleep(350);
-#endif
+
             }
 
             delete []pData;
