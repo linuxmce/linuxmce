@@ -22,7 +22,7 @@ StyledScreen {
 
     GenericListModel {
         id: genericListContainer
-        label: qsTr("Scenarios in  %1 ").arg(roomList.currentRoom)
+        label: qsTr("Scenarios for  %1 ").arg(roomList.currentEA)
         anchors{
             left:parent.left
             top:now_playing_button.bottom
