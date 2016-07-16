@@ -99,7 +99,7 @@ QVariant GenericFlatListModel::data(const QModelIndex &index, int role) const
     const_cast<GenericFlatListModel*>(this)->m_iLastRow = index.row();
     // Only return Loading... for the first role
     if (role == Qt::UserRole+1) {
-        qDebug() << "not loaded";
+     //  qDebug() << "not loaded";
         return QString("Loading...");
     } else {
         return QVariant("");
@@ -468,9 +468,9 @@ void GenericFlatListModel::refreshData() {
 
 void GenericFlatListModel::requestMoreData(int row, int direction) {
 
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData row = %d", row);
+   // LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData row = %d", row);
     if (row >= m_requestStart && row <= m_requestEnd) {
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData row already requested");
+      //  LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData row already requested");
     return;
     }
     // TODO: need to examine threading/signals/slots to determine if we need to use a mutex

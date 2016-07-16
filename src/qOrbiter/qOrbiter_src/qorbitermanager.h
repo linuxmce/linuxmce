@@ -1812,7 +1812,9 @@ public slots:
 #ifndef simulate
         m_testScreenSize = -1;
         resetScreenSize();
+        qDebug() << "Using non simulated values";
 #else
+        qDebug() << "Using non test values for device.";
         int tH = qorbiterUIwin->height();
         int tW = qorbiterUIwin->width() ;
         double diag= (((sqrt( pow( (double)tH,2.0)+pow((double)tW, 2.0) )) *0.0393701) / m_screenInfo->primaryScreen()->physicalDpi()) *10;
@@ -1930,6 +1932,7 @@ private slots:
 private:
     QString m_currentRouter;
     QString m_skinSelector;
+    QString m_currentSizeSelector;
     QQmlFileSelector *selector;
     QFileSelector *m_selector;
     ScreenData::DeviceRange m_deviceSize;
