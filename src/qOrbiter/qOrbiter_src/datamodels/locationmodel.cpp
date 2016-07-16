@@ -194,7 +194,11 @@ void LocationModel::setLocation(int ea, int room)
                 if(tl["ea_number"].toInt()==ea){
                     i_currentEA = ea;
                     i_currentRoom= room;
-                    setCurrentEA(tl["ea_name"].toString());
+                    if(tl["ea_number"].toInt()==0){
+                         setCurrentEA(item->id());
+                    } else {
+                        setCurrentEA(tl["ea_name"].toString());
+                    }
                     setCurrentRoom(item->id());
                     //setCurrentItem(indexFromItem(item).row());                          .
                 }

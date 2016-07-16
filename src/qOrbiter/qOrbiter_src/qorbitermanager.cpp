@@ -3022,8 +3022,6 @@ void qorbiterManager::showExistingOrbiter(const QList<QObject*> l )
     Q_UNUSED(l);
 }
 
-
-
 void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text)
 {
     emit textChanged(sDesignObj, sValue, iPK_Text);
