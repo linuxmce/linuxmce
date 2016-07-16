@@ -214,7 +214,7 @@ Item{
                     font.letterSpacing: 2
                     smooth: true
                     width: parent.width
-                    font.pointSize: 42
+                    font.pixelSize: 42
                     horizontalAlignment: Text.AlignHCenter
                     opacity: .55
                     font.weight: Font.Bold
@@ -226,7 +226,7 @@ Item{
                     font.letterSpacing: 2
                     smooth: true
                     width: parent.width
-                    font.pointSize: 42
+                    font.pixelSize:  42
                     font.weight: Font.Light
                     horizontalAlignment: Text.AlignHCenter
                     opacity: .55
