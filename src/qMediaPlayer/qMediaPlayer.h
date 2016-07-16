@@ -977,7 +977,7 @@ public:
 
         void stopCurrentMedia();
         void startPlayback();
-        void pausePlayback();
+        void pausePlayback(bool paused);
 
         void getScreenShot();
         void setZoomLevel(QString zoom);
