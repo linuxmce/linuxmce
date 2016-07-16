@@ -2654,7 +2654,7 @@ bool qorbiterManager::setSizeSelector()
         } else {
             t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         }
-
+        m_currentSizeSelector = m_screenInfo->primaryScreen()->deviceSizeString() ;
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
         m_window->setPosition(250, 250);
@@ -2676,6 +2676,7 @@ bool qorbiterManager::setSizeSelector()
         }
 
         t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
+       m_currentSizeSelector = testDeviceString;
     }
 
     m_selector->setExtraSelectors(t);
@@ -2712,14 +2713,15 @@ bool qorbiterManager::createThemeStyle()
 
     qDebug() << "Skin entry file set to " << m_skinEntryFile;
     QString fp;
+
 #ifdef NOQRC
     qDebug() << "Using local path for NOQRC flag";
-    fp =m_localQmlPath+"skins/"+currentSkin+"/+"+m_screenInfo->primaryScreen()->deviceSizeString()+"/Style.qml";
+    fp =m_localQmlPath+"skins/"+currentSkin+"/+"+m_currentSizeSelector+"/Style.qml";
 #else
     if(m_bIsOSD)
         fp ="skins/"+currentSkin+"/+md/Style.qml";
     else
-        fp ="skins/"+currentSkin+"/Style.qml";
+        fp ="skins/"+currentSkin+"/+"+m_currentSizeSelector+"/Style.qml";
 #endif
     qWarning() << QString("Selecting Style.qml for theme %1 for skin %2 from path %3").arg(getCurrentTheme()).arg(currentSkin).arg(fp);
     qDebug() << Q_FUNC_INFO << "Current Selectors \n\t" << m_selector->allSelectors().join("\n\t");
@@ -3059,7 +3061,7 @@ void qorbiterManager::reloadQml()
     qDebug() << m_appEngine->baseUrl();
 
     qDebug() << Q_FUNC_INFO << "Current Selectors \n" << m_selector->allSelectors().join("\n\t");
-    QString fp ="skins/"+currentSkin+"/+"+m_screenInfo->primaryScreen()->deviceSizeString()+"/Style.qml";
+    QString fp ="skins/"+currentSkin+"/+"+m_currentSizeSelector+"/Style.qml";
     qDebug () << Q_FUNC_INFO << selectPath(fp);
     QString filePath = m_selector->select(fp);
 
