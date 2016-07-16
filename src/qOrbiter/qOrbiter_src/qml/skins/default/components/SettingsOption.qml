@@ -95,7 +95,7 @@ Item{
                 }
 
                 text: String(settingValue)
-                font.pointSize:  Style.appFontSize_title
+                font.pixelSize:  Style.appFontSize_list
                 color: "white"
                 onAccepted: {
                     settingsRow.valueChanged(text)
@@ -115,14 +115,14 @@ Item{
 
             verticalCenter: parent.verticalCenter
         }
-        fontSize: Style.appFontSize_title
+        fontSize: Style.appFontSize_list
         text:settingName
     }
     
     StyledText{
         id:settingValDisplay
         visible: !useSwitch
-        fontSize: Style.appFontSize_title
+        fontSize: Style.appFontSize_list
         anchors{
             right:parent.right
             verticalCenter: parent.verticalCenter

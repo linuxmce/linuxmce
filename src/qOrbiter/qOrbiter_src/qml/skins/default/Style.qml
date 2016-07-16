@@ -70,9 +70,6 @@ Item{
      property int appFontSize_title:14*dpRatio
 
     property int fontSize_small:6*dpRatio
-
-
-
     property int fontSize_medium:appFontSize_description
     property int fontSize_large:appFontSize_title
 

@@ -15,7 +15,7 @@ QtObject{
         console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
     }
 
-    readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio/2
+    readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
 
     //picture ratios - will be moved to cpp class
     property double dvdPosterRatio:955/1080
@@ -57,18 +57,18 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:42*dpRatio
-    readonly property int appFontSize_header:36*dpRatio
-    readonly property int appFontSize_description:28*dpRatio
-    readonly property int appFontSize_title:64*dpRatio
+    readonly property int appFontSize_list:11*dpRatio+settings.fontSizeMod
+    readonly property int appFontSize_header:16*dpRatio+settings.fontSizeMod
+    readonly property int appFontSize_description:12*dpRatio+settings.fontSizeMod
+    readonly property int appFontSize_title:14*dpRatio+settings.fontSizeMod
 
-    property int fontSize_small:appFontSize_list
-    property int fontSize_medium:appFontSize_description
-    property int fontSize_large:appFontSize_title
+    property int fontSize_small:6*dpRatio+settings.fontSizeMod
+    property int fontSize_medium:appFontSize_description+settings.fontSizeMod
+    property int fontSize_large:appFontSize_title+settings.fontSizeMod
 
-    property int fontSize_listItem:28*dpRatio
-    property int fontSize_listTitle:36*dpRatio
-    property int fontSize_listAccent:24*dpRatio
+    property int fontSize_listItem:9*dpRatio+settings.fontSizeMod
+    property int fontSize_listTitle:11*dpRatio+settings.fontSizeMod
+    property int fontSize_listAccent:10*dpRatio+settings.fontSizeMod
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)
