@@ -1307,8 +1307,30 @@ void VDRPlugin::BuildChannelList()
 void VDRPlugin::UpdateEPGFromVDR(string channelId, bool file)
 {
 	string sVDRResponse="";
+	bool bCacheFailed=false;
+	
     if (file) {
-        FileUtils::ReadTextFile("/var/cache/vdr/epg.data", sVDRResponse);
+        if (!FileUtils::FileExists("/var/cache/var/epg.data"))
+        {
+            bCacheFailed=true;
+            LoggerWrapper::GetInstance()->Write(LV_WARNING,"VDRPlugin::UpdateEPGFromVDR(%s,%b): file /var/cache/var/epg.data does not exist. Attempting a fetch from VDR.",channelId.c_str(),file);
+        }
+        else if (FileUtils::FileSize("/var/cache/var/epg.data")<1)
+        {
+            bCacheFailed=true;
+            LoggerWrapper::GetInstance()->Write(LV_WARNING,"VDRPlugin::UpdateEPGFromVDR(%s,%b): file /var/cache/var/epg.data has a zero length. Attempting a fetch from VDR.",channelId.c_str(),file);
+        }
+        
+        if (!bCacheFailed)
+        {
+            LoggerWrapper::GetInstance()->Write(LV_STATUS,"VDRPlugin::UpdateEPGFromVDRD(%s,%b): cache file /var/cache/var/epg.data exists. Using it.",channelId.c_str(),file);
+            FileUtils::ReadTextFile("/var/cache/vdr/epg.data", sVDRResponse);
+        }
+        else
+        {
+            // it failed above, let's ask VDR for the channel data.
+            UpdateEPGFromVDR(channelId,false);
+        }
     } else {
         string cmd = "LSTE ";
         if (!channelId.empty())
