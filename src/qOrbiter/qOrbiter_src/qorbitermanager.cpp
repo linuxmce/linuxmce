@@ -2838,6 +2838,7 @@ void qorbiterManager::reloadHandler()
 {
     setConnectedState(false);
     setReloadStatus(true);
+    setCurrentScreen("Screen_Reload.qml", true);
 }
 
 void qorbiterManager::disconnectHandler()
