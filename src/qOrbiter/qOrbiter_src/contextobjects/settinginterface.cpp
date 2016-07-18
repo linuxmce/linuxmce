@@ -74,6 +74,40 @@ void SettingInterface::setReady(bool value)
     emit readyChanged();
 }
 
+void SettingInterface::setLastLocation(int room, int entArea)
+{
+    qDebug() << Q_FUNC_INFO << room << " :: " << entArea;
+
+    m_settings.setValue("locations/room", room);
+    m_settings.setValue("locations/entertainArea", entArea);
+    qDebug() << Q_FUNC_INFO << m_settings.value("locations/entertainArea");
+   qDebug() << Q_FUNC_INFO << m_settings.value("locations/room");
+
+}
+
+int SettingInterface::getLastRoom()
+{
+
+    qDebug() << Q_FUNC_INFO << m_settings.value("locations/room");
+    if(m_settings.value("locations/room")==QVariant() ){
+        return -1;
+    }
+    return m_settings.value("locations/room").toInt();
+
+}
+
+int SettingInterface::getLastEa()
+{
+
+      qDebug() << Q_FUNC_INFO << m_settings.value("locations/entertainArea");
+    if(m_settings.value("locations/entertainArea")==QVariant()){
+
+        return -1;
+    }
+    return m_settings.value("locations/entertainArea").toInt();
+
+}
+
 
 
 void SettingInterface::initializeSettings()

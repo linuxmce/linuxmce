@@ -82,6 +82,11 @@ signals://for 'live properties'
     void fontSizeModChanged();
 
 public slots:
+
+    void setLastLocation(int room, int entArea);
+    int getLastRoom();
+    int getLastEa();
+
     void log(QString message);
 
     void destroySettingsData();

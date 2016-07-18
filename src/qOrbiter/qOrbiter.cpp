@@ -3850,7 +3850,6 @@ void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
     SendCommand(set_current_room);
 
     setUser(i_user);
-
 }
 
 void DCE::qOrbiter::setUser(int user)
