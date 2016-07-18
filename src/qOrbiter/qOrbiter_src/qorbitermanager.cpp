@@ -105,9 +105,21 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_window(NULL),
     m_dceRequestNo(1),
     m_useQueueInsteadOfInstantPlay(false), m_bIsOSD(isOsd),
-    usingExternal(false)
+    usingExternal(false),
+    m_routerHelper(new RouterHelper(qOrbiter_ptr))
+
 {
-    m_routerHelper = new RouterHelper(qOrbiter_ptr);
+
+    mediaPlayerID=-1; orbiterInit=true; m_ipAddress="";  m_bStartingUp= true;  homeNetwork=false;  alreadyConfigured = false;  iFK_Room = -1;
+    iea_area= -1; bAppError = false; isPhone = 0; hostDevice=HostSystemData::OTHER_EMBEDDED; appConfigPath=""; status="starting";
+    setUsingExternal(false); disconnectCount=0;  reloadCount=0;
+    i_current_command_grp = 0;  i_current_mediaType =0;  videoDefaultSort = "13";  audioDefaultSort = "2"; photoDefaultSort = "13";
+    gamesDefaultSort = "49"; i_currentFloorplanType = 0; backwards = false;  screenSaverTimeout = 60; screenPowerOffTimeout = 60; currentIndex=0;
+
+    iFK_Room = settingsInterface->getLastRoom();
+    iea_area = settingsInterface->getLastEa();
+
+   // qDebug() << QString("Loaded location settings Room %1 and EA %2").arg(QString::number(iFK_Room)).arg(QString::number(iea_area));
 
     m_mediaHelper = new DceMediaHelper(qOrbiter_ptr, m_routerHelper,this);
     connect(m_mediaHelper, &DceMediaHelper::forwardDceCommand, this, &qorbiterManager::sendDceCommand);
@@ -198,11 +210,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_appEngine->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 
 
-    mediaPlayerID=-1; orbiterInit=true; m_ipAddress="";  m_bStartingUp= true;  homeNetwork=false;  alreadyConfigured = false;  iFK_Room = -1;
-    iea_area= -1; bAppError = false; isPhone = 0; hostDevice=HostSystemData::OTHER_EMBEDDED; appConfigPath=""; status="starting";
-    setUsingExternal(false); disconnectCount=0;  reloadCount=0;
-    i_current_command_grp = 0;  i_current_mediaType =0;  videoDefaultSort = "13";  audioDefaultSort = "2"; photoDefaultSort = "13";
-    gamesDefaultSort = "49"; i_currentFloorplanType = 0; backwards = false;  screenSaverTimeout = 60; screenPowerOffTimeout = 60; currentIndex=0;
+
 
 #ifndef __ANDROID__
     b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
@@ -226,8 +234,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     setupUiSelectors();
     initializeGridModel();
     setupContextObjects();
-
-
     // Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
     prepareModelPool(5);
 
@@ -436,8 +442,13 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     QDomElement defaults = root.firstChildElement("Default");
     QString sPK_User = defaults.attribute("sPK_User");
     if(!alreadyConfigured){
-        iFK_Room = defaults.attribute("DefaultRoom").toInt();
-        iea_area = defaults.attribute("DefaultEA").toInt();
+
+//        if(iFK_Room == -1)
+//        iFK_Room = defaults.attribute("DefaultRoom").toInt();
+
+//        if(iea_area == -1)
+//        iea_area = defaults.attribute("DefaultEA").toInt();
+
         iPK_User = defaults.attribute("PK_User").toInt();
         if(iPK_User == 0)
             iPK_User =1;
@@ -554,11 +565,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
         }
     }
-    m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
-    m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
-
-
-
+    m_lRooms->sdefault_Ea = iea_area;
     setDceResponse("Room Done");
 
     //--LIGHTING SCENARIOS----------------------------------------------------------------------------------
@@ -776,7 +783,6 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         genreFilter->appendRow(new AttributeSortItem(name,pk, "",false,genreFilter));
     }
 
-
     if(!alreadyConfigured){
 
         this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
@@ -808,9 +814,10 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     alreadyConfigured=true;
     setDceResponse("Properties Done");
     setDceResponse("Setting location");
-    setActiveRoom(iFK_Room, iea_area);
+     setActiveRoom(iFK_Room , iea_area);
     setCurrentUser(QString::number(iPK_User));
     beginSetup();
+
 }
 
 void qorbiterManager::getConfiguration()
@@ -888,8 +895,7 @@ void qorbiterManager::updateSelectedAttributes(QString attributes)
 
 //takes care of un-registering the orbiter from the DCERouter and then shutting down
 void qorbiterManager::closeOrbiter()
-{
-    qDebug() << Q_FUNC_INFO;
+{  
     if(writeConfig()){
         setDceResponse("Shutting Down");
     }
@@ -1300,7 +1306,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     emit qtMessage("LocationModel::" +m_lRooms->find(QString::number(room))) ;
 #endif
     //setCurrentRoom(m_lRooms->find(QString::number(room))->data(1).toString());
-    m_lRooms->setLocation(ea, room);
+
 
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(ea);
@@ -1314,14 +1320,13 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     m_appEngine->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
     m_appEngine->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
 
+  m_lRooms->setLocation(ea, room);
 }
 
 
 void qorbiterManager::execGrp(int grp)
 {
     i_current_command_grp = grp;
-
-
     QApplication::processEvents(QEventLoop::AllEvents);
     emit executeCMD(grp);
     qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
@@ -1332,8 +1337,17 @@ void qorbiterManager::execGrp(int grp)
 
 void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
+
+    if(room == -1 && ea == -1)
+        return;
+
     iFK_Room = room;
     iea_area = ea;
+
+    if(room != -1 && ea!=-1){
+          settingsInterface->setLastLocation(room, ea);
+    }
+
     sEntertainArea = QString::number(iea_area).toStdString();
     emit locationChanged(room, ea);
     // pqOrbiter->setLocation(room, ea);
@@ -1495,8 +1509,6 @@ void qorbiterManager::regenComplete(QNetworkReply*r)
             m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imgFile, m_isHidden, m_lRooms));
             LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
-
-
         }
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
@@ -1640,16 +1652,13 @@ void qorbiterManager::regenComplete(QNetworkReply*r)
     }
     setDceResponse("Security Done");
     QApplication::processEvents(QEventLoop::AllEvents);
-
-
-
     binaryConfig.clear();
     tConf.clear();
     configData.clear();
     //---update object image
     getMediaDevices();
     setDceResponse(" Remote Config Complete");
-    emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
+
     if(!alreadyConfigured && mb_useNetworkSkins){
         setOrbiterStatus(true);
     }
@@ -1657,11 +1666,8 @@ void qorbiterManager::regenComplete(QNetworkReply*r)
     alreadyConfigured=true;
 
     emit configurationChanged();
-    int returnRoom = iFK_Room;
-    int returnEa = iea_area;
-
-    setActiveRoom(-1, -1);
-    setActiveRoom(returnRoom, returnEa);
+    setActiveRoom(iFK_Room , iea_area);
+    emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     delayedReloadQml();
 }
 
@@ -1853,7 +1859,7 @@ bool qorbiterManager::loadSkins(QUrl base)
         setDceResponse("Desktop Skin Search Path:"+ desktopQmlPath.dirName());
         localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
-        qDebug() << localSkins.count();
+
         qDebug()<<"inside of skins we find" << localSkins.join(",");
         if(localSkins.count()==0){
             tskinModel->addSkin("default");
@@ -2343,7 +2349,7 @@ void qorbiterManager::setHouseMode(QString pass, int mode, QString handling)
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
-    qDebug() << "Incoming user::" << inc_user;
+   // qDebug() << "Incoming user::" << inc_user;
     sPK_User = userList->find(inc_user)->id();
     int user = inc_user.toInt();
     emit userChanged(user);
@@ -2628,6 +2634,7 @@ void qorbiterManager::beginSetup()
         setUiReady(true);
     }
 
+
 }
 
 bool qorbiterManager::setSizeSelector()
@@ -2790,6 +2797,7 @@ bool qorbiterManager::restoreSettings()
     QString extRouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_ExternalHostname).toString();
     mb_useNetworkSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
     QString last =  settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used).toString();
+    //setLocation( settingsInterface->getLastRoom(), settingsInterface->getLastEa() );
     qDebug() << "Current router " << m_currentRouter;
     /*Fix Me! */ currentSkin="default";
     qDebug() << "Using network skins?" << mb_useNetworkSkins;
@@ -2959,7 +2967,6 @@ void qorbiterManager::setCurrentScreen(int s, bool force)
 
 void qorbiterManager::setCurrentOsdScreen(int s, bool force)
 {
-    qDebug() << Q_FUNC_INFO;
 
     QString i = QString("Screen_%1.qml").arg(QString::number(s));
 
@@ -2973,8 +2980,7 @@ void qorbiterManager::setCurrentOsdScreen(int s, bool force)
 void qorbiterManager::setCurrentOsdScreen(QString s, bool force )
 {
 
-    qDebug() << Q_FUNC_INFO;
-    if(!s.contains(".qml")){
+     if(!s.contains(".qml")){
         setCurrentOsdScreen(s.toInt(), force);
         return;
     }
