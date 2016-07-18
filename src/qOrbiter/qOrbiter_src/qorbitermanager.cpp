@@ -175,23 +175,14 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 #endif
 
     m_testScreenSize =testSize;
-
     m_fontsHelper = new FontsHelper();
-
-
     QString mlocale = QLocale::system().name().append(".qm");
-
     if(  translator.load(":/lang/translations/"+mlocale) ) {  }
     qApp->installTranslator(&translator);
-
-#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
     m_screenInfo = new ScreenInfo();
     m_selector=new QFileSelector(m_appEngine);
     selector=new QQmlFileSelector(m_appEngine);
-    // selector->setSelector(m_selector);
-    // qDebug() << "Selector List\n" << m_selector->allSelectors().join(",");
-    //  selector->setSelector(m_selector);
-#endif
+
 
 #ifdef ANDROID
     m_appEngine->addImportPath("assets:/imports/androidComponents");
