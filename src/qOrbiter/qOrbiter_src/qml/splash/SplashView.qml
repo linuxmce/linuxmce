@@ -48,7 +48,7 @@ Item {
 
         Text {
             id: ui_name
-            text: screenInfo.primaryScreen.stringDeviceSize+"UI"
+            text: manager.currentSizeSelector+"UI"
             font.pixelSize: theme.appFontSize_description
             font.weight: Font.Light
             anchors.right: optionIcon.left

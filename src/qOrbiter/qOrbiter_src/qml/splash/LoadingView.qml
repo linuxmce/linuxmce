@@ -20,7 +20,7 @@ Item {
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         text: qsTr("LinuxMCE is Loading device %1, Please Wait").arg(manager.iPK_Device)
         color:"white"
-        font.pixelSize: theme.fontSize_large
+        font.pixelSize: Style.fontSize_large
         anchors.centerIn: parent
     }
 
