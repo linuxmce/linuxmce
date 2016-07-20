@@ -25,8 +25,8 @@ Item {
             anchors.centerIn: parent
             visible:avcodes_root.state==="ready"
             fontSize:scaleY(8)
-            isBold: true
-        }
+           // isBold: true
+
     }
     HeaderListView {
         id: headerListView

@@ -7,10 +7,7 @@ import QtGraphicalEffects 1.0
 Item{
     id:indexContent
     anchors.fill: parent
-    Component.onCompleted: {
-        manager.setAppH(640)
-        manager.setAppW(800)
-    }
+
 
 
 

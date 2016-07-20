@@ -4,7 +4,7 @@ import "."
 Item{
     id:sw_root
     width: parent.width
-    height: Style.listViewItemHeight
+    height: theme.listViewItemHeight
     property bool enabled:false
     property string switchLabel:qsTr("Use Network Skins?")
     signal triggered()
@@ -16,11 +16,11 @@ Item{
     Text {
         id: skinsLabel
         text: switchLabel
-        color:Style.apptext_color_active
-        font.pixelSize: Style.appFontSize_list
+        color:theme.apptext_color_active
+        font.pixelSize: theme.appFontSize_list
         anchors{
             verticalCenter: parent.verticalCenter
-            leftMargin: Style.listViewMargin
+            leftMargin: theme.listViewMargin
             left: parent.left
         }
         
@@ -35,7 +35,7 @@ Item{
 
         anchors{
             right:parent.right
-            rightMargin: Style.listViewMargin
+            rightMargin: theme.listViewMargin
             verticalCenter: parent.verticalCenter
         }
     }
@@ -65,7 +65,7 @@ Item{
             }
             PropertyChanges {
                 target: inner_rect
-                color:Style.appbutton_confirm_color
+                color:theme.appbutton_confirm_color
             }
         },
         State{
@@ -78,7 +78,7 @@ Item{
             }
             PropertyChanges {
                 target: inner_rect
-                color:Style.appbutton_disabled_color
+                color:theme.appbutton_disabled_color
             }
         }
 
@@ -88,9 +88,9 @@ Item{
         Transition {
             from: "*"
             to: "*"
-            ColorAnimation {  duration: Style.transitionFadeTime }
+            ColorAnimation {  duration: theme.transitionFadeTime }
             AnchorAnimation{
-                duration: Style.transition_animationTime
+                duration: theme.transition_animationTime
                 easing.type: Easing.InCubic
             }
         }

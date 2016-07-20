@@ -30,7 +30,6 @@ StyledScreen {
             bottom:parent.bottom
         }
 
-
         model:qmlRoot.scenarios
         delegate:  Item {
             height: Style.appButtonHeight

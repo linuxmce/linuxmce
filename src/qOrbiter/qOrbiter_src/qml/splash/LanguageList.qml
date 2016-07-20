@@ -6,13 +6,13 @@ Item{
 
     Rectangle{
         anchors.fill: languageList
-        color: Style.appcolor_background_medium
+        color: theme.appcolor_background_medium
     }
     ListView{
         anchors.fill: languageList
         model:languages
         delegate: Item{
-            height: Style.listViewItemHeight
+            height: theme.listViewItemHeight
             width: parent.width
             Rectangle{
                 anchors.fill: parent
@@ -22,7 +22,7 @@ Item{
 
             Text{
                 anchors.centerIn: parent
-                font.pointSize: Style.appFontSize_list
+                font.pointSize: theme.appFontSize_list
                 text:name
                 color:"white"
             }
