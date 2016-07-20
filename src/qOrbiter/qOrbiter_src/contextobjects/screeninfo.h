@@ -263,7 +263,7 @@ public slots:
 signals:
     void logicalDpiChanged();
     void physicalDpiChanged();
-    void orientationChanged();
+    void orientationChanged(ScreenObject *scrn, Qt::ScreenOrientation o);
     void screenNameChanged();
     void screenChanged();
     void refreshRateChanged();
@@ -284,7 +284,7 @@ private slots:
     void setScreenSize(ScreenData::DeviceRange sz){m_deviceSize=sz; emit screenSizeChanged();  }
     void setPixelScale(ScreenData::PixelDensityScale pz){m_pixelScale = pz; emit pixelDensityChanged(); }
     void setScreenGeometry(QRect s){m_height= s.height(); m_width = s.width(); emit geometryChanged(); }
-    void setOrientation(Qt::ScreenOrientation e) {m_orientation = e; emit orientationChanged();}
+    void setOrientation(Qt::ScreenOrientation e) {m_orientation = e; emit orientationChanged(this, e);}
     void setRefreshRate(qreal r) {m_refreshRate = r; emit refreshRateChanged();}
     void setStringDeviceSize(QString s){qs_deviceSize = s; }
 
@@ -341,6 +341,7 @@ signals:
     void screenCountChanged();
     void screenListChanged();
     void screenSizeChanged();
+    void screenOrientationChanged(Qt::ScreenOrientation o);
 
 
 public slots:
@@ -350,6 +351,29 @@ public slots:
             m_primaryScreen = m_screenList.find(name).value();
             emit primaryScreenChanged();
             qDebug() << "begone";
+        }
+    }
+
+   Q_INVOKABLE QString deviceSizeToString(int d){
+        switch(d){
+        case 4: return "small"; break;
+        case 7: return "medium"; break;
+        case 10: return "large"; break;
+        case 13: return "xlarge"; break;
+        default:
+            return QString();
+            break;
+        }
+    }
+
+    void handleScreenObjectOrientationChanged(ScreenObject *obj, Qt::ScreenOrientation o){
+        qDebug() << Q_FUNC_INFO;
+        if(m_screenList.count() == 1){
+            emit screenOrientationChanged(o);
+        } else{
+            if(primaryScreen()->screenName() == obj->screenName()){
+                emit screenOrientationChanged(o);
+            }
         }
     }
 

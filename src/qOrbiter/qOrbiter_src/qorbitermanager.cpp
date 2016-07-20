@@ -107,9 +107,10 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_useQueueInsteadOfInstantPlay(false), m_bIsOSD(isOsd),
     usingExternal(false),
     m_routerHelper(new RouterHelper(qOrbiter_ptr))
-
 {
 
+    m_currentSizeSelector="default";
+    connect(settingsInterface, &SettingInterface::deviceIdChanged, this, &qorbiterManager::setDeviceNumber);
     mediaPlayerID=-1; orbiterInit=true; m_ipAddress="";  m_bStartingUp= true;  homeNetwork=false;  alreadyConfigured = false;  iFK_Room = -1;
     iea_area= -1; bAppError = false; isPhone = 0; hostDevice=HostSystemData::OTHER_EMBEDDED; appConfigPath=""; status="starting";
     setUsingExternal(false); disconnectCount=0;  reloadCount=0;
@@ -164,6 +165,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 #ifdef __ANDROID__
     int testSize=-1;
 #endif
+
     if(settingsInterface->ready){
         if(restoreSettings()){  }
     }
@@ -174,12 +176,15 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_appEngine->load(QUrl(path));
 #endif
 
-    m_testScreenSize =testSize;
+
     m_fontsHelper = new FontsHelper();
     QString mlocale = QLocale::system().name().append(".qm");
     if(  translator.load(":/lang/translations/"+mlocale) ) {  }
     qApp->installTranslator(&translator);
     m_screenInfo = new ScreenInfo();
+    m_testScreenSize =testSize;
+    m_currentSizeSelector = m_screenInfo->deviceSizeToString(m_testScreenSize);
+    emit currentSizeSelectorChanged();
     m_selector=new QFileSelector(m_appEngine);
     selector=new QQmlFileSelector(m_appEngine);
 
@@ -199,9 +204,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     connect(m_screenInfo, SIGNAL(screenSizeChanged()), this, SLOT(resetScreenSize()));
     // connect(qorbiterUIwin->engine(), SIGNAL(warnings(QList<QQmlError>)), this, SLOT(handleViewError(QList<QQmlError>)));
     m_appEngine->rootContext()->setContextProperty("screenInfo", m_screenInfo);
-
-
-
 
 #ifndef __ANDROID__
     b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
@@ -250,21 +252,20 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     if(m_appEngine->rootObjects().length()!=0){
         m_window =qobject_cast<QQuickWindow*>(engine->rootObjects().at(0));
         connect(m_window, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
-        //  connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+        connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         connect(m_window, &QQuickWindow::widthChanged, [=](int w) { setAppW(w);} );
-        connect(m_window, &QQuickWindow::heightChanged, [=](int h) {setAppH(h);} );
-
-        connect(m_window->screen(), SIGNAL(primaryOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
-        // connect(m_window, SIGNAL(contentOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
+        connect(m_window, &QQuickWindow::heightChanged, [=](int h) {setAppH(h);} );      
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
-
 
         if(m_testScreenSize==0){
             m_window->setVisibility(QWindow::FullScreen);
         } else{
+
+
             m_window->setVisibility(QWindow::Windowed);
             m_window->resize(appWidth, appHeight);
+             checkOrientation(m_window->size());
             m_window->show();
         }
 
@@ -1985,77 +1986,8 @@ bool qorbiterManager::writeConfig()
     // qDebug() << Q_FUNC_INFO;
     //setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Last_Used, m_currentRouter);
-    QDomDocument localConfig;
-    QString xmlPath;
 
-#ifdef Q_OS_IOS
-    xmlPath = mobileStorageLocation+"/config.xml";
-    appConfigPath = xmlPath;
-#elif MACBUILD
-    xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
-#elif __ANDROID__
-    xmlPath = mobileStorageLocation+"/config.xml";
-#elif WIN32
-    xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
-#else
-    xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
-#endif
-    QFile localConfigFile;
-
-    if(appConfigPath.isEmpty()){
-        appConfigPath = xmlPath;
-        qDebug() << "Empty application write path. adjusted to: " <<xmlPath;
-    }
-    qDebug() << appConfigPath;
-    localConfigFile.setFileName(appConfigPath);
-
-    if (!localConfigFile.open(QFile::ReadWrite)){
-        setDceResponse(localConfigFile.errorString());
-        setDceResponse("Local Config is missing!");
-        return false;
-    } else {
-        if (!localConfig.setContent(&localConfigFile)){
-            setDceResponse("Cannot set document type!");
-            return false;
-        } else {
-            localConfigFile.close();
-            localConfigFile.remove(); // have to remove and then re-create!
-            QDomElement configVariables = localConfig.documentElement().toElement();
-            configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(m_ipAddress);           //internal ip
-            configVariables.namedItem("routeraddress").attributes().namedItem("id").setNodeValue(internalHost);     //internal hostname
-#ifdef QT5
-            configVariables.namedItem("qt5skin").attributes().namedItem("id").setNodeValue(currentSkin);
-#elif NECESSITAS
-            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
-#endif
-            configVariables.namedItem("routerport").attributes().namedItem("id").setNodeValue(routerPort);
-            configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(externalHost);     //externalip
-            configVariables.namedItem("externalHost").attributes().namedItem("id").setNodeValue(externalHost);      //external host
-
-            configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
-
-            configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
-            configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
-            setDceResponse("Writing device type as "+ QString::number(isPhone));
-            configVariables.namedItem("phone").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
-            configVariables.namedItem("lastconnect").attributes().namedItem("id").setNodeValue(usingExternal ? "external" : "internal");
-            if(!mobileStorageLocation.isEmpty()){
-                configVariables.namedItem("mobile_storage").attributes().namedItem("id").setNodeValue(mobileStorageLocation);
-            }
-
-            QByteArray output = localConfig.toByteArray();
-            localConfigFile.open(QFile::ReadWrite);
-            if (!localConfigFile.write(output)){
-                localConfigFile.close();
-                setDceResponse("save failed");
-                qWarning("Save Failed");
-                return false;
-            }
-            localConfigFile.close();
-            setDceResponse("Save succeded to " + mobileStorageLocation);
-            return true;
-        }
-    }
+    return true;
 }
 
 void qorbiterManager::setStringParam(int paramType, QString param)
@@ -2531,6 +2463,7 @@ void qorbiterManager::setupEarlyContexts()
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
     // qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
     m_screenInfo = new ScreenInfo();
+    connect(m_screenInfo, SIGNAL(screenOrientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)) );
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -2593,7 +2526,7 @@ void qorbiterManager::setupUiSelectors(){
 #ifdef simulate
 
 #ifdef NOQRC
-    m_localQmlPath="../qOrbiter_src/qml/";
+    m_localQmlPath="/../qOrbiter_src/qml/";
 #else
     m_localQmlPath="qrc:/qml/";
 #endif
@@ -2618,7 +2551,7 @@ void qorbiterManager::beginSetup()
     }
 
     if(setSizeSelector() ){
-
+    qDebug() << "Setting size ";
     }
 
     if(createThemeStyle()){
@@ -2631,6 +2564,7 @@ void qorbiterManager::beginSetup()
 bool qorbiterManager::setSizeSelector()
 {
 
+    qDebug() << Q_FUNC_INFO << " enter ";
     if(!m_window){
         qWarning() << " Window Not Set ";
         return false;
@@ -2675,6 +2609,7 @@ bool qorbiterManager::setSizeSelector()
 
         t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
        m_currentSizeSelector = testDeviceString;
+       emit currentSizeSelectorChanged();
     }
 
     m_selector->setExtraSelectors(t);
@@ -2682,6 +2617,8 @@ bool qorbiterManager::setSizeSelector()
     setCurrentTheme(t.join("|"));
 
     qDebug() << Q_FUNC_INFO << "QFile Selector Set to "<< m_selector->allSelectors().join("\n");
+    qDebug() << Q_FUNC_INFO << " exit ";
+
     return true;
 }
 
@@ -2876,6 +2813,7 @@ int qorbiterManager::loadSplash()
  */
 void qorbiterManager::checkOrientation(QSize s)
 {
+    qDebug() << Q_FUNC_INFO;
     if(s.height()==0 || s.width() == 0) return;
 
     setDceResponse("checkOrientation(QSize)::start");
@@ -2889,10 +2827,7 @@ void qorbiterManager::checkOrientation(QSize s)
 #ifdef QT5
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
-
-
-    //return;
-
+qDebug() << Q_FUNC_INFO ;
     switch (o) {
     case Qt::InvertedLandscapeOrientation: qDebug() << "Inverted Landscape";
     case Qt::LandscapeOrientation: qDebug() << "Landscape";
@@ -3117,6 +3052,11 @@ void qorbiterManager::resetScreenSize(){
         qDebug () << Q_FUNC_INFO << "Using device information ";
         t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
+
+    appHeight = m_screenInfo->primaryScreen()->height() ;
+      appWidth = m_screenInfo->primaryScreen()->width();
+      emit appHeightChanged();
+      emit appWidthChanged();
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
         m_window->resize(appWidth, appHeight);
         m_window->showNormal();

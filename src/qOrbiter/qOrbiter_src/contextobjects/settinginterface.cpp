@@ -171,6 +171,7 @@ void SettingInterface::initializeSettings()
 
     log(tr("Settings are ready"));
     setReady(true);
+    emit deviceIdChanged(-1);
 }
 
 void SettingInterface::destroySettingsData()
@@ -179,6 +180,7 @@ void SettingInterface::destroySettingsData()
     m_persistentName = getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_DeviceName).toString();
     m_settings.clear();
     qDebug() << m_settings.allKeys();
+
     initializeSettings();
 }
 
@@ -187,7 +189,6 @@ void SettingInterface::log(QString message)
     QString logMsg;
     logMsg=QDateTime::currentDateTime().toLocalTime().toString()+"::"+message;
     emit newLogMessage(logMsg);
-
 }
 
 void SettingInterface::setOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk, QVariant sval)
