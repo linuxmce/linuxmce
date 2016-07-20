@@ -370,7 +370,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id){
         // swapSkins("default");
         //  emit setSkinStatus(true);
     }
-
+return true;
 }
 
 void qorbiterManager::initiateRestart(){
