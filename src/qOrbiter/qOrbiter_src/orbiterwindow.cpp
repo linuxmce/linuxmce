@@ -76,11 +76,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     m_appEngine->addImportPath("lib");
     m_appEngine->addImportPath("qml");
 
+    QQmlFileSelector *winSelector = new QQmlFileSelector(m_appEngine->rootContext()->engine());
     if(isOsd){
-        QQmlFileSelector *winSelector = new QQmlFileSelector(m_appEngine->rootContext()->engine());
         winSelector->setExtraSelectors(QStringList() << "md" );
     }
-   // qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();
+
+
+    // qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
     m_appEngine->rootContext()->setContextProperty("window", this);
 #ifdef NOQRC
@@ -98,37 +100,45 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         case ScreenData::Device_Small:
             testW=480;
             testH=854;
-           mainView.setGeometry(0,0,480*.75, 854*.75);
+            mainView.setGeometry(0,0,480*.75, 854*.75);
+             winSelector->setExtraSelectors(QStringList() << "small");
             break;
         case ScreenData::Device_Medium:
             testW=1280;
-            testH=720;          
+            testH=720;
             mainView.setGeometry(0,0,1280*.65, 720*.65);
+             winSelector->setExtraSelectors(QStringList() << "medium");
             break;
         case ScreenData::Device_Large:
             testW=1980;
             testH=1080;
-             mainView.setGeometry(0,0,1920*.65, 1080*.65);
+            mainView.setGeometry(0,0,1920*.65, 1080*.65);
+             winSelector->setExtraSelectors(QStringList() << "large");
             break;
         default:
             testW=800;
             testH=600;
-              mainView.setGeometry(0,0,800*.65, 600*.65);
+            mainView.setGeometry(0,0,800*.65, 600*.65);
             break;
         }
+
+//        QFileSelector sel(winSelector);
+//        qDebug() << sel.allSelectors();
+
 
     } else {
 #ifdef ANDROID
         // mainView.showFullScreen();
+
 #elif defined(Q_OS_IOS)
         // mainView.showFullScreen();
 #else
         if(fullScreen){
             //  mainView.showFullScreen();
         } else {
-           testW=800;
+            testW=800;
             testH=600;
-            //  mainView.showNormal();
+          mainView.setGeometry(0,0,800*.65, 600*.65);
         }
 #endif
     }

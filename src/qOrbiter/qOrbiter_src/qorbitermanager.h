@@ -243,6 +243,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
 
     Q_PROPERTY (bool useQueueInsteadOfInstantPlay READ useQueueInsteadOfInstantPlay NOTIFY useQueueInsteadOfInstantPlayChanged)
+    Q_PROPERTY(QString currentSizeSelector READ currentSizeSelector  NOTIFY currentSizeSelectorChanged)
 
 
     /*!
@@ -591,6 +592,7 @@ Param 10 - pk_attribute
     void setCurrentRouter( QString currentRouter) {if(m_currentRouter==currentRouter) return; m_currentRouter = currentRouter; emit currentRouterChanged();  }
 
 signals:
+    void currentSizeSelectorChanged();
     void useQueueInsteadOfInstantPlayChanged();
     void forceReloadRouter();
     void newDceAlert(QString text, QVariant tokens, int timeout, int interruption);
@@ -1005,7 +1007,7 @@ public slots:
     void setLocation(const int& , const int& ) ;
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
-    void setAppH(int h) { if(appHeight==h)return;  appHeight = h; emit appHeightChanged(); }
+    void setAppH(int h) { if(appHeight==h)return;  appHeight = h; emit appHeightChanged(); setOrientation(appHeight > appWidth); }
     int getAppH() { return appHeight; }
 
     void setAppW(int w) {if(appWidth==w)return;  appWidth = w; emit appWidthChanged();}
@@ -1808,16 +1810,16 @@ public slots:
     }
 
     void updateProfileSelector(){
-
+qDebug() << Q_FUNC_INFO << " enter ";
 #ifndef simulate
         m_testScreenSize = -1;
         resetScreenSize();
         qDebug() << "Using non simulated values";
 #else
-        qDebug() << "Using non test values for device.";
+        qDebug() << "Using test values for device.";
         int tH = qorbiterUIwin->height();
         int tW = qorbiterUIwin->width() ;
-        double diag= (((sqrt( pow( (double)tH,2.0)+pow((double)tW, 2.0) )) *0.0393701) / m_screenInfo->primaryScreen()->physicalDpi()) *10;
+        double diag= m_testScreenSize; // (((sqrt( pow( (double)tH,2.0)+pow((double)tW, 2.0) )) *0.0393701) / m_screenInfo->primaryScreen()->physicalDpi()) *10;
 
         qDebug() << diag ;
         if(  diag <= 4.5  ){
@@ -1859,6 +1861,7 @@ public slots:
         }
 
 #endif
+        qDebug() << Q_FUNC_INFO << " exit ";
     }
 
     Q_INVOKABLE QString selectPath(QString p) {
@@ -1902,6 +1905,9 @@ public slots:
 
     Q_INVOKABLE QVariant systemFontList();
 
+    QString currentSizeSelector(){return m_currentSizeSelector; }
+    void setCurrentDeviceSize(QString newSize){ m_currentSizeSelector = newSize; emit currentSizeSelectorChanged();  }
+
 private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
 
@@ -1936,6 +1942,7 @@ private:
     QQmlFileSelector *selector;
     QFileSelector *m_selector;
     ScreenData::DeviceRange m_deviceSize;
+
 
     int m_testScreenSize;
 

@@ -23,6 +23,8 @@ ScreenInfo::ScreenInfo(QObject *parent) :
         connect(screen, SIGNAL(refreshRateChanged(qreal)), newScreen, SLOT(setRefreshRate(qreal)));
         connect(screen, SIGNAL(orientationChanged(Qt::ScreenOrientation)), newScreen, SLOT(setOrientation(Qt::ScreenOrientation)));
         connect(screen, SIGNAL(geometryChanged(QRect)), newScreen, SLOT(setScreenGeometry(QRect)));
+        connect(newScreen, SIGNAL(orientationChanged(ScreenObject*,Qt::ScreenOrientation)), this, SLOT(handleScreenObjectOrientationChanged(ScreenObject*,Qt::ScreenOrientation)));
+
         m_screenList.insert(screen->name(), newScreen);
         qDebug() << Q_FUNC_INFO << " Processed screen" << newScreen->screenName();
         newScreen->setPixelRatio();

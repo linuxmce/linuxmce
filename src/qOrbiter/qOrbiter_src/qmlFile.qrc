@@ -9,7 +9,6 @@
         <file>qml/splash/LoadingView.qml</file>
         <file>qml/splash/ConnectionBox.qml</file>
         <file>qml/splash/Switch.qml</file>
-        <file>qml/splash/Style.qml</file>
         <file>qml/splash/StatusRow.qml</file>
         <file>qml/splash/SplashView.qml</file>
         <file>qml/splash/Splash.qml</file>
@@ -295,5 +294,7 @@
         <file>qml/skins/default/components/GenericOsdRemote.qml</file>
         <file>qml/skins/default/+small/+xhdpi/Style.qml</file>
         <file>qml/skins/default/images/Screen_Reload.jpg</file>
+        <file>splash/Style.qml</file>
+        <file>qml/splash/Style.qml</file>
     </qresource>
 </RCC>
