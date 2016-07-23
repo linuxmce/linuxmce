@@ -164,23 +164,99 @@ function firewall($output,$dbADO) {
 		}
 	}
 	
-	//Select known devices with a ipaddress.
-	$queryknowndeviceip="SELECT IPaddress, Description  FROM `Device` WHERE `IPaddress`!='' ORDER BY IPaddress ASC"; 
-	$resknowndeviceip=$dbADO->Execute($queryknowndeviceip);
-	while ($row=$resknowndeviceip->FetchRow()) {
-			$ip[]=$row['IPaddress'];
-			$name[]=$row['Description'];
-		}
-	$iplistdb=array_combine($name, $ip);
+	// extract NIC IPv6 settings from core
+	$queryNC='SELECT * FROM Device_DeviceData WHERE FK_Device=? AND FK_DeviceData=?';
+	$resNC=$dbADO->Execute($queryNC,array($coreID,$GLOBALS['IPv6NetworkInterfaces']));
 	
-		//get ipadresses from dhcp
-	$readFile = "/var/lib/dhcp/dhcpd.leases";
-	$test = new Leases;
-	if (!isset($_GET['error']) && !$test->readLease($readFile)) {
-		header("Location: index.php?section=DHCPLeases&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." $readFile");
-	exit();
-	}
+	if($resNC->RecordCount()>0){
+		$rowNC=$resNC->FetchRow();
+		$Ipv6interfacesArray=explode('|',$rowNC['IK_DeviceData']);
+		
+		// get external NIC IPv6 settings
+		$ipv6externalInterfaceArray=explode(',',$interfacesArray[0]);
+		$ipv6externalMAC=getMAC($externalInterfaceArray[0]);
+		$coreIPv6Status=$eipv6xternalInterfaceArray[1];
 
+		switch ($coreIPv6Status) {
+		    case 'disabled':
+		    	$coreIPv6='disabled';
+		        break;
+
+		    case 'dhcp':
+				$ipFromDHCP=1;
+	            $coreIPv6=getIPv6IP($ipv6externalInterfaceArray[0]);
+	            $coreIPv6NetMask=getMASK($ipv6externalInterfaceArray[0]);
+				$coreIPv6GW=getGW();
+				$DNS=explode(',',getDNS());
+				$coreIPv6DNS1=trim($DNS[0]);
+				$coreIPv6DNS2=trim($DNS[1]);
+				$coreIPv6DNS3=trim($DNS[2]);
+				break;
+				
+		    case 'static';
+		    default:
+		    	$coreIPv6Status='static';
+				$ipFromDHCP=0;
+				$coreIPv6=$ipv6externalInterfaceArray[1];
+				$coreIPv6NetMask=$ipv6externalInterfaceArray[2];
+				$coreIPv6GW=$ipv6externalInterfaceArray[3];
+				$coreIPv6DNS1=$ipv6externalInterfaceArray[4];
+				$coreIPv6DNS2=$ipv6externalInterfaceArray[5];
+				break;			
+		}
+			   
+		// get internal NIC IPv6 settings
+		$ipv6internalInterfaceArray=explode(',',$interfacesArray[1]);
+		$ipv6internalMAC=getMAC($internalInterfaceArray[0]);
+		$oldipv6InternalCoreIP=$internalInterfaceArray[1];
+		
+		switch ($internalCoreIP64Status) {
+		    case 'disabled':
+		    	$internalCoreIPv6IP='disabled';
+		        break;
+
+			case 'static';
+		    default:
+		    	$internalCoreIPv6Status='static';
+				$internalCoreIPv6IP=$ipv6internalInterfaceArray[1];
+				$internalCoreIPv6NM=$ipv6internalInterfaceArray[2];
+			break;
+		}
+	}
+	
+	if ( $coreIPv6 == 'dhcp'){
+		// Query current IPv6 tunnel settings
+		$ipv6_query=("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292"); 
+		$resNC=$dbADO->Execute($ipv6_query);
+		if($resNC->RecordCount()>0){
+			$rowNC=$resNC->FetchRow();
+			$ipv6_data=explode(",", $rowNC['IK_DeviceData']);
+			$coreIPv6=$ipv6_data[3];
+		}
+	}
+	
+	if ($fwVersion == "ipv4"){
+		//Select known devices with a ipaddress.
+		$queryknowndeviceip="SELECT IPaddress, Description  FROM `Device` WHERE `IPaddress`!='' ORDER BY IPaddress ASC"; 
+		$resknowndeviceip=$dbADO->Execute($queryknowndeviceip);
+		$ip[]=$coreIPv4;
+		$name[]='CORE WAN IP';
+		$ip[]='127.0.0.1';
+		$name[]='localhost';
+		while ($row=$resknowndeviceip->FetchRow()) {
+				$ip[]=$row['IPaddress'];
+				$name[]=$row['Description'];
+		}
+		$iplistdb=array_combine($name, $ip);
+		
+		//get ipadresses from dhcp
+		$readFile = "/var/lib/dhcp/dhcpd.leases";
+		$test = new Leases;
+		if (!isset($_GET['error']) && !$test->readLease($readFile)) {
+			header("Location: index.php?section=DHCPLeases&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." $readFile");
+		exit();
+		}
+	
 		//use only active leases on the list.
 		while($lease = $test->nextLease()){
 			if ($lease["status"] == 'active' ) {
@@ -188,10 +264,18 @@ function firewall($output,$dbADO) {
 				$name[]=$lease["hostname"];
 			}
 		}
-	//merge both lists (known devices and dhcp)
-	$iplistdhcp=array_combine($name, $ip);
-	$iplist=array_unique(array_merge($iplistdb, $iplistdhcp), SORT_REGULAR);
-
+		//merge both lists (known devices and dhcp)
+		$iplistdhcp=array_combine($name, $ip);
+		$iplist=array_unique(array_merge($iplistdb, $iplistdhcp), SORT_REGULAR);
+	} else {
+		$ip[]=$coreIPv6;
+		$name[]='CORE WAN IPv6 IP';
+		$ip[]='::1/128';
+		$name[]='localhost';
+		$iplistdb=array_combine($name, $ip);
+		
+		$iplist=$iplistdb;
+	} 
 	
 	$i=0;
 	if (@$AdvancedFirewall == 1){
@@ -970,12 +1054,11 @@ function firewall($output,$dbADO) {
 			$out.='</select></td>
 			<td align="center" width="120"><input type="text" name="SourcePort" size="4" disabled /> to <input type="text" name="SourcePortEnd" size="2" disabled /></td>
 			<td align="center"><input type="text" name="DestinationPort" size="4" /></td>
-			<td align="center"><select name="DestinationIP" onChange="enableDestinationIP()">
-								<option value="'.$coreIPv4.'">CORE WAN IP</option>';
+			<td align="center"><select name="DestinationIP" onChange="enableDestinationIP()">';
 								foreach ($iplist as $name => $value){
 										$out.='<option value="'.$value.'">'.$name.'&nbsp;'.$value.'</option>';
 								}
-								$out.='<option value="127.0.0.1">localhost (127.0.0.1)</option>
+								$out.='
 								<option value="not">not on the list</option>
 								</select>
 			<input type="text" name="DestinationIP_M" size="13" disabled /></td>
