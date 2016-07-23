@@ -4,6 +4,8 @@ function firewall($output,$dbADO) {
  	includeLangFile('common.lang.php');
  	includeLangFile('firewall.lang.php');
 	
+	$mysqli = new mysqli("localhost", "root", "", "pluto_main");
+	
 	include(APPROOT.'/include/dhcpd-tools/DHCPd-parse.php');
 	
 	/* @var $dbADO ADOConnection */
@@ -1022,7 +1024,7 @@ function firewall($output,$dbADO) {
 		if(isset($_POST['add'])){
 			//Get the post data to local variables
 			if ($AdvancedFirewall == 1){
-				$Chain=isset($_POST['Chain'])? mysqli_real_escape_string($_POST['Chain']):'INPUT';
+				$Chain=isset($_POST['Chain'])? $mysqli->real_escape_string($_POST['Chain']):'INPUT';
 				if ($Chain == "port_forward (NAT)") {
 					$table='nat';
 					$Chain=$_POST['RuleType'];
@@ -1030,15 +1032,15 @@ function firewall($output,$dbADO) {
 			} else { 
 				$Chain='AUTO';
 			}
-			$IntIF=isset($_POST['IntIf'])? mysqli_real_escape_string($_POST['IntIf']):'NULL';
+			$IntIF=isset($_POST['IntIf'])? $mysqli->real_escape_string($_POST['IntIf']):'NULL';
 			if ( $IntIF == '') {
 				$IntIF='NULL';
 			}
-			$ExtIF=isset($_POST['ExtIf'])? mysqli_real_escape_string($_POST['ExtIf']):'NULL';
+			$ExtIF=isset($_POST['ExtIf'])? $mysqli->real_escape_string($_POST['ExtIf']):'NULL';
 			if ( $ExtIF == ''){
 				$ExtIF='NULL';
 			}
-			$Matchname=isset($_POST['Matchname'])? mysqli_real_escape_string($_POST['Matchname']):'NULL';
+			$Matchname=isset($_POST['Matchname'])? $mysqli->real_escape_string($_POST['Matchname']):'NULL';
 			if ( $Matchname == ''){
 				$Matchname='NULL';
 			}
@@ -1047,15 +1049,15 @@ function firewall($output,$dbADO) {
 			} else {
 				$Protocol=@$_POST['protocol'].'-'.$_POST['IPVersion'];
 			}
-			$SourcePort=isset($_POST['SourcePort'])? mysqli_real_escape_string($_POST['SourcePort']):'NULL';
+			$SourcePort=isset($_POST['SourcePort'])? $mysqli->real_escape_string($_POST['SourcePort']):'NULL';
 			if ( $SourcePort == '') {
 				$SourcePort='NULL';
 			}
-			$SourcePortEnd=isset($_POST['SourcePortEnd'])? mysqli_real_escape_string($_POST['SourcePortEnd']):'NULL';
+			$SourcePortEnd=isset($_POST['SourcePortEnd'])? $mysqli->real_escape_string($_POST['SourcePortEnd']):'NULL';
 			if ( $SourcePortEnd == '') {
 				$SourcePortEnd='NULL';
 			}
-			$DestinationPort=isset($_POST['DestinationPort'])? mysqli_real_escape_string($_POST['DestinationPort']):'0:0';
+			$DestinationPort=isset($_POST['DestinationPort'])? $mysqli->real_escape_string($_POST['DestinationPort']):'0:0';
 			if ( $DestinationPort == '0:0') {
 				$DestinationPort='NULL';
 				$DestinationPortEnd='NULL';
@@ -1068,7 +1070,7 @@ function firewall($output,$dbADO) {
 					$DestinationPortEnd=$DestinationPortarr[1];
 				}
 			}
-			$DestinationIP=isset($_POST['DestinationIP'])? mysqli_real_escape_string($_POST['DestinationIP']):'0';
+			$DestinationIP=isset($_POST['DestinationIP'])? $mysqli->real_escape_string($_POST['DestinationIP']):'0';
 			if ( $DestinationIP == '') {
 				$DestinationIP='NULL';
 			} elseif ( $DestinationIP == 'not') {
@@ -1078,12 +1080,12 @@ function firewall($output,$dbADO) {
 					$DestinationIP=$_POST['DestinationIP_M'];
 				}
 			}
-			$SourceIP=isset($_POST['SourceIP'])? mysqli_real_escape_string($_POST['SourceIP']):'NULL';
+			$SourceIP=isset($_POST['SourceIP'])? $mysqli->real_escape_string($_POST['SourceIP']):'NULL';
 			if ( $SourceIP == '') {
 				$SourceIP='NULL';
 			}
-			$RPolicy=isset($_POST['RPolicy'])? mysqli_real_escape_string($_POST['RPolicy']):'ACCEPT';
-			$Description=isset($_POST['Description'])? mysqli_real_escape_string($_POST['Description']):'NULL';
+			$RPolicy=isset($_POST['RPolicy'])? $mysqli->real_escape_string($_POST['RPolicy']):'ACCEPT';
+			$Description=isset($_POST['Description'])? $mysqli->real_escape_string($_POST['Description']):'NULL';
 			
 			$options='-L Rule -H local ';
 			if (isset($table)) {
@@ -1102,7 +1104,7 @@ function firewall($output,$dbADO) {
 		if (isset($_POST['save_Rule'])){
 			$OldChain=$_POST['save_OldChain'];
 			if ($AdvancedFirewall == 1){
-				$Chain=isset($_POST['save_Chain'])? mysqli_real_escape_string($_POST['save_Chain']):'INPUT';
+				$Chain=isset($_POST['save_Chain'])? $mysqli->real_escape_string($_POST['save_Chain']):'INPUT';
 				if ($Chain == "port_forward (NAT)") {
 					$table='nat';
 					$Chain=$_POST['save_RuleType'];
@@ -1110,15 +1112,15 @@ function firewall($output,$dbADO) {
 			} else { 
 				$Chain='AUTO';
 			}
-			$IntIF=isset($_POST['save_IntIf'])?mysqli_real_escape_string($_POST['save_IntIf']):'NULL';
+			$IntIF=isset($_POST['save_IntIf'])? $mysqli->real_escape_string($_POST['save_IntIf']):'NULL';
 			if ( $IntIF == '') {
 				$IntIF='NULL';
 			}
-			$ExtIF=isset($_POST['save_ExtIf'])?mysqli_real_escape_string($_POST['save_ExtIf']):'NULL';
+			$ExtIF=isset($_POST['save_ExtIf'])? $mysqli->real_escape_string($_POST['save_ExtIf']):'NULL';
 			if ( $ExtIF == ''){
 				$ExtIF='NULL';
 			}
-			$Matchname=isset($_POST['save_Matchname'])?mysqli_real_escape_string($_POST['save_Matchname']):'NULL';
+			$Matchname=isset($_POST['save_Matchname'])? $mysqli->real_escape_string($_POST['save_Matchname']):'NULL';
 			if ( $Matchname == ''){
 				$Matchname='NULL';
 			}
@@ -1128,15 +1130,15 @@ function firewall($output,$dbADO) {
 			} else {
 				$Protocol=@$_POST['save_protocol'].'-'.$_POST['save_IPVersion'];
 			}
-			$SourcePort=isset($_POST['save_SourcePort'])?mysqli_real_escape_string($_POST['save_SourcePort']):'NULL';
+			$SourcePort=isset($_POST['save_SourcePort'])? $mysqli->real_escape_string($_POST['save_SourcePort']):'NULL';
 			if ( $SourcePort == '') {
 				$SourcePort='NULL';
 			}
-			$SourcePortEnd=isset($_POST['save_SourcePortEnd'])?mysqli_real_escape_string($_POST['save_SourcePortEnd']):'NULL';
+			$SourcePortEnd=isset($_POST['save_SourcePortEnd'])? $mysqli->real_escape_string($_POST['save_SourcePortEnd']):'NULL';
 			if ( $SourcePortEnd == '') {
 				$SourcePortEnd='NULL';
 			}
-			$DestinationPort=isset($_POST['save_DestinationPort'])?mysqli_real_escape_string($_POST['save_DestinationPort']):'NULL:NULL';
+			$DestinationPort=isset($_POST['save_DestinationPort'])? $mysqli->real_escape_string($_POST['save_DestinationPort']):'NULL:NULL';
 			if ( $DestinationPort == '') {
 				$DestinationPort='NULL';
 				$DestinationPortEnd='NULL';
@@ -1145,7 +1147,7 @@ function firewall($output,$dbADO) {
 				$DestinationPort=$DestinationPortarr[0];
 				$DestinationPortEnd=$DestinationPortarr[1];
 			}
-			$DestinationIP=isset($_POST['save_DestinationIP'])?mysqli_real_escape_string($_POST['save_DestinationIP']):'NULL';
+			$DestinationIP=isset($_POST['save_DestinationIP'])? $mysqli->real_escape_string($_POST['save_DestinationIP']):'NULL';
 			if ( $DestinationIP == '') {
 				$DestinationIP='NULL';
 			} elseif ( $DestinationIP == 'not') {
@@ -1155,12 +1157,12 @@ function firewall($output,$dbADO) {
 					$DestinationIP=$_POST['save_DestinationIP_M'];
 				}
 			}
-			$SourceIP=isset($_POST['save_SourceIP'])?mysqli_real_escape_string($_POST['save_SourceIP']):'NULL';
+			$SourceIP=isset($_POST['save_SourceIP'])? $mysqli->real_escape_string($_POST['save_SourceIP']):'NULL';
 			if ( $SourceIP == '') {
 				$SourceIP='NULL';
 			}
-			$RPolicy=isset($_POST['save_RPolicy'])?mysqli_real_escape_string($_POST['save_RPolicy']):'NULL';
-			$Description=isset($_POST['save_Description'])?mysqli_real_escape_string($_POST['save_Description']):'';
+			$RPolicy=isset($_POST['save_RPolicy'])? $mysqli->real_escape_string($_POST['save_RPolicy']):'NULL';
+			$Description=isset($_POST['save_Description'])? $mysqli->real_escape_string($_POST['save_Description']):'';
 
 			$options='-L Rule -H local ';
 			if (isset($Table)) {
@@ -1377,7 +1379,7 @@ function writeConf($accessFile, $variable,$oldValue,$newValue)
 	}
 	$oldFile=implode('',$oldFileArray);
 	$stringToReplace=$variable.'='.$oldValue;
-	if(ereg($stringToReplace,$oldFile)){
+	if(preg_match($stringToReplace,$oldFile)){
 		$newFile=str_replace($stringToReplace,$variable.'='.$newValue,$oldFile);
 	}
 	else
