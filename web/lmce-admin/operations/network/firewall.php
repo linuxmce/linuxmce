@@ -4,6 +4,8 @@ function firewall($output,$dbADO) {
  	includeLangFile('common.lang.php');
  	includeLangFile('firewall.lang.php');
 	
+	$mysqli = new mysqli("localhost", "root", "", "pluto_main");
+	
 	include(APPROOT.'/include/dhcpd-tools/DHCPd-parse.php');
 	
 	/* @var $dbADO ADOConnection */
@@ -162,23 +164,99 @@ function firewall($output,$dbADO) {
 		}
 	}
 	
-	//Select known devices with a ipaddress.
-	$queryknowndeviceip="SELECT IPaddress, Description  FROM `Device` WHERE `IPaddress`!='' ORDER BY IPaddress ASC"; 
-	$resknowndeviceip=$dbADO->Execute($queryknowndeviceip);
-	while ($row=$resknowndeviceip->FetchRow()) {
-			$ip[]=$row['IPaddress'];
-			$name[]=$row['Description'];
-		}
-	$iplistdb=array_combine($name, $ip);
+	// extract NIC IPv6 settings from core
+	$queryNC='SELECT * FROM Device_DeviceData WHERE FK_Device=? AND FK_DeviceData=?';
+	$resNC=$dbADO->Execute($queryNC,array($coreID,$GLOBALS['IPv6NetworkInterfaces']));
 	
-		//get ipadresses from dhcp
-	$readFile = "/var/lib/dhcp/dhcpd.leases";
-	$test = new Leases;
-	if (!isset($_GET['error']) && !$test->readLease($readFile)) {
-		header("Location: index.php?section=DHCPLeases&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." $readFile");
-	exit();
-	}
+	if($resNC->RecordCount()>0){
+		$rowNC=$resNC->FetchRow();
+		$Ipv6interfacesArray=explode('|',$rowNC['IK_DeviceData']);
+		
+		// get external NIC IPv6 settings
+		$ipv6externalInterfaceArray=explode(',',$interfacesArray[0]);
+		$ipv6externalMAC=getMAC($externalInterfaceArray[0]);
+		$coreIPv6Status=$eipv6xternalInterfaceArray[1];
 
+		switch ($coreIPv6Status) {
+		    case 'disabled':
+		    	$coreIPv6='disabled';
+		        break;
+
+		    case 'dhcp':
+				$ipFromDHCP=1;
+	            $coreIPv6=getIPv6IP($ipv6externalInterfaceArray[0]);
+	            $coreIPv6NetMask=getMASK($ipv6externalInterfaceArray[0]);
+				$coreIPv6GW=getGW();
+				$DNS=explode(',',getDNS());
+				$coreIPv6DNS1=trim($DNS[0]);
+				$coreIPv6DNS2=trim($DNS[1]);
+				$coreIPv6DNS3=trim($DNS[2]);
+				break;
+				
+		    case 'static';
+		    default:
+		    	$coreIPv6Status='static';
+				$ipFromDHCP=0;
+				$coreIPv6=$ipv6externalInterfaceArray[1];
+				$coreIPv6NetMask=$ipv6externalInterfaceArray[2];
+				$coreIPv6GW=$ipv6externalInterfaceArray[3];
+				$coreIPv6DNS1=$ipv6externalInterfaceArray[4];
+				$coreIPv6DNS2=$ipv6externalInterfaceArray[5];
+				break;			
+		}
+			   
+		// get internal NIC IPv6 settings
+		$ipv6internalInterfaceArray=explode(',',$interfacesArray[1]);
+		$ipv6internalMAC=getMAC($internalInterfaceArray[0]);
+		$oldipv6InternalCoreIP=$internalInterfaceArray[1];
+		
+		switch ($internalCoreIP64Status) {
+		    case 'disabled':
+		    	$internalCoreIPv6IP='disabled';
+		        break;
+
+			case 'static';
+		    default:
+		    	$internalCoreIPv6Status='static';
+				$internalCoreIPv6IP=$ipv6internalInterfaceArray[1];
+				$internalCoreIPv6NM=$ipv6internalInterfaceArray[2];
+			break;
+		}
+	}
+	
+	if ( $coreIPv6 == 'dhcp'){
+		// Query current IPv6 tunnel settings
+		$ipv6_query=("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292"); 
+		$resNC=$dbADO->Execute($ipv6_query);
+		if($resNC->RecordCount()>0){
+			$rowNC=$resNC->FetchRow();
+			$ipv6_data=explode(",", $rowNC['IK_DeviceData']);
+			$coreIPv6=$ipv6_data[3];
+		}
+	}
+	
+	if ($fwVersion == "ipv4"){
+		//Select known devices with a ipaddress.
+		$queryknowndeviceip="SELECT IPaddress, Description  FROM `Device` WHERE `IPaddress`!='' ORDER BY IPaddress ASC"; 
+		$resknowndeviceip=$dbADO->Execute($queryknowndeviceip);
+		$ip[]=$coreIPv4;
+		$name[]='CORE WAN IP';
+		$ip[]='127.0.0.1';
+		$name[]='localhost';
+		while ($row=$resknowndeviceip->FetchRow()) {
+				$ip[]=$row['IPaddress'];
+				$name[]=$row['Description'];
+		}
+		$iplistdb=array_combine($name, $ip);
+		
+		//get ipadresses from dhcp
+		$readFile = "/var/lib/dhcp/dhcpd.leases";
+		$test = new Leases;
+		if (!isset($_GET['error']) && !$test->readLease($readFile)) {
+			header("Location: index.php?section=DHCPLeases&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." $readFile");
+		exit();
+		}
+	
 		//use only active leases on the list.
 		while($lease = $test->nextLease()){
 			if ($lease["status"] == 'active' ) {
@@ -186,10 +264,18 @@ function firewall($output,$dbADO) {
 				$name[]=$lease["hostname"];
 			}
 		}
-	//merge both lists (known devices and dhcp)
-	$iplistdhcp=array_combine($name, $ip);
-	$iplist=array_unique(array_merge($iplistdb, $iplistdhcp), SORT_REGULAR);
-
+		//merge both lists (known devices and dhcp)
+		$iplistdhcp=array_combine($name, $ip);
+		$iplist=array_unique(array_merge($iplistdb, $iplistdhcp), SORT_REGULAR);
+	} else {
+		$ip[]=$coreIPv6;
+		$name[]='CORE WAN IPv6 IP';
+		$ip[]='::1/128';
+		$name[]='localhost';
+		$iplistdb=array_combine($name, $ip);
+		
+		$iplist=$iplistdb;
+	} 
 	
 	$i=0;
 	if (@$AdvancedFirewall == 1){
@@ -968,12 +1054,11 @@ function firewall($output,$dbADO) {
 			$out.='</select></td>
 			<td align="center" width="120"><input type="text" name="SourcePort" size="4" disabled /> to <input type="text" name="SourcePortEnd" size="2" disabled /></td>
 			<td align="center"><input type="text" name="DestinationPort" size="4" /></td>
-			<td align="center"><select name="DestinationIP" onChange="enableDestinationIP()">
-								<option value="'.$coreIPv4.'">CORE WAN IP</option>';
+			<td align="center"><select name="DestinationIP" onChange="enableDestinationIP()">';
 								foreach ($iplist as $name => $value){
 										$out.='<option value="'.$value.'">'.$name.'&nbsp;'.$value.'</option>';
 								}
-								$out.='<option value="127.0.0.1">localhost (127.0.0.1)</option>
+								$out.='
 								<option value="not">not on the list</option>
 								</select>
 			<input type="text" name="DestinationIP_M" size="13" disabled /></td>
@@ -1022,7 +1107,7 @@ function firewall($output,$dbADO) {
 		if(isset($_POST['add'])){
 			//Get the post data to local variables
 			if ($AdvancedFirewall == 1){
-				$Chain=isset($_POST['Chain'])? mysqli_real_escape_string($_POST['Chain']):'INPUT';
+				$Chain=isset($_POST['Chain'])? $mysqli->real_escape_string($_POST['Chain']):'INPUT';
 				if ($Chain == "port_forward (NAT)") {
 					$table='nat';
 					$Chain=$_POST['RuleType'];
@@ -1030,15 +1115,15 @@ function firewall($output,$dbADO) {
 			} else { 
 				$Chain='AUTO';
 			}
-			$IntIF=isset($_POST['IntIf'])? mysqli_real_escape_string($_POST['IntIf']):'NULL';
+			$IntIF=isset($_POST['IntIf'])? $mysqli->real_escape_string($_POST['IntIf']):'NULL';
 			if ( $IntIF == '') {
 				$IntIF='NULL';
 			}
-			$ExtIF=isset($_POST['ExtIf'])? mysqli_real_escape_string($_POST['ExtIf']):'NULL';
+			$ExtIF=isset($_POST['ExtIf'])? $mysqli->real_escape_string($_POST['ExtIf']):'NULL';
 			if ( $ExtIF == ''){
 				$ExtIF='NULL';
 			}
-			$Matchname=isset($_POST['Matchname'])? mysqli_real_escape_string($_POST['Matchname']):'NULL';
+			$Matchname=isset($_POST['Matchname'])? $mysqli->real_escape_string($_POST['Matchname']):'NULL';
 			if ( $Matchname == ''){
 				$Matchname='NULL';
 			}
@@ -1047,15 +1132,15 @@ function firewall($output,$dbADO) {
 			} else {
 				$Protocol=@$_POST['protocol'].'-'.$_POST['IPVersion'];
 			}
-			$SourcePort=isset($_POST['SourcePort'])? mysqli_real_escape_string($_POST['SourcePort']):'NULL';
+			$SourcePort=isset($_POST['SourcePort'])? $mysqli->real_escape_string($_POST['SourcePort']):'NULL';
 			if ( $SourcePort == '') {
 				$SourcePort='NULL';
 			}
-			$SourcePortEnd=isset($_POST['SourcePortEnd'])? mysqli_real_escape_string($_POST['SourcePortEnd']):'NULL';
+			$SourcePortEnd=isset($_POST['SourcePortEnd'])? $mysqli->real_escape_string($_POST['SourcePortEnd']):'NULL';
 			if ( $SourcePortEnd == '') {
 				$SourcePortEnd='NULL';
 			}
-			$DestinationPort=isset($_POST['DestinationPort'])? mysqli_real_escape_string($_POST['DestinationPort']):'0:0';
+			$DestinationPort=isset($_POST['DestinationPort'])? $mysqli->real_escape_string($_POST['DestinationPort']):'0:0';
 			if ( $DestinationPort == '0:0') {
 				$DestinationPort='NULL';
 				$DestinationPortEnd='NULL';
@@ -1068,7 +1153,7 @@ function firewall($output,$dbADO) {
 					$DestinationPortEnd=$DestinationPortarr[1];
 				}
 			}
-			$DestinationIP=isset($_POST['DestinationIP'])? mysqli_real_escape_string($_POST['DestinationIP']):'0';
+			$DestinationIP=isset($_POST['DestinationIP'])? $mysqli->real_escape_string($_POST['DestinationIP']):'0';
 			if ( $DestinationIP == '') {
 				$DestinationIP='NULL';
 			} elseif ( $DestinationIP == 'not') {
@@ -1078,12 +1163,12 @@ function firewall($output,$dbADO) {
 					$DestinationIP=$_POST['DestinationIP_M'];
 				}
 			}
-			$SourceIP=isset($_POST['SourceIP'])? mysqli_real_escape_string($_POST['SourceIP']):'NULL';
+			$SourceIP=isset($_POST['SourceIP'])? $mysqli->real_escape_string($_POST['SourceIP']):'NULL';
 			if ( $SourceIP == '') {
 				$SourceIP='NULL';
 			}
-			$RPolicy=isset($_POST['RPolicy'])? mysqli_real_escape_string($_POST['RPolicy']):'ACCEPT';
-			$Description=isset($_POST['Description'])? mysqli_real_escape_string($_POST['Description']):'NULL';
+			$RPolicy=isset($_POST['RPolicy'])? $mysqli->real_escape_string($_POST['RPolicy']):'ACCEPT';
+			$Description=isset($_POST['Description'])? $mysqli->real_escape_string($_POST['Description']):'NULL';
 			
 			$options='-L Rule -H local ';
 			if (isset($table)) {
@@ -1102,7 +1187,7 @@ function firewall($output,$dbADO) {
 		if (isset($_POST['save_Rule'])){
 			$OldChain=$_POST['save_OldChain'];
 			if ($AdvancedFirewall == 1){
-				$Chain=isset($_POST['save_Chain'])? mysqli_real_escape_string($_POST['save_Chain']):'INPUT';
+				$Chain=isset($_POST['save_Chain'])? $mysqli->real_escape_string($_POST['save_Chain']):'INPUT';
 				if ($Chain == "port_forward (NAT)") {
 					$table='nat';
 					$Chain=$_POST['save_RuleType'];
@@ -1110,15 +1195,15 @@ function firewall($output,$dbADO) {
 			} else { 
 				$Chain='AUTO';
 			}
-			$IntIF=isset($_POST['save_IntIf'])?mysqli_real_escape_string($_POST['save_IntIf']):'NULL';
+			$IntIF=isset($_POST['save_IntIf'])? $mysqli->real_escape_string($_POST['save_IntIf']):'NULL';
 			if ( $IntIF == '') {
 				$IntIF='NULL';
 			}
-			$ExtIF=isset($_POST['save_ExtIf'])?mysqli_real_escape_string($_POST['save_ExtIf']):'NULL';
+			$ExtIF=isset($_POST['save_ExtIf'])? $mysqli->real_escape_string($_POST['save_ExtIf']):'NULL';
 			if ( $ExtIF == ''){
 				$ExtIF='NULL';
 			}
-			$Matchname=isset($_POST['save_Matchname'])?mysqli_real_escape_string($_POST['save_Matchname']):'NULL';
+			$Matchname=isset($_POST['save_Matchname'])? $mysqli->real_escape_string($_POST['save_Matchname']):'NULL';
 			if ( $Matchname == ''){
 				$Matchname='NULL';
 			}
@@ -1128,15 +1213,15 @@ function firewall($output,$dbADO) {
 			} else {
 				$Protocol=@$_POST['save_protocol'].'-'.$_POST['save_IPVersion'];
 			}
-			$SourcePort=isset($_POST['save_SourcePort'])?mysqli_real_escape_string($_POST['save_SourcePort']):'NULL';
+			$SourcePort=isset($_POST['save_SourcePort'])? $mysqli->real_escape_string($_POST['save_SourcePort']):'NULL';
 			if ( $SourcePort == '') {
 				$SourcePort='NULL';
 			}
-			$SourcePortEnd=isset($_POST['save_SourcePortEnd'])?mysqli_real_escape_string($_POST['save_SourcePortEnd']):'NULL';
+			$SourcePortEnd=isset($_POST['save_SourcePortEnd'])? $mysqli->real_escape_string($_POST['save_SourcePortEnd']):'NULL';
 			if ( $SourcePortEnd == '') {
 				$SourcePortEnd='NULL';
 			}
-			$DestinationPort=isset($_POST['save_DestinationPort'])?mysqli_real_escape_string($_POST['save_DestinationPort']):'NULL:NULL';
+			$DestinationPort=isset($_POST['save_DestinationPort'])? $mysqli->real_escape_string($_POST['save_DestinationPort']):'NULL:NULL';
 			if ( $DestinationPort == '') {
 				$DestinationPort='NULL';
 				$DestinationPortEnd='NULL';
@@ -1145,7 +1230,7 @@ function firewall($output,$dbADO) {
 				$DestinationPort=$DestinationPortarr[0];
 				$DestinationPortEnd=$DestinationPortarr[1];
 			}
-			$DestinationIP=isset($_POST['save_DestinationIP'])?mysqli_real_escape_string($_POST['save_DestinationIP']):'NULL';
+			$DestinationIP=isset($_POST['save_DestinationIP'])? $mysqli->real_escape_string($_POST['save_DestinationIP']):'NULL';
 			if ( $DestinationIP == '') {
 				$DestinationIP='NULL';
 			} elseif ( $DestinationIP == 'not') {
@@ -1155,12 +1240,12 @@ function firewall($output,$dbADO) {
 					$DestinationIP=$_POST['save_DestinationIP_M'];
 				}
 			}
-			$SourceIP=isset($_POST['save_SourceIP'])?mysqli_real_escape_string($_POST['save_SourceIP']):'NULL';
+			$SourceIP=isset($_POST['save_SourceIP'])? $mysqli->real_escape_string($_POST['save_SourceIP']):'NULL';
 			if ( $SourceIP == '') {
 				$SourceIP='NULL';
 			}
-			$RPolicy=isset($_POST['save_RPolicy'])?mysqli_real_escape_string($_POST['save_RPolicy']):'NULL';
-			$Description=isset($_POST['save_Description'])?mysqli_real_escape_string($_POST['save_Description']):'';
+			$RPolicy=isset($_POST['save_RPolicy'])? $mysqli->real_escape_string($_POST['save_RPolicy']):'NULL';
+			$Description=isset($_POST['save_Description'])? $mysqli->real_escape_string($_POST['save_Description']):'';
 
 			$options='-L Rule -H local ';
 			if (isset($Table)) {
@@ -1377,7 +1462,7 @@ function writeConf($accessFile, $variable,$oldValue,$newValue)
 	}
 	$oldFile=implode('',$oldFileArray);
 	$stringToReplace=$variable.'='.$oldValue;
-	if(ereg($stringToReplace,$oldFile)){
+	if(preg_match($stringToReplace,$oldFile)){
 		$newFile=str_replace($stringToReplace,$variable.'='.$newValue,$oldFile);
 	}
 	else
