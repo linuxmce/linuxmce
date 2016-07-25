@@ -7,7 +7,7 @@ Item{
     anchors.verticalCenter: parent.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenterOffset:10
-    width: scaleX(65)
+    width: scaleX(85)
     height: scaleY(45)
     opacity:0
     Rectangle {
@@ -32,7 +32,7 @@ Item{
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details for Device %1").arg(settings.getOption(SettingsType.Settings_Network, SettingsKey.Setting_Network_Device_ID))
-        font.pixelSize: theme.appFontSize_header
+        font.pointSize: theme.appFontSize_header
         font.weight: Font.Light
         width:parent.width
         horizontalAlignment: Text.AlignHCenter
@@ -49,9 +49,10 @@ Item{
             left:parent.left
             right:parent.right
             top:connectionlabel.bottom
-            bottom:goBox.top
+            bottom:exitbutton.top
         }
         ConnectionElement {
+            height: parent.height/2
             id: connectionVars
             location: qsTr("Home")
             onValueSet: {
@@ -59,6 +60,7 @@ Item{
             }
         }
         ConnectionElement{
+            height: parent.height/2
             id:connection_away
             location: qsTr("Away")
             router: settings.getOption(SettingsType.Settings_Network, SettingsKey.Setting_Network_ExternalHostname)
@@ -69,13 +71,6 @@ Item{
 
     }
 
-    Row{
-        id:goBox
-        height:theme.appButtonHeight*theme.dpRatio
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width *.65
-        spacing: scaleX(15)
 //        Rectangle {
 //            id: connectbutton
 //            height: theme.appButtonHeight*theme.dpRatio
@@ -108,19 +103,23 @@ Item{
 
         Rectangle {
             id: exitbutton
-            height: theme.appButtonHeight*screenInfo.primaryScreen.pixelRatio
-            width: theme.appButtonWidth*screenInfo.primaryScreen.pixelRatio
-            radius: height
+            height: parent.height*.25
+            width: theme.appButtonWidth
+            radius: 5
+            anchors{
+                horizontalCenter: parent.horizontalCenter
+                bottom:parent.bottom
+                bottomMargin: 5
+            }
+
             color: "red"
 
             Text {
                 id: exitlabel
                 anchors.centerIn: parent
                 color:theme.apptext_color_active
-
                 text: qsTr("Exit!")
-                font.pixelSize: theme.appFontSize_list
-                font.family: myFont.name
+                font.pointSize: theme.appFontSize_list
             }
 
             MouseArea{
@@ -129,7 +128,7 @@ Item{
 
             }
         }
-    }
+
     states: [
         State {
             name: "showing"

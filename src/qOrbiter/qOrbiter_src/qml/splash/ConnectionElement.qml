@@ -6,7 +6,7 @@ Item{
     property alias router:routerInput.text
     property string location:""
     signal valueSet();
-    width: parent.width *.65
+    width: parent.width *.85
     height: parent.height *.35
     anchors.horizontalCenter: parent.horizontalCenter
 
@@ -53,7 +53,7 @@ Item{
     Text {
         id:host_label
         text: qsTr("Host:")
-        font.pixelSize: theme.appFontSize_title
+        font.pointSize:  theme.appFontSize_title
         color:theme.apptext_color_active
         font.family: myFont.name
        // font.weight: Font.Light
@@ -74,7 +74,7 @@ Item{
         height: host_label.paintedHeight
         clip: true
         text: orbiterWindow.router
-        font.pixelSize:theme.appFontSize_list
+        font.pointSize:theme.appFontSize_list
         font.family: myFont.name
 
         anchors{
@@ -89,7 +89,7 @@ Item{
     Rectangle {
         id: connectbutton
         height: routerInput.height
-        width: theme.appButtonWidth*theme.dpRatio
+        width: parent.width *.25
         radius:5
         color:theme.appbutton_confirm_color
 
@@ -101,7 +101,7 @@ Item{
             id: name
             anchors.centerIn: parent
             text: qsTr("Go!")
-            font.pixelSize: theme.appFontSize_list
+            font.pointSize: theme.appFontSize_list
             verticalAlignment: Text.AlignTop
             font.bold: true
             font.family: myFont.name

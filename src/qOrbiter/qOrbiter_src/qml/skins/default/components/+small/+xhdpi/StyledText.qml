@@ -4,7 +4,7 @@ Text {
     property string textLabel:"ipsum"
     property string preLabel:""
     property int textHeight
-    property int textWidth  
+    property int textWidth
     property bool isItalic:false
     property double fontSize:Style.appFontSize_description
     property double largeFontSize:Style.appFontSize_title
@@ -12,9 +12,9 @@ Text {
     horizontalAlignment: Text.AlignHCenter
     onVisibleChanged: if(!visible)height=0
     id:labelelement
-    text: textLabel   
-    font.pixelSize: fontSize+settings.fontSizeMod
-    verticalAlignment:Text.AlignVCenter   
-    color:Style.apptext_color_active
-    wrapMode: Text.WrapAtWordBoundaryOrAnywhere 
+    text: textLabel
+    font.pixelSize: (fontSize+settings.fontSizeMod) *4
+    verticalAlignment:Text.AlignVCenter
+    color: Style.apptext_color_active
+    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 }

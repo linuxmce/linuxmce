@@ -296,5 +296,7 @@
         <file>qml/skins/default/images/Screen_Reload.jpg</file>
         <file>splash/Style.qml</file>
         <file>qml/splash/Style.qml</file>
+        <file>qml/splash/+small/+xhdpi/Style.qml</file>
+        <file>qml/skins/default/components/+small/+xhdpi/StyledText.qml</file>
     </qresource>
 </RCC>
