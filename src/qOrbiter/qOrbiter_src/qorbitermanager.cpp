@@ -108,9 +108,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     usingExternal(false),
     m_routerHelper(new RouterHelper(qOrbiter_ptr))
 {
-
-    m_currentSizeSelector="default";
-    connect(settingsInterface, &SettingInterface::deviceIdChanged, this, &qorbiterManager::setDeviceNumber);
+   setCurrentDeviceSize("medium");
+   connect(settingsInterface, &SettingInterface::deviceIdChanged, this, &qorbiterManager::setDeviceNumber);
     mediaPlayerID=-1; orbiterInit=true; m_ipAddress="";  m_bStartingUp= true;  homeNetwork=false;  alreadyConfigured = false;  iFK_Room = -1;
     iea_area= -1; bAppError = false; isPhone = 0; hostDevice=HostSystemData::OTHER_EMBEDDED; appConfigPath=""; status="starting";
     setUsingExternal(false); disconnectCount=0;  reloadCount=0;
@@ -183,7 +182,12 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     qApp->installTranslator(&translator);
     m_screenInfo = new ScreenInfo();
     m_testScreenSize =testSize;
-    m_currentSizeSelector = m_screenInfo->deviceSizeToString(m_testScreenSize);
+    if(m_testScreenSize !=-1){
+       m_screenInfo->deviceSizeToString(m_testScreenSize);
+    } else {
+       m_currentSizeSelector = m_screenInfo->primaryScreen()->deviceSizeString();
+    }
+
     emit currentSizeSelectorChanged();
     m_selector=new QFileSelector(m_appEngine);
     selector=new QQmlFileSelector(m_appEngine);
@@ -3027,7 +3031,7 @@ void qorbiterManager::reloadQml()
 
 void qorbiterManager::handleScreenChanged(QScreen *screen)
 {
-    Q_UNUSED(screen);
+    m_screenInfo->setCurrentScreen(screen->name());
     resetScreenSize();
 }
 

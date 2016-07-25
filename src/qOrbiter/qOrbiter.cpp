@@ -3018,7 +3018,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             {
                 /*! \todo - add way to cancel out of this if user closes ui */
                 pCell = it->second;
-                const char *pPath = pCell->GetImagePath();
+//                const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
@@ -3041,6 +3041,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 else if(attributeType == "Rating") { emit fd_ratingChanged(attribute);              emit newFileDetailAttribute(ATTRIBUTETYPE_Rated_CONST, at,attribute ); }
                 else {
                 }
+                QApplication::processEvents(QEventLoop::AllEvents);
 
             }
 

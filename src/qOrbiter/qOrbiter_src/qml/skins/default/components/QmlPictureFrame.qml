@@ -96,7 +96,7 @@ Item{
 
         for(var img in li){
             var str = li[img]
-         //   console.log(str)
+            //   console.log(str)
             pictureList.append({"img":str})
         }
 
@@ -194,68 +194,83 @@ Item{
         }
 
         Timer { // Update the clock element periodically
+            id:clockTimer
             interval: 1000; running: clock.opacity!==0; repeat: true
             onTriggered:{ txtDate.text = clock.getShortDate(); txtTime.text = clock.getTime(); }
         }
+        Rectangle{
+            opacity: clockTimer.running ? .45 : 0
+            color:"black"
 
+            height: temporalid.height
+            anchors{
+                left:parent.left
+                right:parent.right
+                bottom:parent.bottom
+            }
+
+           PropertyAnimation on opacity {
+               duration: Style.transition_animationTime
+           }
+        }
         Column{
             id:temporalid
             height:childrenRect.height
-            width:parent.width/2
+            width:parent.width*.65
 
             anchors{
                 right:parent.right
                 bottom:parent.bottom
             }
 
-                StyledText{
-                    id: txtDate
-                    color: clock.clockColor
-                    font.letterSpacing: 2
-                    smooth: true
-                    width: parent.width
-                    font.pixelSize: 42
-                    horizontalAlignment: Text.AlignHCenter
-                    opacity: .55
-                    font.weight: Font.Bold
-                }
-
-                StyledText{
-                    id: txtTime
-                    color: clock.clockColor
-                    font.letterSpacing: 2
-                    smooth: true
-                    width: parent.width
-                    font.pixelSize:  42
-                    font.weight: Font.Light
-                    horizontalAlignment: Text.AlignHCenter
-                    opacity: .55
-                }
-
+            StyledText{
+                id: txtDate
+                color: clock.clockColor
+                font.letterSpacing: 2
+                smooth: true
+                width: parent.width
+                fontSize: txtTime.fontSize /2
+                horizontalAlignment: Text.AlignHCenter
+                opacity: .65
+                font.weight: Font.Bold
             }
+
+            StyledText{
+                id: txtTime
+                color: clock.clockColor
+                font.letterSpacing: 2
+                smooth: true
+                width: parent.width
+                fontSize: Style.appFontSize_title
+                font.weight: Font.Light
+                horizontalAlignment: Text.AlignHCenter
+                opacity: .65
+            }
+
         }
+    }
 
 
-//        StyledText{
-//            id: txtDate
-//            color: clock.clockColor
-//            font.letterSpacing: 2
-//            smooth: true
-//            width: parent.width
-//            anchors.centerIn: parent
-//            font.pointSize: Style.appFontSize_header
-//            horizontalAlignment: Text.AlignHCenter
-//            opacity: .55
-//        }
+    //        StyledText{
+    //            id: txtDate
+    //            color: clock.clockColor
+    //            font.letterSpacing: 2
+    //            smooth: true
+    //            width: parent.width
+    //            anchors.centerIn: parent
+    //            font.pointSize: Style.appFontSize_header
+    //            horizontalAlignment: Text.AlignHCenter
+    //            opacity: .55
+    //        }
 
-//        InnerShadow{
-//           color:"black"
-//           source: txtDate
-//           anchors.fill: txtDate
-//           radius: 6
-//           samples: 16
-//           spread: 0.0
-//        }
+    //        InnerShadow{
+    //           color:"black"
+    //           source: txtDate
+    //           anchors.fill: txtDate
+    //           radius: 6
+    //           samples: 16
+    //           spread: 0.0
+    //        }
 
 
     states: [

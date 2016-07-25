@@ -49,7 +49,7 @@ Item {
         Text {
             id: ui_name
             text: manager.currentSizeSelector+"UI"
-            font.pixelSize: theme.appFontSize_description
+            font.pointSize: theme.appFontSize_description
             font.weight: Font.Light
             anchors.right: optionIcon.left
             anchors.verticalCenter: optionIcon.verticalCenter
@@ -79,7 +79,7 @@ Item {
         id: welcome
         text: qsTr(" Welcome to LinuxMCE")
         font.weight: Font.Light
-        font.pixelSize: theme.appFontSize_header
+        font.pointSize: theme.appFontSize_header
         anchors{
            top:topContainer.top
             horizontalCenter: parent.horizontalCenter
@@ -89,7 +89,7 @@ Item {
     Text {
         id: welcome_select
         text: qsTr("Please Choose an orbiter")
-        font.pixelSize: theme.appFontSize_description
+        font.pointSize:  theme.appFontSize_description
         font.weight: Font.Light
         anchors{
             bottom:topContainer.bottom

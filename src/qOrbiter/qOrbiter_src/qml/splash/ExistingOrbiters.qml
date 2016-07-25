@@ -25,7 +25,7 @@ Item{
     Text{
         id:lbl
         text:qsTr("Existing Orbiters", "list of existing qorbiters")
-        font.pixelSize: theme.appFontSize_list
+        font.pointSize: theme.appFontSize_list
         color:theme.apptext_color_active
         anchors.centerIn: hdr
     }
@@ -71,7 +71,7 @@ Item{
             Text {
                 id: dev_num
                 text: device
-                font.pixelSize: theme.appFontSize_list
+                font.pointSize: theme.appFontSize_list
                 font.weight: Font.Light
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 color:"white"
@@ -88,7 +88,7 @@ Item{
                 Text {
                     id: orbiter_label
                     text: qsTr("Orbiter: ")+ label
-                    font.pixelSize: theme.appFontSize_list
+                    font.pointSize: theme.appFontSize_list
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     anchors.horizontalCenter: parent.horizontalCenter
                     color: "white"
@@ -96,7 +96,7 @@ Item{
                 Text {
                     id: loc
                     text:qsTr("Location:")+ location
-                    font.pixelSize: theme.appFontSize_list
+                    font.pointSize: theme.appFontSize_list
                     font.weight: Font.Light
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     color:"white"

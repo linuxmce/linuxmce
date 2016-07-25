@@ -15,8 +15,7 @@ QtObject{
         console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
     }
 
-    readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio/2
-
+    readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
     //picture ratios - will be moved to cpp class
     property double dvdPosterRatio:955/1080
     property double hdPosterRatio:755/1080
@@ -31,7 +30,7 @@ QtObject{
     readonly property int transitionFadeTime:350
 
     /* Application Colors */
-    readonly property color appcolor_background:"red" // "#0588ff"
+    readonly property color appcolor_background:"#0588ff"
     readonly property color appcolor_background_light:  "#80c4ff"
     readonly property color appcolor_background_medium:"#43acff"
     readonly property color appcolor_background_list:"#222222"

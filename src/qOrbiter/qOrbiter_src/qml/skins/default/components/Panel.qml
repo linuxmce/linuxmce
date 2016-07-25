@@ -1,4 +1,5 @@
 import QtQuick 2.2
+import "../."
 
 Item {
     id:panelRoot
@@ -115,10 +116,7 @@ Item {
         height: panelHeader.height
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         font.weight: Font.DemiBold
-        font.pixelSize:Style.fontSize_listTitle
+        fontSize:Style.fontSize_medium
         color:Style.appbutton_color
     }
-
-
-
 }

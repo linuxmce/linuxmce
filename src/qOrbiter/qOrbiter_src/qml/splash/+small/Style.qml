@@ -19,7 +19,7 @@ QtObject{
      console.log("Default small style set")
     }
 
-     readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio/2
+     readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
 
     //picture ratios - will be moved to cpp class
     property double dvdPosterRatio:955/1080

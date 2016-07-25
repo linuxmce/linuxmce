@@ -217,9 +217,7 @@ public slots:
         case ScreenData::Device_Medium: return "medium"; break;
         case ScreenData::Device_Large: return "large"; break;
         case ScreenData::Device_XLarge: return "xlarge"; break;
-        default:
-            return QString();
-            break;
+        default: return "Unknown";     break;
         }
     }
 
@@ -325,9 +323,6 @@ class ScreenInfo : public QObject
     Q_PROPERTY(QString screenName READ screenName NOTIFY primaryScreenChanged)
 public:
     explicit ScreenInfo(QObject *parent = 0);
-
-
-
     ScreenObject* primaryScreen(){return m_primaryScreen;}
     int screenCount(){ return m_screenList.count()-1;}
     QList<QString> screenList(){return m_screenList.keys();}
@@ -347,27 +342,23 @@ signals:
 public slots:
     Q_INVOKABLE void setCurrentScreen(QString name){
         if(m_screenList.contains(name)){
-            qDebug() << "Poof";
+            qDebug() << "Set current screen to " << name;
             m_primaryScreen = m_screenList.find(name).value();
-            emit primaryScreenChanged();
-            qDebug() << "begone";
+            emit primaryScreenChanged();         
         }
     }
 
    Q_INVOKABLE QString deviceSizeToString(int d){
         switch(d){
-        case 4: return "small"; break;
-        case 7: return "medium"; break;
-        case 10: return "large"; break;
-        case 13: return "xlarge"; break;
-        default:
-            return QString();
-            break;
+        case 4:     return "small"; break;
+        case 7:     return "medium"; break;
+        case 10:    return "large"; break;
+        case 13:    return "xlarge"; break;
+        default:    return ""; break;
         }
     }
 
-    void handleScreenObjectOrientationChanged(ScreenObject *obj, Qt::ScreenOrientation o){
-        qDebug() << Q_FUNC_INFO;
+    void handleScreenObjectOrientationChanged(ScreenObject *obj, Qt::ScreenOrientation o){        
         if(m_screenList.count() == 1){
             emit screenOrientationChanged(o);
         } else{
@@ -377,13 +368,10 @@ public slots:
         }
     }
 
-
-
 private:
     ScreenObject* m_primaryScreen;
     int m_screenCount;
     QMap<QString, ScreenObject*> m_screenList;
-
     double m_logicalDpi;
     double m_phisicalDpi;
     QString m_orientation;
