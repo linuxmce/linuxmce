@@ -1997,7 +1997,7 @@ bool qorbiterManager::writeConfig()
 void qorbiterManager::setStringParam(int paramType, QString param)
 {
     mediaFilter.setStringParam(paramType, param);
-    qDebug() << "Param = " << param;
+    qDebug() << Q_FUNC_INFO << "Param = " << param;
     switch (paramType)
     {
     case 0: setGridMediaType(param);            break;

@@ -13,7 +13,7 @@ Text {
     onVisibleChanged: if(!visible)height=0
     id:labelelement
     text: textLabel
-    font.pixelSize: (fontSize+settings.fontSizeMod) *4
+    font.pixelSize: (fontSize+settings.fontSizeMod) *2
     verticalAlignment:Text.AlignVCenter
     color: Style.apptext_color_active
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere

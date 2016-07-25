@@ -28,6 +28,7 @@ Item {
            // isBold: true
 
     }
+
     HeaderListView {
         id: headerListView
         isUsingIndex: false

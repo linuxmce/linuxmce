@@ -11,7 +11,7 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     qOrbiter*ptr = qobject_cast<qOrbiter*>(qorbiter_ptr);
     qmlRegisterType<FileDetailsObject>("FileAttribute", 1, 0, "FileAttribute");
 
-    QObject::connect(ptr, &qOrbiter::newFileDetailAttribute, this, &FileDetailsClass::handleNewFileAttribute, Qt::QueuedConnection);
+    QObject::connect(ptr, &qOrbiter::newFileDetailAttribute, this, &FileDetailsClass::handleNewFileAttribute, Qt::BlockingQueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_programChanged,this, &FileDetailsClass::setProgram,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_mediaTitleChanged,this, &FileDetailsClass::setMediaTitle,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_chanIdChanged, this, &FileDetailsClass::setChannelID, Qt::QueuedConnection);

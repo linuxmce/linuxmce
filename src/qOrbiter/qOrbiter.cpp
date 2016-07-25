@@ -2750,7 +2750,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
 void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 {
 
-    this->thread()->sleep(2);
+//    this->thread()->sleep(2);
     string s_value_assignment;
 
     CMD_Get_Attributes_For_Media cmd_file_info(m_dwPK_Device, iPK_Device_MediaPlugin , qs_file_reference.toStdString(), "", &s_value_assignment);
@@ -2893,6 +2893,7 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
 
 void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 {
+    qDebug() << Q_FUNC_INFO << " start ";
     emit commandResponseChanged("Getting file info");
     int gHeight = 1;
     int gWidth = 1;
@@ -3042,7 +3043,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 else {
                 }
                 QApplication::processEvents(QEventLoop::AllEvents);
-
             }
 
             delete []pData;
@@ -3052,7 +3052,10 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             pDataGridTable =NULL;
 
         }
+         qDebug() << Q_FUNC_INFO << " end ";
     }
+
+
 
 }
 
@@ -4139,8 +4142,9 @@ void DCE::qOrbiter::showAdvancedButtons()
                 //cell title is device and heriarchy
                 // fk_file seems to be device name and heirachy
                 //
+
                 QStringList splitter;
-                splitter = cellTitle.split("/");
+                splitter = cellTitle.split("/");              
 
                 if(fk_file.toInt()== m_dwPK_Device_NowPlaying ||
                         fk_file.toInt()== m_dwPK_Device_NowPlaying_Audio||
