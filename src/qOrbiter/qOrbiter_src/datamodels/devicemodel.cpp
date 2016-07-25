@@ -29,8 +29,10 @@ int DeviceModel::rowCount(const QModelIndex &parent) const
 
 QVariant DeviceModel::data(const QModelIndex &index, int role) const
 {
+
     if(index.row() < 0 || index.row() >= m_list.size())
-        return QVariant();
+        return QVariant("Undefined");
+
     return m_list.at(index.row())->data(role);
 }
 

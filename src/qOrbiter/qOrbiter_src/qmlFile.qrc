@@ -298,5 +298,6 @@
         <file>qml/splash/Style.qml</file>
         <file>qml/splash/+small/+xhdpi/Style.qml</file>
         <file>qml/skins/default/components/+small/+xhdpi/StyledText.qml</file>
+        <file>qml/skins/default/components/HeaderListView.qml</file>
     </qresource>
 </RCC>

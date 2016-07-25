@@ -26,10 +26,10 @@ StyledScreen {
                 }
                 StyledText{
                     id:hdrText
-                    text:qsTr("Please choose device to control")
+                    text:qsTr("Please choose device to control. Only active devices are shown.")
                     anchors.centerIn: parent
                     visible:avcodes_root.state==="ready"
-                    fontSize:Style.scaleY(6)
+                    fontSize:Style.appFontSize_title
 
                 }
             }
@@ -50,7 +50,7 @@ StyledScreen {
                height: Style.listViewItemHeight
                phil: status ? "green" : "blue"
                width: parent.width
-               buttonText: name+"\n"+"Room:"+location
+               buttonText: qsTr("Device: %1 ").arg(name)
                  onActivated: {
                       deviceCommands.clear()
                     //  console.log("\n"+JSON.stringify(props, null, "\t"))
