@@ -153,6 +153,9 @@ public:
         {
         case 0: q_mediaType = param.toInt(); break;
         case 1: q_subType = param; q_pk_attribute="";
+            if(q_attributetype_sort == "52")
+                q_attributetype_sort = "";
+
             break;
         case 2: q_fileFormat = param;        break;
         case 3: q_attribute_genres = param;  break;
