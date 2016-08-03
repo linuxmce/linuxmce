@@ -98,8 +98,7 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged )/*!< \brief The main title of the media \ingroup file_details*/
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)/*!< \brief Duplicate of qs_maintitle? \ingroup file_details*/
 
-    Q_PROPERTY (QString genre READ getGenre  NOTIFY genreChanged) /*!< \brief Genre of media \ingroup file_details*/
-    Q_PROPERTY(QQmlListProperty<FileDetailsObject> genreList READ genreList NOTIFY genreChanged)
+   Q_PROPERTY(QQmlListProperty<FileDetailsObject> genreList READ genreList NOTIFY genreChanged)
 
     Q_PROPERTY (QString studio READ getStudio  NOTIFY studioChanged) /*!< \brief Publishing studio if availible  \ingroup file_details*/
     Q_PROPERTY(QQmlListProperty<FileDetailsObject> studioList READ studioList NOTIFY studioChanged)
@@ -166,7 +165,7 @@ public:
     QString performerlist;
     QString album;
 
-    QString genre;
+
     QStringList composers;
     QString composerlist;
 
@@ -362,8 +361,6 @@ public slots:
         return QQmlListProperty<FileDetailsObject>(this,m_directorList);
     }
 
-    void setGenre (const QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
-    QString getGenre() { return genre;}
 
     QQmlListProperty<FileDetailsObject> genreList(){
         return QQmlListProperty<FileDetailsObject>(this, m_genreList);
