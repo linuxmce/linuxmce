@@ -2950,6 +2950,27 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     placeholder = details.indexOf("RUN TIME");
     if(placeholder != -1) { emit fd_runtimeChanged(details.at(placeholder+1) );  }
 
+    placeholder = details.indexOf("RATING");
+    if(placeholder != -1) { emit fd_ratingChanged(details.at(placeholder+1) );  }
+
+    placeholder = details.indexOf("EPISODE NUMBER");
+    if(placeholder != -1) {  emit newFileDetailAttribute(ATTRIBUTETYPE_Episode_Number_CONST, -1,details.at(placeholder+1) );  }
+
+     placeholder = details.indexOf("TRACK");
+    if(placeholder != -1) {emit newFileDetailAttribute(ATTRIBUTETYPE_Track_CONST, -1 ,details.at(placeholder+1) ); }
+
+    placeholder = details.indexOf("RELEASE DATE");
+    if(placeholder != -1) {  emit newFileDetailAttribute(ATTRIBUTETYPE_Release_Date_CONST, -1,details.at(placeholder+1) );  }
+
+    placeholder = details.indexOf("SEASON NUMBER");
+    if(placeholder != -1) {
+        int p2 = details.indexOf("TV SEASON ID");
+        if(p2 != -1){
+            int tvprogId = details.at(p2+1).toInt();
+              emit newFileDetailAttribute(ATTRIBUTETYPE_Season_Number_CONST, tvprogId,details.at(placeholder+1) );
+        }
+    }
+
     placeholder = details.indexOf("PROGRAM");
     if(placeholder != -1) {
         int p2 = details.indexOf("TV PROGRAM ID");
