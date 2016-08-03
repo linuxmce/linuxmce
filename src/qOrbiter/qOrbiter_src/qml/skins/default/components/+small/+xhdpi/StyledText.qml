@@ -10,7 +10,14 @@ Text {
     property double largeFontSize:Style.appFontSize_title
     property double cellFontSize: Style.appFontSize_list
     horizontalAlignment: Text.AlignHCenter
-    onVisibleChanged: if(!visible)height=0
+    onVisibleChanged: {
+        onVisibleChanged: {
+            if(!visible)height=0
+            else
+                height=paintedHeight
+        }
+    }
+
     id:labelelement
     text: textLabel
     font.pixelSize: (fontSize+settings.fontSizeMod) *2

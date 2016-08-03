@@ -301,6 +301,5 @@
         <file>qml/skins/default/components/HeaderListView.qml</file>
         <file>qml/skins/default/components/Clock.qml</file>
         <file>qml/skins/default/components/+small/Clock.qml</file>
-        <file>qml/skins/default/components/+small/FileDetails.qml</file>
     </qresource>
 </RCC>
