@@ -64,7 +64,7 @@ Item{
             right:parent.right
             top:parent.top
         }
-        height: Style.appNavigation_panelHeight / 2
+        height: Style.appNavigation_panelHeight
         color:enabled ? Style.appcolor_background_medium :" grey"
         opacity: Style.appList_opacity
 

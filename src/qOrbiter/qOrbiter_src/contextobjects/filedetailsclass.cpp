@@ -12,6 +12,8 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     qmlRegisterType<FileDetailsObject>("FileAttribute", 1, 0, "FileAttribute");
 
     QObject::connect(ptr, &qOrbiter::newFileDetailAttribute, this, &FileDetailsClass::handleNewFileAttribute, Qt::BlockingQueuedConnection);
+    QObject::connect(ptr, &qOrbiter::fd_runtimeChanged, this, &FileDetailsClass::setRunTime, Qt::QueuedConnection );
+    QObject::connect(ptr, &qOrbiter::fd_ratingChanged, this, &FileDetailsClass::setRating, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_programChanged,this, &FileDetailsClass::setProgram,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_mediaTitleChanged,this, &FileDetailsClass::setMediaTitle,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_chanIdChanged, this, &FileDetailsClass::setChannelID, Qt::QueuedConnection);
@@ -22,7 +24,7 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     QObject::connect(ptr, &qOrbiter::fd_genreChanged,this, &FileDetailsClass::setGenre,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_albumChanged,this, &FileDetailsClass::setAlbum,Qt::QueuedConnection);
     QObject::connect(ptr,&qOrbiter::fd_studioChanged,this, &FileDetailsClass::setStudio, Qt::QueuedConnection);
-    QObject::connect(ptr, &qOrbiter::fd_trackChanged,this, &FileDetailsClass::setTrack,Qt::QueuedConnection);
+
     QObject::connect(ptr, &qOrbiter::fd_ratingChanged,this, &FileDetailsClass::setRating, Qt::QueuedConnection);
 
     QObject::connect(ptr, &qOrbiter::fd_imageUrlChanged,this, &FileDetailsClass::setScreenshot, Qt::QueuedConnection);
@@ -49,9 +51,12 @@ void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QSt
     case ATTRIBUTETYPE_Rated_CONST: m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) ); emit ratingChanged();      break;
     case ATTRIBUTETYPE_Genre_CONST: m_genreList.append(new FileDetailsObject(attribute, val, attribType));                  emit genreChanged();       break;
     case ATTRIBUTETYPE_Episode_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType)); emit episodeChanged();     break;
+    case ATTRIBUTETYPE_Episode_Number_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType)); emit episodeNumberChanged();     break;
     case ATTRIBUTETYPE_Studio_CONST:m_studioList.append(new FileDetailsObject(attribute, val, attribType));                 emit studioChanged();      break;
     case ATTRIBUTETYPE_ComposerWriter_CONST:m_composerWriterList.append(new FileDetailsObject(attribute, val, attribType)); emit composersChanged();   break;
-    case ATTRIBUTETYPE_Album_Artist_CONST:m_albumArtistList.append(new FileDetailsObject(attribute, val, attribType));      emit albumArtistChanged(); break;
+    case ATTRIBUTETYPE_Album_Artist_CONST:m_albumArtistList.append(new FileDetailsObject(attribute, val, attribType) );     emit albumArtistChanged(); break;
+    case ATTRIBUTETYPE_Season_Number_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) );     emit seasonChanged(); break;
+    case ATTRIBUTETYPE_Release_Date_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) );     emit releaseDateChanged(); break;
         break;
     default:
         qDebug() << " No handler for attribute " << attribute << " value:: " << val;
@@ -73,6 +78,7 @@ void FileDetailsClass::clear(){
     m_composerWriterList.clear();
     m_studioList.clear();
     m_directorList.clear();
+    m_singleItemMap.clear();
     directors.clear();
     composers.clear();
     composerlist.clear();
@@ -87,9 +93,8 @@ void FileDetailsClass::clear(){
     channelID.clear();
     episode.clear();
     album.clear();
-    track.clear();
+
     genre.clear();
-    releasedate.clear();
     studio.clear();
     rating.clear();
     synop.clear();
@@ -102,8 +107,8 @@ void FileDetailsClass::clear(){
     setTitle2("");
     setMediaTitle("");
     setAlbum("");
-    setTrack("");
     setRunTime("");
+
 
 
     emit objectChanged();

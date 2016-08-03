@@ -3,7 +3,7 @@ import org.linuxmce.enums 1.0
 import "../."
 GenericPopup{
     id:fileDetails
-    title: qsTr("Media Information for %1", "File Details").arg(filedetailsclass.filename)
+    title: qsTr("Media: %1", "File Details").arg(filedetailsclass.filename)
     content: Item{
         id:content_item
         property int bgImageProp:manager.q_subType ===("1"||"13") ? 43 : manager.q_attributetype_sort===53 ? 43 :36
@@ -11,6 +11,40 @@ GenericPopup{
         anchors.fill: parent
         focus:true
         onActiveFocusChanged: if(activeFocus)media_options.forceActiveFocus()
+
+        MouseArea{
+            anchors.fill: parent
+        }
+
+        Component{
+            id:attribSelectButton
+
+            Item{
+                width: parent.width
+                height: Style.appButtonHeight /2
+                Rectangle{
+                    color: index % 2 ? "black" : "darkgrey"
+                    opacity: .45
+                    anchors.fill: parent
+                }
+
+                StyledText{
+                    color: "white"
+                    fontSize: Style.appFontSize_title
+                    text:modelData.attribute
+                    anchors.centerIn: parent
+                }
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked:{
+                        manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                        fileDetails.close()
+                    }
+                }
+            }
+        }
+
         Image{
             id:imdb_background
             fillMode: Image.PreserveAspectCrop
@@ -46,7 +80,7 @@ GenericPopup{
 
         StyledText{
             id:album
-            text:qsTr("Album: %1").arg(filedetailsclass.album)
+            text:qsTr("Album: %1, Released: %2").arg(filedetailsclass.album).arg(filedetailsclass.releaseDate)
             anchors{
                 top:title.bottom
                 left: title.left
@@ -69,14 +103,14 @@ GenericPopup{
             id:tv_meta
             visible:false
             anchors{
-                top:title.bottom
+                top:parent.top
                 left: parent.left
             }
             width: parent.width/2
             height: Style.scaleY(20)
 
             Column{
-              anchors.fill: parent
+                anchors.fill: parent
                 StyledText{
                     id:program
                     fontSize: Style.appFontSize_title
@@ -88,6 +122,13 @@ GenericPopup{
                     id:episode
                     fontSize: Style.appFontSize_title
                     text:qsTr("Episode: %1").arg(filedetailsclass.episode)
+                    visible:tv_meta.visible
+                }
+
+                StyledText{
+                    id:episode_season
+                    fontSize: Style.appFontSize_title
+                    text:qsTr("Season: %1, Episode Number %2").arg(filedetailsclass.season).arg(filedetailsclass.episodeNumber)
                     visible:tv_meta.visible
                 }
             }
@@ -109,7 +150,7 @@ GenericPopup{
                 width: Style.scaleX(50)
                 height: Style.scaleY(65)
                 anchors.centerIn: parent
-                property int containerHeight:Style.scaleY(10)
+                property int containerHeight:Style.scaleY(25)
                 Rectangle{
                     id:spacer
                     color:"transparent"
@@ -124,25 +165,7 @@ GenericPopup{
                     clip:true
                     label:qsTr("%n Director(s)", "", filedetailsclass.directorList.length)
                     model:filedetailsclass.directorList
-                    delegate: StyledText{
-                        Rectangle{
-                            color: index % 2 ? "black" : "darkgrey"
-                            opacity: .45
-                            anchors.fill: parent
-                            z:parent.z-2
-                        }
-                        color: "white"
-                        fontSize: Style.appFontSize_title
-                        width: parent.width
-                        text:modelData.attribute
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked:{
-                                manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
-                                fileDetails.close()
-                            }
-                        }
-                    }
+                    delegate: attribSelectButton
                 }
 
                 GenericListModel{
@@ -153,25 +176,7 @@ GenericPopup{
                     clip:true
                     label:qsTr("%n Writer(s)", "", filedetailsclass.writerList.length)
                     model:filedetailsclass.writersList
-                    delegate: StyledText{
-                        Rectangle{
-                            color: index % 2 ? "black" : "darkgrey"
-                            opacity: .45
-                            anchors.fill: parent
-                            z:parent.z-2
-                        }
-                        color:"white"
-                        fontSize: Style.appFontSize_title
-                        width: parent.width
-                        text:modelData.attribute
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked:{
-                                manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
-                                fileDetails.close()
-                            }
-                        }
-                    }
+                    delegate:attribSelectButton
                 }
 
                 GenericListModel{
@@ -180,28 +185,9 @@ GenericPopup{
                     width: parent.width
                     clip:true
                     label:qsTr("%n Performer(s)", "0", filedetailsclass.performersList.length)
-                    extended: true
+                    extended: false
                     model:filedetailsclass.performersList
-                    delegate: StyledText{
-                        Rectangle{
-                            color: index % 2 ? "black" : "darkgrey"
-                            opacity: .45
-                            anchors.fill: parent
-                            z:parent.z-2
-                        }
-
-                        color:"white"
-                        fontSize: Style.appFontSize_title
-                        width: parent.width
-                        text:modelData.attribute
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked:{
-                                manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
-                                fileDetails.close()
-                            }
-                        }
-                    }
+                    delegate: attribSelectButton
                 }
 
 
@@ -210,28 +196,10 @@ GenericPopup{
                     height:extended ? metadata.containerHeight : headerHeight
                     width: parent.width
                     clip:true
-                    extended: true
+                    extended: false
                     label:qsTr("%n Studio(s)", "0", filedetailsclass.studioList.length)
                     model:filedetailsclass.studioList
-                    delegate: StyledText{
-                        Rectangle{
-                            color: index % 2 ? "black" : "darkgrey"
-                            opacity: .45
-                            anchors.fill: parent
-                            z:parent.z-2
-                        }
-                        color: "white"
-                        fontSize: Style.appFontSize_title
-                        width: parent.width
-                        text:modelData.attribute
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked:{
-                                manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
-                                fileDetails.close()
-                            }
-                        }
-                    }
+                    delegate: attribSelectButton
                 }
             }
         }
@@ -322,8 +290,8 @@ GenericPopup{
                 PropertyChanges{ target: spacer; height:Style.scaleY(30); width:height }
                 PropertyChanges{ target: directors; height:0; visible:false }
                 PropertyChanges{ target: album; visible:true }
-                PropertyChanges{ target: comps; visible:false; height:100; extended:true }
-                PropertyChanges{ target: perfs; height:perfs.extended ? parent.height*.30 : parent.height*.10; visible:true }
+                PropertyChanges{ target: comps; visible:true; extended:true }
+                PropertyChanges{ target: perfs; extended:true; visible:true }
                 PropertyChanges{ target: studios; height:0; visible:false }
                 PropertyChanges{ target: description; visible:false; height:0}
             },
@@ -331,7 +299,7 @@ GenericPopup{
             State{
                 name:"tv"
                 extend: "video"
-               when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==MediaSubtypes.TVSHOWS
+                when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==MediaSubtypes.TVSHOWS
                 PropertyChanges{
                     target:filedetailsimage
                     source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
@@ -339,6 +307,7 @@ GenericPopup{
                 }
                 PropertyChanges{ target: spacer; height:Style.scaleY(8); width:height }
                 PropertyChanges{ target: tv_meta; visible: true; }
+                PropertyChanges{ target: title; visible: false; }
             },
 
             State {
@@ -352,9 +321,9 @@ GenericPopup{
                 PropertyChanges{ target:filedetailsimage; source:""     }
                 PropertyChanges{ target: album; visible:false }
                 PropertyChanges{ target: comps; height:0; visible:false }
-                PropertyChanges{ target: perfs; height:perfs.extended ? parent.height*.30 : parent.height*.10; visible:true }
-                PropertyChanges{ target: directors; height:directors.extended ? parent.height*.20 : parent.height*.10; visible:true }
-                PropertyChanges{ target: studios; height:studios.extended ? parent.height*.30 : parent.height*.10; visible:true }
+                PropertyChanges{ target: perfs;  visible:true }
+                PropertyChanges{ target: directors;  visible:true }
+                PropertyChanges{ target: studios;  visible:true }
                 PropertyChanges{ target: tv_meta; visible: false; }
                 PropertyChanges{ target: description; visible:true; }
             },

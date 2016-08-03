@@ -108,6 +108,9 @@ class FileDetailsClass : public QObject
     Q_PROPERTY (QString channel READ getChannel  NOTIFY channelChanged)/*!<  \brief The current channel for broadcast media file_details*/
     Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged) /*!< \brief Schedules direct channel id  \ingroup file_details*/
     Q_PROPERTY (QString episode READ getEpisode  NOTIFY episodeChanged) /*!< \brief Episode number   \ingroup file_details*/
+    Q_PROPERTY(QString episodeNumber READ episodeNumber NOTIFY episodeNumberChanged)
+    Q_PROPERTY(QString season READ season  NOTIFY seasonChanged)
+    Q_PROPERTY(QString releaseDate READ releaseDate NOTIFY releaseDateChanged)
 
     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged) /*!< \brief The director of the current media.  \ingroup file_details*/
     Q_PROPERTY(QQmlListProperty <FileDetailsObject> directorList READ directorList NOTIFY directorChanged )
@@ -115,7 +118,7 @@ class FileDetailsClass : public QObject
 
     //audio related
     Q_PROPERTY (QString album READ getAlbum  NOTIFY albumChanged) /*!< \brief The album  \ingroup file_details*/
-    Q_PROPERTY (QString track READ getTrack  NOTIFY trackChanged) /*!< \brief The current track \ingroup file_details*/
+    Q_PROPERTY (QString track READ track  NOTIFY trackChanged) /*!< \brief The current track \ingroup file_details*/
 
     Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged) /*!< \brief String of '|' seperated performers.  \ingroup file_details*/
     Q_PROPERTY (QStringList performers READ getPerformerList) /*!< \brief List of performers \warning experimental  \ingroup file_details*/
@@ -140,7 +143,7 @@ public:
 
     QString file;
 
-    QString season;
+
     QString imdb;
     QString qs_mainTitle;
     QString qs_mainTitle2;
@@ -162,11 +165,11 @@ public:
     QStringList performers;
     QString performerlist;
     QString album;
-    QString track;
+
     QString genre;
     QStringList composers;
     QString composerlist;
-    QString releasedate;
+
     QString rating;
 
     bool showDetails;
@@ -214,6 +217,9 @@ signals:
     void aspectHChanged();
     void aspectWChanged();
     void ratingChanged();
+    void seasonChanged();
+    void episodeNumberChanged();
+    void releaseDateChanged();
 
     //audio signals
     void albumChanged();
@@ -237,13 +243,15 @@ signals:
 
 public slots:
 
+
+
+
     void handleNewFileAttribute(int attribType, int attribute, QString val);
 
     void clear();
 
     void setRating(const QString r) {rating = r; emit ratingChanged();}
     QString getRating(){return rating;}
-
 
     void setStorageDevice(const QString device) {
         qs_storageDevice = device;
@@ -255,10 +263,30 @@ public slots:
 
     QString getStorageDevice() {return qs_storageDevice;}
 
+    QString releaseDate(){
+        if(!m_singleItemMap.contains(ATTRIBUTETYPE_Release_Date_CONST)) return tr("Unknown");
+        return m_singleItemMap.value(ATTRIBUTETYPE_Release_Date_CONST)->attribute();
+    }
+
     void setProgram(const QString newProgram) {program = newProgram;  emit programChanged();}
     QString getProgram () {
         if(!m_singleItemMap.contains(ATTRIBUTETYPE_Program_CONST)) return tr("Unknown");
         return m_singleItemMap.value(ATTRIBUTETYPE_Program_CONST)->attribute();
+    }
+
+    QString season() {
+        if(!m_singleItemMap.contains(ATTRIBUTETYPE_Season_Number_CONST)) return tr("Unknown");
+        return m_singleItemMap.value(ATTRIBUTETYPE_Season_Number_CONST)->attribute();
+    }
+
+    QString episodeNumber(){
+        if(!m_singleItemMap.contains(ATTRIBUTETYPE_Episode_Number_CONST)) return tr("Unknown");
+        return m_singleItemMap.value(ATTRIBUTETYPE_Episode_Number_CONST)->attribute();
+    }
+
+    QString track(){
+        if(!m_singleItemMap.contains(ATTRIBUTETYPE_Track_CONST)) return tr("Unknown");
+        return m_singleItemMap.value(ATTRIBUTETYPE_Track_CONST)->attribute();
     }
 
     void setTitle (const QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
@@ -304,8 +332,8 @@ public slots:
     void setAlbum (const QString inc_album) {album = inc_album;  emit albumChanged();}
     QString getAlbum () {return album;}
 
-    void setTrack (const QString inc_track) {track = inc_track;  emit trackChanged();}
-    QString getTrack() {return track;}
+
+
 
     void setPerformers (const QString inc_performer) {performers << inc_performer; emit performersChanged();}
     QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
@@ -330,7 +358,7 @@ public slots:
     void setDirector (const QString inc_director) {directors << inc_director;  emit directorChanged();}
     QString getDirector() {director = directors.join(" | "); return director;}
 
-    QQmlListProperty <FileDetailsObject> directorList() {      
+    QQmlListProperty <FileDetailsObject> directorList() {
         return QQmlListProperty<FileDetailsObject>(this,m_directorList);
     }
 
