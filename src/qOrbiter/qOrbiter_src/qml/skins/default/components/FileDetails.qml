@@ -4,6 +4,7 @@ import "../."
 GenericPopup{
     id:fileDetails
     title: qsTr("Media: %1", "File Details").arg(filedetailsclass.filename)
+
     content: Item{
         id:content_item
         property int bgImageProp:manager.q_subType ===("1"||"13") ? 43 : manager.q_attributetype_sort===53 ? 43 :36
@@ -11,6 +12,32 @@ GenericPopup{
         anchors.fill: parent
         focus:true
         onActiveFocusChanged: if(activeFocus)media_options.forceActiveFocus()
+
+        Item{
+            height: Style.appButtonHeight
+            width: height
+            Component.onCompleted: parent=fileDetails
+            anchors{
+                top:parent.top
+                right:parent.right
+            }
+            Rectangle{
+                color: Style.appbutton_cancel_color
+                height: parent.height/2
+                width: parent.width/2
+                radius: height
+                StyledText{
+                    text:"i"
+                    anchors.centerIn: parent
+                    font.pointSize: 24
+                    font.bold: true
+                }
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: metaPanel.state==="open" ? metaPanel.state = "closed" : metaPanel.state = "open"
+            }
+        }
 
         MouseArea{
             anchors.fill: parent
@@ -66,17 +93,17 @@ GenericPopup{
             }
         }
 
-
         StyledText{
             id:title
             text:qsTr("Title: %1").arg(filedetailsclass.mediatitle)
-            fontSize: Style.appFontSize_title
+            fontSize: Style.appFontSize_header
             anchors{
                 left:parent.left
                 top:parent.top
                 right:parent.right
             }
         }
+
 
         StyledText{
             id:album
@@ -97,6 +124,24 @@ GenericPopup{
                 right:parent.right
             }
             visible:album.visible
+        }
+
+        Item{
+            id:video_meta
+            visible: false
+            anchors.top: title.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            Column{
+                StyledText{
+                    id:rated
+                    text:qsTr("Rated: %1 ").arg(filedetailsclass.rating)
+                }
+                StyledText{
+                    id:runtime
+                    text:qsTr("Running Time: %2 minutes").arg(filedetailsclass.runTime)
+                }
+            }
+
         }
 
         Item{
@@ -131,6 +176,10 @@ GenericPopup{
                     text:qsTr("Season: %1, Episode Number %2").arg(filedetailsclass.season).arg(filedetailsclass.episodeNumber)
                     visible:tv_meta.visible
                 }
+                StyledText{
+                    id:rating
+                    text:qsTr("Rated: %1 Running Time %2 minutes").arg(filedetailsclass.rating).arg(filedetailsclass.runTime)
+                }
             }
 
         }
@@ -157,61 +206,7 @@ GenericPopup{
                     height: 0
                 }
 
-                GenericListModel{
-                    id:directors
-                    height: extended ? metadata.containerHeight : headerHeight
-                    extended: false
-                    width: parent.width
-                    clip:true
-                    label:qsTr("%n Director(s)", "", filedetailsclass.directorList.length)
-                    model:filedetailsclass.directorList
-                    delegate: attribSelectButton
-                }
 
-                GenericListModel{
-                    id:comps
-                    height:extended ? metadata.containerHeight : headerHeight
-                    extended: false
-                    width: parent.width
-                    clip:true
-                    label:qsTr("%n Writer(s)", "", filedetailsclass.writerList.length)
-                    model:filedetailsclass.writersList
-                    delegate:attribSelectButton
-                }
-
-                GenericListModel{
-                    id:perfs
-                    height: extended ? metadata.containerHeight : headerHeight
-                    width: parent.width
-                    clip:true
-                    label:qsTr("%n Performer(s)", "0", filedetailsclass.performersList.length)
-                    extended: false
-                    model:filedetailsclass.performersList
-                    delegate: attribSelectButton
-                }
-
-                GenericListModel{
-                    id:genres
-                    height: extended ? metadata.containerHeight : headerHeight
-                    width: parent.width
-                    clip:true
-                    label:qsTr("%n Genres(s)", "0", filedetailsclass.genreList.length)
-                    extended: false
-                    model:filedetailsclass.genreList
-                    delegate: attribSelectButton
-                }
-
-
-                GenericListModel{
-                    id:studios
-                    height:extended ? metadata.containerHeight : headerHeight
-                    width: parent.width
-                    clip:true
-                    extended: false
-                    label:qsTr("%n Studio(s)", "0", filedetailsclass.studioList.length)
-                    model:filedetailsclass.studioList
-                    delegate: attribSelectButton
-                }
             }
         }
 
@@ -287,6 +282,144 @@ GenericPopup{
 
         }
 
+        Item{
+            id:metaPanel
+            height: parent.height*.75
+            width: parent.width
+            Rectangle{
+                color: "grey"
+                anchors.fill: parent
+                opacity: .85
+            }
+
+            Rectangle{
+                id:hdr
+                width: parent.width
+                anchors.top:parent.top
+                anchors.left: parent.left
+                height: Style.appNavigation_panelHeight
+                color:Style.appcolor_background_list
+
+                StyledText{
+                    text:qsTr("Click to close")
+                    anchors.centerIn: parent
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: metaPanel.state = "closed"
+                }
+
+            }
+
+            ListView{
+                anchors{
+                    top:hdr.bottom
+                    left:parent.left
+                    right:parent.right
+                    bottom:parent.bottom
+                }
+                model:meta_rows
+                clip:true
+            }
+
+            VisualItemModel{
+                id:meta_rows
+
+
+                GenericListModel{
+                    id:directors
+                    height: extended ? metadata.containerHeight : headerHeight
+                    extended: false
+                    width: parent.width
+                    clip:true
+                    label:qsTr("%n Director(s)", "", filedetailsclass.directorList.length)
+                    model:filedetailsclass.directorList
+                    delegate: attribSelectButton
+                }
+
+                GenericListModel{
+                    id:comps
+                    height:extended ? metadata.containerHeight : headerHeight
+                    extended: false
+                    width: parent.width
+                    clip:true
+                    label:qsTr("%n Writer(s)", "", filedetailsclass.writerList.length)
+                    model:filedetailsclass.writersList
+                    delegate:attribSelectButton
+                }
+
+                GenericListModel{
+                    id:perfs
+                    height: extended ? metadata.containerHeight : headerHeight
+                    width: parent.width
+                    clip:true
+                    label:qsTr("%n Performer(s)", "0", filedetailsclass.performersList.length)
+                    extended: false
+                    model:filedetailsclass.performersList
+                    delegate: attribSelectButton
+                }
+
+                GenericListModel{
+                    id:genres
+                    height: extended ? metadata.containerHeight : headerHeight
+                    width: parent.width
+                    clip:true
+                    label:qsTr("%n Genres(s)", "0", filedetailsclass.genreList.length)
+                    extended: false
+                    model:filedetailsclass.genreList
+                    delegate: attribSelectButton
+                }
+
+
+                GenericListModel{
+                    id:studios
+                    height:extended ? metadata.containerHeight : headerHeight
+                    width: parent.width
+                    clip:true
+                    extended: false
+                    label:qsTr("%n Studio(s)", "0", filedetailsclass.studioList.length)
+                    model:filedetailsclass.studioList
+                    delegate: attribSelectButton
+                }
+
+            }
+
+            anchors.verticalCenter: parent.verticalCenter
+            state:"closed"
+            states: [
+                State {
+                    name: "open"
+                    AnchorChanges{
+                        target: metaPanel
+                        anchors{
+                            left:parent.left
+                        }
+                    }
+                },
+                State {
+                    name: "closed"
+                    AnchorChanges{
+                        target: metaPanel
+                        anchors{
+                            left:parent.right
+                        }
+                    }
+                }
+            ]
+
+            transitions: [
+                Transition {
+                    from: "*"
+                    to: "*"
+                    AnchorAnimation{
+                        duration: Style.transition_accentTime
+                        easing.type: Easing.InCubic
+                    }
+                }
+            ]
+
+        }
+
         states: [
             State {
                 when:manager.q_mediaType==MediaTypes.LMCE_StoredAudio
@@ -319,6 +452,7 @@ GenericPopup{
                 PropertyChanges{ target: spacer; height:Style.scaleY(8); width:height }
                 PropertyChanges{ target: tv_meta; visible: true; }
                 PropertyChanges{ target: title; visible: false; }
+
             },
 
             State {
@@ -337,6 +471,7 @@ GenericPopup{
                 PropertyChanges{ target: studios;  visible:true }
                 PropertyChanges{ target: tv_meta; visible: false; }
                 PropertyChanges{ target: description; visible:true; }
+                PropertyChanges{ target:video_meta; visible:true }
             },
 
             State{
