@@ -21,7 +21,6 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
     QObject::connect(ptr, &qOrbiter::fd_performersChanged,this, &FileDetailsClass::setPerformers,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_composersChanged, this, &FileDetailsClass::setComposers, Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_directorChanged,this, &FileDetailsClass::setDirector,Qt::QueuedConnection);
-    QObject::connect(ptr, &qOrbiter::fd_genreChanged,this, &FileDetailsClass::setGenre,Qt::QueuedConnection);
     QObject::connect(ptr, &qOrbiter::fd_albumChanged,this, &FileDetailsClass::setAlbum,Qt::QueuedConnection);
     QObject::connect(ptr,&qOrbiter::fd_studioChanged,this, &FileDetailsClass::setStudio, Qt::QueuedConnection);
 
@@ -78,6 +77,7 @@ void FileDetailsClass::clear(){
     m_composerWriterList.clear();
     m_studioList.clear();
     m_directorList.clear();
+    m_genreList.clear();
     m_singleItemMap.clear();
     directors.clear();
     composers.clear();
@@ -94,8 +94,7 @@ void FileDetailsClass::clear(){
     episode.clear();
     album.clear();
 
-    genre.clear();
-    studio.clear();
+
     rating.clear();
     synop.clear();
 

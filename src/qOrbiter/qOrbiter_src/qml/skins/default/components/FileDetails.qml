@@ -190,6 +190,17 @@ GenericPopup{
                     delegate: attribSelectButton
                 }
 
+                GenericListModel{
+                    id:genres
+                    height: extended ? metadata.containerHeight : headerHeight
+                    width: parent.width
+                    clip:true
+                    label:qsTr("%n Genres(s)", "0", filedetailsclass.genreList.length)
+                    extended: false
+                    model:filedetailsclass.genreList
+                    delegate: attribSelectButton
+                }
+
 
                 GenericListModel{
                     id:studios
