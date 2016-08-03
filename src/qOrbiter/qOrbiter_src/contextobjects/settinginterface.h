@@ -58,8 +58,8 @@ public:
 class SettingInterface : public QObject
 {
     Q_OBJECT
-      Q_PROPERTY(bool ready READ getReady NOTIFY readyChanged)
-      Q_PROPERTY(int fontSizeMod READ fontSizeMod  NOTIFY fontSizeModChanged)
+    Q_PROPERTY(bool ready READ getReady NOTIFY readyChanged)
+    Q_PROPERTY(int fontSizeMod READ fontSizeMod  NOTIFY fontSizeModChanged)
 public:
     explicit SettingInterface(QObject *parent = 0);
     bool ready;
@@ -72,6 +72,8 @@ public:
     void setReady(bool value);
     int fontSizeMod() { return m_fontSizeMod;}
 
+
+
 signals:
     void newLogMessage(QString msg);
     void settingsDataCleared();
@@ -83,7 +85,7 @@ signals://for 'live properties'
     void deviceIdChanged(int deviceId);
 
 public slots:
-
+    Q_INVOKABLE void setPrefferedSize(QString size);
     void setLastLocation(int room, int entArea);
     int getLastRoom();
     int getLastEa();
@@ -103,7 +105,7 @@ public slots:
     Q_INVOKABLE void setFontSizeMod(int m){
         setSimpleOption(SettingsKeyType::Setting_Text_sizemod, m);
         m_fontSizeMod = m;
-        emit fontSizeModChanged();    
+        emit fontSizeModChanged();
     }
 
     Q_INVOKABLE bool isScreenSaverEnabled() {

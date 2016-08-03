@@ -2916,10 +2916,17 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     m_dwIDataGridRequestCounter++;
 
     string s_val;
-    CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iPK_Device_MediaPlugin,  qs_fk_fileno.toStdString(), " ",&s_val );
+    CMD_Get_Attributes_For_Media attribute_detail_get(
+                m_dwPK_Device,                      //device from
+                iPK_Device_MediaPlugin,             //device to
+                qs_fk_fileno.toStdString(),         //file number
+                " ",                                // entertain area
+                &s_val                              // value to return
+                );
+
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
-
+    qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << s_val.c_str();
     QStringList details = breaker.split(QRegExp("\\t"));
 
     int placeholder;
@@ -2929,26 +2936,27 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 #endif
 
     placeholder = details.indexOf("TITLE");
-    if(placeholder != -1)
-    {   temp = details.at(placeholder+1);
-        emit fd_titleChanged(temp);
-    }
+    if(placeholder != -1) { emit fd_titleChanged(details.at(placeholder+1));  }
 
     placeholder = details.indexOf("SYNOPSIS");
-    if(placeholder != -1)
-    {
-        temp = details.at(placeholder+1);
-        emit fd_synopChanged(temp);
-    }
+    if(placeholder != -1) { emit fd_synopChanged(details.at(placeholder+1));  }
 
     placeholder = details.indexOf("PICTURE");
-    if(placeholder != -1)
-    {
-        // filedetailsclass->setScreenshot(details.at(placeholder+1));
-        // filedetailsclass->setScreenshotimage(getfileForDG(details.at(placeholder+1).toStdString()));
-        emit mediaResponseChanged(details.at(placeholder+1));
-        emit fd_imageUrlChanged(QString(details.at(placeholder+1)));
+    if(placeholder != -1) { emit fd_imageUrlChanged(QString(details.at(placeholder+1))); }
 
+    placeholder = details.indexOf("EPISODE");
+    if(placeholder != -1) { emit fd_episodeChanged(details.at(placeholder+1) );  }
+
+    placeholder = details.indexOf("RUN TIME");
+    if(placeholder != -1) { emit fd_runtimeChanged(details.at(placeholder+1) );  }
+
+    placeholder = details.indexOf("PROGRAM");
+    if(placeholder != -1) {
+        int p2 = details.indexOf("TV PROGRAM ID");
+        if(p2 != -1){
+            int tvprogId = details.at(p2+1).toInt();
+              emit newFileDetailAttribute(ATTRIBUTETYPE_Program_CONST, tvprogId,details.at(placeholder+1) );
+        }
     }
 
     placeholder = details.indexOf("PATH");
@@ -2984,10 +2992,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     }
     //QApplication::processEvents(QEventLoop::AllEvents);
     placeholder = details.indexOf("FILENAME");
-    if(placeholder != -1)
-    {
-        emit fd_fileNameChanged(details.at(placeholder+1));
-    }
+    if(placeholder != -1) { emit fd_fileNameChanged(details.at(placeholder+1)); }
 
     CMD_Populate_Datagrid cmd_populate_attribute_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 83, qs_fk_fileno.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 

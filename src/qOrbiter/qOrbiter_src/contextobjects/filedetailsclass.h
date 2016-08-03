@@ -98,24 +98,24 @@ class FileDetailsClass : public QObject
     Q_PROPERTY(QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged )/*!< \brief The main title of the media \ingroup file_details*/
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)/*!< \brief Duplicate of qs_maintitle? \ingroup file_details*/
 
-    Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged) /*!< \brief Genre of media \ingroup file_details*/
+    Q_PROPERTY (QString genre READ getGenre  NOTIFY genreChanged) /*!< \brief Genre of media \ingroup file_details*/
     Q_PROPERTY(QQmlListProperty<FileDetailsObject> genreList READ genreList NOTIFY genreChanged)
 
-    Q_PROPERTY (QString studio READ getStudio WRITE setStudio NOTIFY studioChanged) /*!< \brief Publishing studio if availible  \ingroup file_details*/
+    Q_PROPERTY (QString studio READ getStudio  NOTIFY studioChanged) /*!< \brief Publishing studio if availible  \ingroup file_details*/
     Q_PROPERTY(QQmlListProperty<FileDetailsObject> studioList READ studioList NOTIFY studioChanged)
     //television related variables
-    Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged) /*!< \brief The current program. Applies to tv and some broadcast media  \ingroup file_details*/
-    Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)/*!<  \brief The current channel for broadcast media file_details*/
+    Q_PROPERTY (QString program READ getProgram  NOTIFY programChanged) /*!< \brief The current program. Applies to tv and some broadcast media  \ingroup file_details*/
+    Q_PROPERTY (QString channel READ getChannel  NOTIFY channelChanged)/*!<  \brief The current channel for broadcast media file_details*/
     Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged) /*!< \brief Schedules direct channel id  \ingroup file_details*/
-    Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged) /*!< \brief Episode number   \ingroup file_details*/
+    Q_PROPERTY (QString episode READ getEpisode  NOTIFY episodeChanged) /*!< \brief Episode number   \ingroup file_details*/
 
     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged) /*!< \brief The director of the current media.  \ingroup file_details*/
     Q_PROPERTY(QQmlListProperty <FileDetailsObject> directorList READ directorList NOTIFY directorChanged )
 
 
     //audio related
-    Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged) /*!< \brief The album  \ingroup file_details*/
-    Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged) /*!< \brief The current track \ingroup file_details*/
+    Q_PROPERTY (QString album READ getAlbum  NOTIFY albumChanged) /*!< \brief The album  \ingroup file_details*/
+    Q_PROPERTY (QString track READ getTrack  NOTIFY trackChanged) /*!< \brief The current track \ingroup file_details*/
 
     Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged) /*!< \brief String of '|' seperated performers.  \ingroup file_details*/
     Q_PROPERTY (QStringList performers READ getPerformerList) /*!< \brief List of performers \warning experimental  \ingroup file_details*/
@@ -127,6 +127,8 @@ class FileDetailsClass : public QObject
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo change to enum.  \ingroup file_details*/
     Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged)
     Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged)
+
+    Q_PROPERTY (QString runTime READ runTime NOTIFY runningTimeChanged)
 
 public:
     explicit FileDetailsClass(QObject *qorbiter_ptr, QObject *parent = 0);
@@ -231,6 +233,7 @@ signals:
     void programChanged();
     void channelChanged();
     void episodeChanged();
+    void runningTimeChanged();
 
 public slots:
 
@@ -254,8 +257,8 @@ public slots:
 
     void setProgram(const QString newProgram) {program = newProgram;  emit programChanged();}
     QString getProgram () {
-        if(!m_attributeMap.contains(ATTRIBUTETYPE_Program_CONST)) return "";
-        return m_attributeMap.value(ATTRIBUTETYPE_Program_CONST).at(0)->attribute();
+        if(!m_singleItemMap.contains(ATTRIBUTETYPE_Program_CONST)) return tr("Unknown");
+        return m_singleItemMap.value(ATTRIBUTETYPE_Program_CONST)->attribute();
     }
 
     void setTitle (const QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
@@ -284,7 +287,8 @@ public slots:
     }
 
     //--tv getters and setters-------------//
-
+    void setRunTime(QString runningTime){ m_runningTime = runningTime; emit runningTimeChanged();}
+    QString runTime(){return m_runningTime; }
 
 
     void setChannel (const QString inc_channel) {channel = inc_channel;  emit channelChanged();}
@@ -387,6 +391,8 @@ private:
     QList<FileDetailsObject*>  m_composerWriterList;
     QList<FileDetailsObject*>  m_directorList;
     QMap<int, FileDetailsObject*>  m_singleItemMap;
+
+    QString m_runningTime;
 
 };
 

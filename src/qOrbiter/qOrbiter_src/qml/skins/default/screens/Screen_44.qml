@@ -10,21 +10,23 @@ StyledScreen {
         headerTitle: screen
         useHeader: true
 
-        content:  Flickable{
+        content:
+            Flickable{
             anchors.fill: parent
-            contentWidth: parent.width
-            contentHeight:parent.width
+            contentWidth: flow.width
+            contentHeight:flow.height
             clip:true
+
             Flow{
                 id:flow
                 anchors.centerIn: parent
-                anchors.fill: parent
+              width: parent.width
+              height: childrenRect.height
                 spacing: 25
                 Component.onCompleted: forceActiveFocus()
 
                 StyledButton{
                     id:regenorbiter
-
                     buttonText: "Regen\nOrbiter"
                     onActivated:  manager.currentScreen="Screen_Reload.qml"
                 }

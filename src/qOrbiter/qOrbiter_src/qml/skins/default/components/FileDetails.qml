@@ -1,7 +1,6 @@
 import QtQuick 2.2
 import org.linuxmce.enums 1.0
-import "../components"
-import "../"
+import "../."
 GenericPopup{
     id:fileDetails
     title: qsTr("Media Information for %1", "File Details").arg(filedetailsclass.filename)
@@ -14,6 +13,7 @@ GenericPopup{
         onActiveFocusChanged: if(activeFocus)media_options.forceActiveFocus()
         Image{
             id:imdb_background
+            fillMode: Image.PreserveAspectCrop
             anchors.fill: parent
             // onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
         }
@@ -23,7 +23,8 @@ GenericPopup{
             property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
             width:profile ? Style.scaleX(25) : Style.scaleX(45)
             height:profile ? Style.scaleY(65) : Style.scaleY(58)
-           // source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
+            fillMode: Image.PreserveAspectCrop
+            // source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
             smooth: true
             anchors{
                 verticalCenter: parent.verticalCenter
@@ -31,129 +32,209 @@ GenericPopup{
             }
         }
 
+
         StyledText{
             id:title
-            text:qsTr("Title: ")+filedetailsclass.mediatitle
+            text:qsTr("Title: %1").arg(filedetailsclass.mediatitle)
             fontSize: Style.appFontSize_title
             anchors{
                 left:parent.left
                 top:parent.top
+                right:parent.right
             }
         }
 
-        Column{
-           id:metadata
-           spacing: 5
-           width: Style.listViewWidth_medium
-           height: parent.height
-           anchors.right: content_item.right
+        StyledText{
+            id:album
+            text:qsTr("Album: %1").arg(filedetailsclass.album)
+            anchors{
+                top:title.bottom
+                left: title.left
+                right:parent.right
+            }
+        }
 
-           StyledText{
-                width: parent.width
-               id:album
-               text:qsTr("Album: ")+filedetailsclass.album
-           }
-           GenericListModel{
-               id:directors
-                height: extended ? parent.height*.30 : parent.height*.10
-                 extended: false
-               width: parent.width
-               clip:true
-               label:"Director"
-               model:filedetailsclass.directorList
-               delegate: StyledText{
-                   color:"white"
-                   width: parent.width
-                   text:modelData.attribute
-                   MouseArea{
-                       anchors.fill: parent
-                       onClicked:{
-                           manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
-                           fileDetails.close()
-                       }
-                   }
-               }
-           }
-           GenericListModel{
-               id:comps
-                height: extended ? parent.height*.30 : parent.height*.10
-                 extended: false
-               width: parent.width
-               clip:true
-               label:"Writers"
-               model:filedetailsclass.writersList
-               delegate: StyledText{
-                   color:"white"
-                   width: parent.width
-                   text:modelData.attribute
-                   MouseArea{
-                       anchors.fill: parent
-                       onClicked:{
-                           manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
-                           fileDetails.close()
-                       }
-                   }
-               }
-           }
-           GenericListModel{
-               id:perfs
-              height: extended ? parent.height*.30 : parent.height*.10
-               width: parent.width
-               clip:true
-               label:"Performers"
-               extended: true
-               model:filedetailsclass.performersList
-               delegate: StyledText{
-                   color:"white"
-                   width: parent.width
-                   text:modelData.attribute
+        StyledText{
+            id:track
+            text:qsTr("Track: %1").arg(filedetailsclass.track)
+            anchors{
+                top:album.bottom
+                left: album.left
+                right:parent.right
+            }
+            visible:album.visible
+        }
 
-                   MouseArea{
-                       anchors.fill: parent
-                       onClicked:{
-                           manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
-                           fileDetails.close()
-                       }
-                   }
-               }
-           }
-           StyledText{
-               width: parent.width
-               id:program
-               text:qsTr("Program: ")+filedetailsclass.program
-               visible: filedetailsclass.program !== ""
-           }
-           StyledText{
-                width: parent.width
-               id:episode
-               text:qsTr("Episode: ")+filedetailsclass.episode
-                 visible: filedetailsclass.episode !== ""
-           }
+        Item{
+            id:tv_meta
+            visible:false
+            anchors{
+                top:title.bottom
+                left: parent.left
+            }
+            width: parent.width/2
+            height: Style.scaleY(20)
 
-           GenericListModel{
-               id:studios
-               height: extended ? parent.height*.30 : parent.height*.10
-               width: parent.width
-               clip:true
-                extended: true
-               label:qsTr("Studios")
-               model:filedetailsclass.studioList
-               delegate: StyledText{
-                   color:"white"
-                   width: parent.width
-                   text:modelData.attribute
-                   MouseArea{
-                       anchors.fill: parent
-                       onClicked:{
-                           manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
-                           fileDetails.close()
-                       }
-                   }
-               }
-           }
+            Column{
+              anchors.fill: parent
+                StyledText{
+                    id:program
+                    fontSize: Style.appFontSize_title
+                    text:qsTr("Program: %1").arg(filedetailsclass.program)
+                    visible: tv_meta.visible
+                }
+
+                StyledText{
+                    id:episode
+                    fontSize: Style.appFontSize_title
+                    text:qsTr("Episode: %1").arg(filedetailsclass.episode)
+                    visible:tv_meta.visible
+                }
+            }
 
         }
 
+
+
+        Flickable{
+            width: Style.scaleX(50)
+            height: parent.height
+            anchors.right: content_item.right
+            contentWidth: metadata.width
+            contentHeight: metadata.height
+
+            Column{
+                id:metadata
+                spacing: 5
+                width: Style.scaleX(50)
+                height: Style.scaleY(65)
+                anchors.centerIn: parent
+                property int containerHeight:Style.scaleY(10)
+                Rectangle{
+                    id:spacer
+                    color:"transparent"
+                    height: 0
+                }
+
+                GenericListModel{
+                    id:directors
+                    height: extended ? metadata.containerHeight : headerHeight
+                    extended: false
+                    width: parent.width
+                    clip:true
+                    label:qsTr("%n Director(s)", "", filedetailsclass.directorList.length)
+                    model:filedetailsclass.directorList
+                    delegate: StyledText{
+                        Rectangle{
+                            color: index % 2 ? "black" : "darkgrey"
+                            opacity: .45
+                            anchors.fill: parent
+                            z:parent.z-2
+                        }
+                        color: "white"
+                        fontSize: Style.appFontSize_title
+                        width: parent.width
+                        text:modelData.attribute
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:{
+                                manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                                fileDetails.close()
+                            }
+                        }
+                    }
+                }
+
+                GenericListModel{
+                    id:comps
+                    height:extended ? metadata.containerHeight : headerHeight
+                    extended: false
+                    width: parent.width
+                    clip:true
+                    label:qsTr("%n Writer(s)", "", filedetailsclass.writerList.length)
+                    model:filedetailsclass.writersList
+                    delegate: StyledText{
+                        Rectangle{
+                            color: index % 2 ? "black" : "darkgrey"
+                            opacity: .45
+                            anchors.fill: parent
+                            z:parent.z-2
+                        }
+                        color:"white"
+                        fontSize: Style.appFontSize_title
+                        width: parent.width
+                        text:modelData.attribute
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:{
+                                manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                                fileDetails.close()
+                            }
+                        }
+                    }
+                }
+
+                GenericListModel{
+                    id:perfs
+                    height: extended ? metadata.containerHeight : headerHeight
+                    width: parent.width
+                    clip:true
+                    label:qsTr("%n Performer(s)", "0", filedetailsclass.performersList.length)
+                    extended: true
+                    model:filedetailsclass.performersList
+                    delegate: StyledText{
+                        Rectangle{
+                            color: index % 2 ? "black" : "darkgrey"
+                            opacity: .45
+                            anchors.fill: parent
+                            z:parent.z-2
+                        }
+
+                        color:"white"
+                        fontSize: Style.appFontSize_title
+                        width: parent.width
+                        text:modelData.attribute
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:{
+                                manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                                fileDetails.close()
+                            }
+                        }
+                    }
+                }
+
+
+                GenericListModel{
+                    id:studios
+                    height:extended ? metadata.containerHeight : headerHeight
+                    width: parent.width
+                    clip:true
+                    extended: true
+                    label:qsTr("%n Studio(s)", "0", filedetailsclass.studioList.length)
+                    model:filedetailsclass.studioList
+                    delegate: StyledText{
+                        Rectangle{
+                            color: index % 2 ? "black" : "darkgrey"
+                            opacity: .45
+                            anchors.fill: parent
+                            z:parent.z-2
+                        }
+                        color: "white"
+                        fontSize: Style.appFontSize_title
+                        width: parent.width
+                        text:modelData.attribute
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:{
+                                manager.jumpToAttributeGrid(modelData.attributeType, modelData.attributeValue)
+                                fileDetails.close()
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         Rectangle{
             anchors.fill: description
@@ -161,15 +242,12 @@ GenericPopup{
             opacity: .65
         }
 
-
         StyledText{
             width: parent.width
-           id:description
-           text:qsTr("Synopsis:\n")+filedetailsclass.synop
-           anchors{
-               bottom:media_options.top
-           }
-       }
+            id:description
+            text:qsTr("Synopsis:\n %1").arg(filedetailsclass.synop)
+            anchors{ bottom:media_options.top }
+        }
 
         Row{
             id:media_options
@@ -239,19 +317,30 @@ GenericPopup{
                 PropertyChanges{
                     target:filedetailsimage
                     source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
+                    height: manager.isProfile? Style.scaleX(50) : Style.scaleY(50) ; width: filedetailsimage.height
                 }
-
+                PropertyChanges{ target: spacer; height:Style.scaleY(30); width:height }
                 PropertyChanges{ target: directors; height:0; visible:false }
                 PropertyChanges{ target: album; visible:true }
-                PropertyChanges{ target: comps; height:comps.extended ? parent.height*.30 : parent.height*.10; visible:true }
+                PropertyChanges{ target: comps; visible:false; height:100; extended:true }
                 PropertyChanges{ target: perfs; height:perfs.extended ? parent.height*.30 : parent.height*.10; visible:true }
                 PropertyChanges{ target: studios; height:0; visible:false }
-                PropertyChanges{ target: program; visible: false; height:0}
-                PropertyChanges{ target: episode; visible: false; height:0}
                 PropertyChanges{ target: description; visible:false; height:0}
-
-
             },
+
+            State{
+                name:"tv"
+                extend: "video"
+               when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==MediaSubtypes.TVSHOWS
+                PropertyChanges{
+                    target:filedetailsimage
+                    source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
+                    //  height: manager.isProfile? Style.scaleX(50) : Style.scaleY(50) ; width: filedetailsimage.height
+                }
+                PropertyChanges{ target: spacer; height:Style.scaleY(8); width:height }
+                PropertyChanges{ target: tv_meta; visible: true; }
+            },
+
             State {
                 when:manager.q_mediaType==MediaTypes.LMCE_StoredVideo
                 name: "video"
@@ -259,31 +348,21 @@ GenericPopup{
                     target: imdb_background
                     source:"http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+content_item.bgImageProp
                 }
-
+                PropertyChanges{ target: spacer; height:Style.scaleY(6); width:height }
                 PropertyChanges{ target:filedetailsimage; source:""     }
-                PropertyChanges{ target: album; height:0; visible:false }
+                PropertyChanges{ target: album; visible:false }
                 PropertyChanges{ target: comps; height:0; visible:false }
                 PropertyChanges{ target: perfs; height:perfs.extended ? parent.height*.30 : parent.height*.10; visible:true }
-                 PropertyChanges{ target: directors; height:directors.extended ? parent.height*.20 : parent.height*.10; visible:true }
+                PropertyChanges{ target: directors; height:directors.extended ? parent.height*.20 : parent.height*.10; visible:true }
                 PropertyChanges{ target: studios; height:studios.extended ? parent.height*.30 : parent.height*.10; visible:true }
-                PropertyChanges{ target: program; visible: false; }
-                PropertyChanges{ target: episode; visible: false; }
+                PropertyChanges{ target: tv_meta; visible: false; }
                 PropertyChanges{ target: description; visible:true; }
-
-            },
-
-            State{
-                name:"tv"
-                extend: "video"
-                when:manager.q_subType == (MediaSubtypes.TVSHOWS || MediaSubtypes.TVSHOWS )
-                PropertyChanges{ target: program; visible: true; }
-                PropertyChanges{ target: episode; visible: true; }
-
             },
 
             State{
                 name:"photo"
             },
+
             State{
                 name:""
                 PropertyChanges{
@@ -291,7 +370,6 @@ GenericPopup{
                     source:""
                 }
             }
-
         ]
     }
 

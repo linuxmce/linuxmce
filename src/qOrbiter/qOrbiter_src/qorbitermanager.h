@@ -1906,7 +1906,7 @@ qDebug() << Q_FUNC_INFO << " enter ";
     Q_INVOKABLE QVariant systemFontList();
 
     QString currentSizeSelector(){return m_currentSizeSelector; }
-    void setCurrentDeviceSize(QString newSize){ m_currentSizeSelector = newSize; emit currentSizeSelectorChanged();  }
+    void setCurrentDeviceSize(QString newSize);
 
 private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}

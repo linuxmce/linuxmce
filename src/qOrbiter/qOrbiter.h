@@ -1696,6 +1696,7 @@ signals:
     void fd_channelChanged(QString chan);
     void fd_chanIdChanged(QString chanid);
     void fd_episodeChanged(QString ep);
+    void fd_runtimeChanged(QString rt);
     void fd_directorChanged(QString dir);
     void fd_albumChanged(QString al);
     void fd_trackChanged(QString track);
