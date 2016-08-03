@@ -2974,6 +2974,14 @@ QVariant qorbiterManager::systemFontList()
     return QVariant(m_fontDir.entryList());
 }
 
+void qorbiterManager::setCurrentDeviceSize(QString newSize)
+{
+    if(m_currentSizeSelector == newSize) return;
+     m_currentSizeSelector = newSize;
+     settingsInterface->setPrefferedSize(newSize);
+     emit currentSizeSelectorChanged();
+}
+
 void qorbiterManager::reloadQml()
 {
     setUiReady(false);

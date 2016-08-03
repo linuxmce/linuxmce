@@ -74,6 +74,12 @@ void SettingInterface::setReady(bool value)
     emit readyChanged();
 }
 
+void SettingInterface::setPrefferedSize(QString size)
+{
+     m_settings.setValue("ui/preferredsize", size);
+     qDebug() << m_settings.value("ui/ppreferredsize");
+}
+
 void SettingInterface::setLastLocation(int room, int entArea)
 {
     qDebug() << Q_FUNC_INFO << room << " :: " << entArea;

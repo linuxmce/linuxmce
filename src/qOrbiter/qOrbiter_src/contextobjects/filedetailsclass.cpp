@@ -103,10 +103,11 @@ void FileDetailsClass::clear(){
     setMediaTitle("");
     setAlbum("");
     setTrack("");
+    setRunTime("");
 
 
     emit objectChanged();
-    emit screenTypeChanged();  
+    emit screenTypeChanged();
     emit genreChanged();
     emit albumChanged();
     emit trackChanged();

@@ -19,6 +19,7 @@ Item{
     property string dataGridOptions:""
     property bool extended:true
     property string sectionProperty:""
+    property int headerHeight:hdr.height
     property Component sectionDelegate
 
     signal viewToggled(bool open)
@@ -63,7 +64,7 @@ Item{
             right:parent.right
             top:parent.top
         }
-        height: Style.appNavigation_panelHeight
+        height: Style.appNavigation_panelHeight / 2
         color:enabled ? Style.appcolor_background_medium :" grey"
         opacity: Style.appList_opacity
 

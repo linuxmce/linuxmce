@@ -215,41 +215,19 @@ Panel{
         NowPlayingImage {
             id: npImage
 
-            Connections{
-                target:manager
-                onIsProfileChanged:{
-                    if(manager.isProfile){
-                        anchors.verticalCenter = undefined
-                        anchors.top = generic_playback.top
-                    } else {
-                        anchors.top = undefined
-                        anchors.verticalCenter = generic_playback.verticalCenter
-                    }
-                }
-            }
-
             anchors{
-                left:playlistPanel.right
+                verticalCenter:  manager.isProfile ? undefined : parent.verticalCenter
+                top : manager.isProfile ? parent.top : undefined
+                  left:playlistPanel.right
             }
         }
 
         Image{
             id:dvdImage
-            Connections{
-                target:manager
-                onIsProfileChanged:{
-                    if(manager.isProfile){
-                        anchors.verticalCenter = undefined
-                        anchors.top = generic_playback.top
-                    } else {
-                        anchors.top = undefined
-                        anchors.verticalCenter = generic_playback.verticalCenter
-                    }
-                }
-            }
-
             anchors{
-                left:playlistPanel.right
+                verticalCenter:  manager.isProfile ? undefined : parent.verticalCenter
+                top : manager.isProfile ? parent.top : undefined
+                  left:playlistPanel.right
             }
             Connections{
                 target: manager
