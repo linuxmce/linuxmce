@@ -108,8 +108,8 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     usingExternal(false),
     m_routerHelper(new RouterHelper(qOrbiter_ptr))
 {
-   setCurrentDeviceSize("medium");
-   connect(settingsInterface, &SettingInterface::deviceIdChanged, this, &qorbiterManager::setDeviceNumber);
+    setCurrentDeviceSize("medium");
+    connect(settingsInterface, &SettingInterface::deviceIdChanged, this, &qorbiterManager::setDeviceNumber);
     mediaPlayerID=-1; orbiterInit=true; m_ipAddress="";  m_bStartingUp= true;  homeNetwork=false;  alreadyConfigured = false;  iFK_Room = -1;
     iea_area= -1; bAppError = false; isPhone = 0; hostDevice=HostSystemData::OTHER_EMBEDDED; appConfigPath=""; status="starting";
     setUsingExternal(false); disconnectCount=0;  reloadCount=0;
@@ -119,7 +119,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     iFK_Room = settingsInterface->getLastRoom();
     iea_area = settingsInterface->getLastEa();
 
-   // qDebug() << QString("Loaded location settings Room %1 and EA %2").arg(QString::number(iFK_Room)).arg(QString::number(iea_area));
+    // qDebug() << QString("Loaded location settings Room %1 and EA %2").arg(QString::number(iFK_Room)).arg(QString::number(iea_area));
 
     m_mediaHelper = new DceMediaHelper(qOrbiter_ptr, m_routerHelper,this);
     connect(m_mediaHelper, &DceMediaHelper::forwardDceCommand, this, &qorbiterManager::sendDceCommand);
@@ -183,9 +183,9 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     m_screenInfo = new ScreenInfo();
     m_testScreenSize =testSize;
     if(m_testScreenSize !=-1){
-       m_screenInfo->deviceSizeToString(m_testScreenSize);
+        m_screenInfo->deviceSizeToString(m_testScreenSize);
     } else {
-       m_currentSizeSelector = m_screenInfo->primaryScreen()->deviceSizeString();
+        m_currentSizeSelector = m_screenInfo->primaryScreen()->deviceSizeString();
     }
 
     emit currentSizeSelectorChanged();
@@ -258,7 +258,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         connect(m_window, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
         connect(m_window->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(Qt::ScreenOrientation)));
         connect(m_window, &QQuickWindow::widthChanged, [=](int w) { setAppW(w);} );
-        connect(m_window, &QQuickWindow::heightChanged, [=](int h) {setAppH(h);} );      
+        connect(m_window, &QQuickWindow::heightChanged, [=](int h) {setAppH(h);} );
 
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
 
@@ -269,7 +269,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
             m_window->setVisibility(QWindow::Windowed);
             m_window->resize(appWidth, appHeight);
-             checkOrientation(m_window->size());
+            checkOrientation(m_window->size());
             m_window->show();
         }
 
@@ -374,7 +374,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id){
         // swapSkins("default");
         //  emit setSkinStatus(true);
     }
-return true;
+    return true;
 }
 
 void qorbiterManager::initiateRestart(){
@@ -439,11 +439,11 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     QString sPK_User = defaults.attribute("sPK_User");
     if(!alreadyConfigured){
 
-//        if(iFK_Room == -1)
-//        iFK_Room = defaults.attribute("DefaultRoom").toInt();
+        //        if(iFK_Room == -1)
+        //        iFK_Room = defaults.attribute("DefaultRoom").toInt();
 
-//        if(iea_area == -1)
-//        iea_area = defaults.attribute("DefaultEA").toInt();
+        //        if(iea_area == -1)
+        //        iea_area = defaults.attribute("DefaultEA").toInt();
 
         iPK_User = defaults.attribute("PK_User").toInt();
         if(iPK_User == 0)
@@ -810,7 +810,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     alreadyConfigured=true;
     setDceResponse("Properties Done");
     setDceResponse("Setting location");
-     setActiveRoom(iFK_Room , iea_area);
+    setActiveRoom(iFK_Room , iea_area);
     setCurrentUser(QString::number(iPK_User));
     beginSetup();
 
@@ -1316,7 +1316,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     m_appEngine->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
     m_appEngine->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
 
-  m_lRooms->setLocation(ea, room);
+    m_lRooms->setLocation(ea, room);
 }
 
 
@@ -1341,7 +1341,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
     iea_area = ea;
 
     if(room != -1 && ea!=-1){
-          settingsInterface->setLastLocation(room, ea);
+        settingsInterface->setLastLocation(room, ea);
     }
 
     sEntertainArea = QString::number(iea_area).toStdString();
@@ -2276,7 +2276,7 @@ void qorbiterManager::setHouseMode(QString pass, int mode, QString handling)
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
-   // qDebug() << "Incoming user::" << inc_user;
+    // qDebug() << "Incoming user::" << inc_user;
     sPK_User = userList->find(inc_user)->id();
     int user = inc_user.toInt();
     emit userChanged(user);
@@ -2555,7 +2555,7 @@ void qorbiterManager::beginSetup()
     }
 
     if(setSizeSelector() ){
-    qDebug() << "Setting size ";
+        qDebug() << "Setting size ";
     }
 
     if(createThemeStyle()){
@@ -2612,8 +2612,8 @@ bool qorbiterManager::setSizeSelector()
         }
 
         t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
-       m_currentSizeSelector = testDeviceString;
-       emit currentSizeSelectorChanged();
+        m_currentSizeSelector = testDeviceString;
+        emit currentSizeSelectorChanged();
     }
 
     m_selector->setExtraSelectors(t);
@@ -2831,7 +2831,7 @@ void qorbiterManager::checkOrientation(QSize s)
 #ifdef QT5
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
-qDebug() << Q_FUNC_INFO ;
+    qDebug() << Q_FUNC_INFO ;
     switch (o) {
     case Qt::InvertedLandscapeOrientation: qDebug() << "Inverted Landscape";
     case Qt::LandscapeOrientation: qDebug() << "Landscape";
@@ -2882,7 +2882,7 @@ void qorbiterManager::setCurrentScreen(QString s, bool force)
 
 void qorbiterManager::setCurrentScreen(int s, bool force)
 {
-
+    if(s==0) return;
     QString i = QString("Screen_%1.qml").arg(QString::number(s));
 
     if(i!=currentScreen || force){
@@ -2910,7 +2910,7 @@ void qorbiterManager::setCurrentOsdScreen(int s, bool force)
 void qorbiterManager::setCurrentOsdScreen(QString s, bool force )
 {
 
-     if(!s.contains(".qml")){
+    if(!s.contains(".qml")){
         setCurrentOsdScreen(s.toInt(), force);
         return;
     }
@@ -2977,9 +2977,9 @@ QVariant qorbiterManager::systemFontList()
 void qorbiterManager::setCurrentDeviceSize(QString newSize)
 {
     if(m_currentSizeSelector == newSize) return;
-     m_currentSizeSelector = newSize;
-     settingsInterface->setPrefferedSize(newSize);
-     emit currentSizeSelectorChanged();
+    m_currentSizeSelector = newSize;
+    settingsInterface->setPrefferedSize(newSize);
+    emit currentSizeSelectorChanged();
 }
 
 void qorbiterManager::reloadQml()
@@ -3065,10 +3065,10 @@ void qorbiterManager::resetScreenSize(){
         t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
 
-    appHeight = m_screenInfo->primaryScreen()->height() ;
-      appWidth = m_screenInfo->primaryScreen()->width();
-      emit appHeightChanged();
-      emit appWidthChanged();
+        appHeight = m_screenInfo->primaryScreen()->height() ;
+        appWidth = m_screenInfo->primaryScreen()->width();
+        emit appHeightChanged();
+        emit appWidthChanged();
 #if !defined(QANDROID) && !defined(Q_OS_IOS)
         m_window->resize(appWidth, appHeight);
         m_window->showNormal();
