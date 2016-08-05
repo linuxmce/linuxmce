@@ -14,10 +14,8 @@ StyledScreen{
             anchors.top: parent.headerRect.bottom
             anchors.bottom: parent.bottom
             anchors.right: parent.horizontalCenter
-
             dataGrid: DataGrids.Active_Channels
             dataGridLabel: "activeChannels"
-
             delegate: StyledButton{
                 anchors.left: parent.left
                 anchors.right: parent.right

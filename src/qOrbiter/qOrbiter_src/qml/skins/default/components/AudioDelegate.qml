@@ -93,4 +93,15 @@ Item{
             }
         }
     }
+
+    states: [
+        State {
+            name: "photos"
+            when:manager.q_mediaType == MediaTypes.LMCE_Pictures
+            PropertyChanges {
+                target: imdbImg
+                  source:path !=="" ? "http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=screensaver&val="+path : ""
+            }
+        }
+    ]
 }
