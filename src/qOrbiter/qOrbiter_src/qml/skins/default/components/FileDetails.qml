@@ -483,9 +483,6 @@ GenericPopup{
                     anchors.fill: parent
                     fillMode:Image.PreserveAspectFit
                 }
-                StateChangeScript{
-                    script: { console.log("Switched to photo state ")}
-                }
             },
 
             State{
