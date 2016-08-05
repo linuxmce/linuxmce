@@ -3101,8 +3101,6 @@ void DCE::qOrbiter::stop_AV()
 void qOrbiter::checkTimeCode(int npDevice)
 {
     qWarning() << "Searching for ip address of media player, device " << npDevice;
-    //  emit setMyIp(QString::fromStdString(m_sIPAddress));
-
     DeviceData_Base *pDevice =m_pData->m_AllDevices.m_mapDeviceData_Base_Find((long)npDevice) ;
 
     qWarning() << pDevice->m_dwPK_DeviceTemplate;
@@ -3159,7 +3157,8 @@ void qOrbiter::checkTimeCode(int npDevice)
             }
         }
         else
-        { qWarning() << "Could not find ip address";
+        {
+            qWarning() << "Could not find ip address";
             LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media Player Has No Address");
             return;
         }
@@ -3195,8 +3194,7 @@ void qOrbiter::getStreamingVideo()
         QByteArray buf;
         buf.setRawData(grabData, grabData_size);
         tgrab.loadFromData(buf);
-        emit  videoGrabReady(tgrab);
-        //emit commandResponseChanged("Image Retrieved");
+        emit  videoGrabReady(tgrab);       
     }
     else
     {
@@ -3207,13 +3205,11 @@ void qOrbiter::getStreamingVideo()
 }
 
 
-
 void qOrbiter::changedPlaylistPosition(QString pos)
 {
 
     if(!pos.contains(QRegExp("TITLE:")))
     {
-        //  qDebug() << pos;
         jumpToPlaylistPosition(pos);
     }
     else
@@ -3358,7 +3354,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
     CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iPK_Device_MediaPlugin, "" , StringUtils::itos(i_ea),&s_val );
     if (SendCommand(attribute_detail_get, &pResponse) && pResponse == "OK")
     {
-        emit commandResponseChanged("Getting Media Attributes");
+        qDebug() << Q_FUNC_INFO << pResponse.c_str() << "\n" << s_val.c_str();
         QString breaker = s_val.c_str();
         QStringList details = breaker.split(QRegExp("\\t"));
         int placeholder;

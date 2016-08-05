@@ -80,8 +80,6 @@ Item{
             }
         }
 
-
-
         GridView{
             id:media_grid
             clip:true
