@@ -475,7 +475,17 @@ GenericPopup{
             },
 
             State{
+                when:manager.q_mediaType == MediaTypes.LMCE_Pictures
                 name:"photo"
+                PropertyChanges{
+                    target: imdb_background
+                    source:"http://"+manager.currentRouter+"/lmce-admin/imdbImage.php?type=screensaver&val="+filedetailsclass.screenshot
+                    anchors.fill: parent
+                    fillMode:Image.PreserveAspectFit
+                }
+                StateChangeScript{
+                    script: { console.log("Switched to photo state ")}
+                }
             },
 
             State{

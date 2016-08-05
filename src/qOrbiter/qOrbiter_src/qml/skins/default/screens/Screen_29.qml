@@ -21,7 +21,7 @@ StyledScreen {
                 dataGrid: DataGrids.Alarms_In_Room
                 dataGridLabel: "sleepingAlarms"
                 dataGridOptions: String(manager.getlocation())
-                label:qsTr("(%1) Alarms in Room").arg(alarm_model.modelCount)
+                label:qsTr("(%n) Alarm(s) in Room %2").arg(alarm_model.modelCount).arg(manager.currentRoom)
                 height: parent.height
                 width: parent.width
                 delegate: Item{
