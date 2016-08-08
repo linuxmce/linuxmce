@@ -1,8 +1,15 @@
-import QtQuick 2.4
+import QtQuick 2.2
 
-QtObject{
+Item{
     id:applicationStyle
     objectName: "style"
+
+    Connections{
+        target:settings
+        onFontSizeModChanged:{
+            console.log("Font mod changed:")
+        }
+    }
     function scaleX(w){
         return w/100*manager.appWidth
     }
@@ -15,7 +22,7 @@ QtObject{
         console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
     }
 
-    readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
+  readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
 
     //picture ratios - will be moved to cpp class
     property double dvdPosterRatio:955/1080
@@ -27,12 +34,12 @@ QtObject{
 
     /* Transitions */
     readonly property int transition_animationTime:350
-    readonly property int transition_accentTime:500
+    readonly property int transition_accentTime:350
     readonly property int transitionFadeTime:350
 
     /* Application Colors */
-    readonly property color appcolor_background:  "#0588ff"
-    readonly property color appcolor_background_light:  "#80c4ff"
+    readonly property color appcolor_background:"#0588ff"
+    readonly property color appcolor_background_light:"#80c4ff"
     readonly property color appcolor_background_medium:"#43acff"
     readonly property color appcolor_background_list:"#222222"
     readonly property color appcolor_foregroundColor:"darkgreen"
@@ -43,12 +50,12 @@ QtObject{
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
     readonly property color appbutton_color:appcolor_background
-    property int appButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)
-    property int appButtonWidth: manager.isProfile ? scaleX(28) : scaleX(18)
+    property int appButtonHeight:manager.isProfile ? scaleY(12) : scaleY(16)
+    property int appButtonWidth: manager.isProfile ? scaleX(26) : scaleX(15)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
     readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
-    readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(9) : scaleY(15)
-    readonly property int appButtonNumberPadSmallWidth:manager.isProfile ? scaleX(15) : scaleX(9)
+    readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(6) : scaleY(9)
+    readonly property int appButtonNumberPadSmallWidth:manager.isProfile ? scaleX(9) : scaleX(6)
     readonly property int appButtonLargeHeight:manager.isProfile ? scaleY(15) : scaleY(20)
     readonly property int appButtonLargeWidth:manager.isProfile ? scaleX(28) : scaleX(25)
     readonly property int buttonSpacing:5
@@ -57,33 +64,34 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:11*dpRatio
-    readonly property int appFontSize_header:16*dpRatio
-    readonly property int appFontSize_description:12*dpRatio
-    readonly property int appFontSize_title:14*dpRatio
+     property int appFontSize_list:12
+     property int appFontSize_header:16
+     property int appFontSize_description:11
+     property int appFontSize_title:14
 
-    property int fontSize_small:6*dpRatio
+
+    property int fontSize_small:8
     property int fontSize_medium:appFontSize_description
     property int fontSize_large:appFontSize_title
 
-    property int fontSize_listItem:9*dpRatio
-    property int fontSize_listTitle:11*dpRatio
-    property int fontSize_listAccent:10*dpRatio
+    property int fontSize_listItem:9
+    property int fontSize_listTitle:14
+    property int fontSize_listAccent:10
 
     /* Application Navigation Bars */
-    readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)
-    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(10) : scaleY(15)
+    readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
+    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(7) : scaleY(9)
 
     /* Application Menu Panels */
-    readonly property int appMenuPanel_height:manager.isProfile ? scaleY(9) : scaleY(6)
+    readonly property int appMenuPanel_height:scaleY(90)
     readonly property int appMenuPanel_widthSmall:scaleX(25)
     readonly property int appMenuPanel_widthMedium:scaleX(45)
     readonly property int appMenuPanel_widthLarge:scaleX(85)
 
     /* Application List Views */
     readonly property int listViewWidth_large:scaleX(55)
-    readonly property int listViewWidth_medium:manager.b_orientation ? scaleX(30) : scaleX(15)
-    readonly property int listViewWidth_small:manager.b_orientation ? scaleX(20) : scaleX(15)
+    readonly property int listViewWidth_medium:manager.isProfile ? scaleX(35): scaleX(20)
+    readonly property int listViewWidth_small:scaleX(15)
     readonly property int listViewItemHeight:manager.isProfile ? scaleY(12) : scaleY(15)
     readonly property int listViewMargin:manager.isProfile ? scaleX(5) : scaleX(2.5)
 
@@ -97,10 +105,10 @@ QtObject{
     readonly property double appList_opacity:.89
 
     //remote Screens
-    readonly property double remote_posterHeight:manager.isProfile ? scaleY(100) : scaleY(55)
+    readonly property double remote_posterHeight:manager.isProfile ? scaleY(34) : scaleY(55)
     readonly property double remote_posterWidth:remote_posterHeight*hdPosterRatio
 
-    readonly property double remote_albumHeight:manager.b_orientation ? scaleY(50) : scaleY(75)
+    readonly property double remote_albumHeight:manager.b_orientation ? scaleY(25) : scaleY(50)
     readonly property double remote_albumWidth:remote_albumHeight
 
 }

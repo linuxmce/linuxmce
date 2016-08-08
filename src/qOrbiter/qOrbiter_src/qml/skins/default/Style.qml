@@ -64,20 +64,19 @@ Item{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-     property int appFontSize_list:12*dpRatio
-     property int appFontSize_header:16*dpRatio
-     property int appFontSize_description:11*dpRatio
-     property int appFontSize_title:14*dpRatio
+     property int appFontSize_list:12
+     property int appFontSize_header:16
+     property int appFontSize_description:11
+     property int appFontSize_title:14
 
-    property int appFontSize_clock: 20*dpRatio
 
-    property int fontSize_small:8*dpRatio
+    property int fontSize_small:8
     property int fontSize_medium:appFontSize_description
     property int fontSize_large:appFontSize_title
 
-    property int fontSize_listItem:9*dpRatio
-    property int fontSize_listTitle:14*dpRatio
-    property int fontSize_listAccent:10*dpRatio
+    property int fontSize_listItem:9
+    property int fontSize_listTitle:14
+    property int fontSize_listAccent:10
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
