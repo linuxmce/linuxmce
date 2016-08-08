@@ -92,7 +92,7 @@ Item{
             font.letterSpacing: 2
             smooth: true
             width: parent.width
-            fontSize: Style.appFontSize_clock * 3
+            fontSize: 24
             font.weight: Font.Light
             horizontalAlignment: Text.AlignHCenter
             opacity: .65

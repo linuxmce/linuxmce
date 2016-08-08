@@ -1,8 +1,15 @@
 import QtQuick 2.2
 
-QtObject{
+Item{
     id:applicationStyle
     objectName: "style"
+
+    Connections{
+        target:settings
+        onFontSizeModChanged:{
+            console.log("Font mod changed:")
+        }
+    }
     function scaleX(w){
         return w/100*manager.appWidth
     }
@@ -47,8 +54,8 @@ QtObject{
     property int appButtonWidth: manager.isProfile ? scaleX(26) : scaleX(15)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
     readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
-    readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(9) : scaleY(15)
-    readonly property int appButtonNumberPadSmallWidth:manager.isProfile ? scaleX(15) : scaleX(9)
+    readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(6) : scaleY(9)
+    readonly property int appButtonNumberPadSmallWidth:manager.isProfile ? scaleX(9) : scaleX(6)
     readonly property int appButtonLargeHeight:manager.isProfile ? scaleY(15) : scaleY(20)
     readonly property int appButtonLargeWidth:manager.isProfile ? scaleX(28) : scaleX(25)
     readonly property int buttonSpacing:5
@@ -57,18 +64,19 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:11*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_header:16*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_description:12*dpRatio+settings.fontSizeMod
-    readonly property int appFontSize_title:14*dpRatio+settings.fontSizeMod
+     property int appFontSize_list:12
+     property int appFontSize_header:16
+     property int appFontSize_description:11
+     property int appFontSize_title:14
 
-    property int fontSize_small:6*dpRatio+settings.fontSizeMod
-    property int fontSize_medium:appFontSize_description+settings.fontSizeMod
-    property int fontSize_large:appFontSize_title+settings.fontSizeMod
 
-    property int fontSize_listItem:9*dpRatio+settings.fontSizeMod
-    property int fontSize_listTitle:11*dpRatio+settings.fontSizeMod
-    property int fontSize_listAccent:10*dpRatio+settings.fontSizeMod
+    property int fontSize_small:8
+    property int fontSize_medium:appFontSize_description
+    property int fontSize_large:appFontSize_title
+
+    property int fontSize_listItem:9
+    property int fontSize_listTitle:14
+    property int fontSize_listAccent:10
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
@@ -100,7 +108,7 @@ QtObject{
     readonly property double remote_posterHeight:manager.isProfile ? scaleY(34) : scaleY(55)
     readonly property double remote_posterWidth:remote_posterHeight*hdPosterRatio
 
-    readonly property double remote_albumHeight:manager.b_orientation ? scaleY(50) : scaleY(75)
+    readonly property double remote_albumHeight:manager.b_orientation ? scaleY(25) : scaleY(50)
     readonly property double remote_albumWidth:remote_albumHeight
 
 

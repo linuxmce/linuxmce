@@ -10,17 +10,14 @@ Text {
     property double largeFontSize:Style.appFontSize_title
     property double cellFontSize: Style.appFontSize_list
     horizontalAlignment: Text.AlignHCenter
-    onVisibleChanged: {
-        onVisibleChanged: {
-            if(!visible)height=0
+    onVisibleChanged: {       
+            if(!visible)height=0.1
             else
-                height=paintedHeight
-        }
+                height=paintedHeight        
     }
-
     id:labelelement
     text: textLabel
-    font.pixelSize: (fontSize+settings.fontSizeMod) *2
+    font.pointSize: (fontSize+settings.fontSizeMod)
     verticalAlignment:Text.AlignVCenter
     color: Style.apptext_color_active
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere

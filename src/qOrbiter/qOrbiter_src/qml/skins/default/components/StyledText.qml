@@ -11,13 +11,13 @@ Text {
     property double cellFontSize: Style.appFontSize_list
     horizontalAlignment: Text.AlignHCenter
     onVisibleChanged: {
-        if(!visible)height=0
+        if(!visible)height=0.1
         else
             height=paintedHeight
     }
     id:labelelement
     text: textLabel   
-    font.pixelSize: fontSize+settings.fontSizeMod
+    font.pointSize: fontSize+settings.fontSizeMod
     verticalAlignment:Text.AlignVCenter   
     color:Style.apptext_color_active
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere 
