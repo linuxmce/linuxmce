@@ -2,12 +2,12 @@
 
 . /etc/lmce-build/builder.conf
 
-if [ "$KVER" ]
-then
-	Moon_KernelVersion=$KVER
-else
-	Moon_KernelVersion=$(basename $(find /lib/modules/* -maxdepth 0 -type d | grep -v "+" |sort -r |head -1))
-fi
+#if [ "$KVER" ]
+#then
+#	Moon_KernelVersion=$KVER
+#else
+	Moon_KernelVersion=$(basename $(find /lib/modules/* -maxdepth 0 -type d | sort -r | head -1))
+#fi
 
 #Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture ' | sed 's/APT::Architecture "\(.*\)".*/\1/g')
 Moon_KernelArch="all"
@@ -51,8 +51,8 @@ AddModules()
 # TODO: verify this is in the file?
 sed -i 's/^.*BOOT=.*/BOOT=nfs/g' "$initramfs_tools_dir/initramfs.conf"
 
-mkinitramfs -d "$initramfs_tools_dir/" -o ${Moon_RootLocation}/${kernel_dir}/initrd.img-${Moon_KernelVersion} ${Moon_KernelVersion}
-
+#mkinitramfs -d "$initramfs_tools_dir/" -o ${Moon_RootLocation}/${kernel_dir}/initrd.img-${Moon_KernelVersion} ${Moon_KernelVersion}
+mkinitramfs -d "$initramfs_tools_dir/" -o ${Moon_RootLocation}/${kernel_dir}/initramfs ${Moon_KernelVersion}
 
 cp ${Moon_RootLocation}/DEBIAN/changelog{.in,}
 cp ${Moon_RootLocation}/DEBIAN/control{.in,}
@@ -63,6 +63,21 @@ sed -i "s/{Kernel_Version}/${Moon_KernelVersion}/g" ${Moon_RootLocation}/DEBIAN/
 sed -i "s/{Kernel_Arch}/${Moon_KernelArch}/g"       ${Moon_RootLocation}/DEBIAN/control
 sed -i "s/^.*Package:.*/Package: linux-image-default-$flavor-$build_name/g" $Moon_RootLocation/DEBIAN/control
 
+# Create PXE configuration for default boot
+echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/nfs rw ip=dhcp rootwait elevator=deadline" > ${Moon_RootLocation}/${kernel_dir}/cmdline.txt
+
+cat <<-EEOF >${Moon_RootLocation}/${kernel_dir}/config.txt
+	# For more options and information see
+	# http://www.raspberrypi.org/documentation/configuration/config-txt.md
+	# Some settings may impact device functionality. See link above for details
+	
+	# uncomment if you get no picture on HDMI for a default "safe" mode
+	#hdmi_safe=1
+	#disable_overscan=1
+	gpu_mem=128
+	#kernel=kernel7.img
+	initramfs=initramfs
+EEOF
 
 #old
 ## Setup the symlinks
