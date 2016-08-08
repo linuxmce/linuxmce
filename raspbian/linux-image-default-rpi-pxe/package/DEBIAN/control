@@ -1,0 +1,12 @@
+Package: linux-image-default-raspbian-jessie
+Version: 4.4.0-1-rpi2-lmce2
+Section: unknown
+Priority: optional
+Architecture: all
+Installed-Size: 5796
+Provides: fuse-module, ivtv-modules, kvm-api-4, linux-image, linux-image-2.6, linux-image-4.4.0-1-rpi2, rhcs-modules2-1
+Depends: 
+Suggests: linux-headers-4.4.0-1-rpi2
+Maintainer: LinuxMCE Team <packaging@linuxmce.org>
+Description: Linux kernel image for version 4.4.0-1-rpi2 on all Diskless
+ Kernel image for LinuxMCE diskless Media Directors

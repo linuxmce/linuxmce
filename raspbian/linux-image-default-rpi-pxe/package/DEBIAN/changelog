@@ -1,0 +1,7 @@
+linux-image-default-raspbian-jessie (4.4.15-1-rpi2) unstable; urgency=low
+
+  * build for Raspbian jessie lmce
+
+ -- phenigma <phenigma@hotmail.com>  Mon, 08 Aug 2016 10:46:02 -0500
+
+
