@@ -13,8 +13,8 @@ DEVICEDATA_Operating_System=209
 DEVICEDATA_Architecture=112
 
 ###TARGET_TYPES="ubuntu-i386 raspbian-armhf" ### experimental
-#TARGET_TYPES="raspbian-armhf"
-TARGET_TYPES="ubuntu-i386"
+TARGET_TYPES="raspbian-armhf"
+#TARGET_TYPES="ubuntu-i386"
 
 INSTALL_KUBUNTU_DESKTOP="yes"
 #INSTALL_KUBUNTU_DESKTOP="no"
@@ -532,11 +532,10 @@ MD_Install_Packages () {
 					LC_ALL=C chroot "$TEMP_DIR" /tmp/symlink_kernel.sh
 					;;
 			esac
-			;;
-
 	                LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils
 			# pulseaudio
 			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
+			;;
 	esac
 
 	case "$TARGET_ARCH" in
