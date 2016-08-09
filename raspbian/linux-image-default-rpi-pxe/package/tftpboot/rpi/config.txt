@@ -1,0 +1,10 @@
+# For more options and information see
+# http://www.raspberrypi.org/documentation/configuration/config-txt.md
+# Some settings may impact device functionality. See link above for details
+
+# uncomment if you get no picture on HDMI for a default "safe" mode
+#hdmi_safe=1
+#disable_overscan=1
+gpu_mem=128
+#kernel=kernel7.img
+initramfs=initramfs

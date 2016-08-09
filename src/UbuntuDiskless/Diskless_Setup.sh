@@ -15,31 +15,66 @@ DEVICEDATA_DisklessBoot=9
 DEVICEDATA_DisklessImages=258
 DEVICEDATA_Model=233
 DEVICEDATA_PK_Distro=7
+DEVICEDATA_Serial_Number=161
+
+DD_DISTRO_Raspbian_Wheezy=19
+DD_DISTRO_Raspbian_Jessie=22
 
 HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 HOST_RELEASE=$(lsb_release -c -s)
 HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+
+function setup_tftp_boot_rpi
+{
+	Moon_DistroID="$1"
+	Moon_Serial_Number=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_Serial_Number'")
+
+	local Moon_BootDir="/tftpboot/$Moon_Serial_Number"
+	local Moon_cmdline_File="$Moon_BootDir/cmdline.txt"
+	local Moon_config_File="$Moon_BootDir/config.txt"
+
+	local BootConf=""
+
+	ln -sf "/usr/pluto/diskless/$Moon_DeviceID/boot" "$Moon_BootDir"
+	echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/nfs nfsroot=192.168.80.1:/usr/pluto/diskless/$Moon_DeviceID rw ip=dhcp rootwait elevator=deadline" >"${Moon_cmdline_File}"
+
+	cat <<-EEOF >"${Moon_config_File}"
+		# For more options and information see
+		# http://www.raspberrypi.org/documentation/configuration/config-txt.md
+		# Some settings may impact device functionality. See link above for details
+
+		# TODO: bring other values from the database to here
+
+		# uncomment if you get no picture on HDMI for a default "safe" mode
+		#hdmi_safe=1
+		disable_overscan=1
+		gpu_mem=128
+		lcd_rotate=2
+		EEOF
+}
 
 function setup_tftp_boot 
 {
 	echo "* Configuring TFTP Boot for MD #${Moon_DeviceID}"
 
 	Moon_DistroID=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_PK_Distro'")
+
+	# For jessie we setup the native rpi pxe booting methods rather than standard pxe
+	case $Moon_DistroID in
+		$DD_DISTRO_Raspbian_Jessie)
+			setup_tftp_boot_rpi $Moon_DistroID
+			return 0
+			;;
+	esac
+
 	local Moon_BootConfFile="/tftpboot/pxelinux.cfg/01-$(echo ${Moon_MAC//:/-} | tr 'A-Z' 'a-z')"
 	local BootConf=""
 
 	# deprecated boot parameter "video=" and we don't want to force vesafb with modern accelerated framebuffers (ie intel)
 	# if extra parameters are necessary they should be added to the DT as DEVICEDATA_Extra_Parameters
 	#local BootParams="quiet splash video=uvesafb:mode_option=1024x768-24,mtrr=3,scroll=ywrap vmalloc=256m"
-	case $Moon_DistroID in
-		19)
-			local BootParams="splash"
-			;;
-		*)
-			#local BootParams="quiet splash"
-			local BootParams=""
-			;;
-	esac
+	#local BootParams="quiet splash"
+	local BootParams=""
 	local BootParams_Extra=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters")
 	local BootParams_Override=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters_Override")
 	if [[ "$BootParams_Override" == "1" ]] ;then
@@ -132,7 +167,7 @@ function setup_tftp_boot
 		chmod +r /tftpboot/${Moon_DeviceID}/initrd.img
 
 		case $Moon_DistroID in
-			19)
+			$DD_DISTRO_Raspbian_Wheezy)
 				nfsroot="${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}"
 				initrd=""
 				;;
