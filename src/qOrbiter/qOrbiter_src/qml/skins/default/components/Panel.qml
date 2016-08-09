@@ -10,13 +10,13 @@ Item {
     property int panelHeaderHeight: useHeader ? Style.appNavigation_panelHeight : 0
     property string headerTitle:"Lorem Ipsum"
     property bool useHeader:true
-    property alias headerRow:control_row
+    property alias headerRow:bttnLoader.item
     property alias contentItem:panelContent.item
     property alias fillColor:bgfill.color
     property string headerFillColor:Style.appcolor_background_list
     property Component content
     property Component buttonControls
-    property alias buttonContent:control_row.children
+    property alias buttonContent:bttnLoader.item
 
     clip:true
     anchors.centerIn: centered ? parent : undefined
@@ -55,10 +55,10 @@ Item {
     }
 
     ScrollRow{
+        id:bttncntrl
         height: panelHeader.height *.95
         contentWidth:parent.width
         contentHeight: height
-
 
         anchors{
             right:panelHeader.right
@@ -68,25 +68,15 @@ Item {
         }
 
         Loader{
+            id:bttnLoader
             height: panelHeader.height
-            width: parent.width
+
             sourceComponent:buttonControls
+            onLoaded: {
+                bttncntrl.contentWidth = bttnLoader.item.width
+            }
         }
 
-        Row{
-            id:control_row
-            spacing: 2
-            width: children.length*Style.appButtonWidth
-            height: panelHeader.height *.95
-            Component.onCompleted: console.log("ctrl row len"+children.length)
-//            onChildrenChanged:{
-//                if(children.length===0)
-//                    return
-
-//               // children[children.length-1].height=height-5
-//                return;
-//            }
-        }
     }
 
     Image {
