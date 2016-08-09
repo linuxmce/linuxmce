@@ -12,7 +12,7 @@ set -e
 DEVICEDATA_Operating_System=209
 DEVICEDATA_Architecture=112
 
-###TARGET_TYPES="ubuntu-i386 raspbian-armhf"
+###TARGET_TYPES="ubuntu-i386 raspbian-armhf" ### experimental
 #TARGET_TYPES="raspbian-armhf"
 TARGET_TYPES="ubuntu-i386"
 
@@ -289,7 +289,7 @@ MD_System_Level_Prep () {
 		"raspbian")
 			StatsMessage "Setting up /etc/apt/sources.list for raspbian"
 			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list
-				#deb http://10.10.42.99/raspbian/ ./
+				#deb http://10.10.42.99/raspbian-$TARGET_RELEASE/ ./
 				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
 				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
 				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
@@ -507,33 +507,36 @@ MD_Install_Packages () {
 			mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
 			;;
 		"raspbian")
-			# raspbian doesn't come with lsb-release by default???
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
-			cat <<-EOF > $TEMP_DIR/etc/lsb-release
-				DISTRIB_ID=Raspbian
-				DISTRIB_CODENAME=$TARGET_RELEASE
-				EOF
+			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi-bin raspberrypi-bootloader rpi-update
+			LC_ALL=C chroot "$TEMP_DIR" BRANCH=next rpi-update
 
-			# HACK: copy the foundation kernel.img to a normal linux kernal name with version
-			# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
-			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.6-trunk-rpi
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi-bin raspberrypi-bootloader
-			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install rpi-update
-			#LC_ALL=C chroot "$TEMP_DIR" rpi-update
-			LC_ALL=C chroot "$TEMP_DIR" mkdir -p /sdcard
-			LC_ALL=C chroot "$TEMP_DIR" mkdir -p /tmp
-			cat <<-EOF > $TEMP_DIR/tmp/symlink_kernel.sh
-				#!/bin/bash
-				cd /boot
-				ln -sf kernel.img vmlinuz-3.6-trunk-rpi
-				touch /boot/initrd.img-3.6-trunk-rpi
-				EOF
-			chmod +x $TEMP_DIR/tmp/symlink_kernel.sh
-			LC_ALL=C chroot "$TEMP_DIR" /tmp/symlink_kernel.sh
+			case "$TARGET_DISTRO_ID" in
+				19)  # Wheezy (for rpi1 u-boot pxe booting)
+					# raspbian wheezy doesn't come with lsb-release by default??? fixed in jessie
+					LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
+					cat <<-EOF > $TEMP_DIR/etc/lsb-release
+						DISTRIB_ID=Raspbian
+						DISTRIB_CODENAME=$TARGET_RELEASE
+						EOF
+
+					# HACK: copy the foundation kernel.img to a normal linux kernal name with version
+					LC_ALL=C chroot "$TEMP_DIR" mkdir -p /sdcard
+					LC_ALL=C chroot "$TEMP_DIR" mkdir -p /tmp
+					cat <<-EOF > $TEMP_DIR/tmp/symlink_kernel.sh
+						#!/bin/bash
+						cd /boot
+						ln -sf kernel.img vmlinuz-3.6-trunk-rpi
+						touch /boot/initrd.img-3.6-trunk-rpi
+						EOF
+					chmod +x $TEMP_DIR/tmp/symlink_kernel.sh
+					LC_ALL=C chroot "$TEMP_DIR" /tmp/symlink_kernel.sh
+					;;
+			esac
+			;;
+
 	                LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils
 			# pulseaudio
 			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
-			;;
 	esac
 
 	case "$TARGET_ARCH" in
@@ -560,7 +563,7 @@ MD_Install_Packages () {
 			# Classic MD/qMD/squeezelite
 			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2278 2284"
 			# qMD
-			#DEVICE_LIST="2216 2278 2259 11 26 1808 2122"
+			DEVICE_LIST="$DEVICE_LIST 2122"
 			;;
 	esac
 
@@ -614,12 +617,7 @@ MD_Install_Packages () {
 	done
 
 	StatsMessage "Install other ancillary programs for MCE"
-	case "$TARGET_ARCH" in
-		i386|amd64)
-			## Packages that are marked as dependencies only in the database
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install id-my-disc
-			;;
-	esac
+	LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-media-identifier
 
 	## Put back discover
 	#mv "$TEMP_DIR"/sbin/discover.disabled "$TEMP_DIR"/sbin/discover
@@ -749,8 +747,8 @@ Create_Diskless_Tar () {
 	StatsMessage "Creating the compressed tar image file, this could take up to 1 hour depending on your system..."
 	mkdir -p "$ARCHIVE_DIR"
 	pushd "$TEMP_DIR" >/dev/null
-	tar -cJf "$ARCHIVE_DIR/$DisklessFS" *
-#	tar -czf "$ARCHIVE_DIR/$DisklessFS" *
+#	tar -cJf "$ARCHIVE_DIR/$DisklessFS" *
+	tar -czf "$ARCHIVE_DIR/$DisklessFS" *
 	VerifyExitCode "create tar file failed"
 	echo "$PlutoVersion" > "$ARCHIVE_DIR/$DisklessFS.version"
 	popd >/dev/null
@@ -784,6 +782,7 @@ Create_PXE_Initramfs_Vmlinuz () {
 			VerifyExitCode "PXE vmlinuz and initramfs"
 			;;
 		"raspbian")
+			# TODO: create/build initial image in chroot from an installed md??
 			StatsMessage "No initramfs/boot files at this time"
 			;;
 	esac
@@ -836,14 +835,16 @@ for TARGET in "$TARGET_TYPES" ; do
 					;;
 			esac
 			;;
-		"raspbian-armhf")
+		"raspbian-armhf")  # rpi2/3 and up
 			TARGET_DISTRO="raspbian"
-			TARGET_RELEASE="wheezy" #TODO: get from ?
+			#TARGET_RELEASE="wheezy"
+			TARGET_RELEASE="jessie"
 			TARGET_ARCH="armhf"
 			TARGET_REPO="http://archive.raspbian.org/raspbian/"
 			DBST_ARCHIVE="LMCEMD_Debootstraped-raspbian-armhf.tar.xz"
 			DisklessFS="LMCEMD-$TARGET_DISTRO-$TARGET_ARCH.tar.xz"
-			TARGET_DISTRO_ID=19
+			#TARGET_DISTRO_ID=19
+			TARGET_DISTRO_ID=22
 			TARGET_REPO_DISTRO_SRC=22
 			TARGET_REPO_LMCE_SRC=23
 			;;
