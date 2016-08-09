@@ -76,7 +76,7 @@ cat <<-EEOF >${Moon_RootLocation}/${kernel_dir}/config.txt
 	#disable_overscan=1
 	gpu_mem=128
 	#kernel=kernel7.img
-	initramfs=initramfs
+	initramfs initramfs
 EEOF
 
 #old
