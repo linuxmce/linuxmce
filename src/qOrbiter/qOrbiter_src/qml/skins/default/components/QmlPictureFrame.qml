@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
-import QtMultimedia 5.0
+
 import "."
 import "../."
 
@@ -109,17 +109,17 @@ Item{
         screenSaverTimer.start()
         console.log("Orbiter Consume Screensaver images")
         console.log("Orbiter counts " + pictureList.count)
-
     }
 
     function loadNextImage(){
 
         if (!settings.isScreenSaverEnabled()) {
-            console.log("Orbiter screensaver not enabled")
+            console.log("qOrbiter screensaver not enabled")
             return;
         }
+
         var link = getImage()
-        // console.log("Getting "+link)
+
         if(img1.closing) {
             img2.source= link;
         }
@@ -133,11 +133,11 @@ Item{
         qmlPictureFrame.visible=true
         console.log("Screensaver Started")
     }
+
     function stopScreenSaver(){
         screenSaverTimer.stop()
         qmlPictureFrame.visible=false
-        img1.source=""
-        img2.source=""
+        img1.source="" ; img2.source=""
         console.log("Screen Saver Stopped")
     }
 
@@ -148,6 +148,7 @@ Item{
         onReadyToShow: transitionPlanes()
 
     }
+
     FadeImage{
         id:img2
         onBadImageError: handleBadImage()
@@ -159,31 +160,9 @@ Item{
     }
 
 
-    //        StyledText{
-    //            id: txtDate
-    //            color: clock.clockColor
-    //            font.letterSpacing: 2
-    //            smooth: true
-    //            width: parent.width
-    //            anchors.centerIn: parent
-    //            font.pointSize: Style.appFontSize_header
-    //            horizontalAlignment: Text.AlignHCenter
-    //            opacity: .55
-    //        }
-
-    //        InnerShadow{
-    //           color:"black"
-    //           source: txtDate
-    //           anchors.fill: txtDate
-    //           radius: 6
-    //           samples: 16
-    //           spread: 0.0
-    //        }
-
-
     states: [
         State {
-            name: "active"
+            name: "active"       
         },
         State {
             name: "inactive"
