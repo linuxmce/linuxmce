@@ -487,7 +487,7 @@ MD_Install_Packages () {
 			[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
 			[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
 			[[ "xenial" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES=""
-			echo "LTS_HES=$TARGET_KVER_LTS_HES" >> $TEMP_DIR/etc/pluto.conf
+			echo "LTS_HES = $TARGET_KVER_LTS_HES" >> $TEMP_DIR/etc/pluto.conf
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 			VerifyExitCode "Install linux headers package failed"
 
@@ -509,6 +509,9 @@ MD_Install_Packages () {
 		"raspbian")
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi-bin raspberrypi-bootloader rpi-update
 			BRANCH=next LC_ALL=C chroot "$TEMP_DIR" rpi-update
+
+			echo "AVWizardDone = 1" >> $TEMP_DIR/etc/pluto.conf
+			echo "AVWizardOverride = 0" >> $TEMP_DIR/etc/pluto.conf
 
 			case "$TARGET_DISTRO_ID" in
 				19)  # Wheezy (for rpi1 u-boot pxe booting)
