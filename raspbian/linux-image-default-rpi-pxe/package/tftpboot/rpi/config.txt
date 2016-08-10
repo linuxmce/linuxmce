@@ -7,4 +7,4 @@
 #disable_overscan=1
 gpu_mem=128
 #kernel=kernel7.img
-initramfs=initramfs
+initramfs initramfs.img
