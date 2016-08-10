@@ -51,6 +51,10 @@ subnet %INTERNAL_SUBNET% netmask %INTERNAL_SUBNET_MASK% {
 	filename "/tftpboot/pxelinux.0";
 	option pxelinux.reboottime = 30;
 
+	# "Raspberry Pi Boot"
+	option vendor-encapsulated-options
+		06:01:03:0A:04:00:50:58:45:09:14:00:00:11:52:61:73:70:62:65:72:72:79:20:50:69:20:42:6F:6F:74:FF;
+
 	default-lease-time 86400;
 	max-lease-time 604800;
 	%DYNAMIC_IP_RANGE%

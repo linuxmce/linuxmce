@@ -1,0 +1,48 @@
+#!/bin/sh
+
+PREREQ=""
+
+# Output pre-requisites
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case "$1" in
+    prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+exec 1>&2
+
+sleep 5
+wait_for_udev 10
+
+#DT=$(/scripts/DeviceTemplate)
+#PNP_ID=$(/scripts/PlugNPlayID)
+PNP_ID="rpi_b"
+
+MyIP=`ifconfig eth0 | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
+MyMAC=`ifconfig eth0 | grep "HWaddr "  | sed -r 's/^.* HWaddr ([a-zA-Z0-9:]*)/\1/g'`
+Gateway=`ip route | grep "default via" | cut -d " " -f3`
+
+#Temporarily Removed until amd64 builds are re-instated. -tschak
+#if grep -q "^flags.* lm" /proc/cpuinfo ;then
+#	Architecture="amd64"
+#fi
+#Architecture="i386"
+Architecture="armhf"
+
+DD="$Architecture"
+CpuSerial=$(cat /proc/cpuinfo | grep Serial | awk {'print $3;'} | sed 's/^0*//')
+DD="$DD|161|$CpuSerial"
+
+echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; DeviceData: $DD; PNP_ID: $PNP_ID"
+/scripts/interactor "$Gateway" "$MyIP" "$MyMAC" "$DD" "$PNP_ID" "select"
+
+clear
+echo "ERROR: Cannot connect to router, rebooting in 5 seconds.."
+sleep 5
+reboot
