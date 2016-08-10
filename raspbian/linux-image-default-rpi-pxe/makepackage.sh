@@ -33,10 +33,6 @@ mkdir -p $Moon_RootLocation/$kernel_dir
 cp -aR /boot/* ${Moon_RootLocation}/${kernel_dir}/
 chmod a+r -R ${Moon_RootLocation}/${kernel_dir}/
 
-#old
-#cp /boot/vmlinuz-${Moon_KernelVersion} ${Moon_RootLocation}/${kernel_dir}/
-#cp /boot/System.map-${Moon_KernelVersion} ${Moon_RootLocation}/${kernel_dir}/
-
 # Generate NFS bootable initrd
 AddModules()
 {
@@ -52,7 +48,7 @@ AddModules()
 sed -i 's/^.*BOOT=.*/BOOT=nfs/g' "$initramfs_tools_dir/initramfs.conf"
 
 #mkinitramfs -d "$initramfs_tools_dir/" -o ${Moon_RootLocation}/${kernel_dir}/initrd.img-${Moon_KernelVersion} ${Moon_KernelVersion}
-mkinitramfs -d "$initramfs_tools_dir/" -o ${Moon_RootLocation}/${kernel_dir}/initramfs ${Moon_KernelVersion}
+mkinitramfs -d "$initramfs_tools_dir/" -o ${Moon_RootLocation}/${kernel_dir}/initramfs.img ${Moon_KernelVersion}
 
 cp ${Moon_RootLocation}/DEBIAN/changelog{.in,}
 cp ${Moon_RootLocation}/DEBIAN/control{.in,}
@@ -70,29 +66,14 @@ cat <<-EEOF >${Moon_RootLocation}/${kernel_dir}/config.txt
 	# For more options and information see
 	# http://www.raspberrypi.org/documentation/configuration/config-txt.md
 	# Some settings may impact device functionality. See link above for details
-	
+
 	# uncomment if you get no picture on HDMI for a default "safe" mode
 	#hdmi_safe=1
 	#disable_overscan=1
 	gpu_mem=128
 	#kernel=kernel7.img
-	initramfs initramfs
+	initramfs initramfs.img
 EEOF
-
-#old
-## Setup the symlinks
-#pushd ${Moon_RootLocation}/${kernel_dir}
-#ln -fs vmlinuz-${Moon_KernelVersion} vmlinuz
-#ln -fs initrd.img-${Moon_KernelVersion} initrd.img
-#popd
-#
-## Create PXE configuration for default boot
-#mkdir -p "$pxe_config_dir"
-#echo "DEFAULT LinuxMCE
-#LABEL LinuxMCE
-#KERNEL $default_name/vmlinuz
-#APPEND root=/dev/nfs initrd=$default_name/initrd.img ramdisk_size=10240 rw
-#" > ${pxe_config_file}
 
 rm -rf pkgrootdir
 cp -a ${Moon_RootLocation} pkgrootdir

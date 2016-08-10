@@ -36,7 +36,7 @@ Gateway=`ip route | grep "default via" | cut -d " " -f3`
 Architecture="armhf"
 
 DD="$Architecture"
-CpuSerial=$(cat /proc/cpuinfo | grep Serial | awk {'print $3;'} | sed 's/^0*//')
+CpuSerial=$(cat /proc/cpuinfo | grep Serial | cut -d' ' -f2 | sed 's/^0*//')
 DD="$DD|161|$CpuSerial"
 
 echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; DeviceData: $DD; PNP_ID: $PNP_ID"
