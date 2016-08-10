@@ -1,0 +1,12 @@
+Package: linux-image-default-raspbian-jessie
+Version: 4.4.15-v7+-lmce4
+Section: unknown
+Priority: optional
+Architecture: all
+Installed-Size: 5796
+Provides:
+Depends: 
+Suggests:
+Maintainer: LinuxMCE Team <packaging@linuxmce.org>
+Description: Linux kernel image for version 4.4.15-v7+ on all Diskless
+ Kernel image for LinuxMCE diskless RPi2/3 Media Directors

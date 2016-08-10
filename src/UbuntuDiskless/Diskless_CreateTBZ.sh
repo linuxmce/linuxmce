@@ -3,8 +3,8 @@
 set -e
 #set -x
 
-#PROXY="http://10.10.42.99:3142"
-#http_proxy="http://10.10.42.99:3142"
+#export PROXY="http://10.10.42.99:3142"
+#export http_proxy="http://10.10.42.99:3142"
 
 ###########################################################
 ### Setup global variables
@@ -12,7 +12,7 @@ set -e
 DEVICEDATA_Operating_System=209
 DEVICEDATA_Architecture=112
 
-###TARGET_TYPES="ubuntu-i386 raspbian-armhf"
+###TARGET_TYPES="ubuntu-i386 raspbian-armhf" ### experimental
 #TARGET_TYPES="raspbian-armhf"
 TARGET_TYPES="ubuntu-i386"
 
@@ -289,7 +289,7 @@ MD_System_Level_Prep () {
 		"raspbian")
 			StatsMessage "Setting up /etc/apt/sources.list for raspbian"
 			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list
-				#deb http://10.10.42.99/raspbian/ ./
+				#deb http://10.10.42.99/raspbian-$TARGET_RELEASE/ ./
 				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
 				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
 				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
@@ -487,7 +487,7 @@ MD_Install_Packages () {
 			[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
 			[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
 			[[ "xenial" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES=""
-			echo "LTS_HES=$TARGET_KVER_LTS_HES" >> $TEMP_DIR/etc/pluto.conf
+			echo "LTS_HES = $TARGET_KVER_LTS_HES" >> $TEMP_DIR/etc/pluto.conf
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 			VerifyExitCode "Install linux headers package failed"
 
@@ -507,29 +507,34 @@ MD_Install_Packages () {
 			mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
 			;;
 		"raspbian")
-			# raspbian doesn't come with lsb-release by default???
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
-			cat <<-EOF > $TEMP_DIR/etc/lsb-release
-				DISTRIB_ID=Raspbian
-				DISTRIB_CODENAME=$TARGET_RELEASE
-				EOF
+			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi-bin raspberrypi-bootloader rpi-update
+			BRANCH=next LC_ALL=C chroot "$TEMP_DIR" rpi-update
 
-			# HACK: copy the foundation kernel.img to a normal linux kernal name with version
-			# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
-			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.6-trunk-rpi
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi-bin raspberrypi-bootloader
-			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install rpi-update
-			#LC_ALL=C chroot "$TEMP_DIR" rpi-update
-			LC_ALL=C chroot "$TEMP_DIR" mkdir -p /sdcard
-			LC_ALL=C chroot "$TEMP_DIR" mkdir -p /tmp
-			cat <<-EOF > $TEMP_DIR/tmp/symlink_kernel.sh
-				#!/bin/bash
-				cd /boot
-				ln -sf kernel.img vmlinuz-3.6-trunk-rpi
-				touch /boot/initrd.img-3.6-trunk-rpi
-				EOF
-			chmod +x $TEMP_DIR/tmp/symlink_kernel.sh
-			LC_ALL=C chroot "$TEMP_DIR" /tmp/symlink_kernel.sh
+			echo "AVWizardDone = 1" >> $TEMP_DIR/etc/pluto.conf
+			echo "AVWizardOverride = 0" >> $TEMP_DIR/etc/pluto.conf
+
+			case "$TARGET_DISTRO_ID" in
+				19)  # Wheezy (for rpi1 u-boot pxe booting)
+					# raspbian wheezy doesn't come with lsb-release by default??? fixed in jessie
+					LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
+					cat <<-EOF > $TEMP_DIR/etc/lsb-release
+						DISTRIB_ID=Raspbian
+						DISTRIB_CODENAME=$TARGET_RELEASE
+						EOF
+
+					# HACK: copy the foundation kernel.img to a normal linux kernal name with version
+					LC_ALL=C chroot "$TEMP_DIR" mkdir -p /sdcard
+					LC_ALL=C chroot "$TEMP_DIR" mkdir -p /tmp
+					cat <<-EOF > $TEMP_DIR/tmp/symlink_kernel.sh
+						#!/bin/bash
+						cd /boot
+						ln -sf kernel.img vmlinuz-3.6-trunk-rpi
+						touch /boot/initrd.img-3.6-trunk-rpi
+						EOF
+					chmod +x $TEMP_DIR/tmp/symlink_kernel.sh
+					LC_ALL=C chroot "$TEMP_DIR" /tmp/symlink_kernel.sh
+					;;
+			esac
 	                LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils
 			# pulseaudio
 			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
@@ -560,20 +565,24 @@ MD_Install_Packages () {
 			# Classic MD/qMD/squeezelite
 			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2278 2284"
 			# qMD
-			#DEVICE_LIST="2216 2278 2259 11 26 1808 2122"
+			DEVICE_LIST="$DEVICE_LIST 2122"
 			;;
 	esac
 
-	# Determine if MythTV is installed by looking for MythTV_Plugin...
-	# Don't install mythtv into raspbian
-	if [[ "$TARGET_DISTRO" != "raspbian" ]]; then
-		Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
-		MythTV_Installed=$(RunSQL "$Q")
-		if [ $MythTV_Installed ];then
-			#MythTV_Plugin is installed, so install MythTV_Player on MD
+#	# Determine if MythTV is installed by looking for MythTV_Plugin...
+#	# Don't install mythtv into raspbian
+#	if [[ "$TARGET_DISTRO" != "raspbian" ]]; then
+#		Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
+#		MythTV_Installed=$(RunSQL "$Q")
+#		if [ $MythTV_Installed ];then
+#			#MythTV_Plugin is installed, so install MythTV_Player on MD
 			DEVICE_LIST="$DEVICE_LIST 35"
-		fi
-	fi
+#		fi
+#	fi
+
+	# Add vdr device packages to diskless image - needs some jessie armhf love
+	#DEVICE_LIST="$DEVICE_LIST 1705"
+
 	########## END CREATE LIST OF DEVICES ###################"
 
 	## Begin installing the packages needed for the pluto devices
@@ -614,12 +623,6 @@ MD_Install_Packages () {
 	done
 
 	StatsMessage "Install other ancillary programs for MCE"
-	case "$TARGET_ARCH" in
-		i386|amd64)
-			## Packages that are marked as dependencies only in the database
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install id-my-disc
-			;;
-	esac
 
 	## Put back discover
 	#mv "$TEMP_DIR"/sbin/discover.disabled "$TEMP_DIR"/sbin/discover
@@ -627,6 +630,7 @@ MD_Install_Packages () {
 	## Install additional packages
 	case "$TARGET_DISTRO" in
 		"ubuntu")
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-media-identifier
 			## If libdvdcss2 is installed on the hybrid/core
 			if [[ -d /usr/share/doc/libdvdcss2 ]] ;then
 				pushd $TEMP_DIR >/dev/null
@@ -671,6 +675,7 @@ MD_Install_Packages () {
 			#LC_ALL=C chroot $TEMP_DIR addgroup --force-badname Debian-exim
 			#VerifyExitCode "addgroup Debian-Exim failed"
 			LC_ALL=C chroot "$TEMP_DIR" sed -i '/Debian-exim/d' /var/lib/dpkg/statoverride
+			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install abcde acl adduser adwaita-icon-theme alsa-base alsa-utils apt apt-utils aptitude aptitude-common aspell aspell-en at-spi2-core attr autofs avahi-daemon base-files base-passwd bash bc beep bind9-host binutils bluez-obexd bluez-tools bsd-mailx bsdmainutils bsdutils bzip2 ca-certificates cabextract cd-discid cdparanoia cifs-utils colord colord-data coreutils cpio cpp cpp-4.9 cron cryptsetup-bin curl dash dbus dbus-x11 dconf-gsettings-backend dconf-service debconf debconf-i18n debianutils device-tree-compiler dh-python dictionaries-common diffutils dmidecode dmsetup dosfstools dpkg e2fslibs e2fsprogs eject emacsen-common enchant ethtool exim4-base exim4-config exim4-daemon-light fbset file findutils flac fontconfig fontconfig-config fonts-dejavu fonts-dejavu-core fonts-dejavu-extra fonts-droid fonts-freefont-ttf fonts-liberation fonts-tlwg-purisa freepats fuse gawk gcc-4.6-base gcc-4.7-base gcc-4.8-base gcc-4.9-base gconf-service gconf2 gconf2-common gcr geoip-database ghostscript gir1.2-glib-2.0 gksu glib-networking glib-networking-common glib-networking-services gnome-keyring gnome-mime-data gnome-osd gnupg gpgv grep groff-base gsettings-desktop-schemas gsfonts gstreamer1.0-alsa gstreamer1.0-libav gstreamer1.0-omx gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-x gzip hdparm hicolor-icon-theme hostname hunspell-en-us ifupdown imagemagick-common info init init-system-helpers initramfs-tools initscripts insserv install-info iproute iproute2 iptables iputils-ping isc-dhcp-client isc-dhcp-common iso-codes keyboard-configuration keyutils klibc-utils kmod krb5-locales lame less liba52-0.7.4 libaa1 libaacs0 libacl1 libaio1 libalgorithm-c3-perl libao-common libao4 libapt-inst1.5 libapt-pkg4.12 libarchive-extract-perl libarchive13 libart-2.0-2 libasn1-8-heimdal libasound2 libasound2-data libasound2-plugins libaspell15 libass5 libasyncns0 libatasmart4 libatk-bridge2.0-0 libatk1.0-0 libatk1.0-data libatspi2.0-0 libattr1 libaudio2 libaudit-common libaudit1 libauthen-sasl-perl libavahi-client3 libavahi-common-data libavahi-common3 libavahi-compat-libdnssd1 libavahi-core7 libavahi-glib1 libavc1394-0 libavcodec-ffmpeg56 libavcodec56 libavformat-ffmpeg56 libavformat56 libavresample2 libavutil-ffmpeg54 libavutil54 libbfb0 libbind9-90 libblas-common libblas3 libblkid1 libbluetooth3 libbluray1 libbonobo2-0 libbonobo2-common libbonoboui2-0 libbonoboui2-common libboost-iostreams1.49.0 libboost-iostreams1.50.0 libboost-iostreams1.53.0 libboost-iostreams1.54.0 libboost-iostreams1.55.0 libbsd0 libbz2-1.0 libc-bin libc6 libc6-dbg libcaca0 libcairo-gobject2 libcairo2 libcanberra-gtk3-0 libcanberra-gtk3-module libcanberra0 libcap-ng0 libcap2 libcap2-bin libcddb2 libcdio13 libcdparanoia0 libcec-platform1 libcec3v4 libcgi-fast-perl libcgi-pm-perl libchromaprint0 libclass-accessor-perl libclass-c3-perl libclass-c3-xs-perl libcloog-isl4 libcolord2 libcolorhug2 libcomerr2 libconfuse-common libconfuse0 libcpan-meta-perl libcroco3 libcrypt-smbhash-perl libcryptsetup4 libcups2 libcupsfilters1 libcupsimage2 libcurl3 libcurl3-gnutls libcwidget3 libdaemon0 libdata-optlist-perl libdata-section-perl libdatrie1 libdb5.3 libdbd-mysql-perl libdbi-perl libdbus-1-3 libdbus-c++-1-0 libdbus-glib-1-2 libdc1394-22 libdca0 libdconf1 libdebconfclient0 libdevmapper-event1.02.1 libdevmapper1.02.1 libdigest-md4-perl libdirectfb-1.2-9 libdiscid0 libdns-export100 libdns100 libdrm-amdgpu1 libdrm-freedreno1 libdrm-nouveau2 libdrm-radeon1 libdrm2 libdv4 libdvdnav4 libdvdread4 libecore1 libedit2 libegl1-mesa libeina1 libelf1 libenca0 libenchant1c2a libencode-locale-perl libepoxy0 libestr0 libevdev2 libevent-2.0-5 libexif12 libexiv2-13 libexosip2-11 libexpat1 libfaad2 libfcgi-perl libffi6 libfftw3-double3 libfftw3-single3 libfile-copy-recursive-perl libfile-listing-perl libflac8 libflite1 libfluidsynth1 libfont-afm-perl libfontconfig1 libfontenc1 libfreetype6 libfribidi0 libfstrcmp0 libfuse2 libgail18 libgbm1 libgcc1 libgck-1-0 libgconf-2-4 libgcr-3-common libgcr-base-3-1 libgcr-ui-3-1 libgcrypt20 libgd3 libgdbm3 libgdk-pixbuf2.0-0 libgdk-pixbuf2.0-common libgeoclue0 libgeoip1 libgfortran3 libgirepository-1.0-1 libgksu2-0 libgl1-mesa-dri libgl1-mesa-glx libglade2-0 libglapi-mesa libgles2-mesa libglew1.10 libglib2.0-0 libglib2.0-data libglu1-mesa libgme0 libgmp10 libgnome-2-0 libgnome-keyring-common libgnome-keyring0 libgnome2-common libgnomecanvas2-0 libgnomecanvas2-common libgnomeui-0 libgnomeui-common libgnomevfs2-0 libgnomevfs2-common libgnomevfs2-extra libgnutls-deb0-28 libgnutls-openssl27 libgomp1 libgpg-error0 libgphoto2-6 libgphoto2-l10n libgphoto2-port10 libgpm2 libgraphicsmagick3 libgraphite2-3 libgs9 libgs9-common libgsm1 libgssapi-krb5-2 libgstreamer-plugins-bad1.0-0 libgstreamer-plugins-base1.0-0 libgstreamer1.0-0 libgtk-3-0 libgtk-3-bin libgtk-3-common libgtk2.0-0 libgtk2.0-bin libgtk2.0-common libgtkglext1 libgtop2-7 libgtop2-common libgudev-1.0-0 libgusb2 libharfbuzz-icu0 libharfbuzz0b libhcrypto4-heimdal libhdb9-heimdal libheimbase1-heimdal libhogweed2 libhtml-form-perl libhtml-format-perl libhtml-parser-perl libhtml-tagset-perl libhtml-tree-perl libhttp-cookies-perl libhttp-daemon-perl libhttp-date-perl libhttp-message-perl libhttp-negotiate-perl libhunspell-1.3-0 libhx509-5-heimdal libical1a libice6 libicu52 libident libidl0 libidn11 libiec61883-0 libieee1284-3 libijs-0.35 libilmbase6 libio-html-perl libio-socket-inet6-perl libio-socket-ssl-perl libirs-export91 libisc-export95 libisc95 libisccc90 libisccfg-export90 libisccfg90 libisl10 libiso9660-8 libjack-jackd2-0 libjasper1 libjavascriptcoregtk-3.0-0 libjbig0 libjbig2dec0 libjpeg62-turbo libjpeg8 libjson-c2 libjson-glib-1.0-0 libjson-glib-1.0-common libk5crypto3 libkate1 libkeyutils1 libklibc libkmod2 libkrb5-26-heimdal libkrb5-3 libkrb5support0 liblapack3 liblcms2-2 libldap-2.4-2 libldb1 liblinear1 liblinphone5 liblircclient0 libllvm3.7 liblocale-gettext-perl liblockdev1 liblockfile-bin liblockfile1 liblog-message-perl liblog-message-simple-perl liblogging-stdlog0 liblognorm1 liblqr-1-0 libltdl7 liblua5.2-0 liblvm2app2.2 liblwp-mediatypes-perl liblwp-protocol-https-perl liblwres90 liblzma5 liblzo2-2 libmad0 libmagic1 libmagickcore-6.q16-2 libmagickwand-6.q16-2 libmailtools-perl libmediastreamer-base3 libmimic0 libmjpegutils-2.1-0 libmms0 libmng1 libmodplug1 libmodule-build-perl libmodule-pluggable-perl libmodule-signature-perl libmount1 libmp3lame0 libmpc3 libmpcdec6 libmpdec2 libmpeg2-4 libmpeg2encpp-2.1-0 libmpfr4 libmpg123-0 libmplex2-2.1-0 libmro-compat-perl libmspack0 libmtdev1 libmulticobex1 libmusicbrainz-discid-perl libmysqlclient18 libmyth-0.27-0 libmyth-python libmythtv-perl libncurses5 libncursesw5 libnet-http-perl libnet-smtp-ssl-perl libnet-ssleay-perl libnet-upnp-perl libnettle4 libnewt0.52 libnfnetlink0 libnfsidmap2 libnih-dbus1 libnih1 libnotify-bin libnotify4 libnss-mdns libntdb1 libobexftp0 libofa0 libogg0 libopenal-data libopenal1 libopencore-amrnb0 libopencore-amrwb0 libopencv-calib3d2.4 libopencv-contrib2.4 libopencv-core2.4 libopencv-features2d2.4 libopencv-flann2.4 libopencv-highgui2.4 libopencv-imgproc2.4 libopencv-legacy2.4 libopencv-ml2.4 libopencv-objdetect2.4 libopencv-video2.4 libopenexr6 libopenjpeg5 libopenobex1 libopts25 libopus0 liborbit-2-0 liborbit2 liborc-0.4-0 libortp9 libosip2-11 libp11-kit0 libpackage-constants-perl libpam-gnome-keyring libpam-modules libpam-modules-bin libpam-runtime libpam-systemd libpam0g libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libpangox-1.0-0 libpaper-utils libpaper1 libparams-util-perl libparted2 libpcap0.8 libpci3 libpciaccess0 libpcre3 libpipeline1 libpixman-1-0 libpng12-0 libpod-latex-perl libpod-readme-perl libpolkit-agent-1-0 libpolkit-backend-1-0 libpolkit-gobject-1-0 libpopt0 libpostproc52 libprocps3 libproxy1 libpsl0 libpulse0 libpython-stdlib libpython2.7 libpython2.7-minimal libpython2.7-stdlib libpython3-stdlib libpython3.4-minimal libpython3.4-stdlib libqt4-dbus libqt4-network libqt4-script libqt4-sql libqt4-sql-mysql libqt4-xml libqt4-xmlpatterns libqt5core5a libqt5dbus5 libqt5gui5 libqt5multimedia5 libqt5multimediaquick-p5 libqt5network5 libqt5opengl5 libqt5qml5 libqt5quick5 libqt5quickparticles5 libqt5script5 libqt5widgets5 libqt5xml5 libqtcore4 libqtdbus4 libqtgui4 libqtwebkit4 libquicktime2 libraspberrypi-bin libraspberrypi0 libraw1394-11 libreadline6 libregexp-common-perl librest-0.7-0 libroken18-heimdal librsvg2-2 librsvg2-common librtmp1 libsamplerate0 libsane libsane-common libsane-extras libsane-extras-common libsasl2-2 libsasl2-modules libsasl2-modules-db libsbc1 libschroedinger-1.0-0 libsdl-gfx1.2-5 libsdl-image1.2 libsdl-sge libsdl-ttf2.0-0 libsdl1.2debian libsecret-1-0 libsecret-common libselinux1 libsemanage-common libsemanage1 libsepol1 libsgutils2-2 libshine3 libshout3 libsigc++-1.2-5c2 libsigc++-2.0-0c2a libsigsegv2 libslang2 libslp1 libsm6 libsmartcols1 libsmbclient libsndfile1 libsocket6-perl libsoftware-license-perl libsoundtouch0 libsoup-gnome2.4-1 libsoup2.4-1 libsox-fmt-alsa libsox-fmt-base libsox2 libsoxr0 libspandsp2 libspeex1 libspeexdsp1 libsqlite3-0 libsrtp0 libss2 libssh-4 libssh2-1 libssl1.0.0 libstartup-notification0 libstdc++6 libsub-exporter-perl libsub-install-perl libsub-name-perl libsvga1 libswresample-ffmpeg1 libswscale3 libsysfs2 libsystemd0 libtag1-vanilla libtag1c2a libtalloc2 libtasn1-6 libtdb1 libterm-readkey-perl libterm-ui-perl libtevent0 libtext-charwidth-perl libtext-iconv-perl libtext-soundex-perl libtext-template-perl libtext-wrapi18n-perl libthai-data libthai0 libtheora0 libtiff5 libtimedate-perl libtinfo5 libtirpc1 libtwolame0 libtxc-dxtn-s2tc0 libudev0 libudev1 libupnp6 liburi-perl libusb-0.1-4 libusb-1.0-0 libustr-1.0-1 libutempter0 libuuid1 libv4l-0 libv4lconvert0 libva-glx1 libva-x11-1 libva1 libvcdinfo0 libvdpau1 libvisual-0.4-0 libvisual-0.4-plugins libvo-aacenc0 libvo-amrwbenc0 libvorbis0a libvorbisenc2 libvorbisfile3 libvpx1 libwavpack1 libwayland-client0 libwayland-cursor0 libwayland-server0 libwbclient0 libwebkitgtk-3.0-0 libwebkitgtk-3.0-common libwebp5 libwebpdemux1 libwebpmux1 libwebservice-musicbrainz-perl libwildmidi-config libwildmidi1 libwind0-heimdal libwmf0.2-7 libwnck-common libwnck22 libwrap0 libwww-perl libwww-robotrules-perl libx11-6 libx11-data libx11-xcb1 libx264-142 libx265-43 libxapian22 libxau6 libxaw7 libxcb-dri2-0 libxcb-dri3-0 libxcb-glx0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-present0 libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util0 libxcb-xfixes0 libxcb-xkb1 libxcb-xv0 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxdmcp6 libxext6 libxfce4ui-1-0 libxfce4util-bin libxfce4util-common libxfce4util6 libxfconf-0-2 libxfixes3 libxfont1 libxft2 libxi6 libxine2 libxine2-bin libxine2-doc libxine2-ffmpeg libxine2-misc-plugins libxine2-plugins libxine2-x libxinerama1 libxkbcommon-x11-0 libxkbcommon0 libxkbfile1 libxml-libxml-perl libxml-namespacesupport-perl libxml-parser-perl libxml-sax-base-perl libxml-sax-expat-perl libxml-sax-perl libxml-simple-perl libxml-xpath-perl libxml2 libxmu6 libxmuu1 libxosd2 libxpm4 libxrandr2 libxrender1 libxres1 libxshmfence1 libxslt1.1 libxt6 libxtables10 libxtst6 libxv1 libxvidcore4 libxvmc1 libxxf86dga1 libxxf86vm1 libzbar0 libzvbi-common libzvbi0 linphone-common lmce-avwizard-skin-basic lmce-cec-adaptor lmce-core-locator lmce-install-scripts lmce-launch-manager lmce-md-meta lmce-mythtv-scripts lmce-nbd-client-wrapper lmce-omx-player lmce-picture-viewer lmce-qorbiter lmce-runtime-dependencies lmce-squeezeslave lmce-usb-gamepad lmce-windowutils locales login logrotate lsb-base lsb-release lsscsi make makedev man-db manpages mawk mdadm mime-support mount mountall multiarch-support mysql-client mysql-client-5.5 mysql-common mythtv-backend mythtv-common mythtv-dbg mythtv-frontend mythtv-transcode-utils nano nbd-client nbd-server nbtscan ncurses-base ncurses-bin ncurses-term ndiff net-tools netbase netcat netcat-openbsd netcat-traditional nfs-common nfs-kernel-server nis nmap notification-daemon ntfs-3g ntp obexftp omxplayer openobex-apps openssh-client openssh-server openssh-sftp-server openssl p11-kit p11-kit-modules parallel passwd pastebinit pciutils perl perl-base perl-modules pluto-app-server pluto-avwizard pluto-bluetooth-dongle pluto-boot-scripts pluto-capture-card-scripts pluto-confirm-dependencies pluto-dcecommon pluto-disc-drive-functions pluto-disk-drive pluto-disk-monitor pluto-hal-device-finder pluto-hald pluto-irbase pluto-libbd pluto-libresolution pluto-libserial pluto-mcr-remote pluto-messagesend pluto-messagetrans pluto-mythtv-player pluto-orbiter pluto-orbitergen pluto-photo-screen-saver pluto-pluto-main-db pluto-pluto-media-db pluto-plutoutils pluto-pnp-detection pluto-raid-tools pluto-sdl-helpers pluto-serializeclass pluto-shiftstate pluto-simplephone pluto-sound-card-scripts pluto-storage-devices pluto-test-serial-port pluto-updateentarea pluto-vipshared pluto-x-scripts pluto-xine-player plymouth policykit-1 poppler-data powermgmt-base procps psmisc pwgen python python-cairo python-crypto python-dbus python-dbus-dev python-dnspython python-gconf python-gi python-gnome2 python-gobject-2 python-gtk2 python-imaging python-imdbpy python-ldb python-lxml python-minimal python-mysqldb python-ntdb python-numpy python-pil python-pycurl python-pyorbit python-pyorbit-omg python-samba python-support python-talloc python-tdb python-urlgrabber python2.7 python2.7-minimal python3 python3-minimal python3.4 python3.4-minimal qdbus qml-module-qtgraphicaleffects qml-module-qtmultimedia qml-module-qtquick-controls qml-module-qtquick-dialogs qml-module-qtquick-layouts qml-module-qtquick-particles2 qml-module-qtquick-privatewidgets qml-module-qtquick-window2 qml-module-qtquick2 qtchooser qtcore4-l10n qttranslations5-l10n raspberrypi-bootloader raspberrypi-kernel raspbian-archive-keyring raspi2png readline-common rename rpcbind rpi-update rsyslog samba samba-common samba-common-bin samba-dsdb-modules samba-libs samba-vfs-modules sane-utils screen sed sensible-utils sgml-base shared-mime-info smbclient sox squeezelite ssh startpar sudo systemd systemd-sysv sysv-rc sysvinit-utils tar tasksel tasksel-data tcpd tdb-tools tee-pluto traceroute transcode transcode-doc ttf-dejavu ttf-dejavu-core ttf-dejavu-extra ttf-mscorefonts-installer twolame tzdata ucf udev udisks update-inetd util-linux va-driver-all vdpau-va-driver vim-common vim-tiny vorbis-tools wget whiptail winbind wmctrl x11-apps x11-common x11-session-utils x11-utils x11-xkb-utils x11-xserver-utils xauth xbitmaps xcompmgr xdg-user-dirs xfce-keyboard-shortcuts xfconf xfonts-100dpi xfonts-75dpi xfonts-base xfonts-encodings xfonts-scalable xfonts-utils xfwm4 xinit xkb-data xloadimage xml-core xorg xorg-docs-core xosd-bin xserver-common xserver-xorg xserver-xorg-core xserver-xorg-input-all xserver-xorg-input-evdev xserver-xorg-input-synaptics xserver-xorg-input-wacom xserver-xorg-video-fbdev xterm xz-utils zenity zenity-common zlib1g
 			;;
 	esac
 
@@ -749,8 +754,8 @@ Create_Diskless_Tar () {
 	StatsMessage "Creating the compressed tar image file, this could take up to 1 hour depending on your system..."
 	mkdir -p "$ARCHIVE_DIR"
 	pushd "$TEMP_DIR" >/dev/null
-	tar -cJf "$ARCHIVE_DIR/$DisklessFS" *
-#	tar -czf "$ARCHIVE_DIR/$DisklessFS" *
+#	tar -cJf "$ARCHIVE_DIR/$DisklessFS" *
+	tar -czf "$ARCHIVE_DIR/$DisklessFS" *
 	VerifyExitCode "create tar file failed"
 	echo "$PlutoVersion" > "$ARCHIVE_DIR/$DisklessFS.version"
 	popd >/dev/null
@@ -784,6 +789,7 @@ Create_PXE_Initramfs_Vmlinuz () {
 			VerifyExitCode "PXE vmlinuz and initramfs"
 			;;
 		"raspbian")
+			# TODO: create/build initial image in chroot from an installed md??
 			StatsMessage "No initramfs/boot files at this time"
 			;;
 	esac
@@ -836,14 +842,16 @@ for TARGET in "$TARGET_TYPES" ; do
 					;;
 			esac
 			;;
-		"raspbian-armhf")
+		"raspbian-armhf")  # rpi2/3 and up
 			TARGET_DISTRO="raspbian"
-			TARGET_RELEASE="wheezy" #TODO: get from ?
+			#TARGET_RELEASE="wheezy"
+			TARGET_RELEASE="jessie"
 			TARGET_ARCH="armhf"
-			TARGET_REPO="http://archive.raspbian.org/raspbian/"
+			TARGET_REPO="http://mirrordirector.raspbian.org/raspbian/"
 			DBST_ARCHIVE="LMCEMD_Debootstraped-raspbian-armhf.tar.xz"
 			DisklessFS="LMCEMD-$TARGET_DISTRO-$TARGET_ARCH.tar.xz"
-			TARGET_DISTRO_ID=19
+			#TARGET_DISTRO_ID=19
+			TARGET_DISTRO_ID=22
 			TARGET_REPO_DISTRO_SRC=22
 			TARGET_REPO_LMCE_SRC=23
 			;;
