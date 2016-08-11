@@ -76,6 +76,9 @@ public:
 	void SetStateValue(DeviceData_Router *pDevice, string sOn, string sMode, string sFan, string sSetPoint, string sTemp);
 	static void GetStateVar(DeviceData_Router *pDevice, string& sOn, string& sMode, string& sFan, string& sSetPoint, string& sTemp);
 
+	bool EnergyMonitoringEvent( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+	void SplitEnergyState(string state, double &power, double &energy, time_t &powerTime);
+
 //<-dceag-h-b->
 	/*
 				AUTO-GENERATED SECTION

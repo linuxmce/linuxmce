@@ -105,7 +105,8 @@ bool Climate_Plugin::Register()
 		new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&Climate_Plugin::ClimateScenariosGrid))
 		,DATAGRID_Climate_Scenarios_CONST,PK_DeviceTemplate_get());
 
-    RegisterMsgInterceptor(( MessageInterceptorFn )( &Climate_Plugin::ClimateCommand ), 0, 0, 0, DEVICECATEGORY_Climate_Device_CONST, 0, 0 );
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &Climate_Plugin::ClimateCommand ), 0, 0, 0, DEVICECATEGORY_Climate_Device_CONST, 0, 0 );
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &Climate_Plugin::EnergyMonitoringEvent ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Power_Usage_Changed_CONST );
 
 	return Connect(PK_DeviceTemplate_get()); 
 }
@@ -569,5 +570,87 @@ void Climate_Plugin::SetStateValue(DeviceData_Router *pDevice,
 			break; 
 		default:
 			pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")");
+	}
+}
+
+bool Climate_Plugin::EnergyMonitoringEvent( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+	class DeviceData_Router *pDevice_RouterFrom = (class DeviceData_Router *) pDeviceFrom;
+	if (pDevice_RouterFrom != NULL)
+	{
+		if (pDevice_RouterFrom->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Standard_Energy_Meter_CONST
+		    && pMessage->m_dwID == EVENT_Power_Usage_Changed_CONST)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Climate_Plugin::EnergyMonitoringEvent");
+			string state = pDevice_RouterFrom->m_sState_get();
+			string capabilities = pDevice_RouterFrom->m_mapParameters_Find(DEVICEDATA_Capabilities_CONST);
+			bool bReportsPower = capabilities.find("P") != string::npos;
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,
+							    "Climate_Plugin::EnergyMonitoringEvent Previous %s",
+							    state.c_str());
+
+			time_t tReportTime = 0, now = time(0);
+			double iPowerPrev = 0, iEnergyPrev = 0;
+			SplitEnergyState(state, iPowerPrev, iEnergyPrev, tReportTime);
+			string sPowerNow = pMessage->m_mapParameters[EVENTPARAMETER_Watts_CONST];
+			double iPowerNow = atof(sPowerNow.c_str());
+			string sEnergyNow = pMessage->m_mapParameters[EVENTPARAMETER_WattsMTD_CONST];
+			double iEnergyNow = atof(sEnergyNow.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,
+							    "Climate_Plugin::EnergyMonitoringEvent Now: Power: %s [W] Cumulative: %s [kWh]",
+							    sPowerNow.c_str(), sEnergyNow.c_str());
+			if (!state.empty())
+			{
+				// Skip changing data if value has not changed (to avoid 0 values after calculations)
+				if (iEnergyNow - iEnergyPrev < 0.00001)
+				{
+					return false;
+				}
+				// If there is no power data, estimate if old power reading is long ago
+				if( !bReportsPower )
+				{
+					// estimate power based on cumulated energy
+					double timediff = difftime(now, tReportTime);
+					iPowerNow = (iEnergyNow - iEnergyPrev) / timediff * 3600.0 * 1000.0;
+					LoggerWrapper::GetInstance()->Write(
+						LV_WARNING, "Climate_Plugin::EnergyMonitoringEvent estimating power : now (%f) - last (%f) = power = %f", iEnergyNow, iEnergyPrev, iPowerNow);
+				}
+			}
+
+			// Update device state
+			char acTime[100];
+			struct tm tm;
+#ifdef WIN32
+			_localtime64_s(&tm, &now);
+#else
+			localtime_r(&now,&tm);
+#endif
+			sprintf( acTime, "%04d%02d%02d%02d%02d%02d",
+				 tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec );
+
+			string newstate = StringUtils::itos((int)iPowerNow) + "/"
+				+ StringUtils::ftos(iEnergyNow) + "@"
+				+ acTime;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,
+							    "Climate_Plugin::EnergyMonitoringEvent new state %s",
+							    newstate.c_str());
+			pDevice_RouterFrom->m_sState_set(newstate);
+		}
+	}
+	return false;
+}
+
+void Climate_Plugin::SplitEnergyState(string state, double &power, double &cumulative, time_t &powerTime)
+{
+	// state data format:
+	// current power/cumulated power consumption@timestamp of last report
+	if (!state.empty()) {
+		vector<string> parts = StringUtils::Split(state, "/@");
+		if (parts.size() >= 3)
+		{
+			power = atof(parts[0].c_str());
+			cumulative = atof(parts[1].c_str());
+			powerTime = StringUtils::SQLDateTime(parts[2]);
+		}
 	}
 }
