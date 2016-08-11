@@ -9,14 +9,14 @@ $mysqldb="lmce_datalog";
 $connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
 mysqli_select_db($connection, $mysqldb) or die("ERROR: could not select database!");
 
-$device = mysqli_real_escape_string($_GET['device']);
-$days = mysqli_real_escape_string($_GET['days']);
-$color = mysqli_real_escape_string($_GET['color']);
-$name = mysqli_real_escape_string($_GET['name']);
-$unit = mysqli_real_escape_string($_GET['unit']); 
-$keepValue = array(5,9,10); // Units that have the same value until new value i reported
-$startTime = mysqli_real_escape_string($_GET['startTime']);
-$endTime = mysqli_real_escape_string($_GET['endTime']);
+$device = mysqli_real_escape_string($connection, $_GET['device']);
+$days = mysqli_real_escape_string($connection, $_GET['days']);
+$color = mysqli_real_escape_string($connection, $_GET['color']);
+$name = mysqli_real_escape_string($connection, $_GET['name']);
+$unit = mysqli_real_escape_string($connection, $_GET['unit']); 
+$keepValue = array(5,9,10); // Units that have the same value until new value is reported
+$startTime = mysqli_real_escape_string($connection, $_GET['startTime']);
+$endTime = mysqli_real_escape_string($connection, $_GET['endTime']);
 
 if (empty($days)) {
      $days=1;
@@ -54,7 +54,6 @@ $sql.=" order by timestamp";
 $query=mysqli_query($connection, $sql);
 
 $num = mysqli_num_rows($query); //find number off datapoints for the graph
-
 
 // If there is not enough data in the db to create a graph 
 if ($num<=1) {
