@@ -316,12 +316,8 @@ start() {
 		FK_DeviceTemplate=$(RunSQL "$Q")
 
 		# FIXME: Look for an Orbiter on non-rpi-qMDs to determine if X is needed?
-		if [[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_GenericPC_as_MD" ]] ||
-			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_GenericPC_as_qMD" ]] ||
-			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_RPi_B_as_MD" ]] ||
-			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Core" ]] ||
-			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Joggler" ]] ; then
-				StartX
+		if [[ "$FK_DeviceTemplate" != "$DD_DEVICETEMPLATE_RPi_B_as_qMD" ]] && [[ "$FK_DeviceTemplate" != "$DD_DEVICETEMPLATE_RPi_B_as_Squeezebox" ]] ; then
+			StartX
 		fi
 	fi
 
