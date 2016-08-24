@@ -6,4 +6,4 @@ cat <<-EEOF >/etc/udev/rules.d/10-pheonix-duet.rules
 	EEOF
 
 # Kill SimplePhone so it will get the new configuration
-killall -9 SimplePhone
+killall -9 SimplePhone || :
