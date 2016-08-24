@@ -149,5 +149,10 @@ case "$TARGET_DISTRO" in
 		;;
 esac
 
+###. Extend systemd timeout for linuxmce start script
+mkdir -p /lib/systemd/system/linuxmce.service.d
+echo "[Service]
+TimeoutSec=1d" > /lib/systemd/system/linuxmce.service.d/timeout.conf
+
 # Add a single new startup script.
 update-rc.d -f linuxmce defaults 99 1 >/dev/null
