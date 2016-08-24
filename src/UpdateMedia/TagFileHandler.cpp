@@ -208,7 +208,11 @@ void TagFileHandler::SetUserDefinedInformation(string sFilename, char *pData, si
 bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 									list<pair<char *, size_t> >& listPicturesForTags)
 {
-	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
+	string sFileWithAttributes = FileWithAttributes(pPlutoMediaAttributes, true);
+	if ( sFileWithAttributes.size() == 0 )
+		return false;
+
+	sFileWithAttributes = m_sDirectory + "/" + sFileWithAttributes;
 	//string sFileWithAttributes = m_sFullFilename;
 
 	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
@@ -273,7 +277,11 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 //-----------------------------------------------------------------------------------------------------
 bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 {
-	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
+	string sFileWithAttributes = FileWithAttributes(pPlutoMediaAttributes, true);
+	if ( sFileWithAttributes.size() == 0 )
+		return false;
+
+	sFileWithAttributes = m_sDirectory + "/" + sFileWithAttributes;
 	//string sFileWithAttributes = m_sFullFilename;
 
 	LoggerWrapper::GetInstance()->Write(LV_MEDIA, "# TagFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
@@ -327,7 +335,11 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 //-----------------------------------------------------------------------------------------------------
 bool TagFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttributes *pPlutoMediaAttributes)
 {
-	string sFileWithAttributes = m_sDirectory + "/" + FileWithAttributes(pPlutoMediaAttributes, true);
+	string sFileWithAttributes = FileWithAttributes(pPlutoMediaAttributes, true);
+	if ( sFileWithAttributes.size() == 0 )
+		return false;
+
+	sFileWithAttributes = m_sDirectory + "/" + sFileWithAttributes;
 	//string sFileWithAttributes = m_sFullFilename;
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::RemoveAttribute: removing Value: '%s', Type: '%d'", sValue.c_str(), nTagType);
