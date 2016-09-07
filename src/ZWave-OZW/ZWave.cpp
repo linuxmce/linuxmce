@@ -1402,6 +1402,10 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
                 // HSM100 motion detector, value with instance = 1 is motion detector
                 || (manuId == "0086" && prodType == "0002" && prodId == "0005" && label == "Sensor")
                 // Aeotec multi-sensor motion detector
+	        || (manuId == "010f" && prodType == "0800" && prodId == "1001" && label == "Sensor")
+	        // Fibaro motion sensor, 010f, prodType = 0800, prodId = 1001
+	        || (manuId == "011a" && prodType == "0601" && prodId == "0901" && label == "Sensor")
+	        // ZWN-BPC z-wave 360 PIR motion sensor
                 ) {
             devicetemplate = DEVICETEMPLATE_Motion_Detector_CONST;
         } else if ( label == "Temperature" )
