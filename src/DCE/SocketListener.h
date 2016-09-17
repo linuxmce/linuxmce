@@ -33,6 +33,9 @@ This will only remove the socket when the number of references is 1.
 #include <string>
 #include "ServerSocket.h"
 #include "DCE/Logger.h"
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 namespace DCE
 {
@@ -56,6 +59,10 @@ namespace DCE
 		SOCKET m_Socket; /**< the socket that listens for incomming connections */
 		bool m_bAllowIncommingConnections;
 
+		bool m_bSSL; /** true if we should also start a SSL listening socket */
+		pthread_t m_SSLListenerThreadID; /**< the thread on witch the socket runs */
+		SOCKET m_SSLSocket; /**< the socket that listens for incomming connections */
+		SSL_CTX *m_sslctx;
 	public:
 
 		string m_sName; /**< the socket listener name */
@@ -109,10 +116,14 @@ namespace DCE
 		*/
 		void Run();
 
+		/** Runs the SSL listener by creating the master socket, setting it up and telling it to start listening.
+		*/
+		void RunSSL();
+
 		/** Creates a socket listener based on the parameter data.
 		@see the class member data
 		*/
-		virtual Socket *CreateSocket( SOCKET newsock, string sName, string sIPAddress="", string sMacAddress="" );
+		virtual Socket *CreateSocket( SOCKET newsock, string sName, string sIPAddress="", string sMacAddress="", SSL *ssl=NULL, bool isSSL=false );
 
 		/** Removes the socket from the listClients mb data and clears any dependencies.
 		*/

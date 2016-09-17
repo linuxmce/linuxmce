@@ -589,7 +589,7 @@ int Command_Impl::DeviceIdInvalid()
 
 void Command_Impl::GetDevicesByTemplate(int PK_DeviceTemplate,map<int,string> *p_mapDevices)
 {
-	Event_Impl *pEvent = new Event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
+	Event_Impl *pEvent = new Event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName, true, -1, -1, m_bIsSSL);
 	pEvent->m_pClientSocket->SendString("DEVICES BY TEMPLATE " + StringUtils::itos(PK_DeviceTemplate));
 	string sResponse;
 	if ( pEvent->m_pClientSocket->ReceiveString( sResponse ) && sResponse.substr(0,11)=="DEVICE_INFO" )
@@ -616,7 +616,7 @@ void Command_Impl::GetDevicesByTemplate(int PK_DeviceTemplate,map<int,string> *p
 
 void Command_Impl::GetDevicesByCategory(int PK_DeviceCategory,map<int,string> *p_mapDevices)
 {
-	Event_Impl *pEvent = new Event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
+	Event_Impl *pEvent = new Event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName, true, -1, -1, m_bIsSSL);
 	pEvent->m_pClientSocket->SendString("DEVICES BY CATEGORY " + StringUtils::itos(PK_DeviceCategory));
 	string sResponse;
 	if ( pEvent->m_pClientSocket->ReceiveString( sResponse ) && sResponse.substr(0,11)=="DEVICE_INFO" )

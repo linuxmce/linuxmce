@@ -8,7 +8,7 @@ CPPFLAGS = -I./ -I../ -I../DCE/ -I../VIPShared/ -D_FILE_OFFSET_BITS=64 -D_LARGEF
 CXX = g++
 LDFLAGS =
 LDFLAGS += -L$(ROOT)/lib
-LDLIBS = -lpthread -lSerializeClass
+LDLIBS = -lpthread -lSerializeClass -lssl
 
 MYSQL_FLAGS = $(shell pkg-config --cflags mysqlclient)
 MYSQL_LIBS = $(shell pkg-config --libs mysqlclient)

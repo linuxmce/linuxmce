@@ -32,6 +32,9 @@ Header file for the ClientSocket class
 #endif
 
 #include "Socket.h"
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #define MAX_RETRIES 3	// Maximum retries to establish TCP connection
 #define MAX_CONNECT_STEPS 10
@@ -51,6 +54,7 @@ The derived ClientSocket's responsibility is to make, and keep a reliable connec
      */
 	class ClientSocket : public Socket
 	{
+		SSL_CTX *m_sslctx;
 
 	public:
 		bool m_bNeedReload; /**< the device was recently added and the router not yet reloaded, so functionality may be limited */
@@ -66,7 +70,7 @@ The derived ClientSocket's responsibility is to make, and keep a reliable connec
         @param sName is the socketrs name.
         This assigns values to the member data
 		 */
-		ClientSocket( int iDeviceID, string sIPAddress, string sName );
+		ClientSocket( int iDeviceID, string sIPAddress, string sName, bool bIsSSL=false );
 
 		virtual ~ClientSocket();
 
