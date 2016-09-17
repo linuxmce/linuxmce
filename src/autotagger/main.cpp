@@ -36,7 +36,7 @@ int main(int argc, char *argv[])        //main loop
 
     metaDataDB.appPath=argv[0];
 
-    cout << "Media Autotagger v1.5 - Scan Start" << qPrintable(scanStart.toString ()) << endl;
+    cout << "Media Autotagger v1.6 - Scan Start" << qPrintable(scanStart.toString ()) << endl;
     if(argc == 1)                                                                //no arguments, setting to hardcoded default and looking up file id.
     {
         startingDirectory = metaDataDB.findHome("/home/public/data/videos");
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])        //main loop
 
         int mType;
         int mediaSubType = metaDataDB.findMediaType(db_File_ID);
-        if(mediaSubType != -1)
+        if(mediaSubType > 0)
         {
             mType = mediaSubType;
             cout << "Found Overriding Media Sub Type::"<< mType << endl;
