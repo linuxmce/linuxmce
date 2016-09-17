@@ -60,7 +60,7 @@ namespace DCE
 		/**
 		* @brief constructor, assignes values to the member data and starts the looping thread
 		*/
-		ServerSocket( SocketListener *pListener, SOCKET Sock, string sName, string sIPAddress="", string sMacAddress="" );
+		ServerSocket( SocketListener *pListener, SOCKET Sock, string sName, string sIPAddress="", string sMacAddress="", SSL* ssl=NULL, bool isSSL=false );
 
 		/**
 		* @brief destructor, kills the tread

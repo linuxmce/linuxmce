@@ -37,12 +37,13 @@ using namespace DCE;
 #endif
 
 
-ClientSocket::ClientSocket( int iDeviceID, string sIPAddress, string sName ) : Socket( sName, sIPAddress )
+ClientSocket::ClientSocket( int iDeviceID, string sIPAddress, string sName, bool bIsSSL ) : Socket( sName, sIPAddress )
 {
 	m_dwPK_Device = iDeviceID;
 	m_eLastError = cs_err_None;
 	m_bNeedReload = false;
 	m_dwMaxRetries = MAX_RETRIES;
+	m_bIsSSL_set(bIsSSL);
 	/** @todo check comment */
 	//	if( g_pDCELogger ) // This won't be created yet if this is the server logger socket
 	//		g_pDCELogger->Write(LV_SOCKET,"Created client socket %p device: %d ip: %s",this,m_DeviceID,m_IPAddress.c_str());
@@ -52,10 +53,50 @@ ClientSocket::ClientSocket( int iDeviceID, string sIPAddress, string sName ) : S
 ClientSocket::~ClientSocket()
 {
 	Disconnect();
+	if (m_bIsSSL)
+	{
+		SSL_CTX_free(m_sslctx);
+	}
 }
 
 bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnectRetries, int nConnectStepsLeft )
 {
+
+	if (m_bIsSSL)
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Connecting with SSL.\r" );
+		m_sslctx = SSL_CTX_new(SSLv23_client_method()); // TODO: replace with TLS_client_method when using new openssl
+		if ( !m_sslctx ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't create SSL context.\r" );
+			ERR_print_errors_fp(stderr);
+			return false;
+		}
+		// TODO: configurable paths (for qOrbiter)
+		if ( SSL_CTX_use_certificate_file(m_sslctx, "/etc/pluto/certs/dce-client.crt" , SSL_FILETYPE_PEM) <= 0 ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL public key.\r" );
+			return false;
+		}
+		if ( SSL_CTX_use_PrivateKey_file(m_sslctx, "/etc/pluto/certs/dce-client.key.pem", SSL_FILETYPE_PEM) <= 0 ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL private key.\r" );
+			return false;
+		}
+		if ( !SSL_CTX_check_private_key(m_sslctx) ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Public and private keys does not match.\r" );
+			return false;
+		}
+/*
+		if (SSL_CTX_load_verify_locations(m_sslctx, "/etc/pluto/certs/CA/cacert.pem", NULL) <= 0 ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL CA cert.\r" );
+			return false;
+		}
+*/
+		SSL_CTX_use_certificate_chain_file(m_sslctx, "/etc/pluto/certs/CA/cacert.pem");
+		
+//		SSL_CTX_set_verify(m_sslctx, SSL_VERIFY_PEER, NULL);
+//		SSL_CTX_set_verify_depth(m_sslctx, 1);
+		SSL_CTX_set_mode(m_sslctx, SSL_MODE_AUTO_RETRY);
+	}	  
+
 	m_bCancelSocketOp = false;
 
 	if( iConnectRetries==-1 )
@@ -115,6 +156,8 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 			string sAddress;
 			int iPort;
 			StringUtils::AddressAndPortFromString( m_sIPAddress, DCE_DEFAULT_PORT, sAddress, iPort );
+			if (m_bIsSSL)
+				iPort = 12232;
 			addrT.sin_port = htons( iPort );
 
 			unsigned long dwAddr = inet_addr( sAddress.c_str() );
@@ -158,6 +201,19 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
                 inet_ntop( AF_INET, &( addrT.sin_addr.s_addr), pcAddress, 32 );
 				m_sMyIPAddress = pcAddress;
 #endif
+				if (m_bIsSSL)
+				{
+					m_pSSL = SSL_new (m_sslctx);
+					SSL_set_fd(m_pSSL, m_Socket);
+					int err = SSL_connect(m_pSSL);
+
+					if ( err < 1 )
+					{
+						int err = SSL_get_error(m_pSSL,err);
+						LoggerWrapper::GetInstance()->Write(LV_WARNING, "SSL_Connect() failed, Error Code %d (%s))", err);
+					}
+				}
+
 				bSuccess = true;
 			}
 			else

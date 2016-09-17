@@ -53,8 +53,8 @@ void *ServerSocket::BeginWapClientThread(void *SvSock)
 	return NULL;
 }
 
-ServerSocket::ServerSocket( SocketListener *pListener, SOCKET Sock, string sName, string sIPAddress, string sMacAddress ) :
-	Socket( sName, sIPAddress, sMacAddress ),
+ServerSocket::ServerSocket( SocketListener *pListener, SOCKET Sock, string sName, string sIPAddress, string sMacAddress, SSL* ssl, bool isSSL ) :
+  Socket( sName, sIPAddress, sMacAddress, ssl, isSSL ),
 	m_bSelfDestroying(false),
 	m_ConnectionMutex( "connection " + sName ),
 #ifdef PTHREAD2

@@ -47,14 +47,22 @@ void *BeginListenerThread( void *pSockListener )
 	return NULL;
 }
 
+void *BeginSSLListenerThread( void *pSockListener )
+{
+	SocketListener *pListener = (SocketListener *)pSockListener;
+	pListener->RunSSL(); // start the listener
+	return NULL;
+}
+
 SocketListener::SocketListener( string sName )
 #ifdef PTHREAD2
-	: m_ListenerThreadID(pthread_t{ NULL, 0 }),
+	: m_ListenerThreadID(pthread_t{ NULL, 0 }), m_SSLListenerThreadID(pthread_t{ NULL, 0 }),
 #else
-	: m_ListenerThreadID((pthread_t)NULL),
+	: m_ListenerThreadID((pthread_t)NULL), m_SSLListenerThreadID((pthread_t)NULL),
 #endif
 	  m_iListenPort(0),
 	  m_Socket( INVALID_SOCKET ),
+	  m_SSLSocket( INVALID_SOCKET ),
 	  m_bAllowIncommingConnections(true),
 	  m_sName(sName),
 	  m_ListenerMutex( "listener " + sName ),
@@ -64,6 +72,9 @@ SocketListener::SocketListener( string sName )
 	  m_bFailedToBind(false),
 	  m_bSendOnlySocket(false)
 {
+	SSL_library_init();
+	SSL_load_error_strings();
+
 	pthread_mutexattr_init( &m_MutexAttr );
 	pthread_mutexattr_settype( &m_MutexAttr, PTHREAD_MUTEX_RECURSIVE_NP );
 	m_ListenerMutex.Init( &m_MutexAttr );
@@ -87,6 +98,25 @@ SocketListener::~SocketListener()
 #endif
 		pthread_join( m_ListenerThreadID, 0 ); // wait for it to finish
 
+	// The same for the SSL Socket
+	LoggerWrapper::GetInstance()->Write( LV_SOCKET, "~SocketListener SSL %d", m_SSLSocket );
+	if ( m_SSLSocket != INVALID_SOCKET )
+	{
+		LoggerWrapper::GetInstance()->Write( LV_SOCKET, "closing listener m_SSLSocket: %d", m_SSLSocket );
+		closesocket( m_SSLSocket ); // closing the socket
+		m_SSLSocket = INVALID_SOCKET; // now it is invalid
+	}
+
+#ifdef PTHREAD2
+	if (m_SSLListenerThreadID.p )
+#else
+	if (m_SSLListenerThreadID)
+#endif
+		pthread_join( m_SSLListenerThreadID, 0 ); // wait for it to finish
+
+	SSL_CTX_free(m_sslctx);
+	EVP_cleanup();
+
 	//drop all sockets
 	DropAllSockets();
 
@@ -102,6 +132,222 @@ void SocketListener::StartListening( int iPortNumber )
 	m_bRunning = false; // So we know when we started
 	m_iListenPort = iPortNumber;
 	pthread_create( &m_ListenerThreadID, NULL, BeginListenerThread, (void *)this );
+	if (m_bSSL)
+		pthread_create( &m_SSLListenerThreadID, NULL, BeginSSLListenerThread, (void *)this );
+}
+
+void SocketListener::RunSSL()
+{
+	struct sockaddr_in6  addrT;
+	int iSSLPort = m_iListenPort + 1;
+	m_sslctx = SSL_CTX_new(SSLv23_server_method());
+	if ( !m_sslctx ) {
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't create SSL context.\r" );
+		m_bRunning = false;
+		return;
+	}
+	if ( SSL_CTX_use_certificate_file(m_sslctx, "/etc/pluto/certs/CA/certs/dce-server.crt" , SSL_FILETYPE_PEM) < 0 ) {
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL public key.\r" );
+		m_bRunning = false;
+		return;
+	}
+	if ( SSL_CTX_use_PrivateKey_file(m_sslctx, "/etc/pluto/certs/dce.key.pem", SSL_FILETYPE_PEM) < 0 ) {
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL private key.\r" );
+		m_bRunning = false;
+		return;
+	}
+	if ( !SSL_CTX_check_private_key(m_sslctx) ) {
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Public and private keys does not match.\r" );
+		m_bRunning = false;
+		return;
+	}
+	if (SSL_CTX_load_verify_locations(m_sslctx, "/etc/pluto/certs/CA/cacert.pem", NULL) < 0 ) {
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL CA cert.\r" );
+		m_bRunning = false;
+		return;
+	}
+//	SSL_CTX_use_certificate_chain_file(m_sslctx, "/etc/pluto/certs/CA/cacert.pem");
+
+	SSL_CTX_set_verify(m_sslctx, SSL_VERIFY_PEER, NULL);
+	SSL_CTX_set_verify_depth(m_sslctx, 1);
+	SSL_CTX_set_mode(m_sslctx, SSL_MODE_AUTO_RETRY);
+
+	// Open IPv6 socket
+	m_SSLSocket = socket( AF_INET6, SOCK_STREAM, 0 );
+	/** @todo check comment */
+	// setsockopt(m_Socket, IPPROTO_TCP, TCP_NODELAY, (SOCKOPTTYPE)&b, sizeof(b));
+	if ( m_SSLSocket == INVALID_SOCKET ) // error
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't create SSL listener socket.\r" );
+		m_bRunning = false;
+		return;
+	}
+
+	// Make socket also listen to IPv4 requests
+	int iOptIPv6only = 0;
+	if (setsockopt(m_SSLSocket, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&iOptIPv6only, sizeof(iOptIPv6only)) == -1)
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "SOCKET: Cannot set IPV6_V6ONLY socket option.\r" );
+		m_SSLSocket = INVALID_SOCKET;
+		m_bRunning=false;
+		return;
+	} 
+	else 
+	{
+		LoggerWrapper::GetInstance()->Write( LV_SOCKET, "SOCKET: IPV6_V6ONLY option set.\r" );
+	}
+	int iOptReuse = 1;
+	int iOptKeepAlive = 1;
+	if (setsockopt(m_SSLSocket, SOL_SOCKET, SO_REUSEADDR, (SOCKOPTTYPE)&iOptReuse, sizeof(iOptReuse))
+		|| setsockopt(m_SSLSocket, SOL_SOCKET, SO_KEEPALIVE, (SOCKOPTTYPE)&iOptKeepAlive, sizeof(iOptKeepAlive))) // error
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "setsockopt failed" ); // couldn't set the sock option
+		closesocket(m_SSLSocket);
+		m_SSLSocket = INVALID_SOCKET;
+		m_bRunning=false;
+		return;
+	}
+
+	LoggerWrapper::GetInstance()->Write( LV_SOCKET, "TCPIP: Listening on %d (SSL).", iSSLPort ); // from now trying to start listening
+	
+	memset( &addrT, 0, sizeof(addrT) ); // clearing it
+	addrT.sin6_family = AF_INET6;
+	addrT.sin6_port = htons( iSSLPort );
+	addrT.sin6_addr = in6addr_any;
+
+	if ( SOCKFAIL( bind( m_SSLSocket, (struct sockaddr*)&addrT, sizeof(addrT) ) ) ) // test if we can bind the socket with the desired properties @todo ask
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Failed to bind to port (SSL).\r" );
+		m_bFailedToBind=true;
+		m_bRunning=false;
+		return;
+	}
+	else if ( SOCKFAIL( listen( m_SSLSocket, SOMAXCONN ) ) )
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Failed to listen to port (SSL).\r" );
+	}
+	else // no errors
+	{
+#ifdef WIN32
+		unsigned long on = 1;
+		::ioctlsocket( m_SSLSocket, FIONBIO, &on );
+#else
+		long dwFlags = fcntl( m_SSLSocket, F_GETFL );
+		dwFlags |= O_NONBLOCK;
+		fcntl( m_SSLSocket, F_SETFL, dwFlags );
+
+		// set close-on-exec flag
+		dwFlags = fcntl(m_SSLSocket, F_GETFD);
+		dwFlags |= FD_CLOEXEC;
+		fcntl(m_SSLSocket, F_SETFD, dwFlags);
+#endif
+		m_bRunning = true; // So we know when we started
+		while( !m_bTerminate && m_bAllowIncommingConnections) // while the listener dosen't terminate
+		{
+			fd_set rfds;
+			struct timeval tv;
+
+			int iRet = 0;
+
+			while( !m_bTerminate && iRet != 1 )
+			{
+				FD_ZERO( &rfds );
+				FD_SET( m_SSLSocket, &rfds );
+				tv.tv_sec = 1;
+				tv.tv_usec = 0;
+				fflush( stdout );
+				iRet = select( (int) (m_SSLSocket+1), &rfds, NULL, NULL, &tv );
+			}
+			if( m_bTerminate )
+				break;
+
+			struct sockaddr_in6 addr;
+			socklen_t len = sizeof( addr );
+			SOCKET newsock = accept( m_SSLSocket, (sockaddr *)&addr, &len ); // creating a new socket
+
+			if(!m_bAllowIncommingConnections)
+			{
+				LoggerWrapper::GetInstance()->Write( LV_STATUS, "Got an incoming connection, but the server is closing." );
+				send( newsock, "CLOSED\n", 6, 0 );
+				closesocket( newsock );
+				break;
+			}
+
+			if ( newsock != INVALID_SOCKET )
+			{
+				if ( m_bClosed )
+				{
+					LoggerWrapper::GetInstance()->Write( LV_STATUS, "Got an incoming connection, but the server state is closed." );
+					send( newsock, "CLOSED\n", 6, 0 );
+					closesocket( newsock );
+				}
+				else
+				{
+					char str[INET6_ADDRSTRLEN];
+					inet_ntop(AF_INET6, &addr.sin6_addr, str, sizeof(str));
+					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "TCPIP: Accepting incoming connection on socket %d (SSL), port %d, from IP %s.", newsock, iSSLPort, str);
+#ifdef WIN32
+					unsigned long on = 1;
+					::ioctlsocket( newsock, FIONBIO, &on );
+#else
+					long dwFlags = fcntl( newsock, F_GETFL );
+					dwFlags |= O_NONBLOCK;
+					fcntl( newsock, F_SETFL, dwFlags );
+
+					// set close-on-exec flag
+					dwFlags = fcntl(newsock, F_GETFD);
+					dwFlags |= FD_CLOEXEC;
+					fcntl(newsock, F_SETFD, dwFlags);
+#endif
+					/** @todo check comment */
+					// setsockopt(newsock, IPPROTO_TCP, TCP_NODELAY, (SOCKOPTTYPE) &b, sizeof(b));
+					inet_ntop(AF_INET6, &(addr.sin6_addr), str, INET6_ADDRSTRLEN);
+
+					SSL *ssl;
+					ssl = SSL_new(m_sslctx);
+					SSL_set_fd(ssl, newsock);
+					int sslret = SSL_accept(ssl);
+					int sslerr = -1;
+					while (sslret <= 0 && (sslerr == -1 || sslerr == SSL_ERROR_WANT_READ || sslerr == SSL_ERROR_WANT_WRITE ))
+					{
+						sslerr = SSL_get_error(ssl, sslret);
+						if ( sslerr == SSL_ERROR_WANT_READ || sslerr == SSL_ERROR_WANT_WRITE ) {
+							LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "(SSL accept failed: WANT READ/WRITE) with %d, error = %d.\r", sslret, sslerr );
+							sslret = SSL_accept(ssl);
+							if (sslret <= 0)
+								sslerr = SSL_get_error(ssl, sslret);
+						} else {
+							LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Invalid connection socket (SSL accept failed) with %d, error = %d.\r", sslret, sslerr );
+							char error[256];
+							ERR_error_string(sslerr, error);
+							LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "%s", error );
+							ERR_print_errors_fp(stdout);
+						}
+					}
+					if ( sslret > 0 ) {
+						// TODO: SSL_verify
+						CreateSocket( newsock, "Incoming_Conn Socket " + StringUtils::itos(int(newsock)) + " " + str, str, "", ssl, true);
+					}
+				}
+			}
+			else
+			{
+				if ( !m_bTerminate )
+				{
+					LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Invalid connection socket (accept failed).\r" );
+					Sleep( 1000 );
+				}
+			}
+			Sleep( 0 );
+		}
+	}
+
+	closesocket( m_SSLSocket );
+
+	m_SSLSocket = INVALID_SOCKET;
+	m_bRunning = false;
+
+	return;
 }
 
 void SocketListener::Run()
@@ -261,10 +507,10 @@ void SocketListener::Run()
 	return;
 }
 
-Socket *SocketListener::CreateSocket( SOCKET newsock, string sName, string sIPAddress, string sMacAddress )
+Socket *SocketListener::CreateSocket( SOCKET newsock, string sName, string sIPAddress, string sMacAddress, SSL *ssl, bool isSSL )
 {
 	PLUTO_SAFETY_LOCK( lm, m_ListenerMutex );
-	ServerSocket *pSocket = new ServerSocket( this, newsock, sName, sIPAddress, sMacAddress );
+	ServerSocket *pSocket = new ServerSocket( this, newsock, sName, sIPAddress, sMacAddress, ssl, isSSL );
 	pSocket->m_bSendOnlySocket = m_bSendOnlySocket;
 	m_vectorServerSocket.push_back(pSocket);
 	pSocket->Run();

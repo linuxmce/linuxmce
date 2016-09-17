@@ -149,9 +149,10 @@ void* PingLoop( void* param ) // renamed to cancel link-time name collision in M
 	}
 }
 
-Socket::Socket(string Name,string sIPAddress, string sMacAddress) : 
+Socket::Socket(string Name,string sIPAddress, string sMacAddress, SSL* pSSL, bool isSSL) : 
 	m_pInternalBuffer_Data(NULL), m_nInternalBuffer_Position(0), 
-	m_bReceiveData_TimedOut(false), m_SocketMutex("socket mutex " + Name)
+	m_bReceiveData_TimedOut(false), m_SocketMutex("socket mutex " + Name),
+	m_pSSL(pSSL), m_bIsSSL(isSSL)
 {
     m_bCancelSocketOp = false;
 	m_pcSockLogFile=m_pcSockLogErrorFile=NULL;
@@ -232,6 +233,8 @@ Socket::~Socket()
 	{
 		PLUTO_SAFETY_LOCK_ERRORSONLY(sSM,m_SocketMutex);  // don't log anything but failures
 		Close();
+		if (m_bIsSSL)
+			SSL_free(m_pSSL);
 		sSM.Release();
 	}
 
@@ -445,6 +448,7 @@ bool Socket::SendData( int iSize, const char *pcData )
 #endif //LL_DEBUG
 
 	int iBytesLeft = iSize;
+        bool bWantRead = true;
 	while( iBytesLeft > 0 )
 	{
 		fd_set wrfds;
@@ -480,7 +484,7 @@ bool Socket::SendData( int iSize, const char *pcData )
             //before select
             gettimeofday(&tv_select_1, NULL);
 
-			iRet = select((int) (m_Socket+1), NULL, &wrfds, NULL, &tv);
+	                iRet = select((int) (m_Socket+1), NULL, &wrfds, NULL, &tv);
 
             //after select
             gettimeofday(&tv_select_2, NULL);
@@ -503,9 +507,27 @@ bool Socket::SendData( int iSize, const char *pcData )
 		if (iRet == 1)
 		{
 			int iSendBytes = ( iBytesLeft > 16192 ) ? 16192 : iBytesLeft;
-			iSendBytes = send( m_Socket, pcData+( iSize-iBytesLeft ), iSendBytes, 0 );
+			bWantRead = false;
+			if (m_bIsSSL)
+			{
+				int cnt = SSL_write( m_pSSL, pcData+( iSize-iBytesLeft ), iSendBytes );
+				int sslerr = SSL_get_error(m_pSSL, cnt);
+//				LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "SendData: SSLerr = %d", sslerr);
+				switch (sslerr) {
+				case SSL_ERROR_WANT_WRITE:
+					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::SendData() SSL Want WRITE");
+					bWantRead = true;
+					break;
+				case SSL_ERROR_NONE:
+//					LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Sent %d bytes", cnt);
+					iSendBytes = cnt;
+					break;
+				}
+			}
+			else 
+				iSendBytes = send( m_Socket, pcData+( iSize-iBytesLeft ), iSendBytes, 0 );
 
-			if ( iSendBytes > 0 )
+			if ( iSendBytes > 0 && !bWantRead)
 				iBytesLeft -= iSendBytes;
 			else
 			{
@@ -712,9 +734,10 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 	clock_t clk_select1=0, clk_select1b=0, clk_select2=0, clk_select2b=0;
 #endif
 
+	bool bWantRead = true;
 	while( iBytesLeft > 0 )
 	{
-		if ( m_pcCurInsockBuffer )
+	if ( m_pcCurInsockBuffer )
 		{
 			int iByteCpy = min( m_iSockBufBytesLeft, iBytesLeft );
 			memcpy( pcData, m_pcCurInsockBuffer, iByteCpy );
@@ -762,16 +785,18 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 					tv.tv_usec = 0;
 				}
 
-                //before select
-                gettimeofday(&tv_select_1, NULL);
+				//before select
+				gettimeofday(&tv_select_1, NULL);
+				
+				if (bWantRead)
+					iRet = select((int) (m_Socket+1), &rfds, NULL, NULL, &tv);
 
-				iRet = select((int) (m_Socket+1), &rfds, NULL, NULL, &tv);
-
-                //after select
-                gettimeofday(&tv_select_2, NULL);
-                //the select took 'tv_select' time
-                tv_select = tv_select_2 - tv_select_1;
-
+				//after select
+				gettimeofday(&tv_select_2, NULL);
+				//the select took 'tv_select' time
+				tv_select = tv_select_2 - tv_select_1;
+				tv_total -= tv_select;
+				
 #ifndef WINCE
 				if (errno == EINTR)
 				{
@@ -779,7 +804,6 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 					iRet = 0;
 				}
 #endif
-				tv_total -= tv_select;
 #ifndef DISABLE_SOCKET_TIMEOUTS
 			} while (iRet != -1 && iRet != 1 && (nInternalReceiveTimeout > 0 || nInternalReceiveTimeout==-2 ? tv_total.tv_sec > 0 : true));
 #else
@@ -821,12 +845,34 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 				return false;
 			}
 
-			m_iSockBufBytesLeft = recv( m_Socket, m_pcInSockBuffer, INSOCKBUFFER_SIZE - 1, 0 );
+			bWantRead = false;
+			if (m_bIsSSL) {
+				int pos = 0;
+				int read = 0;
+				read = SSL_read(m_pSSL, m_pcInSockBuffer, INSOCKBUFFER_SIZE - 1 /* - pos*/);
+				int sslerr = SSL_get_error(m_pSSL, read);
+				switch (sslerr)
+				{
+				case SSL_ERROR_NONE:
+					m_iSockBufBytesLeft = read;
+					break;
+				case SSL_ERROR_WANT_READ:
+					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::ReceiveData() SSL Want Read");
+					m_iSockBufBytesLeft = 0;
+					bWantRead = true;
+					break;
+				default:
+					LoggerWrapper::GetInstance()->Write( LV_WARNING, "SSL Wants other");
+					break;
+				}
+			}
+			else
+				m_iSockBufBytesLeft = recv( m_Socket, m_pcInSockBuffer, INSOCKBUFFER_SIZE - 1, 0 );
 
 #ifndef PLATFORM_PR_MC1_CABLE
-			if ( m_iSockBufBytesLeft <= 0 )
+			if ( m_iSockBufBytesLeft <= 0 && !bWantRead ) 
 #else
-			if ( m_iSockBufBytesLeft < 0 )
+			if ( m_iSockBufBytesLeft < 0 && !bWantRead )
 #endif
 			{
 #ifdef WIN32
@@ -843,7 +889,8 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 				return false;
 			}
 
-			m_pcCurInsockBuffer = m_pcInSockBuffer; // refreshing the current position
+			if (!bWantRead)
+				m_pcCurInsockBuffer = m_pcInSockBuffer; // refreshing the current position
 
 #ifdef LL_DEBUG
 			char *pcTmp = new char[m_iSockBufBytesLeft +1]; // freed after writing to the file
@@ -1002,6 +1049,8 @@ void Socket::Close()
 
 	if ( m_Socket != INVALID_SOCKET )
  	{
+		if (m_bIsSSL)
+			SSL_free(m_pSSL);
 #ifdef DEBUG
 		int iResult2=closesocket( m_Socket );
 		LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::Close() m_Socket %d closesocket: %d", m_Socket, iResult2 );

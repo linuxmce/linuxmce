@@ -35,6 +35,7 @@ Header file for the Socket class
 
 #include "DCE/Logger.h"
 #include "DCE/Message.h"
+#include <openssl/ssl.h>
 
 /**
 @namespace DCE
@@ -64,6 +65,9 @@ namespace DCE
 		bool m_bReceiveData_TimedOut; /** < this will become true if ReceiveData times out */
 		int m_nReceiveData_BytesLeft; /** < the number of bytes left to receive */
 
+	protected:
+		bool m_bIsSSL;
+		SSL *m_pSSL;
 	public:
 
 		enum SocketType { st_Unknown, st_ServerCommand, st_ServerEvent, st_ClientCommand, st_ClientEvent } m_eSocketType;
@@ -104,7 +108,7 @@ namespace DCE
 		/**
 		 * @brief creates a new socket objest with the specified name, and it also writes a log
 		 */
-		Socket( string sName,string sIPAddress="",string sMacAddress="" );
+		Socket( string sName,string sIPAddress="",string sMacAddress="", SSL* ssl=NULL, bool isSSL=false );
 
 		/**
 		 * @brief frees the allocated memory and closes the base socket, and it also writes a log
@@ -211,6 +215,12 @@ namespace DCE
 		virtual void PingFailed();
 		static class SocketInfo *g_mapSocketInfo_Find(int iSocketCounter,string sName,Socket *pSocket);
 
+		void m_bIsSSL_set(bool b) { m_bIsSSL = b;
+			if (m_bIsSSL) {
+				SSL_library_init();
+				SSL_load_error_strings();
+			}
+		}
 		bool m_bQuit_get() { return m_bQuit; }
 		void m_bQuit_set(bool bQuit)
 		{
