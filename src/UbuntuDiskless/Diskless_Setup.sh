@@ -167,7 +167,7 @@ function setup_tftp_boot
 		chmod +r /tftpboot/${Moon_DeviceID}/initrd.img
 
 		case $Moon_DistroID in
-			$DD_DISTRO_Raspbian_Wheezy)
+			$DD_DISTRO_Raspbian_Wheezy|$DD_DISTRO_Raspbian_Jessie)
 				nfsroot="${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}"
 				initrd=""
 				;;
