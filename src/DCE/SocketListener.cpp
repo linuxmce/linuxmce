@@ -166,9 +166,19 @@ void SocketListener::RunSSL()
 		m_bRunning = false;
 		return;
 	}
-//	SSL_CTX_use_certificate_chain_file(m_sslctx, "/etc/pluto/certs/CA/cacert.pem");
 
-	SSL_CTX_set_verify(m_sslctx, SSL_VERIFY_PEER, NULL);
+	STACK_OF(X509_NAME) *cert_names;
+	cert_names = SSL_load_client_CA_file("/etc/pluto/certs/CA/cacert.pem");
+	if (cert_names != NULL)
+	{
+		SSL_CTX_set_client_CA_list(m_sslctx, cert_names);
+	} else {
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't load CA list from file." );
+		m_bRunning = false;
+		return;
+	}
+
+	SSL_CTX_set_verify(m_sslctx, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
 	SSL_CTX_set_verify_depth(m_sslctx, 1);
 	SSL_CTX_set_mode(m_sslctx, SSL_MODE_AUTO_RETRY);
 
@@ -306,27 +316,62 @@ void SocketListener::RunSSL()
 					SSL *ssl;
 					ssl = SSL_new(m_sslctx);
 					SSL_set_fd(ssl, newsock);
-					int sslret = SSL_accept(ssl);
-					int sslerr = -1;
-					while (sslret <= 0 && (sslerr == -1 || sslerr == SSL_ERROR_WANT_READ || sslerr == SSL_ERROR_WANT_WRITE ))
-					{
-						sslerr = SSL_get_error(ssl, sslret);
-						if ( sslerr == SSL_ERROR_WANT_READ || sslerr == SSL_ERROR_WANT_WRITE ) {
-							LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "(SSL accept failed: WANT READ/WRITE) with %d, error = %d.\r", sslret, sslerr );
-							sslret = SSL_accept(ssl);
-							if (sslret <= 0)
-								sslerr = SSL_get_error(ssl, sslret);
-						} else {
-							LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Invalid connection socket (SSL accept failed) with %d, error = %d.\r", sslret, sslerr );
-							char error[256];
-							ERR_error_string(sslerr, error);
-							LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "%s", error );
-							ERR_print_errors_fp(stdout);
+					bool bWantRead = false, bWantWrite = false;
+					int err = -1;
+					do {
+						if (bWantRead || bWantWrite) {
+							fd_set rfds;
+							struct timeval tv;
+							FD_ZERO(&rfds);
+							FD_SET(newsock, &rfds);
+
+							tv.tv_sec = 1;
+							tv.tv_usec = 0;
+							if (bWantRead) {
+								int iRet = select((int) (newsock+1), &rfds, NULL, NULL, &tv);
+							} else {
+								int iRet = select((int) (newsock+1), NULL, &rfds, NULL, &tv);
+							}
 						}
-					}
-					if ( sslret > 0 ) {
-						// TODO: SSL_verify
-						CreateSocket( newsock, "Incoming_Conn Socket " + StringUtils::itos(int(newsock)) + " " + str, str, "", ssl, true);
+						bWantRead = false;
+						bWantWrite = false;
+
+						err = SSL_accept(ssl);
+						if ( err != 1 )
+						{
+							int sslerr = SSL_get_error(ssl, err);
+							switch (sslerr) {
+							case SSL_ERROR_WANT_WRITE:
+								LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::RunSSL() SSL Want WRITE");
+								bWantWrite = true;
+								break;
+							case SSL_ERROR_WANT_READ:
+								LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::RunSSL() SSL Want READ");
+								bWantRead = true;
+								break;
+							case SSL_ERROR_NONE:
+								break;
+							default:
+								LoggerWrapper::GetInstance()->Write(LV_WARNING, "SSL_Accept() failed, Error Code %d, %d", err, sslerr);
+								Socket::DumpSSLError( LV_WARNING, sslerr );
+								break;
+							}
+						}
+					} while (bWantRead || bWantWrite);
+					if ( err == 1 ) {
+						// Verify client certificate
+						X509* pPeer = SSL_get_peer_certificate(ssl);
+						if (pPeer)
+						{
+							if (SSL_get_verify_result(ssl) == X509_V_OK)
+							{
+								CreateSocket( newsock, "Incoming_Conn Socket " + StringUtils::itos(int(newsock)) + " " + str, str, "", ssl, true);
+							} else {
+								LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Peer certificate not valid!" );
+							}
+						} else {
+							LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "No peer certificate presented!" );
+						}
 					}
 				}
 			}

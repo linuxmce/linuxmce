@@ -64,36 +64,49 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 
 	if (m_bIsSSL)
 	{
-		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Connecting with SSL.\r" );
+		LoggerWrapper::GetInstance()->Write( LV_WARNING, "Connecting with SSL.\r" );
 		m_sslctx = SSL_CTX_new(SSLv23_client_method()); // TODO: replace with TLS_client_method when using new openssl
 		if ( !m_sslctx ) {
-			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't create SSL context.\r" );
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't create SSL context." );
 			ERR_print_errors_fp(stderr);
 			return false;
 		}
-		// TODO: configurable paths (for qOrbiter)
-		if ( SSL_CTX_use_certificate_file(m_sslctx, "/etc/pluto/certs/dce-client.crt" , SSL_FILETYPE_PEM) <= 0 ) {
-			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL public key.\r" );
+		string path = s_sSSL_key_path + "dce-client.crt";
+		if ( SSL_CTX_use_certificate_file(m_sslctx, path.c_str() , SSL_FILETYPE_PEM) <= 0 ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL public key. %s", path.c_str() );
+			ERR_print_errors_fp(stderr);
 			return false;
 		}
-		if ( SSL_CTX_use_PrivateKey_file(m_sslctx, "/etc/pluto/certs/dce-client.key.pem", SSL_FILETYPE_PEM) <= 0 ) {
-			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL private key.\r" );
+		path = s_sSSL_key_path + "dce-client.key.pem";
+		if ( SSL_CTX_use_PrivateKey_file(m_sslctx, path.c_str(), SSL_FILETYPE_PEM) <= 0 ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL private key. %s", path.c_str() );
+			ERR_print_errors_fp(stderr);
 			return false;
 		}
 		if ( !SSL_CTX_check_private_key(m_sslctx) ) {
-			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Public and private keys does not match.\r" );
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Public and private keys does not match." );
+			ERR_print_errors_fp(stderr);
 			return false;
 		}
-/*
-		if (SSL_CTX_load_verify_locations(m_sslctx, "/etc/pluto/certs/CA/cacert.pem", NULL) <= 0 ) {
-			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL CA cert.\r" );
+
+		path = s_sSSL_key_path + "CA/cacert.pem";
+		if (SSL_CTX_load_verify_locations(m_sslctx, path.c_str(), NULL) <= 0 ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL CA cert.\r %s", path.c_str() );
+			ERR_print_errors_fp(stderr);
 			return false;
 		}
-*/
-		SSL_CTX_use_certificate_chain_file(m_sslctx, "/etc/pluto/certs/CA/cacert.pem");
-		
-//		SSL_CTX_set_verify(m_sslctx, SSL_VERIFY_PEER, NULL);
-//		SSL_CTX_set_verify_depth(m_sslctx, 1);
+
+
+/*		path = s_sSSL_key_path + "CA/cacert.pem";
+		if ( SSL_CTX_use_certificate_chain_file(m_sslctx, path.c_str()) <= 0 ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Unable to set CA file. %s", path.c_str() );
+			DumpSSLError(LV_CRITICAL, 0);
+			return false;
+		}
+
+*/		
+		SSL_CTX_set_verify(m_sslctx, SSL_VERIFY_PEER, NULL);
+		SSL_CTX_set_verify_depth(m_sslctx, 1);
 		SSL_CTX_set_mode(m_sslctx, SSL_MODE_AUTO_RETRY);
 	}	  
 
@@ -203,18 +216,54 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 #endif
 				if (m_bIsSSL)
 				{
+					int err = -1;
 					m_pSSL = SSL_new (m_sslctx);
 					SSL_set_fd(m_pSSL, m_Socket);
-					int err = SSL_connect(m_pSSL);
-
-					if ( err < 1 )
-					{
-						int err = SSL_get_error(m_pSSL,err);
-						LoggerWrapper::GetInstance()->Write(LV_WARNING, "SSL_Connect() failed, Error Code %d (%s))", err);
-					}
+					bool bWantRead = false, bWantWrite = false;
+					do {
+						if (bWantRead || bWantWrite) {
+							fd_set rfds;
+							struct timeval tv;
+							FD_ZERO(&rfds);
+							FD_SET(m_Socket, &rfds);
+							
+							tv.tv_sec = 1;
+							tv.tv_usec = 0;
+							if (bWantRead) {
+								int iRet = select((int) (m_Socket+1), &rfds, NULL, NULL, &tv);
+							} else {
+								int iRet = select((int) (m_Socket+1), NULL, &rfds, NULL, &tv);
+							}
+						}
+						bWantRead = false;
+						bWantWrite = false;
+						err = SSL_connect(m_pSSL);
+						if ( err != 1 )
+						{
+							int sslerr = SSL_get_error(m_pSSL, err);
+							switch (sslerr) {
+							case SSL_ERROR_WANT_WRITE:
+								LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::Connect() SSL Want WRITE");
+								bWantWrite = true;
+								break;
+							case SSL_ERROR_WANT_READ:
+								LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::Connect() SSL Want READ");
+								bWantRead = true;
+								break;
+							case SSL_ERROR_NONE:
+								break;
+							default:
+								LoggerWrapper::GetInstance()->Write(LV_WARNING, "SSL_Connect() failed, Error Code %d, %d", err, sslerr);
+								DumpSSLError( LV_WARNING, sslerr );
+								break;
+							}
+						}
+					} while (bWantRead || bWantWrite);
+					if ( err == 1 )
+						bSuccess = true;
+				} else {
+					bSuccess = true;
 				}
-
-				bSuccess = true;
 			}
 			else
 			{

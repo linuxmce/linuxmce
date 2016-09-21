@@ -80,6 +80,8 @@ SocketInfo *Socket::g_mapSocketInfo_Find(int iSocketCounter,string sName,Socket 
 
 static int SocketCounter=0;
 
+string Socket::s_sSSL_key_path = "/etc/pluto/certs/";
+
 // An application can create another handler that gets called instead in the event of a deadlock
 void (*g_pSocketCrashHandler)(Socket *pSocket)=NULL;
 
@@ -448,7 +450,7 @@ bool Socket::SendData( int iSize, const char *pcData )
 #endif //LL_DEBUG
 
 	int iBytesLeft = iSize;
-        bool bWantRead = true;
+        bool bWantRead = false, bWantWrite = true;
 	while( iBytesLeft > 0 )
 	{
 		fd_set wrfds;
@@ -481,10 +483,14 @@ bool Socket::SendData( int iSize, const char *pcData )
 			tv.tv_sec = 1;
 			tv.tv_usec = 0;
 
-            //before select
-            gettimeofday(&tv_select_1, NULL);
+			//before select
+			gettimeofday(&tv_select_1, NULL);
 
-	                iRet = select((int) (m_Socket+1), NULL, &wrfds, NULL, &tv);
+			// Default is to wait for write, but with SSL we might need to wait for read as well
+			if (bWantRead)
+				iRet = select((int) (m_Socket+1), &wrfds, NULL, NULL, &tv);
+			else if (bWantWrite || !m_bIsSSL)
+				iRet = select((int) (m_Socket+1), NULL, &wrfds, NULL, &tv);
 
             //after select
             gettimeofday(&tv_select_2, NULL);
@@ -508,26 +514,34 @@ bool Socket::SendData( int iSize, const char *pcData )
 		{
 			int iSendBytes = ( iBytesLeft > 16192 ) ? 16192 : iBytesLeft;
 			bWantRead = false;
+			bWantWrite = false;
 			if (m_bIsSSL)
 			{
 				int cnt = SSL_write( m_pSSL, pcData+( iSize-iBytesLeft ), iSendBytes );
 				int sslerr = SSL_get_error(m_pSSL, cnt);
-//				LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "SendData: SSLerr = %d", sslerr);
 				switch (sslerr) {
 				case SSL_ERROR_WANT_WRITE:
 					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::SendData() SSL Want WRITE");
+					bWantWrite = true;
+					break;
+				case SSL_ERROR_WANT_READ:
+					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::SendData() SSL Want Read");
 					bWantRead = true;
 					break;
 				case SSL_ERROR_NONE:
-//					LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Sent %d bytes", cnt);
+					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Sent %d bytes", cnt);
 					iSendBytes = cnt;
+					break;
+				default:
+					LoggerWrapper::GetInstance()->Write( LV_WARNING, "Socket::SendData() SSL other");
+					DumpSSLError( LV_WARNING, sslerr );
 					break;
 				}
 			}
 			else 
 				iSendBytes = send( m_Socket, pcData+( iSize-iBytesLeft ), iSendBytes, 0 );
 
-			if ( iSendBytes > 0 && !bWantRead)
+			if ( iSendBytes > 0 && !bWantRead && !bWantWrite)
 				iBytesLeft -= iSendBytes;
 			else
 			{
@@ -734,10 +748,10 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 	clock_t clk_select1=0, clk_select1b=0, clk_select2=0, clk_select2b=0;
 #endif
 
-	bool bWantRead = true;
+	bool bWantRead = true, bWantWrite = false;
 	while( iBytesLeft > 0 )
 	{
-	if ( m_pcCurInsockBuffer )
+		if ( m_pcCurInsockBuffer )
 		{
 			int iByteCpy = min( m_iSockBufBytesLeft, iBytesLeft );
 			memcpy( pcData, m_pcCurInsockBuffer, iByteCpy );
@@ -788,7 +802,12 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 				//before select
 				gettimeofday(&tv_select_1, NULL);
 				
-				if (bWantRead)
+				// Default is to wait for read, but with SSL we might need to wait for write as well
+				// With SSL, we can not always wait for available data, because SSL might have read all data to its internal buffer
+				// so we only wait when SSL tells us to (bWantRead/bWantWrite)
+				if ( bWantWrite )
+					iRet = select((int) (m_Socket+1), NULL, &rfds, NULL, &tv);
+				else if (bWantRead || !m_bIsSSL)
 					iRet = select((int) (m_Socket+1), &rfds, NULL, NULL, &tv);
 
 				//after select
@@ -846,10 +865,11 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 			}
 
 			bWantRead = false;
+			bWantWrite = false;
 			if (m_bIsSSL) {
 				int pos = 0;
 				int read = 0;
-				read = SSL_read(m_pSSL, m_pcInSockBuffer, INSOCKBUFFER_SIZE - 1 /* - pos*/);
+				read = SSL_read(m_pSSL, m_pcInSockBuffer, INSOCKBUFFER_SIZE - 1);
 				int sslerr = SSL_get_error(m_pSSL, read);
 				switch (sslerr)
 				{
@@ -861,8 +881,14 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 					m_iSockBufBytesLeft = 0;
 					bWantRead = true;
 					break;
+				case SSL_ERROR_WANT_WRITE:
+					LoggerWrapper::GetInstance()->Write( LV_SOCKET, "Socket::ReceiveData() SSL Want Write");
+					m_iSockBufBytesLeft = 0;
+					bWantWrite = true;
+					break;
 				default:
-					LoggerWrapper::GetInstance()->Write( LV_WARNING, "SSL Wants other");
+					LoggerWrapper::GetInstance()->Write( LV_WARNING, "Socket::ReceiveData() SSL other");
+					DumpSSLError( LV_WARNING, sslerr );
 					break;
 				}
 			}
@@ -870,9 +896,9 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 				m_iSockBufBytesLeft = recv( m_Socket, m_pcInSockBuffer, INSOCKBUFFER_SIZE - 1, 0 );
 
 #ifndef PLATFORM_PR_MC1_CABLE
-			if ( m_iSockBufBytesLeft <= 0 && !bWantRead ) 
+			if ( m_iSockBufBytesLeft <= 0 && !bWantRead && !bWantWrite) 
 #else
-			if ( m_iSockBufBytesLeft < 0 && !bWantRead )
+			if ( m_iSockBufBytesLeft < 0 && !bWantRead && !bWantWrite )
 #endif
 			{
 #ifdef WIN32
@@ -889,7 +915,7 @@ bool Socket::ReceiveData( int iSize, char *pcData, int nTimeout/* = -1*/ )
 				return false;
 			}
 
-			if (!bWantRead)
+			if (!bWantRead && !bWantWrite)
 				m_pcCurInsockBuffer = m_pcInSockBuffer; // refreshing the current position
 
 #ifdef LL_DEBUG

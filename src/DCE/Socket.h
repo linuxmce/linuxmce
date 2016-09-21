@@ -36,6 +36,7 @@ Header file for the Socket class
 #include "DCE/Logger.h"
 #include "DCE/Message.h"
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 
 /**
 @namespace DCE
@@ -68,6 +69,7 @@ namespace DCE
 	protected:
 		bool m_bIsSSL;
 		SSL *m_pSSL;
+		static string s_sSSL_key_path;
 	public:
 
 		enum SocketType { st_Unknown, st_ServerCommand, st_ServerEvent, st_ClientCommand, st_ClientEvent } m_eSocketType;
@@ -215,10 +217,23 @@ namespace DCE
 		virtual void PingFailed();
 		static class SocketInfo *g_mapSocketInfo_Find(int iSocketCounter,string sName,Socket *pSocket);
 
-		void m_bIsSSL_set(bool b) { m_bIsSSL = b;
+		static void setSSLKeyPath(string path) { s_sSSL_key_path = path; }
+		void m_bIsSSL_set(bool b) {
+			m_bIsSSL = b;
 			if (m_bIsSSL) {
 				SSL_library_init();
 				SSL_load_error_strings();
+			}
+		}
+		static void DumpSSLError(int level, unsigned long sslerr) {
+			char error[256];
+			ERR_error_string(sslerr, error);
+			LoggerWrapper::GetInstance()->Write( level, "%s", error );
+			unsigned long er = ERR_get_error();
+			while (er != 0) {
+				ERR_error_string_n(er, error, sizeof(error));
+				LoggerWrapper::GetInstance()->Write( level, "%s", error );
+				er = ERR_get_error();
 			}
 		}
 		bool m_bQuit_get() { return m_bQuit; }
