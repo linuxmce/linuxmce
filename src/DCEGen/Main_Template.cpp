@@ -118,6 +118,7 @@ int main(int argc, char* argv[])
 	string sLogger="stdout";
 
 	bool bLocalMode=false,bError=false; // An error parsing the command line
+	bool bUseSSL = false;
 	char c;
 	for(int optnum=1;optnum<argc;++optnum)
 	{
@@ -136,11 +137,14 @@ int main(int argc, char* argv[])
 		case 'd':
 			PK_Device = atoi(argv[++optnum]);
 			break;
-        case 'L':
-            bLocalMode = true;
-            break;
+		case 'L':
+			bLocalMode = true;
+			break;
 		case 'l':
 			sLogger = argv[++optnum];
+			break;
+		case 's':
+			bUseSSL = true;
 			break;
 		default:
 			bError=true;
@@ -154,7 +158,8 @@ int main(int argc, char* argv[])
 			<< "Usage: DCE_Template [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
 			<< "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
 			<< "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
-			<< "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl;
+			<< "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
+			<< "-s -- Connect using SSL." << endl;
 		exit(1);
 	}
 
@@ -194,6 +199,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		DCE_Template *pDCE_Template = new DCE_Template(PK_Device, sRouter_IP,true,bLocalMode);
+		pDCE_Template->m_bIsSSL_set(bUseSSL);
 		if ( pDCE_Template->GetConfig() && pDCE_Template->Connect(pDCE_Template->PK_DeviceTemplate_get()) ) 
 		{
 			g_pCommand_Impl=pDCE_Template;

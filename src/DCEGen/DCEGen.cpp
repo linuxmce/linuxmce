@@ -367,8 +367,8 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 	fstr_DeviceCommand << "\t/**" << endl;
 	fstr_DeviceCommand << "\t* @brief Constructors" << endl;
 	fstr_DeviceCommand << "\t*/" << endl;
-	fstr_DeviceCommand << "\t" << Name << "_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :" << endl;
-	fstr_DeviceCommand << "\t\t" << "Event_Impl(DeviceID, " << GetDeviceTemplateConstStr(p_Row_DeviceTemplate) << ", ServerAddress, bConnectEventHandler, " << (bIsPlugin ? "SOCKET_TIMEOUT_PLUGIN" : "SOCKET_TIMEOUT") << ") {};" << endl;
+	fstr_DeviceCommand << "\t" << Name << "_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true, bool bUseSSL=false) :" << endl;
+	fstr_DeviceCommand << "\t\t" << "Event_Impl(DeviceID, " << GetDeviceTemplateConstStr(p_Row_DeviceTemplate) << ", ServerAddress, bConnectEventHandler, " << (bIsPlugin ? "SOCKET_TIMEOUT_PLUGIN" : "SOCKET_TIMEOUT") << ", -1, bUseSSL) {};" << endl;
 	fstr_DeviceCommand << "\t" << Name << "_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};" << endl;
 	fstr_DeviceCommand << endl;
 
@@ -542,7 +542,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 	fstr_DeviceCommand << "\tvirtual bool GetConfig()" << endl;
 	fstr_DeviceCommand << "\t{" << endl;
 	fstr_DeviceCommand << "\t\tm_pData=NULL;" << endl;
-	fstr_DeviceCommand << "\t\tm_pEvent = new "  << Name  << "_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);" << endl;
+	fstr_DeviceCommand << "\t\tm_pEvent = new "  << Name  << "_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode, m_bIsSSL);" << endl;
 	fstr_DeviceCommand << "\t\tif( m_pEvent->m_dwPK_Device )" << endl;
 	fstr_DeviceCommand << "\t\t\tm_dwPK_Device = m_pEvent->m_dwPK_Device;" << endl;
 	fstr_DeviceCommand << "\t\tif( m_sIPAddress!=m_pEvent->m_pClientSocket->m_sIPAddress )	" << endl;
@@ -556,7 +556,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 	fstr_DeviceCommand << "\t\t\t\twhile( m_pEvent->m_pClientSocket->m_eLastError==cs_err_BadDevice && (m_dwPK_Device = DeviceIdInvalid())!=0 )" << endl;
 	fstr_DeviceCommand << "\t\t\t\t{" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\tdelete m_pEvent;" << endl;
-	fstr_DeviceCommand << "\t\t\t\t\tm_pEvent = new "  << Name  << "_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);" << endl;
+	fstr_DeviceCommand << "\t\t\t\t\tm_pEvent = new "  << Name  << "_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode, m_bIsSSL);" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\tif( m_pEvent->m_dwPK_Device )" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\t\tm_dwPK_Device = m_pEvent->m_dwPK_Device;" << endl;
 	fstr_DeviceCommand << "\t\t\t\t}" << endl;
@@ -566,7 +566,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 	fstr_DeviceCommand << "\t\t\t\tif( RouterNeedsReload() )" << endl;
 	fstr_DeviceCommand << "\t\t\t\t{" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\tstring sResponse;" << endl;
-	fstr_DeviceCommand << "\t\t\t\t\tEvent_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);" << endl;
+	fstr_DeviceCommand << "\t\t\t\t\tEvent_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName, true, SOCKET_TIMEOUT, -1, m_bIsSSL);" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\tevent_Impl.m_pClientSocket->SendString( \"RELOAD\" );" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\tif( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!=\"OK\" )" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\t{" << endl;
@@ -602,7 +602,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 	fstr_DeviceCommand << "\t\t{" << endl;
 	fstr_DeviceCommand << "\t\t\tm_pData->m_dwPK_Device=m_dwPK_Device;  // Assign this here since it didn't get it's own data" << endl;
 	fstr_DeviceCommand << "\t\t\tstring sResponse;" << endl;
-	fstr_DeviceCommand << "\t\t\tEvent_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);" << endl;
+	fstr_DeviceCommand << "\t\t\tEvent_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName, true, -1, -1, m_bIsSSL);" << endl;
 	fstr_DeviceCommand << "\t\t\tevent_Impl.m_pClientSocket->SendString( \"PARENT \" + StringUtils::itos(m_dwPK_Device) );" << endl;
 	fstr_DeviceCommand << "\t\t\tif( event_Impl.m_pClientSocket->ReceiveString( sResponse ) && sResponse.size()>=8 )" << endl;
 	fstr_DeviceCommand << "\t\t\t\tm_pData->m_dwPK_Device_ControlledVia = atoi( sResponse.substr(7).c_str() );" << endl;
@@ -615,7 +615,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 	fstr_DeviceCommand << "\t\t\treturn false;" << endl;
 	fstr_DeviceCommand << "\t\tdelete[] pConfig;" << endl;
 	fstr_DeviceCommand << "\t\tm_pData->m_pEvent_Impl = m_pEvent;" << endl;
-	fstr_DeviceCommand << "\t\tm_pcRequestSocket = new Event_Impl(m_dwPK_Device, " << GetDeviceTemplateConstStr(p_Row_DeviceTemplate) << ",m_sHostName);" << endl;
+	fstr_DeviceCommand << "\t\tm_pcRequestSocket = new Event_Impl(m_dwPK_Device, " << GetDeviceTemplateConstStr(p_Row_DeviceTemplate) << ",m_sHostName, true, -1, -1, m_bIsSSL);" << endl;
 	fstr_DeviceCommand << "\t\tif( m_iInstanceID )" << endl;
 	fstr_DeviceCommand << "\t\t{" << endl;
 	fstr_DeviceCommand << "\t\t\tm_pEvent->m_pClientSocket->SendString(\"INSTANCE \" + StringUtils::itos(m_iInstanceID));" << endl;
