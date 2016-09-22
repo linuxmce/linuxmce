@@ -541,13 +541,16 @@ bool Socket::SendData( int iSize, const char *pcData )
 			else 
 				iSendBytes = send( m_Socket, pcData+( iSize-iBytesLeft ), iSendBytes, 0 );
 
-			if ( iSendBytes > 0 && !bWantRead && !bWantWrite)
-				iBytesLeft -= iSendBytes;
-			else
+			if ( !bWantRead && !bWantWrite )
 			{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Socket::SendData sendbytes==0");
-				Close();
-				return false;
+				if ( iSendBytes > 0 )
+					iBytesLeft -= iSendBytes;
+				else
+				{
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Socket::SendData sendbytes==0");
+					Close();
+					return false;
+				}
 			}
 		}
 		else
