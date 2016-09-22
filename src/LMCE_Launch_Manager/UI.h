@@ -6,6 +6,7 @@
 #include "Gen_Devices/LMCE_Launch_ManagerBase.h"
 #include <vector>
 
+namespace DCE {
 class UI
 {
 private:
@@ -46,6 +47,7 @@ public:
 };
 
 class CB
+
 {
 private:
 	string m_sLabel;
@@ -64,5 +66,5 @@ public:
 
 };
 
-
+};
 #endif
