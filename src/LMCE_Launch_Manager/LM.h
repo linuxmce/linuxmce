@@ -42,7 +42,7 @@ private:
        	XRRScreenSize *m_pSizes;
 
 	DCE::LMCE_Launch_Manager * m_pLMCE_Launch_Manager;
-	UI m_uiMainUI;
+	DCE::UI m_uiMainUI;
 	vector<string> m_vCoreDevices;
 	vector<string> m_vMediaDevices;
 	bool m_bRemoteAssistanceRunning;

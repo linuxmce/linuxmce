@@ -13,26 +13,26 @@
 #include <fstream>
 
 
-using namespace std; //DCE
+using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 
 //UI class method impmlementations
-UI::UI()
+DCE::UI::UI()
 {
 	m_sTitle = "Generic CLI app";
 	m_bCenterTitle = false;
 }
-UI::~UI()
+DCE::UI::~UI()
 {
 
 }
-void UI::initialize(string sTitle, bool bCenterTitle)
+void DCE::UI::initialize(string sTitle, bool bCenterTitle)
 {
 	m_sTitle = sTitle;
 	m_bCenterTitle = bCenterTitle;
 }
-void UI::writeLog(string s)
+void DCE::UI::writeLog(string s)
 {
 	m_vLog.push_back(s);
 	if (m_vLog.size() > 10) {
@@ -40,18 +40,18 @@ void UI::writeLog(string s)
 	}
 	draw();
 }
-void UI::appendLog(string s)
+void DCE::UI::appendLog(string s)
 {
 	m_vLog.pop_back();
 	m_vLog.push_back(s);
 	draw();
 
 }
-void UI::flushLog()
+void DCE::UI::flushLog()
 {
 	DCE::LoggerWrapper::GetInstance()->Flush();
 }
-void UI::draw()
+void DCE::UI::draw()
 {
 	system("clear");  //yes, I know this is not the best way to do it...
 	cout << " LinuxMCE Launch Manager, V1.0                                                  " << endl;
@@ -74,7 +74,7 @@ void UI::draw()
 		cout << m_vLog[i] << endl;
 	}  
 }
-string UI::checkBox(string s)
+string DCE::UI::checkBox(string s)
 {
 	string sRet;
 
@@ -85,7 +85,7 @@ string UI::checkBox(string s)
 	}
 	return sRet;
 }
-string UI::checkBox(bool b)
+string DCE::UI::checkBox(bool b)
 {
 	string sRet;
 	
@@ -96,36 +96,36 @@ string UI::checkBox(bool b)
 	}
 	return sRet;
 }
-void UI::setCoreIP(string thisIP)
+void DCE::UI::setCoreIP(string thisIP)
 {
 	m_sCoreIP = thisIP;
 }
-void UI::setVideoDriver(string thisVideoDriver)
+void DCE::UI::setVideoDriver(string thisVideoDriver)
 {
 	m_sVideoDriver = thisVideoDriver;
 }
-void UI::setVideoResolution(string thisVideoResolution)
+void DCE::UI::setVideoResolution(string thisVideoResolution)
 {
 	m_sVideoResolution = thisVideoResolution;
 }
-void UI::setMySQLInfo(string mysqlHost, string mysqlUser, string mysqlPass)
+void DCE::UI::setMySQLInfo(string mysqlHost, string mysqlUser, string mysqlPass)
 {
 	m_sMySQLHost = mysqlHost;
 	m_sMySQLUser = mysqlUser;
 	m_sMySQLPass = mysqlPass;
 }
-void UI::setAudioInfo(string thisSetting, bool thisAC3Pass)
+void DCE::UI::setAudioInfo(string thisSetting, bool thisAC3Pass)
 {
 	m_bAC3Pass = thisAC3Pass;
 	m_sSoundSetting = thisSetting;
 }
-void UI::setStatus(string sAutostartCore, string sAutostartMedia, bool bRemoteAssistance)
+void DCE::UI::setStatus(string sAutostartCore, string sAutostartMedia, bool bRemoteAssistance)
 {
 	m_sAutostartCore = sAutostartCore;
 	m_sAutostartMedia = sAutostartMedia;
 	m_bRemoteAssistanceRunning = bRemoteAssistance;
 }
-string UI::padString(std::string s, std::string sPad, int len)
+string DCE::UI::padString(std::string s, std::string sPad, int len)
 {
 	string sRet;
 
@@ -140,7 +140,7 @@ string UI::padString(std::string s, std::string sPad, int len)
 	}
 	return s+sRet;
 }
-string UI::wrapTo(string s, int width)
+string DCE::UI::wrapTo(string s, int width)
 {
 	int len = s.length();
 	while (len>width) {
