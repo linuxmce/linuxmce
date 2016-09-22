@@ -170,7 +170,7 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 			int iPort;
 			StringUtils::AddressAndPortFromString( m_sIPAddress, DCE_DEFAULT_PORT, sAddress, iPort );
 			if (m_bIsSSL)
-				iPort = 12232;
+				iPort++;
 			addrT.sin_port = htons( iPort );
 
 			unsigned long dwAddr = inet_addr( sAddress.c_str() );
