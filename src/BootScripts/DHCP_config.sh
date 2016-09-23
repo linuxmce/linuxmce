@@ -35,6 +35,7 @@ if ! BlacklistConfFiles '/etc/dhcp/dhcpd.conf' ;then
 	fi
 	/usr/pluto/bin/PlutoDHCP >/etc/dhcp/dhcpd.conf
 	touch /etc/dhcp/dhcpd-extra.conf
-	service isc-dhcp-server restart
+	service isc-dhcp-server stop
+	service isc-dhcp-server start
 fi
 Unlock "PlutoDHCP" "PlutoDHCP_config"
