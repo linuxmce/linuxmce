@@ -48,8 +48,13 @@ function setup_tftp_boot_rpi
 		# uncomment if you get no picture on HDMI for a default "safe" mode
 		#hdmi_safe=1
 		disable_overscan=1
-		gpu_mem=128
+		config_hdmi_boost=4
+		hdmi_force_hotplug=1
 		lcd_rotate=2
+		gpu_mem=128
+
+		# Enable audio (loads snd_bcm2835)
+		dtparam=audio=on
 		EEOF
 }
 
