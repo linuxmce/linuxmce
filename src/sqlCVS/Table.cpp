@@ -2706,12 +2706,14 @@ void Table::ValidateTable()
 					m_pDatabase->threaded_mysql_query( sSQL2.str() );
 					break;
 				}
-				if( it->find("`psc_mod`")!=string::npos && (
-					it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos ))
+				if( it->find("`psc_mod`")!=string::npos )
 				{
-					std::ostringstream sSQL;
-					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `psc_mod` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP";
-					m_pDatabase->threaded_mysql_query( sSQL.str() );
+					if( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos )
+					{
+						std::ostringstream sSQL;
+						sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `psc_mod` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP";
+						m_pDatabase->threaded_mysql_query( sSQL.str() );
+					}
 					std::ostringstream sSQL2;
 					sSQL2 << "UPDATE `" << m_sName << "` set psc_mod=NULL WHERE psc_mod=0 OR psc_mod='1970-01-01 00:00:00'";
 					m_pDatabase->threaded_mysql_query( sSQL2.str() );
