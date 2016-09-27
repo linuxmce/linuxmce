@@ -2663,7 +2663,7 @@ void Table::ValidateTable()
 
 
 	 // In Mysql 5 they require an ON UPDATE CURRENT_TIMESTAMP for the psc_mod and no longer permit '0' date values
-	if( mysql_get_server_version(m_pDatabase->m_pMySQL)>55000 )
+	if( mysql_get_server_version(m_pDatabase->m_pMySQL)>50000 )
 	{
 		std::ostringstream sSQL;
 		sSQL << "show create table `" << m_sName << "`";
@@ -2682,8 +2682,9 @@ void Table::ValidateTable()
 					std::ostringstream sSQL;
 					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `psc_mod` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					sSQL << "UPDATE `" << m_sName << "` set psc_mod=NULL WHERE psc_mod=0 OR psc_mod='1970-01-01 00:00:00'";
-					m_pDatabase->threaded_mysql_query( sSQL.str() );
+					std::ostringstream sSQL2;
+					sSQL2 << "UPDATE `" << m_sName << "` set psc_mod=NULL WHERE psc_mod=0 OR psc_mod='1970-01-01 00:00:00'";
+					m_pDatabase->threaded_mysql_query( sSQL2.str() );
 					break;
 				}
 			}
