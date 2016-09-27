@@ -1378,7 +1378,7 @@ void Database::Reset_all()
 				while ( row = mysql_fetch_row( result_set.r ) )
 				{
 					sql.str("");
-					sql << "UPDATE `" << pTable->Name_get() << "` SET psc_mod=0,psc_id=" << RowCount++ << " WHERE ";
+					sql << "UPDATE `" << pTable->Name_get() << "` SET psc_mod=NULL,psc_id=" << RowCount++ << " WHERE ";
 					int FieldCount=0;
 					bool bFirst=true;
 					for(ListField::iterator it=pTable->m_listField_PrimaryKey.begin();it!=pTable->m_listField_PrimaryKey.end();++it)
