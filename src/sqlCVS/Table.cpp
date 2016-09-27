@@ -165,8 +165,8 @@ void Table::TrackChanges_set( bool bOn )
 			m_pDatabase->threaded_mysql_query( "ALTER TABLE `" + m_sName + "` ADD `psc_frozen` TINYINT( 1 ) default '0';" );
 		if( !m_pField_mod )
 		{
-			m_pDatabase->threaded_mysql_query( "ALTER TABLE `" + m_sName + "` ADD `psc_mod` timestamp( 14 ) default 0;" );
-			m_pDatabase->threaded_mysql_query( "UPDATE `" + m_sName + "` SET `psc_mod`=0;" );
+			m_pDatabase->threaded_mysql_query( "ALTER TABLE `" + m_sName + "` ADD `psc_mod` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;" );
+			m_pDatabase->threaded_mysql_query( "UPDATE `" + m_sName + "` SET `psc_mod`=NULL;" );
 		}
 		if( !m_pField_restrict )
 			m_pDatabase->threaded_mysql_query( "ALTER TABLE `" + m_sName + "` ADD `psc_restrict` INT( 11 );" );
@@ -662,7 +662,7 @@ void Table::GetChanges( )
 		FieldNum++;
 	}
 
-	sql << " FROM `" << m_sName << "` WHERE psc_mod>0 AND " << g_GlobalConfig.GetRestrictionClause(m_sName);
+	sql << " FROM `" << m_sName << "` WHERE psc_mod IS NOT NULL AND " << g_GlobalConfig.GetRestrictionClause(m_sName);
 
 	PlutoSqlResult result_set;
 	MYSQL_ROW row=NULL;
@@ -808,7 +808,7 @@ bool Table::ConfirmDependency( ChangedRow *pChangedRow, Field *pField_Referring,
 		return false;
 	}
 	row = mysql_fetch_row( res2.r );
-	if( !row[0] || atoi( row[0] )==0 )
+	if( !row[0] || row[0]==NULL_TOKEN )
 		return true;
 
 	cerr << "Table: " << pField_ReferredTo->m_pTable->Name_get( ) << " needs to be checked in." << endl;
@@ -1315,7 +1315,7 @@ cout << "pChangedRowToMove now original auto incr id: " << pChangedRowToMove->m_
 			}
 
 			sSQL.str( "" );
-			sSQL << "UPDATE `" << m_sName << "` SET psc_mod=0 WHERE psc_id=" << ( toc==toc_New ? r_CommitRow.m_psc_id_new : r_CommitRow.m_psc_id );
+			sSQL << "UPDATE `" << m_sName << "` SET psc_mod=NULL WHERE psc_id=" << ( toc==toc_New ? r_CommitRow.m_psc_id_new : r_CommitRow.m_psc_id );
 			if( m_pDatabase->threaded_mysql_query( sSQL.str( ) )<0 )
 			{
 				cerr << "SQL failed: " << sSQL.str( );
@@ -1323,7 +1323,7 @@ cout << "pChangedRowToMove now original auto incr id: " << pChangedRowToMove->m_
 			}
 
 			/**
-				* First update this table's auto increment field before setting the psc_mod to 0. Then, handle the
+				* First update this table's auto increment field before setting the psc_mod to NULL. Then, handle the
 				* propagate. That way if this table contains a foreign key to itself, or is somehow modified by
 				* the propagate, it's modification flag will be set again
 				*/
@@ -1523,7 +1523,7 @@ int k=2;
 	{
 		// Reset the mod flag
 		sSQL.str( "" );
-		sSQL << "UPDATE `" << m_sName << "` SET psc_mod=0 WHERE psc_id=" << pA_UpdateRow->m_psc_id;
+		sSQL << "UPDATE `" << m_sName << "` SET psc_mod=NULL WHERE psc_id=" << pA_UpdateRow->m_psc_id;
 		if( m_pDatabase->threaded_mysql_query( sSQL.str( ) )<0 )
 		{
 			cerr << "SQL failed: " << sSQL.str( );
@@ -2096,10 +2096,7 @@ bool Table::Dump( SerializeableStrings &str )
 					<< "however it should never have happened." << endl;
 				throw "Missing psc_id";
 			}
-			if( s==num_psc_mod )
-				str.m_vectString.push_back( "0" );
-			else
-				str.m_vectString.push_back( row[s] ? row[s] : NULL_TOKEN );
+			str.m_vectString.push_back( row[s] ? row[s] : NULL_TOKEN );
 		}
 	}
 
@@ -2175,9 +2172,7 @@ bool Table::RevertChange(int psc_id,enum TypeOfChange toc)
 			if( it!=r_GetRow.m_mapCurrentValues.begin() )
 				sSQL << ",";
 
-			if( (*it).first=="psc_mod" )
-				sSQL << "0";
-			else if( (*it).second==NULL_TOKEN )
+			if( (*it).second==NULL_TOKEN )
 				sSQL << "NULL";
 			else
 				sSQL << "'" << StringUtils::SQLEscape((*it).second) << "'";
@@ -2194,9 +2189,7 @@ bool Table::RevertChange(int psc_id,enum TypeOfChange toc)
 
 			sSQL << "`" << (*it).first << "`=";
 
-			if( (*it).first=="psc_mod" )
-				sSQL << "0";
-			else if( (*it).second==NULL_TOKEN )
+			if( (*it).second==NULL_TOKEN )
 				sSQL << "NULL";
 			else
 				sSQL << "'" << StringUtils::SQLEscape((*it).second) << "'";
@@ -2644,7 +2637,7 @@ bool Table::ModifiedRow(int psc_id)
 	PlutoSqlResult result_set;
 	MYSQL_ROW row=NULL;
 	if( ( result_set.r=m_pDatabase->mysql_query_result( sSQL2.str( ) ) ) && (row = mysql_fetch_row(result_set.r) ) && row[0] )
-		return atoi(row[0])!=0;
+		return row[0]!=NULL_TOKEN;
 	else
 		return false;
 }
@@ -2667,7 +2660,10 @@ void Table::ValidateTable()
 {
 //<-mkr_b_ubuntu_b->
 	// Do any fixups if something has changed in the schema
-	if( mysql_get_server_version(m_pDatabase->m_pMySQL)>50000 ) // In Mysql 5 they require an ON UPDATE CURRENT_TIMESTAMP for the psc_mod
+
+
+	 // In Mysql 5 they require an ON UPDATE CURRENT_TIMESTAMP for the psc_mod and no longer permit '0' date values
+	if( mysql_get_server_version(m_pDatabase->m_pMySQL)>55000 )
 	{
 		std::ostringstream sSQL;
 		sSQL << "show create table `" << m_sName << "`";
@@ -2680,10 +2676,13 @@ void Table::ValidateTable()
 			StringUtils::Tokenize(s,"\n",vectString);
 			for(vector<string>::iterator it=vectString.begin();it!=vectString.end();++it)
 			{
-				if( it->find("`psc_mod`")!=string::npos && it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos )
+				if( it->find("`psc_mod`")!=string::npos && (
+					it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos ))
 				{
 					std::ostringstream sSQL;
-					sSQL << "ALTER TABLE `" << m_sName << "` change `psc_mod` `psc_mod` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP";
+					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `psc_mod` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP";
+					m_pDatabase->threaded_mysql_query( sSQL.str() );
+					sSQL << "UPDATE `" << m_sName << "` set psc_mod=NULL WHERE psc_mod=0 OR psc_mod='1970-01-01 00:00:00'";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
 					break;
 				}

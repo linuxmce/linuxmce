@@ -931,13 +931,7 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 		string sDefault = str.m_vectString[pos++];
 		string sExtra = str.m_vectString[pos++];
 
-		// don't add a psc_mod field that has the default set to NULL
-		// a psc_mod defaulting to NULL didn't exist in the original table to begin with
-		// seems to be a bug in the dumping algorithm, but it's earier to hack it in than to fix it :D
-		if (sField == "psc_mod" && sDefault == NULL_TOKEN)
-			sDefault = "";
-
-		// Don't allow defaulting to NULL and importing with NULL as not allowed.  This worked in 0710, but not in 0804
+		// Don't allow defaulting to NULL when importing with NULL as not allowed.  This worked in 0710, but not in 0804
 		if( sNULL!="YES" && sDefault == NULL_TOKEN )
 			sDefault = "";
 
