@@ -808,7 +808,7 @@ bool Table::ConfirmDependency( ChangedRow *pChangedRow, Field *pField_Referring,
 		return false;
 	}
 	row = mysql_fetch_row( res2.r );
-	if( !row[0] || row[0]==NULL_TOKEN )
+	if( !row[0] )
 		return true;
 
 	cerr << "Table: " << pField_ReferredTo->m_pTable->Name_get( ) << " needs to be checked in." << endl;
@@ -2637,7 +2637,7 @@ bool Table::ModifiedRow(int psc_id)
 	PlutoSqlResult result_set;
 	MYSQL_ROW row=NULL;
 	if( ( result_set.r=m_pDatabase->mysql_query_result( sSQL2.str( ) ) ) && (row = mysql_fetch_row(result_set.r) ) && row[0] )
-		return row[0]!=NULL_TOKEN;
+		return atoi(row[0])!=0;
 	else
 		return false;
 }
