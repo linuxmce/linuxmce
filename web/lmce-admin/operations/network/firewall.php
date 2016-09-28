@@ -853,7 +853,7 @@ function firewall($output,$dbADO) {
 					<input type="hidden" name="save_RuleType" value="'.$save_RuleType[1].'" />
 					<td align="center"><input type="text" name="save_SourceIP" value="'.$row['SourceIP'].'" size="8"></td>
 					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /> to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" /></B></td>
-					<td align="center"><select name="save_DestinationIP" onChange="save_enableDestinationIP()">
+					<td align="center"><select name="save_DestinationIP" onChange="save_enableDestinationIP()">';
 								$selected="0";
 								foreach ($iplist as $name => $value){
 									 if ($row['DestinationIP'] == $value) {
