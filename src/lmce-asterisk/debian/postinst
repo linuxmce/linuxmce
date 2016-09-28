@@ -19,6 +19,7 @@ if [[ "$1" == configure ]]; then
 		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE phonelines ADD  dtmfmode VARCHAR(10) NOT NULL DEFAULT 'auto' AFTER protocol" 2>>/dev/null
 		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE extensions MODIFY appdata VARCHAR(150);" 2>>/dev/null
 		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE sip_devices CHANGE qualify qualify CHAR(5) NULL DEFAULT 'no'" 2>>/dev/null
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE cdr MODIFY calldate datetime NULL DEFAULT NULL;" 2>>/dev/null
 	fi
 	
 	# recreate asterisk database (except tables which contains user data)
