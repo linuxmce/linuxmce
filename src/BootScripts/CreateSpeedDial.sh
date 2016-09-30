@@ -99,7 +99,7 @@ RunSQL "$Q"
 
 Q="
 	UPDATE Orbiter
-	SET Regen=1, Modification_LastGen=0
+	SET Regen=1, Modification_LastGen='1970-01-01 00:00:00'
 	WHERE PK_Orbiter IN ($OrbiterIDs)
 "
 RunSQL "$Q"
