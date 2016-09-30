@@ -135,6 +135,7 @@ void psc_restrict_set(long int val);
 
 		
 		bool EK_DeviceGroup_isNull();
+bool ChangeTime_isNull();
 bool EK_Users_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -145,6 +146,7 @@ bool psc_restrict_isNull();
 
 			
 		void EK_DeviceGroup_setNull(bool val);
+void ChangeTime_setNull(bool val);
 void EK_Users_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
