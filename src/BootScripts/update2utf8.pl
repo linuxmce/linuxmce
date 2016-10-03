@@ -6,7 +6,8 @@ require "/usr/pluto/bin/config_ops.pl";
 # We try the regular LinuxMCE/Pluto credentials. If they fail, we try a local connection
 $db = DBI->connect(&read_pluto_cred()) or $db = DBI->connect("DBI:mysql:") or die "Couldn't connect to database: $DBI::errstr\n";
 
-@databases = ("pluto_main","pluto_media","pluto_telecom","asterisk","asteriskcdrdb","mythconverg","pluto_mediatomb","pluto_myth","pluto_security","pluto_telecom","pluto_vdr");
+#@databases = ("pluto_main","pluto_media","pluto_telecom","asterisk","asteriskcdrdb","mythconverg","pluto_mediatomb","pluto_myth","pluto_security","pluto_telecom","pluto_vdr");
+@databases = ("asterisk","asteriskcdrdb","mythconverg","pluto_mediatomb","pluto_vdr");
 
 # fix calldate in asterisk.cdr, sqlCVS takes care of lmce databases
 $sql = "UPDATE asterisk.cdr set calldate='1970-01-01 00:00:00' WHERE calldate=0;";
