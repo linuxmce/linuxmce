@@ -141,8 +141,7 @@ m_FK_DesignObj = 0;
 is_null[1] = false;
 m_Version = 0;
 is_null[2] = false;
-m_Modification_LastGen = "0000-00-00 00:00:00";
-is_null[3] = false;
+is_null[3] = true;
 m_ContainsArrays = 0;
 is_null[4] = false;
 m_Schema = 1;
@@ -155,8 +154,7 @@ is_null[8] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[9] = false;
-m_psc_mod = "0000-00-00 00:00:00";
-is_null[10] = false;
+is_null[10] = true;
 is_null[11] = true;
 m_psc_restrict = 0;
 
@@ -242,6 +240,9 @@ void Row_CachedScreens::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSO
 m_psc_restrict = val; is_modified=true; is_null[11]=false;}
 
 		
+bool Row_CachedScreens::Modification_LastGen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_CachedScreens::ContainsArrays_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -260,11 +261,18 @@ return is_null[8];}
 bool Row_CachedScreens::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[9];}
+bool Row_CachedScreens::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[10];}
 bool Row_CachedScreens::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[11];}
 
 			
+void Row_CachedScreens::Modification_LastGen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
+is_modified=true;
+}
 void Row_CachedScreens::ContainsArrays_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
 is_modified=true;
@@ -287,6 +295,10 @@ is_modified=true;
 }
 void Row_CachedScreens::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[9]=val;
+is_modified=true;
+}
+void Row_CachedScreens::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[10]=val;
 is_modified=true;
 }
 void Row_CachedScreens::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

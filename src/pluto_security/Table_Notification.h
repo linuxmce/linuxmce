@@ -134,7 +134,8 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Info_isNull();
+		bool NotificationTime_isNull();
+bool Info_isNull();
 bool Result_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
@@ -144,7 +145,8 @@ bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Info_setNull(bool val);
+		void NotificationTime_setNull(bool val);
+void Info_setNull(bool val);
 void Result_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);

@@ -156,6 +156,7 @@ void psc_restrict_set(long int val);
 
 		
 		bool FK_AlertType_isNull();
+bool DetectionTime_isNull();
 bool ExpirationTime_isNull();
 bool ResetBeforeExpiration_isNull();
 bool Benign_isNull();
@@ -173,6 +174,7 @@ bool psc_restrict_isNull();
 
 			
 		void FK_AlertType_setNull(bool val);
+void DetectionTime_setNull(bool val);
 void ExpirationTime_setNull(bool val);
 void ResetBeforeExpiration_setNull(bool val);
 void Benign_setNull(bool val);
