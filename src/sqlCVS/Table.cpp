@@ -2683,17 +2683,16 @@ void Table::ValidateTable()
 					StringUtils::Tokenize(sInput," ",vectString2);
 
 					string sFieldName = vectString2[0];
-cout << "**** Fixing datetime field of column " << sFieldName << ", in table `" << m_sName << "`";
+cout << "**** Fixing datetime field of column " << sFieldName << ", in table `" << m_sName << "`" << endl;
 					std::ostringstream sSQL;
 					sSQL << "UPDATE `" << m_sName << "` set " << sFieldName << "='1970-01-01 00:00:00' WHERE " << sFieldName << "=0";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					sSQL.flush();
-					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN " << sFieldName << " datetime NULL default NULL";
-					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					sSQL.flush();
-					sSQL << "UPDATE `" << m_sName << "` set " << sFieldName << "=NULL WHERE " << sFieldName << "='1970-01-01 00:00:00' OR " << sFieldName << "=0";
-					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					sSQL.flush();
+					std::ostringstream sSQL2;
+					sSQL2 << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN " << sFieldName << " datetime NULL default NULL";
+					m_pDatabase->threaded_mysql_query( sSQL2.str() );
+					std::ostringstream sSQL3;
+					sSQL3 << "UPDATE `" << m_sName << "` set " << sFieldName << "=NULL WHERE " << sFieldName << "='1970-01-01 00:00:00' OR " << sFieldName << "=0";
+					m_pDatabase->threaded_mysql_query( sSQL3.str() );
 				}
 /*
 				if( it->find("`Modification_LastGen`")!=string::npos )
@@ -2764,15 +2763,15 @@ cout << "**** Fixing datetime field of column " << sFieldName << ", in table `" 
 */
 				if( it->find("ENGINE=")!=string::npos && it->find("CHARSET=utf8")==string::npos )
 				{
-cout << "**** Fixing charset in table `" << m_sName << "`";
+cout << "**** Fixing charset in table `" << m_sName << "`" << endl;
 					// Increase the IP address field size in psc_ tables
 					std::ostringstream sSQL;
 					sSQL << "ALTER TABLE `" << m_sName << "`  CHARACTER SET utf8";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
 				}
-				if( m_sName.find("psc_")!=string::npos && m_sName.rfind("bathdr")!=string::npos && it->find("IPAddress")!=string::npos )
+				if( m_sName.find("psc_")!=string::npos && m_sName.rfind("bathdr")!=string::npos && it->find("IPAddress")!=string::npos && it->find("varchar(50)")==string::npos)
 				{
-cout << "**** Fixing IPAddress field in table `" << m_sName << "`";
+cout << "**** Fixing IPAddress field in table `" << m_sName << "`" << endl;
 					// Increase the IP address field size in psc_ tables
 					std::ostringstream sSQL;
 					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `IPAddress` varchar(50) DEFAULT NULL";
@@ -2782,16 +2781,16 @@ cout << "**** Fixing IPAddress field in table `" << m_sName << "`";
 				{
 					if( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos )
 					{
-cout << "**** Fixing timestamp field of column `psc_mod`, in table `" << m_sName << "`";
+cout << "**** Fixing timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
 						std::ostringstream sSQL;
 						sSQL << "UPDATE `" << m_sName << "` set psc_mod='1970-01-01 00:00:00' WHERE psc_mod=0";
 						m_pDatabase->threaded_mysql_query( sSQL.str() );
-						sSQL.flush();
-						sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `psc_mod` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP";
-						m_pDatabase->threaded_mysql_query( sSQL.str() );
-						sSQL.flush();
-						sSQL << "UPDATE `" << m_sName << "` set psc_mod=NULL WHERE psc_mod=0 OR psc_mod='1970-01-01 00:00:00'";
-						m_pDatabase->threaded_mysql_query( sSQL.str() );
+						std::ostringstream sSQL2;
+						sSQL2 << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `psc_mod` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP";
+						m_pDatabase->threaded_mysql_query( sSQL2.str() );
+						std::ostringstream sSQL3;
+						sSQL3 << "UPDATE `" << m_sName << "` set psc_mod=NULL WHERE psc_mod=0 OR psc_mod='1970-01-01 00:00:00'";
+						m_pDatabase->threaded_mysql_query( sSQL3.str() );
 						break;
 					}
 				}
