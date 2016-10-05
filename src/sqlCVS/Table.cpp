@@ -2662,7 +2662,8 @@ void Table::ValidateTable()
 	// Do any fixups if something has changed in the schema
 
 
-	 // In Mysql 5 they require an ON UPDATE CURRENT_TIMESTAMP for the psc_mod and no longer permit '0' date values
+	// In Mysql 5 they require an ON UPDATE CURRENT_TIMESTAMP for the psc_mod and no longer permit '0' date values
+	// In Mysql >5.5 timestamps can no longer be '0' or '0000-00-00 00:00:00'
 	if( mysql_get_server_version(m_pDatabase->m_pMySQL)>50000 )
 	{
 		std::ostringstream sSQL;
@@ -2676,7 +2677,8 @@ void Table::ValidateTable()
 			StringUtils::Tokenize(s,"\n",vectString);
 
 			// #### make data valid for modify column and alter table
-			// #### all data in the tables must be valid for any column/table alterations to succeed.
+			// #### all data in the tables must be valid for both the
+			// #### old and new data type for any column/table alterations to succeed.
 			for(vector<string>::iterator it=vectString.begin();it!=vectString.end();++it)
 			{
 				vector<string> vectString2;
@@ -2690,7 +2692,7 @@ void Table::ValidateTable()
 					std::ostringstream sSQL;
 					sSQL << "UPDATE `" << m_sName << "` set " << sFieldName << "='1970-01-01 00:00:00' WHERE " << sFieldName << "<'1970-01-01 00:00:00'";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					break;
+					continue;
 				}
 
 				if( it->find("`psc_mod`")!=string::npos )
@@ -2711,14 +2713,22 @@ void Table::ValidateTable()
 						}
 					}
 					else
-					if( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos )
+					//if( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos )
 					{
-						cout << "**** Fixing timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
+						//cout << "**** CHECKING timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
 						std::ostringstream sSQL;
-						sSQL << "UPDATE `" << m_sName << "` set psc_mod='1970-01-01 00:00:00' WHERE psc_mod<'1970-01-01 00:00:00'";
-						m_pDatabase->threaded_mysql_query( sSQL.str() );
+						sSQL << "select psc_mod from `" << m_sName << "` where psc_mod<'1970-01-01 00:00:00'";
+						PlutoSqlResult result_set;
+						MYSQL_ROW row=NULL;
+						if( ( result_set.r=m_pDatabase->mysql_query_result( sSQL.str( ) ) ) && (row = mysql_fetch_row(result_set.r) ) && row[0] )
+						{
+							cout << "**** Fixing timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
+							std::ostringstream sSQL;
+							sSQL << "UPDATE `" << m_sName << "` set psc_mod='1970-01-01 00:00:00' WHERE psc_mod<'1970-01-01 00:00:00'";
+							m_pDatabase->threaded_mysql_query( sSQL.str() );
+						}
 					}
-					break;
+					continue;
 				}
 			}
 
@@ -2736,9 +2746,9 @@ void Table::ValidateTable()
 					std::ostringstream sSQL;
 					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN " << sFieldName << " datetime NULL default NULL";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					break;
+					continue;
 				}
-								
+
 				if( it->find("`psc_mod`")!=string::npos )
 				{
 					if( it->find("timestamp")==string::npos )
@@ -2757,9 +2767,9 @@ void Table::ValidateTable()
 						sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `psc_mod` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP";
 						m_pDatabase->threaded_mysql_query( sSQL.str() );
 					}
-					break;
+					continue;
 				}
-				
+
 				if( m_sName.find("psc_")!=string::npos && m_sName.rfind("bathdr")!=string::npos && it->find("IPAddress")!=string::npos && it->find("varchar(50)")==string::npos)
 				{
 					cout << "**** Modifying IPAddress field in table `" << m_sName << "`" << endl;
@@ -2767,33 +2777,17 @@ void Table::ValidateTable()
 					std::ostringstream sSQL;
 					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN `IPAddress` varchar(50) DEFAULT NULL";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					break;
+					continue;
 				}
 
 				if( it->find("ENGINE=")!=string::npos && it->find("CHARSET=utf8")==string::npos )
 				{
 					cout << "**** Modifying charset in table `" << m_sName << "`" << endl;
-					// Increase the IP address field size in psc_ tables
+					// alter the table's character set
 					std::ostringstream sSQL;
 					sSQL << "ALTER TABLE `" << m_sName << "`  CHARACTER SET utf8";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					break;
-				}
-				
-				if( it->find("CHARACTER SET")!=string::npos )
-				{
-					cout << "**** Modifying character set field of column " << sFieldName << ", in table `" << m_sName << "`" << endl;
-
-					size_t stBegin = it->find("CHARACTER SET");
-					size_t stEnd = it->find_first_of(" ", stBegin+14) + 1;
-					it->erase(stBegin, stEnd-stBegin);
-
-					std::ostringstream sSQL;
-					it->resize(it->size()-1);
-					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN " << *it;
-//cout << "****      " << sSQL.str() << endl;
-					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					break;
+					continue;
 				}
 			}
 
@@ -2811,16 +2805,60 @@ void Table::ValidateTable()
 					std::ostringstream sSQL;
 					sSQL << "UPDATE `" << m_sName << "` set " << sFieldName << "=NULL WHERE " << sFieldName << "<='1970-01-01 00:00:00'";
 					m_pDatabase->threaded_mysql_query( sSQL.str() );
-					break;
+					continue;
 				}
-				
-				if( it->find("`psc_mod`")!=string::npos && ( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos ) )
+
+				if( it->find("`psc_mod`")!=string::npos ) //&& ( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos ) )
 				{
-					cout << "**** Updating timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
-					std::ostringstream sSQL3;
-					sSQL3 << "UPDATE `" << m_sName << "` set psc_mod=NULL WHERE psc_mod<='1970-01-01 00:00:00'";
-					m_pDatabase->threaded_mysql_query( sSQL3.str() );
-					break;
+					//cout << "**** CHECKING timestamp data in column `psc_mod`, in table `" << m_sName << "`" << endl;
+					std::ostringstream sSQL;
+					sSQL << "select psc_mod from `" << m_sName << "` where psc_mod<='1970-01-01 00:00:00'";
+					PlutoSqlResult result_set;
+					MYSQL_ROW row=NULL;
+					if( ( result_set.r=m_pDatabase->mysql_query_result( sSQL.str( ) ) ) && (row = mysql_fetch_row(result_set.r) ) && row[0] )
+					{
+						cout << "**** Updating timestamp data in column `psc_mod`, in table `" << m_sName << "`" << endl;
+						std::ostringstream sSQL3;
+						sSQL3 << "UPDATE `" << m_sName << "` set psc_mod=NULL WHERE psc_mod<='1970-01-01 00:00:00'";
+						m_pDatabase->threaded_mysql_query( sSQL3.str() );
+						continue;
+					}
+				}
+			}
+		}
+
+		std::ostringstream sSQL2;
+		sSQL2 << "show create table `" << m_sName << "`";
+		PlutoSqlResult result_set2;
+		MYSQL_ROW row2=NULL;
+		if( ( result_set2.r=m_pDatabase->mysql_query_result( sSQL2.str( ) ) ) && (row2 = mysql_fetch_row(result_set2.r) ) && row2[0] && row2[1] )
+		{
+			vector<string> vectString;
+			string s = row2[1];
+			StringUtils::Tokenize(s,"\n",vectString);
+
+			// #### the need to update character sets for columns only arises after the table's charset has changed.
+			// #### need to re-query the create table string to find these columns.
+			for(vector<string>::iterator it=vectString.begin();it!=vectString.end();++it)
+			{
+				vector<string> vectString2;
+				string sInput = *it;
+				StringUtils::Tokenize(sInput," ",vectString2);
+				string sFieldName = vectString2[0];
+
+				if( it->find("CHARACTER SET")!=string::npos )
+				{
+					cout << "**** Modifying character set field of column " << sFieldName << ", in table `" << m_sName << "`" << endl;
+					size_t stBegin = it->find("CHARACTER SET");
+					size_t stEnd = it->find_first_of(" ", stBegin+14) + 1;
+					it->erase(stBegin, stEnd-stBegin);
+
+					std::ostringstream sSQL;
+					it->resize(it->size()-1);
+					sSQL << "ALTER TABLE `" << m_sName << "` MODIFY COLUMN " << *it;
+					//cout << "****      " << sSQL.str() << endl;
+					m_pDatabase->threaded_mysql_query( sSQL.str() );
+					continue;
 				}
 			}
 		}
