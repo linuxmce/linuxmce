@@ -2698,9 +2698,9 @@ void Table::ValidateTable()
 					if( it->find("timestamp")==string::npos )
 					{
 						// the myth_sqlcvs table has incorrect data types for the psc_mod column, need to set as timestamp.
-						cout << "**** Fixing timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
 						if( it->find("NOT NULL")==string::npos )
 						{
+							cout << "**** Fixing timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
 							std::ostringstream sSQL;
 							sSQL << "UPDATE `" << m_sName << "` set psc_mod=NULL";
 							m_pDatabase->threaded_mysql_query( sSQL.str() );
@@ -2711,7 +2711,7 @@ void Table::ValidateTable()
 						}
 					}
 					else
-					//if( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos )
+					if( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos )
 					{
 						cout << "**** Fixing timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
 						std::ostringstream sSQL;
@@ -2782,7 +2782,7 @@ void Table::ValidateTable()
 				
 				if( it->find("CHARACTER SET")!=string::npos )
 				{
-					cout << "**** Fixing character set field of column " << sFieldName << ", in table `" << m_sName << "`" << endl;
+					cout << "**** Modifying character set field of column " << sFieldName << ", in table `" << m_sName << "`" << endl;
 
 					size_t stBegin = it->find("CHARACTER SET");
 					size_t stEnd = it->find_first_of(" ", stBegin+14) + 1;
@@ -2814,7 +2814,7 @@ void Table::ValidateTable()
 					break;
 				}
 				
-				if( it->find("`psc_mod`")!=string::npos )
+				if( it->find("`psc_mod`")!=string::npos && ( it->find("ON UPDATE CURRENT_TIMESTAMP")==string::npos || it->find("timestamp NULL")==string::npos ) )
 				{
 					cout << "**** Updating timestamp field of column `psc_mod`, in table `" << m_sName << "`" << endl;
 					std::ostringstream sSQL3;
