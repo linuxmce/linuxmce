@@ -663,7 +663,7 @@ void Table::GetChanges( )
 	}
 
 	sql << " FROM `" << m_sName << "` WHERE psc_mod IS NOT NULL AND " << g_GlobalConfig.GetRestrictionClause(m_sName);
-
+//cout << "$$$$ --- " << sql.str() << endl;
 	PlutoSqlResult result_set;
 	MYSQL_ROW row=NULL;
 	if( ( result_set.r=m_pDatabase->mysql_query_result( sql.str( ) ) ) )
@@ -1229,6 +1229,8 @@ int k=2;
 					from the server.  But until then, the server may be giving out id's that we're already using for another row.  So we
 					have to do a quick check, and if that's the case, move that other row to a different id.
 				*/
+
+//OMFG: FIXME: TODO: fix this ^^^
 
 				sSQL.str( "" );
 				sSQL << "SELECT PK_" << m_sName << " FROM `" << m_sName << "` WHERE PK_" << m_sName << "=" << r_CommitRow.m_iNewAutoIncrID;
@@ -2189,7 +2191,9 @@ bool Table::RevertChange(int psc_id,enum TypeOfChange toc)
 
 			sSQL << "`" << (*it).first << "`=";
 
-			if( (*it).second==NULL_TOKEN )
+			if( (*it).first=="psc_mod")
+				sSQL << "NULL";
+			else if( (*it).second==NULL_TOKEN )
 				sSQL << "NULL";
 			else
 				sSQL << "'" << StringUtils::SQLEscape((*it).second) << "'";
@@ -2197,6 +2201,8 @@ bool Table::RevertChange(int psc_id,enum TypeOfChange toc)
 		sSQL << " WHERE psc_id=" << psc_id;
 	}
 	delete pSocket;
+
+	//cout << "**** | " << sSQL.str() << endl;
 
 	if( m_pDatabase->threaded_mysql_query( sSQL.str( ) )<0 )
 	{
