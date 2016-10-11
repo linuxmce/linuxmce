@@ -951,6 +951,7 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 			sPrimaryKey += ( sPrimaryKey.length( ) ? "," : "" ) + string( "`" ) + sField + "`";
 		sSQL << "`" << sField << "` " << sType
 			<< ( sNULL!="YES" ? " NOT NULL " : "" );
+
 		if( sDefault.length( ) )
 		{
 			string sQuotedDefault;
@@ -964,6 +965,14 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 				sQuotedDefault = "'" + sDefault + "'";
 
 			sSQL << " default " << ( sDefault==NULL_TOKEN ? "NULL" : sQuotedDefault );
+		}
+		// need to ensure that NOT NULL varchar fields have a default or db import will fail.
+		else
+		{
+			if( sNULL!="YES" && sType.find("varchar")!=string::npos )
+			{
+				sSQL << " default ''";
+			}
 		}
 		sSQL << " " << sExtra;
 	}
