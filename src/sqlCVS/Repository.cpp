@@ -1176,6 +1176,8 @@ int k=2;
 				sSQL << ",";
 
 			string Value = str.m_vectString[pos++];
+			if ( *it == "psc_mod" )
+				Value = NULL_TOKEN;
 
 			if( bUpdate )
 				sSQL << " `" << *it << "`=";
