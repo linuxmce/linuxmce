@@ -1753,7 +1753,7 @@ void Database::ListBatchContents()
 						if( atoi(row2[1])==toc_Delete && strcmp(result_set2.r->fields[iField].name,"psc_id")!=0 )
 							continue;
 						if( strcmp(result_set2.r->fields[iField].name,"psc_batch")==0 ||
-								strcmp(result_set2.r->fields[iField].name,"psc_mod")==0 ||
+//								strcmp(result_set2.r->fields[iField].name,"psc_mod")==0 ||
 								strcmp(result_set2.r->fields[iField].name,"psc_toc")==0 )
 							continue;
 
