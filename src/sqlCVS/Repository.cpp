@@ -949,8 +949,11 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 			sSQL << ", ";
 		if( sIndex=="PRI" )
 			sPrimaryKey += ( sPrimaryKey.length( ) ? "," : "" ) + string( "`" ) + sField + "`";
-		sSQL << "`" << sField << "` " << sType
-			<< ( sNULL!="YES" ? " NOT NULL " : "" );
+		sSQL << "`" << sField << "` " << sType;
+		if ( sField=="psc_mod" )
+			sSQL << " NULL ";
+		else
+			sSQL << ( sNULL!="YES" ? " NOT NULL " : "" );
 
 		if( sDefault.length( ) )
 		{
