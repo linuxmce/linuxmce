@@ -2,6 +2,7 @@
  * Create LinuxMCE asterisk database
  * and realtime tables
  *
+ * v0.4 - 27/09/2016 - phenigma - updates for mysql >v5.5 datetime/timestamp changes
  * v0.3 - 16/11/2015 - phenigma - updates for chan_sccp-v4.2
  * v0.2 - 15/04/2012 - foxi352 - removed asteriskcdrdb and created cdr table in asterisk db
  * v0.1 - 22/09/2011 - foxi352 - initial version
@@ -376,7 +377,7 @@ CREATE TABLE IF NOT EXISTS `fax_list` (
 -- Table for calls details records (cdr)
 --
 CREATE TABLE IF NOT EXISTS `cdr` (
-  `calldate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `calldate` datetime DEFAULT NULL,
   `clid` varchar(80) NOT NULL DEFAULT '',
   `src` varchar(80) NOT NULL DEFAULT '',
   `dst` varchar(80) NOT NULL DEFAULT '',
