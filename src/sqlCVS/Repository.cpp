@@ -931,13 +931,7 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 		string sDefault = str.m_vectString[pos++];
 		string sExtra = str.m_vectString[pos++];
 
-		// don't add a psc_mod field that has the default set to NULL
-		// a psc_mod defaulting to NULL didn't exist in the original table to begin with
-		// seems to be a bug in the dumping algorithm, but it's earier to hack it in than to fix it :D
-		if (sField == "psc_mod" && sDefault == NULL_TOKEN)
-			sDefault = "";
-
-		// Don't allow defaulting to NULL and importing with NULL as not allowed.  This worked in 0710, but not in 0804
+		// Don't allow defaulting to NULL when importing with NULL as not allowed.  This worked in 0710, but not in 0804
 		if( sNULL!="YES" && sDefault == NULL_TOKEN )
 			sDefault = "";
 
@@ -955,8 +949,12 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 			sSQL << ", ";
 		if( sIndex=="PRI" )
 			sPrimaryKey += ( sPrimaryKey.length( ) ? "," : "" ) + string( "`" ) + sField + "`";
-		sSQL << "`" << sField << "` " << sType
-			<< ( sNULL!="YES" ? " NOT NULL " : "" );
+		sSQL << "`" << sField << "` " << sType;
+		if ( sField=="psc_mod" )
+			sSQL << " NULL ";
+		else
+			sSQL << ( sNULL!="YES" ? " NOT NULL " : "" );
+
 		if( sDefault.length( ) )
 		{
 			string sQuotedDefault;
@@ -970,6 +968,14 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 				sQuotedDefault = "'" + sDefault + "'";
 
 			sSQL << " default " << ( sDefault==NULL_TOKEN ? "NULL" : sQuotedDefault );
+		}
+		// need to ensure that NOT NULL varchar fields have a default or db import will fail.
+		else
+		{
+			if( sNULL!="YES" && sType.find("varchar")!=string::npos )
+			{
+				sSQL << " default ''";
+			}
 		}
 		sSQL << " " << sExtra;
 	}
@@ -1173,6 +1179,8 @@ int k=2;
 				sSQL << ",";
 
 			string Value = str.m_vectString[pos++];
+			if ( *it == "psc_mod" )
+				Value = NULL_TOKEN;
 
 			if( bUpdate )
 				sSQL << " `" << *it << "`=";

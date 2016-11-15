@@ -1378,7 +1378,7 @@ void Database::Reset_all()
 				while ( row = mysql_fetch_row( result_set.r ) )
 				{
 					sql.str("");
-					sql << "UPDATE `" << pTable->Name_get() << "` SET psc_mod=0,psc_id=" << RowCount++ << " WHERE ";
+					sql << "UPDATE `" << pTable->Name_get() << "` SET psc_mod=NULL,psc_id=" << RowCount++ << " WHERE ";
 					int FieldCount=0;
 					bool bFirst=true;
 					for(ListField::iterator it=pTable->m_listField_PrimaryKey.begin();it!=pTable->m_listField_PrimaryKey.end();++it)
@@ -1753,7 +1753,7 @@ void Database::ListBatchContents()
 						if( atoi(row2[1])==toc_Delete && strcmp(result_set2.r->fields[iField].name,"psc_id")!=0 )
 							continue;
 						if( strcmp(result_set2.r->fields[iField].name,"psc_batch")==0 ||
-								strcmp(result_set2.r->fields[iField].name,"psc_mod")==0 ||
+//								strcmp(result_set2.r->fields[iField].name,"psc_mod")==0 ||
 								strcmp(result_set2.r->fields[iField].name,"psc_toc")==0 )
 							continue;
 
