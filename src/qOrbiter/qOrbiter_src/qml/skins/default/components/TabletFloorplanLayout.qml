@@ -5,13 +5,14 @@ Panel{
     id:fp_panel
     headerTitle:qsTr("Floorplan")
 
-    buttonContent:[
+    buttonControls:[
         StyledButton{
             buttonText: qsTr("Show List")
             height: Style.appNavigation_panelHeight
             onActivated:{
                 outerContainer.state="list"
             }
+
         },
         GenericListModel{
             id:pageView
