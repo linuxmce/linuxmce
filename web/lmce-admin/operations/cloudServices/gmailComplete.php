@@ -23,50 +23,22 @@ if (! isset($_GET['code'])) {
  
 //header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 }
-$deviceTemplate=2316;
-$deviceQuery = 'SELECT 
-				DeviceData.Description AS dd_Description, 
-				Device_DeviceData.FK_DeviceData,
-                                Device.PK_Device,
-				ParameterType.Description AS typeParam, 
-				Device_DeviceData.IK_DeviceData
-			FROM DeviceData 
-			INNER JOIN ParameterType ON FK_ParameterType = PK_ParameterType 
-			INNER JOIN Device_DeviceData ON Device_DeviceData.FK_DeviceData=PK_DeviceData 
-			INNER JOIN Device ON FK_Device=PK_Device
-			LEFT JOIN DeviceTemplate_DeviceData ON DeviceTemplate_DeviceData.FK_DeviceData=Device_DeviceData.FK_DeviceData AND DeviceTemplate_DeviceData.FK_DeviceTemplate=Device.FK_DeviceTemplate
-			WHERE Device.FK_DeviceTemplate=2316 AND Device_DeviceData.FK_DeviceData=59 ';
-	$res = $dbADO->Execute($deviceQuery);
-	$ddForDevice = $res->FetchRow();
+
+	file_put_contents('/tmp/user'.$_SESSION['userID'].'.json', $_SESSION['access_token']);
 	$out="";
 	$out.="<br>";
-	$out.="Device:".$ddForDevice['PK_Device'];
-	$oldData= json_decode($ddForDevice['IK_DeviceData']);
-	$newDataString= array( $_SESSION['userID']=>$_SESSION['access_token'] );
-	$accessData = json_decode($_SESSION['access_token']);
-	
-	$parsedOldData= $oldData;
-	$parsedOldData[$_SESSION['userID']] = $accessData;
-	$newDataString = json_encode($parsedOldData);
-	$updateQuery="UPDATE Device_DeviceData SET IK_DeviceData= ' ".$newDataString." ' where FK_DEVICE=".$ddForDevice['PK_Device']." AND FK_DeviceData=59";
-	$dbADO->Execute($updateQuery);
-	
-	$out='Completed google authorization for '.$_SESSION['hh_username'].'.<br>';
-	
-	$jsonArr = json_decode($_SESSION['access_token'], true );
-	
-	/*
+	$out='Completed google authorization for '.$_SESSION['hh_username'].'.<br>';	
+	$jsonArr = json_decode($_SESSION['access_token'], true );	
 	$out.="Access Token:".$jsonArr['access_token']."<br>";
 	$out.="Token Type:".$jsonArr['token_type']."<br>";
 	$out.="Expires:".$jsonArr['expires_in']."<br>";
 	$out.="created:".$jsonArr['created']."<br>";
 	$out.="Refresh Token:".$jsonArr['refresh_token']."<br>";
 	$out.="ID Token: Not Shown<br><br>";
-	 * 
-	 */
+
+	$out.="Writing to file.<br>";
 	
-	print_r($newDataString);
-	$out.="Writing to device data.<br>";
+	
 	
 	//$output -> setScriptInHead($scriptInHead);
 	$output -> setReloadLeftFrame(false);
