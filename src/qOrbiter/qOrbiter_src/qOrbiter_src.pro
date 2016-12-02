@@ -297,6 +297,7 @@ win32{
         DEFINES += USE_MYSQL_WRAPPER
         QT += network
 }
+LIBS += -lssl -lcrypto
 
 CONFIG +=warn_off
 

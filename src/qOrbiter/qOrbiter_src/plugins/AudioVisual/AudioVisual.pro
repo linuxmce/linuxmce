@@ -42,7 +42,10 @@ linux-rasp-pi-g++{
 
 android-g++{
     DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
-  }
+    INCLUDEPATH += /home/mb/project/openssl/openssl-master/include/
+    LIBS += /home/mb/project/openssl/openssl-master/libssl.so
+    LIBS += /home/mb/project/openssl/openssl-master/libcrypto.so
+}
 
 macx-g++{
 message( Building for OS x )
