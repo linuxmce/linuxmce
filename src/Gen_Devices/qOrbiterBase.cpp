@@ -25,7 +25,7 @@ Event_Impl *qOrbiter_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, Clie
 {
 	switch(dwPK_DeviceTemplate) {
 		case 2186:
-			return (Event_Impl *) new qOrbiter_Event(pOCClientSocket, dwDevice);
+		  return (Event_Impl *) new qOrbiter_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);
 	return NULL;

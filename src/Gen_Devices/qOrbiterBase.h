@@ -32,8 +32,8 @@ public:
 	/**
 	* @brief Constructors
 	*/
-	qOrbiter_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
-		Event_Impl(DeviceID, DEVICETEMPLATE_qOrbiter_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
+ qOrbiter_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true, bool ssl=false) :
+  Event_Impl(DeviceID, DEVICETEMPLATE_qOrbiter_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT, -1, ssl) {};
 	qOrbiter_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
 
 	/**
@@ -369,7 +369,7 @@ public:
 	virtual bool GetConfig()
 	{
 		m_pData=NULL;
-		m_pEvent = new qOrbiter_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+		m_pEvent = new qOrbiter_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode, m_bIsSSL);
 		if( m_pEvent->m_dwPK_Device )
 			m_dwPK_Device = m_pEvent->m_dwPK_Device;
 		if( m_sIPAddress!=m_pEvent->m_pClientSocket->m_sIPAddress )	
@@ -382,7 +382,7 @@ public:
 				while( m_pEvent->m_pClientSocket->m_eLastError==cs_err_BadDevice && (m_dwPK_Device = DeviceIdInvalid())!=0 )
 				{
 					delete m_pEvent;
-					m_pEvent = new qOrbiter_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+					m_pEvent = new qOrbiter_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode, m_bIsSSL);
 					if( m_pEvent->m_dwPK_Device )
 						m_dwPK_Device = m_pEvent->m_dwPK_Device;
 				}
@@ -392,7 +392,7 @@ public:
 				if( RouterNeedsReload() )
 				{
 					string sResponse;
-					Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
+					Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName,true, -1, -1, m_bIsSSL);
 					event_Impl.m_pClientSocket->SendString( "RELOAD" );
 					if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
 					{
@@ -425,7 +425,7 @@ public:
 		{
 			m_pData->m_dwPK_Device=m_dwPK_Device;  // Assign this here since it didn't get it's own data
 			string sResponse;
-			Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
+			Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName, true, -1, -1, m_bIsSSL);
 			event_Impl.m_pClientSocket->SendString( "PARENT " + StringUtils::itos(m_dwPK_Device) );
 			if( event_Impl.m_pClientSocket->ReceiveString( sResponse ) && sResponse.size()>=8 )
 				m_pData->m_dwPK_Device_ControlledVia = atoi( sResponse.substr(7).c_str() );
@@ -437,7 +437,7 @@ public:
 			return false;
 		delete[] pConfig;
 		m_pData->m_pEvent_Impl = m_pEvent;
-		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_qOrbiter_CONST,m_sHostName);
+		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_qOrbiter_CONST,m_sHostName, true, -1, -1,  m_bIsSSL);
 		if( m_iInstanceID )
 		{
 			m_pEvent->m_pClientSocket->SendString("INSTANCE " + StringUtils::itos(m_iInstanceID));
