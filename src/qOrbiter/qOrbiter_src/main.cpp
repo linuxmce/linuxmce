@@ -250,6 +250,7 @@ int main(int argc, char* argv[])
 #ifdef __ANDROID__
     AndroidSystem androidHelper;
     deviceType=2;
+    Socket::setSSLKeyPath(androidHelper.getExternalStorageLocation().toStdString()+"/LinuxMCE/");
 #endif
 
     QOrbiterLogger localLogger;
@@ -425,6 +426,14 @@ int main(int argc, char* argv[])
 
         qOrbiter pqOrbiter(name, PK_Device, sRouter_IP,true,bLocalMode );
         pqOrbiter.setOsd(isOsd);
+
+        // If we are not on our home network, or if no device id is yet set, don't use SSL
+        // We need to connect once at our home network to get the SSL keys
+   //TODO: add when ssl works with qt+android     qDebug() << OpenSSL_version(OPENSSL_VERSION) << endl;
+        QVariant deviceID = settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toString();
+        bool useSSL = !isHomeNetwork && deviceID.toInt() > 0;
+        qDebug() << "useSSL " < <useSSL << " (" << isHomeNetwork << ", " << deviceID << ")";
+        pqOrbiter.m_bIsSSL_set(false); //useSSL);
 
         qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
