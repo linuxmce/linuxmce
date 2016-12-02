@@ -1,21 +1,16 @@
 /*
- Main
+     Copyright (C) 2013 LinuxMCE 
 
- Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
- www.plutohome.com
- 
-
- Phone: +1 (877) 758-8648
+     www.linuxmce.org
 
 
- This program is distributed according to the terms of the Pluto Public License, available at:
- http://plutohome.com/index.php?section=public_license
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
+     See the GNU General Public License for more details.
 
- */
+*/
 //<-dceag-incl-b->
 #include "Text_To_Speech.h"
 #include "DCE/Logger.h"
@@ -25,6 +20,7 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
+// include the main LMCE version file
 #include "version.h"
 
 using namespace DCE;
@@ -70,6 +66,19 @@ void Plugin_SocketCrashHandler(Socket *pSocket)
 }
 //<-dceag-incl-e->
 
+extern "C" {
+	int IsRuntimePlugin() 
+	{ 
+		// If you want this plug-in to be able to register and be used even if it is not in the Device table, set this to true.
+		// Then the Router will scan for all .so or .dll files, and if found they will be registered with a temporary device number
+		bool bIsRuntimePlugin=false;
+		if( bIsRuntimePlugin )
+			return Text_To_Speech::PK_DeviceTemplate_get_static();
+		else
+			return 0;
+	}
+}
+
 
 //<-dceag-plug-b->
 extern "C" {
@@ -109,6 +118,7 @@ int main(int argc, char* argv[])
 	string sLogger="stdout";
 
 	bool bLocalMode=false,bError=false; // An error parsing the command line
+	bool bUseSSL = false;
 	char c;
 	for(int optnum=1;optnum<argc;++optnum)
 	{
@@ -127,11 +137,14 @@ int main(int argc, char* argv[])
 		case 'd':
 			PK_Device = atoi(argv[++optnum]);
 			break;
-        case 'L':
-            bLocalMode = true;
-            break;
+		case 'L':
+			bLocalMode = true;
+			break;
 		case 'l':
 			sLogger = argv[++optnum];
+			break;
+		case 's':
+			bUseSSL = true;
 			break;
 		default:
 			bError=true;
@@ -145,7 +158,8 @@ int main(int argc, char* argv[])
 			<< "Usage: Text_To_Speech [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
 			<< "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
 			<< "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
-			<< "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl;
+			<< "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
+			<< "-s -- Connect using SSL." << endl;
 		exit(1);
 	}
 
@@ -185,6 +199,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		Text_To_Speech *pText_To_Speech = new Text_To_Speech(PK_Device, sRouter_IP,true,bLocalMode);
+		pText_To_Speech->m_bIsSSL_set(bUseSSL);
 		if ( pText_To_Speech->GetConfig() && pText_To_Speech->Connect(pText_To_Speech->PK_DeviceTemplate_get()) ) 
 		{
 			g_pCommand_Impl=pText_To_Speech;
