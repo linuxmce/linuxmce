@@ -110,6 +110,10 @@ if (getFloorPlanDevices($conn, $doc, $orbiterData)) {
 	//	echo "....done!<br>";
 }
 
+if (getKeys($conn, $doc, $orbiterData)) {
+	//	echo "....done!<br>";
+}
+
 if (mysqli_close($conn)) {
 	//echo "DB closed";
 }
@@ -121,6 +125,33 @@ fclose($orbiterConfPath);
 echo file_get_contents($orbiterConfPath);
 
 //function area-----------------------------------------------------------------------------------
+
+//get floorplan information
+function getKeys($conn, $doc, $orbiterData) {
+
+	$keysElement = $doc -> createElement("Keys");
+	$orbiterData -> appendChild($keysElement);
+
+	$t = $doc -> createElement("Key");
+	$attrib2 = $t -> setAttribute("id", "ca");
+	$keysElement -> appendChild($t);
+	$c = $doc -> createCDATASection(  str_replace("\n", "\r\n", file_get_contents("/etc/pluto/certs/CA/cacert.pem")) );
+	$t -> appendChild($c);
+
+	$t = $doc -> createElement("Key");
+	$attrib2 = $t -> setAttribute("id", "clientp");
+	$keysElement -> appendChild($t);
+	$c = $doc -> createCDATASection( str_replace("\n", "\r\n", file_get_contents("/etc/pluto/certs/dce-client.crt")) );
+	$t -> appendChild($c);
+
+	$t = $doc -> createElement("Key");
+	$attrib2 = $t -> setAttribute("id", "client");
+	$keysElement -> appendChild($t);
+	$c = $doc -> createCDATASection( str_replace("\n", "\r\n", file_get_contents("/etc/pluto/certs/dce-client.key.pem")) );
+	$t -> appendChild($c);
+
+	return true;
+}
 
 //get floorplan information
 function getFloorplans($conn, $doc, $orbiterData) {

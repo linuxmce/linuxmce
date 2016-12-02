@@ -795,6 +795,33 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(clear()) );
     }
 
+#ifdef ANDROID
+    // DCE SSL keys
+    QDomElement keysElement = root.firstChildElement("Keys");
+    QDomNodeList keylist = keysElement.childNodes();
+
+    string path = Socket::getSSLKeyPath();
+    FileUtils::MakeDir(path + "CA");
+    DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING, "Attempting to store keys at: %s", path.c_str());
+    for(int index = 0; index < keylist.count(); index++)
+    {
+        QString id = keylist.at(index).attributes().namedItem("id").nodeValue();
+        QString data = keylist.at(index).firstChild().toCDATASection().data();
+        string file = path;
+        if (id.toStdString() == "ca") {
+            FileUtils::MakeDir(path + "CA");
+            file += "CA/cacert.pem";
+        } else if (id.toStdString() == "client") {
+            file += "dce-client.key.pem";
+        } else if (id.toStdString() == "clientp") {
+            file += "dce-client.crt";
+        }
+        DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING, "Attempting to write: %s", file.c_str());
+        string certData = data.toStdString();
+        FileUtils::WriteTextFile(file, certData.c_str());
+    }
+#endif
+
     binaryConfig.clear();
     tConf.clear();
     configData.clear();
