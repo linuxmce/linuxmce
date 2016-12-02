@@ -71,28 +71,30 @@ bool ClientSocket::Connect( int PK_DeviceTemplate,string sExtraInfo,int iConnect
 			ERR_print_errors_fp(stderr);
 			return false;
 		}
-		string path = s_sSSL_key_path + "dce-client.crt";
-		if ( SSL_CTX_use_certificate_file(m_sslctx, path.c_str() , SSL_FILETYPE_PEM) <= 0 ) {
-			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL public key. %s", path.c_str() );
-			ERR_print_errors_fp(stderr);
-			return false;
-		}
-		path = s_sSSL_key_path + "dce-client.key.pem";
+		string 	path = s_sSSL_key_path + "dce-client.key.pem";
 		if ( SSL_CTX_use_PrivateKey_file(m_sslctx, path.c_str(), SSL_FILETYPE_PEM) <= 0 ) {
 			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL private key. %s", path.c_str() );
-			ERR_print_errors_fp(stderr);
+			DumpSSLError(LV_CRITICAL, ERR_get_error());
+			return false;
+		}
+
+		path = s_sSSL_key_path + "dce-client.crt";
+		int ret = SSL_CTX_use_certificate_file(m_sslctx, path.c_str() , SSL_FILETYPE_PEM);
+		if ( ret <= 0 ) {
+			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL public key. %s", path.c_str() );
+			DumpSSLError(LV_CRITICAL, ERR_get_error());
 			return false;
 		}
 		if ( !SSL_CTX_check_private_key(m_sslctx) ) {
 			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Public and private keys does not match." );
-			ERR_print_errors_fp(stderr);
+			DumpSSLError(LV_CRITICAL, ERR_get_error());
 			return false;
 		}
 
 		path = s_sSSL_key_path + "CA/cacert.pem";
 		if (SSL_CTX_load_verify_locations(m_sslctx, path.c_str(), NULL) <= 0 ) {
 			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Couldn't set SSL CA cert.\r %s", path.c_str() );
-			ERR_print_errors_fp(stderr);
+			DumpSSLError(LV_CRITICAL, ERR_get_error());
 			return false;
 		}
 

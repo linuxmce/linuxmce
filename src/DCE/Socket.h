@@ -225,6 +225,7 @@ namespace DCE
 				SSL_load_error_strings();
 			}
 		}
+        static string getSSLKeyPath() { return s_sSSL_key_path; }
 		static void DumpSSLError(int level, unsigned long sslerr) {
 			char error[256];
 			ERR_error_string(sslerr, error);
