@@ -31,8 +31,8 @@ public:
 	/**
 	* @brief Constructors
 	*/
-	Text_To_Speech_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
-		Event_Impl(DeviceID, DEVICETEMPLATE_Text_To_Speech_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
+	Text_To_Speech_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true, bool bUseSSL=false) :
+		Event_Impl(DeviceID, DEVICETEMPLATE_Text_To_Speech_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT, -1, bUseSSL) {};
 	Text_To_Speech_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
 
 	/**
@@ -80,6 +80,14 @@ public:
 	* @brief Device data access methods:
 	*/
 
+	int Get_PK_Language()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Language_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_PK_Language_CONST].c_str());
+	}
+
 	string Get_BranchNo()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -112,7 +120,7 @@ public:
 	virtual bool GetConfig()
 	{
 		m_pData=NULL;
-		m_pEvent = new Text_To_Speech_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+		m_pEvent = new Text_To_Speech_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode, m_bIsSSL);
 		if( m_pEvent->m_dwPK_Device )
 			m_dwPK_Device = m_pEvent->m_dwPK_Device;
 		if( m_sIPAddress!=m_pEvent->m_pClientSocket->m_sIPAddress )	
@@ -125,7 +133,7 @@ public:
 				while( m_pEvent->m_pClientSocket->m_eLastError==cs_err_BadDevice && (m_dwPK_Device = DeviceIdInvalid())!=0 )
 				{
 					delete m_pEvent;
-					m_pEvent = new Text_To_Speech_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+					m_pEvent = new Text_To_Speech_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode, m_bIsSSL);
 					if( m_pEvent->m_dwPK_Device )
 						m_dwPK_Device = m_pEvent->m_dwPK_Device;
 				}
@@ -135,7 +143,7 @@ public:
 				if( RouterNeedsReload() )
 				{
 					string sResponse;
-					Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
+					Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName, true, SOCKET_TIMEOUT, -1, m_bIsSSL);
 					event_Impl.m_pClientSocket->SendString( "RELOAD" );
 					if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
 					{
@@ -168,7 +176,7 @@ public:
 		{
 			m_pData->m_dwPK_Device=m_dwPK_Device;  // Assign this here since it didn't get it's own data
 			string sResponse;
-			Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
+			Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName, true, -1, -1, m_bIsSSL);
 			event_Impl.m_pClientSocket->SendString( "PARENT " + StringUtils::itos(m_dwPK_Device) );
 			if( event_Impl.m_pClientSocket->ReceiveString( sResponse ) && sResponse.size()>=8 )
 				m_pData->m_dwPK_Device_ControlledVia = atoi( sResponse.substr(7).c_str() );
@@ -180,7 +188,7 @@ public:
 			return false;
 		delete[] pConfig;
 		m_pData->m_pEvent_Impl = m_pEvent;
-		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_Text_To_Speech_CONST,m_sHostName);
+		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_Text_To_Speech_CONST,m_sHostName, true, -1, -1, m_bIsSSL);
 		if( m_iInstanceID )
 		{
 			m_pEvent->m_pClientSocket->SendString("INSTANCE " + StringUtils::itos(m_iInstanceID));
@@ -200,6 +208,7 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	int DATA_Get_PK_Language() { return GetData()->Get_PK_Language(); }
 	string DATA_Get_BranchNo() { return GetData()->Get_BranchNo(); }
 	string DATA_Get_default_voice() { return GetData()->Get_default_voice(); }
 	//Event accessors
