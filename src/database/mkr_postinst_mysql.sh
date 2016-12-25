@@ -43,6 +43,9 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 	Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 
+	Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'localhost';"
+	mysql $MYSQL_DB_CRED -e "$Q"
+
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
 
