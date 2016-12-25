@@ -40,7 +40,7 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 	Q="GRANT ALL PRIVILEGES ON pluto_main.* to 'root'@'127.0.0.1';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 
-	Q="GRANT FILE, SHOW DATABASES ON asterisk.* TO 'asteriskuser'@'127.0.0.1';"
+	Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 
 	Q="FLUSH PRIVILEGES;"
