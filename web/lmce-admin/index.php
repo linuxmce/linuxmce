@@ -1626,7 +1626,7 @@ switch ($section) {
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
 	    include_once('operations/telecom/voicemail.php');
-	    voicemail($output,$dbADO);	    
+	    voicemail($output,$dbADO);
 	break;	
 	case 'keyboardLayout':
 		$output = new Template($dbADO);
@@ -1958,6 +1958,21 @@ switch ($section) {
 		include_once('operations/cloudServices/includes/googleFiles.php');
 		showGoogleDriveFiles($mediadbADO, $dbADO, $output);
 		 break;
+	 case 'energyGraph':
+
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/datalog/energyGraph.php');
+        break;
+	 case 'sipConf':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/telecom/sipConf.php');
+	    
+		@include($GLOBALS['globalConfigPath'].'telecom.inc.php');    	
+		@include($GLOBALS['globalConfigPath'].'asteriskDB.inc.php');	    
+	    sipConf($output,$asteriskADO,$dbADO,$telecomADO);
+        break;
 	case '';
 		$output = new Template($dbADO);	
 
