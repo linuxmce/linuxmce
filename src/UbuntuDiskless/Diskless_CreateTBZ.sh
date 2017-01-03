@@ -283,6 +283,7 @@ MD_System_Level_Prep () {
 				#deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
 				deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
+				deb $TARGET_REPO $TARGET_RELEASE-backports main restricted universe multiverse
 				deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
 				EOF
 			;;
