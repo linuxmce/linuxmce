@@ -6,8 +6,20 @@ require "/usr/pluto/bin/config_ops.pl";
 # We try the regular LinuxMCE/Pluto credentials. If they fail, we try a local connection
 $db = DBI->connect(&read_pluto_cred()) or $db = DBI->connect("DBI:mysql:") or die "Couldn't connect to database: $DBI::errstr\n";
 
-@databases = ("pluto_main","pluto_media","pluto_telecom","asterisk","asteriskcdrdb","mythconverg","pluto_mediatomb","pluto_myth","pluto_security","pluto_telecom","pluto_vdr");
+#@databases = ("pluto_main","pluto_media","pluto_telecom","asterisk","asteriskcdrdb","mythconverg","pluto_mediatomb","pluto_myth","pluto_security","pluto_telecom","pluto_vdr");
+@databases = ("asterisk","asteriskcdrdb","mythconverg","pluto_mediatomb","pluto_vdr");
 
+# fix calldate in asterisk.cdr, sqlCVS takes care of lmce databases
+$sql = "UPDATE asterisk.cdr set calldate='1970-01-01 00:00:00' WHERE calldate=0;";
+$st = $db->prepare($sql) or die "Error in prepare $sql\n";
+$st->execute() or die "Error on execute $sql\n";
+$sql = "ALTER TABLE asterisk.cdr MODIFY calldate datetime NULL DEFAULT NULL;";
+$st = $db->prepare($sql) or die "Error in prepare $sql\n";
+$st->execute() or die "Error on execute $sql\n";
+$sql = "UPDATE asterisk.cdr set calldate=NULL WHERE calldate=0 OR calldate='1970-01-01 00:00:00';";
+$st = $db->prepare($sql) or die "Error in prepare $sql\n";
+$st->execute() or die "Error on execute $sql\n";
+ 
 foreach $dbname (@databases) {
         # Select all tbles that don't have utf8_general_ci as there collation
 	$sql = "SELECT TABLE_NAME FROM information_schema.TABLES Where TABLE_SCHEMA = '$dbname' AND TABLE_NAME != 'Schema' AND TABLE_COLLATION != 'utf8_general_ci';";

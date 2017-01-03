@@ -139,8 +139,7 @@ m_EK_HouseMode = 0;
 is_null[1] = false;
 is_null[2] = true;
 m_EK_DeviceGroup = 0;
-m_ChangeTime = "0000-00-00 00:00:00";
-is_null[3] = false;
+is_null[3] = true;
 is_null[4] = true;
 m_EK_Users = 0;
 is_null[5] = true;
@@ -234,6 +233,9 @@ m_psc_restrict = val; is_modified=true; is_null[10]=false;}
 bool Row_ModeChange::EK_DeviceGroup_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[2];}
+bool Row_ModeChange::ChangeTime_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_ModeChange::EK_Users_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -259,6 +261,10 @@ return is_null[10];}
 			
 void Row_ModeChange::EK_DeviceGroup_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[2]=val;
+is_modified=true;
+}
+void Row_ModeChange::ChangeTime_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
 is_modified=true;
 }
 void Row_ModeChange::EK_Users_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

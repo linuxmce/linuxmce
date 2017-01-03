@@ -16,7 +16,13 @@
 	$dbPlutoMainPass = $DB_PASS;
 	$dbPlutoMainDatabase = $DB_NAME;
 	$dbPlutoMainServer = $DB_HOST;
-	
+
+    // pluto myth
+	$dbMythType = "mysqli";
+	$dbMythUser = $DB_USER;
+	$dbMythPass = $DB_PASS;
+	$dbPlutoMythDatabase = $DB_NAME;
+	$dbMythServer = $DB_HOST;
 	
 	// pluto media
 	$dbPlutoMediaType = "mysqli";

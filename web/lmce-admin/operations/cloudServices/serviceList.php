@@ -2,31 +2,20 @@
 
 function init_services($mediadbADO, $dbADO, $output){
 	
-	$googleCheck=' SELECT 
-				DeviceData.Description AS dd_Description, 
-				Device_DeviceData.FK_DeviceData,
-                                Device.PK_Device,
-				ParameterType.Description AS typeParam, 
-				Device_DeviceData.IK_DeviceData
-			FROM DeviceData 
-			INNER JOIN ParameterType ON FK_ParameterType = PK_ParameterType 
-			INNER JOIN Device_DeviceData ON Device_DeviceData.FK_DeviceData=PK_DeviceData 
-			INNER JOIN Device ON FK_Device=PK_Device
-			LEFT JOIN DeviceTemplate_DeviceData ON DeviceTemplate_DeviceData.FK_DeviceData=Device_DeviceData.FK_DeviceData AND DeviceTemplate_DeviceData.FK_DeviceTemplate=Device.FK_DeviceTemplate
-			WHERE Device.FK_DeviceTemplate=2316 AND Device_DeviceData.FK_DeviceData=59  ';
-			
-    $gmailBox='<th class="tg-031e"> <a href="index.php?section=cloudServices&service=gmail&action=auth" ><img src="operations/cloudServices/images/gmail.gif" alt="gmail" ></a></th>';		
-	$res = $dbADO->Execute($googleCheck);
-	$ddForDevice = $res->FetchRow();
+	$authfile = '/tmp/user'.$_SESSION['userID'].'.json';
+	$check = file_exists($authfile);			
+    $gmailBox='<th class="tg-031e"> <a href="index.php?section=cloudServices&service=gmail&action=auth" >
+    <img src="operations/cloudServices/images/gmail.gif" alt="gmail" >
+      <br> Google Services are not enabled for '.$_SESSION['hh_username'].'. <br> Click to Authorize <br></a>
+    </th>';		
 	
-	$confData=json_decode($ddForDevice['IK_DeviceData'], true);
-	$userDataArray = $confData[$_SESSION['userID']];	
-
-	if( !empty($userDataArray)){	
+	if( $check){	
 		$gmailBox='<th class="tg-031e"> 
    <img src="operations/cloudServices/images/gmail.gif" alt="gmail" >
      <br> Google Services are enabled. <a href="index.php?section=googleFiles">View Files.</a> <br>
    </th>';
+	} else {
+		
 	}
 	
 	$out='<style type="text/css">

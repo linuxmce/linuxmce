@@ -22,4 +22,11 @@ if [ $PROCESS = "install" ]; then
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
 fi
+if [ $PROCESS = "upgrade" ]; then
+	echo
+	echo Updating media database using sqlCVS
+	echo Please be patient...
+	## FIXME - schema.linuxmce.org is hard coded
+	/usr/pluto/bin/sqlCVS -R 7999 -H schema.linuxmce.org $PLUTO_DB_CRED -n -d anonymous -U anonymous~nopass -D pluto_telecom -r telecom -A -e update || exit $?
+fi
 

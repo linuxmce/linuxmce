@@ -618,17 +618,29 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int, std::vector<string> >
 				sProperty = StringUtils::TrimSpaces(sProperty);
 				std::vector<string> vsProperties;
 
-				if ( (i->first == "ALBUMARTIST") || (i->first == "ALBUM ARTIST") || (i->first == "ENSEMBLE") )
+				if ( (i->first == "ALBUMARTIST") || (i->first == "ALBUM ARTIST") || (i->first == "ALBUMARTISTSORT") )
 				{
-					stov( sProperty, vsProperties, "/;" );
-					for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
-						mapAttributes[ATTRIBUTETYPE_Album_Artist_CONST].push_back( *itProperty );
+					if ( sProperty == "AC/DC" ) {
+						mapAttributes[ATTRIBUTETYPE_Album_Artist_CONST].push_back( sProperty );
+					}
+					else
+					{
+						stov( sProperty, vsProperties, "/;" );
+						for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
+							mapAttributes[ATTRIBUTETYPE_Album_Artist_CONST].push_back( *itProperty );
+					}
 				}
 				else if ( i->first == "ARTIST" )
 				{
-					stov( sProperty, vsProperties, "/;" );
-					for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
-						mapAttributes[ATTRIBUTETYPE_Performer_CONST].push_back( *itProperty );
+					if ( sProperty == "AC/DC" ) {
+						mapAttributes[ATTRIBUTETYPE_Performer_CONST].push_back( sProperty );
+					}
+					else
+					{
+						stov( sProperty, vsProperties, "/;" );
+						for ( std::vector<string>::iterator itProperty = vsProperties.begin(); itProperty != vsProperties.end(); ++itProperty )
+							mapAttributes[ATTRIBUTETYPE_Performer_CONST].push_back( *itProperty );
+					}
 				}
 				else if ( (i->first == "TITLE") &&  mapAttributes[ATTRIBUTETYPE_Title_CONST].empty() )
 				{
@@ -872,6 +884,7 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int, std::vector<str
 		if ( !vsParameters.empty() )
 		{
 			InsertTagValues(f, string("ALBUMARTIST"), vsParameters );
+			InsertTagValues(f, string("ALBUMARTISTSORT"), vsParameters );
 
 			string sParameters = vtos( vsParameters, ';' );
 //			cout << "SetTagInfo - set Album Artist to: " << String(sParameters, String::UTF8).to8Bit(true) << endl;
@@ -1041,6 +1054,7 @@ void TagFileHandler::RemoveTag(string sFilename, int nTagType, string sValue)
 				RemoveTagValue(f, "ALBUMARTIST", sValue);
 				RemoveTagValue(f, "ALBUM ARTIST", sValue);
 				RemoveTagValue(f, "ENSEMBLE", sValue);
+				RemoveTagValue(f, "ALBUMARTISTSORT", sValue);
 				break;
 
 			case ATTRIBUTETYPE_Performer_CONST:
