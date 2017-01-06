@@ -59,6 +59,7 @@ Item {
         height: panelHeader.height *.95
         contentWidth:parent.width
         contentHeight: height
+        clip: false
 
         anchors{
             right:panelHeader.right
