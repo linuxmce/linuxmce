@@ -27,7 +27,7 @@
 #include <algorithm>
 
 // #define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
-#define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
+#define INACTIVE_VIDEO "/usr/pluto/share/vlcblack.mpeg"
 
 /**
  * Convert a string to a c string for use in char** array. 
