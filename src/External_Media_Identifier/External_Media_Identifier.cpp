@@ -149,11 +149,11 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
       pIdentifier = new IdentifierCDMDR(sFilename, sID);
       break;
     case IdentifyDisc::DiscType::DVD:
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"DVD Identification temporarily disabled.");
-      sCMD_Result="DISABLED";
-      return;
-      // pIdentifier = new IdentifierDVDMDR(sFilename, sID);
-      //break;
+      // LoggerWrapper::GetInstance()->Write(LV_WARNING,"DVD Identification temporarily disabled.");
+      // sCMD_Result="DISABLED";
+      // return;
+      pIdentifier = new IdentifierDVDMDR(sFilename, sID);
+      break;
     case IdentifyDisc::DiscType::UNKNOWN:
     default:
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not identify disc. Aborting");
