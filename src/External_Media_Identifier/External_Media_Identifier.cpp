@@ -147,12 +147,11 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
     {
     case IdentifyDisc::DiscType::CD:
       pIdentifier = new IdentifierCDMDR(sFilename, sID);
+      iPK_MediaType=MEDIATYPE_pluto_CD_CONST;
       break;
     case IdentifyDisc::DiscType::DVD:
-      // LoggerWrapper::GetInstance()->Write(LV_WARNING,"DVD Identification temporarily disabled.");
-      // sCMD_Result="DISABLED";
-      // return;
       pIdentifier = new IdentifierDVDMDR(sFilename, sID);
+      iPK_MediaType=MEDIATYPE_pluto_DVD_CONST;
       break;
     case IdentifyDisc::DiscType::UNKNOWN:
     default:
