@@ -556,12 +556,16 @@ namespace DCE
 
   int64_t VLC::SetTime(int64_t iTime)
   {
+    if (!IsPlaying())
+      return -1;
     libvlc_media_player_set_time(m_pMp,iTime);
     return libvlc_media_player_get_time(m_pMp);
   }
 
   int64_t VLC::GetTime()
   {
+    if (!IsPlaying())
+      return -1;
     return libvlc_media_player_get_time(m_pMp);
   }
 
@@ -1051,5 +1055,22 @@ namespace DCE
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PreProcessMediaUrl out %s",sMediaURL.c_str());
     return sMediaURL;
   }
+
+  void VLC::OSD_Status(string sStatusString)
+  {
+    if (!m_pMp)
+      return;
+
+    libvlc_video_set_marquee_string(m_pMp,1,sStatusString.c_str());
+    libvlc_video_set_marquee_int(m_pMp,6,36);
+    libvlc_video_set_marquee_int(m_pMp,3,255); //opacity
+    libvlc_video_set_marquee_int(m_pMp,2,0x00FFFFFF); //color
+    libvlc_video_set_marquee_int(m_pMp,7,5000); //timeout
+    libvlc_video_set_marquee_int(m_pMp,8,100);  //x-coordinate
+    libvlc_video_set_marquee_int(m_pMp,9,100);  //y-coordinate
+    libvlc_video_set_marquee_int(m_pMp,0,1);
+
+  }
+
 
 }
