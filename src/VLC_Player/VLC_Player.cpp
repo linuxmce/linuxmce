@@ -1093,6 +1093,8 @@ void VLC_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &s
       m_pVLC->SetAudioTrack(atoi(sValue_To_Assign.c_str()));
     }
 
+  m_pVLC->SetPreviousAudioTrack(m_pVLC->GetVLCAudioTrack());
+
 }
 
 //<-dceag-c141-b->

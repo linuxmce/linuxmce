@@ -323,6 +323,8 @@ namespace DCE
 	break;
       case libvlc_MediaPlayerVout:
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA VOUT!!");
+	self->m_iPreviousAudioTrack = self->GetVLCAudioTrack();
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC::Media_Callbacks(): Previous audio track reset to %d",self->m_iPreviousAudioTrack);
 	self->ReportPlaybackStarted();
 	self->UpdateNav();
 	break;
@@ -574,8 +576,15 @@ namespace DCE
     if (!m_pMp)
       return;
 
-    m_iPreviousAudioTrack=GetAudioTrack();
-    cout << "Previous Audio Track: " << m_iPreviousAudioTrack << endl;
+    if (m_iPreviousAudioTrack == 0 || m_iPreviousAudioTrack == -1 || GetVLCAudioTrack() == -1 || GetVLCAudioTrack() == 0)
+      {
+	// Do not set previous audio track.
+      }
+    else
+      { 
+	m_iPreviousAudioTrack=GetVLCAudioTrack();
+	cout << "Previous Audio Track: " << m_iPreviousAudioTrack << endl;
+      }
     SetAudioTrack(0); // Temporarily disable audio, free sound card for other uses.
     libvlc_media_player_set_pause(m_pMp, 1);
   }
@@ -734,11 +743,23 @@ namespace DCE
     if (!m_pMp)
       return;
 
+    if (iAudioTrack == -1)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Setting audio track to previously set audio track. %d",m_iPreviousAudioTrack);
+	libvlc_audio_set_track(m_pMp,m_iPreviousAudioTrack);
+	return;
+      }
+
     if (m_mapDgIndexToAudioTrackId.find(iAudioTrack) == m_mapDgIndexToAudioTrackId.end())
       return;
 
     LoggerWrapper::GetInstance()->Write(LV_WARNING,"Setting Audio track to: %d",m_mapDgIndexToAudioTrackId[iAudioTrack]);
     libvlc_audio_set_track(m_pMp,m_mapDgIndexToAudioTrackId[iAudioTrack]);
+  }
+
+  int VLC::GetVLCAudioTrack()
+  {
+    return libvlc_audio_get_track(m_pMp);
   }
 
   int VLC::GetAudioTrack()
