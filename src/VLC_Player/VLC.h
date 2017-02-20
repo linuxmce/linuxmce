@@ -141,6 +141,7 @@ namespace DCE
     void ReportPlaybackStarted();
     void EnumerateAudioDevices();
     string PreProcessMediaURL(string sMediaURL);
+    void OSD_Status(string sStatusString);
   };
 
 }

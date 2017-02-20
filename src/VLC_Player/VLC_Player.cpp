@@ -476,6 +476,7 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
       return;
     }
 
+  m_pVLC->SetPlaying(false);
   m_pVLC->Pause();
   
   Position pPosition = Position(m_pVLC->GetCurrentTitle(),
@@ -530,6 +531,7 @@ void VLC_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
       return;      
     }
 
+  m_pVLC->SetRate(0.0);
   m_pVLC->Pause();
   m_iMediaPlaybackSpeed=0;
 
@@ -564,50 +566,120 @@ void VLC_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
       return;      
     }
 
+  m_pVLC->SetRate(1.0);
   m_pVLC->Restart();
   m_iMediaPlaybackSpeed=1000;
 }
 
 /**
- * DoTransportControl - Transport control in VLC_Player is represented by a series of libvlc_media_player_set_time() calls, which
+ * DoTransportControls - Transport control in VLC_Player is represented by a series of libvlc_media_player_set_time() calls, which
  * call this function from an alarm. The frequency of the alarm is determined by the requested media speed, e.g. 2x means two jumps by 2000ms
  * every second, 4x means four jumps by 4000ms every second, and so on. 
  */
 void VLC_Player::DoTransportControls()
 {
-  if ((m_iMediaPlaybackSpeed == 1000) || m_iMediaPlaybackSpeed == 0)
-    return;
 
-  int i=0, iSleepValue=0, iNumSleeps=0;
+  int64_t i=0, iSleepValue=0, iNumSleeps=0, iNewTimeVal=0;
+  string sOSDStatus, sSpeed, sDirection;
   m_pAlarmManager->CancelAlarmByType(2);
 
-  // currently done as a table, Thom: come back here and make this a calculation, instead.
+  if (!m_pVLC->IsPlaying())
+    {
+      // Media is no longer playing, most likely we fell off the end. Just return.
+      return;
+    }
+
+
+  // Generate OSD String
+  if (m_iMediaPlaybackSpeed == 0)
+    {
+      sDirection = "||";
+    }
+  else if (m_iMediaPlaybackSpeed == 1000)
+    {
+      sDirection = "|>";
+    }
+  else if (m_iMediaPlaybackSpeed < 0)
+    {
+      sDirection = "<<";
+    }
+  else if (m_iMediaPlaybackSpeed > 0)
+    {
+      sDirection = ">>";
+    }
+
+  sSpeed = StringUtils::itos(m_iMediaPlaybackSpeed / 1000) + "x";
+
+  sOSDStatus = sDirection + "    " + sSpeed;
+
+  // Update OSD
+  m_pVLC->OSD_Status(sOSDStatus);
+  
+  if ((m_iMediaPlaybackSpeed == 1000))
+    {
+      m_pVLC->SetRate(1.0);
+      m_pVLC->Restart();
+      return;
+    }
+  
+  /* Any positive speed greater than 0; less than 8000, use a set rate */
+  if ((m_iMediaPlaybackSpeed < 8000) && (m_iMediaPlaybackSpeed > 0))
+    {
+      m_pVLC->Restart();
+      m_pVLC->SetRate((float)m_iMediaPlaybackSpeed/1000);
+      return;
+    }
+
   switch (abs(m_iMediaPlaybackSpeed))
     {
+    case 250:
+    case 500:
+    case 1000:
     case 2000:
-      iSleepValue=500;
-      iNumSleeps=2;
-      break;
+    case 3000:
     case 4000:
-      iSleepValue=250;
-      iNumSleeps=4;
-      break;
+    case 6000:
     case 8000:
+    case 10000:
+    case 15000:
     case 16000:
+    case 20000:
+    case 30000:
     case 32000:
+    case 50000:
     case 64000:
+    case 100000:
+    case 200000:
+    case 400000:
+    default:
       iSleepValue=125;
       iNumSleeps=8;
       break;
     }
   
+
   for (i=0;i<iNumSleeps;++i)
     {
-      m_pVLC->SetTime(m_pVLC->GetTime()+m_iMediaPlaybackSpeed);
+      m_pVLC->Pause();
+      if (m_iMediaPlaybackSpeed < 0)
+      	{
+	  iNewTimeVal = (m_pVLC->GetTime())-abs(m_iMediaPlaybackSpeed);
+	  if (iNewTimeVal <= 0)
+	    iNewTimeVal = 0;
+      	  m_pVLC->SetTime(iNewTimeVal);
+      	}
+      else
+      	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Going forward by %d - new time is %d",m_iMediaPlaybackSpeed,m_pVLC->GetTime()+m_iMediaPlaybackSpeed);
+	  iNewTimeVal = (m_pVLC->GetTime())+abs(m_iMediaPlaybackSpeed);
+	  if (iNewTimeVal >= m_pVLC->GetCurrentDuration())
+	    iNewTimeVal = m_pVLC->GetDuration();
+      	  m_pVLC->SetTime(iNewTimeVal);	
+      	}
       Sleep(iSleepValue);
     }
 
-  m_pAlarmManager->AddRelativeAlarm(1,this,2,NULL);
+  m_pAlarmManager->AddRelativeAlarm(0,this,2,NULL);
 
 }
 
@@ -643,6 +715,7 @@ void VLC_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 
   if (iMediaPlaybackSpeed==0)
     {
+      m_pVLC->SetRate(0.0);
       m_pVLC->Pause();
     }
   else if (iMediaPlaybackSpeed!=0)
