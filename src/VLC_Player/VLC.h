@@ -123,6 +123,8 @@ namespace DCE
     int GetCurrentAngle() { return 0; } 
     void SetAudioTrack(int iAudioTrack);
     int GetAudioTrack();
+    int GetVLCAudioTrack();
+    void SetPreviousAudioTrack(int iTrack) { m_iPreviousAudioTrack = iTrack; };
     void SetSubtitle(int iSubtitle);
     int GetSubtitle();
     string GetAllSubtitles();
