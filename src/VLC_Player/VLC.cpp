@@ -395,6 +395,17 @@ namespace DCE
 	m = libvlc_media_new_location(m_pInst,cDev);
 	libvlc_media_add_option(m,cTrack);
       }
+    else if (sMediaURL.find("fifo:") != string::npos)
+      {
+	// Issue #2730
+	// This is a local capture card requested by the Media Plugin, for now, assume that this is a 
+	// MPEGx stream of some sort that the system can directly process. I will add V4L2 URL processing
+	// once we can differentiate this via device data -TSCHAK
+
+	sMediaURL = "file://" + sMediaURL.substr(7,sMediaURL.size());
+	m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
+
+      }
     else
       {
 	m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
