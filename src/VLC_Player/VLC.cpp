@@ -1128,5 +1128,18 @@ namespace DCE
 
   }
 
+  string VLC::OSD_Time(int64_t time)
+  {
+    int seconds = (int) (time / 1000) % 60 ;
+    int minutes = (int) ((time / (1000*60)) % 60);
+    int hours   = (int) ((time / (1000*60*60)) % 24);
+    char output[64];
+
+    sprintf(output,"%02d:%02d:%02d",hours,minutes,seconds);
+    return string(output);
+
+  }
+
+
 
 }
