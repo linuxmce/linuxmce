@@ -875,23 +875,31 @@ void VLC_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
 
       int iCurrentChapter = m_pVLC->GetCurrentChapter();
       int iNewChapter=0;
+      int iChapterOffset=0;
 
-      if (sValue_To_Assign[0]=='+')
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXXXX - Current chapter is %d",iCurrentChapter);
+
+      if (sValue_To_Assign.find("+") != string::npos)
 	{
 	  // Skip forward X chapters
-	  iNewChapter = iCurrentChapter + atoi(sValue_To_Assign.substr(1).c_str());
+	  iChapterOffset=atoi(sValue_To_Assign.substr(1).c_str());
+	  iNewChapter = iCurrentChapter + iChapterOffset;
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Jump_Position_in_Playlist() - Plus value %d %d.",iChapterOffset,iNewChapter);
 	}
-      else if (sValue_To_Assign[0]=='-')
+      else if (sValue_To_Assign.find("-") != string::npos)
 	{
 	  // Skip backward X chapters
-	  iNewChapter = iCurrentChapter - atoi(sValue_To_Assign.substr(1).c_str());
+	  iChapterOffset=atoi(sValue_To_Assign.substr(1).c_str());
+	  iNewChapter = iCurrentChapter - iChapterOffset;
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Jump_Position_in_Playlist() - Minus value %d %d.",iChapterOffset,iNewChapter);
 	}
       else 
 	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Jump_Position_in_Playlist() - Absolute value.");
 	  iNewChapter = atoi(sValue_To_Assign.c_str());
 	}
 
-      if (iNewChapter!=0 && iNewChapter < m_pVLC->numChapters())
+      if (iNewChapter!=0 && iNewChapter <= m_pVLC->numChapters())
 	{
 	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::CMD_Jump_Position_in_Playlist(%d) - setting new chapter.",iNewChapter);
 	  m_pVLC->SetChapter(iNewChapter);
