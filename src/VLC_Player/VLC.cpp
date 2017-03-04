@@ -474,7 +474,7 @@ namespace DCE
 	  }
 	if (pPosition->getChapter()!=0)
 	  {
-	    SetChapter(pPosition->getChapter()-1);
+	    SetChapter(pPosition->getChapter());
 	  }
 	if (pPosition->getPosition()!=0)
 	  {
