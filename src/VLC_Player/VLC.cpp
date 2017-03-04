@@ -411,6 +411,20 @@ namespace DCE
 	m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
       }
 
+    // Issue #2736
+    // If Hardware Accelleration is set to something libvlc can handle (vdpau, vaapi), then turn it on.
+    
+    if (m_pVLC_Player->DATA_Get_Hardware_acceleration() == "vdpau")
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC::PlayURL() - Hardware Acceleration set to VDPAU.");
+	libvlc_media_add_option(m, ":avcodec-hw=vdpau");
+      }
+    else if (m_pVLC_Player->DATA_Get_Hardware_acceleration() == "vaapi")
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC::PlayURL() - Hardware Acceleration set to VAAPI.");
+	libvlc_media_add_option(m, ":avcodec-hw=vaapi");
+      }
+      
     m_pMp = libvlc_media_player_new_from_media(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
 
