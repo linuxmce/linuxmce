@@ -653,31 +653,47 @@ void VLC_Player::DoTransportControls()
     case 400000:
     default:
       iSleepValue=125;
-      iNumSleeps=8;
       break;
     }
   
 
-  for (i=0;i<iNumSleeps;++i)
+  // for (i=0;i<iNumSleeps;++i)
+  //   {
+  //     m_pVLC->Pause();
+  //     if (m_iMediaPlaybackSpeed < 0)
+  //     	{
+  // 	  iNewTimeVal = (m_pVLC->GetTime())-abs(m_iMediaPlaybackSpeed);
+  // 	  if (iNewTimeVal <= 0)
+  // 	    iNewTimeVal = 0;
+  //     	  m_pVLC->SetTime(iNewTimeVal);
+  //     	}
+  //     else
+  //     	{
+  // 	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Going forward by %d - new time is %d",m_iMediaPlaybackSpeed,m_pVLC->GetTime()+m_iMediaPlaybackSpeed);
+  // 	  iNewTimeVal = (m_pVLC->GetTime())+abs(m_iMediaPlaybackSpeed);
+  // 	  if (iNewTimeVal >= m_pVLC->GetCurrentDuration())
+  // 	    iNewTimeVal = m_pVLC->GetDuration();
+  //     	  m_pVLC->SetTime(iNewTimeVal);	
+  //     	}
+  //     Sleep(iSleepValue);
+  //   }
+
+  m_pVLC->Pause();
+  if (m_iMediaPlaybackSpeed < 0)
     {
-      m_pVLC->Pause();
-      if (m_iMediaPlaybackSpeed < 0)
-      	{
-	  iNewTimeVal = (m_pVLC->GetTime())-abs(m_iMediaPlaybackSpeed);
-	  if (iNewTimeVal <= 0)
-	    iNewTimeVal = 0;
-      	  m_pVLC->SetTime(iNewTimeVal);
-      	}
-      else
-      	{
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Going forward by %d - new time is %d",m_iMediaPlaybackSpeed,m_pVLC->GetTime()+m_iMediaPlaybackSpeed);
-	  iNewTimeVal = (m_pVLC->GetTime())+abs(m_iMediaPlaybackSpeed);
-	  if (iNewTimeVal >= m_pVLC->GetCurrentDuration())
-	    iNewTimeVal = m_pVLC->GetDuration();
-      	  m_pVLC->SetTime(iNewTimeVal);	
-      	}
-      Sleep(iSleepValue);
+      iNewTimeVal = (m_pVLC->GetTime())-abs(m_iMediaPlaybackSpeed);
+      if (iNewTimeVal <= 0)
+	iNewTimeVal = 0;
+      m_pVLC->SetTime(iNewTimeVal);
     }
+  else
+    {
+      iNewTimeVal = (m_pVLC->GetTime())+abs(m_iMediaPlaybackSpeed);
+      if (iNewTimeVal >= m_pVLC->GetCurrentDuration())
+	iNewTimeVal = m_pVLC->GetDuration();
+      m_pVLC->SetTime(iNewTimeVal);
+    }
+  Sleep(iSleepValue);
 
   m_pAlarmManager->AddRelativeAlarm(0,this,2,NULL);
 
@@ -763,6 +779,11 @@ void VLC_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStr
       int64_t currentTime = m_pVLC->GetTime();
       newTime=atoi(sValue_To_Assign.c_str());
       m_pVLC->SetTime((currentTime+newTime)*1000);
+    }
+  else if (firstChar=='T')
+    {
+      string sNewTime = sValue_To_Assign.substr(1);
+      m_pVLC->SetTime(atoi(sNewTime.c_str()));
     }
   else
     {
