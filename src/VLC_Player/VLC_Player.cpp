@@ -476,8 +476,7 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
       return;
     }
 
-  m_pVLC->SetPlaying(false);
-  m_pVLC->Pause();
+  // m_pVLC->Pause(); // so we don't inadvertently set audio channel to -1
   
   Position pPosition = Position(m_pVLC->GetCurrentTitle(),
 				m_pVLC->GetCurrentChapter(),
@@ -486,7 +485,7 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 				m_pVLC->GetAudioTrack(),
 				m_pVLC->GetCurrentDuration());
   
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Stop Position::toString(%s)",pPosition.toString().c_str());
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Stop Position::toString(%s)",pPosition.toString().c_str());
 
   *sMediaPosition=pPosition.toString();
 
@@ -500,6 +499,7 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 
   UnmountRemoteDVD();
   UnmountLocalBD();
+  m_pVLC->SetPlaying(false); // This must be done after position query, otherwise we get incorrect data.
 
 }
 
