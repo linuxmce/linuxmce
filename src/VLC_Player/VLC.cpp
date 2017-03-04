@@ -740,7 +740,7 @@ namespace DCE
     if (!m_pMp)
       return false;
 
-    return libvlc_media_player_get_chapter_count(m_pMp)>0;
+    return libvlc_media_player_get_chapter_count(m_pMp)>1;
   }
 
   int VLC::numChapters()
