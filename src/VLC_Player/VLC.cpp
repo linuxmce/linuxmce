@@ -368,6 +368,7 @@ namespace DCE
       }
 
     m_iChapter=0;
+    m_iPreviousAudioTrack=1; // Hopefully, this fixes single track audio files.
 
     if (sMediaURL.find("://") == string::npos)
       {
@@ -603,7 +604,8 @@ namespace DCE
     if (!m_pMp)
       return;
 
-    if (m_iPreviousAudioTrack == 0 || m_iPreviousAudioTrack == -1 || GetVLCAudioTrack() == -1 || GetVLCAudioTrack() == 0)
+    // Got rid of audio track 0 check, as this is a valid entry for audio files! grrrr libvlc!
+    if (m_iPreviousAudioTrack == -1 || GetVLCAudioTrack() == -1)
       {
 	// Do not set previous audio track.
       }
