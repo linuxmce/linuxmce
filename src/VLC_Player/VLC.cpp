@@ -367,6 +367,8 @@ namespace DCE
 	libvlc_media_player_release(m_pMp);
       }
 
+    m_iChapter=0;
+
     if (sMediaURL.find("://") == string::npos)
       {
 	sMediaURL = "file://" + sMediaURL;
@@ -687,12 +689,14 @@ namespace DCE
 
   void VLC::NextChapter()
   {
+    m_iChapter++;
     if (m_pMp)
       libvlc_media_player_next_chapter(m_pMp);
   }
   
   void VLC::PreviousChapter()
   {
+    m_iChapter--;
     if (m_pMp)
       libvlc_media_player_previous_chapter(m_pMp);
   }
@@ -753,7 +757,10 @@ namespace DCE
     if (!m_pMp)
       return false;
 
-    return libvlc_media_player_get_chapter(m_pMp);
+    return m_iChapter;
+    
+    // This seems to be _very_ broken, so we will keep chapter state, ourselves.
+    // return libvlc_media_player_get_chapter(m_pMp);
   }
 
   int VLC::GetCurrentTitle()
@@ -1029,6 +1036,7 @@ namespace DCE
   {
     if (!m_pMp)
       return;
+    m_iChapter=iChapter;
     libvlc_media_player_set_chapter(m_pMp,iChapter);
   }
 
