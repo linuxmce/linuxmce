@@ -588,32 +588,6 @@ void VLC_Player::DoTransportControls()
       // Media is no longer playing, most likely we fell off the end. Just return.
       return;
     }
-
-
-  // Generate OSD String
-  if (m_iMediaPlaybackSpeed == 0)
-    {
-      sDirection = "||";
-    }
-  else if (m_iMediaPlaybackSpeed == 1000)
-    {
-      sDirection = "|>";
-    }
-  else if (m_iMediaPlaybackSpeed < 0)
-    {
-      sDirection = "<<";
-    }
-  else if (m_iMediaPlaybackSpeed > 0)
-    {
-      sDirection = ">>";
-    }
-
-  sSpeed = StringUtils::itos(m_iMediaPlaybackSpeed / 1000) + "x";
-
-  sOSDStatus = sDirection + "    " + sSpeed;
-
-  // Update OSD
-  m_pVLC->OSD_Status(sOSDStatus);
   
   if ((m_iMediaPlaybackSpeed == 1000))
     {
@@ -693,6 +667,34 @@ void VLC_Player::DoTransportControls()
 	iNewTimeVal = m_pVLC->GetDuration();
       m_pVLC->SetTime(iNewTimeVal);
     }
+
+  // Generate OSD String
+  if (m_iMediaPlaybackSpeed == 0)
+    {
+      sDirection = "||";
+    }
+  else if (m_iMediaPlaybackSpeed == 1000)
+    {
+      sDirection = "|>";
+    }
+  else if (m_iMediaPlaybackSpeed < 0)
+    {
+      sDirection = "<<";
+    }
+  else if (m_iMediaPlaybackSpeed > 0)
+    {
+      sDirection = ">>";
+    }
+
+  sSpeed = StringUtils::itos(m_iMediaPlaybackSpeed / 1000) + "x";
+
+  sOSDStatus = sDirection + "    " + sSpeed + "   " + m_pVLC->OSD_Time(iNewTimeVal) + " / " + m_pVLC->OSD_Time(m_pVLC->GetCurrentDuration());
+
+  // Update OSD
+  m_pVLC->OSD_Status(sOSDStatus);
+
+
+
   Sleep(iSleepValue);
 
   m_pAlarmManager->AddRelativeAlarm(0,this,2,NULL);
