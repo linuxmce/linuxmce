@@ -101,7 +101,7 @@ if [[ "$Action" == "start" ]] ;then
 		mkdir -p "${WorkDir}/${Computer}_${BlockDevice}"
 
 		## Mount / Remount the dvd drive
-		if ! mount -t "smbfs" -o "ro,port=139,credentials=/usr/pluto/var/sambaCredentials.secret" "//$IPaddress/Optical_${BlockDevice}\$" "${WorkDir}/${Computer}_${BlockDevice}" ;then
+		if ! mount -t "cifs" -o "ro,port=139,credentials=/usr/pluto/var/sambaCredentials.secret" "//$IPaddress/Optical_${BlockDevice}\$" "${WorkDir}/${Computer}_${BlockDevice}" ;then
 			Log "Cannot mount the remote DVD"
 			exit 1
 		fi
