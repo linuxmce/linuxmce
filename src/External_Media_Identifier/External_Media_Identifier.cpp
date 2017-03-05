@@ -140,6 +140,10 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
 {    
   IdentifierBase* pIdentifier = NULL;
   int iPK_MediaType=0;
+  string sIdentifiedData;
+  const char* Data=NULL;
+  size_t iData_Size=0;
+  int iEK_Disc=0;
 
   IdentifyDisc::DiscType discType = m_pIdentifyDisc->Identify(sFilename);
 
@@ -153,6 +157,10 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
       pIdentifier = new IdentifierDVDMDR(sFilename, sID);
       iPK_MediaType=MEDIATYPE_pluto_DVD_CONST;
       break;
+    case IdentifyDisc::DiscType::BluRay:
+      pIdentifier = NULL;    // One does not exist yet, but we still want to set the disc type!
+      iPK_MediaType=MEDIATYPE_pluto_BD_CONST;
+      break;
     case IdentifyDisc::DiscType::UNKNOWN:
     default:
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not identify disc. Aborting");
@@ -160,30 +168,25 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
       return;
     }
 
-  if (pIdentifier==NULL)
+  if (pIdentifier!=NULL)
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Identify_Media(): pIdentifier is NULL");
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Init()");
+      if (!pIdentifier->Init())
+	return;
+      
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Identify()");
+      if (!pIdentifier->Identify())
+	return;
+      
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->GetIdentifiedData()");
+      sIdentifiedData = pIdentifier->GetIdentifiedData(); 
+      Data = pIdentifier->GetPictureData().data();
+      if (pIdentifier->GetPictureData().size() == 0)
+	Data = NULL;
+      iData_Size = pIdentifier->GetPictureData().size();
     }
 
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Init()");
-  if (!pIdentifier->Init())
-    return;
-
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Identify()");
-  if (!pIdentifier->Identify())
-    return;
-
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->GetIdentifiedData()");
-  string sIdentifiedData = pIdentifier->GetIdentifiedData();
-  
   sCMD_Result = "OK";
-  const char *Data = pIdentifier->GetPictureData().data();
-  if (pIdentifier->GetPictureData().size() == 0)
-    Data = NULL;
-
-  int iEK_Disc=0;
-
-  size_t iData_Size = pIdentifier->GetPictureData().size();
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling CMD_Media_Identified();");
 
