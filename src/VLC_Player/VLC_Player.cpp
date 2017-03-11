@@ -256,8 +256,8 @@ void VLC_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
   mediaInfo.m_iSubtitle = m_pVLC->GetSubtitle();
   string sIPTimeCodeInfo = mediaInfo.ToString();
   
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
-  EVENT_Media_Position_Changed(atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName, StringUtils::itos(mediaInfo.m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
+  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
+  // EVENT_Media_Position_Changed(atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName, StringUtils::itos(mediaInfo.m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
   
   m_pNotificationSocket->SendStringToAll( sIPTimeCodeInfo );
 }
@@ -289,8 +289,6 @@ void VLC_Player::StopTimecodeReporting()
 
 void VLC_Player::TimecodeReportingLoop()
 {
-  unsigned iWidth=0;
-  unsigned iHeight=0;
   while (m_bTimecodeReporting)
     {
       ReportTimecodeViaIP(m_pVLC->GetStreamID(),m_iMediaPlaybackSpeed);
@@ -392,6 +390,22 @@ void VLC_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char 
   cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 }
 
+/**
+ * Did this URL get passed from CMD_Start_Streaming? 
+ */
+bool VLC_Player::MediaURLIsStreaming(string sMediaURL)
+{
+  return sMediaURL.find("#sync") != string::npos;
+}
+
+/**
+ * Strip the #sync tag from the URL, because we've detected it, and no longer need it.
+ */
+string VLC_Player::StripSyncTagFromURL(string sMediaURL)
+{
+  return sMediaURL.substr(0,sMediaURL.size()-5); // #sync
+}
+
 //<-dceag-c37-b->
 
 /** @brief COMMAND: #37 - Play Media */
@@ -436,11 +450,15 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
   m_iPK_MediaType = iPK_MediaType;
 
+  if (MediaURLIsStreaming(sMediaURL))
+    {
+      sMediaURL = StripSyncTagFromURL(sMediaURL);
+    }
+
   if (m_pVLC->PlayURL(sMediaURL,iStreamID,sMediaPosition,sMediaInfo))
     {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
       EVENT_Playback_Started(sMediaURL,iStreamID,sMediaInfo,m_pVLC->m_sAudioInfo,m_pVLC->m_sVideoInfo);
-      // m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
       m_iMediaPlaybackSpeed=1000;
     }
   else
@@ -475,8 +493,6 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
       sCMD_Result="ERROR";
       return;
     }
-
-  // m_pVLC->Pause(); // so we don't inadvertently set audio channel to -1
   
   Position pPosition = Position(m_pVLC->GetCurrentTitle(),
 				m_pVLC->GetCurrentChapter(),
@@ -500,6 +516,23 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
   UnmountRemoteDVD();
   UnmountLocalBD();
   m_pVLC->SetPlaying(false); // This must be done after position query, otherwise we get incorrect data.
+
+  // Tell other targets to stop.
+  if (!m_sStreamingTargets.empty())
+    {
+      string::size_type pos=0;
+      string curTarget = StringUtils::Tokenize(m_sStreamingTargets,string(","),pos);
+      while (curTarget!="")
+	{
+	  int targetDevice = atoi(curTarget.c_str());
+	  DCE::CMD_Stop_Media cmd(m_dwPK_Device, targetDevice, iStreamID,sMediaPosition);
+	  SendCommandNoResponse(cmd);
+	  curTarget = StringUtils::Tokenize(m_sStreamingTargets,string(","),pos);
+	}
+      
+    }
+
+  m_sStreamingTargets.clear();
 
 }
 
@@ -579,7 +612,7 @@ void VLC_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 void VLC_Player::DoTransportControls()
 {
 
-  int64_t i=0, iSleepValue=0, iNumSleeps=0, iNewTimeVal=0;
+  int64_t iSleepValue=0, iNewTimeVal=0;
   string sOSDStatus, sSpeed, sDirection;
   m_pAlarmManager->CancelAlarmByType(2);
 
@@ -1395,6 +1428,19 @@ void VLC_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMed
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
   cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
   cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
+
+  m_sStreamingTargets=sStreamingTargets;
+
+  string::size_type pos=0;
+  string curTarget = StringUtils::Tokenize(sStreamingTargets,string(","),pos);
+  while (curTarget!="")
+    {
+      int targetDevice = atoi(curTarget.c_str());
+      DCE::CMD_Play_Media cmd(m_dwPK_Device, targetDevice, iPK_MediaType, iStreamID, sMediaPosition, sMediaURL + "#sync");
+      SendCommandNoResponse(cmd);
+      curTarget = StringUtils::Tokenize(sStreamingTargets,string(","),pos);
+    }
+  
 }
 
 //<-dceag-c259-b->
@@ -1577,6 +1623,7 @@ bool VLC_Player::MountLocalBD(string sURL) {
 	string sMountCommand = "mount " + sDrive + " " + sMount;
 	system(sMountCommand.c_str());
 	mountedLocalBluRays.push_back(sURL);
+	return true;
 }
 
 bool VLC_Player::UnmountLocalBD(string sURL) {
@@ -1592,6 +1639,7 @@ bool VLC_Player::UnmountLocalBD(string sURL) {
 		sUmountCommand = "umount " + sDrive;
 		system(sUmountCommand.c_str());
 	}
+	return true;
 }
 
 bool VLC_Player::UnmountLocalBD() {
@@ -1608,6 +1656,7 @@ bool VLC_Player::UnmountLocalBD() {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::UnmountLocalBD() no local BD mounted.");
       return false;
     }
+  return true;
 }
 
 bool VLC_Player::IsLocalBD(string sURL) {

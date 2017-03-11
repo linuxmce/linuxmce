@@ -69,6 +69,7 @@ namespace DCE
 
     int m_iMediaPlaybackSpeed;
     int m_iPK_MediaType; 
+    string m_sStreamingTargets;
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();
     string Audiosettings_get();
@@ -600,6 +601,10 @@ namespace DCE
     bool MountLocalBD(string sURL);
     bool UnmountLocalBD(string sURL);
     bool UnmountLocalBD();
+
+    // Play Media functions for streaming sources
+    bool MediaURLIsStreaming(string sMediaURL);
+    string StripSyncTagFromURL(string sMediaURL);
 
 	// From Xine_Player
 	// socket listener for playback info notification
