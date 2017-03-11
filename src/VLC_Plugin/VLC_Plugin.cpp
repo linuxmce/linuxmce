@@ -41,6 +41,8 @@ VLC_Plugin::VLC_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHand
 	, m_VLCMediaMutex("vlc media mutex")
 {
   m_VLCMediaMutex.Init(NULL);
+  m_pSyncSocket = new VLCSyncListener(string("m_pSyncSocket"), this);
+  // m_pSyncSocket->m_bSendOnlySocket = true; // misabled in API, but hey, this is what we need.
 }
 
 //<-dceag-dest-b->
@@ -83,6 +85,8 @@ bool VLC_Plugin::Register()
   m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
   
   RegisterMsgInterceptor(( MessageInterceptorFn )( &VLC_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
+
+  m_pSyncSocket->StartListening(13001);
   
   return Connect(PK_DeviceTemplate_get()); 
 }
