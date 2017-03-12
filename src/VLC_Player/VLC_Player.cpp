@@ -52,6 +52,9 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_pNotificationSocket = new XineNotification_SocketListener(string("m_pNotificationSocket"));
   m_pNotificationSocket->m_bSendOnlySocket = true; // one second
   m_bIsStreaming=false;
+  m_pSyncSocket=NULL;
+  m_bSyncConnected=false;
+  m_bSyncInStream=false;
 }
 
 //<-dceag-dest-b->
@@ -64,6 +67,20 @@ VLC_Player::~VLC_Player()
 
   UnmountRemoteDVD();
   UnmountLocalBD();
+
+  if (m_bSyncInStream)
+    {
+      StreamExit(m_pVLC->GetStreamID());
+      m_bSyncInStream=false;
+    }
+
+  if (m_pSyncSocket)
+    {
+      m_pSyncSocket->SendString("BYE");
+      delete m_pSyncSocket;
+      m_pSyncSocket=NULL;
+      m_bSyncConnected=false;
+    }
 
   if (m_config)
     {
@@ -97,6 +114,12 @@ bool VLC_Player::Connect(int iPK_DeviceTemplate)
   LoggerWrapper::GetInstance()->Write(LV_STATUS, "Configured port for time/speed notification is: %i, IP is %s", iPort, m_sIPofMD.c_str());
   m_pNotificationSocket->StartListening (iPort);
   EVENT_Playback_Completed("",0,false);  // In case media plugin thought something was playing, let it know that there's not
+
+  // Connect to sync socket, and register my device ID.
+  m_pSyncSocket = new PlainClientSocket("dcerouter:13001");
+  string sIgnoredResponse = m_pSyncSocket->SendReceiveString("EVENT "+StringUtils::itos(m_dwPK_Device));
+  sIgnoredResponse.clear();
+  m_bSyncConnected=true;
 
   return true;
 }
@@ -470,6 +493,11 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
       EVENT_Playback_Completed(sMediaURL,iStreamID,true);
     }
 
+  if (m_bIsStreaming && m_bSyncConnected)
+    {
+      StreamEnter(iStreamID);
+    }
+
 }
 
 //<-dceag-c38-b->
@@ -531,6 +559,11 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 	  curTarget = StringUtils::Tokenize(m_sStreamingTargets,string(","),pos);
 	}
       
+    }
+
+  if (m_bSyncInStream)
+    {
+      StreamExit(iStreamID);
     }
 
   m_bIsStreaming=false;
@@ -1771,3 +1804,40 @@ bool VLC_Player::UnmountRemoteDVD() {
     }
 }
 
+void VLC_Player::StreamEnter(int iStreamID)
+{
+  if (!m_pSyncSocket)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamEnter - Attempted stream entry on a NULL socket. Ignoring.");
+      return;
+    }
+
+  if (!m_bSyncConnected)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamEnter - Attempted stream entry on a disconnected socket. Ignoring.");
+      return;
+    }
+
+  m_pSyncSocket->SendString("STREAM_ENTER "+StringUtils::itos(iStreamID));
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StreamEnter - Entered stream %d",iStreamID);
+
+}
+
+void VLC_Player::StreamExit(int iStreamID)
+{
+  if (!m_pSyncSocket)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamExit - Attempted stream entry on a NULL socket. Ignoring.");
+      return;
+    }
+
+  if (!m_bSyncConnected)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamExit - Attempted stream entry on a disconnected socket. Ignoring.");
+      return;
+    }
+
+  m_pSyncSocket->SendString("STREAM_EXIT "+StringUtils::itos(iStreamID));
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StreamExit - Left stream %d",iStreamID);
+
+}
