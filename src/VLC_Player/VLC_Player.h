@@ -69,6 +69,7 @@ namespace DCE
 
     int m_iMediaPlaybackSpeed;
     int m_iPK_MediaType; 
+    bool m_bIsStreaming;
     string m_sStreamingTargets;
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();

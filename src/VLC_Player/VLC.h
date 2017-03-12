@@ -82,7 +82,7 @@ namespace DCE
     bool init();
     bool CreateWindow();
     bool Minimize();
-    bool PlayURL(string sMediaURL, int iStreamID, string sMediaPosition, string& sMediaInfo);
+    bool PlayURL(string sMediaURL, int iStreamID, string sMediaPosition, string& sMediaInfo, bool bIsStreaming);
     void Stop();
     float GetDuration();
     int64_t GetCurrentDuration();
