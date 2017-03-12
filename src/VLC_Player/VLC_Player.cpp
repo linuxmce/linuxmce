@@ -51,7 +51,7 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_VLCMutex.Init(NULL);
   m_pNotificationSocket = new XineNotification_SocketListener(string("m_pNotificationSocket"));
   m_pNotificationSocket->m_bSendOnlySocket = true; // one second
-
+  m_bIsStreaming=false;
 }
 
 //<-dceag-dest-b->
@@ -452,14 +452,15 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
   if (MediaURLIsStreaming(sMediaURL))
     {
+      m_bIsStreaming=true;
       sMediaURL = StripSyncTagFromURL(sMediaURL);
     }
 
-  if (m_pVLC->PlayURL(sMediaURL,iStreamID,sMediaPosition,sMediaInfo))
+  if (m_pVLC->PlayURL(sMediaURL,iStreamID,sMediaPosition,sMediaInfo,m_bIsStreaming))
     {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
       EVENT_Playback_Started(sMediaURL,iStreamID,sMediaInfo,m_pVLC->m_sAudioInfo,m_pVLC->m_sVideoInfo);
-      m_iMediaPlaybackSpeed=1000;
+      m_iMediaPlaybackSpeed=m_bIsStreaming ? 0 : 1000;
     }
   else
     {
@@ -532,6 +533,7 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
       
     }
 
+  m_bIsStreaming=false;
   m_sStreamingTargets.clear();
 
 }
