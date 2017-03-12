@@ -75,6 +75,7 @@ namespace DCE
     bool m_bIsStreaming;
     bool m_bSyncConnected;
     bool m_bSyncInStream;
+    bool m_bSyncInitialMaster;
     string m_sStreamingTargets;
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();
@@ -90,6 +91,9 @@ namespace DCE
     void TimecodeReportingLoop();
     void StreamEnter(int iStreamID);
     void StreamExit(int iStreamID);
+    void GetControlOfStream();
+    void SendMediaPositionToAllPlayers(string sMediaPosition);
+
     
     //<-dceag-h-b->
     /*

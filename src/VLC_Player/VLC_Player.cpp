@@ -55,6 +55,7 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_pSyncSocket=NULL;
   m_bSyncConnected=false;
   m_bSyncInStream=false;
+  m_bSyncInitialMaster=false;
 }
 
 //<-dceag-dest-b->
@@ -496,6 +497,12 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
   if (m_bIsStreaming && m_bSyncConnected)
     {
       StreamEnter(iStreamID);
+    }
+
+  if (m_bSyncInitialMaster)
+    {
+      GetControlOfStream();
+      // Call for setting timecode here
     }
 
 }
@@ -1465,6 +1472,7 @@ void VLC_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMed
   cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
 
   m_sStreamingTargets=sStreamingTargets;
+  m_bSyncInitialMaster=true;
 
   string::size_type pos=0;
   string curTarget = StringUtils::Tokenize(sStreamingTargets,string(","),pos);
@@ -1827,17 +1835,68 @@ void VLC_Player::StreamExit(int iStreamID)
 {
   if (!m_pSyncSocket)
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamExit - Attempted stream entry on a NULL socket. Ignoring.");
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamExit - Attempted stream exit on a NULL socket. Ignoring.");
       return;
     }
 
   if (!m_bSyncConnected)
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamExit - Attempted stream entry on a disconnected socket. Ignoring.");
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamExit - Attempted stream exit on a disconnected socket. Ignoring.");
       return;
     }
 
   m_pSyncSocket->SendString("STREAM_EXIT "+StringUtils::itos(iStreamID));
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StreamExit - Left stream %d",iStreamID);
 
+}
+
+void VLC_Player::GetControlOfStream()
+{
+  if (!m_pSyncSocket)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::GetControlOfStream - Attempted stream grab on a NULL socket. Ignoring.");
+      return;
+    }
+
+  if (!m_bSyncConnected)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::GetControlOfStream - Attempted stream grab on a disconnected socket. Ignoring.");
+      return;
+    }
+
+  if (!m_bSyncInStream)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::GetControlOfStream - Attempted stream grab when not enrolled in a stream. Ignoring.");
+      return;
+    }
+  
+  m_pSyncSocket->SendString("GC");
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::GetControlOfStream - Grabbed control of stream %d",m_pVLC->GetStreamID());
+
+}
+
+void VLC_Player::SendMediaPositionToAllPlayers(string sMediaPosition)
+{
+  if (!m_pSyncSocket)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::SendMediaPositionToAllPlayers - Attempted stream scoot on a NULL socket. Ignoring.");
+      return;
+    }
+
+  if (!m_bSyncConnected)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::SendMediaPositionToAllPlayers - Attempted stream scoot on a disconnected socket. Ignoring.");
+      return;
+    }
+
+  if (!m_bSyncInStream)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::SendMediaPositionToAllPlayers - Attempted stream scoot when not enrolled in a stream. Ignoring.");
+      return;
+    }
+
+  m_pSyncSocket->SendString("T:"+sMediaPosition);
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SendMediaPositionToAllPlayers - Send position %s to all players.",sMediaPosition.c_str());
+  
+  
 }
