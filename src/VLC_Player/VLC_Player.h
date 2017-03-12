@@ -24,6 +24,7 @@
 #include "AlarmManager.h"
 #include "DCE/SocketListener.h"
 #include "DCE/ServerSocket.h"
+#include "DCE/PlainClientSocket.h"
 
 #define ALARM_CHECK_STATUS 1
 
@@ -41,6 +42,8 @@ namespace DCE
     vector<string> mountedLocalBluRays;
 
     string m_sIPofMD;
+
+    PlainClientSocket* m_pSyncSocket;
     
     // Private methods
   public:
@@ -70,6 +73,8 @@ namespace DCE
     int m_iMediaPlaybackSpeed;
     int m_iPK_MediaType; 
     bool m_bIsStreaming;
+    bool m_bSyncConnected;
+    bool m_bSyncInStream;
     string m_sStreamingTargets;
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();
@@ -83,6 +88,8 @@ namespace DCE
     void StartTimecodeReporting();
     void StopTimecodeReporting();
     void TimecodeReportingLoop();
+    void StreamEnter(int iStreamID);
+    void StreamExit(int iStreamID);
     
     //<-dceag-h-b->
     /*
