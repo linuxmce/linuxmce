@@ -25,6 +25,7 @@
 #include "DCE/SocketListener.h"
 #include "DCE/ServerSocket.h"
 #include "DCE/PlainClientSocket.h"
+#include "Position.h"
 
 #define ALARM_CHECK_STATUS 1
 
@@ -52,7 +53,7 @@ namespace DCE
     VLC* m_pVLC;
     bool m_bTimecodeReporting;
     pthread_t m_timecodeThread;
-    
+    pthread_t m_syncListenerThread;
     
     //<-dceag-const-b->
   public:
@@ -76,6 +77,8 @@ namespace DCE
     bool m_bSyncConnected;
     bool m_bSyncInStream;
     bool m_bSyncInitialMaster;
+    bool m_bSyncListenerRunning;
+    bool m_bSync;
     string m_sStreamingTargets;
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();
@@ -93,7 +96,11 @@ namespace DCE
     void StreamExit(int iStreamID);
     void GetControlOfStream();
     void SendMediaPositionToAllPlayers(string sMediaPosition);
-
+    void StartSyncListenerThread();
+    void StopSyncListenerThread();
+    void SyncListenerLoop();
+    bool ParseSyncResponse(string sResponse, Position& position, uint64_t& dwTimecode);
+    void Sync(Position position, uint64_t dwTimeCode);
     
     //<-dceag-h-b->
     /*
