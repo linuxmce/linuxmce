@@ -41,8 +41,8 @@ VLC_Plugin::VLC_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHand
 	, m_VLCMediaMutex("vlc media mutex")
 {
   m_VLCMediaMutex.Init(NULL);
-  m_pSyncSocket = new VLCSyncListener(string("m_pSyncSocket"), this);
-  // m_pSyncSocket->m_bSendOnlySocket = true; // misabled in API, but hey, this is what we need.
+  m_pSyncSocket = new VLCSyncListener(string("m_pSyncSocket"));
+  m_pSyncSocket->m_bSendOnlySocket=true; // Socket receives nothing. So socket won't ever block.
 }
 
 //<-dceag-dest-b->
@@ -119,6 +119,12 @@ void VLC_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 }
 
 //<-dceag-sample-b->!
+
+ReceivedMessageResult VLC_Plugin::ReceivedMessage(class Message *pMessage)
+{
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"RRRRRRRRRRRRRR: F: %d T: %d I: %d Y: %d",pMessage->m_dwPK_Device_From,pMessage->m_dwPK_Device_To,pMessage->m_dwID,pMessage->m_dwMessage_Type);
+  return rmr_NotProcessed;
+}
 
 /**
  * MediaHandlerBase implementations, below.

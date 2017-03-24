@@ -322,7 +322,9 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC::Media_Callbacks(): MEDIA VOUT!!");
 	self->m_iPreviousAudioTrack = self->GetVLCAudioTrack();
 	if (self->m_pVLC_Player->m_bIsStreaming)
-	  self->Pause();
+	  {
+	    self->Pause();
+	  }
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC::Media_Callbacks(): Previous audio track reset to %d",self->m_iPreviousAudioTrack);
 	self->ReportPlaybackStarted();
 	self->UpdateNav();

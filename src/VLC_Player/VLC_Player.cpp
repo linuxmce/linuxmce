@@ -27,13 +27,20 @@ using namespace DCE;
 
 #include "pluto_main/Define_Button.h"
 #include "../Xine_Player/XineMediaInfo.h"
-#include "Position.h"
 
 void * SpawnTimecodeReportingThread(void * Arg)
 {
   DCE::VLC_Player *pVLC_Player = (DCE::VLC_Player *) Arg;
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
   pVLC_Player->TimecodeReportingLoop();
+  return NULL;
+}
+
+void * SpawnSyncListenerThread(void * Arg)
+{
+  DCE::VLC_Player *pVLC_Player = (DCE::VLC_Player *) Arg;
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  pVLC_Player->SyncListenerLoop();
   return NULL;
 }
 
@@ -56,6 +63,8 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_bSyncConnected=false;
   m_bSyncInStream=false;
   m_bSyncInitialMaster=false;
+  m_bSyncListenerRunning=false;
+  m_bSync=false;
 }
 
 //<-dceag-dest-b->
@@ -78,9 +87,15 @@ VLC_Player::~VLC_Player()
   if (m_pSyncSocket)
     {
       m_pSyncSocket->SendString("BYE");
+      m_pSyncSocket->Disconnect();
       delete m_pSyncSocket;
       m_pSyncSocket=NULL;
       m_bSyncConnected=false;
+    }
+
+  if (m_bSyncListenerRunning)
+    {
+      StopSyncListenerThread();
     }
 
   if (m_config)
@@ -118,8 +133,12 @@ bool VLC_Player::Connect(int iPK_DeviceTemplate)
 
   // Connect to sync socket, and register my device ID.
   m_pSyncSocket = new PlainClientSocket("dcerouter:13001");
+  m_pSyncSocket->Connect();
   string sIgnoredResponse = m_pSyncSocket->SendReceiveString("EVENT "+StringUtils::itos(m_dwPK_Device));
   sIgnoredResponse.clear();
+
+  StartSyncListenerThread();
+
   m_bSyncConnected=true;
 
   return true;
@@ -497,12 +516,13 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
   if (m_bIsStreaming && m_bSyncConnected)
     {
       StreamEnter(iStreamID);
+      m_bSyncInStream=true;
     }
 
   if (m_bSyncInitialMaster)
     {
       GetControlOfStream();
-      // Call for setting timecode here
+      SendMediaPositionToAllPlayers(sMediaPosition);
     }
 
 }
@@ -1554,6 +1574,12 @@ void VLC_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
       // If we are streaming, we should re-do the CMD_Start_Streaming here (FIXME)
       CMD_Play_Media(0,m_pVLC->GetStreamID(),position.toString(),m_pVLC->GetMediaURL(),sCMD_Result,pMessage);
     }
+
+  if (m_bIsStreaming)
+    {
+      SendMediaPositionToAllPlayers(position.toString()); // Yes, everybody sends, but only the one who has control is broadcast.
+    }
+
 }
 
 //<-dceag-c548-b->
@@ -1898,5 +1924,112 @@ void VLC_Player::SendMediaPositionToAllPlayers(string sMediaPosition)
   m_pSyncSocket->SendString("T:"+sMediaPosition);
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SendMediaPositionToAllPlayers - Send position %s to all players.",sMediaPosition.c_str());
   
-  
+}
+
+void VLC_Player::StartSyncListenerThread()
+{
+  if (m_bSyncListenerRunning)
+    return; // Do not start another thread if one is already running.
+
+  m_bSyncListenerRunning=true;
+
+  if (pthread_create(&m_syncListenerThread, NULL, SpawnSyncListenerThread, (void *)this))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StartSyncListenerThread() - could not start sync listener thread.");
+      return;
+    }
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StartSyncListenerThread() - Thread started.");
+
+  usleep(10000);
+}
+
+void VLC_Player::StopSyncListenerThread()
+{
+  if (m_bSyncListenerRunning && m_syncListenerThread)
+    {
+      m_bSyncListenerRunning=false;
+      pthread_join(m_syncListenerThread,NULL);
+    }
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StopSyncListenerThread() - Thread stopped.");
+
+}
+
+bool VLC_Player::ParseSyncResponse(string sResponse, Position& position, uint64_t& dwTimecode)
+{
+  string::size_type pos=2; // Ignore T| when tokenizing.
+ 
+  if (sResponse.find("T|") == string::npos)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Malformed timecode %s",sResponse.c_str());
+      return false;
+    }
+
+  position = Position(StringUtils::Tokenize(sResponse, "|", pos));
+  dwTimecode = stoull(StringUtils::Tokenize(sResponse,"|",pos));
+  return true;
+}
+
+void VLC_Player::Sync(Position position, uint64_t dwTimecode)
+{
+  struct timespec t;
+  uint64_t current_time = 0;
+
+  CMD_Set_Media_Position(m_pVLC->GetStreamID(), position.toString());
+
+  while (current_time < dwTimecode)
+    {
+      clock_gettime(CLOCK_REALTIME,&t);
+      current_time = t.tv_sec;
+      usleep(10000);
+    }
+
+  // and restart the media.
+  CMD_Restart_Media(m_pVLC->GetStreamID());
+
+}
+
+void VLC_Player::SyncListenerLoop()
+{
+  string sResponse;
+  uint64_t dwTimecode=0;
+  Position position;
+
+  m_bSyncListenerRunning=true;
+
+  while(m_bSyncListenerRunning)
+    {
+
+      if (!m_pSyncSocket || !m_bSyncConnected)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::SyncListenerLoop - m_pSyncSocket is dead. stopping thread.");
+	  m_bSyncListenerRunning=false;
+	  return;
+	}
+
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Attempt read.");
+
+      if (m_pSyncSocket->ReceiveString(sResponse, 1))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Received string: %s",sResponse.c_str());
+	  m_pSyncSocket->SendString("OK");
+	  if (ParseSyncResponse(sResponse,position,dwTimecode))
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Received Sync Packet Response - Position %s - Timecode %llu",position.toString().c_str(),dwTimecode);
+	      if (!m_bSyncInitialMaster)
+		{
+		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Synchronizing.");
+		  Sync(position,dwTimecode);
+		}
+	      else
+		{
+		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Ignoring sync response packet, as I am master.");
+		}
+	    }
+	}
+
+      usleep(10000);
+    }
+
 }
