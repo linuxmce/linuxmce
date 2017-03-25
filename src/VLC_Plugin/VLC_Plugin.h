@@ -37,6 +37,9 @@ namespace DCE
 //<-dceag-decl-e->
 		// Private member variables
 	  pluto_pthread_mutex_t m_VLCMediaMutex;
+	  
+	  bool m_bSyncReporting;
+	  pthread_t m_tSyncThread;
 
 		// Private methods
 public:
@@ -52,7 +55,7 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-
+		virtual void CreateChildren();
 		virtual ReceivedMessageResult ReceivedMessage(class Message *pMessage);
 
 	protected:
@@ -62,9 +65,6 @@ public:
 		class VLCSyncListener;
 
 		VLCSyncListener *m_pSyncSocket;
-
-		string m_sSyncedTimecode;
-		int m_iSyncedStreamID;
 
 		// MediaHandlerBase implementations
 		/**
@@ -92,6 +92,13 @@ public:
 		VLCMediaStream *ConvertToVLCMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
 		
 		bool ConfirmSourceIsADestination(string &sMRL,VLCMediaStream *pVLCMediaStream,int PK_Device_Drive);
+
+		// Sync thread routines
+		void StartSyncReporting();
+		void StopSyncReporting();
+		void SyncReportingLoop();
+		
+		
 
 		
 //<-dceag-h-b->

@@ -33,6 +33,14 @@ using namespace DCE;
 #include "pluto_main/Define_DesignObj.h"
 #include "pluto_main/Define_Variable.h"
 
+void * SpawnSyncThread(void * Arg)
+{
+  DCE::VLC_Plugin *pVLC_Plugin = (DCE::VLC_Plugin *) Arg;
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  pVLC_Plugin->SyncReportingLoop();
+  return NULL;
+}
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 VLC_Plugin::VLC_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -65,6 +73,11 @@ bool VLC_Plugin::GetConfig()
 	return true;
 }
 
+void VLC_Plugin::CreateChildren()
+{
+  Sleep(500);
+}
+
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
 bool VLC_Plugin::Register()
@@ -87,7 +100,7 @@ bool VLC_Plugin::Register()
   RegisterMsgInterceptor(( MessageInterceptorFn )( &VLC_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
 
   m_pSyncSocket->StartListening(13001);
-  
+
   return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -186,6 +199,8 @@ class MediaStream *VLC_Plugin::CreateMediaStream( class MediaHandlerInfo *pMedia
   if ( pMediaDevice_PassedIn && pMediaDevice_PassedIn->m_pDeviceData_Router->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Disk_Drive_CONST )
     pVLCMediaStream->setIsMovable(false);
 
+  StartSyncReporting();	// This is okay, because if we've already started a stream, then we don't restart the sync listener.
+
   return pVLCMediaStream;
 }
 
@@ -211,7 +226,7 @@ VLCMediaStream *VLC_Plugin::ConvertToVLCMediaStream(MediaStream *pMediaStream, s
 bool VLC_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 {
   PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
-  
+
   LoggerWrapper::GetInstance()->Write( LV_STATUS, "VLC_Plugin::StartMedia() Starting media stream playback. pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
   
   VLCMediaStream *pVLCMediaStream = NULL;
@@ -392,6 +407,8 @@ bool VLC_Plugin::StopMedia( class MediaStream *pMediaStream )
 					   pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device);
     }
   
+  StopSyncReporting();
+
   return MediaHandlerBase::StopMedia(pMediaStream);
 }
 
@@ -533,6 +550,57 @@ bool VLC_Plugin::ConfirmSourceIsADestination(string &sMRL,VLCMediaStream *pVLCMe
   
   pVLCMediaStream->m_pMediaDevice_Source = pMediaDevice_VLC;
   return true;
+}
+
+void VLC_Plugin::StartSyncReporting()
+{
+  if (m_bSyncReporting)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"SSSS - Already running.");
+      return; // Already started
+    }
+
+  if (pthread_create(&m_tSyncThread, NULL, SpawnSyncThread, (void *)this))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Plugin::StartSyncThread - Unable to spawn sync output thread");
+      return;
+    }
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Plugin::StartSyncThread - Started thread successfully.");
+
+  m_bSyncReporting=true;
+  usleep(10000);
+  return;
+}
+
+void VLC_Plugin::StopSyncReporting()
+{
+  if (m_bSyncReporting && m_tSyncThread)
+    {
+      m_bSyncReporting=false;
+      pthread_join(m_tSyncThread,NULL);
+    }
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Plugin::StopSyncThread - Stopped thread successfully.");
+
+}
+
+void VLC_Plugin::SyncReportingLoop()
+{
+  struct timespec st;
+  time_t sec;
+
+  while (m_bSyncReporting)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"SyncReportingLoop - Report.");
+      clock_gettime(CLOCK_REALTIME,&st);
+      if (!(st.tv_sec % 5))
+	{
+	  sec = st.tv_sec;
+	}
+      m_pSyncSocket->SendToAll(StringUtils::i64tos(sec+5));
+      Sleep(250);
+    }
 }
  
 /*
