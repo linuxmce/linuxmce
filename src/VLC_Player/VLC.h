@@ -96,6 +96,8 @@ namespace DCE
     void UpdateStatus();
     void Pause();
     void Restart();
+    void SyncPause();
+    void SyncRestart();
     void SetRate(float fMediaPlayBackSpeed);
     void JumpFwd(int iMult);
     void JumpBack(int iMult);

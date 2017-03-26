@@ -32,15 +32,12 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-  class VLC_Plugin : public VLC_Plugin_Command, public MediaHandlerBase
+  class VLC_Plugin : public VLC_Plugin_Command, public MediaHandlerBase, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
 	  pluto_pthread_mutex_t m_VLCMediaMutex;
 	  
-	  bool m_bSyncReporting;
-	  pthread_t m_tSyncThread;
-
 		// Private methods
 public:
 		// Public member variables
@@ -56,7 +53,7 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 		virtual void CreateChildren();
-		virtual ReceivedMessageResult ReceivedMessage(class Message *pMessage);
+		/* virtual ReceivedMessageResult ReceivedMessage(class Message *pMessage); */
 
 	protected:
 		class Orbiter_Plugin *m_pOrbiter_Plugin;
@@ -65,6 +62,9 @@ public:
 		class VLCSyncListener;
 
 		VLCSyncListener *m_pSyncSocket;
+
+		class AlarmManager *m_pAlarmManager;
+		virtual void AlarmCallback(int id, void* param);
 
 		// MediaHandlerBase implementations
 		/**
@@ -92,13 +92,10 @@ public:
 		VLCMediaStream *ConvertToVLCMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
 		
 		bool ConfirmSourceIsADestination(string &sMRL,VLCMediaStream *pVLCMediaStream,int PK_Device_Drive);
-
-		// Sync thread routines
-		void StartSyncReporting();
-		void StopSyncReporting();
-		void SyncReportingLoop();
 		
-		
+		// Alarm callback to send sync timecode.
+		time_t m_dwSec;
+		void SendSync();
 
 		
 //<-dceag-h-b->
@@ -142,7 +139,7 @@ public:
 		      {
 			if ((*it)->SendString(sString))
 			  {
-			    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending data to: %s - %s",(*it)->m_sHostName.c_str(), sString.c_str());
+			    /* LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending data to: %s - %s",(*it)->m_sHostName.c_str(), sString.c_str()); */
 			  }
 			else  // failed to send to a client.
 			  {
