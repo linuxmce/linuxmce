@@ -323,7 +323,8 @@ namespace DCE
 	self->m_iPreviousAudioTrack = self->GetVLCAudioTrack();
 	if (self->m_pVLC_Player->m_bIsStreaming)
 	  {
-	    self->Pause();
+	    self->m_pVLC_Player->m_bSync=false;
+	    self->SyncPause();
 	  }
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC::Media_Callbacks(): Previous audio track reset to %d",self->m_iPreviousAudioTrack);
 	self->ReportPlaybackStarted();
@@ -615,7 +616,6 @@ namespace DCE
 
   int64_t VLC::GetTime()
   {
-    LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC::GetTime() - Time %lu returned from libvlc",libvlc_media_player_get_time(m_pMp));
     if (!IsPlaying())
       return -1;
     return libvlc_media_player_get_time(m_pMp);
@@ -646,6 +646,18 @@ namespace DCE
     libvlc_media_player_set_pause(m_pMp, 1);
   }
   
+  void VLC::SyncPause()
+  {
+    if (m_pMp)
+      libvlc_media_player_set_pause(m_pMp,1);
+  }
+
+  void VLC::SyncRestart()
+  {
+    if (m_pMp)
+      libvlc_media_player_set_pause(m_pMp,0);
+  }
+
   void VLC::Restart()
   {
     if (!m_pMp)

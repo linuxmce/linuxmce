@@ -28,6 +28,10 @@ using namespace DCE;
 #include "pluto_main/Define_Button.h"
 #include "../Xine_Player/XineMediaInfo.h"
 
+#include <sstream>
+#include <algorithm>
+#include <iterator>
+
 void * SpawnTimecodeReportingThread(void * Arg)
 {
   DCE::VLC_Player *pVLC_Player = (DCE::VLC_Player *) Arg;
@@ -42,6 +46,13 @@ void * SpawnSyncListenerThread(void * Arg)
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
   pVLC_Player->SyncListenerLoop();
   return NULL;
+}
+
+string join(const vector<string>& vec, const char* delim)
+{
+  stringstream res;
+  copy(vec.begin(), vec.end(), ostream_iterator<string>(res, delim));
+  return res.str();
 }
 
 //<-dceag-const-b->
@@ -61,8 +72,6 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_bIsStreaming=false;
   m_pSyncSocket=NULL;
   m_bSyncConnected=false;
-  m_bSyncInStream=false;
-  m_bSyncInitialMaster=false;
   m_bSyncListenerRunning=false;
   m_bSync=false;
 }
@@ -78,15 +87,8 @@ VLC_Player::~VLC_Player()
   UnmountRemoteDVD();
   UnmountLocalBD();
 
-  if (m_bSyncInStream)
-    {
-      StreamExit(m_pVLC->GetStreamID());
-      m_bSyncInStream=false;
-    }
-
   if (m_pSyncSocket)
     {
-      m_pSyncSocket->SendString("BYE");
       m_pSyncSocket->Disconnect();
       delete m_pSyncSocket;
       m_pSyncSocket=NULL;
@@ -134,8 +136,6 @@ bool VLC_Player::Connect(int iPK_DeviceTemplate)
   // Connect to sync socket, and register my device ID.
   m_pSyncSocket = new PlainClientSocket("dcerouter:13001");
   m_pSyncSocket->Connect();
-  string sIgnoredResponse = m_pSyncSocket->SendReceiveString("EVENT "+StringUtils::itos(m_dwPK_Device));
-  sIgnoredResponse.clear();
 
   StartSyncListenerThread();
 
@@ -209,6 +209,7 @@ bool VLC_Player::GetConfig()
 }
 
 //<-dceag-reg-b->
+
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
 bool VLC_Player::Register()
 //<-dceag-reg-e->
@@ -338,6 +339,30 @@ void VLC_Player::TimecodeReportingLoop()
       m_pVLC->UpdateTracks();
       Sleep(DATA_Get_Time_Code_Report_Frequency()*1000);
     }
+}
+
+void VLC_Player::BuildOtherStreamingTargets(string sStreamingTargets)
+{
+  vector<string> vectStreamingTargets;
+  vector<string> vectOtherStreamingTargets;
+  StringUtils::Tokenize(sStreamingTargets,",",vectStreamingTargets);
+
+  for (vector<string>::iterator it=vectStreamingTargets.begin(); it!=vectStreamingTargets.end(); ++it)
+    {
+      string sDevice = *it;
+      long dwPK_Device = atoi(sDevice.c_str());
+      if (dwPK_Device == m_dwPK_Device)
+	{
+	  continue;
+	}
+      else
+	{
+	  vectOtherStreamingTargets.push_back(StringUtils::itos(dwPK_Device));
+	}
+    }
+  
+  m_sOtherStreamingTargets = join(vectOtherStreamingTargets,",");
+
 }
 
 /*
@@ -513,18 +538,6 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
       EVENT_Playback_Completed(sMediaURL,iStreamID,true);
     }
 
-  if (m_bIsStreaming && m_bSyncConnected)
-    {
-      StreamEnter(iStreamID);
-      m_bSyncInStream=true;
-    }
-
-  if (m_bSyncInitialMaster)
-    {
-      GetControlOfStream();
-      SendMediaPositionToAllPlayers(sMediaPosition);
-    }
-
 }
 
 //<-dceag-c38-b->
@@ -588,11 +601,6 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
       
     }
 
-  if (m_bSyncInStream)
-    {
-      StreamExit(iStreamID);
-    }
-
   m_bIsStreaming=false;
   m_sStreamingTargets.clear();
 
@@ -626,10 +634,16 @@ void VLC_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
       return;      
     }
 
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Pause_Media_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   m_pVLC->SetRate(0.0);
   m_pVLC->Pause();
   m_iMediaPlaybackSpeed=0;
-
+  
 }
 
 //<-dceag-c40-b->
@@ -659,6 +673,12 @@ void VLC_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 					  iStreamID);
       sCMD_Result="ERROR";
       return;      
+    }
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Restart_Media_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
     }
 
   m_pVLC->SetRate(1.0);
@@ -725,28 +745,6 @@ void VLC_Player::DoTransportControls()
       break;
     }
   
-
-  // for (i=0;i<iNumSleeps;++i)
-  //   {
-  //     m_pVLC->Pause();
-  //     if (m_iMediaPlaybackSpeed < 0)
-  //     	{
-  // 	  iNewTimeVal = (m_pVLC->GetTime())-abs(m_iMediaPlaybackSpeed);
-  // 	  if (iNewTimeVal <= 0)
-  // 	    iNewTimeVal = 0;
-  //     	  m_pVLC->SetTime(iNewTimeVal);
-  //     	}
-  //     else
-  //     	{
-  // 	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Going forward by %d - new time is %d",m_iMediaPlaybackSpeed,m_pVLC->GetTime()+m_iMediaPlaybackSpeed);
-  // 	  iNewTimeVal = (m_pVLC->GetTime())+abs(m_iMediaPlaybackSpeed);
-  // 	  if (iNewTimeVal >= m_pVLC->GetCurrentDuration())
-  // 	    iNewTimeVal = m_pVLC->GetDuration();
-  //     	  m_pVLC->SetTime(iNewTimeVal);	
-  //     	}
-  //     Sleep(iSleepValue);
-  //   }
-
   m_pVLC->Pause();
   if (m_iMediaPlaybackSpeed < 0)
     {
@@ -826,6 +824,12 @@ void VLC_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 
   m_iMediaPlaybackSpeed=iMediaPlaybackSpeed;
 
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Change_Playback_Speed_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID, iMediaPlaybackSpeed, bReport);
+      SendCommandNoResponse(cmd);
+    }
+
   if (iMediaPlaybackSpeed==0)
     {
       m_pVLC->SetRate(0.0);
@@ -865,6 +869,12 @@ void VLC_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStr
       return;
     }
   
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Jump_to_Position_in_Stream_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, sValue_To_Assign, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   if (firstChar=='+')
     {
       int64_t currentTime = m_pVLC->GetTime();
@@ -909,6 +919,12 @@ void VLC_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Re
       return;
     }
 
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Skip_Fwd_ChannelTrack_Greater_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   m_pVLC->NextChapter();
 
 }
@@ -931,6 +947,12 @@ void VLC_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Res
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Skip_Back_ChannelTrack_Lower(iStreamID=%i) - m_pVLC == NULL",iStreamID);
       sCMD_Result="ERROR";
       return;
+    }
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Skip_Back_ChannelTrack_Lower_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
     }
 
   m_pVLC->PreviousChapter();
@@ -959,6 +981,12 @@ void VLC_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
   if (!m_pVLC)
     return; // do nothing.
   
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Jump_Position_In_Playlist_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, sValue_To_Assign, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   // Resume playback at normal speed, if needed.
   if (m_iMediaPlaybackSpeed!=1000)
     {
@@ -1035,6 +1063,7 @@ void VLC_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
 void VLC_Player::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c81-e->
 {
+  // TODO: Implement this
   cout << "Need to implement command #81 - Navigate Next" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
@@ -1049,6 +1078,7 @@ void VLC_Player::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pM
 void VLC_Player::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c82-e->
 {
+  // TODO: Implement this
   cout << "Need to implement command #82 - Navigate Prev" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
@@ -1095,6 +1125,8 @@ void VLC_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,i
       return;
     }
 
+  // Stream forwarding isn't required for this command.
+
   *pData = FileUtils::ReadFileIntoBuffer("/tmp/shot.png",size);
   *iData_Size = size;
   FileUtils::DelFile("/tmp/shot.png");
@@ -1129,6 +1161,12 @@ void VLC_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Re
       return;
     }
 
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Goto_Media_Menu_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID, iMenuType);
+      SendCommandNoResponse(cmd);
+    }
+
   m_pVLC->GotoMediaMenu(iMenuType);
 
 }
@@ -1145,6 +1183,13 @@ void VLC_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 {
   cout << "Need to implement command #92 - Pause" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Pause_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   CMD_Pause_Media(0);
 }
 
@@ -1165,6 +1210,13 @@ void VLC_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message 
   cout << "Parm #203 - Eject=" << bEject << endl;
   string sMediaPosition;
   CMD_Stop_Media(0,&sMediaPosition);
+  
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Stop_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID, false);
+      SendCommandNoResponse(cmd);
+    }
+  
 }
 
 //<-dceag-c126-b->
@@ -1176,6 +1228,13 @@ void VLC_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
 //<-dceag-c126-e->
 {
   cout << "Need to implement command #126 - Guide" << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Guide_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets);
+      SendCommandNoResponse(cmd);
+    }
+
   CMD_Goto_Media_Menu(0,0);
 }
 
@@ -1192,6 +1251,13 @@ void VLC_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
   cout << "Need to implement command #139 - Play" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   CMD_Play_Media(0,1,"","");
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Play_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
 }
 
 //<-dceag-c140-b->
@@ -1209,6 +1275,12 @@ void VLC_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &s
   cout << "Need to implement command #140 - Audio Track" << endl;
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Audio_Track_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, sValue_To_Assign, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
 
   if (sValue_To_Assign=="")
     {
@@ -1238,6 +1310,12 @@ void VLC_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD
   cout << "Need to implement command #141 - Subtitle" << endl;
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Subtitle_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, sValue_To_Assign, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
 
   if (sValue_To_Assign=="")
     {
@@ -1279,6 +1357,13 @@ void VLC_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage
 {
   cout << "Need to implement command #190 - Enter/Go" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_EnterGo_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+  
   m_pVLC->EnterGo();
 }
 
@@ -1294,6 +1379,13 @@ void VLC_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage
 {
   cout << "Need to implement command #200 - Move Up" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Move_Up_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   m_pVLC->MoveUp();
 }
 
@@ -1309,6 +1401,13 @@ void VLC_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessa
 {
   cout << "Need to implement command #201 - Move Down" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Move_Down_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   m_pVLC->MoveDown();
 }
 
@@ -1324,6 +1423,13 @@ void VLC_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessa
 {
   cout << "Need to implement command #202 - Move Left" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Move_Left_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   m_pVLC->MoveLeft();
 }
 
@@ -1339,6 +1445,13 @@ void VLC_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMess
 {
   cout << "Need to implement command #203 - Move Right" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Move_Right_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   m_pVLC->MoveRight();
 }
 
@@ -1492,8 +1605,10 @@ void VLC_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMed
   cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
 
   m_sStreamingTargets=sStreamingTargets;
-  m_bSyncInitialMaster=true;
 
+  BuildOtherStreamingTargets(m_sStreamingTargets);
+
+  // TODO: Come back here, and try again with _DL
   string::size_type pos=0;
   string curTarget = StringUtils::Tokenize(sStreamingTargets,string(","),pos);
   while (curTarget!="")
@@ -1577,7 +1692,8 @@ void VLC_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
 
   if (m_bIsStreaming)
     {
-      SendMediaPositionToAllPlayers(position.toString()); // Yes, everybody sends, but only the one who has control is broadcast.
+      // SendMediaPositionToAllPlayers(position.toString()); // Yes, everybody sends, but only the one who has control is broadcast.
+      // TODO: Come back here and implement this!
     }
 
 }
@@ -1597,6 +1713,13 @@ void VLC_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message
   cout << "Need to implement command #548 - Menu" << endl;
   cout << "Parm #9 - Text=" << sText << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Menu_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, sText, iStreamID);
+      SendCommandNoResponse(cmd);
+    }
+
   CMD_Goto_Media_Menu(0,0);
 }
 
@@ -1840,90 +1963,18 @@ bool VLC_Player::UnmountRemoteDVD() {
 
 void VLC_Player::StreamEnter(int iStreamID)
 {
-  if (!m_pSyncSocket)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamEnter - Attempted stream entry on a NULL socket. Ignoring.");
-      return;
-    }
-
-  if (!m_bSyncConnected)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamEnter - Attempted stream entry on a disconnected socket. Ignoring.");
-      return;
-    }
-
-  m_pSyncSocket->SendString("STREAM_ENTER "+StringUtils::itos(iStreamID));
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StreamEnter - Entered stream %d",iStreamID);
-
 }
 
 void VLC_Player::StreamExit(int iStreamID)
 {
-  if (!m_pSyncSocket)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamExit - Attempted stream exit on a NULL socket. Ignoring.");
-      return;
-    }
-
-  if (!m_bSyncConnected)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StreamExit - Attempted stream exit on a disconnected socket. Ignoring.");
-      return;
-    }
-
-  m_pSyncSocket->SendString("STREAM_EXIT "+StringUtils::itos(iStreamID));
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StreamExit - Left stream %d",iStreamID);
-
 }
 
 void VLC_Player::GetControlOfStream()
 {
-  if (!m_pSyncSocket)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::GetControlOfStream - Attempted stream grab on a NULL socket. Ignoring.");
-      return;
-    }
-
-  if (!m_bSyncConnected)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::GetControlOfStream - Attempted stream grab on a disconnected socket. Ignoring.");
-      return;
-    }
-
-  if (!m_bSyncInStream)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::GetControlOfStream - Attempted stream grab when not enrolled in a stream. Ignoring.");
-      return;
-    }
-  
-  m_pSyncSocket->SendString("GC");
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::GetControlOfStream - Grabbed control of stream %d",m_pVLC->GetStreamID());
-
 }
 
 void VLC_Player::SendMediaPositionToAllPlayers(string sMediaPosition)
 {
-  if (!m_pSyncSocket)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::SendMediaPositionToAllPlayers - Attempted stream scoot on a NULL socket. Ignoring.");
-      return;
-    }
-
-  if (!m_bSyncConnected)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::SendMediaPositionToAllPlayers - Attempted stream scoot on a disconnected socket. Ignoring.");
-      return;
-    }
-
-  if (!m_bSyncInStream)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::SendMediaPositionToAllPlayers - Attempted stream scoot when not enrolled in a stream. Ignoring.");
-      return;
-    }
-
-  m_pSyncSocket->SendString("T:"+sMediaPosition);
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SendMediaPositionToAllPlayers - Send position %s to all players.",sMediaPosition.c_str());
-  
 }
 
 void VLC_Player::StartSyncListenerThread()
@@ -1956,29 +2007,23 @@ void VLC_Player::StopSyncListenerThread()
 
 }
 
-bool VLC_Player::ParseSyncResponse(string sResponse, Position& position, uint64_t& dwTimecode)
+bool VLC_Player::ParseSyncResponse(string sResponse)
 {
-  string::size_type pos=2; // Ignore T| when tokenizing.
- 
-  if (sResponse.find("T|") == string::npos)
+  time_t dwTimecode = stoull(sResponse);
+  if (dwTimecode != m_dwTimecode)
     {
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Malformed timecode %s",sResponse.c_str());
-      return false;
+      m_dwTimecode = dwTimecode;
+      return true;
     }
-
-  position = Position(StringUtils::Tokenize(sResponse, "|", pos));
-  dwTimecode = stoull(StringUtils::Tokenize(sResponse,"|",pos));
-  return true;
+  return false;
 }
 
-void VLC_Player::Sync(Position position, uint64_t dwTimecode)
+void VLC_Player::Sync()
 {
   struct timespec t;
-  uint64_t current_time = 0;
+  time_t current_time = 0;
 
-  CMD_Set_Media_Position(m_pVLC->GetStreamID(), position.toString());
-
-  while (current_time < dwTimecode)
+  while (current_time < m_dwTimecode)
     {
       clock_gettime(CLOCK_REALTIME,&t);
       current_time = t.tv_sec;
@@ -1986,46 +2031,25 @@ void VLC_Player::Sync(Position position, uint64_t dwTimecode)
     }
 
   // and restart the media.
-  CMD_Restart_Media(m_pVLC->GetStreamID());
+  m_bSync=true;
+  m_pVLC->SyncRestart();
 
 }
 
 void VLC_Player::SyncListenerLoop()
 {
   string sResponse;
-  uint64_t dwTimecode=0;
-  Position position;
 
   m_bSyncListenerRunning=true;
 
   while(m_bSyncListenerRunning)
     {
 
-      if (!m_pSyncSocket || !m_bSyncConnected)
+      if (m_pSyncSocket->ReceiveString(sResponse, -2))
 	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::SyncListenerLoop - m_pSyncSocket is dead. stopping thread.");
-	  m_bSyncListenerRunning=false;
-	  return;
-	}
-
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Attempt read.");
-
-      if (m_pSyncSocket->ReceiveString(sResponse, 1))
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Received string: %s",sResponse.c_str());
-	  m_pSyncSocket->SendString("OK");
-	  if (ParseSyncResponse(sResponse,position,dwTimecode))
+	  if (!m_bSync && ParseSyncResponse(sResponse))
 	    {
-	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Received Sync Packet Response - Position %s - Timecode %llu",position.toString().c_str(),dwTimecode);
-	      if (!m_bSyncInitialMaster)
-		{
-		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Synchronizing.");
-		  Sync(position,dwTimecode);
-		}
-	      else
-		{
-		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::SyncListenerLoop - Ignoring sync response packet, as I am master.");
-		}
+	      Sync();
 	    }
 	}
 

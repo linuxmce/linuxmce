@@ -43,8 +43,9 @@ namespace DCE
     vector<string> mountedLocalBluRays;
 
     string m_sIPofMD;
-
     PlainClientSocket* m_pSyncSocket;
+
+    time_t m_dwTimecode;
     
     // Private methods
   public:
@@ -75,16 +76,16 @@ namespace DCE
     int m_iPK_MediaType; 
     bool m_bIsStreaming;
     bool m_bSyncConnected;
-    bool m_bSyncInStream;
-    bool m_bSyncInitialMaster;
     bool m_bSyncListenerRunning;
     bool m_bSync;
     string m_sStreamingTargets;
+    string m_sOtherStreamingTargets;
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();
     string Audiosettings_get();
     string Videosettings_get();
     
+    void BuildOtherStreamingTargets(string sStreamingTargets);
     void DoTransportControls();
     class AlarmManager* m_pAlarmManager;
     void AlarmCallback(int id, void* param);
@@ -99,8 +100,8 @@ namespace DCE
     void StartSyncListenerThread();
     void StopSyncListenerThread();
     void SyncListenerLoop();
-    bool ParseSyncResponse(string sResponse, Position& position, uint64_t& dwTimecode);
-    void Sync(Position position, uint64_t dwTimeCode);
+    bool ParseSyncResponse(string sResponse);
+    void Sync();
     
     //<-dceag-h-b->
     /*
