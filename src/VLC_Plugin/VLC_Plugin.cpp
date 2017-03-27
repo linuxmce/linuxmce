@@ -33,6 +33,8 @@ using namespace DCE;
 #include "pluto_main/Define_DesignObj.h"
 #include "pluto_main/Define_Variable.h"
 
+#define SEND_SYNC 1
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 VLC_Plugin::VLC_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -41,6 +43,10 @@ VLC_Plugin::VLC_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHand
 	, m_VLCMediaMutex("vlc media mutex")
 {
   m_VLCMediaMutex.Init(NULL);
+  m_pSyncSocket = new VLCSyncListener(string("m_pSyncSocket"));
+  m_pSyncSocket->m_bSendOnlySocket=true; // Socket receives nothing. So socket won't ever block.
+  m_pAlarmManager=NULL;
+  m_dwSec=0;
 }
 
 //<-dceag-dest-b->
@@ -49,6 +55,9 @@ VLC_Plugin::~VLC_Plugin()
 {
   PLUTO_SAFETY_LOCK(mm,m_VLCMediaMutex);
   pthread_mutex_destroy(&m_VLCMediaMutex.mutex);
+  delete m_pAlarmManager;
+  m_pAlarmManager=NULL;
+  m_dwSec=0;
 }
 
 //<-dceag-getconfig-b->
@@ -58,9 +67,33 @@ bool VLC_Plugin::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
-	// Put your code here to initialize the data in this class
-	// The configuration parameters DATA_ are now populated
+	m_pAlarmManager = new AlarmManager();
+	m_pAlarmManager->Start(2);
+	m_pAlarmManager->AddRelativeAlarm(2,this,SEND_SYNC,NULL);
 	return true;
+}
+
+void VLC_Plugin::AlarmCallback(int id, void* param)
+{
+  struct timespec st;
+
+  m_pAlarmManager->CancelAlarmByType(SEND_SYNC);
+
+  clock_gettime(CLOCK_REALTIME,&st);
+  
+  if (!(st.tv_sec % 5))
+    {
+      m_dwSec = st.tv_sec;
+    }
+  
+  m_pSyncSocket->SendToAll(StringUtils::i64tos(m_dwSec+5));
+  
+  m_pAlarmManager->AddRelativeAlarm(2,this,SEND_SYNC,NULL);
+
+}
+
+void VLC_Plugin::CreateChildren()
+{
 }
 
 //<-dceag-reg-b->
@@ -83,7 +116,9 @@ bool VLC_Plugin::Register()
   m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
   
   RegisterMsgInterceptor(( MessageInterceptorFn )( &VLC_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
-  
+
+  m_pSyncSocket->StartListening(13001);
+
   return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -115,6 +150,12 @@ void VLC_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 }
 
 //<-dceag-sample-b->!
+
+// ReceivedMessageResult VLC_Plugin::ReceivedMessage(class Message *pMessage)
+// {
+//   LoggerWrapper::GetInstance()->Write(LV_STATUS,"RRRRRRRRRRRRRR: F: %d T: %d I: %d Y: %d",pMessage->m_dwPK_Device_From,pMessage->m_dwPK_Device_To,pMessage->m_dwID,pMessage->m_dwMessage_Type);
+//   return rmr_NotProcessed;
+// }
 
 /**
  * MediaHandlerBase implementations, below.
@@ -201,7 +242,7 @@ VLCMediaStream *VLC_Plugin::ConvertToVLCMediaStream(MediaStream *pMediaStream, s
 bool VLC_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 {
   PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
-  
+
   LoggerWrapper::GetInstance()->Write( LV_STATUS, "VLC_Plugin::StartMedia() Starting media stream playback. pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
   
   VLCMediaStream *pVLCMediaStream = NULL;
@@ -523,6 +564,10 @@ bool VLC_Plugin::ConfirmSourceIsADestination(string &sMRL,VLCMediaStream *pVLCMe
   
   pVLCMediaStream->m_pMediaDevice_Source = pMediaDevice_VLC;
   return true;
+}
+
+void VLC_Plugin::SendSync()
+{
 }
  
 /*
