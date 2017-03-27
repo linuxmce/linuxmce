@@ -1690,6 +1690,12 @@ void VLC_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
       CMD_Play_Media(0,m_pVLC->GetStreamID(),position.toString(),m_pVLC->GetMediaURL(),sCMD_Result,pMessage);
     }
 
+  if (!m_sOtherStreamingTargets.empty())
+    {
+      CMD_Set_Media_Position_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID, sMediaPosition);
+      SendCommandNoResponse(cmd);
+    }
+
   if (m_bIsStreaming)
     {
       // SendMediaPositionToAllPlayers(position.toString()); // Yes, everybody sends, but only the one who has control is broadcast.
