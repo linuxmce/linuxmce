@@ -352,7 +352,8 @@ Setup_LibVLCConf()
 	
 	touch /etc/pluto/libvlc.conf
 
-	echo "--sub-filter" >/etc/pluto/libvlc.conf
+	echo "--no-snapshot-preview" >/etc/pluto/libvlc.conf
+	echo "--sub-filter" >>/etc/pluto/libvlc.conf
 	echo "marq" >>/etc/pluto/libvlc.conf
 	echo "--alsa-audio-device" >>/etc/pluto/libvlc.conf
 	echo "$PlaybackCard" >>/etc/pluto/libvlc.conf
