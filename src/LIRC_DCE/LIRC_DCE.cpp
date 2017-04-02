@@ -203,6 +203,15 @@ bool LIRC_DCE::GetConfig()
 		return true;
 	}
 
+	// If default is used, then wipe the kernel ir to keycodes mapping
+	// as this will interfere with normal LIRC operation (TSCHAK)
+	
+	if (sLIRCDriver == "default")
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"default driver selected. Wiping kernel key translation table.");
+	    system("ir-keytable -c"); // seeya.
+	  }
+
 	system((string("lircd") + " -H " + sLIRCDriver + " -d " + sSerialPort + " /etc/lirc/lircd.conf").c_str());
 //TODO: Check if it started
 
