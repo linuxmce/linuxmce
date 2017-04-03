@@ -42,6 +42,9 @@ bool MDRCDParser::parse()
   string sCoverURL=doc.child("METADATA").child("MDR-CD").child_value("largeCoverParams");
   sCoverURL=string(CD_COVER_URL_PREFIX) + "/" + sCoverURL;
 
+  if (sAlbumTitle.empty() && sAlbumArtist.empty())
+    return false;
+
   m_pReply=new MDRCDReply(sAlbumTitle,
 			  sAlbumArtist,
 			  sReleaseDate,
