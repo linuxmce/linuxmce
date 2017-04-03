@@ -4,7 +4,7 @@
  * Author: Thomas Cherryhomes <thom.cherryhomes@gmail.com> 
  */
 
-#ifndef IDENITIFERDVDBASE_H
+#ifndef IDENTIFIERDVDBASE_H
 #define IDENTIFIERDVDBASE_H
 
 #include <string>

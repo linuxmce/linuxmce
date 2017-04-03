@@ -16,7 +16,7 @@
 using namespace DCE;
 using namespace std;
 
-IdentifierGenericDVD::IdentifierGenericDVD(string sPath, string sID) : IdentifierBase(sPath, sID)
+IdentifierGenericDVD::IdentifierGenericDVD(string sPath, string sID) : IdentifierDVDBase(sPath, sID)
 {
 }
 
@@ -32,19 +32,27 @@ bool IdentifierGenericDVD::Init()
 
 bool IdentifierGenericDVD::Identify()
 {
-  // TODO: Implement
+  if (!IdentifierDVDBase::Identify())
+    return false;
+
+  return true;
 }
 
 string IdentifierGenericDVD::GetIdentifiedData()
 {
-  // TODO: Implement
-  return "";
+
+  OutputMiscTab DiscData(DVDID_get());
+  DiscData.addAttribute(0, ATTRIBUTETYPE_Disc_ID_CONST, 0, DVDID_get());
+  DiscData.addAttribute(0, ATTRIBUTETYPE_Title_CONST, 0, "Unknown Disc");
+  
+  return DiscData.OutputAttributes();
 }
 
 string IdentifierGenericDVD::GetPictureData()
 {
-  // TODO: Implement
-  return "";
+  string sData="";
+  FileUtils::ReadTextFile("/usr/pluto/share/video_cd.jpg",sData);
+  return sData;
 }
 
 string IdentifierGenericDVD::GetPictureURL()

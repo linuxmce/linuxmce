@@ -189,6 +189,10 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
 	    case IdentifyDisc::DiscType::BluRay:
 	      pIdentifier = new IdentifierGenericDVD(sFilename, sID);
 	      break;
+	    case IdentifyDisc::DiscType::UNKNOWN:
+	      pIdentifier=NULL;
+	      sCMD_Result="ERROR";
+	      return;
 	    }
 
 	  if (!pIdentifier->Init())

@@ -9,13 +9,13 @@
 #define IDENTIFIERGENERICDVD_H
 
 #include <string>
-#include "IdentifierBase.h"
+#include "IdentifierDVDBase.h"
 
 using namespace std;
 
 namespace DCE
 {
-  class IdentifierGenericDVD : public IdentifierBase
+  class IdentifierGenericDVD : public IdentifierDVDBase
   {
 
   public:
