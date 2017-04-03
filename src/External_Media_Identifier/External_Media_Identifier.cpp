@@ -24,7 +24,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
-
+#include "IdentifierGenericCD.h"
+#include "IdentifierGenericDVD.h"
 #include "IdentifierCDMDR.h"
 #include "IdentifierDVDMDR.h"
 #include <iostream>
@@ -176,7 +177,37 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
       
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Identify()");
       if (!pIdentifier->Identify())
-	return;
+	{
+	  // If we couldn't identify, but we know the disc type instantiate the appropriate
+	  // generic disc identifier.
+	  switch (discType)
+	    {
+	    case IdentifyDisc::DiscType::CD:
+	      pIdentifier = new IdentifierGenericCD(sFilename, sID);
+	      break;
+	    case IdentifyDisc::DiscType::DVD:
+	    case IdentifyDisc::DiscType::BluRay:
+	      pIdentifier = new IdentifierGenericDVD(sFilename, sID);
+	      break;
+	    case IdentifyDisc::DiscType::UNKNOWN:
+	      pIdentifier=NULL;
+	      sCMD_Result="ERROR";
+	      return;
+	    }
+
+	  if (!pIdentifier->Init())
+	    {
+	      sCMD_Result="ERROR";
+	      return;
+	    }
+
+	  if (!pIdentifier->Identify())
+	    {
+	      sCMD_Result="ERROR";
+	      return;
+	    }
+	  // Otherwise, we now have an appropriate generic disc.
+	}
       
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->GetIdentifiedData()");
       sIdentifiedData = pIdentifier->GetIdentifiedData(); 
