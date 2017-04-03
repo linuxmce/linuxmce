@@ -27,7 +27,7 @@ IdentifierGenericDVD::~IdentifierGenericDVD()
 bool IdentifierGenericDVD::Init()
 {
   // nothing really to initialize.
-  return true;
+  return IdentifierDVDBase::Init();
 }
 
 bool IdentifierGenericDVD::Identify()
