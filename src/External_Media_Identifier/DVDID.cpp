@@ -27,7 +27,7 @@ string DVDID::DVDID_get()
 {
   char output[18];
   string sOutput;
-  if (m_sPath.empty())
+  if (m_sPath=="")
     return "";
 
   int e=0;
