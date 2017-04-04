@@ -405,7 +405,7 @@ function getLineState($protocol, $username){
 	}
 
 	else if($protocol == 'SPA') {
-		$cmd='sudo -u root /usr/sbin/asterisk -rx "sip show peers" |  awk \'$1 == "'.$username.'/'.$username.'" { print $6}\'';
+		$cmd='sudo -u root /usr/sbin/asterisk -rx "sip show peers" |  awk \'$1 == "'.$username.'" { print $6}\'';
 		$response=exec_batch_command($cmd,1);
 		//$response='N/A';
 	}
