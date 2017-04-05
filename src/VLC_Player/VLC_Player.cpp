@@ -524,6 +524,9 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
       sMediaURL = StripSyncTagFromURL(sMediaURL);
     }
 
+  // Replace # in URL so that VLC does not complain.
+  sMediaURL = StringUtils::Replace(sMediaURL,"#","%23");
+
   if (m_pVLC->PlayURL(sMediaURL,iStreamID,sMediaPosition,sMediaInfo,m_bIsStreaming))
     {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
