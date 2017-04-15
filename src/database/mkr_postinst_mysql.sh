@@ -40,12 +40,10 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 fi
 
 # Added user create, as mysql auth has changed. -tschak
-Q="CREATE USER '$MySqlUser'@'127.0.0.1' IDENTIFIED WITH mysql_old_password;"
+Q="CREATE USER '$MySqlUser'@'127.0.0.1';"
 mysql $MYSQL_DB_CRED -e "$Q"
 			
 # Added user create, part 2 -tschak
-Q="SET old_passwords = 1"
-mysql $MYSQL_DB_CRED -e "$Q"
 Q="SET PASSWORD FOR '$MySqlUser'@'127.0.0.1' = PASSWORD('$MySqlPassword')"
 mysql $MYSQL_DB_CRED -e "$Q"
 
