@@ -43,8 +43,12 @@ if [ "x$MySqlUser" == "x" ] ; then
 fi
 # Added user create, as mysql auth has changed. -tschak
 echo "Creating MySQL user $MySqlUser and asteriskuser"
-Q="CREATE USER '$MySqlUser'@'127.0.0.1'; CREATE USER 'asteriskuser'@'127.0.0.1';"
-mysql $MYSQL_DB_CRED -e "$Q"
+for NEWUSER in '$MySqlUser','asteriskuser','plutosecurity','plutotelecom','plutomedia' 
+do
+	Q="CREATE USER '$NEWUSER'@'127.0.0.1';"
+	# If it fails we continue with the grants.
+	mysql $MYSQL_DB_CRED -e "$Q" || :
+done
 			
 # Added user create, part 2 -tschak
 Q="SET PASSWORD FOR '$MySqlUser'@'127.0.0.1' = PASSWORD('$MySqlPassword')"
@@ -56,9 +60,6 @@ Q="GRANT ALL PRIVILEGES ON pluto_main.* to 'root'@'127.0.0.1';"
 mysql $MYSQL_DB_CRED -e "$Q"
 
 Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';"
-mysql $MYSQL_DB_CRED -e "$Q"
-
-Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'localhost';"
 mysql $MYSQL_DB_CRED -e "$Q"
 
 Q="FLUSH PRIVILEGES;"
