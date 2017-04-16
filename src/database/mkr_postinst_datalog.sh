@@ -15,7 +15,7 @@ if [ $PROCESS = "install" ]; then
 
 	/usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 	
-	Q="GRANT ALL PRIVILEGES ON $DL_DB.* TO 'plutomedia'@'localhost';"
+	Q="GRANT ALL PRIVILEGES ON $DL_DB.* TO 'plutomedia'@'127.0.0.1';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 	
 	Q="GRANT ALL PRIVILEGES ON $DL_DB.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
