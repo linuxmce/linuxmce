@@ -38,7 +38,9 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 		EOF
 		service mysql restart
 fi
-
+if [ "x$MySqlUser" == "x" ] ; then
+	MySqlUser=root
+fi
 # Added user create, as mysql auth has changed. -tschak
 echo "Creating MySQL user $MySqlUser and asteriskuser"
 Q="CREATE USER '$MySqlUser'@'127.0.0.1'; CREATE USER 'asteriskuser'@'127.0.0.1';"
