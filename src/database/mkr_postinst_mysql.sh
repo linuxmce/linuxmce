@@ -43,7 +43,7 @@ if [ "x$MySqlUser" == "x" ] ; then
 fi
 # Added user create, as mysql auth has changed. -tschak
 echo "Creating MySQL user $MySqlUser and asteriskuser"
-for NEWUSER in '$MySqlUser','asteriskuser','plutosecurity','plutotelecom','plutomedia' 
+for NEWUSER in '$MySqlUser' 'asteriskuser' 'plutosecurity' 'plutotelecom' 'plutomedia' 
 do
 	Q="CREATE USER '$NEWUSER'@'127.0.0.1';"
 	# If it fails we continue with the grants.
