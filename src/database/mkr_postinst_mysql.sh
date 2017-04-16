@@ -40,7 +40,8 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 fi
 
 # Added user create, as mysql auth has changed. -tschak
-Q="CREATE USER '$MySqlUser'@'127.0.0.1';"
+echo "Creating MySQL user $MySqlUser and asteriskuser"
+Q="CREATE USER '$MySqlUser'@'127.0.0.1'; CREATE USER 'asteriskuser'@'127.0.0.1';"
 mysql $MYSQL_DB_CRED -e "$Q"
 			
 # Added user create, part 2 -tschak
