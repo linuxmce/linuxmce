@@ -27,7 +27,8 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 		init_connect='SET NAMES utf8; SET collation_connection = utf8_general_ci;' # Set UTF8 for connection
 		character-set-server=utf8
 		collation-server=utf8_general_ci
-		skip-character-set-client-handshake  # Tells to server to ignore client's charset for connetion
+		# We remove the skip-character-set-client-handshake, as it causes issues with MySQL 5.7 and sqlCVS
+		# skip-character-set-client-handshake  # Tells to server to ignore client's charset for connetion
 		skip-name-resolve
 		skip-external-locking
 		innodb-flush-log-at-trx-commit = 2
