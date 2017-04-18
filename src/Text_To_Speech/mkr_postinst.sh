@@ -52,7 +52,7 @@ mv festival/lib/voices/us/* /usr/share/festival/voices/us
 cd /tmp/
 rm -rf hts_tmp/
 
-Q="SELECT IK_DeviceData WHERE Device_DeviceData WHERE FK_Device='$DEVICE_TTS' AND FK_DeviceData='$DD_DEFAULT_VOICE'"
+Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$DEVICE_TTS' AND FK_DeviceData='$DD_DEFAULT_VOICE'"
 R=$(RunSQL "$Q")
 DEFAULT_VOICE=$(Field 1 "$R")
 if [[ -z "$DEFAULT_VOICE" ]]; then
