@@ -84,6 +84,8 @@ CreateDialplanLines()
 		Line="10$(echo $(Field 1 "$Row") | sed -e "s/^.*\(.\)$/\1/")"
 		HouseMode=$(Field 2 "$Row")
 		Routing=$(Field 3 "$Row")
+		#Todo need to make this variable a setting in the system.
+        Block_Anonymous="no"
 
 		if [[  "$OldLine" != "$Line"  ]]; then	
 			if [[ "$Block_Anonymous" = "yes" ]]; then
