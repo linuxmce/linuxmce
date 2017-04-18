@@ -84,14 +84,35 @@ CreateDialplanLines()
 		Line="10$(echo $(Field 1 "$Row") | sed -e "s/^.*\(.\)$/\1/")"
 		HouseMode=$(Field 2 "$Row")
 		Routing=$(Field 3 "$Row")
+		#Todo need to make this variable a setting in the system.
+        Block_Anonymous="no"
 
 		if [[  "$OldLine" != "$Line"  ]]; then	
-			SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
-			('$Context_From_Lmce','$Line','1','AGI','lmce-phonebook-lookup.agi'),
-			('$Context_From_Lmce','$Line','2','AGI','lmce-gethousemode.agi'),
-			('$Context_From_Lmce','$Line','3','Set','CHANNEL(language)=\'$LANGUAGE\''),
-			('$Context_From_Lmce','$Line','4','Goto','$Context_From_Lmce,$Line-hm\${HOUSEMODE},1'),
-			('$Context_From_Lmce','$Line','5','Hangup','');"
+			if [[ "$Block_Anonymous" = "yes" ]]; then
+                SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
+                ('$Context_From_Lmce','$Line','1','GotoIf','(\$[\"\${CALLERID\(NUM\)}\" = \"anonymous\"] ? 7)'),
+                ('$Context_From_Lmce','$Line','2','GotoIf','(\${BLACKLIST()} ? 7)'),
+                ('$Context_From_Lmce','$Line','3','AGI','lmce-phonebook-lookup.agi'),
+                ('$Context_From_Lmce','$Line','4','AGI','lmce-gethousemode.agi'),
+                ('$Context_From_Lmce','$Line','5','Set','CHANNEL(language)=\'$LANGUAGE\''),
+                ('$Context_From_Lmce','$Line','6','Goto','$Context_From_Lmce,$Line-hm\${HOUSEMODE},1'),
+                ('$Context_From_Lmce','$Line','7','Hangup','');"
+            elif [[ "$Block_Anonymous" = "no" ]]; then 
+                SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
+                ('$Context_From_Lmce','$Line','1','GotoIf','(\${BLACKLIST()} ? 7)'),
+                ('$Context_From_Lmce','$Line','2','AGI','lmce-phonebook-lookup.agi'),
+                ('$Context_From_Lmce','$Line','3','AGI','lmce-gethousemode.agi'),
+                ('$Context_From_Lmce','$Line','4','Set','CHANNEL(language)=\'$LANGUAGE\''),
+                ('$Context_From_Lmce','$Line','5','Goto','$Context_From_Lmce,$Line-hm\${HOUSEMODE},1'),
+                ('$Context_From_Lmce','$Line','6','Hangup','');"
+            else        
+                SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
+                ('$Context_From_Lmce','$Line','1','AGI','lmce-phonebook-lookup.agi'),
+                ('$Context_From_Lmce','$Line','2','AGI','lmce-gethousemode.agi'),
+                ('$Context_From_Lmce','$Line','3','Set','CHANNEL(language)=\'$LANGUAGE\''),
+                ('$Context_From_Lmce','$Line','4','Goto','$Context_From_Lmce,$Line-hm\${HOUSEMODE},1'),
+                ('$Context_From_Lmce','$Line','5','Hangup','');"
+            fi
 		fi
 
 		App="NoOp"
