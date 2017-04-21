@@ -14,6 +14,8 @@ if [ $PROCESS = "install" ]; then
 	
 	Q="GRANT ALL PRIVILEGES ON pluto_security.* TO 'plutosecurity'@'127.0.0.1';"
 	mysql $MYSQL_DB_CRED -e "$Q"
+	Q="GRANT ALL PRIVILEGES ON pluto_security.* TO 'plutosecurity'@'localhost';"
+	mysql $MYSQL_DB_CRED -e "$Q"
 	
 	Q="GRANT ALL PRIVILEGES ON pluto_security.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
 	mysql $MYSQL_DB_CRED -e "$Q"

@@ -21,6 +21,12 @@ if [ $PROCESS = "install" ]; then
 	Q="GRANT ALL PRIVILEGES ON $DL_DB.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 	
+	Q="GRANT ALL PRIVILEGES ON $DL_DB.* TO 'plutomedia'@'localhost';"
+	mysql $MYSQL_DB_CRED -e "$Q"
+	
+	Q="GRANT ALL PRIVILEGES ON $DL_DB.* TO '$MySqlUser'@'localhost' IDENTIFIED BY '$MySqlPassword';"
+	mysql $MYSQL_DB_CRED -e "$Q"
+	
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
 fi
