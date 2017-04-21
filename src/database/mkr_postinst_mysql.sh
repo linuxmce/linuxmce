@@ -46,7 +46,8 @@ fi
 echo "Creating MySQL user $MySqlUser and asteriskuser"
 for NEWUSER in $MySqlUser 'asteriskuser' 'plutosecurity' 'plutotelecom' 'plutomedia' 
 do
-	Q="CREATE USER '$NEWUSER'@'127.0.0.1';"
+	# We need both 127.0.0.1 and localhost to work.
+	Q="CREATE USER '$NEWUSER'@'127.0.0.1'; CREATE USER '$NEWUSER'@'localhost';"
 	# If it fails we continue with the grants.
 	mysql $MYSQL_DB_CRED -e "$Q" || :
 done
@@ -57,10 +58,10 @@ mysql $MYSQL_DB_CRED -e "$Q"
 
 # Even if we do not modify the my.cnf file (ie. blacklist it),
 # we still want all the grants to hapen.
-Q="GRANT ALL PRIVILEGES ON pluto_main.* to 'root'@'127.0.0.1';"
+Q="GRANT ALL PRIVILEGES ON pluto_main.* to '$MySqlUser'@'127.0.0.1';GRANT ALL PRIVILEGES ON pluto_main.* to '$MySqlUser'@'localhost';"
 mysql $MYSQL_DB_CRED -e "$Q"
 
-Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';"
+Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'localhost';"
 mysql $MYSQL_DB_CRED -e "$Q"
 
 Q="FLUSH PRIVILEGES;"
