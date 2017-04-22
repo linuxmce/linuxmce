@@ -21,7 +21,6 @@
 //<-dceag-d-e->
 
 #include "VLC.h"
-#include "AlarmManager.h"
 #include "DCE/SocketListener.h"
 #include "DCE/ServerSocket.h"
 #include "DCE/PlainClientSocket.h"
@@ -32,7 +31,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-  class VLC_Player : public VLC_Player_Command, public AlarmEvent
+  class VLC_Player : public VLC_Player_Command
   {
     //<-dceag-decl-e->
     // Private member variables
@@ -87,8 +86,6 @@ namespace DCE
     
     void BuildOtherStreamingTargets(string sStreamingTargets);
     void DoTransportControls();
-    class AlarmManager* m_pAlarmManager;
-    void AlarmCallback(int id, void* param);
     pluto_pthread_mutex_t m_VLCMutex;
     void StartTimecodeReporting();
     void StopTimecodeReporting();

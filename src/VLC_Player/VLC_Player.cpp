@@ -65,7 +65,6 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_config=new VLC::Config();
   m_pVLC=NULL;
   m_bTimecodeReporting=false;
-  m_pAlarmManager=NULL;
   m_VLCMutex.Init(NULL);
   m_pNotificationSocket = new XineNotification_SocketListener(string("m_pNotificationSocket"));
   m_pNotificationSocket->m_bSendOnlySocket = true; // one second
@@ -110,13 +109,6 @@ VLC_Player::~VLC_Player()
     {
       delete m_pVLC;
       m_pVLC=NULL;
-    }
-
-  if (m_pAlarmManager)
-    {
-      m_pAlarmManager->Stop();
-      delete m_pAlarmManager;
-      m_pAlarmManager=NULL;
     }
   
 }
@@ -200,9 +192,6 @@ bool VLC_Player::GetConfig()
       return false;
     }
 
-  m_pAlarmManager=new AlarmManager();
-  m_pAlarmManager->Start(1); // Change this to more workers?
-
   // At this point, VLC is running.
   
   return true;
@@ -247,38 +236,6 @@ void VLC_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 }
 
 //<-dceag-sample-b->!
-
-void VLC_Player::AlarmCallback(int id, void* param)
-{
-  PLUTO_SAFETY_LOCK(vm,m_VLCMutex);
-
-  switch (id)
-    {
-    case 1:
-      // temporary hack.
-      if (m_pVLC->IsPlaying())
-      {
-	m_pAlarmManager->CancelAlarmByType(1);
-	m_pVLC->UpdateStatus();
-	m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
-      }
-      else
-	{
-	  m_pAlarmManager->CancelAlarmByType(1);
-	}
-      break;
-    case 2:
-      // Transport Control altered.
-      if (m_pVLC->IsPlaying())
-	{
-	  DoTransportControls();
-	}
-      else
-	{
-	  m_pAlarmManager->CancelAlarmByType(2);
-	}
-    }
-}
 
 void VLC_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
 {  
@@ -580,8 +537,6 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
   // Preliminary, needs to be amended to close multiple streams
   m_pVLC->Stop();
   m_iMediaPlaybackSpeed=0;
-  if (!m_pVLC->IsPlaying())
-    m_pAlarmManager->CancelAlarmByType(1);
 
   StopTimecodeReporting();
 
@@ -699,7 +654,6 @@ void VLC_Player::DoTransportControls()
 
   int64_t iSleepValue=0, iNewTimeVal=0;
   string sOSDStatus, sSpeed, sDirection;
-  m_pAlarmManager->CancelAlarmByType(2);
 
   if (!m_pVLC->IsPlaying())
     {
@@ -792,8 +746,6 @@ void VLC_Player::DoTransportControls()
 
 
   Sleep(iSleepValue);
-
-  m_pAlarmManager->AddRelativeAlarm(0,this,2,NULL);
 
 }
 
