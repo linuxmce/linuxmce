@@ -54,7 +54,8 @@ namespace DCE
     bool m_bTimecodeReporting;
     pthread_t m_timecodeThread;
     pthread_t m_syncListenerThread;
-    
+    pthread_t m_transportControlThread;
+
     //<-dceag-const-b->
   public:
     // Constructors/Destructor
@@ -77,6 +78,7 @@ namespace DCE
     bool m_bSyncConnected;
     bool m_bSyncListenerRunning;
     bool m_bSync;
+    bool m_bTransportControlThreadRunning;
     string m_sStreamingTargets;
     string m_sOtherStreamingTargets;
     string MD_DeviceData_get(int iFK_DeviceData);
@@ -85,6 +87,7 @@ namespace DCE
     string Videosettings_get();
     
     void BuildOtherStreamingTargets(string sStreamingTargets);
+    void DisplayTransportOnOSD();
     void DoTransportControls();
     pluto_pthread_mutex_t m_VLCMutex;
     void StartTimecodeReporting();
@@ -96,6 +99,8 @@ namespace DCE
     void SendMediaPositionToAllPlayers(string sMediaPosition);
     void StartSyncListenerThread();
     void StopSyncListenerThread();
+    void StartTransportControlThread();
+    void StopTransportControlThread();
     void SyncListenerLoop();
     bool ParseSyncResponse(string sResponse);
     void Sync();
