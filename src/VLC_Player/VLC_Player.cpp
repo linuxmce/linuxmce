@@ -32,6 +32,14 @@ using namespace DCE;
 #include <algorithm>
 #include <iterator>
 
+void * SpawnTransportControlThread(void * Arg)
+{
+  DCE::VLC_Player *pVLC_Player = (DCE::VLC_Player *) Arg;
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  pVLC_Player->DoTransportControls();
+  return NULL;
+}
+
 void * SpawnTimecodeReportingThread(void * Arg)
 {
   DCE::VLC_Player *pVLC_Player = (DCE::VLC_Player *) Arg;
@@ -65,7 +73,6 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_config=new VLC::Config();
   m_pVLC=NULL;
   m_bTimecodeReporting=false;
-  m_pAlarmManager=NULL;
   m_VLCMutex.Init(NULL);
   m_pNotificationSocket = new XineNotification_SocketListener(string("m_pNotificationSocket"));
   m_pNotificationSocket->m_bSendOnlySocket = true; // one second
@@ -74,6 +81,7 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_bSyncConnected=false;
   m_bSyncListenerRunning=false;
   m_bSync=false;
+  m_bTransportControlThreadRunning=false;
 }
 
 //<-dceag-dest-b->
@@ -100,6 +108,11 @@ VLC_Player::~VLC_Player()
       StopSyncListenerThread();
     }
 
+  if (m_bTransportControlThreadRunning)
+    {
+      StopTransportControlThread();
+    }
+
   if (m_config)
     {
       delete m_config;
@@ -110,13 +123,6 @@ VLC_Player::~VLC_Player()
     {
       delete m_pVLC;
       m_pVLC=NULL;
-    }
-
-  if (m_pAlarmManager)
-    {
-      m_pAlarmManager->Stop();
-      delete m_pAlarmManager;
-      m_pAlarmManager=NULL;
     }
   
 }
@@ -138,6 +144,7 @@ bool VLC_Player::Connect(int iPK_DeviceTemplate)
   m_pSyncSocket->Connect();
 
   StartSyncListenerThread();
+  StartTransportControlThread();
 
   m_bSyncConnected=true;
 
@@ -200,9 +207,6 @@ bool VLC_Player::GetConfig()
       return false;
     }
 
-  m_pAlarmManager=new AlarmManager();
-  m_pAlarmManager->Start(1); // Change this to more workers?
-
   // At this point, VLC is running.
   
   return true;
@@ -247,38 +251,6 @@ void VLC_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 }
 
 //<-dceag-sample-b->!
-
-void VLC_Player::AlarmCallback(int id, void* param)
-{
-  PLUTO_SAFETY_LOCK(vm,m_VLCMutex);
-
-  switch (id)
-    {
-    case 1:
-      // temporary hack.
-      if (m_pVLC->IsPlaying())
-      {
-	m_pAlarmManager->CancelAlarmByType(1);
-	m_pVLC->UpdateStatus();
-	m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
-      }
-      else
-	{
-	  m_pAlarmManager->CancelAlarmByType(1);
-	}
-      break;
-    case 2:
-      // Transport Control altered.
-      if (m_pVLC->IsPlaying())
-	{
-	  DoTransportControls();
-	}
-      else
-	{
-	  m_pAlarmManager->CancelAlarmByType(2);
-	}
-    }
-}
 
 void VLC_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
 {  
@@ -507,6 +479,8 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
       sCMD_Result="ERROR";
     }
 
+  m_sOtherStreamingTargets.clear();
+
   if (IsRemoteDVD(sMediaURL))
     {
       MountRemoteDVD(sMediaURL);
@@ -580,8 +554,6 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
   // Preliminary, needs to be amended to close multiple streams
   m_pVLC->Stop();
   m_iMediaPlaybackSpeed=0;
-  if (!m_pVLC->IsPlaying())
-    m_pAlarmManager->CancelAlarmByType(1);
 
   StopTimecodeReporting();
 
@@ -643,8 +615,6 @@ void VLC_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
       SendCommandNoResponse(cmd);
     }
 
-  m_pVLC->SetRate(0.0);
-  m_pVLC->Pause();
   m_iMediaPlaybackSpeed=0;
   
 }
@@ -684,85 +654,18 @@ void VLC_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
       SendCommandNoResponse(cmd);
     }
 
-  m_pVLC->SetRate(1.0);
-  m_pVLC->Restart();
   m_iMediaPlaybackSpeed=1000;
 }
 
 /**
- * DoTransportControls - Transport control in VLC_Player is represented by a series of libvlc_media_player_set_time() calls, which
- * call this function from an alarm. The frequency of the alarm is determined by the requested media speed, e.g. 2x means two jumps by 2000ms
- * every second, 4x means four jumps by 4000ms every second, and so on. 
+ * DisplayOSD - Display current transport speed / time / duration on OSD
  */
-void VLC_Player::DoTransportControls()
+
+void VLC_Player::DisplayTransportOnOSD()
 {
 
-  int64_t iSleepValue=0, iNewTimeVal=0;
-  string sOSDStatus, sSpeed, sDirection;
-  m_pAlarmManager->CancelAlarmByType(2);
-
-  if (!m_pVLC->IsPlaying())
-    {
-      // Media is no longer playing, most likely we fell off the end. Just return.
-      return;
-    }
-  
-  if ((m_iMediaPlaybackSpeed == 1000))
-    {
-      m_pVLC->SetRate(1.0);
-      m_pVLC->Restart();
-      return;
-    }
-  
-  /* Any positive speed greater than 0; less than 8000, use a set rate */
-  if ((m_iMediaPlaybackSpeed < 8000) && (m_iMediaPlaybackSpeed > 0))
-    {
-      m_pVLC->Restart();
-      m_pVLC->SetRate((float)m_iMediaPlaybackSpeed/1000);
-      return;
-    }
-
-  switch (abs(m_iMediaPlaybackSpeed))
-    {
-    case 250:
-    case 500:
-    case 1000:
-    case 2000:
-    case 3000:
-    case 4000:
-    case 6000:
-    case 8000:
-    case 10000:
-    case 15000:
-    case 16000:
-    case 20000:
-    case 30000:
-    case 32000:
-    case 50000:
-    case 64000:
-    case 100000:
-    case 200000:
-    case 400000:
-    default:
-      iSleepValue=125;
-      break;
-    }
-  
-  m_pVLC->Pause();
-  if (m_iMediaPlaybackSpeed < 0)
-    {
-      iNewTimeVal = (m_pVLC->GetTime())-abs(m_iMediaPlaybackSpeed);
-      if (iNewTimeVal <= 0)
-	iNewTimeVal = 0;
-      m_pVLC->SetTime(iNewTimeVal);
-    }
-  else
-    {
-      iNewTimeVal = (m_pVLC->GetTime())+abs(m_iMediaPlaybackSpeed);
-      if (iNewTimeVal >= m_pVLC->GetCurrentDuration())
-	iNewTimeVal = m_pVLC->GetDuration();
-      m_pVLC->SetTime(iNewTimeVal);
-    }
+  string sDirection="";
+  string sSpeed = StringUtils::itos(m_iMediaPlaybackSpeed / 1000) + "x";  
 
   // Generate OSD String
   if (m_iMediaPlaybackSpeed == 0)
@@ -781,21 +684,96 @@ void VLC_Player::DoTransportControls()
     {
       sDirection = ">>";
     }
-
-  sSpeed = StringUtils::itos(m_iMediaPlaybackSpeed / 1000) + "x";
-
-  sOSDStatus = sDirection + "    " + sSpeed + "   " + m_pVLC->OSD_Time(iNewTimeVal) + " / " + m_pVLC->OSD_Time(m_pVLC->GetCurrentDuration());
-
+    
   // Update OSD
-  m_pVLC->OSD_Status(sOSDStatus);
-
-
-
-  Sleep(iSleepValue);
-
-  m_pAlarmManager->AddRelativeAlarm(0,this,2,NULL);
+  m_pVLC->OSD_Status(sDirection + "    " + sSpeed + "   " + m_pVLC->OSD_Time(m_pVLC->GetTime()) + " / " + m_pVLC->OSD_Time(m_pVLC->GetCurrentDuration()));
 
 }
+
+/**
+ * DoTransportControls - Transport control in VLC_Player is represented by a series of libvlc_media_player_set_time() calls, which
+ * call this function from an alarm. The frequency of the alarm is determined by the requested media speed, e.g. 2x means two jumps by 2000ms
+ * every second, 4x means four jumps by 4000ms every second, and so on. 
+ */
+
+void VLC_Player::DoTransportControls()
+{
+
+  bool bTrickPlayMode=false;
+  int iCurrentPlaybackSpeed=0;
+  int64_t iNewTimeVal=0;
+  int64_t iOSDTimer=0;
+
+  while (m_bTransportControlThreadRunning)
+    {
+      if (m_pVLC->IsPlaying() && m_iMediaPlaybackSpeed != iCurrentPlaybackSpeed)
+	{
+
+	  bTrickPlayMode=false;
+
+	  // Either do an explicit set rate if from 0 to 8x speed, or go into trickplay mode for any other rate.
+	  switch (m_iMediaPlaybackSpeed)
+	    {
+	    case 0:
+	      m_pVLC->SetRate(0.0);
+	      m_pVLC->Pause();
+	      DisplayTransportOnOSD();
+	      break;
+	    case 1000:
+	      iOSDTimer=0;
+	      m_pVLC->SetRate(1.0);
+	      m_pVLC->Restart();
+	      DisplayTransportOnOSD();
+	      break;
+	    case 250:
+	    case 500:
+	    case 2000:
+	    case 3000:
+	    case 4000:
+	      bTrickPlayMode=false;
+	      m_pVLC->SetRate((float)m_iMediaPlaybackSpeed/1000);
+	      m_pVLC->Restart();
+	      DisplayTransportOnOSD();
+	      break;
+	    default:
+	      bTrickPlayMode=true;
+	      m_pVLC->SetRate(1.0);
+	      m_pVLC->Restart();
+	      DisplayTransportOnOSD();
+	    }
+
+	  usleep(125000);
+
+	  iCurrentPlaybackSpeed=m_iMediaPlaybackSpeed;
+
+	}
+      else if (m_pVLC->IsPlaying() && m_iMediaPlaybackSpeed == iCurrentPlaybackSpeed)
+	{
+	  if (m_iMediaPlaybackSpeed != 1000)
+	    {
+	      DisplayTransportOnOSD();
+	    }
+	  else if (m_iMediaPlaybackSpeed == 1000 && iOSDTimer < 64)
+	    {
+	      DisplayTransportOnOSD();
+	      iOSDTimer++;
+	    }
+
+	  if (bTrickPlayMode)
+	    {
+	      iNewTimeVal = m_pVLC->GetTime() + m_iMediaPlaybackSpeed;
+	      m_pVLC->SetTime(iNewTimeVal);
+	    }
+	  usleep(125000);
+	}
+      else
+	{
+	  // Nothing playing, so wait a bit so the thread doesn't spin too fast.
+	  usleep(10000);
+	}
+    }
+}
+
 
 //<-dceag-c41-b->
 
@@ -831,17 +809,6 @@ void VLC_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
     {
       CMD_Change_Playback_Speed_DL cmd(m_dwPK_Device, m_sOtherStreamingTargets, iStreamID, iMediaPlaybackSpeed, bReport);
       SendCommandNoResponse(cmd);
-    }
-
-  if (iMediaPlaybackSpeed==0)
-    {
-      m_pVLC->SetRate(0.0);
-      m_pVLC->Pause();
-    }
-  else if (iMediaPlaybackSpeed!=0)
-    {
-      m_pVLC->Restart();
-      DoTransportControls();
     }
 
 }
@@ -2014,6 +1981,32 @@ void VLC_Player::StopSyncListenerThread()
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StopSyncListenerThread() - Thread stopped.");
 
+}
+
+void VLC_Player::StartTransportControlThread()
+{
+  if (m_bTransportControlThreadRunning)
+    return;
+
+  m_bTransportControlThreadRunning=true;
+
+  if (pthread_create(&m_transportControlThread, NULL, SpawnTransportControlThread, (void *)this))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::StartTransportControlThread - Could not start transport control thread. Transport controls will be inoperative.");
+      return;
+    }
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::StartTransportControlThread - thread started.");
+
+}
+
+void VLC_Player::StopTransportControlThread()
+{
+  if (m_bTransportControlThreadRunning)
+    {
+      m_bTransportControlThreadRunning=false;
+      pthread_join(m_transportControlThread,NULL);
+    }
 }
 
 bool VLC_Player::ParseSyncResponse(string sResponse)
