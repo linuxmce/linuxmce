@@ -4,7 +4,8 @@ if [[ "$6" != "" ]]; then
     if [[ "$VPNenabled" == "on" ]]; then
 	. /usr/pluto/bin/Config_Ops.sh
 	if [[ "$DisableIPv4Firewall" != "1" ]]; then
-	    R=$(mysql pluto_main -ss -e"SELECT Place, Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall")
+	    sql="SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall"
+	    R=$(RunSQL "$sql")
 	    if [[ "$R" ]]; then
 	        for Port in $R; do
                         Place=$(Field 1 "$Port")
@@ -13,6 +14,7 @@ if [[ "$6" != "" ]]; then
 		      /usr/pluto/bin/Network_Firewall.sh -L Rule -A Disable -P $Protocol -p $Place
 		   done
 	    fi
+	    /usr/pluto/bin/Network_Firewall.sh -L Rule -A Offline -C VPN -P $Protocol -p $Place
 	fi
     fi
 fi
