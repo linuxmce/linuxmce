@@ -13,10 +13,10 @@ if [ $PROCESS = "install" ]; then
 	
 	/usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 	
-	Q="GRANT ALL PRIVILEGES ON pluto_myth.* TO '$MySqlUser'@'localhost' IDENTIFIED BY '$MySqlPassword';"
+	Q="GRANT ALL PRIVILEGES ON pluto_myth.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 	
-	Q="GRANT ALL PRIVILEGES ON pluto_myth.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
+	Q="GRANT ALL PRIVILEGES ON pluto_myth.* TO '$MySqlUser'@'localhost' IDENTIFIED BY '$MySqlPassword';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 	
 	Q="FLUSH PRIVILEGES;"

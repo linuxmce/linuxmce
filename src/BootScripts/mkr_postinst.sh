@@ -99,6 +99,12 @@ if ! grep -qF 'LogLevels' /etc/pluto.conf ;then
 	echo "LogLevels = 1,5,7,8" >> /etc/pluto.conf
 fi
 
+## If pluto.conf has no MySqlUser add root
+if ! grep -qF 'MySqlUser' /etc/pluto.conf ; then
+	echo "MySqlUser = root" >> /etc/pluto.conf
+fi
+
+
 ## Remove dash diversion of /bin/sh -- FIXME: this is erroring, why?
 if [[ -f /bin/sh.distrib ]] ;then
 	mv /bin/sh.distrib /bin/sh || :

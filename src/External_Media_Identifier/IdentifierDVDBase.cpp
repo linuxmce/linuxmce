@@ -20,6 +20,7 @@ IdentifierDVDBase::IdentifierDVDBase(string sPath, string sID) : IdentifierBase(
 {
   m_sPath=sPath;
   m_sDiskId=sID;
+  m_sDVDID="";
   m_pDVDID=NULL;
   m_bIsMounted=false;
 }

@@ -104,9 +104,10 @@ bool VDR::GetConfig()
 	m_pDevice_Xine = m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_Xine_Player_CONST);
 	m_pDevice_MediaPlugin = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Media_Plugins_CONST);
 	
-	if( !m_pDevice_Xine || !m_pDevice_MediaPlugin )
+	// Xine is no longer the only frontend for VDR, so we will erradicate the exit if Xine is not available.
+	if( !m_pDevice_MediaPlugin )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"I need a Xine player & media plugin to function");
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"I need a media plugin to function");
 		return false;
 	}
 	

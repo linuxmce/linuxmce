@@ -27,25 +27,6 @@ if [ $PROCESS = "install" ]; then
 	) || exit $?
 	mysql $MySqlDBName < /usr/pluto/database/city.dump
 
-	# Added user create, as mysql auth has changed. -tschak
-	Q="CREATE USER '$MySqlUser'@'127.0.0.1' IDENTIFIED WITH mysql_old_password;"
-	mysql $MYSQL_DB_CRED -e "$Q"
-
-	# Added user create, part 2 -tschak
-	Q="SET old_passwords = 1"
-	mysql $MYSQL_DB_CRED -e "$Q"
-
-	Q="SET PASSWORD FOR '$MySqlUser'@'127.0.0.1' = PASSWORD('$MySqlPassword')"
-	mysql $MYSQL_DB_CRED -e "$Q"
-	
-	Q="GRANT ALL PRIVILEGES ON $MySqlDBName.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
-	mysql $MYSQL_DB_CRED -e "$Q"
-	
-	Q="GRANT ALL PRIVILEGES ON $MySqlDBName.* TO 'plutomedia'@'localhost';"
-	mysql $MYSQL_DB_CRED -e "$Q"
-	
-	Q="FLUSH PRIVILEGES;"
-	mysql $MYSQL_DB_CRED -e "$Q"
 fi
 if [ $PROCESS = "upgrade" ]; then
 	echo
