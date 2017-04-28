@@ -90,8 +90,8 @@ CreateDialplanLines()
 		if [[  "$OldLine" != "$Line"  ]]; then	
 			if [[ "$Block_Anonymous" = "yes" ]]; then
                 SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
-                ('$Context_From_Lmce','$Line','1','GotoIf','(\$[\"\${CALLERID\(NUM\)}\" = \"anonymous\"] ? 7)'),
-                ('$Context_From_Lmce','$Line','2','GotoIf','(\${BLACKLIST()} ? 7)'),
+                ('$Context_From_Lmce','$Line','1','GotoIf','\$[\"\${CALLERID\(NUM\)}\" = \"anonymous\" | \"\${CALLERID\(NUM\)}\" =  \"0000000000\"] ?7:2)'),
+                ('$Context_From_Lmce','$Line','2','GotoIf','\$[\"\${BLACKLIST()}\" = \"1\"]?7:3'),
                 ('$Context_From_Lmce','$Line','3','AGI','lmce-phonebook-lookup.agi'),
                 ('$Context_From_Lmce','$Line','4','AGI','lmce-gethousemode.agi'),
                 ('$Context_From_Lmce','$Line','5','Set','CHANNEL(language)=\'$LANGUAGE\''),
@@ -99,7 +99,7 @@ CreateDialplanLines()
                 ('$Context_From_Lmce','$Line','7','Hangup','');"
             elif [[ "$Block_Anonymous" = "no" ]]; then 
                 SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
-                ('$Context_From_Lmce','$Line','1','GotoIf','(\${BLACKLIST()} ? 7)'),
+                ('$Context_From_Lmce','$Line','1','GotoIf','\$[\"\${BLACKLIST()}\" = \"1\"]?6:2'),
                 ('$Context_From_Lmce','$Line','2','AGI','lmce-phonebook-lookup.agi'),
                 ('$Context_From_Lmce','$Line','3','AGI','lmce-gethousemode.agi'),
                 ('$Context_From_Lmce','$Line','4','Set','CHANNEL(language)=\'$LANGUAGE\''),
