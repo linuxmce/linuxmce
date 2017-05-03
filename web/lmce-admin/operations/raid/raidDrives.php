@@ -65,8 +65,17 @@ function raidDrives($output,$dbADO) {
 	if($RAIDStatus!=0){
 		// send sommand to update raid status
 		// /usr/pluto/bin/refresh_status_RAID.sh <DEVICE_ID>
-		
-		$cmd='sudo -u root /usr/pluto/bin/refresh_status_RAID.sh  "'.$deviceID.'"';
+
+		if ($raidTemplate==$GLOBALS['ZFSPool'] || $raidTemplate==$GLOBALS['ZFSMirror'] || $raidTemplate==$GLOBALS['ZFSRaidZ1'] || 
+            $raidTemplate==$GLOBALS['ZFSRaidZ2'] || $raidTemplate==$GLOBALS['ZFSRaidZ3'])
+		{
+			$cmd='sudo -u root /usr/pluto/bin/refresh_status_ZFS.sh "'.$deviceID.'"';
+		}
+		else
+		{
+			$cmd='sudo -u root /usr/pluto/bin/refresh_status_RAID.sh  "'.$deviceID.'"';
+		}
+
 		$ret=exec_batch_command($cmd,1);
 	}
 		
@@ -277,7 +286,15 @@ function raidDrives($output,$dbADO) {
 			
 			// if is spare and raid is created or in progress
 			if($spare==1){
-				$cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "/usr/pluto/bin/add_spare.sh '.$newDrive.' '.$deviceID.'"';
+				if ($raidTemplate==$GLOBALS['ZFSPool'] || $raidTemplate==$GLOBALS['ZFSMirror'] || $raidTemplate==$GLOBALS['ZFSRaidZ1'] ||
+				    $raidTemplate==$GLOBALS['ZFSRaidZ2'] || $raidTemplate==$GLOBALS['ZFSRaidZ3'])
+				{
+					$cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "/usr/pluto/bin/add_ZFS_spare.sh '.$newDrive.' '.$deviceID.'"';
+				}
+				else
+				{
+					$cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "/usr/pluto/bin/add_spare.sh '.$newDrive.' '.$deviceID.'"';
+				}
 				exec_batch_command($cmd);
 			}
 			
@@ -288,7 +305,17 @@ function raidDrives($output,$dbADO) {
 		$raidDrives=explode(',',$_POST['raidDrives']);
 		foreach ($raidDrives AS $drive){
 			if(isset($_POST['delete_'.$drive])){
-				$cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "/usr/pluto/bin/delete_drive.sh 0 '.$deviceID.' '.$drive.'"';
+				if ($raidTemplate==$GLOBALS['ZFSPool'] || $raidTemplate==$GLOBALS['ZFSMirror'] || $raidTemplate==$GLOBALS['ZFSRaidZ1'] ||
+				    $raidTemplate==$GLOBALS['ZFSRaidZ2'] || $raidTemplate==$GLOBALS['ZFSRaidZ3'])
+				{
+					// Deletion of drives from ZFS pools are not permitted.
+					header("Location: index.php?section=raidDrives&deviceID=$deviceID&msg=".urlencode($TEXT_ZFS_DRIVE_DELETE_NOT_ALLOWED));
+					exit();
+				}
+				else
+				{
+					$cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "/usr/pluto/bin/delete_drive.sh 0 '.$deviceID.' '.$drive.'"';
+				}
 				exec_batch_command($cmd);
 				deleteDevice($drive,$dbADO);
 				
@@ -299,7 +326,15 @@ function raidDrives($output,$dbADO) {
 				//get path for drive determined by id
 				$res =getFieldsAsArray('Device_DeviceData','IK_DeviceData',$dbADO,'WHERE FK_Device='.$drive);
 				
-				$cmd='sudo -u root /usr/pluto/bin/add_drive.sh '.$blockDevice.' '.$res['IK_DeviceData'][0];
+				if ($raidTemplate==$GLOBALS['ZFSPool'] || $raidTemplate==$GLOBALS['ZFSMirror'] || $raidTemplate==$GLOBALS['ZFSRaidZ1'] ||
+				    $raidTemplate==$GLOBALS['ZFSRaidZ2'] || $raidTemplate==$GLOBALS['ZFSRaidZ3'])
+				{
+					$cmd='sudo -u root /usr/pluto/bin/add_ZFS_drive.sh '.$blockDevice.' '.$res['IK_DeviceData'][0];	
+				}
+				else
+				{
+					$cmd='sudo -u root /usr/pluto/bin/add_drive.sh '.$blockDevice.' '.$res['IK_DeviceData'][0];
+				}
 				$msg= exec_batch_command($cmd);
 				header("Location: index.php?section=raidDrives&deviceID=$deviceID&msg=".urlencode(@$msg));
 		exit();
@@ -324,7 +359,22 @@ function raidDrives($output,$dbADO) {
 				break;				
 				case $GLOBALS['Raid5']:
 					$cmd='/usr/pluto/bin/create_RAID5.sh';
-				break;				
+				break;			
+				case $GLOBALS['ZFSPool']:
+					$cmd='/usr/pluto/bin/create_ZFSPool.sh';
+				break;
+				case $GLOBALS['ZFSMirror']:
+					$cmd='/usr/pluto/bin/create_ZFSMirror.sh';
+				break;
+				case $GLOBALS['ZFSRaidZ1']:
+					$cmd='/usr/pluto/bin/create_ZFSRaidZ1.sh';
+				break;
+				case $GLOBALS['ZFSRaidZ2']:
+					$cmd='/usr/pluto/bin/create_ZFSRaidZ2.sh';
+				break;
+				case $GLOBALS['ZFSRaidZ3']:
+					$cmd='/usr/pluto/bin/create_ZFSRaidZ3.sh';
+				break;
 			}
 			
 			$full_cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "'.$cmd.' '.$deviceID.'"';
@@ -340,7 +390,15 @@ function raidDrives($output,$dbADO) {
 			exit();				
 		}
 		if(isset($_POST['grow'])){
-			$cmd = 'sudo -u root /usr/pluto/bin/grow_raid.sh '.$blockDevice.' '.$numSparesToGrow;
+			if($raidTemplate==$GLOBALS['ZFSPool'] || $raidTemplate==$GLOBALS['ZFSMirror'] || $raidTemplate==$GLOBALS['ZFSRaidZ1'] ||
+			   $raidTemplate==$GLOBALS['ZFSRaidZ2'] || $raidTemplate==$GLOBALS['ZFSRaidZ3'])
+			{
+				$cmd = 'sudo -u root /usr/pluto/bin/grow_raid.sh '.$blockDevice.' '.$numSparesToGrow;
+			}
+			else
+			{
+				$cmd = 'sudo -u root /usr/pluto/bin/grow_raid.sh '.$blockDevice.' '.$numSparesToGrow;
+			}
 			$res=exec_batch_command($cmd);	
 			if($res){		
 				header("Location: index.php?section=raidDrives&deviceID=$deviceID&error=".urlencode(@$res));

@@ -179,8 +179,15 @@ function raid($output,$dbADO) {
 		foreach ($raidDevices AS $device){
 			if(isset($_POST['delete_'.$device])){
 				$parentIP=$_REQUEST['parentIP_'.$device];
-				
-				$cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "/usr/pluto/bin/delete_raid.sh '.$device.'"';
+				if ($_POST["template"] == $GLOBALS["ZFSPool"] || $_POST["template"] == $GLOBALS["ZFSMirror"] || $_POST["template"] == $GLOBALS["ZFSRaid1"] ||
+				    $_POST["template"] == $GLOBALS["ZFSRaid2"] || $_POST["template"] == $GLOBALS["ZFSRaid3"])
+				{
+					$cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "/usr/pluto/bin/delete_ZFS.sh '.$device.'"'; 
+				} 		
+				else
+				{
+					$cmd='sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '.$parentIP.' "/usr/pluto/bin/delete_raid.sh '.$device.'"';
+				}
 				$ret=exec_batch_command($cmd,1);
 				
 				// delete moved in delete_raid.sh
