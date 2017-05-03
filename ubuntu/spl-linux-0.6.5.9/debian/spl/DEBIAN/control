@@ -1,0 +1,15 @@
+Package: spl
+Source: spl-linux
+Version: 0.6.5.9-1~trusty
+Architecture: amd64
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 83
+Depends: libc6 (>= 2.3.4)
+Recommends: spl-dkms
+Conflicts: spl-dev
+Section: kernel
+Priority: extra
+Homepage: http://www.zfsonlinux.org/
+Description: Solaris Porting Layer utilities for Linux
+ This package provides the userspace utilities for the SPL and SPLAT Linux
+ kernel modules.

@@ -1,0 +1,16 @@
+libnvpair1_0.6.5.9-1~trusty_amd64.deb libs extra
+libnvpair1-dbg_0.6.5.9-1~trusty_amd64.deb debug extra
+libuutil1_0.6.5.9-1~trusty_amd64.deb libs extra
+libuutil1-dbg_0.6.5.9-1~trusty_amd64.deb debug extra
+libzfs-dev_0.6.5.9-1~trusty_amd64.deb libdevel extra
+libzfs2_0.6.5.9-1~trusty_amd64.deb libs extra
+libzfs2-dbg_0.6.5.9-1~trusty_amd64.deb debug extra
+libzpool2_0.6.5.9-1~trusty_amd64.deb libs extra
+libzpool2-dbg_0.6.5.9-1~trusty_amd64.deb debug extra
+zfs-dkms_0.6.5.9-1~trusty_amd64.deb kernel extra
+zfs-doc_0.6.5.9-1~trusty_amd64.deb doc extra
+zfs-initramfs_0.6.5.9-1~trusty_amd64.deb kernel extra
+zfs-zed_0.6.5.9-1~trusty_amd64.deb admin extra
+zfs-zed-dbg_0.6.5.9-1~trusty_amd64.deb debug extra
+zfsutils_0.6.5.9-1~trusty_amd64.deb admin extra
+zfsutils-dbg_0.6.5.9-1~trusty_amd64.deb debug extra

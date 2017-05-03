@@ -1,0 +1,5 @@
+/etc/sudoers.d/zfs
+/etc/default/zfs
+/etc/init.d/zfs-share
+/etc/init/zpool-import.conf
+/etc/bash_completion.d/zfs

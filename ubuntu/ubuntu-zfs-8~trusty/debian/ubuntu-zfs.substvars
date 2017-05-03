@@ -1,0 +1,3 @@
+germinate:Depends=spl, spl-dkms, zfs-dkms, zfsutils
+germinate:Recommends=build-essential, linux-headers, ubuntu-minimal, zfs-mountall
+misc:Depends=

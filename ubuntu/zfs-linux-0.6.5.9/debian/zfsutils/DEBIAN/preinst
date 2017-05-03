@@ -1,0 +1,40 @@
+#!/bin/sh -e
+
+if dpkg-maintscript-helper supports rm_conffile 2>/dev/null
+then
+	dpkg-maintscript-helper rm_conffile /etc/default/zfsload -- "$@"
+	dpkg-maintscript-helper rm_conffile /etc/init.d/zfs -- "$@"
+fi
+
+# Automatically added by dh_installinit
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+	if [ -e "/etc/init.d/zpool-import" ] && [ -L "/etc/init.d/zpool-import" ] \
+	   && [ $(readlink -f "/etc/init.d/zpool-import") = /lib/init/upstart-job ]
+	then
+		rm -f "/etc/init.d/zpool-import"
+	fi
+fi
+# End automatically added section
+# Automatically added by dh_installudev
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+	if [ -e "/etc/udev/rules.d/60_zfsutils.zvol.rules" ]; then
+		if [ "`md5sum \"/etc/udev/rules.d/60_zfsutils.zvol.rules\" | sed -e \"s/ .*//\"`" = \
+		     "`dpkg-query -W -f='${Conffiles}' zfsutils | sed -n -e \"\\\\' /etc/udev/rules.d/60_zfsutils.zvol.rules '{s/ obsolete$//;s/.* //p}\"`" ]
+		then
+			rm -f "/etc/udev/rules.d/60_zfsutils.zvol.rules"
+		fi
+	fi
+fi
+# End automatically added section
+# Automatically added by dh_installudev
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+	if [ -e "/etc/udev/rules.d/69_zfsutils.vdev.rules" ]; then
+		if [ "`md5sum \"/etc/udev/rules.d/69_zfsutils.vdev.rules\" | sed -e \"s/ .*//\"`" = \
+		     "`dpkg-query -W -f='${Conffiles}' zfsutils | sed -n -e \"\\\\' /etc/udev/rules.d/69_zfsutils.vdev.rules '{s/ obsolete$//;s/.* //p}\"`" ]
+		then
+			rm -f "/etc/udev/rules.d/69_zfsutils.vdev.rules"
+		fi
+	fi
+fi
+# End automatically added section
+

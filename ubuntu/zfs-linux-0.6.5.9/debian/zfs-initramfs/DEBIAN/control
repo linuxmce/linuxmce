@@ -1,0 +1,12 @@
+Package: zfs-initramfs
+Source: zfs-linux
+Version: 0.6.5.9-1~trusty
+Architecture: amd64
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 43
+Depends: zfs-doc, zfsutils
+Section: kernel
+Priority: extra
+Description: Native OpenZFS root filesystem capabilities for Linux
+ This package adds OpenZFS to the system initramfs with a hook
+ for the initramfs-tools infrastructure.

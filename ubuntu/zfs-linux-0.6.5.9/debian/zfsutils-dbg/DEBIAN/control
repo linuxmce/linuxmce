@@ -1,0 +1,15 @@
+Package: zfsutils-dbg
+Source: zfs-linux
+Version: 0.6.5.9-1~trusty
+Architecture: amd64
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 1502
+Depends: zfs-doc, zfsutils (= 0.6.5.9-1~trusty)
+Replaces: zfs-dbg
+Section: debug
+Priority: extra
+Description: Debugging symbols for zfsutils
+ This package provides the zpool and zfs commands that are used to
+ manage OpenZFS filesystems.
+ .
+ This package contains the debugging symbols for zfsutils.

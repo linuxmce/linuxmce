@@ -1,0 +1,2 @@
+misc:Depends=sysv-rc (>= 2.88dsf-24) | file-rc (>= 0.8.16), zfs-doc
+shlibs:Depends=libc6 (>= 2.14), libnvpair1, libzfs2
