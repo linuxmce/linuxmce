@@ -54,7 +54,7 @@ Lock "ZFS" "ZFS"
 case $PK_Distro in
     $DD_DISTRO_Precise) install_from_stable_ppa ;;
     $DD_DISTRO_Trusty) install_from_stable_ppa ;;
-    $DD_DISTRO_Jessie) exit 1 ;;
+    $DD_DISTRO_Jessie) exit 0 ;;
     $DD_DISTRO_Xenial) install_xenial ;;
 esac
 
