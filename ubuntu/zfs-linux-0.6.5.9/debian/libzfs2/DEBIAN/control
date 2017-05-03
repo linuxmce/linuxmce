@@ -1,0 +1,12 @@
+Package: libzfs2
+Source: zfs-linux
+Version: 0.6.5.9-1~trusty
+Architecture: amd64
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 304
+Depends: zfs-doc, libc6 (>= 2.8), libnvpair1, libuutil1, libzpool2
+Replaces: libzfs0, libzfs1
+Section: libs
+Priority: extra
+Description: Native OpenZFS filesystem library for Linux
+ The ZoL management library.

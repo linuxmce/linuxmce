@@ -1,0 +1,14 @@
+Package: libzfs2-dbg
+Source: zfs-linux
+Version: 0.6.5.9-1~trusty
+Architecture: amd64
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 847
+Depends: zfs-doc, libzfs2 (= 0.6.5.9-1~trusty)
+Replaces: libzfs0-dbg, libzfs1-dbg
+Section: debug
+Priority: extra
+Description: Debugging symbols for libzfs2
+ The ZoL management library.
+ .
+ This package contains the debugging symbols for libzfs2.

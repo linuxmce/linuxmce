@@ -1,0 +1,2 @@
+misc:Depends=zfs-doc
+shlibs:Depends=libc6 (>= 2.4), libuutil1

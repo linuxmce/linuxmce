@@ -1,0 +1,12 @@
+Package: ubuntu-zfs
+Version: 8~trusty
+Architecture: amd64
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 38
+Depends: spl, spl-dkms, zfs-dkms, zfsutils
+Recommends: build-essential, linux-headers, ubuntu-minimal, zfs-mountall
+Suggests: zfs-auto-snapshot
+Conflicts: libzfs1, libzpool1
+Section: metapackages
+Priority: optional
+Description: Native ZFS filesystem metapackage for Ubuntu.

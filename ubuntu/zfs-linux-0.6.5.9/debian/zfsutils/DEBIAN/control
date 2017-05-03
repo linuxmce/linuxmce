@@ -1,0 +1,16 @@
+Package: zfsutils
+Source: zfs-linux
+Version: 0.6.5.9-1~trusty
+Architecture: amd64
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 728
+Depends: sysv-rc (>= 2.88dsf-24) | file-rc (>= 0.8.16), zfs-doc, libc6 (>= 2.14), libnvpair1, libuuid1 (>= 2.16), libuutil1, libzfs2, libzpool2
+Recommends: zfs-dkms
+Suggests: samba-common-bin (>= 3.0.23), nfs-kernel-server, zfs-initramfs
+Conflicts: zfs, zfs-fuse
+Replaces: zfs
+Section: admin
+Priority: extra
+Description: Native OpenZFS management utilities for Linux
+ This package provides the zpool and zfs commands that are used to
+ manage OpenZFS filesystems.
