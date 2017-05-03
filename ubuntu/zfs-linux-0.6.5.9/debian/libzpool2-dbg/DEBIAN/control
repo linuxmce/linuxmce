@@ -1,0 +1,14 @@
+Package: libzpool2-dbg
+Source: zfs-linux
+Version: 0.6.5.9-1~trusty
+Architecture: amd64
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 3653
+Depends: zfs-doc, libzpool2 (= 0.6.5.9-1~trusty)
+Replaces: libzpool0-dbg, libzpool1-dbg
+Section: debug
+Priority: extra
+Description: Debugging symbols for libzpool2
+ The zpool management library.
+ .
+ This package contains the debugging symbols for libzpool2.
