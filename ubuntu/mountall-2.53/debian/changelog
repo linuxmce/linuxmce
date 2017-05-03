@@ -1,0 +1,1036 @@
+mountall (2.53-zfs1) trusty; urgency=low
+
+  * Import mountall 2.51-zfs1 changes for ZoL.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Mon, 31 Mar 2014 00:25:43 -0500
+
+mountall (2.53) unstable; urgency=medium
+
+  [ James Hunt ]
+  * man/mountall.8:
+    - Added SEE ALSO section.
+    - Updated date and copyright.
+    - Remove comments about mountall being a temporary tool
+      since this is not true (it's been "temporary" since 2009) and it
+      undermines its current importance.
+    - Reworked DESCRIPTION and made mention of /lib/init/fstab.
+
+  [ Steve Langasek ]
+  * conf/mounted-run.conf: the dynamic motd location used by PAM has changed
+    to /run/motd.dynamic; update the job to match.
+
+ -- Steve Langasek <vorlon@debian.org>  Wed, 19 Feb 2014 16:17:14 -0800
+
+mountall (2.52) unstable; urgency=low
+
+  * Don't emit extra 'mounting' events for mounts already in progress; this
+    will cause double triggering of some jobs for remote filesystems, and
+    can also cause us to miss 'mounted' events.  LP: #1048017.
+  * Fix mountall upstart job to not start a subshell for reading
+    /proc/cmdline, since this causes upstart to lose track of the daemon
+    process and leaves mountall-net unable to signal it to retry network
+    mounts.  LP: #1235013.
+
+ -- Steve Langasek <vorlon@debian.org>  Wed, 09 Oct 2013 04:12:51 +0000
+
+mountall (2.51) unstable; urgency=low
+
+  * Fix tagging of filesystems to not have local/remote inheritance
+    overridden; otherwise we will mis-tag various mounts and deadlock the
+    boot.  Also fixes an inconsistency with the inheritance of
+    'bootwait'/'nobootwait' flags depending on the order of mounts in
+    /etc/fstab: we now always treat the 'nobootwait' flag as applying to
+    submounts. LP: #1223745, LP: #1153672.
+
+ -- Steve Langasek <vorlon@debian.org>  Fri, 13 Sep 2013 22:23:55 -0700
+
+mountall (2.50) unstable; urgency=low
+
+  * Add support for pstore.  Closes: #722212.
+  * Allow multiple fstab entries with the same mountpoint: we still mask
+    any entries that came from a different source (i.e., /etc/fstab will
+    mask /lib/init/fstab), but if there are multiple entries in /etc/fstab,
+    treat them all as separate mounts instead of letting the last one win.
+    LP: #503003.
+  * Don't set 'console output' anymore; now that we have upstart logging by
+    default, logs will be captured and (assuming /var/log becomes writable
+    at some point) mountall is debuggable without having to spew text to the
+    console.
+  * Support reading --verbose/--debug options from /proc/cmdline, so that
+    we can give users a better way to debug mountall without having to
+    edit the upstart job.
+  * Since everything is in a single event loop, a request from plymouth to
+    skip a mount may come in after the mount has already happened.  So don't
+    assert on a bogus request, just treat it as a no-op and continue.
+    LP: #731800.
+
+ -- Steve Langasek <vorlon@debian.org>  Tue, 10 Sep 2013 04:01:19 +0000
+
+mountall (2.49) unstable; urgency=low
+
+  [ James Hunt ]
+  * apport/mountall.py: add a mountall apport hook.
+
+  [ Steve Langasek ]
+  * Ignore parse errors in /etc/default/rcS or /etc/default/locale; these
+    problems shouldn't be allowed to prevent the system from booting.
+    LP: #1192514.
+
+ -- Steve Langasek <vorlon@debian.org>  Tue, 02 Jul 2013 15:51:12 -0700
+
+mountall (2.48) unstable; urgency=low
+
+  [ Steve Langasek ]
+  * Make sure we don't show the error message claiming a device is not
+    ready when we're actually already handling it but are just waiting for
+    related upstart jobs that are blocking the mount to finish.
+    LP: #1091792.
+
+  [ Stéphane Graber ]
+  * Mount a tmpfs on /sys/fs/cgroup if it exists.
+
+ -- Steve Langasek <vorlon@debian.org>  Sat, 09 Mar 2013 00:36:22 +0000
+
+mountall (2.47) unstable; urgency=low
+
+  [ Dave Chiluk ]
+  * Adjust parsing of options so mountall doesn't strip options that are
+    substrings of these strings (showthrough, optional, bootwait, nobootwait
+    or timeout). This fixes the issue where timeo was getting stripped from
+    nfs mounts. LP: #1041377.
+
+  [ Steve Langasek ]
+  * Ensure callbacks are called directly when running with --no-events,
+    otherwise the "event" handling of the non-events never finishes and
+    mountall hangs.  LP: #1099349.
+
+ -- Steve Langasek <vorlon@debian.org>  Mon, 14 Jan 2013 16:37:36 -0800
+
+mountall (2.46) unstable; urgency=low
+
+  * Fix a further remaining issue from 2.41: by fixing the missing 'mounted'
+    events in 2.43, we have again introduced a case where mountall may block
+    waiting for 'mounted MOUNTPOINT=/' to return before handling 'mounted
+    MOUNTPOINT=/run' and emitting virtual-filesystems, thus causing
+    dependency loops and long boot timeouts.  LP: #1078926.
+
+ -- Steve Langasek <vorlon@debian.org>  Mon, 03 Dec 2012 23:44:16 +0000
+
+mountall (2.45) unstable; urgency=low
+
+  [ Serge Hallyn ]
+  * mounted-dev.conf: leave consoles alone in a lxc or libvirt container
+    (LP: #1075717)
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 28 Nov 2012 22:07:18 -0800
+
+mountall (2.44) unstable; urgency=low
+
+  * conf/{checkfs,checkroot-bootclean,checkroot,mountall-bootclean}.sh.conf,
+    conf/{mountnfs-bootclean,mtab,bootmisc}.sh.conf: additional null jobs
+    for compatibility with pre-existing sysvinit script names, so that the
+    sysvinit scripts aren't run.  This speeds up the boot, improves
+    compatibility with insserv, and guards against e.g.,
+    mountall-bootclean.sh running after /run is already in use by ifupdown.
+
+ -- Steve Langasek <vorlon@debian.org>  Fri, 16 Nov 2012 01:05:31 +0000
+
+mountall (2.43) unstable; urgency=low
+
+  * Fix a regression introduced in 2.41: parse_mountinfo() doesn't 
+    generate a mounted event for a filesystem whose canonicalized
+    mountpoint doesn't match the mountpoint specified in /etc/fstab.  So
+    we still need to call mounted() explicitly for this case.  LP: #1059471.
+
+ -- Steve Langasek <vorlon@debian.org>  Tue, 06 Nov 2012 01:03:12 -0800
+
+mountall (2.42) unstable; urgency=low
+
+  [ Andy Whitcroft ]
+  * Add support for mounting the efivars filesystem onto
+    /sys/firmware/efi/efivars.  LP: #1063061.
+
+  [ Steve Langasek ]
+  * mount events now happen so much in parallel that /etc/mtab may not get
+    updated due to races between 'mounted' events.  Explicitly track the
+    list of mounts that are in need of fake-remounting and make sure mount -f
+    gets called for them if they missed the boat. LP: #1060296
+
+ -- Steve Langasek <vorlon@debian.org>  Tue, 09 Oct 2012 12:32:56 -0700
+
+mountall (2.41) unstable; urgency=low
+
+  [ Alexander Achenbach ]
+  * Don't block other, unrelated mounts from being processed while one
+    mount is blocked on its mounting signal to process.  LP: #643289.
+
+  [ Steve Langasek ]
+  * Likewise, allow 'mounted' signals to be processed in parallel with
+    other unrelated mounts.
+
+ -- Steve Langasek <vorlon@debian.org>  Tue, 25 Sep 2012 23:21:59 -0700
+
+mountall (2.40) unstable; urgency=low
+
+  * Add /run/user as a default mountpoint, in support of $XDG_RUNTIME_DIR.
+    LP: #894391.
+
+ -- Steve Langasek <vorlon@debian.org>  Fri, 31 Aug 2012 19:55:01 -0700
+
+mountall (2.39) unstable; urgency=low
+
+  * Adjust parsing of device names so that network mounts pointing to the
+    server's root don't have the path mis-normalized to the empty string.
+    Thanks to Damien Churchill <damien.churchill@ukplc.net> for the initial
+    implementation.  LP: #809221.
+  * Add compatibility jobs with names to match the historic sysvinit init
+    scripts, so that startpar can DTRT.
+
+ -- Steve Langasek <vorlon@debian.org>  Fri, 31 Aug 2012 18:31:19 +0000
+
+mountall (2.38) unstable; urgency=low
+
+  * Counterproductively document in debian/copyright the license of files in
+    intl that form no part of the binary package, to get through the Debian
+    NEW queue.
+
+ -- Steve Langasek <vorlon@debian.org>  Sat, 30 Jun 2012 11:44:59 -0700
+
+mountall (2.37) unstable; urgency=low
+
+  * Initial upload to Debian.
+  * Document the branch location with Vcs-Bzr.
+  * Mark myself as maintainer, with Scott and James as uploaders.
+  * Drop maintainer scripts, only used for upgrades from natty and earlier
+    and no longer relevant post-precise.
+  * Replace build flag handling in debian/rules with debhelper compat 9 and
+    dpkg-buildflags.
+  * Remove extra space in fsck progress message.  LP: #573304.
+  * Adjust build-dependencies for the differing plymouth -dev package name
+    in Debian vs. Ubuntu.
+  * Fix an inverted check for whether the change-mount mntctl has a
+    different device name.
+  * Update standards-version to 3.9.3.
+  * debian/copyright: copyright-format 1.0, and link explicitly to the GPL-2
+    license file since that's what applies.
+
+  [ Raphaël Pinson ]
+  * Honor nobootwait option for /var/* and /usr/* remote filesystems.
+    LP: #654545
+
+  [ Eelco Dolstra ]
+  * Install the SIGUSR1 signal handler before daemonizing mountall, so that
+    there's no race with signals from network interfaces being brought up.
+    LP: #960079.
+
+  [ Adam Gleichsner ]
+  * Add options to mountall(8) manual page.  LP: #805509.
+
+ -- Steve Langasek <vorlon@debian.org>  Thu, 28 Jun 2012 19:35:33 +0000
+
+mountall (2.36) precise; urgency=low
+
+  * If no specific fsck.* checker is found for a given filesystem type
+    (except for a short list where we know that checkers really should be
+    present), skip checking that filesystem rather than emitting scary error
+    messages (LP: #838091).  This duplicates some logic from 'fsck -A', but
+    that seems reasonable given mountall's purpose.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 12 Apr 2012 18:58:16 +0100
+
+mountall (2.35) precise; urgency=low
+
+  * conf/mounted-tmp.conf: Mount an 1 MiB tmpfs on /tmp/ if /tmp has less than
+    1 MB of space, so that booting has a chance of succeeding with a full
+    disk. Ubuntu up to 8.04 LTS already had this, but this got lost in
+    between. (LP: #932598)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 08 Mar 2012 11:57:29 +0100
+
+mountall (2.34) precise; urgency=low
+
+  * Change conf/mounted-debugfs.conf to run the chmod in a || true.
+    This is to avoid showing an "Event failed" message in containers
+    where apparmor denies access to /sys/kernel/debug.
+    Having that job always success shouldn't make any difference as it's
+    not running anything after that chmod and /sys/kernel/debug is indeed
+    mounted.
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Wed, 15 Feb 2012 12:54:40 -0500
+
+mountall (2.33) precise; urgency=low
+
+  * Mark mountall as Multi-Arch: foreign to allow for upstart to be
+    installable with multi-arch (needed for armhf containers on x86)
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Thu, 02 Feb 2012 13:09:51 -0500
+
+mountall (2.32) precise; urgency=low
+
+  [ Steve Langasek ]
+  * Drop /lib/init/rw from /lib/init/fstab, since this is now always a symlink
+    to /run.
+
+  [ James Hunt ]
+  * src/mountall.c: mounted(): Add cast to appease gcc 4.6.2.
+
+  [ Stéphane Graber ]
+  * src/mountall.c: mount_policy(): Ignore mount points if there is already a
+    mounted child (required for lxc(7) to ignore mounts such as /dev). 
+
+ -- James Hunt <james.hunt@ubuntu.com>  Thu, 05 Jan 2012 16:07:12 +0000
+
+mountall (2.31) oneiric; urgency=low
+
+  * Added com.ubuntu.Mountall.server interface. Implemented the mntctl command
+    with 4 commands: 1. StopTimer 2. RestartTimer 3. ChangeMountDevice 4.
+    Version.
+  * Fixed the coding style bugs in the "timeout" option related code. Also
+    removed a break from the is_device_ready () to get the "device-not-ready"
+    event for all the devices which are marked with the timeout option and
+    which are not ready by the time the timer expires.
+  * Added debian/initramfs/Makefile.am to install mountall.initramfs-hook as
+    an initramfs hook that installs mntctl, mountall and other files needed by
+    an event driven initramfs. Also added
+    debian/initramfs/upstart-jobs/Makefile.am to install the upstart-jobs
+    related to mountall in the event driven initramfs. The current
+    mountall.conf execute as an upstart job in place of the "local" script in
+    the non-event driven initramfs
+    
+ -- Surbhi Palande <surbhi.palande@canonical.com>  Fri, 15 Jul 2011 13:32:33 +0100
+
+mountall (2.30) oneiric; urgency=low
+
+  * conf/mounted-dev.conf: Stop copying /lib/udev/devices/. udevd already does
+    that, and with devtmpfs it's obsolete now anyway.
+  * conf/mounted-dev.conf: Create a /dev/shm → /run/shm symlink, while our
+    eglibc is still looking for it in /dev/.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 14 Jul 2011 09:14:15 +0200
+
+mountall (2.29) oneiric; urgency=low
+
+  * Don't actually try to migrate /var/run in /etc/init/mounted-run.conf,
+    since / isn't guaranteed to be mounted read-write at the time /run is
+    mounted.  Handle this in the initscripts shutdown scripts instead.
+  * Handle clean up of the obsolete /etc/init/mounted-varrun.conf conffile.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 13 Jul 2011 23:53:09 +0000
+
+mountall (2.28) oneiric; urgency=low
+
+  [ Colin Watson ]
+  * Mount /run, /run/lock, and /run/shm rather than /var/run, /var/lock, and
+    /var/shm.  Handle migration of the old locations to symlinks.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 13 Jul 2011 13:30:31 -0700
+
+mountall (2.27) oneiric; urgency=low
+
+  * Resolve wording error when checking disks.
+
+ -- Brian Murray <brian@ubuntu.com>  Wed, 06 Jul 2011 12:46:36 +0200
+
+mountall (2.26) oneiric; urgency=low
+
+  * Correct grammar on user-visible strings
+    (LP: #572016)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 07 Jun 2011 12:16:22 -0700
+
+mountall (2.25ubuntu1) natty; urgency=low
+
+  * Fixed two errors found while browsing the code: 1) find_mount("/") returns
+    NULL when / is not found, so cannot access root->mounted. 2) the
+    information message about the dev_wait_timeout should be printed after
+    dev_wait_timeout is initialized properly.
+
+ -- Surbhi Palande <surbhi.palande@canonical.com>  Wed, 13 Apr 2011 12:59:22 +0300
+
+mountall (2.25) natty; urgency=low
+
+  * src/mountall.c: ignore ureadahead's potential mount of
+    /var/lib/ureadahead/debugfs (LP: #736512).
+
+ -- Kees Cook <kees@ubuntu.com>  Sat, 19 Mar 2011 16:46:02 -0700
+
+mountall (2.24) natty; urgency=low
+
+  [ Colin Watson ]
+  * Update mountall's version number; it was last updated at 2.15.
+
+  [ Surbhi Palande ]
+  * Added a command line option dev-wait-time which specifies the time that
+    mountall needs to wait for a device to get ready. The default value for the
+    wait is 30 seconds.
+    (LP: #595904)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Mon, 07 Mar 2011 16:50:04 -0800
+
+mountall (2.23) natty; urgency=low
+
+  * conf/mounted-proc.conf: switch sensitive entries in /proc to be
+    mode 0400 to help slightly resist certain kernel heap attacks.
+
+ -- Kees Cook <kees@ubuntu.com>  Mon, 07 Mar 2011 10:12:18 -0800
+
+mountall (2.22) natty; urgency=low
+
+  * conf/mounted-debugfs.conf: since this filesystem should not be used on
+    production systems (https://lkml.org/lkml/2011/2/22/372) we should
+    transition to removing it. As a first step, make the tree only
+    accessible to the root user.
+
+ -- Kees Cook <kees@ubuntu.com>  Tue, 22 Feb 2011 13:25:25 -0800
+
+mountall (2.21) natty; urgency=low
+
+  * conf/mounted-tmp.conf: find is needed from /usr, so delay this and
+    try again when /usr is mounted. LP: #655447
+
+ -- Clint Byrum <clint@ubuntu.com>  Fri, 04 Feb 2011 15:47:59 -0800
+
+mountall (2.20+nmu1) natty; urgency=low
+
+  * Non-maintainer upload.
+  * src/mountall Change an output string to be grammatically correct;
+    (thanks, Julie Lyrae; LP: #685009).
+
+ -- Chris Wilson <afrowildo@gmail.com>  Wed, 15 Dec 2010 19:50:48 +0000
+
+mountall (2.20) natty; urgency=low
+
+  * Don't try to remove /dev/.udev/rules.d/root.rules when running inside
+    fakechroot (thanks, Piotr Roszatycki; LP: #675269).
+  * Consider gfs2 filesystems to be remote (thanks, Steve Wilson;
+    LP: #582278).
+  * Consider ceph filesystems to be remote (thanks, Ravi Pinjala;
+    LP: #677960).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 29 Nov 2010 16:44:44 +0000
+
+mountall (2.19) maverick; urgency=low
+
+  * Fix infinite loop when one of mountall's private mount options is
+    followed by a comma, and guard against other reasons why cut_options
+    might end up comparing a zero-length option (LP: #649591).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 28 Sep 2010 09:35:11 +0100
+
+mountall (2.18) maverick; urgency=low
+
+  [ Dustin Kirkland ]
+  * conf/mounted-varrun.conf: seed /var/run/motd on boot, to ensure that
+    initial logins are quick, LP: #587858
+
+  [ Steve Langasek ]
+  * Don't check /etc/environment for locale settings; this is an obsolete
+    usage we transitioned away from years ago.
+  * Add LC_ALL to the list of exported locale variables.
+
+  [ Colin Watson ]
+  * Flush standard output and error before daemonising, so that we don't get
+    three copies of our early debug output.
+  * If a mountpoint is a symlink to another mountpoint, add a dependency on
+    the link target rather than trying to mount it again and failing
+    (LP: #541512).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 24 Sep 2010 10:52:20 +0100
+
+mountall (2.17) maverick; urgency=low
+
+  * SECURITY UPDATE: do not leave writable udev rules file around.
+    - src/mountall.c: set umask correctly (LP: #591807).
+    - debian/preinst: remove boot-time udev rules file.
+    - CVE-2010-2961
+
+ -- Kees Cook <kees@ubuntu.com>  Wed, 01 Sep 2010 15:20:14 -0700
+
+mountall (2.16) maverick; urgency=low
+
+  * conf/mountall.conf: set $LANG so that messages appearing in plymouth are
+    translated (LP: #569365); this is a temporary workaround until upstart is
+    fixed to pass the appropriate env vars to all init scripts
+
+ -- Adrien Cunin <adri2000@ubuntu.com>  Tue, 24 Aug 2010 20:47:33 +0200
+
+mountall (2.15) lucid-proposed; urgency=low
+
+  [ Scott James Remnant ]
+  * Fix an obvious thinko error that meant that the "I"gnore fsck error key
+    for a "hard" failure was ignored.
+  * When cancelling filesystem checks, only cancel those that are actually
+    checking filesystems; otherwise those that are merely verifying the
+    superblock will return an "unrecoverable error" rather than "cancelled".
+    LP: #577331.
+
+  [ Steve Langasek ]
+  * Only send plymouth a progress update when there's actual progress to
+    report; otherwise we flood plymouthd with redundant events, and the
+    progress will spin for minutes after the fsck itself is finished.  Thanks
+    to Tero Mononen and Anders Kaseorg for the patch.  LP: #571707.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 09 May 2010 01:04:24 +0200
+
+mountall (2.14) lucid; urgency=low
+
+  [ Scott James Remnant ]
+  * Flush updates to Plymouth before emitting Upstart events, in case
+    the event kills Plymouth.  LP: #559761.
+  * Don't mark a filesystem "nodev" just because it's got "none" in the
+    device column; this will block the "virtual-filesystems" event which
+    is the one that can't use Plymouth to prompt.  LP: #507881.
+  * When cancelling in-progress fsck, don't deference the NULL mount
+    record.  LP: #562811.
+  * mountall is missing a very important line of code that increases the
+    udev buffer size; without this it's possible we may miss events during
+    busy periods.  LP: #561390.
+
+  [ Steve Langasek ]
+  * If we're not marking all nodev filesystems as virtual, we need to
+    at least mark our placeholder filesystem entries (type=none && dev=none)
+    this way.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 25 Apr 2010 23:36:01 +0100
+
+mountall (2.13) lucid; urgency=low
+
+  [ Scott James Remnant ]
+  * Once a mountpoint has been skipped, don't try and mount it again
+    (unless the udev device actually shows up).  LP: #553290.
+  * Skipping a filesystem means we should also skip anything that depends
+    on that (ie. skip /usr/local when skipping /usr).
+  * Don't skip filesystems due to timeout when Plymouth not available.
+
+  * Don't run mount, swapon or fsck while there's an uncleared error on
+    the filesystem.  LP: #501801.
+
+  * Don't display the filesystem check message when an fsck completes
+    without needing to check the filesystem.  LP: #564434.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 19 Apr 2010 00:15:58 -0700
+
+mountall (2.12) lucid; urgency=low
+
+  [ Scott James Remnant ]
+  * Generate mountall.pot file at build-time, rather than shipping a
+    hopelessly out of date copy in the source package.  LP: #559997.
+
+  [ Colin Watson ]
+  * Fix typo in "Press C" message.
+
+  [ Alberto Milone ]
+  * Pass a localised string to plymouth in plymouth_progress (LP: #553954).
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 15 Apr 2010 08:42:10 +0000
+
+mountall (2.11) lucid; urgency=low
+
+  [ Scott James Remnant ]
+  * conf/mounted-*.conf: Add defaults for $MOUNTPOINT just in case somebody
+    tries to run this by hand.  LP: #557177.
+
+  [ Dustin Kirkland ]
+  * conf/mounted-varrun.conf: drop initial motd creation, as this is now
+    handled entirely dynamically by /etc/update-motd.d/* scripts, with
+    this part specifically handled by base-files's 00-header,
+    LP: #516293
+
+ -- Dustin Kirkland <kirkland@ubuntu.com>  Fri, 09 Apr 2010 13:50:29 -0500
+
+mountall (2.10) lucid; urgency=low
+
+  * Rework the Plymouth connection logic; one needs to attach the client to
+    the event loop *after* connection otherwise you don't get disconnection
+    notification, and one needs to actually actively disconnect in the
+    disconnection handler.
+  * For safety and sanity reasons it becomes much simpler to create the
+    ply_boot_client when we connect, and free it on disconnection.  Thus the
+    presence or not of this struct tells us whether we're connected or not.
+    LP: #524708.
+  * Flush the plymouth connection before closing it and exiting, otherwise
+    updates may be pending and the screen have messages that confuse people
+    while X is starting (like fsck at 90%).  LP: #487744.
+
+  * Replace the modal plymouth prompt for error conditions with code that
+    continues working in the background while prompting.  This most benefits
+    the old "Waiting for" message, which can now allow you to continue to
+    wait and it can solve itself.  LP: #527666, #545435.
+  * Integrate fsck progress updates into the same mechanism.
+  * Allow fsck messages to be translated.  LP: #390740.
+  * Change fsck message to be a little less alarming.  LP: #545267.
+  * Add hard dependency on Plymouth; without it running, mountall will
+    ignore any filesystem which doesn't show up within a few seconds or that
+    fails to fsck or mount.  If you don't want graphical splash, you simply
+    need not install themes.
+
+  * Improve set of messages seen with --verbose, and ensure all visible
+    messages are marked for translation.  LP: #446592.
+  * Reduce priority of failed to mount error for remote filesystems since
+    we try again, and this just spams the console.  LP: #504224. 
+
+  * Keep hold of the dev_t when parsing /proc/self/mountinfo, then after
+    mounting /dev (or seeing that it's mounted) create a quick udev rules
+    file that adds the /dev/root symlink to this device.  LP: #527216.
+  * Do not try and update /etc/mtab when it's a symbolic link.  LP: #529993.
+  * Remove odd -a option from mount calls, probably a C&P error from the
+    fsck code long ago.  LP: #537135.
+  * Wait for Upstart to acknowledge receipt of events, even if we don't
+    hang around for them to be handled.
+  * Always run through try_mounts() at least once.  LP: #537136.
+  * Don't keep mountall running if the only remaining unmounted filesystems
+  * 
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 31 Mar 2010 19:37:31 +0100
+
+mountall (2.9) lucid; urgency=low
+
+  * debian/control: per Scott, don't use pre-depends anymore, just regular
+    depends.  LP: #540091.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 30 Mar 2010 11:58:20 -0700
+
+mountall (2.8) lucid; urgency=low
+
+  * src/mountall.c:
+    - Flush the D-Bus connection queue before exiting, otherwise we can
+      end up leaving important events like "filesystem" in the memory queue
+      without ever sending it on the socket.  LP: #533054.
+    - Move the message about disks being checked here from plymouth.
+  * configure.ac:
+    - Now that it's upstream, there's a proper ply-boot-client.pc file for
+      the boot client library we want.
+  * src/Makefile.am:
+    - Which means we don't need to manually include -lplybootclient (the
+      library changed names anyway)
+  * debian/control:
+    - Bump build-dependency
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 12 Mar 2010 18:22:51 +0000
+
+mountall (2.7) lucid; urgency=low
+
+  * src/mountall.c:
+    - Prepend "keys:" to messages which require user interaction in
+      plymouth.
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Thu, 04 Mar 2010 16:02:04 +0100
+
+mountall (2.6) lucid; urgency=low
+
+  * debian/control: add versioned-dependency on coreutils to get "cp -n"
+    LP: #527829.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 26 Feb 2010 16:16:24 +0000
+
+mountall (2.5) lucid; urgency=low
+
+  * conf/mounted-dev.conf:
+    - Go back to copying from /lib/udev/devices, this is much faster for
+      the devtmpfs case since almost all devices will already exist.
+      LP: #507162.
+  * src/mountall.c:
+    - If we mount something new over /dev, we need to make /dev/console and
+      /dev/null again as otherwise the whole system falls apart (even init).
+      LP: #513919. 
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 17 Feb 2010 11:56:41 +0000
+
+mountall (2.4) lucid; urgency=low
+
+  * conf/mountall-net.conf: only send SIGUSR1 to the main process, not to
+    any pre-start or post-stop script we might have; killing the post-stop
+    script with -USR1, though an unlikely race to hit, is definitely wrong.
+    LP: #506902.
+
+  [ Johan Kiviniemi ]
+  * src/mountall.c: The mount table needs to exist for parse_filesystems
+    - parse_filesystems() could call mount_proc(), which would call
+      find_mount() and segfault.  LP: #503212.
+  * src/mountall.c: Handle TAG_UNKNOWN.  LP: #505748.
+  * src/mountall.c: Ensure boredom_timer is set to NULL when freeing
+  * src/mountall.c: Default to no action for boredom query if prompt fails.
+    LP: #505530.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 14 Jan 2010 05:30:13 -0800
+
+mountall (2.3) lucid; urgency=low
+
+  * conf/mounted-dev.conf: even with devtmpfs we need to make a few symlinks
+    (/dev/fd, /dev/std{in,out,err})
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 24 Dec 2009 02:35:35 +0000
+
+mountall (2.2) lucid; urgency=low
+
+  * Allow the "nobootwait" option for virtual devices too (which we
+    ordinarily wait for all of).
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 23 Dec 2009 03:59:45 +0000
+
+mountall (2.1) lucid; urgency=low
+
+  * Still having problems with the mount-point tagging that decides whether
+    a given filesystem is virtual, local or remote.  Apply further fixes
+    in an attempt to reduce problems:
+    - don't use the prior fstab entry of virtual filesystems when the
+      device spec matches the filesystem type (as well as "none")
+    - inherit local and remote tags of device parents and prior fstab entries
+      as well as mountpoint parents
+    - fix inheritance to also work when fstab is out-of-order (e.g. /mnt/proc
+      before /proc)
+  * Don't assert() when skip_mount() called on a filesystem that needs to
+    be remounted.
+  * Don't trigger the swap event more than once.
+  * Skipping a mount doesn't increase our changes of mounting other
+    filesystems, it just means we'll enter an infinite loop of trying to
+    mount the filesystem we just skipped!
+  * Mountpoints not listed in /etc/fstab should be recorded with the options
+    they were mounted with, not "defaults", otherwise we'll attempt to
+    remount them if read-only.
+  * Start maintenance shell should mountall crash.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 22 Dec 2009 18:48:13 +0000
+
+mountall (2.0) lucid; urgency=low
+
+  [ Scott James Remnant ]
+  * "mount" event changed to "mounting", to make it clear it happens
+    before the filesystem is mounted.  Added "mounted" event which
+    happens afterwards.
+  * Dropped the internal hooks, these are now better handled by Upstart
+    jobs on the "mounted" event.
+  * Dropped the call to restorecon for tmpfs filesystems, this can also be
+    handled by an Upstart job supplied by SELinux now.
+    - mounted-dev.conf replaces /dev hook, uses MAKEDEV to make devices.
+    - mounted-varrun.conf replaces /var/run hook
+    - mounted-tmp.conf replaces /tmp hook.
+      + Hook will be run for any /tmp mountpoint.  LP: #478392.
+      + Switching back to using "find" fixes $TMPTIME to be in days again,
+        rathern than hours.  LP: #482602
+  * Try and make mountpoints, though we only care about failure if the
+    mountpoint is marked "optional" since otherwise the filesystem might
+    make the mountpoint or something.
+  * Rather than hiding the built-in mountpoints inside the code, put them
+    in a new /lib/init/fstab file; that way users can copy the lines into
+    /etc/fstab if they wish to override them in some interesting way.
+  * Now supports multiple filesystem types listed in fstab, the whole
+    comma-separated list is passed to mount and then /proc/self/mountinfo
+    is reparsed to find out what mount actually did.
+    * /dev will be mounted as a devtmpfs filesystem if supported by the
+      kernel (which then does not need to run the /dev hook script).
+  * Filesystem checks may be forced by adding force-fsck to the kernel
+    command-line.
+  * Exit gracefully with an error on failed system calls, don't infinite
+    loop over them.  LP: #469985.
+  * Use plymouth for all user communication, replacing existing usplash and
+    console code;
+    * When plymouth is running, rather than exiting on failures, prompt the
+      user as to whether to fix the problem (if possible), ignore the problem,
+      ignore the mountpoint or drop to a maintenance shell.  LP: #489474.
+    * If plymouth is not running for whatever reason, the fallback action
+      is always to start the recovery shell.
+  * Adjust the set of filesystems that we wait for by default: LP: #484234.
+    * Wait for all local filesystems, except those marked with the
+      "nobootwait" option.
+    * Wait for remote filesystems mounted as, or under, /usr or /var, and
+      those marked with the "bootwait" option.
+  * Always try network mount points, since we allow them to fail silently;
+    SIGUSR1 now simply retries them once more.  LP: #470776.
+  * Don't retry devices repeatedly.  LP: #480564.
+  * Added manual pages for the events emitted by this tool.
+
+  [ Johan Kiviniemi ]
+  * Start all fsck instances in parallel, but set their priorities so that
+    thrashing is avoided.  LP: #491389.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 21 Dec 2009 23:09:23 +0000
+
+mountall (1.1) lucid; urgency=low
+
+  * Update to use external libnih.
+  * Updated autoconf details at same time to match libnih.
+  * rcS is a job, not an event.  LP: #456806.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Sun, 29 Nov 2009 20:16:10 +0000
+
+mountall (1.0) karmic; urgency=low
+
+  [ Kees Cook ]
+  * Call out to restorecon after mounting tmpfs filesystems.  LP: #456942.
+
+  [ Johan Kiviniemi ]
+  * Fix a bug introduced by the 0.2.6 change. In certain situations, we’d
+    quit even though we’re still waiting for some filesystems to be
+    mounted.  LP: #456806.
+
+  [ Scott James Remnant ]
+  * Don't clear the splash screen when we're waiting for filesystems,
+    instead just output following whatever else is there.  In non-verbose
+    mode this won't look any different, but it means we don't clear previous
+    verbose mode text.  LP: #458389.
+  * Only update the "waiting for one or more mounts" text if there's actually
+    a change in the set we're waiting for; this removes the need for a CLEAR
+    this case anyway.
+  * Don't say we're waiting for mounts we're, in fact, not waiting
+    for.  LP: #459859.
+  * Stop mountall (normally) when entering recovery mode.  LP: #458060.
+
+  * Clean up source tarball.  LP: #460348.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 26 Oct 2009 09:30:41 +0000
+
+mountall (0.2.6) karmic; urgency=low
+
+  * Fix the bug where we never realise that we're down, because the
+    fact the filesystem is mounted is updated from /proc/self/mountinfo
+    rather than internally.  LP: #456806.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 21 Oct 2009 16:19:36 +0100
+
+mountall (0.2.5) karmic; urgency=low
+
+  * Filesystem check progress reporting, including cancellation.  LP: 446596.
+  * When we're waiting for a mountpoint, if a few seconds of inactivity
+    passes, report what we're waiting for and allow Escape to drop you to
+    a recovery shell.
+  * Start usplash for filesystem check progress reporting or when we've
+    been waiting for more than a few seconds.  LP: #431184.
+
+  * Hide error removing /forcefsck, people mis-report this as a bug and
+    don't tell us the error above it.
+  * Don't call mount.ecryptfs or mount.aufs when adding an entry for
+    /etc/mtab; these helpers are broken and do not support the -f argument.
+    This means your passphrase may end up in /etc/mtab, blame them not me.
+    LP: #431954, #443080.
+  * Unlink /etc/mtab~ after creating/truncating /etc/mtab and before writing
+    mtab entries.  LP: #431865.
+  * Stop the recovery shell if the user runs shutdown within it, so we
+    don't run mountall again.  LP: #452196.
+  * If the root filesystem check fails, we'll need to reboot, so just have
+    the recovery shell script do that.
+
+  * Post-review logic fixes.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 20 Oct 2009 12:19:16 +0100
+
+mountall (0.2.2) karmic; urgency=low
+
+  [ Steve Langasek ]
+  * Don't emit the local-filesystem signal until after virtual filesystems
+    are also done mounting.  LP: #448981.
+
+  [ Robert Gerlach ]
+  * Fix segfault when root filesystem missing from fstab, or listed
+    as /dev/root.  LP: #448323.
+
+  [ Johan Kiviniemi ]
+  * Don’t queue filesystem check when either device or type is "none".
+
+  [ Scott James Remnant ]
+  * Removed /srv from the list of "essential" mountpoints.  LP: #448267.
+  * Allow overriding of the above list by using the "bootwait" and
+    "nobootwait" fstab options, e.g.
+
+    LABEL=foo /home ext4 nobootwait 0 0
+
+  * Mount /proc before attempting to parse /proc/filesystems.  LP: #447947.
+  * Further improvements to event tagging of filesystems.  A virtual bootwait
+    filesystem underneath a local or remote filesystem inherits that tag,
+    a local bootwait filesystem underneath a remote filesystem inherits that
+    tag, remote filesystems do not inherit them.  LP: #447654.
+
+  * Replace previous hardcoded "arch specific" flag for /spu with an
+    "optional" fstab mount option.
+  * Made binfmt_misc,fusectl, debugfs, securityfs and /lib/init/rw optional
+    as well.
+  * Check whether the mountpoint of optional fstab entries exists before
+    trying to mount, and skip over that if it doesn't.  LP: #447525.
+
+  * Keep /proc/self/mountinfo open, if it changes while we're running,
+    update the knowledge of the mount table and what's mounted.  That
+    way if something else mounts it while mountall running, you'll still
+    get events and mountall will still exit.
+  * Try mounts again if another network device comes up while we were
+    waiting.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 13 Oct 2009 02:17:47 +0100
+
+mountall (0.2.1) karmic; urgency=low
+
+  * Make mountall recognize that *remote* filesystems are still remote, given
+    that their parent fs is almost always local.  LP: #447654.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 09 Oct 2009 19:17:42 -0700
+
+mountall (0.2.0) karmic; urgency=low
+
+  [ Colin Watson ]
+  * Always check the root filesystem if --force-fsck is used, regardless of
+    passno.  LP: #435707.
+
+  [ Johan Kiviniemi ]
+  * Have each fsck instance create a lock for each underlying physical device.
+    If you have a single disk or RAID, all filesystem checks will happen
+    sequentially in order to avoid thrashing.  On more complex configurations,
+    you’ll benefit from the parallel checks mountall has been doing all along.
+    LP: #434974.
+
+  [ Scott James Remnant ]
+  * Flush standard output and error before spawning processes to make
+    capturing logs easier (otherwise we end up repeating things still in
+    the buffer), and before calling exec().
+  * Turn the code upside down so that each mount knows what it's waiting
+    for, and allow multiple dependencies.  This makes the code much more
+    readable putting the "policy" in a single function, and will make it
+    much easier in future when this is done by Upstart.
+  * For kernel filesystems listed in fstab, honour the order that they
+    are listed in fstab.  LP: #432571, #433537, #436796
+  * Always create new swap partition mounts for each fstab entry, don't
+    treat them as updating the same.  LP: #435027.
+  * Virtual filesystems under local or remote filesystems (and local under
+    remote) don't delay the virtual or local events.  LP: #431040.
+  * Simplify event emission, this has the advantage that we can now output
+    what mount points we're waiting for and what they are waiting for as
+    well.
+  * Fixed issue with trailing slashes.  LP: #443035.
+  * Only run hooks if the filesystem was not already mounted.  LP: #444252.
+  * Don't clean up /tmp when run without --tmptime argument.
+  * Ignore loop and ram devices until ready.  LP: #441454.
+  * Add options to binfmt_misc filesystem, which will probably cause it to
+    be mounted on boot as well.
+  * Synchronously mount local and virtual filesystems, I suspect this is
+    the real cause behind the XFS races as one will modprobe and the other
+    will not (and fail).  LP: #432620.
+  * Synchronously activate swap to avoid out of memory issues when checking
+    the root filesystem.
+  * Enumerate existing udev devices on startup, so we don't always have to
+    see udev be coldplugged.
+  * Don't break on general errors for non-essential filesystems.
+    LP: #441144.
+  * Don't repeat attempts to mount a filesystem without having first
+    succeded to mount another.
+  * Still restart mountall even if the recovery shell fails.
+  * Don't queue filesystem check when device is "none", or missing, or the
+    filesystem is marked nodev.
+  * Generate a "mount" event before mounting a filesystem, and wait for its
+    effects to complete.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 09 Oct 2009 16:50:46 +0100
+
+mountall (0.1.8) karmic; urgency=low
+
+  [ Scott James Remnant ]
+  * Further work on the fix from the previous version where the root
+    filesystem would always be considered "local", retain that from the
+    POV of the {virtual,local,remote}-filesystems events, but do mount
+    the root straight away when it's virtual since there's no device to
+    wait until it's ready.  LP: #431204.
+  * If a remote filesystem is already mounted and doesn't need a remount,
+    don't wait for a network device to come up.  LP: #430348.
+
+  * Ignore single and double quotes in fstab device specifications, since
+    mount -a used to.  LP: #431064.
+  * Never write mtab when mounting a mount with showthroughs (ie. /var)
+    and instead update mtab once we've moved it into place
+    later.  LP: #434172.
+
+  [ Kees Cook ]
+  * src/mountall.c: rework nftw hooks to use a global for argument passing
+    instead of using nested functions and the resulting trampolines that
+    cause an executable stack.  LP: #434813.
+  * debian/rules: revert powerpc exception, since the cause is fixed by
+    removing the nested functions.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 23 Sep 2009 14:19:01 -0700
+
+mountall (0.1.7) karmic; urgency=low
+
+  * Build with -O2 on powerpc to work around wrong-code generation with -Os.
+    LP: #432222.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 22 Sep 2009 00:31:52 +0200
+
+mountall (0.1.6) karmic; urgency=low
+
+  [ Scott James Remnant ]
+  * Restored mistakenly removed dh_installchangelogs & dh_installdocs.
+
+  * Allow a further udev event for a block-device to retry swapon/mount
+    after fsck has been already been completed for a prior event.
+  * Massively reduce the pickyness of mountall when it comes to block
+    devices; only expect ID_FS_USAGE and ID_FS_TYPE for dm and md devices,
+    and don't actually expect the values.  For most people this won't make
+    a difference, since we use UUID= anyway.  But for people with hardcoded
+    /dev/sda1 in their fstab, which has multiple metadata, this won't break
+    their boot.
+
+  * Only include FHS filesystems in the {virtual,local,remote}-filesystems
+    events.  This prevents an unmountable entry in fstab blocking things like
+    starting D-Bus or the Network which are required to mount that filesystem.
+    LP: #430880.
+  * Never consider the root filesystem to be virtual or remote, even when
+    it is, since we assert that it's already mounted so we don't have to
+    take care of it.  LP: #431028.
+  * Check whether filesystems mounted readonly when we start do not have
+    "ro" in their fstab, before assuming we need to remount them.
+    Readonly filesystems not in fstab (e.g. LiveCD, Wubi, etc.) never need
+    remounting.  LP: #431028.
+  * Only virtual filesystems will be mounted while the root filesystem is
+    readonly, not filesystems such as /usr and /var.
+  * fuse filesystems are never considered virtual, since they probably
+    need devices, write access and the hand of god to be mounted.
+
+  [ Colin Watson ]
+  * Ignore errors from kill in mountall-net, since they're almost certainly
+    just because mountall exited before we had a chance to kill it
+    LP: #430755.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 16 Sep 2009 23:55:33 +0100
+
+mountall (0.1.4) karmic; urgency=low
+
+  [Johan Kiviniemi]
+  * Don't run fsck when the device has already been marked ready.
+
+  [Scott James Remnant]
+  * Don't abort when we have nothing to copy into /dev and /var/run, or
+    nothing to remove from /tmp
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 16 Sep 2009 00:15:53 +0100
+
+mountall (0.1.3) karmic; urgency=low
+
+  * mount.ntfs and mount.ntfs-3g do not support the standard "-n" (no mtab)
+    mount option, and error when passed.  Since the ntfs code is rather
+    complex, and seems safe against failing to write to mtab, work around
+    it in mountall and never pass -n to mount for ntfs and ntfs-3g
+    filesystems 
+  * Failure to check or mount a filesystem that's not critical to the boot
+    no longer results in immediate termination of mountall.
+  * Failure to mount a remote filesystem no longer results in immediate
+    termination of mountall, since these may be retried when other interfaces
+    are brought up.
+  * Improved error message output on mountall failure, temporarily enabled
+    output so important messages aren't lost.
+  * Removed /forcefsck after checks are complete.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 15 Sep 2009 02:53:34 +0100
+
+mountall (0.1.2) karmic; urgency=low
+
+  * Unconditionally configure.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 15 Sep 2009 01:27:49 +0100
+
+mountall (0.1.1) karmic; urgency=low
+
+  * Fix build issue due to libnih being symlinks. 
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 15 Sep 2009 00:56:12 +0100
+
+mountall (0.1.0) karmic; urgency=low
+
+  * Initial release.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 14 Sep 2009 23:21:05 +0100

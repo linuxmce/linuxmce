@@ -1,0 +1,5 @@
+ubuntu-zfs (8~trusty) trusty; urgency=low
+
+  * Initial release.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Mon, 31 Mar 2014 00:47:01 -0500
