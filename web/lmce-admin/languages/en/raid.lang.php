@@ -42,4 +42,5 @@ $TEXT_GROW_BY_SUFFIX_CONST=' drives';
 $TEXT_GROW_CONST='Grow';
 $TEXT_GROW_SUCCESS_MSG_CONST='Success!<BR>Your RAID array will now rebuild itsself to use the available extra space.<BR>Please note that this may take more than 24 hours. It is normal for your RAID array to be listed as Damaged or Rebuilding during this time.<BR>Please do not reboot until rebuilding is finished.';
 $TEXT_ACTIVATE_DRIVE_CONST="Activate";
+$TEXT_ZFS_DRIVE_DELETE_NOT_ALLOWED="Drives can not be deleted from ZFS pools.";
 ?>

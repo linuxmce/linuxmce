@@ -51,6 +51,11 @@ TPL_GENERIC_NFS_SHARE=1769
 TPL_RAID_0=1854
 TPL_RAID_1=1851
 TPL_RAID_5=1849
+TPL_ZFS_POOL=2351
+TPL_ZFS_MIRROR=2352
+TPL_ZFS_RAIDZ1=2353
+TPL_ZFS_RAIDZ2=2354
+TPL_ZFS_RAIDZ3=2355
 
 DD_SHARE_NAME=126
 DD_USERNAME=127
@@ -62,6 +67,31 @@ DD_BLOCK_DEV=152
 NFS_MOUNT_OPTS="-fstype=nfs,vers=3,udp,proto=udp,soft,timeo=7,retrans=3,retry=2,rsize=32768,wsize=32768"
 
 case "$Template" in
+        ## ZFS Storage Pool
+        "$TPL_ZFS_POOL"|"$TPL_ZFS_MIRROR"|"$TPL_ZFS_RAIDZ1"|"$TPL_ZFS_RAIDZ2"|"$TPL_ZFS_RAIDZ3")
+	        if [[ "$ControlledVia" == "$PK_Device" ]]; then
+		    ## One of our devices
+		    Drive_BlockDevice=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=$StorageDevice AND FK_DeviceData=$DD_BLOCK_DEV")
+		    echo "-fstype=zfs :$Drive_BlockDevice"
+		else
+		    ## External device, do an NFS mount.
+		    ## Get the ip address of the computer that contains that drive
+		    Q="SELECT IPaddress FROM Device WHERE PK_Device = '$ControlledVia' LIMIT 1"
+		    IPaddress=$(RunSQL "$Q")
+		    IPaddress=$(Field 1 "$IPaddress")
+		    
+		    ## Try to see if the computer is up
+		    ping -qnc 1 -W 1 "$IPaddress" &> /dev/null
+		    HostIsUp=$?
+		    if [[ "$HostIsUp" != "0" ]] ;then
+			Log $LOG_WARN "Host $IPaddress is not responding to our ping"
+			exit 0
+		    fi
+		    
+		    ## Do the mount
+		    echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"		    
+		fi
+	;;
 	## Software Raid Array
 	"$TPL_RAID_0"|"$TPL_RAID_1"|"$TPL_RAID_5")
 		## It's one of our own internal storage devices
