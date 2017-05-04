@@ -332,7 +332,7 @@ public:
 	virtual void CMD_Game_Reset(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Game_Options(string sValue_To_Assign,string sPath,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Swap_Media(string sFilename,string sSlot,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Swap_Media(int iSlot_Number,string sSlot,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -1949,9 +1949,9 @@ public:
 				case COMMAND_Swap_Media_CONST:
 					{
 						string sCMD_Result="OK";
-						string sFilename=pMessage->m_mapParameters[COMMANDPARAMETER_Filename_CONST];
+						int iSlot_Number=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Slot_Number_CONST].c_str());
 						string sSlot=pMessage->m_mapParameters[COMMANDPARAMETER_Slot_CONST];
-						CMD_Swap_Media(sFilename.c_str(),sSlot.c_str(),sCMD_Result,pMessage);
+						CMD_Swap_Media(iSlot_Number,sSlot.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -1968,7 +1968,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Swap_Media(sFilename.c_str(),sSlot.c_str(),sCMD_Result,pMessage);
+								CMD_Swap_Media(iSlot_Number,sSlot.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

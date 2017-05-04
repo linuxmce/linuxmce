@@ -1,10 +1,8 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+     Copyright (C) 2017 LinuxMCE 
 
-     www.plutohome.com
+     www.linuxmce.org
 
-     Phone: +1 (877) 758-8648
- 
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -22,109 +20,29 @@
 #include "Gen_Devices/Game_PlayerBase.h"
 //<-dceag-d-e->
 
-// Alarms
-#define CHECK_MAME 1
-
-// Status
-#define STATUS_STARTING_UP 1
-#define STATUS_RUNNING 2
-#define STATUS_EXITED 3
-
-#define SHOW_REMOTE 0
-#define SHOW_GAME_VIEW 1
-#define SHOW_OSD 2
-
-#include "VideoFrameGeometry.h"
-#include "DCE/PlainClientSocket.h"
-#include "X11/Xlib.h"
-#include "X11/Xutil.h"
-#include "X11/keysym.h"
-#include <X11/extensions/XTest.h>
-#include "DCE/PlainClientSocket.h"
-#include "AlarmManager.h"
-
-#include <libxml/parser.h>
-#include <libxml/xpath.h>
-#include <map>
-
-#include "EmulatorFactory.h"
-#include "EmulatorController.h"
-
-#include "VirtualKeyboard.h"
-
-#define GAME_PLAYER_STATE_DIR "/run/Game_Player"
-
 //<-dceag-decl-b->
 namespace DCE
 {
-  class EmulatorFactory;
-  class EmulatorController;
 	class Game_Player : public Game_Player_Command
 	{
 //<-dceag-decl-e->
-    friend class EmulatorController;
-    // Private member variables
+		// Private member variables
 
-    // Private methods
-  public:
-    // Public member variables
+		// Private methods
+public:
+		// Public member variables
 
-  private:
-    VirtualKeyboard* m_pVirtualKeyboard;
-    bool m_bIsRecording;
-    bool m_bStateDirExists;
-    string m_sIPofMD;
-    pluto_pthread_mutex_t m_GameMutex;
-    EmulatorFactory *m_pEmulatorFactory;
-    EmulatorController *m_pEmulatorController;
-    EmulatorController *m_pEmulatorController_prev;
-    int m_iStreamID, m_iPreviousStreamID;
-    DeviceData_Base *m_pDevice_Game_Plugin;
-    DeviceData_Base *m_pDevice_App_Server;
-    DeviceData_Base *m_pDevice_Joystick;
-    Display *m_pDisplay;
-    class AlarmManager *m_pAlarmManager;
-    string m_sJoystick_Configuration;	// If a joystick configuration devicedata is found, it is put here.
-
-    // Private methods
-  public:
-    virtual void PrepareToDelete ();
-    virtual void CreateChildren();
-    virtual void OnReload();
-    virtual void OnQuit();
-    void DoExitActions();
-    bool Connect (int iPK_DeviceTemplate);
-    void pleaseResend();
-
-    pluto_pthread_mutex_t m_X11ControllerMutex;
-    int m_iPK_MediaType;	// Used by the stop media method.
-    int m_iModifier;		// The current button modifier.
-    bool m_bLoadSavedGame;
-    // Public member variables
-
-    void LaunchEmulator();
-    void KillEmulator();
-    void TranscodeAfterRecord(string sPath, string sFilename, long dwPK_Device_Orbiter);
-
-  protected:
-    void AlarmCallback (int id, void *param);
-  
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
 		Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 		virtual ~Game_Player();
 		virtual bool GetConfig();
-		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
-//<-dceag-const2-b->
-		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
-		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		Game_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-//<-dceag-const2-e->
+//<-dceag-const2-b->!
 
 //<-dceag-h-b->
 	/*
@@ -729,8 +647,7 @@ public:
 	virtual void CMD_Swap_Media(int iSlot_Number,string sSlot,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
-
-  };
+	};
 
 //<-dceag-end-b->
 }
