@@ -1,9 +1,0 @@
-# Automatically added by dh_installinit
-if [ "$1" = install ] || [ "$1" = upgrade ]; then
-	if [ -e "/etc/init.d/zed" ] && [ -L "/etc/init.d/zed" ] \
-	   && [ $(readlink -f "/etc/init.d/zed") = /lib/init/upstart-job ]
-	then
-		rm -f "/etc/init.d/zed"
-	fi
-fi
-# End automatically added section

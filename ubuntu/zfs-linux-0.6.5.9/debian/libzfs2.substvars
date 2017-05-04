@@ -1,2 +1,0 @@
-misc:Depends=zfs-doc
-shlibs:Depends=libc6 (>= 2.8), libnvpair1, libuutil1, libzfs2, libzpool2
