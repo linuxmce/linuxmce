@@ -1,0 +1,4 @@
+* Change protected methods to bool.
+* Add logging throughout
+* Implement Done
+* Implement keyPress
