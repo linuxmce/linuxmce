@@ -1,10 +1,8 @@
 /*
-     Copyright (C) 2008 LOCALE|concept
+     Copyright (C) 2017 LinuxMCE
 
-     www.localeconcept.com
+     www.linuxmce.org
 
-     Phone: +1 (617) 319-8219
- 
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -13,7 +11,6 @@
      See the GNU General Public License for more details.
 
 */
-
 //<-dceag-d-b->
 #include "Game_Player.h"
 #include "DCE/Logger.h"
@@ -28,62 +25,12 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
-#include "PlutoUtils/ProcessUtils.h"
-#include "WindowUtils/WindowUtils.h"
-#include "pluto_main/Define_DeviceTemplate.h"
-#include "pluto_main/Define_Command.h"
-#include "pluto_main/Define_CommandParameter.h"
-#include "pluto_main/Define_DesignObj.h"
-#include "pluto_main/Define_MediaType.h"
-#include "pluto_main/Define_Button.h"
-#include "pluto_main/Define_Variable.h"
-#include "Gen_Devices/AllScreens.h"
-
-#include <pthread.h>
-#include <math.h>
-
-#include <X11/Xlib.h>
-
-Game_Player *g_pGame_Player = NULL;
-
-/**
- * This is a castrated window handler so that the program will keep running.
- * This is okay, because any failed X requests will be retried until timeout.
- */
-int _defaultWindowHandler(Display *disp, XErrorEvent *err)
-{
-  char msg[80];
-  XGetErrorText(disp, err->error_code, msg, 80);
-  fprintf(stderr, "Error code %s\n", msg);
-  if (g_pGame_Player)
-    {
-      g_pGame_Player->pleaseResend();
-    }
-  return 0;
-}
-
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: Game_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
-,
-	  m_GameMutex ("game_player"), m_X11ControllerMutex("x11_controller")
 {
-  g_pGame_Player = this;
-  m_GameMutex.Init (NULL);
-  m_X11ControllerMutex.Init(NULL);
-  m_pAlarmManager = NULL;
-  m_pDevice_App_Server = NULL;
-  m_pEmulatorFactory=NULL;
-  m_pEmulatorController=NULL;
-  m_pEmulatorController_prev=NULL;
-  m_iPK_MediaType = 0;
-  m_iStreamID = 0;
-  m_bLoadSavedGame = 0;
-  m_iModifier = 0;
-  m_bIsRecording = false;
-  m_bStateDirExists=false;
 }
 
 //<-dceag-const2-b->!
@@ -92,89 +39,7 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 Game_Player::~Game_Player()
 //<-dceag-dest-e->
 {
-  EVENT_Playback_Completed ("", 0, false);	// In case media plugin thought something was playing, let it know that there's not
-  if (m_pVirtualKeyboard)
-    {
-      delete m_pVirtualKeyboard;
-    }
-}
-
-void Game_Player::pleaseResend()
-{
-  if (m_pEmulatorController)
-    m_pEmulatorController->pleaseResend();
-}
-
-bool Game_Player::Connect (int iPK_DeviceTemplate)
-{
-  if (!Command_Impl::Connect (iPK_DeviceTemplate))
-    return false;
-
-  DeviceData_Base *pDevice = m_pData->GetTopMostDevice();
-  m_sIPofMD = pDevice->m_sIPAddress;
-
-  EVENT_Playback_Completed ("", 0, false);	// In case media plugin thought something was playing, let it know that there's not
-
-  return true;
-
-}
-
-void Game_Player::DoExitActions()
-{
-  delete m_pAlarmManager;
-  delete m_pEmulatorFactory;
-  m_pAlarmManager = NULL;
-  m_pDevice_App_Server = NULL;
-  m_iPK_MediaType = 0;
-  XSetErrorHandler(NULL);
-  if (FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
-    {
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game Player State directory exists. Cleaning up, and deleting.");
-      if (!FileUtils::DelDir(GAME_PLAYER_STATE_DIR))
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game Player State directory could not be deleted.");
-	}
-      else
-	{
-	  m_bStateDirExists=false;
-	}
-    }
-}
-
-void Game_Player::OnQuit()
-{
-  DoExitActions();
-  Command_Impl::OnQuit();
-}
-
-void Game_Player::OnReload()
-{
-  DoExitActions();
-  Command_Impl::OnReload();
-}
-
-void
-Game_Player::PrepareToDelete ()
-{
-  Command_Impl::PrepareToDelete ();
-  delete m_pAlarmManager;
-  delete m_pEmulatorFactory;
-  m_pAlarmManager = NULL;
-  m_pDevice_App_Server = NULL;
-  m_iPK_MediaType = 0;
-  XSetErrorHandler(NULL);
-  if (FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
-    {
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game Player State directory exists. Cleaning up, and deleting.");
-      if (!FileUtils::DelDir(GAME_PLAYER_STATE_DIR))
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game Player State directory could not be deleted.");
-	}
-      else
-	{
-	  m_bStateDirExists=false;
-	}
-    }
+	
 }
 
 //<-dceag-getconfig-b->
@@ -184,115 +49,14 @@ bool Game_Player::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
-  // Put your code here to initialize the data in this class
-  // The configuration parameters DATA_ are now populated
-
-	// This next chunk of code attempts as defensively as possible, to keep a 
-	// clean game state directory, after each launch of Game_Player.
-	if (!FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game Player State directory does not exist. Creating.");
-	    // Create state dir if it does not exist (e.g. after media director boots)
-	    FileUtils::MakeDir(GAME_PLAYER_STATE_DIR);
-	    if (!FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
-	      {
-		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Could not create Game Player State directory.");
-		m_bStateDirExists=false;
-	      }
-	    else
-	      {
-		m_bStateDirExists=true;
-	      }
-	  }
-	else // Directory already exists, delete it; remake it.
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Game Player State dir " GAME_PLAYER_STATE_DIR " exists, possible crash? Deleting and recreating.");
-	    FileUtils::DelDir(GAME_PLAYER_STATE_DIR);
-	    FileUtils::MakeDir(GAME_PLAYER_STATE_DIR);
-	    if (!FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
-	      {
-		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Could not recreate Game Player State Dir after cleanup.");
-		m_bStateDirExists=false;
-	      }
-	    else
-	      {
-		m_bStateDirExists=true;
-	      }
-	  }
-
-  XInitThreads();
-  XSetErrorHandler(_defaultWindowHandler);
-
-  m_pDevice_Game_Plugin =
-    m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate
-    (DEVICETEMPLATE_Game_PlugIn_CONST);
-  if (!m_pDevice_Game_Plugin)
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "I need a Game plugin to function.");
-      return false;
-    }
-
-  m_pDevice_App_Server =
-    m_pData->FindFirstRelatedDeviceOfCategory
-    (DEVICECATEGORY_App_Server_CONST, this);
-  if (!m_pDevice_App_Server)
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "I need an App Server to function.");
-      return false;
-    }
-
-  m_pDevice_Joystick =
-    m_pData->FindFirstRelatedDeviceOfCategory
-    (DEVICECATEGORY_Joysticks_CONST);
-  if (!m_pDevice_Joystick)
-    {
-      LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-					    "No Special Joysticks Found");
-    }
-  else
-    {
-      if (!m_pDevice_Joystick->m_bDisabled)
-	{
-	  m_sJoystick_Configuration =
-	    m_pData->
-	    m_pEvent_Impl->GetDeviceDataFromDatabase (m_pDevice_Joystick->
-						      m_dwPK_Device,
-						      DEVICEDATA_Configuration_CONST);
-	}
-      else
-	{
-	  m_sJoystick_Configuration = "";
-	}
-    }
-
-  m_pVirtualKeyboard=VirtualKeyboard::GetInstance();
-
-  return true;
+	// Put your code here to initialize the data in this class
+	// The configuration parameters DATA_ are now populated
+	return true;
 }
 
-//<-dceag-reg-b->
-// This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
-bool Game_Player::Register()
-//<-dceag-reg-e->
-{
-  return Connect (PK_DeviceTemplate_get ());
-}
-
-void
-Game_Player::AlarmCallback (int id, void *param)
-{
-  switch (id)
-    {
-    case CHECK_MAME:
-      break;
-    }
-}
+//<-dceag-reg-b->!
 
 //<-dceag-createinst-b->!
-
-
 
 /*
 	When you receive commands that are destined to one of your children,
@@ -306,7 +70,7 @@ Game_Player::AlarmCallback (int id, void *param)
 void Game_Player::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-  sCMD_Result = "UNHANDLED CHILD";
+	sCMD_Result = "UNHANDLED CHILD";
 }
 
 /*
@@ -318,65 +82,11 @@ void Game_Player::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
 void Game_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-  sCMD_Result = "UNKNOWN COMMAND";
-}
-
-/**
- * CreateChildren() - This is used to instantiate the EmulatorFactory, which
- * will instantiate the individual EmulatorControllers for use. 
- * 
- * This is deliberately done after GetConfig() so that we do not waste memory
- * if the initial bootstrap to the DCE Router can't be made.
- */
-void
-Game_Player::CreateChildren ()
-{
-  m_pEmulatorFactory = new EmulatorFactory(this);
-  m_pEmulatorFactory->init();
-}
-
-/** 
- * Called from the emulator controller to launch the emulator
- */
-void Game_Player::LaunchEmulator()
-{
-
-    string sMessage = 
-      StringUtils::itos(m_dwPK_Device) + " " +
-      StringUtils::itos(m_dwPK_Device) +
-      " 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
-      TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
-
-    DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,
-						     m_pDevice_App_Server->m_dwPK_Device,
-						     m_pEmulatorController->m_pEmulatorModel->m_sEmulatorBinary,
-						     "emulator",
-						     m_pEmulatorController->m_pEmulatorModel->m_sArgs,
-						     sMessage + "1",
-						     sMessage + "0",
-						     false,
-						     false,
-						     true,
-						     false);
-
-    SendCommand(CMD_Spawn_Application);
-
-}
-
-/**
- * Called from the emulator controller to kill the current emulator engine.
- */
-void Game_Player::KillEmulator()
-{
-    DCE::CMD_Kill_Application CMD_Kill_Application(m_dwPK_Device,
-						   m_pDevice_App_Server->m_dwPK_Device,
-						   "emulator",
-						   false);
-    
-    SendCommand(CMD_Kill_Application);
+	sCMD_Result = "UNKNOWN COMMAND";
 }
 
 //<-dceag-sample-b->!
+
 /*
 
 	COMMANDS TO IMPLEMENT
@@ -397,23 +107,10 @@ void Game_Player::KillEmulator()
 void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
-  cout << "Need to implement command #28 - Simulate Keypress" << endl;
-  cout << "Parm #26 - PK_Button=" << sPK_Button << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #50 - Name=" << sName << endl;
-
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-
-  int iPK_Button = atoi(sPK_Button.c_str());
-
-  if (!m_pEmulatorController)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Simulate_Keypress called, but no emulator controller! bsiling!");
-      return;
-    }
-
-  m_pEmulatorController->pressButton(iPK_Button, pMessage);
-
+	cout << "Need to implement command #28 - Simulate Keypress" << endl;
+	cout << "Parm #26 - PK_Button=" << sPK_Button << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #50 - Name=" << sName << endl;
 }
 
 //<-dceag-c29-b->
@@ -430,22 +127,10 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 void Game_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c29-e->
 {
-  cout << "Need to implement command #29 - Simulate Mouse Click" << endl;
-  cout << "Parm #11 - Position_X=" << iPosition_X << endl;
-  cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-
-  if (!m_pEmulatorController)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Simulate_Keypress called, but no emulator controlelr! Bailing!");
-    }
-  else
-    {
-      m_pEmulatorController->pressClick(iPosition_X,iPosition_Y,pMessage);
-    }
-
+	cout << "Need to implement command #29 - Simulate Mouse Click" << endl;
+	cout << "Parm #11 - Position_X=" << iPosition_X << endl;
+	cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c32-b->
@@ -464,11 +149,11 @@ void Game_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int i
 void Game_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
 //<-dceag-c32-e->
 {
-  cout << "Need to implement command #32 - Update Object Image" << endl;
-  cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
-  cout << "Parm #14 - Type=" << sType << endl;
-  cout << "Parm #19 - Data  (data value)" << endl;
-  cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
+	cout << "Need to implement command #32 - Update Object Image" << endl;
+	cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
+	cout << "Parm #14 - Type=" << sType << endl;
+	cout << "Parm #19 - Data  (data value)" << endl;
+	cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 }
 
 //<-dceag-c37-b->
@@ -487,74 +172,11 @@ void Game_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char
 void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
 //<-dceag-c37-e->
 {
-  cout << "Need to implement command #37 - Play Media" << endl;
-  cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-  cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
-
-  m_iPreviousStreamID = m_iStreamID;
-  m_iStreamID = iStreamID;
-
-  if (m_iPreviousStreamID == m_iStreamID) // We are on the same stream, wait for emulator to exit.
-    {
-      if (m_pEmulatorController)
-	{
-	  m_pEmulatorController->stop();
-	  m_pEmulatorController->waitForEmulatorExit();
-	}
-    }
-
-  if (m_pEmulatorController)
-    m_pEmulatorController=NULL; 
- 
-  m_pEmulatorController = m_pEmulatorFactory->getEmulatorForMediaType(iPK_MediaType);
-
-  if (!m_pEmulatorController)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"I could not get an emulator controller for type %d from the EmulatorFactory. Bailing!",iPK_MediaType);
-      return;
-    }
-
-  // Eject all media from all slots.
-  m_pEmulatorController->ejectAllMedia();
-  // Detect if we are a streaming slave, and if so, parse URL, and point back to server.
-  if (sMediaURL.find("slave://") != string::npos)
-    {
-      size_t pos=0;
-      m_pEmulatorController->setStreaming(true);
-      m_pEmulatorController->setStreamingMaster(false);
-      string sURL1 = StringUtils::Tokenize(sMediaURL,"/",pos); // slave:
-      string sURL2 = StringUtils::Tokenize(sMediaURL,"/",pos); // [ ]
-      string sURL3 = StringUtils::Tokenize(sMediaURL,"/",pos); // ip address
-      string sURL4 = sMediaURL.substr(pos,sMediaURL.size()); // The rest of URL
-      m_pEmulatorController->setHostName(sURL3);
-      sMediaURL=sURL4;
-    }
-
-  // If the media URL contains a system configuration bit, send it to the controller,
-  // and strip it away from the media URL for further processing.
-  if (sMediaURL.find("~") != string::npos)
-    {
-      m_pEmulatorController->setSystemConfiguration(sMediaURL.substr(sMediaURL.find("~")+1));
-      sMediaURL = sMediaURL.substr(0,sMediaURL.find("~"));
-    }
-
-  m_pEmulatorController->insertMediaNamed(sMediaURL);
-
-  // If this was filled, then the media was called from a bookmark in the file browser.
-  if (!sMediaPosition.empty() && !m_pEmulatorController->m_pEmulatorModel->m_bIsStreaming)
-    {
-      m_pEmulatorController->setMediaPosition(sMediaPosition);
-    }
-  else
-    {
-      m_pEmulatorController->setMediaPosition("");
-    }
-
-  m_pEmulatorController->setStreamID(iStreamID);
-  m_pEmulatorController->run();
-
+	cout << "Need to implement command #37 - Play Media" << endl;
+	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 }
 
 //<-dceag-c38-b->
@@ -569,64 +191,9 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c38-e->
 {
-  cout << "Need to implement command #38 - Stop Media" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-
-  string sSavedMediaPosition = "";
-  string sSavedText = "";
-
-  if (!m_pEmulatorController)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Stop_Media called with no EmulatorController; Probably because Game Player was restarted after a crash. Not sending a stop.");
-      return;
-    }
-
-  if (m_pEmulatorController->m_pEmulatorModel)
-    {
-      if (m_pEmulatorController->m_pEmulatorModel->emulatorHasCrashed())
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Stop_Media - Emulator has crashed. Reporting it to Orbiters.");
-	  string sText = "I am sorry, the Game you were playing has unexpectedly crashed. If this persists, please try a different game.";
-	  string sOptions = "Ok|";
-	  // CMD_Display_Dialog_Box_On_Orbiter_Cat db(m_dwPK_Device,DEVICECATEGORY_Orbiter_Plugins_CONST,
-	  //				       false, BL_SameHouse,
-	  //				       sText,
-	  // 				       sOptions,
-	  //				       ""); // FIXME: make proper list.
-	  // SendCommandNoResponse(db);
-	  if (m_bIsRecording)
-	    {
-	      m_bIsRecording = !m_bIsRecording;
-	      // This is simply a toggle, the EmulatorController will do the right thing.
-	      m_pEmulatorController->record();
-	    }
-	  m_pEmulatorController->setStreaming(false);
-	  m_pEmulatorController->setStreamingMaster(false);
-	  return;
-	}
-    }
-
-  if (m_bIsRecording)
-    {
-      m_bIsRecording = !m_bIsRecording;
-      // This is simply a toggle, the EmulatorController will do the right thing.
-      m_pEmulatorController->record();
-    }
-
-  if (!m_pEmulatorController->saveState(sSavedMediaPosition,sSavedText,true))
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Stop_Media - EmulatorController's saveState failed. See above messages for further explanation.");
-    }
-  else
-    {
-      *sMediaPosition  = sSavedMediaPosition; // sSavedText ultimately not used.
-    }
-
-  m_pEmulatorController->stop();
-  m_pEmulatorController->setStreaming(false);
-  m_pEmulatorController->setStreamingMaster(false);
-  m_pEmulatorController=NULL;
+	cout << "Need to implement command #38 - Stop Media" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 }
 
 //<-dceag-c39-b->
@@ -639,14 +206,8 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 void Game_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
-  cout << "Need to implement command #39 - Pause Media" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-
-  if (m_pEmulatorController)
-    m_pEmulatorController->pause();
-  
+	cout << "Need to implement command #39 - Pause Media" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c40-b->
@@ -659,14 +220,8 @@ void Game_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMe
 void Game_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c40-e->
 {
-  cout << "Need to implement command #40 - Restart Media" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-
-  if (m_pEmulatorController)
-    m_pEmulatorController->unpause();
-
+	cout << "Need to implement command #40 - Restart Media" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c41-b->
@@ -683,16 +238,10 @@ void Game_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *p
 void Game_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
 //<-dceag-c41-e->
 {
-  cout << "Need to implement command #41 - Change Playback Speed" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
-  cout << "Parm #220 - Report=" << bReport << endl;
-
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-
-  if (m_pEmulatorController)
-    m_pEmulatorController->setSpeed(iMediaPlaybackSpeed);
-
+	cout << "Need to implement command #41 - Change Playback Speed" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
+	cout << "Parm #220 - Report=" << bReport << endl;
 }
 
 //<-dceag-c42-b->
@@ -707,10 +256,9 @@ void Game_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpee
 void Game_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c42-e->
 {
-  cout << "Need to implement command #42 - Jump to Position in Stream" <<
-    endl;
-  cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Need to implement command #42 - Jump to Position in Stream" << endl;
+	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c63-b->
@@ -723,9 +271,8 @@ void Game_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iSt
 void Game_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c63-e->
 {
-  cout << "Need to implement command #63 - Skip Fwd - Channel/Track Greater"
-    << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Need to implement command #63 - Skip Fwd - Channel/Track Greater" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c64-b->
@@ -738,9 +285,8 @@ void Game_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_R
 void Game_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c64-e->
 {
-  cout << "Need to implement command #64 - Skip Back - Channel/Track Lower" <<
-    endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Need to implement command #64 - Skip Back - Channel/Track Lower" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c65-b->
@@ -755,27 +301,9 @@ void Game_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Re
 void Game_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c65-e->
 {
-  cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
-  cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-
-  // Ironically, this is here to implement the save game stuff.
-  if (sValue_To_Assign == "0")
-    {
-      // This is the original game, just send a reset. 
-      CMD_Game_Reset ();
-      return;
-    }
-  else
-    {
-      gm.Release();
-      // This is a save point, call Set Media Position.
-      CMD_Set_Media_Position (m_iStreamID, sValue_To_Assign);
-      gm.Relock();
-    }
-
+	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
+	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c81-b->
@@ -788,11 +316,8 @@ void Game_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStr
 void Game_Player::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c81-e->
 {
-  cout << "Need to implement command #81 - Navigate Next" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-  m_pVirtualKeyboard->ClickKey(BTN_LEFT);
-  
+	cout << "Need to implement command #81 - Navigate Next" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c82-b->
@@ -805,8 +330,8 @@ void Game_Player::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *p
 void Game_Player::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c82-e->
 {
-  cout << "Need to implement command #82 - Navigate Prev" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Need to implement command #82 - Navigate Prev" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c84-b->
@@ -829,20 +354,13 @@ void Game_Player::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *p
 void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
-  cout << "Need to implement command #84 - Get Video Frame" << endl;
-  cout << "Parm #19 - Data  (data value)" << endl;
-  cout << "Parm #20 - Format=" << sFormat << endl;
-  cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #60 - Width=" << iWidth << endl;
-  cout << "Parm #61 - Height=" << iHeight << endl;
-
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  *sFormat="2"; // We are assuming JPEG now, this may change later!
-  m_pEmulatorController->getSnap(pMessage->m_dwPK_Device_From, iWidth, iHeight, pData, *iData_Size);
-
-  return;
-
+	cout << "Need to implement command #84 - Get Video Frame" << endl;
+	cout << "Parm #19 - Data  (data value)" << endl;
+	cout << "Parm #20 - Format=" << sFormat << endl;
+	cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #60 - Width=" << iWidth << endl;
+	cout << "Parm #61 - Height=" << iHeight << endl;
 }
 
 //<-dceag-c87-b->
@@ -861,27 +379,9 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 void Game_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c87-e->
 {
-  cout << "Need to implement command #87 - Goto Media Menu" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #64 - MenuType=" << iMenuType << endl;
-
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-
-  m_pEmulatorController->gotoMenu(iMenuType);
-
-  CMD_Set_Active_Menu CMD_Set_Active_Menu(m_dwPK_Device,m_pDevice_Game_Plugin->m_dwPK_Device,StringUtils::itos(iMenuType));
-  SendCommand(CMD_Set_Active_Menu);
-
-  if (iMenuType > 0)
-    {
-      // Fire a menu onscreen event.
-      EVENT_Menu_Onscreen(iStreamID,true);
-    }
-  else
-    {
-      EVENT_Menu_Onscreen(iStreamID,false);
-    }
-
+	cout << "Need to implement command #87 - Goto Media Menu" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #64 - MenuType=" << iMenuType << endl;
 }
 
 //<-dceag-c92-b->
@@ -894,9 +394,8 @@ void Game_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_R
 void Game_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c92-e->
 {
-  cout << "Need to implement command #92 - Pause" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
+	cout << "Need to implement command #92 - Pause" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c95-b->
@@ -911,9 +410,20 @@ void Game_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage)
 //<-dceag-c95-e->
 {
-  cout << "Need to implement command #95 - Stop" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #203 - Eject=" << bEject << endl;
+	cout << "Need to implement command #95 - Stop" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #203 - Eject=" << bEject << endl;
+}
+
+//<-dceag-c102-b->
+
+	/** @brief COMMAND: #102 - Record */
+	/** Record the current game. Toggle on off */
+
+void Game_Player::CMD_Record(string &sCMD_Result,Message *pMessage)
+//<-dceag-c102-e->
+{
+	cout << "Need to implement command #102 - Record" << endl;
 }
 
 //<-dceag-c126-b->
@@ -924,7 +434,7 @@ void Game_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message
 void Game_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
 //<-dceag-c126-e->
 {
-  cout << "Need to implement command #126 - Guide" << endl;
+	cout << "Need to implement command #126 - Guide" << endl;
 }
 
 //<-dceag-c139-b->
@@ -937,8 +447,8 @@ void Game_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c139-e->
 {
-  cout << "Need to implement command #139 - Play" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Need to implement command #139 - Play" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c190-b->
@@ -951,10 +461,8 @@ void Game_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c190-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #190 - Enter/Go" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  m_pEmulatorController->uiOK();
+	cout << "Need to implement command #190 - Enter/Go" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c200-b->
@@ -967,10 +475,8 @@ void Game_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessag
 void Game_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c200-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #200 - Move Up" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  m_pEmulatorController->uiUp();
+	cout << "Need to implement command #200 - Move Up" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c201-b->
@@ -983,10 +489,8 @@ void Game_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessag
 void Game_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c201-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #201 - Move Down" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  m_pEmulatorController->uiDown();
+	cout << "Need to implement command #201 - Move Down" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c202-b->
@@ -999,10 +503,8 @@ void Game_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMess
 void Game_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c202-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #202 - Move Left" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  m_pEmulatorController->uiLeft();
+	cout << "Need to implement command #202 - Move Left" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c203-b->
@@ -1015,10 +517,8 @@ void Game_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMess
 void Game_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c203-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #203 - Move Right" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  m_pEmulatorController->uiRight();
+	cout << "Need to implement command #203 - Move Right" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c204-b->
@@ -1029,9 +529,7 @@ void Game_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMes
 void Game_Player::CMD_0(string &sCMD_Result,Message *pMessage)
 //<-dceag-c204-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #204 - 0" << endl;
-  m_pEmulatorController->press0(pMessage);
+	cout << "Need to implement command #204 - 0" << endl;
 }
 
 //<-dceag-c205-b->
@@ -1042,9 +540,7 @@ void Game_Player::CMD_0(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_1(string &sCMD_Result,Message *pMessage)
 //<-dceag-c205-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #205 - 1" << endl;
-  m_pEmulatorController->press1(pMessage);
+	cout << "Need to implement command #205 - 1" << endl;
 }
 
 //<-dceag-c206-b->
@@ -1055,9 +551,7 @@ void Game_Player::CMD_1(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 //<-dceag-c206-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #206 - 2" << endl;
-  m_pEmulatorController->press2(pMessage);
+	cout << "Need to implement command #206 - 2" << endl;
 }
 
 //<-dceag-c207-b->
@@ -1068,9 +562,7 @@ void Game_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 //<-dceag-c207-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #207 - 3" << endl;
-  m_pEmulatorController->press3(pMessage);
+	cout << "Need to implement command #207 - 3" << endl;
 }
 
 //<-dceag-c208-b->
@@ -1081,9 +573,7 @@ void Game_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_4(string &sCMD_Result,Message *pMessage)
 //<-dceag-c208-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #208 - 4" << endl;
-  m_pEmulatorController->press4(pMessage);
+	cout << "Need to implement command #208 - 4" << endl;
 }
 
 //<-dceag-c209-b->
@@ -1094,9 +584,7 @@ void Game_Player::CMD_4(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_5(string &sCMD_Result,Message *pMessage)
 //<-dceag-c209-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #209 - 5" << endl;
-  m_pEmulatorController->press5(pMessage);
+	cout << "Need to implement command #209 - 5" << endl;
 }
 
 //<-dceag-c210-b->
@@ -1107,9 +595,7 @@ void Game_Player::CMD_5(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_6(string &sCMD_Result,Message *pMessage)
 //<-dceag-c210-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #210 - 6" << endl;
-  m_pEmulatorController->press6(pMessage);
+	cout << "Need to implement command #210 - 6" << endl;
 }
 
 //<-dceag-c211-b->
@@ -1120,9 +606,7 @@ void Game_Player::CMD_6(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_7(string &sCMD_Result,Message *pMessage)
 //<-dceag-c211-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #211 - 7" << endl;
-  m_pEmulatorController->press7(pMessage);
+	cout << "Need to implement command #211 - 7" << endl;
 }
 
 //<-dceag-c212-b->
@@ -1133,9 +617,7 @@ void Game_Player::CMD_7(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_8(string &sCMD_Result,Message *pMessage)
 //<-dceag-c212-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #212 - 8" << endl;
-  m_pEmulatorController->press8(pMessage);
+	cout << "Need to implement command #212 - 8" << endl;
 }
 
 //<-dceag-c213-b->
@@ -1146,9 +628,7 @@ void Game_Player::CMD_8(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 //<-dceag-c213-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #213 - 9" << endl;
-  m_pEmulatorController->press9(pMessage);
+	cout << "Need to implement command #213 - 9" << endl;
 }
 
 //<-dceag-c240-b->
@@ -1161,10 +641,8 @@ void Game_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c240-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #240 - Back / Prior Menu" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  m_pEmulatorController->uiBack();
+	cout << "Need to implement command #240 - Back / Prior Menu" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c249-b->
@@ -1185,47 +663,12 @@ void Game_Player::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message 
 void Game_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage)
 //<-dceag-c249-e->
 {
-  cout << "Need to implement command #249 - Start Streaming" << endl;
-  cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-  cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
-  cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
-  
-  string sFinalURL;
-
-  m_pEmulatorController = m_pEmulatorFactory->getEmulatorForMediaType(iPK_MediaType);
-
-  if (!sStreamingTargets.empty())
-    {
-      m_pEmulatorController->setStreaming(true);
-      m_pEmulatorController->setStreamingMaster(true);
-      size_t pos=0;
-      while (pos<sStreamingTargets.size())
-	{
-	  string sCurrentTarget = StringUtils::Tokenize(sStreamingTargets,",",pos);
-	  if (atoi(sCurrentTarget.c_str()) == m_dwPK_Device)
-	    {
-	      // Master
-	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MASTER Device %d sending Local play",atoi(sCurrentTarget.c_str()));
-	      sFinalURL = sMediaURL;
-	      CMD_Play_Media(iPK_MediaType,iStreamID,"",sFinalURL); // smediaposition blank for now
-	    }
-	  else
-	    {
-	      if (m_sIPAddress == "127.0.0.1")
-		m_sIPAddress = "192.168.80.1";   // derp!
-	      sFinalURL = "slave://" + m_sIPofMD + "/" + sMediaURL;
-	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SLAVE Device %d sending Remote play streamid=%d mediaType=%d sFinalURL=%s",atoi(sCurrentTarget.c_str()),iStreamID,iPK_MediaType,sFinalURL.c_str());
-	      DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
-					    atoi(sCurrentTarget.c_str()),
-					    iPK_MediaType,iStreamID,
-						 "", // smediaposition blank for now
-					    sFinalURL);
-	      SendCommand(CMD_Play_Media);
-	    }
-	}      
-    }
+	cout << "Need to implement command #249 - Start Streaming" << endl;
+	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+	cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
 }
 
 //<-dceag-c259-b->
@@ -1242,32 +685,10 @@ void Game_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
 void Game_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c259-e->
 {
-  cout << "Need to implement command #259 - Report Playback Position" << endl;
-  cout << "Parm #9 - Text=" << sText << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  if (m_pEmulatorController->canSaveState())
-    {
-      string sSavePosition, sSaveText;
-      
-      if (m_pEmulatorController->saveState(sSavePosition,sSaveText))
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game_Player::CMD_Report_Playback_Position - Successfully saved state %s",sSavePosition.c_str());
-	  *sMediaPosition = sSavePosition;
-	  *sText = sSaveText;
-	}
-      else
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Report_Playback_Position - Failed saving state. See previous messages for more explanation.");
-	}
-    }
-  else
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Report_Playback_Position - Emulation does not support save states, returning ERROR.");
-      sCMD_Result = "ERROR";
-    }
+	cout << "Need to implement command #259 - Report Playback Position" << endl;
+	cout << "Parm #9 - Text=" << sText << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 }
 
 //<-dceag-c412-b->
@@ -1282,24 +703,9 @@ void Game_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,strin
 void Game_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c412-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #412 - Set Media Position" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-
-  if (m_pEmulatorController->canSaveState())
-    {
-      if (!m_pEmulatorController->loadState(sMediaPosition))
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Set_Media_Position - unable to restore state %s bailing!",sMediaPosition.c_str());
-	  // TODO: Add A call to Orbiter Plugin's Display Alert to display an error to the user.
-	}
-    }
-  else
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Set_Media_Position - Emulation does not support save state restore. Sending ERROR");
-      sCMD_Result = "ERROR";
-    }
+	cout << "Need to implement command #412 - Set Media Position" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 }
 
 //<-dceag-c548-b->
@@ -1314,9 +720,31 @@ void Game_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,str
 void Game_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
 {
-  cout << "Need to implement command #548 - Menu" << endl;
-  cout << "Parm #9 - Text=" << sText << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Need to implement command #548 - Menu" << endl;
+	cout << "Parm #9 - Text=" << sText << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+}
+
+//<-dceag-c616-b->
+
+	/** @brief COMMAND: #616 - Select A */
+	/** Select P1 keypad on supported game systems. */
+
+void Game_Player::CMD_Select_A(string &sCMD_Result,Message *pMessage)
+//<-dceag-c616-e->
+{
+	cout << "Need to implement command #616 - Select A" << endl;
+}
+
+//<-dceag-c617-b->
+
+	/** @brief COMMAND: #617 - Select B */
+	/** Select P2 keypad on supported game systems. */
+
+void Game_Player::CMD_Select_B(string &sCMD_Result,Message *pMessage)
+//<-dceag-c617-e->
+{
+	cout << "Need to implement command #617 - Select B" << endl;
 }
 
 //<-dceag-c812-b->
@@ -1331,37 +759,9 @@ void Game_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Messag
 void Game_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Result,Message *pMessage)
 //<-dceag-c812-e->
 {
-  cout << "Need to implement command #812 - Application Exited" << endl;
-  cout << "Parm #227 - PID=" << iPID << endl;
-  cout << "Parm #228 - Exit_Code=" << iExit_Code << endl;
-
-#ifndef WIN32
-  LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "Process exited %d %d",
-					iPID, iExit_Code);
-
-  // Tell the controller the emulator process has exited.
-  if (!m_pEmulatorController)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Application Exited called, probably due to emulator crash. not calling EmulatorHasExited()");
-      return;
-    }
-  m_pEmulatorController->EmulatorHasExited(iExit_Code);
-
-  // void *data;
-
-  {
-    LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-					  "Send go back to the caller!");
-    DCE::CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat (m_dwPK_Device,
-						      DEVICECATEGORY_Media_Plugins_CONST,
-						      false, BL_SameHouse,
-						      m_dwPK_Device, 0, 0, "",
-						      false);
-    SendCommand (CMD_MH_Stop_Media_Cat);
-  }
-
-#endif
-
+	cout << "Need to implement command #812 - Application Exited" << endl;
+	cout << "Parm #227 - PID=" << iPID << endl;
+	cout << "Parm #228 - Exit_Code=" << iExit_Code << endl;
 }
 
 //<-dceag-c916-b->
@@ -1376,9 +776,9 @@ void Game_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Re
 void Game_Player::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage)
 //<-dceag-c916-e->
 {
-  cout << "Need to implement command #916 - Set Aspect Ratio" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #260 - Aspect_Ratio=" << sAspect_Ratio << endl;
+	cout << "Need to implement command #916 - Set Aspect Ratio" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #260 - Aspect_Ratio=" << sAspect_Ratio << endl;
 }
 
 //<-dceag-c917-b->
@@ -1393,9 +793,9 @@ void Game_Player::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string
 void Game_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage)
 //<-dceag-c917-e->
 {
-  cout << "Need to implement command #917 - Set Zoom" << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #261 - Zoom_Level=" << sZoom_Level << endl;
+	cout << "Need to implement command #917 - Set Zoom" << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	cout << "Parm #261 - Zoom_Level=" << sZoom_Level << endl;
 }
 
 //<-dceag-c920-b->
@@ -1410,124 +810,9 @@ void Game_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Res
 void Game_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c920-e->
 {
-  cout << "Need to implement command #920 - Set Media ID" << endl;
-  cout << "Parm #10 - ID=" << sID << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-}
-
-//<-dceag-c943-b->
-
-	/** @brief COMMAND: #943 - Game 1P Start */
-	/** 1P start */
-
-void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
-//<-dceag-c943-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  m_pEmulatorController->P1Start();
-}
-
-//<-dceag-c944-b->
-
-	/** @brief COMMAND: #944 - Game 2P Start */
-	/** 2P Start */
-
-void Game_Player::CMD_Game_2P_Start(string &sCMD_Result,Message *pMessage)
-//<-dceag-c944-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #944 - Game 2P Start" << endl;
-  m_pEmulatorController->P2Start();
-}
-
-//<-dceag-c945-b->
-
-	/** @brief COMMAND: #945 - Game 3P Start */
-	/** 3P Start */
-
-void Game_Player::CMD_Game_3P_Start(string &sCMD_Result,Message *pMessage)
-//<-dceag-c945-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #945 - Game 3P Start" << endl;
-  m_pEmulatorController->P3Start();
-}
-
-//<-dceag-c946-b->
-
-	/** @brief COMMAND: #946 - Game 4P Start */
-	/** 4P Start */
-
-void Game_Player::CMD_Game_4P_Start(string &sCMD_Result,Message *pMessage)
-//<-dceag-c946-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #946 - Game 4P Start" << endl;
-  m_pEmulatorController->P4Start();
-}
-
-//<-dceag-c947-b->
-
-	/** @brief COMMAND: #947 - Game Insert Coin */
-	/** Insert Coin */
-
-void Game_Player::CMD_Game_Insert_Coin(string &sCMD_Result,Message *pMessage)
-//<-dceag-c947-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #947 - Game Insert Coin" << endl;
-  m_pEmulatorController->coin1();
-}
-
-//<-dceag-c948-b->
-
-	/** @brief COMMAND: #948 - Game Service */
-	/** Service Mode */
-
-void Game_Player::CMD_Game_Service(string &sCMD_Result,Message *pMessage)
-//<-dceag-c948-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #948 - Game Service" << endl;
-  m_pEmulatorController->service1();
-}
-
-//<-dceag-c949-b->
-
-	/** @brief COMMAND: #949 - Game Start */
-	/** Game Start */
-
-void Game_Player::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
-//<-dceag-c949-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #949 - Game Start" << endl;
-  m_pEmulatorController->start();
-}
-
-//<-dceag-c950-b->
-
-	/** @brief COMMAND: #950 - Game Select */
-	/** Game Select */
-
-void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
-//<-dceag-c950-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  m_pEmulatorController->select();
-}
-
-//<-dceag-c951-b->
-
-	/** @brief COMMAND: #951 - Game Option */
-	/** Game Option */
-
-void Game_Player::CMD_Game_Option(string &sCMD_Result,Message *pMessage)
-//<-dceag-c951-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  cout << "Need to implement command #951 - Game Option" << endl;
-  m_pEmulatorController->option();
+	cout << "Need to implement command #920 - Set Media ID" << endl;
+	cout << "Parm #10 - ID=" << sID << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c942-b->
@@ -1540,6 +825,118 @@ void Game_Player::CMD_Game_Option(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage)
 //<-dceag-c942-e->
 {
+	cout << "Need to implement command #942 - Get Ripping Status" << endl;
+	cout << "Parm #199 - Status=" << sStatus << endl;
+}
+
+//<-dceag-c943-b->
+
+	/** @brief COMMAND: #943 - Game 1P Start */
+	/** 1P start */
+
+void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
+//<-dceag-c943-e->
+{
+	cout << "Need to implement command #943 - Game 1P Start" << endl;
+}
+
+//<-dceag-c944-b->
+
+	/** @brief COMMAND: #944 - Game 2P Start */
+	/** 2P Start */
+
+void Game_Player::CMD_Game_2P_Start(string &sCMD_Result,Message *pMessage)
+//<-dceag-c944-e->
+{
+	cout << "Need to implement command #944 - Game 2P Start" << endl;
+}
+
+//<-dceag-c945-b->
+
+	/** @brief COMMAND: #945 - Game 3P Start */
+	/** 3P Start */
+
+void Game_Player::CMD_Game_3P_Start(string &sCMD_Result,Message *pMessage)
+//<-dceag-c945-e->
+{
+	cout << "Need to implement command #945 - Game 3P Start" << endl;
+}
+
+//<-dceag-c946-b->
+
+	/** @brief COMMAND: #946 - Game 4P Start */
+	/** 4P Start */
+
+void Game_Player::CMD_Game_4P_Start(string &sCMD_Result,Message *pMessage)
+//<-dceag-c946-e->
+{
+	cout << "Need to implement command #946 - Game 4P Start" << endl;
+}
+
+//<-dceag-c947-b->
+
+	/** @brief COMMAND: #947 - Game Insert Coin */
+	/** Insert Coin */
+
+void Game_Player::CMD_Game_Insert_Coin(string &sCMD_Result,Message *pMessage)
+//<-dceag-c947-e->
+{
+	cout << "Need to implement command #947 - Game Insert Coin" << endl;
+}
+
+//<-dceag-c948-b->
+
+	/** @brief COMMAND: #948 - Game Service */
+	/** Service Mode */
+
+void Game_Player::CMD_Game_Service(string &sCMD_Result,Message *pMessage)
+//<-dceag-c948-e->
+{
+	cout << "Need to implement command #948 - Game Service" << endl;
+}
+
+//<-dceag-c949-b->
+
+	/** @brief COMMAND: #949 - Game Start */
+	/** Game Start */
+
+void Game_Player::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
+//<-dceag-c949-e->
+{
+	cout << "Need to implement command #949 - Game Start" << endl;
+}
+
+//<-dceag-c950-b->
+
+	/** @brief COMMAND: #950 - Game Select */
+	/** Game Select */
+
+void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
+//<-dceag-c950-e->
+{
+	cout << "Need to implement command #950 - Game Select" << endl;
+}
+
+//<-dceag-c951-b->
+
+	/** @brief COMMAND: #951 - Game Option */
+	/** Game Option */
+
+void Game_Player::CMD_Game_Option(string &sCMD_Result,Message *pMessage)
+//<-dceag-c951-e->
+{
+	cout << "Need to implement command #951 - Game Option" << endl;
+}
+
+//<-dceag-c952-b->
+
+	/** @brief COMMAND: #952 - Game Reset */
+	/** Game Reset */
+
+void Game_Player::CMD_Game_Reset(string &sCMD_Result,Message *pMessage)
+//<-dceag-c952-e->
+{
+	cout << "Need to implement command #952 - Game Reset" << endl;
 }
 
 //<-dceag-c982-b->
@@ -1554,11 +951,9 @@ void Game_Player::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Mes
 void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,string &sCMD_Result,Message *pMessage)
 //<-dceag-c982-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  if (m_pEmulatorController)
-    {
-      m_pEmulatorController->setOption(sPath,sValue_To_Assign,pMessage);
-    }
+	cout << "Need to implement command #982 - Set Game Options" << endl;
+	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+	cout << "Parm #219 - Path=" << sPath << endl;
 }
 
 //<-dceag-c983-b->
@@ -1573,108 +968,11 @@ void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,stri
 void Game_Player::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  string sTmpValue;
-  if (m_pEmulatorController)
-    {
-      m_pEmulatorController->getOption(sPath,sTmpValue,pMessage);
-      *sValue_To_Assign=sTmpValue;
-    }
+	cout << "Need to implement command #983 - Get Game Options" << endl;
+	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+	cout << "Parm #219 - Path=" << sPath << endl;
 }
 
-//<-dceag-c952-b->
-
-	/** @brief COMMAND: #952 - Game Reset */
-	/** Game Reset */
-
-void Game_Player::CMD_Game_Reset(string &sCMD_Result,Message *pMessage)
-//<-dceag-c952-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  m_pEmulatorController->reset();
-}
-
-void Game_Player::TranscodeAfterRecord(string sPath,string sFilename, long int dwPK_Device_Orbiter)
-{
-  
-  // Find Media Plugin
-  DeviceData_Base *pDevice_Media_Plugin = 
-    m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
-
-  if (!pDevice_Media_Plugin)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::TranscodeAfterRecord - Could not find Media Plugin Device. Sorry.");
-      return;
-    }
-
-  // The following sformat string is for ffmpeg.
-  //  string sFormat = "acodec=ac3|ab=128k|vcodec=mpeg4|b=4000k|mbd=2|flags=+mv4+aic|trellis=2|cmp=2|subcmp=2";
-  string sFormat = "oac=mp3lame|ovc=xvid|xvidbitrate=687";
-  string sCaption="Enter a name for the game recording. I will notify you when the file is ready for playback.";
-  string sCommand = StringUtils::itos(dwPK_Device_Orbiter) + " " +
-    StringUtils::itos(pDevice_Media_Plugin->m_dwPK_Device) + " 1 " +
-    TOSTRING (COMMAND_Transcode_File_CONST) + " " +
-    TOSTRING(COMMANDPARAMETER_Format_CONST) + " \"" + sFormat + "\" " +
-    TOSTRING(COMMANDPARAMETER_Filename_CONST) + " \"" + sPath + "/" + sFilename + "\" " +
-    TOSTRING(COMMANDPARAMETER_Directory_CONST) + " " + "\"<%=9%>\" " +
-    TOSTRING(COMMANDPARAMETER_Name_CONST) + " " + "\"<%=17%>.avi\"";
-  
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::TranscodeAfterRecord - sCommand is %s",sCommand.c_str());
-
-  DCE::SCREEN_FileSave screen_FileSave(m_dwPK_Device,
-				       dwPK_Device_Orbiter,
-				       MEDIATYPE_pluto_StoredVideo_CONST,
-				       0,
-				       sCaption,
-				       sCommand,
-				       true);
-
-  SendCommand(screen_FileSave);
-
-}
-
-//<-dceag-c102-b->
-
-	/** @brief COMMAND: #102 - Record */
-	/** Record the current game. Toggle on off */
-
-void Game_Player::CMD_Record(string &sCMD_Result,Message *pMessage)
-//<-dceag-c102-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  m_bIsRecording = !m_bIsRecording;
-  // This is simply a toggle, the EmulatorController will do the right thing.
-  m_pEmulatorController->setOrbiter(pMessage->m_dwPK_Device_From);
-  m_pEmulatorController->record();
-}
-//<-dceag-c616-b->
-
-	/** @brief COMMAND: #616 - Select A */
-	/** Select P1 keypad on supported game systems. */
-
-void Game_Player::CMD_Select_A(string &sCMD_Result,Message *pMessage)
-//<-dceag-c616-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  if (m_pEmulatorController)
-    {
-      m_pEmulatorController->selectA();
-    }
-}
-//<-dceag-c617-b->
-
-	/** @brief COMMAND: #617 - Select B */
-	/** Select P2 keypad on supported game systems. */
-
-void Game_Player::CMD_Select_B(string &sCMD_Result,Message *pMessage)
-//<-dceag-c617-e->
-{
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-  if (m_pEmulatorController)
-    {
-      m_pEmulatorController->selectB();
-    }
-}
 //<-dceag-c1158-b->
 
 	/** @brief COMMAND: #1158 - Swap Media */
@@ -1687,14 +985,9 @@ void Game_Player::CMD_Select_B(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Swap_Media(int iSlot_Number,string sSlot,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1158-e->
 {
-  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
-
-  if (!m_pEmulatorController)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Swap_Media() - Tried to send command with NULL EmulatorController. Bailing!");
-      return;
-    }
-
-  m_pEmulatorController->swapMedia(iSlot_Number,sSlot);
-
+	cout << "Need to implement command #1158 - Swap Media" << endl;
+	cout << "Parm #151 - Slot_Number=" << iSlot_Number << endl;
+	cout << "Parm #291 - Slot=" << sSlot << endl;
 }
+
+
