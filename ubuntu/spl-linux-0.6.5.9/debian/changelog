@@ -1,0 +1,511 @@
+spl-linux (0.6.5.9-1~trusty) trusty; urgency=low
+
+  [ Chunwei Chen ]
+  * Fix crgetgroups out-of-bound and misc cred fix
+  * Linux 4.9 compat: group_info changes
+
+  [ tuxoko ]
+  * Linux 4.8 compat: Fix RW_READ_HELD
+
+  [ Brian Behlendorf ]
+  * Fix aarch64 type warning
+  * Fix p0 initializer
+
+  [ Chunwei Chen ]
+  * Fix splat memleak
+  * Fix splat-cred.c cred usage
+  * Use kernel slab for vn_cache and vn_file_cache
+
+  [ Brian Behlendorf ]
+  * Prepare to release 0.6.5.9
+
+ -- Darik Horn <dajhorn@vanadac.com>  Sat, 04 Feb 2017 10:03:57 -0500
+
+spl-linux (0.6.5.8-1~trusty) trusty; urgency=low
+
+  [ GeLiXin ]
+  * Fix: handle NULL case in spl_kmem_free_track()
+
+  [ Chunwei Chen ]
+  * Linux 4.7 compat: inode_lock() and friends
+
+  [ YunQiang Su ]
+  * Add isa_defs for MIPS
+
+  [ Chunwei Chen ]
+  * Use kernel provided mutex owner
+  * Fix race between taskq_destroy and dynamic spawning thread
+  * Fix taskq_wait_outstanding re-evaluate tq_next_id
+
+  [ Brian Behlendorf ]
+  * Add rw_tryupgrade()
+
+  [ Chunwei Chen ]
+  * Implement a proper rw_tryupgrade
+
+  [ Brian Behlendorf ]
+  * Linux 4.8 compat: rw_semaphore atomic_long_t count
+
+  [ Nikolay Borisov ]
+  * Add handling for kernel 4.7's CONFIG_TRIM_UNUSED_KSYMS
+
+  [ Tim Chase ]
+  * Fix HAVE_MUTEX_OWNER test for kernels prior to 4.6
+
+  [ Ned Bass ]
+  * Prepare to release 0.6.5.8
+
+ -- Darik Horn <dajhorn@vanadac.com>  Sun, 15 Jan 2017 21:24:38 -0500
+
+spl-linux (0.6.5.7-1~trusty) trusty; urgency=low
+
+  [ Brian Behlendorf ]
+  * Fix do_div() types in condvar:timeout
+
+  [ Ned Bass ]
+  * Prepare to tag spl-0.6.5.7
+
+ -- Darik Horn <dajhorn@vanadac.com>  Fri, 13 May 2016 21:10:37 -0400
+
+spl-linux (0.6.5.6-1~trusty) trusty; urgency=low
+
+  [ Dimitri John Ledkov ]
+  * Add support for s390[x].
+
+  [ Brian Behlendorf ]
+  * Remove RPM package restriction
+
+  [ Ned Bass ]
+  * Prepare to tag spl-0.6.5.6
+
+ -- Darik Horn <dajhorn@vanadac.com>  Wed, 23 Mar 2016 19:33:54 -0400
+
+spl-linux (0.6.5.5-1~trusty) trusty; urgency=low
+
+  [ Chunwei Chen ]
+  * Don't call kmem_cache_shrink from shrinker
+  * Don't hold mutex until release cv in cv_wait
+  * Turn on both PF_FSTRANS and PF_MEMALLOC_NOIO in spl_fstrans_mark
+
+  [ Chip Parker ]
+  * Ensure spl/ only occurs once in core-y
+
+  [ Olaf Faaland ]
+  * Create spl-kmod-debuginfo rpm with redhat spec file
+
+  [ Brian Behlendorf ]
+  * Linux 4.5 compat: pfn_t typedef
+
+  [ Ned Bass ]
+  * Prepare to tag spl-0.6.5.5
+
+ -- Darik Horn <dajhorn@vanadac.com>  Thu, 10 Mar 2016 20:31:02 -0500
+
+spl-linux (0.6.5.4-1~trusty) trusty; urgency=low
+
+  [ Jason Zaman ]
+  * sysmacros: Make P2ROUNDUP not trigger int overflow
+
+  [ Brian Behlendorf ]
+  * Fix --enable-linux-builtin
+
+  [ Dimitri John Ledkov ]
+  * spl-kmem-cache: include linux/prefetch.h for prefetchw()
+
+  [ tuxoko ]
+  * Prevent rm modules.* when make install
+
+  [ Brian Behlendorf ]
+  * Either _ILP32 or _LP64 must be defined
+
+  [ zgock ]
+  * Fix build issue on some configured kernels
+
+  [ Kamil Domanski ]
+  * Skip GPL-only symbols test when cross-compiling
+
+  [ Chunwei Chen ]
+  * Use spl_fstrans_mark instead of memalloc_noio_save
+
+  [ tuxoko ]
+  * Fix taskq dynamic spawning
+
+  [ Alex McWhirter ]
+  * _ILP32 is always defined on SPARC
+
+  [ Ned Bass ]
+  * Prepare to tag spl-0.6.5.4
+
+ -- Darik Horn <dajhorn@vanadac.com>  Fri, 08 Jan 2016 21:41:22 -0500
+
+spl-linux (0.6.5.3-1~trusty) trusty; urgency=low
+
+  [ Brian Behlendorf ]
+  * Fix CPU hotplug
+  * Set spl_taskq_thread_dynamic=0 by default
+
+  [ Ned Bass ]
+  * Prepare to tag spl-0.6.5.3
+
+ -- Darik Horn <dajhorn@vanadac.com>  Mon, 19 Oct 2015 19:19:01 -0400
+
+spl-linux (0.6.5.2-1~trusty) trusty; urgency=low
+
+  [ Brian Behlendorf ]
+  * Fix PAX Patch/Grsec SLAB_USERCOPY panic
+
+  [ Nathaniel Clark ]
+  * Always remove during spl-dkms uninstall/update
+
+  [ Ned Bass ]
+  * Prepare to tag spl-0.6.5.2
+
+ -- Darik Horn <dajhorn@vanadac.com>  Wed, 30 Sep 2015 14:01:51 -0400
+
+spl-linux (0.6.5.1-1~trusty) trusty; urgency=low
+
+  [ Ned Bass ]
+  * Tag spl-0.6.5.1
+
+ -- Darik Horn <dajhorn@vanadac.com>  Mon, 21 Sep 2015 20:36:14 -0400
+
+spl-linux (0.6.5-1~trusty) trusty; urgency=low
+
+  [ Richard Yao ]
+  * vn_getf/vn_releasef should not accept negative file descriptors
+  * Implement areleasef()
+
+  [ Chunwei Chen ]
+  * Make tsd_set(key, NULL) remove the tsd entry for current thread
+
+  [ Brian Behlendorf ]
+  * Fix cstyle issues in spl-tsd.c
+  * Add boot_ncpus macro
+
+  [ Chris Dunlop ]
+  * Make taskq_wait() block until the queue is empty
+
+  [ Brian Behlendorf ]
+  * Retire rwsem_is_locked() compat
+  * Rename cv_wait_interruptible() to cv_wait_sig()
+  * Add IMPLY() and EQUIV() macros
+  * Add TASKQ_DYNAMIC feature
+  * Set TASKQ_DYNAMIC for kmem and system taskqs
+  * Add memory compatibility wrappers
+
+  [ Turbo Fredriksson ]
+  * Support parallel build trees (VPATH builds)
+
+  [ Brian Behlendorf ]
+  * Default to --disable-debug-kmem
+  * Add defclsyspri macro
+  * Remove skc_ref from alloc/free paths
+  * Invert minclsyspri and maxclsyspri
+  * Remove needfree, desfree, lotsfree #defines
+
+  [ Tim Chase ]
+  * Include other sources of freeable memory in the freemem calculation
+
+  [ Brian Behlendorf ]
+  * Linux 4.2 compat: vfs_rename()
+
+  [ Chunwei Chen ]
+  * Restructure uio to accommodate bio_vec
+
+  [ Tim Chase ]
+  * Create a new thread during recursive taskq dispatch if necessary
+
+  [ Brian Behlendorf ]
+  * Revert "Create a new thread during recursive taskq dispatch if necessary"
+
+  [ Tim Chase ]
+  * Create a new thread during recursive taskq dispatch if necessary
+
+  [ Brian Behlendorf ]
+  * Linux 4.2 compat: misc_deregister()
+
+  [ Richard Yao ]
+  * Disable direct reclaim in taskq worker threads on Linux 3.9+
+
+  [ Brian Behlendorf ]
+  * Tag spl-0.6.5
+
+ -- Darik Horn <dajhorn@vanadac.com>  Fri, 11 Sep 2015 18:33:31 -0400
+
+spl-linux (0.6.4.2-1~trusty) trusty; urgency=low
+
+  [ Brian Behlendorf ]
+  * Tag spl-0.6.4.1
+
+  [ Ned Bass ]
+  * Tag spl-0.6.4.2 (detached)
+
+ -- Darik Horn <dajhorn@vanadac.com>  Thu, 09 Jul 2015 22:11:19 -0400
+
+spl-linux (0.6.4-1~trusty) trusty; urgency=low
+
+  [ Tim Chase ]
+  * Safer debugging and assertion macros.
+
+  [ Brian Behlendorf ]
+  * Rate limit debugging stack traces
+
+  [ Tim Chase ]
+  * Add functions and macros as used upstream.
+  * Add atomic_swap_32() and atomic_swap_64()
+
+  [ Brian Behlendorf ]
+  * Set spl_kmem_cache_reclaim=0 to default
+  * Set spl_kmem_cache_slab_limit=16384 to default
+
+  [ Ned Bass ]
+  * Linux 3.17 compat: remove wait_on_bit action function
+
+  [ Richard Yao ]
+  * Cleanup vn_rename() and vn_remove()
+
+  [ stf ]
+  * Avoid PAGESIZE redefinition
+
+  [ Turbo Fredriksson ]
+  * Linux 3.16 compat: smp_mb__after_clear_bit()
+
+  [ Brian Behlendorf ]
+  * Fix bug in SPLAT taskq:front
+
+  [ Tom Prince ]
+  * Install header during post-build rather than post-install.
+
+  [ Brian Behlendorf ]
+  * Make license compatibility checks consistent
+  * Update SPLAT to use kmutex_t for portability
+  * Update code to use misc_register()/misc_deregister()
+  * Remove patches directory
+  * Remove adaptive mutex implementation
+  * Remove sysctl_vfs_cache_pressure assumption
+  * Remove utsname() wrapper
+  * Remove register_sysctl() compatibility code
+  * Remove CTL_UNNUMBERED sysctl interface
+  * Map highbit64() to fls64()
+  * Simplify the time compatibility wrappers
+  * Remove atomic64_xchg() wrappers
+  * Remove uintptr_t typedef
+  * Remove linux/uaccess.h header check
+  * Remove kmalloc_node() compatibility code
+  * Remove i_mutex() configure check
+  * Remove mutex_lock_nested() wrapper
+  * Remove on_each_cpu() wrapper
+  * Remove get_vmalloc_info() wrapper
+  * Remove global memory variables
+  * Remove shrink_{i,d}node_cache() wrappers
+  * Remove kallsyms_lookup_name() wrapper
+  * Remove user_path_dir() wrapper
+  * Remove set_fs_pwd() configure check
+  * Add vfs_unlink() and vfs_rename() comments
+  * Remove credential configure checks.
+  * Update put_task_struct() comments
+  * Remove proc_handler() wrapper
+  * Remove kvasprintf() wrapper
+  * Remove kern_path() wrapper
+  * Remove vfs_fsync() wrapper
+
+  [ Tim Chase ]
+  * Linux 3.12 compat: shrinker semantics
+
+  [ Richard Yao ]
+  * kmem_cache: Call constructor/destructor on each alloc/free
+  * Kernel header installation should respect --prefix
+
+  [ Alexander Pyhalov ]
+  * Fix modules installation directory
+
+  [ Marcel Wysocki ]
+  * Add config/compile to config/.gitignore
+
+  [ Brian Behlendorf ]
+  * Lower minimum objects/slab threshold
+  * Retire legacy debugging infrastructure
+
+  [ Ned Bass ]
+  * Remove compat includes from sys/types.h
+
+  [ Chunwei Chen ]
+  * mutex: force serialization on mutex_exit() to fix races
+
+  [ Brian Behlendorf ]
+  * Fix debug object on stack warning
+
+  [ Tim Chase ]
+  * Use current_kernel_time() in the time compatibility wrappers
+
+  [ Richard Yao ]
+  * Revert "Add PF_NOFS debugging flag"
+
+  [ Brian Behlendorf ]
+  * Refactor existing code
+  * Fix kmem cstyle issues
+  * Refactor generic memory allocation interfaces
+
+  [ Richard Yao ]
+  * Add hooks for disabling direct reclaim
+  * Enforce architecture-specific barriers around clear_bit()
+
+  [ Brian Behlendorf ]
+  * Make slab reclaim more aggressive
+  * Update spl-module-parameters(5) man page
+  * Reduce kmem cache deadlock threshold
+  * Refine slab cache sizing
+  * Fix kmem cache deadlock logic
+  * Use __get_free_pages() for emergency objects
+  * Fix GFP_KERNEL allocations flags
+  * Optimize vmem_alloc() retry path
+
+  [ Chunwei Chen ]
+  * Fix spl_hostid module parameter
+
+  [ Brian Behlendorf ]
+  * Retire spl_module_init()/spl_module_fini()
+  * Fix cstyle issue in mutex.h
+  * Retire MUTEX_OWNER checks
+  * Add MUTEX_FSTRANS mutex type
+  * Reduce splat_taskq_test2_impl() stack frame size
+
+  [ Tim Chase ]
+  * Add mutex_enter_nested() which maps to mutex_lock_nested()
+  * Set HAVE_FS_STRUCT_SPINLOCK correctly when CONFIG_FRAME_WARN==1024
+
+  [ Hajo Möller ]
+  * Fix warning about AM_INIT_AUTOMAKE arguments
+
+  [ Brian Behlendorf ]
+  * Remove rpm/fedora directory
+  * Add RHEL style kmod packages
+
+  [ Chris Dunlop ]
+  * Add crgetzoneid() stub
+
+  [ Tim Chase ]
+  * Don't allow shrinking a PF_FSTRANS context
+
+  [ Brian Behlendorf ]
+  * Clear PF_FSTRANS over vfs_sync()
+  * Tag spl-0.6.4
+
+ -- Darik Horn <dajhorn@vanadac.com>  Thu, 09 Apr 2015 12:43:37 -0400
+
+spl-linux (0.6.3-1~trusty) trusty; urgency=low
+
+  [ Richard Yao ]
+  * Replace current_kernel_time() with getnstimeofday()
+
+  [ Ned Bass ]
+  * Add kpreempt() compatibility macro
+
+  [ Kohsuke Kawaguchi ]
+  * Document how to run SPLAT
+
+  [ Brian Behlendorf ]
+  * Consistently use local_irq_disable/local_irq_enable
+
+  [ Richard Yao ]
+  * Define SET_ERROR()
+
+  [ Prakash Surya ]
+  * Add callbacks for displaying KSTAT_TYPE_RAW kstats
+  * Add wrappers for accessing PID and command info
+
+  [ Brian Behlendorf ]
+  * Revert "Add KSTAT_TYPE_TXG type"
+
+  [ Cyril Plisko ]
+  * Kstat to use private lock by default
+
+  [ Ned Bass ]
+  * 3537 add kstat_waitq_enter and friends
+  * Emulate illumos interface cv_timedwait_hires()
+
+  [ Richard Yao ]
+  * Linux 3.12 compat: New shrinker API
+
+  [ Cyril Plisko ]
+  * Tighten spl dependency on spl-kmod
+
+  [ Brian Behlendorf ]
+  * Retroactively fix bogus %changelog date
+
+  [ Turbo Fredriksson ]
+  * Document SPL module parameters.
+
+  [ Richard Yao ]
+  * Linux 3.13 compat: Remove unused flags variable from __cv_init()
+  * Linux 3.13 compat: Pass NULL for new delegated inode argument
+
+  [ Brian Behlendorf ]
+  * Add module versioning
+  * Include linux/vmalloc.h for ARM and Sparc
+  * Remove default taskq thread to CPU bindings
+
+  [ marku89 ]
+  * Define the needed ISA types for Sparc
+
+  [ Brian Behlendorf ]
+  * Remove incorrect use of EXTRA_DIST for man pages
+  * splat kmem:slab_reclaim: Test cleanup
+  * splat cred:groupmember: Fix false positives
+
+  [ Tim Chase ]
+  * Support post-3.13 kthread_create() semantics.
+  * De-inline spl_kthread_create().
+  * Call kthread_create() correctly with fixed arguments.
+
+  [ Richard Yao ]
+  * Simplify hostid logic
+
+  [ Yuxuan Shui ]
+  * This patch add a CTASSERT macro for compile time assertion.
+
+  [ Chunwei Chen ]
+  * Add ddi_time_after and friends
+
+  [ Andrey Vesnovaty ]
+  * Expose max/min objs per slab and max slab size
+
+  [ Richard Yao ]
+  * Change spl_kmem_cache_expire default setting to 2
+
+  [ Jorgen Lundman ]
+  * Add support for aarch64 (ARMv8)
+
+  [ Chunwei Chen ]
+  * Fix crash when using ZFS on Ceph rbd
+
+  [ Andrey Vesnovaty ]
+  * Evenly distribute the taskq threads across available CPUs
+
+  [ Chunwei Chen ]
+  * Linux 3.15 compat: NICE_TO_PRIO and PRIO_TO_NICE
+  * Linux 3.15: vfs_rename() added a flags argument
+
+  [ Brian Behlendorf ]
+  * Add KMC_SLAB cache type
+  * Add spl_kmem_cache_reclaim module option
+  * Restrict release number to META version
+  * Fix DKMS package upgrade and packager
+
+  [ Turbo Fredriksson ]
+  * Set LANG to a reasonable default (C)
+
+  [ Brian Behlendorf ]
+  * Tag spl-0.6.3
+
+  [ Darik Horn ]
+  * Revert "Backport Linux 3.13 compatibility patches."
+
+ -- Darik Horn <dajhorn@vanadac.com>  Thu, 12 Jun 2014 20:34:23 -0400
+
+spl-linux (0.6.2-2~trusty) trusty; urgency=low
+
+  * Update gbp.conf for Ubuntu 14.04 Trusty Tahr.
+  * Backport Linux 3.13 compatibility patches.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Tue, 08 Apr 2014 20:04:41 -0400
