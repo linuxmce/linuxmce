@@ -23,6 +23,8 @@ function phoneLines($output,$astADO,$dbADO,$telecomADO) {
 	if($action=='form'){
 		$ProtocolList=array('SIP','IAX','SPA','GTALK');
 		$DTMFList=array('rfc2833','inband','info','auto');
+		$sql=$astADO->Execute("SELECT mailbox FROM voicemail_users WHERE mailbox like '1%'");
+	    while($row=$sql->FetchRow()) $VoicemailList[$row['mailbox']]=$row['mailbox'];
 		$out.='
 		<script type="text/javascript">
 			function toggleFax() 	{
@@ -123,7 +125,13 @@ function phoneLines($output,$astADO,$dbADO,$telecomADO) {
 					<td><select name="dtmf">';
 					foreach ($DTMFList as $d) $out.='<option value="'.$d.'" '.(($editdata['dtmfmode'] == $d)?'selected="selected"':'').'>'.$d.'</option>';
 					$out .='</select></td>
-				</tr>		
+				</tr>
+				<tr>
+					<td><B>Voicemail</B></td>
+					<td><select name="voicemail">';
+					foreach ($VoicemailList as $v) $out.='<option value="'.$v.'" '.(($editdata['mailbox'] == $v)?'selected="selected"':'').'>'.(($v == "100")?$v.' DEFAULT':$v).'</option>';
+					$out .='</select> <a href="index.php?section=phoneLines&add_voicemail=add&line_id='.$_REQUEST['eid'].'">add voicemail</a></td>
+				</tr>
 				<tr>
 					<td><em>* '.translate('TEXT_REQUIRED_FIELDS_CONST').'</em></td>
 					<td>&nbsp;</td>
@@ -139,7 +147,17 @@ function phoneLines($output,$astADO,$dbADO,$telecomADO) {
 			</script>
 			';
 		}
-	
+	    
+	    //Add mailbox (voicemail) block;
+		if (isset($_REQUEST['add_voicemail']) && $_REQUEST['add_voicemail'] == 'add'){
+			$sql=$astADO->Execute("SELECT MAX(mailbox) AS mailbox FROM voicemail_users WHERE mailbox like '1%'");
+			$row=$sql->FetchRow();
+			$mailbox=$row['mailbox'];
+			$mailbox++;
+			$sql=$astADO->Execute("INSERT INTO voicemail_users (mailbox,password,fullname,context,attach,envelope) VALUES ('".$mailbox."','".$mailbox."','Extra','default','no','no')");
+			header('Location: index.php?section=phoneLines&action=form&eid='.$_REQUEST['line_id']);
+		}
+		
 		$out.='</form>';
 	}
 	else{ // process area
@@ -182,6 +200,7 @@ function phoneLines($output,$astADO,$dbADO,$telecomADO) {
 					."',protocol='".$_POST['proto']
 					."',port='".$_POST['port']
 					."',dtmfmode='".$_POST['dtmf']
+					."',mailbox='".$_POST['voicemail']
 					."' WHERE id=".$editedID;
 				$res=$astADO->Execute($SQL);
 				$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh lines';
