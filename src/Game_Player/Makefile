@@ -26,7 +26,7 @@ VERSION = 2.0.0
 MYDEVTEMPLATEID = 1965
 
 Gen_Dev_Files = $(GENDEV)/Game_PlayerBase.cpp
-sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files)
+sources = UInput.cpp Main.cpp Game_Player.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
