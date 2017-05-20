@@ -57,7 +57,7 @@ if [[ "$3" != "demonized" ]] ;then
 		Log "Using zpool to actually create the pool"
 		zpool create $name raidz3 $ActiveDrives
 		zpool_err="$?"
-		Log "Process 'zpool create $name $ActiveDrives' exited with error $zpool_err"
+		Log "Process 'zpool create "$name" $ActiveDrives' exited with error $zpool_err"
 
 		Log "Setting mount point to legacy for PlutoStorageDevices"
 		zfs set mountpoint=legacy "$name"

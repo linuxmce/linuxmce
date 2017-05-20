@@ -55,7 +55,7 @@ if [[ "$3" != "demonized" ]] ;then
 		for d in $ActiveDrives; do parted -a optimal -s $d mklabel gpt; done
 
 		Log "Using zpool to actually create the pool"
-		zpool create $name raidz2 $ActiveDrives
+		zpool create "$name" raidz2 $ActiveDrives
 		zpool_err="$?"
 		Log "Process 'zpool create $name $ActiveDrives' exited with error $zpool_err"
 
