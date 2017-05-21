@@ -14,7 +14,13 @@ Disk=$(RunSQL "$Q")
 Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $PoolDevice AND FK_DeviceData = $BLOCK_DEVICE_ID"
 Pool=$(RunSQL "$Q")
 
+parted -a optimal -s $R mklabel gpt
 zpool add $Pool spare $Disk
+zpool_err="$?"
+
+if [[ $zpool_err == 1 ]]; then
+    zpool create $Pool spare $Disk
+fi
 
 Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $PoolDevice and FK_DeviceData = $NO_DISK_ID"
 noDisks=$(RunSQL "$Q")

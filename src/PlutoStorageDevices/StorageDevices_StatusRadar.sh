@@ -18,6 +18,11 @@ TPL_INTERNAL_DRIVE=1790
 TPL_RAID_0=1854
 TPL_RAID_1=1851
 TPL_RAID_5=1849
+TPL_ZFS_POOL=2351
+TPL_ZFS_MIRROR=2352
+TPL_ZFS_RAIDZ1=2353
+TPL_ZFS_RAIDZ2=2354
+TPL_ZFS_RAIDZ3=2355
 TPL_MEDIA_PLUGIN=2
 
 CMD_REFRESH_LIST_OF_ONLINE_DEVICES=831
@@ -291,7 +296,7 @@ while : ;do
 			LEFT JOIN Device_DeviceData BlockDev ON BlockDev.FK_Device = Device.PK_Device AND BlockDev.FK_DeviceData = '$DD_BLOCK_DEV'
 			LEFT JOIN Device_DeviceData UUID     ON UUID.FK_Device     = Device.PK_Device AND UUID.FK_DeviceData     = '$DD_UUID'
 		WHERE
-			FK_DeviceTemplate IN ($TPL_INTERNAL_DRIVE, $TPL_RAID_0, $TPL_RAID_1, $TPL_RAID_5)
+			FK_DeviceTemplate IN ($TPL_INTERNAL_DRIVE, $TPL_RAID_0, $TPL_RAID_1, $TPL_RAID_5, $TPL_ZFS_POOL, $TPL_ZFS_MIRROR, $TPL_ZFS_RAIDZ1, $TPL_ZFS_RAIDZ2, $TPL_ZFS_RAIDZ3)
 	"
 	InternalDriveList=$(RunCSQL "$Q")
 
@@ -310,111 +315,176 @@ while : ;do
 		## If is a New Raid with no UUID associated (UUID="") or a Internal Drive in the old format (UUID="NULL" or UUID="")
 		## then we translate the block device to uuid
 		if [[ "$IDrive_Parent" == "$PK_Device" ]] ;then
-		if [[ "$IDrive_UUID" == "" || "$IDrive_UUID" == "NULL" ]] && [[ "$IDrive_BlockDev" != "NULL" ]] ;then
-			IDrive_UUID=$(udevadm info --query=all --name="$IDrive_BlockDev" |  grep 'ID_FS_UUID=' | cut -d'=' -f2)
-
-			if [[ "$IDrive_UUID" != "" ]] ;then
+		    if [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_POOL" ]] || [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_MIRROR" ]] || [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_RAIDZ1" ]] || [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_RAIDZ2" ]] || [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_RAIDZ3" ]]; then
+			if [[ "$IDrive_UUID" == "" || "$IDrive_UUID" == "NULL" ]] && [[ "$IDrive_BlockDev" != "NULL" ]] ;then
+			    IDrive_UUID=$(zfs get -H guid testz3 | cut -f3)
+			    
+			    if [[ "$IDrive_UUID" != "" ]] ;then
 				RunSQL "UPDATE Device_DeviceData SET IK_DeviceData = '$IDrive_UUID' WHERE FK_Device = '$IDrive_ID' AND FK_DeviceData = '$DD_UUID'"
-			else
+			    else
+				echo "Can't find the ZFS uuid of device $IDrive_ID"
+				continue
+			    fi
+			fi			
+		    else
+			if [[ "$IDrive_UUID" == "" || "$IDrive_UUID" == "NULL" ]] && [[ "$IDrive_BlockDev" != "NULL" ]] ;then
+			    IDrive_UUID=$(udevadm info --query=all --name="$IDrive_BlockDev" |  grep 'ID_FS_UUID=' | cut -d'=' -f2)
+			    
+			    if [[ "$IDrive_UUID" != "" ]] ;then
+				RunSQL "UPDATE Device_DeviceData SET IK_DeviceData = '$IDrive_UUID' WHERE FK_Device = '$IDrive_ID' AND FK_DeviceData = '$DD_UUID'"
+			    else
 				echo "Can't find the uuid of device $IDrive_ID"
 				continue
+			    fi
 			fi
+		    fi
 		fi
-		fi
 
-		## Is one of our internal drives
-		if [[ "$IDrive_Parent" == "$PK_Device" ]] ; then
-			if [[ "$IDrive_DeviceTemplate" == "$TPL_INTERNAL_DRIVE" ]] ; then
-				## See if a device with that UUID can be found in udev
-				## Find the drive
-				if [[ ! -e "/dev/disk/by-uuid/$IDrive_UUID" ]] ; then
-					Log "Cannot find disk $IDrive_ID with uuid=$IDrive_UUID"
-					# as in the StorageDevices_Radar.sh script, fall back to serial number and storage_device
-					if [[ ! -e "/dev/disk/by-id/$IDrive_UUID" ]] ; then
-						Log "Cannot find disk $IDrive_ID with id = $IDrive_UUID either"
-						if [[ ! -e "/dev/disk/by-label/$IDrive_UUID" ]] ; then
-							Log "Cannot find disk $IDrive_ID with label = $IDrive_UUID either, aborting!"
-							SetDeviceOnline "$IDrive_ID" "0"
-							continue
-						fi
-					fi
-				fi
+		if [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_POOL" ]] || [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_MIRROR" ]] || [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_RAIDZ1" ]] || [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_RAIDZ2" ]] || [[ "$IDrive_DeviceTemplate" == "$TPL_ZFS_RAIDZ3" ]]; then
+		    if [[ "$IDrive_Parent" == "$PK_Device" ]]; then
 
-				## See if we have a block device associated with that UUID
-				IDrive_BlockDev=$(blkid -U "$IDrive_UUID")
-				if [[ "$IDrive_BlockDev" == "" ]] ;then
-					Log "Drive $IDrive_ID ($IDrive_UUID) doesn't have a block device associated"
-					SetDeviceOnline "$IDrive_ID" "0"
-				fi
-			fi
-
-			## See if is still available in /proc/partitions
-			cat /proc/partitions | grep -q "${IDrive_BlockDev##/dev/}$"
-			isDriveAvailable=$?
-
-			if [[ "$isDriveAvailable" != "0" ]] ;then
-				Log "Drive $IDrive_ID ($IDrive_UUID) that's associated with $IDrive_BlockDev cannot be found in /proc/partitions"
-				SetDeviceOnline "$IDrive_ID" "0"
-				continue
-			fi
-
-			## See if the drive is mountable
-			mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)
-			mount ${IDrive_BlockDev} $mountDirTemp 1>/dev/null 2>/dev/null
-			isDriveMountable=$?
-
-			if [[ "$isDriveMountable" != "0" ]] ;then
-				Log "Drive $IDrive_ID ($IDrive_UUID) that's associated with $IDrive_BlockDev cannot be mounted"
-				SetDeviceOnline "$IDrive_ID" "0"
-				rmdir $mountDirTemp
-				continue
+			PoolStatus=$(zpool get -H health $IDrive_BlockDev | cut -f3)
+			if [[ "$PoolStatus" == "ONLINE" ]] || [[ "$poolStatus" == "DEGRADED" ]]; then
+			    SetDeviceOnline "$IDrive_ID" "1"
 			else
-				umount -lf $mountDirTemp 1>/dev/null 2>/dev/null
-				rmdir $mountDirTemp
+			    SetDeviceOnline "$IDrive_ID" "0" 
 			fi
 
-			SetDeviceOnline "$IDrive_ID" "1"
-
-
-		## Is a internal drive located on a remote computer
-		elif [[ "$PK_Device" -eq "1" ]]; then
-
+		    elif [[ "$PK_Device" -eq "1" ]]; then
+			## It's a remote device.
 			## Get the ip of the parent device
 			IDrive_IP=$(RunCSQL "SELECT IPaddress FROM Device WHERE PK_Device='${IDrive_Parent}'")
 			IDrive_IP=$(Field "1" "$IDrive_IP")
-
+			
 			## Test to see if the parent is online or not
 			ping -qnc 1 -W 1 "$IDrive_IP" &> /dev/null
 			HostIsUp=$?
 			if [[ "$HostIsUp" != "0" ]] ;then
-				SetKidsOnline "$IDrive_Parent" "0"
-				Log "Device $IDrive_Parent ($IDrive_IP) doesn't respond to our ping."
-				continue
+			    SetKidsOnline "$IDrive_Parent" "0"
+			    Log "Device $IDrive_Parent ($IDrive_IP) doesn't respond to our ping."
+			    continue
 			fi
-
+			
 			## Test if the share is still in the list
 			smbclient -A /usr/pluto/var/sambaCredentials.secret --list=//$IDrive_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^Storage$IDrive_ID\$$"
 			isShareInList=$?
-
+			
 			if [[ "$isShareInList" != "0" ]] ;then
-				Log "Drive $IDrive_ID ($IDrive_UUID) is not advertised by it's parent smb server ($IDrive_IP)"
-				SetDeviceOnline "$IDrive_ID" "0"
-				continue
+			    Log "Drive $IDrive_ID ($IDrive_UUID) is not advertised by it's parent smb server ($IDrive_IP)"
+			    SetDeviceOnline "$IDrive_ID" "0"
+			    continue
 			fi
-
+			
 			## Test if the share is still mountable with the username/password that we have
 			smbclient -A /usr/pluto/var/sambaCredentials.secret "//$IDrive_IP/Storage$IDrive_ID\$" -c 'pwd' 1>/dev/null 2>/dev/null
 			isShareMountable=$?
-
+			
 			if [[ "$isShareMountable" != "0" ]] ;then
-				Msg="Drive $IDrive_ID ($IDrive_IP $IDrive_UUID) cannot be mounted"
-				Log "$Msg"
-				SetDeviceOnline "$IDrive_ID" "0"
-				continue
+			    Msg="Drive $IDrive_ID ($IDrive_IP $IDrive_UUID) cannot be mounted"
+			    Log "$Msg"
+			    SetDeviceOnline "$IDrive_ID" "0"
+			    continue
 			fi
-
+			
 			SetDeviceOnline "$IDrive_ID" "1"
+		    fi
+		else
+		## Is one of our internal drives
+		    if [[ "$IDrive_Parent" == "$PK_Device" ]] ; then
+			if [[ "$IDrive_DeviceTemplate" == "$TPL_INTERNAL_DRIVE" ]] ; then
+			    ## See if a device with that UUID can be found in udev
+			    ## Find the drive
+			    if [[ ! -e "/dev/disk/by-uuid/$IDrive_UUID" ]] ; then
+				Log "Cannot find disk $IDrive_ID with uuid=$IDrive_UUID"
+				# as in the StorageDevices_Radar.sh script, fall back to serial number and storage_device
+				if [[ ! -e "/dev/disk/by-id/$IDrive_UUID" ]] ; then
+				    Log "Cannot find disk $IDrive_ID with id = $IDrive_UUID either"
+				    if [[ ! -e "/dev/disk/by-label/$IDrive_UUID" ]] ; then
+					Log "Cannot find disk $IDrive_ID with label = $IDrive_UUID either, aborting!"
+					SetDeviceOnline "$IDrive_ID" "0"
+					continue
+				    fi
+				fi
+			    fi
+			    
+			    ## See if we have a block device associated with that UUID
+			    IDrive_BlockDev=$(blkid -U "$IDrive_UUID")
+			    if [[ "$IDrive_BlockDev" == "" ]] ;then
+				Log "Drive $IDrive_ID ($IDrive_UUID) doesn't have a block device associated"
+				SetDeviceOnline "$IDrive_ID" "0"
+			    fi
+			fi
+			
+			## See if is still available in /proc/partitions
+			cat /proc/partitions | grep -q "${IDrive_BlockDev##/dev/}$"
+			isDriveAvailable=$?
+			
+			if [[ "$isDriveAvailable" != "0" ]] ;then
+			    Log "Drive $IDrive_ID ($IDrive_UUID) that's associated with $IDrive_BlockDev cannot be found in /proc/partitions"
+			    SetDeviceOnline "$IDrive_ID" "0"
+			    continue
+			fi
+			
+			## See if the drive is mountable
+			mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)
+			mount ${IDrive_BlockDev} $mountDirTemp 1>/dev/null 2>/dev/null
+			isDriveMountable=$?
+			
+			if [[ "$isDriveMountable" != "0" ]] ;then
+			    Log "Drive $IDrive_ID ($IDrive_UUID) that's associated with $IDrive_BlockDev cannot be mounted"
+			    SetDeviceOnline "$IDrive_ID" "0"
+			    rmdir $mountDirTemp
+			    continue
+			else
+			    umount -lf $mountDirTemp 1>/dev/null 2>/dev/null
+			    rmdir $mountDirTemp
+			fi
+			
+			SetDeviceOnline "$IDrive_ID" "1"
+			
+			
+			## Is a internal drive located on a remote computer
+		    elif [[ "$PK_Device" -eq "1" ]]; then
+			
+			## Get the ip of the parent device
+			IDrive_IP=$(RunCSQL "SELECT IPaddress FROM Device WHERE PK_Device='${IDrive_Parent}'")
+			IDrive_IP=$(Field "1" "$IDrive_IP")
+			
+			## Test to see if the parent is online or not
+			ping -qnc 1 -W 1 "$IDrive_IP" &> /dev/null
+			HostIsUp=$?
+			if [[ "$HostIsUp" != "0" ]] ;then
+			    SetKidsOnline "$IDrive_Parent" "0"
+			    Log "Device $IDrive_Parent ($IDrive_IP) doesn't respond to our ping."
+			    continue
+			fi
+			
+			## Test if the share is still in the list
+			smbclient -A /usr/pluto/var/sambaCredentials.secret --list=//$IDrive_IP --grepable 2>/dev/null | grep "^Disk" | cut -d'|' -f2 | grep -q "^Storage$IDrive_ID\$$"
+			isShareInList=$?
+			
+			if [[ "$isShareInList" != "0" ]] ;then
+			    Log "Drive $IDrive_ID ($IDrive_UUID) is not advertised by it's parent smb server ($IDrive_IP)"
+			    SetDeviceOnline "$IDrive_ID" "0"
+			    continue
+			fi
+			
+			## Test if the share is still mountable with the username/password that we have
+			smbclient -A /usr/pluto/var/sambaCredentials.secret "//$IDrive_IP/Storage$IDrive_ID\$" -c 'pwd' 1>/dev/null 2>/dev/null
+			isShareMountable=$?
+			
+			if [[ "$isShareMountable" != "0" ]] ;then
+			    Msg="Drive $IDrive_ID ($IDrive_IP $IDrive_UUID) cannot be mounted"
+			    Log "$Msg"
+			    SetDeviceOnline "$IDrive_ID" "0"
+			    continue
+			fi
+			
+			SetDeviceOnline "$IDrive_ID" "1"
+		    fi
+		    
 		fi
+
 	done
 
 	sleep 5
