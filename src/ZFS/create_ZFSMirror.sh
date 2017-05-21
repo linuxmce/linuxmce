@@ -4,7 +4,7 @@
 
 function Log {
 	echo "$(date -R) $$ $*" >&2
-	echo "$(date -R) $$ $*" >> /var/log/pluto/CreateZFSPool.log
+	echo "$(date -R) $$ $*" >> /var/log/pluto/CreateZFSMirror.log
 }
 
 
@@ -22,11 +22,13 @@ if [[ "$3" != "demonized" ]] ;then
 	#if is new added get the list of active drives and spares
 	NewAdd=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Device and FK_DeviceData = $NEW_ADD_ID")
 	if [[ $NewAdd == 0 ]] ;then
-		Log "Creating new RAID 0 on /dev/$name"
+		Log "Creating new ZFS Mirror on /dev/$name"
 
 		## Counting the number of spares and active diskes
 		## Creating a list with spares and active disks
 		ActiveDrives=
+		SpareDrives=
+		AddSpares=0
 		NrDrives=
 		HardDriveList=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate = $HARD_DRIVE_DEVICE_TEMPLATE AND FK_Device_ControlledVia = $Device")
 		for Drive in $HardDriveList; do
@@ -44,20 +46,35 @@ if [[ "$3" != "demonized" ]] ;then
 			R=$(RunSQL "$Q")
 			Disk=$(Field 1 "$R")
 			IsSpare=$(Field 2 "$R")
-			Log "Adding Active drive $Disk to $name"
-			ActiveDrives="$ActiveDrives "$Disk
-			NrDrives=$(($NrDrives+1))
+
+			if [[ $IsSpare == 1 ]]; then
+			    Log "Adding Spare Disk $Disk to $name"
+			    AddSpares=1
+			    SpareDrives="$SpareDrives "$Disk
+			else
+			    Log "Adding Active drive $Disk to $name"
+			    ActiveDrives="$ActiveDrives "$Disk
+			fi
 		done
 
-		## Create the array with mdadm
 		Log "Using parted to create GPT disklabels"
-		
-		for d in $ActiveDrives; do parted -a optimal -s $d mklabel gpt; done
 
+		if [[ $AddSpares == 1 ]]; then
+ 		    for d in $SpareDrives; do parted -a optimal -s $d mklabel gpt; done
+		else
+		    for d in $ActiveDrives; do parted -a optimal -s $d mklabel gpt; done
+		fi
+		
 		Log "Using zpool to actually create the pool"
-		zpool create -m legacy "$name" mirror $ActiveDrives
-		zpool_err="$?"
-		Log "Process 'zpool create $name $ActiveDrives' exited with error $zpool_err"
+		if [[ $AddSpares == 1 ]]; then
+		    zpool_err="$?"
+		    Log "Process 'zpool create $name mirror $ActiveDrives' spare '$SpareDrives' exited with error $zpool_err"
+		    zpool create -m legacy "$name" mirror $ActiveDrives spare $SpareDrives
+		else
+		    zpool create -m legacy "$name" mirror $ActiveDrives
+		    zpool_err="$?"
+		    Log "Process 'zpool create $name mirror $ActiveDrives' exited with error $zpool_err"
+		fi
 
 		sleep 3
 
@@ -77,6 +94,8 @@ if [[ "$3" != "demonized" ]] ;then
 	## Format the new raid
 	LogFile="/usr/pluto/var/${Device}_Raid.log"
 	echo "FORMAT,100" > $LogFile
+
+	sleep 5
 		
 	rm $LogFile
 fi
