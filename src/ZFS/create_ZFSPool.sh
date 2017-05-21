@@ -28,7 +28,9 @@ if [[ "$3" != "demonized" ]] ;then
 		## Counting the number of spares and active diskes
 		## Creating a list with spares and active disks
 		ActiveDrives=
+		SpareDrives=
 		NrDrives=
+		AddSpares=0
 		HardDriveList=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate = $HARD_DRIVE_DEVICE_TEMPLATE AND FK_Device_ControlledVia = $Device")
 		for Drive in $HardDriveList; do
 
@@ -45,20 +47,37 @@ if [[ "$3" != "demonized" ]] ;then
 			R=$(RunSQL "$Q")
 			Disk=$(Field 1 "$R")
 			IsSpare=$(Field 2 "$R")
-			Log "Adding Active drive $Disk to $name"
-			ActiveDrives="$ActiveDrives "$Disk
+
+			if [[ $IsSpare == 1 ]]; then
+			    Log "Adding Spare Disk $Disk to $name"
+			    AddSpares=1
+			    SpareDrives="$SpareDrives "$Disk
+			else
+			    Log "Adding Active drive $Disk to $name"
+			    ActiveDrives="$ActiveDrives "$Disk
+			fi
 			NrDrives=$(($NrDrives+1))
 		done
 
-		## Create the array with mdadm
 		Log "Using parted to create GPT disklabels"
 		
-		for d in $ActiveDrives; do parted -a optimal -s $d mklabel gpt; done
+
+		if [[ $AddSpares == 1 ]]; then
+ 		    for d in $SpareDrives; do parted -a optimal -s $d mklabel gpt; done
+		else
+		    for d in $ActiveDrives; do parted -a optimal -s $d mklabel gpt; done
+		fi
 
 		Log "Using zpool to actually create the pool"
-		zpool create -m legacy "$name" $ActiveDrives
-		zpool_err="$?"
-		Log "Process 'zpool create $name $ActiveDrives' exited with error $zpool_err"
+		if [[ $AddSpares == 1 ]]; then
+		    zpool_err="$?"
+		    Log "Process 'zpool create $name $ActiveDrives' spare '$SpareDrives' exited with error $zpool_err"
+		    zpool create -m legacy "$name" $ActiveDrives spare $SpareDrives
+		else
+		    zpool create -m legacy "$name" $ActiveDrives
+		    zpool_err="$?"
+		    Log "Process 'zpool create $name $ActiveDrives' exited with error $zpool_err"
+		fi
 
 		sleep 3
 
@@ -78,6 +97,8 @@ if [[ "$3" != "demonized" ]] ;then
 	## Format the new raid
 	LogFile="/usr/pluto/var/${Device}_Raid.log"
 	echo "FORMAT,100" > $LogFile
+
+	sleep 5
 		
 	rm $LogFile
 fi
