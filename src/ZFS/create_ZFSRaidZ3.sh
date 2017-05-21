@@ -55,13 +55,10 @@ if [[ "$3" != "demonized" ]] ;then
 		for d in $ActiveDrives; do parted -a optimal -s $d mklabel gpt; done
 
 		Log "Using zpool to actually create the pool"
-		zpool create $name raidz3 $ActiveDrives
+		zpool create -m legacy $name raidz3 $ActiveDrives
 		zpool_err="$?"
-		Log "Process 'zpool create $name $ActiveDrives' exited with error $zpool_err"
+		Log "Process 'zpool create "$name" $ActiveDrives' exited with error $zpool_err"
 
-		Log "Setting mount point to legacy for PlutoStorageDevices"
-		zfs set mountpoint=legacy $name
-	
 		sleep 3
 
 		# Update Raid Information
