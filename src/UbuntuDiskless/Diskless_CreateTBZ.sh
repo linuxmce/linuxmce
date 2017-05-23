@@ -43,20 +43,15 @@ Trap_Exit () {
 	until [[ -z "${PIDS}" ]] ; do
 		kill ${PIDS}
 		PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
+		sleep 1
 	done
 
 	MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
 	until [[ -z "${MNTS}" ]] ; do
 		umount ${MNTS}
 		MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
+		sleep 1
 	done
-
-#	umount -fl $TEMP_DIR/var/cache/apt || :
-#	umount -fl $TEMP_DIR/usr/pluto/deb-cache
-#	umount -fl $TEMP_DIR/dev/pts
-#	umount -fl $TEMP_DIR/dev || :
-#	umount -fl $TEMP_DIR/proc
-#	umount -fl $TEMP_DIR/sys
 
 	rm -rf $TEMP_DIR
 }
@@ -431,44 +426,35 @@ MD_Preseed () {
 }
 
 MD_Install_Packages () {
-	## FIXME: Need to convert this to dpkg-divert for greater reliability
-
 	echo "Install/Upgrade service invocation packages sysv-rc and upstart"
 	# Install service invocation utilities
-	LC_ALL=C chroot $TEMP_DIR apt-get -f -y install sysv-rc screen
-	case "$TARGET_DISTRO" in
-		"ubuntu")
+	LC_ALL=C chroot $TEMP_DIR apt-get -f -y install sysv-rc screen pwgen
+	case "$TARGET_RELEASE" in
+		"trusty")
 			LC_ALL=C chroot $TEMP_DIR apt-get -f -y install upstart
 		;;
 	esac
 
 	echo "Disable all service invocation"
-	# disable service invocation and tools
-	mv -f $TEMP_DIR/sbin/start{,.orig} || :
-	mv -f $TEMP_DIR/usr/sbin/invoke-rc.d{,.orig} || :
-	mv -f $TEMP_DIR/sbin/restart{,.orig} || :
-	mv -f $TEMP_DIR/sbin/initctl{,.orig} || :
+	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /sbin/start.orig /sbin/start || :
+	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /sbin/start-stop-daemon.orig /sbin/start-stop-daemon || :
+	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /usr/sbin/invoke-rc.d.orig /usr/sbin/invoke-rc.d || :
+	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /sbin/restart.orig /sbin/restart || :
+	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /sbin/initctl.orig /sbin/initctl || :
+	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /bin/systemctl.orig /bin/systemctl || :
 
 	cat <<-EOF > $TEMP_DIR/sbin/start
 		#!/bin/bash
+		echo "WARNING: we dont want $0 to run right now"
 		exit 0
 		EOF
 	chmod +x $TEMP_DIR/sbin/start
-	cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/invoke-rc.d
-	cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/restart
-	cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/initctl
+	[[ -f "$TEMP_DIR/sbin/start-stop-daemon.orig" ]] && cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/start-stop-daemon
+	[[ -f "$TEMP_DIR/usr/sbin/invoke-rc.d.orig" ]] && cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/invoke-rc.d
+	[[ -f "$TEMP_DIR/sbin/restart.orig" ]] && cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/restart
+	[[ -f "$TEMP_DIR/sbin/initctl.orig" ]] && cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/initctl
+	[[ -f "$TEMP_DIR/sbin/systemctl.orig" ]] && cp $TEMP_DIR/sbin/start $TEMP_DIR/bin/systemctl
 
-	### Disable invoke-rc.d scripts
-	mv "$TEMP_DIR"/sbin/start-stop-daemon{,.pluto-install}
-	[[ -f "$TEMP_DIR"/sbin/initctl ]] && mv "$TEMP_DIR"/sbin/initctl{,.pluto-install}
-	echo -en '#!/bin/bash\necho "WARNING: we dont want invoke-rc.d to run right now"\n' >"$TEMP_DIR"/usr/sbin/invoke-rc.d
-	echo -en '#!/bin/bash\necho "WARNING: fake start called"\n' >"$TEMP_DIR"/sbin/start
-	echo -en '#!/bin/bash\necho "WARNING: fake start-stop-daemon called"\n' >"$TEMP_DIR"/sbin/start-stop-daemon
-	echo -en '#!/bin/bash\necho "WARNING: fake initctl called"\n' >"$TEMP_DIR"/sbin/initctl
-	chmod +x "$TEMP_DIR/usr/sbin/invoke-rc.d"
-	chmod +x "$TEMP_DIR/sbin/start-stop-daemon"
-	chmod +x "$TEMP_DIR/sbin/start"
-	chmod +x "$TEMP_DIR/sbin/initctl"
 
 	StatsMessage "Installing packages to MD"
 	## Update the chrooted system (needed when created from archive)
@@ -669,7 +655,9 @@ MD_Install_Packages () {
 			#VerifyExitCode "MCE plymouth theme install failed"
 
 	                # upstart fix to prevent waiting on MD boot
-	                sed -i".pbackup" 's/ and static-network-up//g' "$TEMP_DIR/etc/init/rc-sysinit.conf"
+	                if [[ -f "$TEMP_DIR/etc/init/rc-sysinit.conf" ]]; then
+				sed -i".pbackup" 's/ and static-network-up//g' "$TEMP_DIR/etc/init/rc-sysinit.conf"
+			fi
 			;;
 		"raspbian")
 			#FIXME: why is this required, something missing?
@@ -690,8 +678,8 @@ MD_Install_Packages () {
 	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install pastebinit
 	VerifyExitCode "pastebinit"
 
-	#implement external_media_identifier fix
-	LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
+	##implement external_media_identifier fix
+	#LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
 }
 
 MD_Populate_Debcache () {
@@ -700,6 +688,20 @@ MD_Populate_Debcache () {
 
 MD_Cleanup () {
 	StatsMessage "Cleaning up from package installations..."
+
+	[[ -f "$TEMP_DIR/sbin/start.orig" ]] && rm -f "$TEMP_DIR/sbin/start"
+	[[ -f "$TEMP_DIR/sbin/start-stop-daemon.orig" ]] && rm -f "$TEMP_DIR/sbin/start-stop-daemon"
+	[[ -f "$TEMP_DIR/usr/sbin/invoke-rc.d.orig" ]] && rm -f "$TEMP_DIR/usr/sbin/invoke-rc.d"
+	[[ -f "$TEMP_DIR/sbin/restart.orig" ]] && rm -f "$TEMP_DIR/sbin/restart"
+	[[ -f "$TEMP_DIR/sbin/initctl.orig" ]] && rm -f "$TEMP_DIR/sbin/initctl"
+	[[ -f "$TEMP_DIR/bin/systemctl.orig" ]] && rm -f "$TEMP_DIR/bin/systemctl"
+
+	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /sbin/start
+	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /sbin/start-stop-daemon
+	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /usr/sbin/invoke-rc.d
+	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /sbin/restart
+	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /sbin/initctl
+	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /bin/systemctl
 
 	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
 	until [[ -z "${PIDS}" ]] ; do
@@ -713,26 +715,12 @@ MD_Cleanup () {
 		MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
 	done
 
-#	umount $TEMP_DIR/var/cache/apt || :
-#	umount $TEMP_DIR/usr/pluto/deb-cache
-#	umount $TEMP_DIR/dev/pts
-#	umount $TEMP_DIR/sys
-#	umount $TEMP_DIR/proc
-
 	#Make sure there is are Packages files on the MD so apt-get update does not fail
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
 	echo "" > $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages
 	gzip -9c < $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages > $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
 	echo "" > $TEMP_DIR/usr/pluto/deb-cache/Packages
 	gzip -9c < $TEMP_DIR/usr/pluto/deb-cache/Packages > $TEMP_DIR/usr/pluto/deb-cache/Packages.gz
-
-	mv -f $TEMP_DIR/sbin/invoke-rc.d{.orig,} || :
-	mv -f $TEMP_DIR/sbin/start{.orig,} || :
-	mv -f $TEMP_DIR/sbin/restart{.orig,} || :
-	mv -f $TEMP_DIR/sbin/initctl{.orig,} || :
-	mv -f "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,} || :
-	#mv -f "$TEMP_DIR"/sbin/initctl{.pluto-install,}
-	#rm -f "$TEMP_DIR"/usr/sbin/policy-rc.d
 
 	rm -f ${TEMP_DIR}/etc/dpkg/dpkg.cfg.d/02apt-speedup
 
