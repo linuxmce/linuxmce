@@ -30,9 +30,10 @@ Gateway=`ip route | grep "default via" | cut -d " " -f3`
 Architecture="i386"
 
 #Temporarily Removed until amd64 builds are re-instated. -tschak
-#if grep -q "^flags.* lm" /proc/cpuinfo ;then
-#	Architecture="amd64"
-#fi
+#Reinstated for we have the builds now -phenigma 6/10/2017
+if grep -q "^flags.* lm " /proc/cpuinfo ;then
+	Architecture="amd64"
+fi
 
 echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; Architecture: $Architecture; DT: $DT"
 /scripts/interactor "$Gateway" "$MyIP" "$MyMAC" "$Architecture" "$DT"

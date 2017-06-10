@@ -12,8 +12,12 @@ set -e
 DEVICEDATA_Operating_System=209
 DEVICEDATA_Architecture=112
 
+###TARGET_TYPES="ubuntu-i386 ubuntu-amd64 raspbian-armhf" ### experimental
 ###TARGET_TYPES="ubuntu-i386 raspbian-armhf" ### experimental
 #TARGET_TYPES="raspbian-armhf"
+#TARGET_TYPES="ubuntu-amd64 ubuntu-i386"
+#TARGET_TYPES="ubuntu-i386 ubuntu-amd64"
+#TARGET_TYPES="ubuntu-amd64"
 TARGET_TYPES="ubuntu-i386"
 
 INSTALL_KUBUNTU_DESKTOP="yes"
@@ -42,15 +46,15 @@ Trap_Exit () {
 	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
 	until [[ -z "${PIDS}" ]] ; do
 		kill ${PIDS}
-		PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
 		sleep 1
+		PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
 	done
 
 	MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
 	until [[ -z "${MNTS}" ]] ; do
 		umount ${MNTS}
-		MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
 		sleep 1
+		MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
 	done
 
 	rm -rf $TEMP_DIR
@@ -299,6 +303,7 @@ MD_System_Level_Prep () {
 	[[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
 	[[ -f /etc/apt/apt.conf ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf
 
+	# This can significantly improve overall performance by preventing massive nubmers of 'sync's from occuring during install
 	echo "force-unsafe-io" > ${TEMP_DIR}/etc/dpkg/dpkg.cfg.d/02apt-speedup
 
 	## Setup initial ssh access
@@ -426,6 +431,8 @@ MD_Preseed () {
 }
 
 MD_Install_Packages () {
+	## FIXME: Need to convert this to dpkg-divert for greater reliability
+
 	echo "Install/Upgrade service invocation packages sysv-rc and upstart"
 	# Install service invocation utilities
 	LC_ALL=C chroot $TEMP_DIR apt-get -f -y install sysv-rc screen pwgen
@@ -436,6 +443,7 @@ MD_Install_Packages () {
 	esac
 
 	echo "Disable all service invocation"
+
 	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /sbin/start.orig /sbin/start || :
 	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /sbin/start-stop-daemon.orig /sbin/start-stop-daemon || :
 	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /usr/sbin/invoke-rc.d.orig /usr/sbin/invoke-rc.d || :
@@ -443,9 +451,17 @@ MD_Install_Packages () {
 	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /sbin/initctl.orig /sbin/initctl || :
 	LC_ALL=C chroot $TEMP_DIR dpkg-divert --add --rename --divert /bin/systemctl.orig /bin/systemctl || :
 
+#	# disable service invocation and tools
+#	mv -f $TEMP_DIR/sbin/start{,.orig} || :
+#	mv -f $TEMP_DIR/sbin/start-stop-daemon{,.orig} || :
+#	mv -f $TEMP_DIR/usr/sbin/invoke-rc.d{,.orig} || :
+#	mv -f $TEMP_DIR/sbin/restart{,.orig} || :
+#	mv -f $TEMP_DIR/sbin/initctl{,.orig} || :
+#	mv -f $TEMP_DIR/bin/systemctl{,.orig} || :
+#
 	cat <<-EOF > $TEMP_DIR/sbin/start
 		#!/bin/bash
-		echo "WARNING: we dont want $0 to run right now"
+		echo "DIVERTED: we dont want \$0 to run right now"
 		exit 0
 		EOF
 	chmod +x $TEMP_DIR/sbin/start
@@ -634,15 +650,12 @@ MD_Install_Packages () {
 				#LC_ALL=C chroot $TEMP_DIR apt-get -y install kde-minimal
 			fi
 			echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
-			mkdir -p $TEMP_DIR/etc/init/
-			echo 'manual' > "$TEMP_DIR/etc/init/kdm.override"
-			echo 'manual' > "$TEMP_DIR/etc/init/sddm.override"
-			echo 'manual' > "$TEMP_DIR/etc/init/lightdm.override"
 
 			# Update startup to remove kdm and network manager
 			LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove || :
 			LC_ALL=C chroot $TEMP_DIR update-rc.d -f sddm remove || :
 			LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
+			LC_ALL=C chroot $TEMP_DIR systemctl mask failsafe-x.service || :
 
 			#Install ancillary programs
 			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg"$TARGET_KVER_LTS_HES"
@@ -695,7 +708,6 @@ MD_Cleanup () {
 	[[ -f "$TEMP_DIR/sbin/restart.orig" ]] && rm -f "$TEMP_DIR/sbin/restart"
 	[[ -f "$TEMP_DIR/sbin/initctl.orig" ]] && rm -f "$TEMP_DIR/sbin/initctl"
 	[[ -f "$TEMP_DIR/bin/systemctl.orig" ]] && rm -f "$TEMP_DIR/bin/systemctl"
-
 	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /sbin/start
 	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /sbin/start-stop-daemon
 	LC_ALL=C chroot "$TEMP_DIR" dpkg-divert --rename --remove /usr/sbin/invoke-rc.d
@@ -706,16 +718,18 @@ MD_Cleanup () {
 	PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
 	until [[ -z "${PIDS}" ]] ; do
 		kill ${PIDS}
+		sleep 1
 		PIDS=$(lsof ${TEMP_DIR} 2>/dev/null | awk '{print $2}' | tail -n+2 | uniq )
 	done
 
 	MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
 	until [[ -z "${MNTS}" ]] ; do
 		umount ${MNTS}
+		sleep 1
 		MNTS=$(mount | grep ${TEMP_DIR} | awk '{print $3;}' | sort -r)
 	done
 
-	#Make sure there is are Packages files on the MD so apt-get update does not fail
+	#Make sure there are Packages files on the MD so apt-get update does not fail
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
 	echo "" > $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages
 	gzip -9c < $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages > $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
@@ -742,6 +756,8 @@ MD_Cleanup () {
 Create_Diskless_Tar () {
 	StatsMessage "Creating the compressed tar image file, this could take up to 1 hour depending on your system..."
 	mkdir -p "$ARCHIVE_DIR"
+	[[ -f "$ARCHIVE_DIR/$DisklessFS" ]] && rm -f "$ARCHIVE_DIR/$DisklessFS"
+	[[ -f "$ARCHIVE_DIR/$DisklessFS.version" ]] && rm -f "$ARCHIVE_DIR/$DisklessFS.version"
 	pushd "$TEMP_DIR" >/dev/null
 #	tar -cJf "$ARCHIVE_DIR/$DisklessFS" *
 	tar -czf "$ARCHIVE_DIR/$DisklessFS" *
@@ -794,17 +810,20 @@ Setup_Logfile
 #Setup trap
 trap "Trap_Exit" EXIT
 
+StatsMessage "BEGIN: Running diskless create for :$TARGET_TYPES:"
 #TODO get as much of this from database as possible
-for TARGET in "$TARGET_TYPES" ; do
-	case "$TARGET" in
-		"ubuntu-i386")
+for TARGET in $TARGET_TYPES ; do
+	TARGET_DISTRO=$(echo "$TARGET" | cut -d'-' -f1)
+	TARGET_ARCH=$(echo "$TARGET" | cut -d'-' -f2)
+	case "$TARGET_DISTRO" in
+		"ubuntu")
 			if [[ "$HOST_ARCH" == "armhf" ]] ; then
-				echo "Cannot build i386 image on ${HOST_ARCH} core."
+				echo "Cannot build x86/64 images on ${HOST_ARCH} core."
 				exit 1
 			fi
-			TARGET_DISTRO="ubuntu"
+			#TARGET_DISTRO="ubuntu"
+			#TARGET_ARCH="i386"
 			TARGET_RELEASE="$HOST_RELEASE"
-			TARGET_ARCH="i386"
 			TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
 			DBST_ARCHIVE="PlutoMD_Debootstraped.tar.bz2"
 			DisklessFS="PlutoMD-${TARGET_ARCH}.tar.xz"
@@ -831,15 +850,14 @@ for TARGET in "$TARGET_TYPES" ; do
 					;;
 			esac
 			;;
-		"raspbian-armhf")  # rpi2/3 and up
-			TARGET_DISTRO="raspbian"
+		"raspbian")  # rpi2/3 and up
+			#TARGET_DISTRO="raspbian"
 			#TARGET_RELEASE="wheezy"
 			TARGET_RELEASE="jessie"
 			TARGET_ARCH="armhf"
 			TARGET_REPO="http://mirrordirector.raspbian.org/raspbian/"
 			DBST_ARCHIVE="LMCEMD_Debootstraped-raspbian-armhf.tar.xz"
 			DisklessFS="LMCEMD-$TARGET_DISTRO-$TARGET_ARCH.tar.xz"
-			#TARGET_DISTRO_ID=19
 			TARGET_DISTRO_ID=22
 			TARGET_REPO_DISTRO_SRC=22
 			TARGET_REPO_LMCE_SRC=23
@@ -874,6 +892,8 @@ for TARGET in "$TARGET_TYPES" ; do
 	StatsMessage "END: $TARGET_DISTRO - $TARGET_RELEASE - $TARGET_ARCH"
 
 done
+
+StatsMessage "END: Running diskless create for :$TARGET_TYPES:"
 
 #Disable trap, everything was umounted and removed in the cleanup function
 trap - EXIT
