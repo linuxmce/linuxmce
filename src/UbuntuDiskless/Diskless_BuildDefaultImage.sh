@@ -3,7 +3,7 @@
 ## Put a kernel image in there
 mkdir -p /tftpboot/default
 cd /lib/modules
-KERNEL=`find * -type d |head -1`             
+KERNEL=$(find * -maxdepth 0 -type d |sort -r |head -1)
 cp /boot/vmlinuz-$KERNEL /tftpboot/default/vmlinuz
 chmod +r /tftpboot/default/vmlinuz
 mkinitramfs -d /etc/initramfs-tools-interactor/ -o /tftpboot/default/initrd $KERNEL
