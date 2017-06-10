@@ -14,5 +14,5 @@ echo "
 DEFAULT Pluto
 LABEL Pluto
 KERNEL default/vmlinuz
-APPEND root=/dev/nfs acpi=off vga=normal initrd=default/initrd ramdisk_size=10240 rw ip=all apicpmtimer
+APPEND root=/dev/nfs acpi=off vga=normal initrd=default/initrd ramdisk_size=10240 rw ip=all apicpmtimer net.ifnames=0 biosdevname=0
 " > /tftpboot/pxelinux.cfg/default
