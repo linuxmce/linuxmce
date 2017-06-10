@@ -141,10 +141,10 @@ fi
 ###. /usr/pluto/install/install-common.sh ; Disable_DisplayManager
 mkdir -p "/etc/X11"
 echo "/bin/false" >/etc/X11/default-display-manager
-update-rc.d -f kdm remove >/dev/null || :
-update-rc.d -f sddm remove >/dev/null || :
-update-rc.d -f lightdm remove >/dev/null || :
-systemctl mask failsafe-x.service >/dev/null || :
+update-rc.d -f kdm remove &>/dev/null || :
+update-rc.d -f sddm remove &>/dev/null || :
+update-rc.d -f lightdm remove &>/dev/null || :
+systemctl mask failsafe-x.service &>/dev/null || :
 
 ###. /usr/pluto/install/install-common.sh ; Fix_LSB_Data
 case "$TARGET_DISTRO" in
