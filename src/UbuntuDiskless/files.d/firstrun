@@ -26,6 +26,7 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	### END INIT INFO #
 
 	DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
+	DEVICEDATA_DISTRO_Raspbian_Jessie_CONST=22
 
 	raspbian() {
 		trap 'update-rc.d -f firstrun remove' EXIT
@@ -115,7 +116,7 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		. /usr/pluto/bin/Config_Ops.sh
 
 		case "$PK_Distro" in
-			"$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST")
+			$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST|$DEVICEDATA_DISTRO_Raspbian_Jessie_CONST)
 				raspbian
 				err=$?
 				;;

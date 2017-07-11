@@ -70,6 +70,7 @@ void CameraDevice::ReceiveCommandForChild(long pkDevice, string &sCMD_Result, Me
             int iData_Size=pMessage->m_mapData_Lengths[COMMANDPARAMETER_Data_CONST];
             if (Get_Image(iWidth, iHeight, &pData, &iData_Size, &sFormat)) {
                 LoggerWrapper::GetInstance ()->Write (LV_STATUS, "CameraDevice.ReceiveCommandForChild() sending response message");
+                sCMD_Result = "OK";
                 pMessage->m_bRespondedToMessage=true;
                 Message *pMessageOut=new Message(pkDevice,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
                 pMessageOut->m_mapData_Parameters[COMMANDPARAMETER_Data_CONST]=pData;
@@ -77,7 +78,6 @@ void CameraDevice::ReceiveCommandForChild(long pkDevice, string &sCMD_Result, Me
                 pMessageOut->m_mapParameters[COMMANDPARAMETER_Format_CONST]=sFormat;
                 pMessageOut->m_mapParameters[0]=sCMD_Result;
                 m_pAIPC->SendMessage(pMessageOut);
-                sCMD_Result = "OK";
             }
             break;
         }

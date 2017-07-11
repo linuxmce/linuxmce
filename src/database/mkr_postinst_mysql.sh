@@ -34,10 +34,18 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 		bind-address=0.0.0.0
 		query_cache_limit=16M
 		query_cache_size=128M
+		secure-file-priv = ""
 		EOF
 
 	Q="GRANT ALL PRIVILEGES ON pluto_main.* to 'root'@'127.0.0.1';"
 	mysql $MYSQL_DB_CRED -e "$Q"
+
+	Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';"
+	mysql $MYSQL_DB_CRED -e "$Q"
+
+	Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'localhost';"
+	mysql $MYSQL_DB_CRED -e "$Q"
+
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
 

@@ -138,8 +138,7 @@ void Row_Notification::SetDefaultValues()
 is_null[0] = false;
 m_FK_Alert = 0;
 is_null[1] = false;
-m_NotificationTime = "0000-00-00 00:00:00";
-is_null[2] = false;
+is_null[2] = true;
 is_null[3] = true;
 is_null[4] = true;
 is_null[5] = true;
@@ -230,6 +229,9 @@ void Row_Notification::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSON
 m_psc_restrict = val; is_modified=true; is_null[10]=false;}
 
 		
+bool Row_Notification::NotificationTime_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_Notification::Info_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -256,6 +258,10 @@ bool Row_Notification::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,ta
 return is_null[10];}
 
 			
+void Row_Notification::NotificationTime_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_Notification::Info_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;

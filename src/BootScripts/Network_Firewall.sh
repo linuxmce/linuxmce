@@ -986,7 +986,15 @@ fi
 	                        $(RunSQL "$Q")
 	                fi
 	        fi
-	
+	        			
+			#DROP UPNP port 1900 udp FROM external interface:
+	        Q="SELECT Matchname, IntIF, SourceIP, Ruletype FROM Firewall WHERE IntIf='$ExtIf' AND SourcePort='1900' AND RuleType='input' ORDER BY PK_Firewall"
+	        R=$(RunSQL "$Q")
+	        if ! [ "$R" ]; then
+	                Q="INSERT INTO Firewall (Place, IntIF, Protocol, SourcePort RuleType, RPolicy, Description) VALUES ('2', '$ExtIf', 'udp-ipv4', '1900', 'input', 'DROP', 'Block UPNP (udp 1900) from External Network')"
+	                $(RunSQL "$Q")
+	        fi
+			
 	        #Local Network
 	        Q="SELECT Matchname, IntIF, SourceIP, Ruletype FROM Firewall WHERE IntIf='$IntIf' AND SourceIP='$IntNet/$IntBitmask' AND RuleType='input' ORDER BY PK_Firewall"
 	        R=$(RunSQL "$Q")

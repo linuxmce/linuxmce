@@ -306,9 +306,7 @@ bool Advanced_IP_Camera::HttpGet(string sUrl, string sUser, string sPasswd, char
     {
         curl_easy_setopt(m_pCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, sUser.c_str());
-        if (!sPasswd.empty()) {
-            curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, sPasswd.c_str());
-        }
+	curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, sPasswd.c_str());
     }
 
     CURLcode res = curl_easy_perform(m_pCurl);
@@ -328,7 +326,7 @@ bool Advanced_IP_Camera::HttpGet(string sUrl, string sUser, string sPasswd, char
             *iData_Size = data.size;
             return true;
         } else {
-            LoggerWrapper::GetInstance ()->Write (LV_STATUS, "HttpGet: http code: %d, response:",  code, data.buffer);
+            LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "HttpGet: http code: %d, response:",  code, data.buffer);
         }
     }
     return false;

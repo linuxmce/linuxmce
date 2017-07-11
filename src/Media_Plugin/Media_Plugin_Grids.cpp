@@ -1351,7 +1351,7 @@ class DataGridTable *Media_Plugin::MediaSearchAutoCompl( string GridID, string P
 		"ORDER BY Name limit 30";
 */
     SQL = 
-		"select DISTINCT PK_Attribute, IF(FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name, Description, FK_Picture FROM Attribute "
+		"select DISTINCT PK_Attribute, IF(Attribute.FK_AttributeType IN (2,3,13,57), IF(Name LIKE 'the %', CONCAT(SUBSTR(Name, 5), ', The'), Name), Name ) AS Name, Description, FK_Picture FROM Attribute "
 		"JOIN AttributeType ON Attribute.FK_AttributeType=PK_AttributeType "
 		"JOIN MediaType_AttributeType ON MediaType_AttributeType.FK_AttributeType=PK_AttributeType "
 		"LEFT JOIN Picture_Attribute ON FK_Attribute=PK_Attribute "

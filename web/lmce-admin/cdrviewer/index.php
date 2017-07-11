@@ -12,7 +12,7 @@ $dbconn = mysqli_connect( "$db_host", $db_user, $db_pass, $db_name, $db_port) or
 	
 foreach ( array_keys($_REQUEST) as $key ) {
 	$_REQUEST[$key] = preg_replace('/;/', ' ', $_REQUEST[$key]);
-	$_REQUEST[$key] = mysqli_real_escape_string($_REQUEST[$key]);
+	$_REQUEST[$key] = mysqli_real_escape_string($dbconn, $_REQUEST[$key]);
 }
 
 $startmonth = is_blank($_REQUEST['startmonth']) ? date('m') : $_REQUEST['startmonth'];
@@ -369,7 +369,7 @@ if ( isset($_REQUEST['need_chart']) && $_REQUEST['need_chart'] == 'true' ) {
 	$tot_duration_secs = 0;
 	$result_array = array();
 
-	while ($row = mysqli_fetch_array($result2, MYSQL_NUM)) {
+	while ($row = mysqli_fetch_array($result2, MYSQLI_NUM)) {
 		$tot_duration_secs += $row[2];
 		$tot_calls += $row[1];
 		if ( $row[1] > $max_calls ) {
@@ -429,7 +429,7 @@ if ( isset($_REQUEST['need_chart_cc']) && $_REQUEST['need_chart_cc'] == 'true' )
 
 		$result3 = mysqli_query($query3) or die("Query failed[ $query3 ]: " . mysqli_error($dbconn));
 		$group_by_str = '';
-		while ($row = mysqli_fetch_array($result3, MYSQL_NUM)) {
+		while ($row = mysqli_fetch_array($result3, MYSQLI_NUM)) {
 			if ( $group_by_str != $row[0] ) {
 				$group_by_str = $row[0];
 				$result_array = array();
@@ -455,7 +455,7 @@ if ( isset($_REQUEST['need_chart_cc']) && $_REQUEST['need_chart_cc'] == 'true' )
 		$query3 = "SELECT unix_timestamp(calldate) AS ts, duration FROM $db_name.$db_table_name $where ORDER BY unix_timestamp(calldate) ASC LIMIT $result_limit";
 		$result3 = mysqli_query($dbconn, $query3) or die("Query failed[ $query3 ]: " . mysqli_error($dbconn));
 		$group_by_str = '';
-		while ($row = mysqli_fetch_array($result3, MYSQL_NUM)) {
+		while ($row = mysqli_fetch_array($result3, MYSQLI_NUM)) {
 			$group_by_str_cur = substr(strftime($group_by_field_php[0],$row[0]),0,$group_by_field_php[1]) . $group_by_field_php[2];
 			if ( $group_by_str_cur != $group_by_str ) {
 				if ( $group_by_str ) {
@@ -530,7 +530,7 @@ if ( isset($_REQUEST['need_minutes_report']) && $_REQUEST['need_minutes_report']
 			<th class="end_col">AVG Minutes</th>
 		</tr>';
 
-	while ($row = mysqli_fetch_array($result2, MYSQL_NUM)) {
+	while ($row = mysqli_fetch_array($result2, MYSQLI_NUM)) {
 			
 			$html_duration = sprintf('%02d', intval($row[3]/60)).':'.sprintf('%02d', intval($row[3]%60));
 			$html_duration_avg	= sprintf('%02d', intval(($row[3]/$row[1])/60)).':'.sprintf('%02d', intval(($row[3]/$row[1])%60));
