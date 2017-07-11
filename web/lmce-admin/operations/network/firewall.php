@@ -853,16 +853,31 @@ function firewall($output,$dbADO) {
 					<input type="hidden" name="save_RuleType" value="'.$save_RuleType[1].'" />
 					<td align="center"><input type="text" name="save_SourceIP" value="'.$row['SourceIP'].'" size="8"></td>
 					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /> to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" /></B></td>
-					<td align="center"><select name="save_DestinationIP" onChange="save_enableDestinationIP()">
-								<option value="'.$coreIPv4.'">CORE WAN IP</option>';
+					<td align="center"><select name="save_DestinationIP" onChange="save_enableDestinationIP()">';
+								$selected="0";
 								foreach ($iplist as $name => $value){
-										$out.='<option value="'.$value.'">'.$name.'&nbsp;'.$value.'</option>';
+									 if ($row['DestinationIP'] == $value) {
+											$selected="1";
+											$out.='<option value="'.$value.'" selected>'.$name.'&nbsp;'.$value.'</option>';
+									 } else {
+											$out.='<option value="'.$value.'">'.$name.'&nbsp;'.$value.'</option>';
+									 }									 
 								}
-								$out.='<option value="127.0.0.1">localhost (127.0.0.1)</option>
-								<option value="not">not on the list</option>
-								</select>
-			<input type="text" name="save_DestinationIP_M" size="13" disabled /></td>
-                    <td align="center"><input type="text" name="save_DestinationPort" value="'.$Destinationport[0].'" size="4" /><input type="hidden" name="save_DestinationPortEnd" value="'.$Destinationport[1].'" /></td>';
+								if (  $selected == "0" ){
+									$out.='<option value="not" selected>not on the list</option>';
+								} else {
+									$out.='<option value="not" >not on the list</option>';
+								}
+								$out.='
+								</select>';
+								if ( $row['DestinationIP'] != "NULL" && $selected == "0" ) {
+									$out.='<input type="text" name="save_DestinationIP_M" size="13" value="'.$row['DestinationIP'].'"/></td>';
+								} elseif( $row['DestinationIP'] == "NULL" && $selected == "0" ) {
+									$out.='<input type="text" name="save_DestinationIP_M" size="13" value=""/></td>';
+								} else {
+									$out.='<input type="text" name="save_DestinationIP_M" size="13" disabled value=""/></td>';
+								}
+                    $out.='<td align="center"><input type="text" name="save_DestinationPort" value="'.$Destinationport[0].'" size="4" /><input type="hidden" name="save_DestinationPortEnd" value="'.$Destinationport[1].'" /></td>';
 					if (@$AdvancedFirewall == 1){
 						$out.='<td align="center"><select name="save_RPolicy" STYLE="width:70px">';
 						foreach ($RPolicy as $string){

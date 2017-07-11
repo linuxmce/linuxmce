@@ -22,8 +22,13 @@ function refreshToken($token){
 }
 
 function getClient($auth){
-		
+
+ 	
+	
   $latestToken=json_decode( file_get_contents(CREDENTIALS_PATH) , true);
+  if(empty($latestToken)){
+  	
+  }
   $secret = file_get_contents(CLIENT_SECRET_PATH);
   if(empty( $latestToken ) && !empty($auth)){
   	$latestToken=$auth;

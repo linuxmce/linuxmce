@@ -142,8 +142,7 @@ is_null[1] = true;
 m_FK_AlertType = 0;
 m_EK_Device = 0;
 is_null[2] = false;
-m_DetectionTime = "0000-00-00 00:00:00";
-is_null[3] = false;
+is_null[3] = true;
 is_null[4] = true;
 is_null[5] = true;
 m_ResetBeforeExpiration = 0;
@@ -291,6 +290,9 @@ m_psc_restrict = val; is_modified=true; is_null[17]=false;}
 bool Row_Alert::FK_AlertType_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[1];}
+bool Row_Alert::DetectionTime_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[3];}
 bool Row_Alert::ExpirationTime_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
@@ -337,6 +339,10 @@ return is_null[17];}
 			
 void Row_Alert::FK_AlertType_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[1]=val;
+is_modified=true;
+}
+void Row_Alert::DetectionTime_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[3]=val;
 is_modified=true;
 }
 void Row_Alert::ExpirationTime_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

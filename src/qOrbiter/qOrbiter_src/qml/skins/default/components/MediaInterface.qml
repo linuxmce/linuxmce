@@ -17,8 +17,6 @@ Item{
             qmlPlayer.checkMetaData()
     }
 
-
-
     function prepareMedia(mediaUrl){
         processLabel.text="Please Wait, pre-processing media for mobile device."
       //  var url = String(mediaUrl).replace("qOrbiterGenerator.php?id=/home/public/data/", "media");
@@ -65,8 +63,6 @@ Item{
             }
 
         }
-
-
 
         /* TODO Add reconnect handler in cpp and here */
         /* TODO Change android url to streaming url, generic for other devices. */
@@ -166,7 +162,7 @@ Item{
             if(String(artist).length==0)
                 artist=qsTr("Unknown Artist")
 
-            lmceData.playbackInfoUpdated(title, qmlPlayer.metaData.publisher, qmlPlayer.metaData.albumArtist, 54)
+            lmceData.playbackInfoUpdated(title, "",artist, 54)
 
 //            lmceData.pluginNotifyStart(
 //                        String("\nTitle: "+qmlPlayer.metaData.title+"\t"),

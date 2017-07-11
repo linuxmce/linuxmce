@@ -7,7 +7,7 @@ require_once 'Google/Client.php';
 require_once 'Google/autoload.php';
 
 $client = new Google_Client();
-$client->setAuthConfigFile('/tmp/client_secret.json');
+$client->setAuthConfigFile('/var/www/lmce-admin/operations/cloudServices/includes/client_secret.json');
 $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/lmce-admin/operations/cloudServices/googleOauthCallback.php');
 $client->addScope(Google_Service_Drive::DRIVE_METADATA_READONLY);
 

@@ -7,56 +7,57 @@ Panel{
     id:media_playback_base_panel
     headerTitle: manager.translateMediaType(manager.i_current_mediaType)
 
-    buttonContent:[
-
-        StyledButton{
-            id:resend
-             height:Style.appNavigation_panelHeight
-
-            buttonText: qsTr("Resend AV", "Resend AV Commands")
-            onActivated: manager.currentScreen="Screen_38.qml"
-        },
-
-        StyledButton{
-            id:power_btn
-            height:Style.appNavigation_panelHeight
-            buttonText: qsTr("Power Off", "Turn off Device")
-            onConfirm:{
-                manager.exitMediaMenu()
-                manager.stopMedia()
-            }
-        },
-
-        StyledButton{
-            id:options
-            height:Style.appNavigation_panelHeight
-            buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
-            onActivated: {
-                if(contentItem.state==="options"){
-                    contentItem.resetState()
-                } else {
-                    contentItem.state="options"
+        Component{
+            id:broadcastBtns
+            Row{
+                width: children.length*Style.appButtonWidth
+                height:parent.height
+                StyledButton{
+                    id:resend
+                     height:Style.appNavigation_panelHeight
+                    buttonText: qsTr("Resend AV", "Resend AV Commands")
+                    onActivated: manager.currentScreen="Screen_38.qml"
                 }
-            }
-        },
 
-        StyledButton{
-            id:btns
+                StyledButton{
+                    id:power_btn
+                    height:Style.appNavigation_panelHeight
+                    buttonText: qsTr("Power Off", "Turn off Device")
+                    onConfirm:{
+                        manager.exitMediaMenu()
+                        manager.stopMedia()
+                    }
+                }
 
-            height:Style.appNavigation_panelHeight
-            buttonText: qsTr("Buttons", "Additional Tv Buttons")
-            onActivated: {
-                if(contentItem.state=="buttongrid"){
-                    contentItem.resetState()
-                }else {
-                    contentItem.state="buttongrid"
+                StyledButton{
+                    id:options
+                    height:Style.appNavigation_panelHeight
+                    buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
+                    onActivated: {
+                        if(contentItem.state==="options"){
+                            contentItem.resetState()
+                        } else {
+                            contentItem.state="options"
+                        }
+                    }
+                }
+
+                StyledButton{
+                    id:btns
+
+                    height:Style.appNavigation_panelHeight
+                    buttonText: qsTr("Buttons", "Additional Tv Buttons")
+                    onActivated: {
+                        if(contentItem.state=="buttongrid"){
+                            contentItem.resetState()
+                        }else {
+                            contentItem.state="buttongrid"
+                        }
+                    }
                 }
             }
         }
 
-
-
-    ]
 
     content: Item{
         anchors.fill: parent
@@ -101,6 +102,7 @@ Panel{
             manager.setBoundStatus(true)
             forceActiveFocus()
             resetState()
+            buttonControls = broadcastBtns
         }
         Connections{
             target: manager

@@ -6,7 +6,7 @@ error_reporting(-1);
 
 function initAuth($mediadbADO, $dbADO, $output){
 
-	$client_id="252010262386-d8djlkh01ag0v0r514jf1lgcflpodb1c.apps.googleusercontent.com";
+$client_id="252010262386-d8djlkh01ag0v0r514jf1lgcflpodb1c.apps.googleusercontent.com";
 $client_secret="ibgv0ECx-N5bK_Abj4cXR1rj";
 $driveScope="https://www.googleapis.com/auth/drive%20https://www.googleapis.com/auth/drive.metadata";
 $photosScope="%20https://picasaweb.google.com/data/";
