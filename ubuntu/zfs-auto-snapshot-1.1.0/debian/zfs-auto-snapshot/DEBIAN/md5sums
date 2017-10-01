@@ -1,0 +1,4 @@
+622afc0ed33ac7c7ce8f82492546084c  sbin/zfs-auto-snapshot
+724f72d03b56ef4d69dc8844611d18f0  share/man/man8/zfs-auto-snapshot.8
+f2bb04e533a6c5cfb8f75aa761605034  usr/share/doc/zfs-auto-snapshot/changelog.Debian.gz
+4ae0f08311ce93bb06bfaacaedbcc359  usr/share/doc/zfs-auto-snapshot/copyright

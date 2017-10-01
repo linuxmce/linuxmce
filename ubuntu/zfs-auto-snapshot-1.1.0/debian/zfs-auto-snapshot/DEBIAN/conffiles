@@ -1,0 +1,5 @@
+/etc/cron.monthly/zfs-auto-snapshot
+/etc/cron.daily/zfs-auto-snapshot
+/etc/cron.hourly/zfs-auto-snapshot
+/etc/cron.weekly/zfs-auto-snapshot
+/etc/cron.d/zfs-auto-snapshot

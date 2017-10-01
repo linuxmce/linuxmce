@@ -39,6 +39,8 @@ sources += HTTPPicture.cpp \
         IdentifyDisc.cpp \
 	WMMCDI.cpp \
 	IdentifierBase.cpp \
+	IdentifierGenericCD.cpp \
+	IdentifierGenericDVD.cpp \
 	IdentifierDVDBase.cpp \
 	IdentifierDVDMDR.cpp \
 	IdentifierDVDXML.cpp \
