@@ -10,6 +10,11 @@ TPL_GENERIC_INTERNAL_DRIVE=1790
 TPL_RAID_0=1854
 TPL_RAID_1=1851
 TPL_RAID_5=1849
+TPL_ZFS_POOL=2351
+TPL_ZFS_MIRROR=2352
+TPL_ZFS_RAIDZ1=2353
+TPL_ZFS_RAIDZ2=2354
+TPL_ZFS_RAIDZ3=2355
 
 ## Set some variables needed for exporting nfs
 if [[ -f /etc/diskless.conf ]] ;then
@@ -48,7 +53,7 @@ done
 unset IFS
 
 ## Lookup our internal storage devices in the db
-Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate IN ($TPL_GENERIC_INTERNAL_DRIVE,$TPL_RAID_0,$TPL_RAID_1,$TPL_RAID_5) AND FK_Device_ControlledVia=$PK_Device"
+Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate IN ($TPL_GENERIC_INTERNAL_DRIVE,$TPL_RAID_0,$TPL_RAID_1,$TPL_RAID_5,$TPL_ZFS_POOL,$TPL_ZFS_MIRROR,$TPL_ZFS_RAIDZ1,$TPL_ZFS_RAIDZ2,$TPL_ZFS_RAIDZ3) AND FK_Device_ControlledVia=$PK_Device"
 InternalOwnStorageDevices=$(RunSQL "$Q")
 
 for Device in $InternalOwnStorageDevices; do

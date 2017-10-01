@@ -2523,7 +2523,14 @@ void Media_Plugin::StartCaptureCard(MediaStream *pMediaStream)
 	// We check this later.
 
 	// Find the media player to play this capture card
+	// We really need to do this by category, and check device data, instead of having specific templates. -TSCHAK
 	DeviceData_Router *pDevice_MediaPlayer = (DeviceData_Router *) ((DeviceData_Router *) pMediaStream->m_pMediaDevice_Source->m_pDevice_CaptureCard)->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_Xine_Player_CONST);
+
+	if (!pDevice_MediaPlayer)
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"StartCaptureCard(): could not find a Xine player, looking for a VLC Player.");
+	    pDevice_MediaPlayer = (DeviceData_Router *) ((DeviceData_Router *) pMediaStream->m_pMediaDevice_Source->m_pDevice_CaptureCard)->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_VLC_Player_CONST);
+	  }
 
 	// Find the device
 	string sDevice = pMediaStream->m_pMediaDevice_Source->m_pDevice_CaptureCard->m_mapParameters_Find(DEVICEDATA_Block_Device_CONST);

@@ -51,6 +51,9 @@ bool MDRDVDParser::parse()
   string sDVDCoverURL=doc.child("METADATA").child("MDR-DVD").child_value("largeCoverParams");
   sDVDCoverURL=string(DVD_COVER_URL_PREFIX) + "/" + sDVDCoverURL;
   cout << "Added DVD Cover URL: " << sDVDCoverURL << endl;
+
+  if (sDVDTitle.empty())
+    return false;
   
   m_pReply=new MDRDVDReply(sDVDTitle,
 			   sStudio,

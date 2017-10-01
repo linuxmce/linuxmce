@@ -1,0 +1,86 @@
+.TH mountall 8 2013-12-23 upstart
+.\"
+.SH NAME
+mountall \- Mount filesystems during boot
+.\"
+.SH SYNOPSIS
+.B mountall
+.RI [ OPTIONS ]...
+.\"
+.SH DESCRIPTION
+.B mountall
+is an Upstart
+.BR init (8)
+helper that mounts filesystems.
+
+It reads
+.BR fstab (5)
+and supplements the entries found with a set of built-in entries
+(generally found in
+.IR /lib/init/fstab ")"
+and calls
+.BR fsck (8),
+.BR mount (8)
+and
+.BR swapon (8)
+in the correct order to mount filesystems once the underlying devices
+have been created by
+.BR udevd (8).
+.\"
+.SH OPTIONS
+.TP
+.BR \-\-daemon
+Detach and run in the background.
+.TP
+.BR \-\-force\-fsck
+Force check of all filesystems.
+.TP
+.BR \-\-fsck\-fix
+Attempt to fix all fsck errors.
+.TP
+.BR \-\-no\-events
+Do not emit events after mounting filesystems.
+.TP
+.BR \-\-dev\-wait\-time=\fIvalue\fP " (in seconds)"
+In case of bootwait or timeout: specify the time to wait for device to be
+detected.
+The default is 30 seconds.
+Legal values are between 1 and 2147483647 seconds.
+.TP
+.BR \-q ", " \-\-quiet
+Reduce output to errors only.
+.TP
+.BR \-v ", " \-\-verbose
+Increase output to include informational messages.
+.TP
+.BR \-\-help
+Display this help and exit.
+.TP
+.BR \-\-version
+Output version information and exit.
+.\"
+.SH AUTHOR
+Written by Scott James Remnant
+.RB < scott@netsplit.com >
+.\"
+.SH BUGS
+Report bugs at 
+.RB < https://launchpad.net/ubuntu/+source/mountall/+bugs >
+.\"
+.SH COPYRIGHT
+Copyright \(co 2009-2013 Canonical Ltd.
+.PP
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.\"
+.SH SEE ALSO
+
+.BR all\-swaps (7),
+.BR filesystem (7),
+.BR init (8),
+.BR local-filesystems (7),
+.BR mounted (7),
+.BR mounting (7),
+.BR remote-filesystems (7),
+.BR virtual-filesystems (7).
+

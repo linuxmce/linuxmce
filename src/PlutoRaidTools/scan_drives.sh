@@ -53,7 +53,7 @@ availPart=$(substractParts "$availPart" "$mountedPart")
 ## Remove partitions if they're alias is mounted
 mounted_aliases=$(mount | awk '/dev\/disk\// {print $1}' | sed 's/\/dev\///g')
 for part in $availPart ;do
-	for part_alias in $(udevinfo --query=symlink --name="/dev/$part") ;do
+	for part_alias in $(udevadm info --query=symlink --name="/dev/$part") ;do
 		for alias_mounted in $mounted_aliases ;do
 			if [[ "$part_alias" == "$alias_mounted" ]] ;then
 				availPart=$(substractParts "$availPart" "$part")

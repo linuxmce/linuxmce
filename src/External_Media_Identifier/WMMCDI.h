@@ -16,7 +16,8 @@ class WMMCDI
 {
   string m_sPath;
   string m_sWMMCDIId; 
-  
+  int m_iNumtracks;
+
  public:
   WMMCDI(string sPath);
   virtual ~WMMCDI();
@@ -24,6 +25,8 @@ class WMMCDI
   bool calculate();
 
   string WMMCDIId_get() {return m_sWMMCDIId;}
+  int WMMCDINumtracks_get() {return m_iNumtracks;}
+
 };
 
 #endif
