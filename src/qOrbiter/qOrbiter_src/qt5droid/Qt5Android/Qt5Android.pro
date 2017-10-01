@@ -380,13 +380,11 @@ OTHER_FILES += \
     android/src/org/kde/necessitas/origo/QtApplication.java
 
     ANDROID_EXTRA_LIBS += $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libAudioVisual.so #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
-    ANDROID_EXTRA_LIBS += /home/mb/project/openssl/openssl-master/libssl.so
-    ANDROID_EXTRA_LIBS += /home/mb/project/openssl/openssl-master/libcrypto.so
+#    ANDROID_EXTRA_LIBS += /home/mb/project/openssl/openssl-master/libssl.a
+#    ANDROID_EXTRA_LIBS += /home/mb/project/openssl/openssl-master/libcrypto.a
 
-    INCLUDEPATH += /home/mb/project/openssl/openssl-master/include/
-    LIBS += /home/mb/project/openssl/openssl-master/libssl.so
-    LIBS += /home/mb/project/openssl/openssl-master/libcrypto.so
+unix|win32: LIBS += $$PWD/../../../../../../../../../../../../../home/mb/project/openssl/openssl-master/libssl.a
+unix|win32: LIBS += $$PWD/../../../../../../../../../../../../../home/mb/project/openssl/openssl-master/libcrypto.a
 
-
-
-
+INCLUDEPATH += $$PWD/../../../../../../../../../../../../../home/mb/project/openssl/openssl-master/include
+DEPENDPATH += $$PWD/../../../../../../../../../../../../../home/mb/project/openssl/openssl-master/include

@@ -119,8 +119,8 @@ android-g++{
     QMLDIR_TARGET=../../../platforms/Android/androidComponents/DceScreenSaver/qmldir
     }
     INCLUDEPATH += /home/mb/project/openssl/openssl-master/include/
-    LIBS += /home/mb/project/openssl/openssl-master/libssl.so
-    LIBS += /home/mb/project/openssl/openssl-master/libcrypto.so
+    LIBS += /home/mb/project/openssl/openssl-master/libssl.a
+    LIBS += /home/mb/project/openssl/openssl-master/libcrypto.a
 }
 
 linux-g++{
