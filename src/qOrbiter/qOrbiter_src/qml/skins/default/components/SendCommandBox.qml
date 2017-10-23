@@ -4,8 +4,8 @@ import "../."
 GenericListModel{
     id:sendCommandBox
     extended:false
-    height: Style.scaleY(75)
-    width: Style.scaleX(25)
+    height: appStyle.scaleY(75)
+    width: appStyle.scaleX(25)
     focus:true
     clip:true
     model:availbleCommands
@@ -14,7 +14,7 @@ GenericListModel{
     property int trackedInt:0
     delegate: StyledButton{
         width: parent.width
-        height: Style.listViewItemHeight
+        height: appStyle.listViewItemHeight
         buttonText: command_name
         //        Loader {
         //            id:control_comp

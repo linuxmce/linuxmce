@@ -3,8 +3,8 @@ import QtQuick 1.1
 Rectangle{
 
     color: "transparent"
-    height: skinStyle.stdbuttonw
-    width: skinStyle.stdbuttonw
+    height: skinstyle.stdbuttonw
+    width: skinstyle.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.fontSize
@@ -18,11 +18,11 @@ Rectangle{
 
     Rectangle {
         id:buttonBase
-        color:skinStyle.button_system_color
+        color:skinstyle.button_system_color
         height: parent.height
         width: parent.width
         border.width: 2
-        border.color: skinStyle.highlight1
+        border.color: skinstyle.highlight1
         radius: 5
 
     Image {
@@ -58,13 +58,13 @@ Rectangle{
             anchors.fill: buttonLabel
             hoverEnabled: true
             onEntered: {
-                buttonBase.color = skinStyle.button_system_color_hover
-                buttonLabel.color = skinStyle.lighttext
+                buttonBase.color = skinstyle.button_system_color_hover
+                buttonLabel.color = skinstyle.lighttext
                 buttonLabel.font.capitalization = Font.AllUppercase
             }
 
             onExited: {
-                buttonBase.color = skinStyle.button_system_color
+                buttonBase.color = skinstyle.button_system_color
                 buttonLabel.font.capitalization = Font.Normal
                 buttonLabel.color = "black"
             }

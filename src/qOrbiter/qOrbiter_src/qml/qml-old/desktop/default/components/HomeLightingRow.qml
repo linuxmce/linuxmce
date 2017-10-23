@@ -14,8 +14,8 @@ Item{
 
         Rectangle {
             id: lightingfloorplan
-            height: skinStyle.stdbuttonh
-            width: skinStyle.stdbuttonw
+            height: skinstyle.stdbuttonh
+            width: skinstyle.stdbuttonw
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             color:"transparent"
@@ -43,15 +43,15 @@ Item{
         Flickable{
             height: scaleY(16)
             width: scaleX(79)
-            contentHeight: skinStyle.stdbuttonh
-            contentWidth: ((skinStyle.stdbuttonw + 5) * (lightingScenarios.count + 1)) - 5
+            contentHeight: skinstyle.stdbuttonh
+            contentWidth: ((skinstyle.stdbuttonw + 5) * (lightingScenarios.count + 1)) - 5
             clip: false
             flickableDirection: "HorizontalFlick"
 
             ListView{
                 id: lightingScenarios
                 width: stage.width
-                height: scaleY(skinStyle.stdbuttonh)
+                height: scaleY(skinstyle.stdbuttonh)
                 model: currentRoomLights
                 spacing: 5
                 orientation:ListView.Horizontal

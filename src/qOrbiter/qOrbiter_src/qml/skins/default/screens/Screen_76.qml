@@ -9,8 +9,8 @@ StyledScreen {
     Panel{
         headerTitle: qsTr("Power and Reboot Options")
         Flow{
-            width: Style.appButtonWidth *2+10
-            height: Style.appButtonHeight *2+10
+            width: appStyle.appButtonWidth *2+10
+            height: appStyle.appButtonHeight *2+10
             spacing: 4
             anchors.centerIn: parent
 

@@ -48,7 +48,7 @@ Item {
         id: pos_label
         anchors.top: fileviewscreen.top
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
-        color:skinStyle.darkhighlight
+        color:skinstyle.darkhighlight
         width: gridView.width
         height: scaleY(5)
         opacity: .25
@@ -245,8 +245,8 @@ Item {
 
     //        ButtonSq
     //        {
-    //            height: scaleY(skinStyle.iconHeight)
-    //            width: scaleX(skinStyle.iconWidth)
+    //            height: scaleY(skinstyle.iconHeight)
+    //            width: scaleX(skinstyle.iconWidth)
     //            buttontext: "Go Back"
     //            buttontextbold: true
     //            MouseArea

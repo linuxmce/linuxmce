@@ -28,7 +28,7 @@ Column{
         smooth: true
         fontSize: scaleY(4)
         visible:  dcenowplaying.episode =="" ? false: true
-        color:skinStyle.accentcolor
+        color:skinstyle.accentcolor
     }
     //    StyledText {
     //        id: starring

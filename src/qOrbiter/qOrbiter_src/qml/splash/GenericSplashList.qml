@@ -21,20 +21,20 @@ Item{
             right:parent.right
             top:parent.top
         }
-        height: Style.appNavigation_panelHeight
-        color:enabled ? Style.appcolor_background_medium :" grey"
-        opacity: Style.appList_opacity
+        height: style.appNavigation_panelHeight
+        color:enabled ? style.appcolor_background_medium :" grey"
+        opacity: style.appList_opacity
 
         Behavior on color {
             ColorAnimation {
-                duration: Style.transition_animationTime
+                duration: style.transition_animationTime
                 easing.type: Easing.InOutCubic
             }
         }
 
         Behavior on opacity {
             PropertyAnimation {
-                duration: Style.transition_animationTime
+                duration: style.transition_animationTime
                 easing.type: Easing.InOutCubic
             }
         }
@@ -46,7 +46,7 @@ Item{
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text:genericListContainer.label
-        font.pointSize: Style.appFontSize_title
+        font.pointSize: style.appFontSize_title
         color:"white"
     }
 

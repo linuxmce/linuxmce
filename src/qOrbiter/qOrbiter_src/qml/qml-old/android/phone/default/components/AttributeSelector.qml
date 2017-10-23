@@ -26,7 +26,7 @@ Item {
         ButtonSq{
             buttontext: "Play All"
             buttontextfontsize: scaleY(5)
-            height: appStyle.stdbuttonh
+            height: appstyle.stdbuttonh
             width: parent.width
             buttontextbold: false
             imgSource: ""
@@ -37,7 +37,7 @@ Item {
 
         StyledButton{
             buttonText: "Attribute Sort"
-            height: appStyle.stdbuttonh
+            height: appstyle.stdbuttonh
             width: parent.width
             onActivated:{filterTarget.currentModel = attribfilter; attributeSelector.state="hidden"}
         }

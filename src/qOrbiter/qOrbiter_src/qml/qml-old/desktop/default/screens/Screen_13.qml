@@ -77,7 +77,7 @@ Stage{
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        delegatetext.color = "white"; secrect.color = skinStyle.darkhighlight
+                        delegatetext.color = "white"; secrect.color = skinstyle.darkhighlight
                     }
                     onExited: {
                         delegatetext.color = "black"; secrect.color = "whitesmoke"
@@ -103,7 +103,7 @@ Stage{
     //main layout
     Rectangle{
         id:container
-        color: skinStyle.lightHighlight
+        color: skinstyle.lightHighlight
         anchors.centerIn: parent
         height: childrenRect.height + scaleY(1)
         width: contentrow.width + scaleX(1)

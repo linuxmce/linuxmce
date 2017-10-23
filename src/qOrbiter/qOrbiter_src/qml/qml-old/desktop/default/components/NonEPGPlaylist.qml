@@ -158,9 +158,9 @@ Rectangle {
             spacing: scaleX(3)
             Rectangle{
                 id:save_playlist
-                height: skinStyle.avoptionbuttonh
-                width: skinStyle.avoptionbuttonw
-                color: skinStyle.darkhighlight
+                height: skinstyle.avoptionbuttonh
+                width: skinstyle.avoptionbuttonw
+                color: skinstyle.darkhighlight
                 TextInput {
                     id: save_as
                     text: qsTr("Edit name")
@@ -173,9 +173,9 @@ Rectangle {
 
             Rectangle{
                 id:public_option
-                height: skinStyle.avoptionbuttonh
-                width: skinStyle.avoptionbuttonw
-                color: skinStyle.darkhighlight
+                height: skinstyle.avoptionbuttonh
+                width: skinstyle.avoptionbuttonw
+                color: skinstyle.darkhighlight
                 Text {
                     id: public_text
                     text: qsTr("Public")
@@ -188,9 +188,9 @@ Rectangle {
             }
             Rectangle{
                 id:private_option
-                height: skinStyle.avoptionbuttonh
-                width: skinStyle.avoptionbuttonw
-                color: skinStyle.darkhighlight
+                height: skinstyle.avoptionbuttonh
+                width: skinstyle.avoptionbuttonw
+                color: skinstyle.darkhighlight
                 Text {
                     id: private_text
                     text: qsTr("Private")

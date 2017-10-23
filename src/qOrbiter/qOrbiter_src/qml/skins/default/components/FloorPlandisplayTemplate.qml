@@ -132,7 +132,7 @@ Item {
         id:phil
         anchors.fill: parent
         border.color: "black"
-        border.width: Style.scaleX(1) *.25
+        border.width: appStyle.scaleX(1) *.25
         radius: 5
         anchors.centerIn: parent
         color: backgroundColor

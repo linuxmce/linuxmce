@@ -121,7 +121,7 @@ GenericListModel{
 
     model:alphabetlist
     delegate: StyledButton{
-        height: Style.appButtonHeight
+        height: appStyle.appButtonHeight
         width: parent.width
         buttonText: name
         onActivated: alphaSelected(name)

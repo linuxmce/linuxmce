@@ -15,7 +15,7 @@ Item{
         samples:24
         spread:ms.pressed ? 0.1 :0.0
         color:"black"
-        //color:Style.apptext_color_active
+        //color:appStyle.apptext_color_active
         source:back_img
     }
 

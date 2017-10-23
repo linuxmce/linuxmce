@@ -44,7 +44,7 @@ StyledScreen {
         }
         Rectangle{
             anchors.fill: parent
-            color: appStyle.primaryDarkColor
+            color: appstyle.primaryDarkColor
         }
         GradientFiller{
             fillColor: "black"
@@ -239,13 +239,13 @@ StyledScreen {
 
         Behavior on width {
             PropertyAnimation{
-                duration: skinStyle.globalAnimationSpeed
+                duration: skinstyle.globalAnimationSpeed
             }
         }
 
         Behavior on scale{
             PropertyAnimation{
-                duration: skinStyle.globalAnimationSpeed
+                duration: skinstyle.globalAnimationSpeed
             }
         }
     }
@@ -269,7 +269,7 @@ StyledScreen {
 
         Behavior on width {
             PropertyAnimation{
-                duration: skinStyle.globalAnimationSpeed
+                duration: skinstyle.globalAnimationSpeed
             }
         }
         Keys.onEscapePressed: {
@@ -407,7 +407,7 @@ StyledScreen {
 
                 Rectangle{
                     anchors.fill: parent
-                    color: filterView.currentIndex === index  ? skinStyle.lightHighlightColor : skinStyle.mainColor
+                    color: filterView.currentIndex === index  ? skinstyle.lightHighlightColor : skinstyle.mainColor
                     opacity:.85
                 }
                 StyledText{

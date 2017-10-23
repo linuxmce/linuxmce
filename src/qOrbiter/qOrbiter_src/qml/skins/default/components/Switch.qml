@@ -3,8 +3,8 @@ import org.linuxmce.settings 1.0
 import "../"
 Item{
     id:sw_root
-    width: manager.isProfile ? Style.scaleX(24) :  Style.scaleX(12)
-    height: Style.scaleY(6)
+    width: manager.isProfile ? appStyle.scaleX(24) :  appStyle.scaleX(12)
+    height: appStyle.scaleY(6)
     property bool enabled:false
     property string switchLabel:"ipsum"
     signal triggered()
@@ -29,8 +29,8 @@ Item{
         radius: width
         anchors.verticalCenter: parent.verticalCenter
         anchors.left:outerRect.left
-        anchors.leftMargin:Style.scaleX(.15)
-        anchors.rightMargin:Style.scaleX(.15)
+        anchors.leftMargin:appStyle.scaleX(.15)
+        anchors.rightMargin:appStyle.scaleX(.15)
     }
 
     StyledText{
@@ -41,7 +41,7 @@ Item{
         text:sw_root.state==="on" ? qsTr("Enabled") : qsTr("Disabled")
         color:sw_root.state==="on" ? "green" : "red"
        anchors.margins: 5
-       fontSize: Style.appFontSize_description
+       fontSize: appStyle.appFontSize_description
     }
 
     MouseArea{
@@ -60,7 +60,7 @@ Item{
             }
             PropertyChanges {
                 target: inner_rect
-                color:Style.appbutton_confirm_color
+                color:appStyle.appbutton_confirm_color
             }
             AnchorChanges{
                 target: label
@@ -80,7 +80,7 @@ Item{
             }
             PropertyChanges {
                 target: inner_rect
-                color:Style.appbutton_disabled_color
+                color:appStyle.appbutton_disabled_color
             }
             AnchorChanges{
                 target: label
@@ -96,9 +96,9 @@ Item{
         Transition {
             from: "*"
             to: "*"
-            ColorAnimation {  duration: Style.transitionFadeTime }
+            ColorAnimation {  duration: appStyle.transitionFadeTime }
             AnchorAnimation{
-                duration: Style.transition_animationTime
+                duration: appStyle.transition_animationTime
                 easing.type: Easing.InCubic
             }
         }

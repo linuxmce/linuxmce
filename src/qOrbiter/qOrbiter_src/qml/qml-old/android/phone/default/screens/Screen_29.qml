@@ -26,7 +26,7 @@ Panel{
             }
             anchors.margins: 2
             Rectangle{
-                color:appStyle.darkhighlight
+                color:appstyle.darkhighlight
                 border.color: "black"
                 border.width: 2
                 anchors.fill: parent

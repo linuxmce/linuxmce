@@ -162,13 +162,13 @@ Item{
         }
         Behavior on width {
             PropertyAnimation{
-                duration: appStyle.globalAnimationSpeed
+                duration: appstyle.globalAnimationSpeed
             }
         }
 
         Behavior on scale{
             PropertyAnimation{
-                duration: appStyle.globalAnimationSpeed
+                duration: appstyle.globalAnimationSpeed
             }
         }
     }

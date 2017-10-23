@@ -21,7 +21,7 @@ Item{
             bottom:parent.bottom
             left:parent.left
             right:parent.right
-            margins: appStyle.margins
+            margins: appstyle.margins
         }
         spacing: 5
         StyledText {
@@ -80,8 +80,8 @@ Item{
             to: "*"
 
             AnchorAnimation{
-                duration: appStyle.globalAnimationSpeed
-                easing.type: appStyle.globalAnimationEasing
+                duration: appstyle.globalAnimationSpeed
+                easing.type: appstyle.globalAnimationEasing
 
             }
         }

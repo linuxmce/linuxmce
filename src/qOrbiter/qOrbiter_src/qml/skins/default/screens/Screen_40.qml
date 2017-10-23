@@ -53,7 +53,7 @@ StyledScreen{
                         left:parent.left
                     }
                     height: parent.height *.25
-                    width: Style.appButtonWidth/2
+                    width: appStyle.appButtonWidth/2
 
                     StyledButton{
                         width: parent.width
@@ -132,7 +132,7 @@ StyledScreen{
                     right:parent.right
                 }
                 height: parent.height *.25
-                width: Style.appButtonWidth/2
+                width: appStyle.appButtonWidth/2
                 StyledButton{
                     width: parent.width
                     height: parent.height/3

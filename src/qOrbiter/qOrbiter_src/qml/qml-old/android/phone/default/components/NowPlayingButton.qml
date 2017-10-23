@@ -11,7 +11,7 @@ Item {
     height: manager.isProfile ? scaleY(8) : scaleY(12)
     visible: dcenowplaying.b_mediaPlaying ? true : false
     clip:true
-    property real textSize:appStyle.buttonLabelText
+    property real textSize:appstyle.buttonLabelText
     property variant propertyModel:{
         "title":dcenowplaying.mediatitle,
     }

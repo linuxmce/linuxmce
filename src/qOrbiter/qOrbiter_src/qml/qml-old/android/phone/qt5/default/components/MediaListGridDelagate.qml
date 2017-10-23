@@ -24,7 +24,7 @@ Item
             anchors.fill: mainItem
             hoverEnabled: true
             onEntered: {
-                mainItem.color = appStyle.darkhighlight
+                mainItem.color = appstyle.darkhighlight
                 mainItem.scale = 1.25
                 mainItem.z = 10
             }

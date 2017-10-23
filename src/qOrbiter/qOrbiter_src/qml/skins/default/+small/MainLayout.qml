@@ -89,8 +89,8 @@ Item {
         }
         Rectangle{
             anchors.fill: parent
-            color:Style.appbutton_confirm_color
-            opacity: Style.appPanel_opacity
+            color:appStyle.appbutton_confirm_color
+            opacity: appStyle.appPanel_opacity
         }
 
         MouseArea{
@@ -98,7 +98,7 @@ Item {
             onClicked:manager.setCurrentScreen(dcenowplaying.qs_screen)
         }
 
-        height: dcenowplaying.b_mediaPlaying && manager.currentScreen=="Screen_1.qml" ? Style.appMenuPanel_height : 0
+        height: dcenowplaying.b_mediaPlaying && manager.currentScreen=="Screen_1.qml" ? appStyle.appMenuPanel_height : 0
 
         StyledText{
             id:generaltitle
@@ -106,7 +106,7 @@ Item {
             height:parent.height
             width:parent.width /2
             anchors.left: parent.left
-            opacity: mediaNotification.height == Style.appMenuPanel_height ? 1 : 0
+            opacity: mediaNotification.height == appStyle.appMenuPanel_height ? 1 : 0
             Behavior on opacity {
                 PropertyAnimation{
                     duration: 350
@@ -116,7 +116,7 @@ Item {
         StyledText {
             id: updating_time
             text:dcenowplaying.b_mediaPlaying ? dceTimecode.qsCurrentTime + " of " + dceTimecode.qsTotalTime :""
-            fontSize:Style.appFontSize_header
+            fontSize:appStyle.appFontSize_header
             color: "white"
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
@@ -133,7 +133,7 @@ Item {
             contentWidth:row.width
             Row{
                 id:row
-                width: children.length*Style.appButtonWidth
+                width: children.length*appStyle.appButtonWidth
                 height:footer.height
                 StyledButton{
                     buttonText: roomList.currentRoom

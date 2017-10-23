@@ -17,7 +17,7 @@ Item{
         text: qsTr("Filename: ")+filedetailsclass.filename
         font.pixelSize: 14
         font.bold: true
-        color: skinStyle.lighttext
+        color: skinstyle.lighttext
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
