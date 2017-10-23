@@ -29,12 +29,12 @@ StyledScreen {
                 dataGrid:86
                 dataGridLabel:"Discs"
                 delegate: Item{
-                    height: Style.listViewItemHeight
+                    height: appStyle.listViewItemHeight
                     width: parent.width
                     Rectangle{
                         anchors.fill: parent
-                        color:Style.appcolor_background_list
-                        opacity: Style.appList_opacity
+                        color:appStyle.appcolor_background_list
+                        opacity: appStyle.appList_opacity
                     }
 
                     Row{

@@ -23,8 +23,8 @@ GenericPopup{
         Image {
             id: filedetailsimage
             property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
-            width:profile ? Style.scaleX(25) : Style.scaleX(45)
-            height:profile ? Style.scaleY(65) : Style.scaleY(58)
+            width:profile ? appStyle.scaleX(25) : appStyle.scaleX(45)
+            height:profile ? appStyle.scaleY(65) : appStyle.scaleY(58)
             source:filedetailsclass.screenshot !=="" ? "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot: ""
             smooth: true
             asynchronous: true
@@ -43,7 +43,7 @@ GenericPopup{
             id:metadata
             visible: false
             spacing: 5
-            width:  parent.width /2 //Style.listViewWidth_large
+            width:  parent.width /2 //appStyle.listViewWidth_large
             height: parent.height
             anchors.right: content_item.right
             Text{
@@ -265,7 +265,7 @@ GenericPopup{
                 right:parent.right
                 bottom:parent.bottom
             }
-            height: Style.appNavigation_panelHeight
+            height: appStyle.appNavigation_panelHeight
 
             LargeStyledButton{
                 buttonText: qsTr("Play", "Play Media Selection")

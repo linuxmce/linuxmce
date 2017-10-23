@@ -25,7 +25,7 @@ Item {
         smooth: true
         width: parent.width
         anchors.centerIn: parent
-        font.pointSize: skinStyle.clockFontSize
+        font.pointSize: skinstyle.clockFontSize
         horizontalAlignment: Text.AlignHCenter
         font.bold: boldClock
     }

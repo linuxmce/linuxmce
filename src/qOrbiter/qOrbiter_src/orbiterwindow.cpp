@@ -122,14 +122,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
             break;
         }
 
-//        QFileSelector sel(winSelector);
-//        qDebug() << sel.allSelectors();
-
-
     } else {
 #ifdef ANDROID
-        // mainView.showFullScreen();
 
+mainView.showMaximized();
 #elif defined(Q_OS_IOS)
         // mainView.showFullScreen();
 #else

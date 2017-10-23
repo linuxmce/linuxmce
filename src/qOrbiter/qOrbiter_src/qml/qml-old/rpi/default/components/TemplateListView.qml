@@ -40,7 +40,7 @@ ListView{
 
         Rectangle{
             anchors.fill: parent
-            color:isCurrent? skinStyle.darkHighlightColor : skinStyle.mainColor
+            color:isCurrent? skinstyle.darkHighlightColor : skinstyle.mainColor
             opacity: .85
             border.width: isCurrent ? 5 : 2
             radius:5

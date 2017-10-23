@@ -5,7 +5,7 @@ import "../"
 Item {
     id:stbDelegate
     height:parent.height
-    width: Style.appButtonWidth
+    width: appStyle.appButtonWidth
     property bool arrow:false
     property bool rotateUp:false
     property bool triggered:false
@@ -32,14 +32,14 @@ Item {
           target:phil
                 property: "opacity"
                 to:1
-                duration: Style.transition_animationTime
+                duration: appStyle.transition_animationTime
             }
 
             PropertyAnimation {
                 target:phil
                 property:"color"
-                to: Style.appbutton_confirm_color
-                duration: Style.transition_animationTime
+                to: appStyle.appbutton_confirm_color
+                duration: appStyle.transition_animationTime
             }
         }
 
@@ -48,15 +48,15 @@ Item {
             PropertyAnimation{
                 target:phil
                 property: "opacity"
-                to:Style.appList_opacity
-                duration: Style.transition_animationTime
+                to:appStyle.appList_opacity
+                duration: appStyle.transition_animationTime
             }
 
             PropertyAnimation {
                 target:phil
                 property:"color"
-                to: Style.appcolor_background_list
-                duration: Style.transition_animationTime
+                to: appStyle.appcolor_background_list
+                duration: appStyle.transition_animationTime
             }
         }
     }
@@ -81,8 +81,8 @@ Item {
     Rectangle{
         id:filler
         anchors.fill: parent
-        color:  Style.appcolor_background_list
-        opacity: Style.appList_opacity
+        color:  appStyle.appcolor_background_list
+        opacity: appStyle.appList_opacity
         radius: buttonRadius
         border.color: "white"
         border.width: stbDelegate.currentSelection ? 2 : 0
@@ -91,7 +91,7 @@ Item {
     StyledText{
         id:rowLabel
         text:buttonText
-        font.pointSize:Style.appFontSize_title
+        font.pointSize:appStyle.appFontSize_title
         anchors.fill: parent
         elide: Text.ElideRight
     }
@@ -100,7 +100,7 @@ Item {
         radius:16
         samples:24
         spread:0.1
-        color:Style.apptext_color_active
+        color:appStyle.apptext_color_active
         source:rowLabel
         visible:stbDelegate.currentSelection
     }
@@ -113,7 +113,7 @@ Item {
             verticalCenter: parent.verticalCenter
             right:parent.right
         }
-        height: Style.scaleY(3)
+        height: appStyle.scaleY(3)
         width: height+5
     }
     MouseArea{

@@ -8,7 +8,7 @@ Panel{
     buttonControls: Row {
         StyledButton{
             buttonText: qsTr("Show List")
-            height: Style.appNavigation_panelHeight
+            height: appStyle.appNavigation_panelHeight
             onActivated:{
                 outerContainer.state="list"
             }
@@ -18,19 +18,19 @@ Panel{
             id:pageView
             model: floorplan_pages
             label: qsTr("Floorplan(s) : %1").arg(modelCount)
-            width: Style.scaleX(25)
-            height: Style.scaleY(45)
+            width: appStyle.scaleX(25)
+            height: appStyle.scaleY(45)
             delegate:Rectangle{
-                height: Style.scaleY(9)
+                height: appStyle.scaleY(9)
                 width:parent.width
-                color: Style.appcolor_background
-                border.color: Style.appcolor_foregroundColor
+                color: appStyle.appcolor_background
+                border.color: appStyle.appcolor_foregroundColor
                 StyledText {
                     id: desc
                     text: m_description
                     width: parent.width
                     height: parent.height
-                    fontSize: Style.fontSize_small
+                    fontSize: appStyle.fontSize_small
                 }
                 MouseArea{
                     anchors.fill: parent
@@ -119,8 +119,8 @@ Panel{
             id:activeStreams
             label:qsTr("Media Streams")
             visible: false
-            width: Style.scaleX(25)
-            height: Style.scaleY(45)
+            width: appStyle.scaleX(25)
+            height: appStyle.scaleY(45)
             dataGrid: -1
             dataGridLabel:"mediaStreams"
             extended: false
@@ -133,8 +133,8 @@ Panel{
                 StyledButton{
                 id:gridBtn
                 buttonText: description
-                textSize: Style.appFontSize_description
-                height: Style.appButtonHeight
+                textSize: appStyle.appFontSize_description
+                height: appStyle.appButtonHeight
                 width: parent.width
 
                 onActivated: {
@@ -160,8 +160,8 @@ Panel{
 
         SendCommandBox {
             id: sendCommandBox
-            width: Style.appButtonWidth
-            height: Style.scaleY(65)
+            width: appStyle.appButtonWidth
+            height: appStyle.scaleY(65)
             Component.onCompleted: parent=fp_panel.headerRow
         }
 
@@ -174,7 +174,7 @@ Panel{
                 right:phoneFloorplanLayout.right
                 top:phoneFloorplanLayout.top
             }
-            height: Style.appNavigation_panelHeight
+            height: appStyle.appNavigation_panelHeight
 
             Row {
                 id: rowButtons
@@ -184,7 +184,7 @@ Panel{
                 StyledButton {
                     id: btOff
                     height: parent.height
-                    width: Style.appButtonWidth/2
+                    width: appStyle.appButtonWidth/2
                     buttonText: "Stop"
                     // call stopMedia with selected EA
                     onActivated: {
@@ -197,7 +197,7 @@ Panel{
                 }
                 StyledButton {
                     id: btRemote
-                    height: Style.appButtonHeight
+                    height: appStyle.appButtonHeight
                     width: 100
                     buttonText: "Remote"
                     // open remote for this EA
@@ -214,11 +214,11 @@ Panel{
                 left:parent.left
                 right:parent.right
             }
-            height: Style.scaleY(8)
+            height: appStyle.scaleY(8)
 
             Rectangle{
                 anchors.fill: parent
-                color: Style.appcolor_background
+                color: appStyle.appcolor_background
             }
             ListView{
                 width: parent.width
@@ -227,7 +227,7 @@ Panel{
                 orientation: ListView.Horizontal
                 model:selections
                 delegate: StyledButton{
-                    width: Style.appButtonWidth
+                    width: appStyle.appButtonWidth
                     height: parent.height
                     buttonText:name
                     onActivated:floorplan_devices.setDeviceSelection(device)

@@ -1,10 +1,11 @@
 import QtQuick 2.2
+import "../."
 import QtGraphicalEffects 1.0
 import "../."
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
 Item{
     id:header
-    height: Style.appNavigation_panelHeight
+    height: appStyle.appNavigation_panelHeight
     property bool active:false
     state:uiOn ? "open" : "closed"
     focus:true
@@ -28,15 +29,15 @@ Item{
     Rectangle{
         id:bg_fill
         anchors.fill: parent
-        color:manager.connectedState ?  Style.appcolor_background_light : "red"
-        opacity:manager.connectedState ? Style.appHeader_opacity : .55
+        color:manager.connectedState ?  appStyle.appcolor_background_light : "red"
+        opacity:manager.connectedState ? appStyle.appHeader_opacity : .55
     }
 
     Glow{
         anchors.fill:bg_fill
         radius:8
         samples:16
-        color:Style.apptext_color_active
+        color:appStyle.apptext_color_active
         source:bg_fill
         visible:header.active
     }
@@ -66,7 +67,7 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: Style.transition_accentTime
+                duration: appStyle.transition_accentTime
                 easing.type: Easing.OutExpo
             }
         }

@@ -98,8 +98,8 @@ Item {
                 delegate:Rectangle{
                     height: scaleY(9)
                     width: scaleX(16)
-                    color: appStyle.accentcolor
-                    border.color: appStyle.darkhighlight
+                    color: appstyle.accentcolor
+                    border.color: appstyle.darkhighlight
                     Text {
                         id: desc
                         text: m_description

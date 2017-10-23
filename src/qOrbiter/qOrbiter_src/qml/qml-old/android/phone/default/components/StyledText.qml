@@ -11,7 +11,7 @@ Text {
     property double headerSize:scaleY(6)
     property double paraSize:manager.isProfile ? scaleY(4) : scaleY(6)
     property double regSize:manager.isProfile ? scaleY(3) : scaleY(5)
-    color:appStyle.tile_color
+    color:appstyle.tile_color
     id:labelelement
     text: textLabel
     font.bold: isBold

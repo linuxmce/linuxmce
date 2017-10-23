@@ -4,7 +4,7 @@ import "../components"
 Item {
     id: mediaSquare
 
-    height: manager.isProfile ? Style.scaleY(15) : Style.scaleY(25)
+    height: manager.isProfile ? appStyle.scaleY(15) : appStyle.scaleY(25)
     width:height
     Rectangle{
         opacity: .25

@@ -30,7 +30,7 @@ Item {
     Rectangle{
         anchors.fill: parent
         color:"black"
-        opacity: Style.appPanel_opacity
+        opacity: appStyle.appPanel_opacity
     }
     MouseArea{
         anchors.fill: parent
@@ -41,9 +41,9 @@ Item {
     }
     Rectangle{
         id:header
-        height: Style.appNavigation_panelHeight
+        height: appStyle.appNavigation_panelHeight
         width: parent.width
-        color:Style.appcolor_navigationBackgroundColor
+        color:appStyle.appcolor_navigationBackgroundColor
     }
     StyledText{
         id:label

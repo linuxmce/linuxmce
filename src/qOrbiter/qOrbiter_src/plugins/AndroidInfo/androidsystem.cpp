@@ -46,7 +46,7 @@
 
 #include "androidsystem.h"
 #include <QDebug>
-#include <QApplication>
+#include <QGuiApplication>
 #include <QUrl>
 
 static JavaVM *m_pvm = 0;

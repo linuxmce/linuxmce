@@ -40,7 +40,7 @@ Rectangle{
             smooth: true
             font.pointSize: scaleY(3.5)
             visible:  dcenowplaying.tvProgram =="" ? false: true
-            color:skinStyle.accentcolor
+            color:skinstyle.accentcolor
         }
         StyledText {
             id: starring
@@ -86,7 +86,7 @@ Rectangle{
             font.bold: true
             fontSize: scaleY(2)
             visible:  dcenowplaying.releasedate =="" ? false: true
-            color:skinStyle.accentColor
+            color:skinstyle.accentColor
         }
 
         StyledText {

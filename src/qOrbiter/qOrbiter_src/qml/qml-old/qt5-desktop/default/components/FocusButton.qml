@@ -49,7 +49,7 @@ Item{
     }
     Rectangle{
         anchors.fill: parent
-        gradient: appStyle.buttonGradient
+        gradient: appstyle.buttonGradient
         radius:5
     }
     StyledText{

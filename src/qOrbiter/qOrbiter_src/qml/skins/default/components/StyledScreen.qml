@@ -124,7 +124,7 @@ Item {
             from: "*"
             to: "*"
             PropertyAnimation{
-                duration: Style.transition_animationTime
+                duration: appStyle.transition_animationTime
             }
         }
     ]
