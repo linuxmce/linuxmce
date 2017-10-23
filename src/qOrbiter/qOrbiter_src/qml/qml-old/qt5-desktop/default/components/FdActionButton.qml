@@ -11,7 +11,7 @@ Item{
     
     Rectangle{
         anchors.fill: parent
-        color:parent.activeFocus ? appStyle.darkHighlightColor : appStyle.mainColor
+        color:parent.activeFocus ? appstyle.darkHighlightColor : appstyle.mainColor
     }
     
     StyledText{

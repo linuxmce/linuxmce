@@ -34,13 +34,13 @@ Item{
 
     anchors{
         bottom:parent.bottom
-        bottomMargin: Style.scaleX(5)
+        bottomMargin: appStyle.scaleX(5)
         left:parent.left
     }
 
     Behavior on opacity{
         PropertyAnimation{
-            duration: Style.transitionFadeTime
+            duration: appStyle.transitionFadeTime
         }
     }
 
@@ -61,7 +61,7 @@ Item{
         }
 
         PropertyAnimation on opacity {
-            duration: Style.transition_animationTime
+            duration: appStyle.transition_animationTime
         }
     }
     Column{

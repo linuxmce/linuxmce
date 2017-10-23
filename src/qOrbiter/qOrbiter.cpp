@@ -2931,12 +2931,54 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     int placeholder;
     //QApplication::processEvents(QEventLoop::AllEvents);
-#ifdef debug
-    qDebug() << details.join("||");
-#endif
+
+    bool next = false;
+    for(auto key : details){
+        if(next==true){
+            emit newFileDetailAttribute(ATTRIBUTETYPE_Performer_CONST, -1 , key );
+            next=false;
+        }
+        if(key=="PERFORMER"){
+            next=true;
+        }
+    }
+
+    next = false;
+    for(auto key : details){
+        if(next==true){
+            emit newFileDetailAttribute(ATTRIBUTETYPE_Studio_CONST , -1 , key );
+            next=false;
+        }
+        if(key=="STUDIO"){
+            next=true;
+        }
+    }
+
+    next = false;
+    for(auto key : details){
+        if(next==true){
+            emit newFileDetailAttribute(ATTRIBUTETYPE_Genre_CONST, -1 , key );
+            next=false;
+        }
+        if(key=="GENRE"){
+            next=true;
+        }
+    }
+
+    next = false;
+    for(auto key : details){
+        if(next==true){
+            emit newFileDetailAttribute(ATTRIBUTETYPE_ComposerWriter_CONST, -1 , key );
+            next=false;
+        }
+        if(key=="COMPOSER/WRITER"){
+            next=true;
+        }
+    }
+
 
     placeholder = details.indexOf("TITLE");
-    if(placeholder != -1) { emit fd_titleChanged(details.at(placeholder+1));  }
+    if(placeholder != -1) { emit fd_mediaTitleChanged(details.at(placeholder+1)); emit  newFileDetailAttribute( ATTRIBUTETYPE_Title_CONST, -1, details.at(placeholder+1)  ); }
 
     placeholder = details.indexOf("SYNOPSIS");
     if(placeholder != -1) { emit fd_synopChanged(details.at(placeholder+1));  }
@@ -2945,13 +2987,13 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     if(placeholder != -1) { emit fd_imageUrlChanged(QString(details.at(placeholder+1))); }
 
     placeholder = details.indexOf("EPISODE");
-    if(placeholder != -1) { emit fd_episodeChanged(details.at(placeholder+1) );  }
+    if(placeholder != -1) { emit fd_episodeChanged(details.at(placeholder+1) ); emit newFileDetailAttribute( ATTRIBUTETYPE_Episode_CONST, -1, details.at(placeholder+1) );  }
 
     placeholder = details.indexOf("RUN TIME");
-    if(placeholder != -1) { emit fd_runtimeChanged(details.at(placeholder+1) );  }
+    if(placeholder != -1) { emit fd_runtimeChanged(details.at(placeholder+1) ); emit newFileDetailAttribute(ATTRIBUTETYPE_Run_Time_CONST, -1, details.at(placeholder+1) );  }
 
     placeholder = details.indexOf("RATING");
-    if(placeholder != -1) { emit fd_ratingChanged(details.at(placeholder+1) );  }
+    if(placeholder != -1) { emit fd_ratingChanged(details.at(placeholder+1) );  emit newFileDetailAttribute(ATTRIBUTETYPE_Rated_CONST, -1,details.at(placeholder+1) );  }
 
     placeholder = details.indexOf("EPISODE NUMBER");
     if(placeholder != -1) {  emit newFileDetailAttribute(ATTRIBUTETYPE_Episode_Number_CONST, -1,details.at(placeholder+1) );  }
@@ -2960,7 +3002,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     if(placeholder != -1) {emit newFileDetailAttribute(ATTRIBUTETYPE_Track_CONST, -1 ,details.at(placeholder+1) ); }
 
     placeholder = details.indexOf("RELEASE DATE");
-    if(placeholder != -1) {  emit newFileDetailAttribute(ATTRIBUTETYPE_Release_Date_CONST, -1,details.at(placeholder+1) );  }
+    if(placeholder != -1) {  emit newFileDetailAttribute(ATTRIBUTETYPE_Release_Date_CONST, -1, details.at(placeholder+1) );  }
 
     placeholder = details.indexOf("SEASON NUMBER");
     if(placeholder != -1) {
@@ -3043,6 +3085,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
+
                 /*! \todo - add way to cancel out of this if user closes ui */
                 pCell = it->second;
 //                const char *pPath = pCell->GetImagePath();
@@ -3050,10 +3093,12 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
+                qDebug() << Q_FUNC_INFO << attribute;
 #ifdef debug
                 emit commandResponseChanged();
 #endif
                 int at = cellfk.remove("!A").toInt();
+                qDebug() << attributeType;
                 if(attributeType == "Program") { emit fd_programChanged(attribute);                 emit newFileDetailAttribute(ATTRIBUTETYPE_Program_CONST, at,attribute ); }
                 else if(attributeType == "Title") { emit fd_mediaTitleChanged(attribute); }
                 else if(attributeType == "Channel") { emit fd_chanIdChanged(attribute);             emit newFileDetailAttribute(ATTRIBUTETYPE_TV_Channel_ID_CONST, at,attribute ); }
@@ -3263,7 +3308,6 @@ void DCE::qOrbiter::GetScreenSaverImages()
     emit screenSaverImages(tempList);
     tempList.detachShared();
     tempList.clear();
-
 }
 
 void DCE::qOrbiter::BindMediaRemote(bool onoff)
@@ -5521,6 +5565,7 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 void qOrbiter::getAttributeImage(QString param)
 {
     CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iPK_Device_MediaPlugin );
+
 
 }
 

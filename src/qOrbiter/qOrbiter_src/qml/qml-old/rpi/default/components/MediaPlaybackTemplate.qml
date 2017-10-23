@@ -33,7 +33,7 @@ Item {
         clip:false
         Rectangle{
             id:phil
-            color: skinStyle.mainColor
+            color: skinstyle.mainColor
             anchors.fill: parent
             clip:false
             opacity: playlist.state === "showing" ? .75 : 0

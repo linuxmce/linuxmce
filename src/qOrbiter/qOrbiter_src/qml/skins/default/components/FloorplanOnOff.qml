@@ -3,7 +3,7 @@ import "../components"
 import "../."
 Rectangle {
     id:cmdEntry
-    height: Style.appButtonHeight
+    height: appStyle.appButtonHeight
     width: parent.width
     color: "black"
     border.color: "white"
@@ -12,7 +12,7 @@ Rectangle {
     StyledText {
         anchors.left: parent.left
         text: "On/Off"
-        fontSize: Style.appFontSize_description
+        fontSize: appStyle.appFontSize_description
     }
     Row {
         anchors.top: parent.top
@@ -21,18 +21,18 @@ Rectangle {
         width: childrenRect.width
         spacing: 10
         StyledButton {
-            height: Style.appButtonHeight
-            width: Style.appButtonWidth /2
-            textSize: Style.appFontSize_description
+            height: appStyle.appButtonHeight
+            width: appStyle.appButtonWidth /2
+            textSize: appStyle.appFontSize_description
             anchors.verticalCenter: parent.verticalCenter
             label:qsTr( "On")
             onActivated: sendCommand(cmdNumber, []);
         }
         StyledButton {
             anchors.verticalCenter: parent.verticalCenter
-            height: Style.appButtonHeight
-            fontSize: Style.appFontSize_description
-            width: Style.appButtonWidth /2
+            height: appStyle.appButtonHeight
+            fontSize: appStyle.appFontSize_description
+            width: appStyle.appButtonWidth /2
             label: "Off"
             onActivated: sendCommand("193", []);
         }

@@ -40,7 +40,7 @@ Item {
         Behavior on x{
             PropertyAnimation{
                 duration: 350
-                easing.type: appStyle.animationEasing
+                easing.type: appstyle.animationEasing
             }
         }
 

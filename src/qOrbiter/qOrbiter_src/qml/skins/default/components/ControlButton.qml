@@ -14,7 +14,7 @@ Item{
         id:fil
         anchors.fill: parent
         radius:parent.height
-        color:ms.pressed ? Style.appbutton_confirm_color: "black"
+        color:ms.pressed ? appStyle.appbutton_confirm_color: "black"
         opacity:.35
 
     }

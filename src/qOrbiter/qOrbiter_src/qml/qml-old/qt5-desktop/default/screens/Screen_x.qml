@@ -12,7 +12,7 @@ StyledScreen {
         Rectangle{
             id:hdr
             height: parent.height/3
-            gradient: appStyle.alertGradient
+            gradient: appstyle.alertGradient
             radius:5
             anchors{
                 left:parent.left
@@ -30,7 +30,7 @@ StyledScreen {
                 topMargin: -20
                 bottom: parent.bottom
             }
-            gradient:appStyle.contentGradient
+            gradient:appstyle.contentGradient
 
             StyledText {
                 id: name

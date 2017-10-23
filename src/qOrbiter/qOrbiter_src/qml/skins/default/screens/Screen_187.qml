@@ -32,7 +32,7 @@ StyledScreen{
 
         StyledText{
             text: qsTr("Would you like to resume your media?")
-            fontSize: Style.scaleY(8)
+            fontSize: appStyle.scaleY(8)
             anchors.top:resume_content.headerRect.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.margins: 10
@@ -41,9 +41,9 @@ StyledScreen{
         Row{
             height: parent.height/2
             width: parent.width
-            spacing: Style.scaleX(2)
+            spacing: appStyle.scaleX(2)
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: Style.scaleY(15)
+            anchors.bottomMargin: appStyle.scaleY(15)
             StyledButton{
                 buttonText: qsTr("Yes Resume")
                 hitArea.onReleased: {

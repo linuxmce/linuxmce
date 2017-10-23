@@ -294,7 +294,7 @@ Item {
         }
         Rectangle{
             anchors.fill: parent
-            color:appStyle.toolbarBgColor
+            color:appstyle.toolbarBgColor
 
         }
     }
@@ -354,8 +354,8 @@ Item {
 
         //        Behavior on AnchorChanges{
         //            AnchorAnimation{
-        //                duration: appStyle.animation_medium
-        //                easing: appStyle.animation_easing
+        //                duration: appstyle.animation_medium
+        //                easing: appstyle.animation_easing
         //            }
         //        }
 
@@ -386,8 +386,8 @@ Item {
                 from: "*"
                 to: "*"
                 AnchorAnimation{
-                    duration:appStyle.animation_medium
-                    easing:appStyle.animation_easing
+                    duration:appstyle.animation_medium
+                    easing:appstyle.animation_easing
                 }
             }
         ]

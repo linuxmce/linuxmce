@@ -47,7 +47,7 @@ Item{
             width: parent.width -5
             anchors.centerIn: mainItem
             clip:true
-            color: appStyle.primaryDarkColor
+            color: appstyle.primaryDarkColor
         }
 
         Image{

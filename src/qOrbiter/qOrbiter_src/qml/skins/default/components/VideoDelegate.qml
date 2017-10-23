@@ -15,7 +15,7 @@ Item{
         anchors.fill: parent
         anchors.margins: 5
         opacity: path !=="" ? .70 : .85
-        color:trap.pressed ? Style.appcolor_background_medium : "black"
+        color:trap.pressed ? appStyle.appcolor_background_medium : "black"
         border.color: "white"
         border.width: active ? 2 : 0
     }
@@ -53,10 +53,10 @@ Item{
             bottom:bgExtent.bottom
         }
         wrapMode: Text.Wrap
-        fontSize: Style.appFontSize_description
+        fontSize: appStyle.appFontSize_description
       //  visible: manager.q_subType!=MediaSubtypes.MOVIES && imdbImg.source!==""
         color: "White"
-        height: titleBlock.lineCount * Style.dpRatio*25
+        height: titleBlock.lineCount * appStyle.dpRatio*25
     }
 
     Keys.onEnterPressed: {

@@ -13,13 +13,13 @@ Item {
     clip:true
     Rectangle{
         id:setup_hdr
-        color:enabled ? Style.appcolor_background_medium :" grey"
+        color:enabled ? style.appcolor_background_medium :" grey"
         radius:5
         width:parent.width
         anchors{
             top:parent.top
            }
-        height: Style.appNavigation_panelHeight
+        height: style.appNavigation_panelHeight
     }
 
     Text{
@@ -83,7 +83,7 @@ Item {
         }
         delegate: Item{
             width: setup_hdr.width
-            height: Style.listViewItemHeight
+            height: style.listViewItemHeight
             Rectangle{
                 anchors.fill: parent
                 color:trackedProperty===index ? "green" :"lightgrey"

@@ -25,7 +25,7 @@ StyledScreen{
                 anchors.left: parent.left
                 anchors.right: parent.right
                 buttonText: description
-                textSize: Style.appFontSize_list
+                textSize: appStyle.appFontSize_list
                 onActivated:   {
                     myPanel.numberToCall = value
                     telecomDevices.visible = true
@@ -48,7 +48,7 @@ StyledScreen{
                 anchors.left: parent.left
                 anchors.right: parent.right
                 buttonText: description
-                textSize: Style.appFontSize_list
+                textSize: appStyle.appFontSize_list
                 onActivated: {
                     myPanel.numberToCall = value
                     telecomDevices.visible = true

@@ -263,6 +263,7 @@ int main(int argc, char* argv[])
     string screen = "";
     int PK_Device=-1;
     int screenSize=-1;
+    bool clearSettings=false;
     string sLogger="stdout";
     bool bLocalMode=false,bError=false; // An error parsing the command line
     char c;
@@ -304,6 +305,9 @@ int main(int argc, char* argv[])
         case 'z':
             screenSize=atoi(argv[++optnum]);
             break;
+        case 'c':
+            settings.destroySettingsData();
+            break;
         case 'x':
             overrideDir= QString::fromStdString( argv[++optnum]);
             break;
@@ -324,6 +328,7 @@ int main(int argc, char* argv[])
              << "-o --Switch for frameless MD and desktops. " << endl
              << "-s --Switch for fullscreen. " << endl
              << "-z --Screen size setting for testing 4 - small \n 7 - medium\n 10 - large " << endl
+             << "-c --Clear existing settings" << endl
              << "-x --Point to custom skins directory. " << endl;
 
     }

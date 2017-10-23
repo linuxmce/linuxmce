@@ -28,7 +28,7 @@ Rectangle{
             smooth: true
             font.pixelSize: scaleY(4)
             visible:  dcenowplaying.mediatitle =="" ? false: true
-            color:skinStyle.accentcolor
+            color:skinstyle.accentcolor
         }
         StyledText { /* showing up with performers! fix */
             id: title_text
@@ -89,7 +89,7 @@ Rectangle{
             font.bold: true
             fontSize: scaleY(2)
             visible:  dcenowplaying.releasedate =="" ? false: true
-            color:skinStyle.accentColor
+            color:skinstyle.accentColor
         }        
     }
 }

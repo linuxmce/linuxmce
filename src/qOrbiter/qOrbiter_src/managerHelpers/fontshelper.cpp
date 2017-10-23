@@ -1,6 +1,6 @@
 #include "fontshelper.h"
 #include "qdebug.h"
-#include "qapplication.h"
+
 #include "qfont.h"
 
 FontsHelper::FontsHelper(QObject *parent) : QObject(parent)

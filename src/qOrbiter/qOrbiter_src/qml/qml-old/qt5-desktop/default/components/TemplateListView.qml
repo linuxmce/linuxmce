@@ -46,7 +46,7 @@ ListView{
 
         Rectangle{
             anchors.fill: parent
-            color:playlist.currentIndex === index? "black" : appStyle.mainColor
+            color:playlist.currentIndex === index? "black" : appstyle.mainColor
             opacity: .85
             border.width: index === dcenowplaying.m_iplaylistPosition ? 5 : 2
             radius:5
@@ -109,8 +109,8 @@ ListView{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: appStyle.globalAnimationSpeed
-                easing.type: appStyle.globalAnimationEasing
+                duration: appstyle.globalAnimationSpeed
+                easing.type: appstyle.globalAnimationEasing
             }
         }
     ]

@@ -18,6 +18,7 @@ ApplicationWindow {
     width: manager.appWidth
     onWidthChanged: console.log("window size"+manager.appWidth+ "w x "+manager.appHeight+"h")
     visible: true
+
     color:"transparent"
     property string appEntryQml: manager.skinEntryFile
     property int currentStage:deviceSettingsReady+orbiterReady

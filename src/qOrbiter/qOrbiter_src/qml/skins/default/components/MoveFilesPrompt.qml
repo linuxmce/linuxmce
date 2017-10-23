@@ -63,7 +63,7 @@ GenericPopup{
 
             delegate: Rectangle{
                 width: parent.width
-                height: Style.listViewItemHeight
+                height: appStyle.listViewItemHeight
                 color:"black"
 
 
@@ -85,7 +85,7 @@ GenericPopup{
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 5
-                    width: Style.appButtonWidth
+                    width: appStyle.appButtonWidth
                     onActivated: {
                         var target = filedetailsclass.path+filedetailsclass.file
                         console.log("moving file "+ target)
@@ -99,8 +99,8 @@ GenericPopup{
         LargeStyledButton{
             id:this_dir
            anchors.centerIn: dir_listing
-           width: Style.appButtonLargeWidth
-            height: Style.appButtonHeight
+           width: appStyle.appButtonLargeWidth
+            height: appStyle.appButtonHeight
             buttonText: qsTr("Select this directory.")
             onActivated: {
                 var target = filedetailsclass.path+filedetailsclass.file
@@ -118,7 +118,7 @@ GenericPopup{
                 right:parent.right
                 bottom:parent.bottom
             }
-            height: Style.appButtonHeight
+            height: appStyle.appButtonHeight
             buttonText: qsTr("Move up one level")
             onActivated:move_content.moveUp()
         }

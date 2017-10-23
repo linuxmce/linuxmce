@@ -26,8 +26,8 @@ StyledScreen {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.topMargin: Style.scaleY(5)
-            anchors.bottomMargin: Style.scaleY(5)
+            anchors.topMargin: appStyle.scaleY(5)
+            anchors.bottomMargin: appStyle.scaleY(5)
 
             StyledText {
                 id: helpText

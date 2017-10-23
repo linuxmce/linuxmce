@@ -48,10 +48,10 @@ Item {
             right:parent.right
             top:parent.top
         }
-        height: appStyle.stdHdrHeight
+        height: appstyle.stdHdrHeight
         Rectangle{
             anchors.fill: parent
-            color: appStyle.primaryLightColor
+            color: appstyle.primaryLightColor
         }
         StyledText{
             anchors.centerIn: parent
@@ -78,7 +78,7 @@ Item {
             property bool expanded:ea_list.length > 1 ? true : false
             Rectangle{
                 anchors.fill: parent
-                gradient: appStyle.buttonGradient
+                gradient: appstyle.buttonGradient
                 color: "grey"
                 border.color: "white"
                 border.width: index === room_list.currentIndex ? 2 : 0
@@ -147,12 +147,12 @@ Item {
                     width: scaleX(18)
                     Rectangle{
                         anchors.fill: parent
-                        gradient: appStyle.buttonGradient
+                        gradient: appstyle.buttonGradient
                     }
 
                     Rectangle{
                         anchors.fill: parent
-                        color: index === innerList.currentIndex ? skinStyle.mainColor : "grey"
+                        color: index === innerList.currentIndex ? skinstyle.mainColor : "grey"
                         radius: 5
                         opacity:index === innerList.currentIndex ? .65 : .50
                     }
