@@ -35,12 +35,12 @@ else
         anchors.right: parent.right
         anchors.left: parent.left
         height: scaleY(8)
-        anchors.rightMargin: appStyle.margins
-        anchors.leftMargin: appStyle.margins
+        anchors.rightMargin: appstyle.margins
+        anchors.leftMargin: appstyle.margins
 
         Rectangle{
             id:titleRect
-            color:appStyle.primaryLightColor
+            color:appstyle.primaryLightColor
             anchors{
                 margins: 5
                 top:parent.top
@@ -65,7 +65,7 @@ else
         }
         Rectangle{
             id:subTitleRect
-            color:appStyle.primaryLightColor
+            color:appstyle.primaryLightColor
             anchors{
                 margins: 5
                 top:parent.top
@@ -91,7 +91,7 @@ else
         }
         Rectangle{
             id:temporalRect
-             color:appStyle.primaryLightColor
+             color:appstyle.primaryLightColor
             anchors{
                 margins: 5
                 top:parent.top

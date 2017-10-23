@@ -9,11 +9,11 @@ Item{
         anchors.fill: parent
         color: fillColor
         radius:grpRadius
-        opacity:appStyle.bgContentOpacity
+        opacity:appstyle.bgContentOpacity
     }
     Rectangle{
         anchors.fill: parent
-        gradient: appStyle.buttonGradient
+        gradient: appstyle.buttonGradient
         radius:grpRadius
         opacity: parent.opacity
     }

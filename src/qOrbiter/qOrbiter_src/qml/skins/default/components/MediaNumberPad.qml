@@ -8,7 +8,7 @@ Panel {
     headerTitle: qsTr("Channel:", "Tv Channel Entry") + targetChannel
     centered: false
 
-        property int buttonHeight: manager.isProfile ? Style.scaleY(9) : Style.scaleY(11)
+        property int buttonHeight: manager.isProfile ? appStyle.scaleY(9) : appStyle.scaleY(11)
         function submit(){
             manager.gridChangeChannel(targetChannel, targetChannel)
             //        var pad = 3 - targetChannel.length
@@ -45,7 +45,7 @@ Panel {
             Repeater{
                 model: 9
                 StyledButton {
-                    height: manager.isProfile ? Style.scaleY(9) : Style.scaleY(11)
+                    height: manager.isProfile ? appStyle.scaleY(9) : appStyle.scaleY(11)
                     width: headerRect.width/3
                     buttonText: (index+1)
                     onActivated: if(targetChannel.length!==3) {targetChannel = targetChannel+String(index+1); }else {submit()}

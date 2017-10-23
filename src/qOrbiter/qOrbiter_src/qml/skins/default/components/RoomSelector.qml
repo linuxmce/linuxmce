@@ -19,13 +19,13 @@ GenericPopup{
                 top:parent.top
                 margins: 5
             }
-            width: Style.listViewWidth_large
+            width: appStyle.listViewWidth_large
             delegate: Item{
                 id:generic_delegate
-                height: Style.listViewItemHeight
-                width: Style.listViewWidth_large
+                height: appStyle.listViewItemHeight
+                width: appStyle.listViewWidth_large
                 property bool active:activeFocus
-                property string activeColor:Style.appcolor_background_medium
+                property string activeColor:appStyle.appcolor_background_medium
                 property string label:name
                 function handleTriggered(){
                     if(ea_list[0].ea_number!==0){
@@ -51,7 +51,7 @@ GenericPopup{
 
                 Rectangle{
                     anchors.fill: parent
-                    color:generic_delegate.active ? generic_delegate.activeColor : Style.appcolor_background_list
+                    color:generic_delegate.active ? generic_delegate.activeColor : appStyle.appcolor_background_list
                 }
                 StyledText{
                     anchors.fill: parent
@@ -84,8 +84,8 @@ GenericPopup{
         ListView{
             id:secondLevel
             
-            height: Style.scaleY(55)
-            width: Style.scaleX(25)
+            height: appStyle.scaleY(55)
+            width: appStyle.scaleX(25)
 
             anchors{
                 left: primaryModel.right
@@ -93,14 +93,14 @@ GenericPopup{
             
             delegate:Item{
                 id:generic_subdelegate
-                height: Style.listViewItemHeight
-                width: Style.listViewWidth_medium
+                height: appStyle.listViewItemHeight
+                width: appStyle.listViewWidth_medium
                 property bool active:activeFocus
-                property string activeColor:Style.appcolor_background_medium
+                property string activeColor:appStyle.appcolor_background_medium
 
                 Rectangle{
                     anchors.fill: parent
-                    color:generic_subdelegate.active ? generic_subdelegate.activeColor : Style.appcolor_background_list
+                    color:generic_subdelegate.active ? generic_subdelegate.activeColor : appStyle.appcolor_background_list
                 }
                 StyledText{
                     anchors.centerIn: parent

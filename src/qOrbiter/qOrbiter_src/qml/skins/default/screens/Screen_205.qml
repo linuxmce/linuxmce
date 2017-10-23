@@ -11,7 +11,7 @@ screen:qsTr("Need to Regenerate Orbiter")
        Panel{
            useHeader: false
            anchors.centerIn: parent
-           fillColor: Style.appcolor_background_light
+           fillColor: appStyle.appcolor_background_light
            width: parent.width/2
            height: parent.width/2
            Row{

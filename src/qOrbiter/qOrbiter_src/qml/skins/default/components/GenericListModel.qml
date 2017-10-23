@@ -5,7 +5,7 @@ import org.linuxmce.screens 1.0
 import org.linuxmce.grids 1.0
 Item{
     id:genericListContainer
-    width: Style.listViewWidth_medium
+    width: appStyle.listViewWidth_medium
 
     property alias listView:view
     property alias currentItem:view.currentItem
@@ -64,20 +64,20 @@ Item{
             right:parent.right
             top:parent.top
         }
-        height: Style.appNavigation_panelHeight
-        color:enabled ? Style.appcolor_background_medium :" grey"
-        opacity: Style.appList_opacity
+        height: appStyle.appNavigation_panelHeight
+        color:enabled ? appStyle.appcolor_background_medium :" grey"
+        opacity: appStyle.appList_opacity
 
         Behavior on color {
             ColorAnimation {
-                duration: Style.transition_animationTime
+                duration: appStyle.transition_animationTime
                 easing.type: Easing.InOutCubic
             }
         }
 
         Behavior on opacity {
             PropertyAnimation {
-                duration: Style.transition_animationTime
+                duration: appStyle.transition_animationTime
                 easing.type: Easing.InOutCubic
             }
         }
@@ -93,7 +93,7 @@ Item{
         }
 
         text:genericListContainer.label
-        fontSize: Style.appFontSize_title
+        fontSize: appStyle.appFontSize_title
         color:"white"
     }
 
@@ -156,12 +156,12 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: Style.transition_animationTime
+                duration: appStyle.transition_animationTime
                 easing.type: Easing.InOutCubic
             }
 
             PropertyAnimation{
-                duration: Style.transition_animationTime
+                duration: appStyle.transition_animationTime
                 easing.type: Easing.InOutCubic
             }
         }

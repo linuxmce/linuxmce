@@ -12,7 +12,7 @@ Item{
     Rectangle{
         anchors.fill: parent
         color: "black"
-        opacity:Style.appHeader_opacity
+        opacity:appStyle.appHeader_opacity
     }
 
     state:"selected"
@@ -95,7 +95,7 @@ Item{
         delegate: Item{
             id:cmdDelegate
             clip:false
-            height:Style.appButtonHeight
+            height:appStyle.appButtonHeight
             width: parent.width
 
             StyledText{
@@ -103,7 +103,7 @@ Item{
                 text:CommandHint
                 width: parent.width/2
                 color:"white"
-                fontSize: Style.appFontSize_description
+                fontSize: appStyle.appFontSize_description
                 anchors{
                     top:parent.top
                     horizontalCenter: parent.horizontalCenter
@@ -151,7 +151,7 @@ Item{
             Loader{
 
                 width:controls_loader.item.width
-                height: Style.listViewItemHeight
+                height: appStyle.listViewItemHeight
                 anchors{
                     top:desc.bottom
                     horizontalCenter: parent.horizontalCenter
@@ -177,7 +177,7 @@ Item{
         StyledText{
             text: "Send"
             color:"white"
-            fontSize: Style.appFontSize_description
+            fontSize: appStyle.appFontSize_description
         }
         
         MouseArea{

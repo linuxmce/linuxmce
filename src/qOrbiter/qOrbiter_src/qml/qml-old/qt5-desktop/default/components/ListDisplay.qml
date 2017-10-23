@@ -41,7 +41,7 @@ ListView
         Rectangle{
             id:phil
             anchors.fill: parent
-            color:mickey.pressed ? skinStyle.darkHighlightColor :skinStyle.mainColor
+            color:mickey.pressed ? skinstyle.darkHighlightColor :skinstyle.mainColor
             opacity: .75
 
         }
@@ -109,7 +109,7 @@ ListView
                     height:50
                     width: lbl.width
                     radius:5
-                    color: fp_submodel.currentIndex === index ? skinStyle.mainColor : sublist_hit.containsMouse ? "lightblue": sublist_hit.pressed ? "green": "darkblue"
+                    color: fp_submodel.currentIndex === index ? skinstyle.mainColor : sublist_hit.containsMouse ? "lightblue": sublist_hit.pressed ? "green": "darkblue"
                     StyledText{
                         id:lbl
                         text: commandlist["commands"][index].command_name

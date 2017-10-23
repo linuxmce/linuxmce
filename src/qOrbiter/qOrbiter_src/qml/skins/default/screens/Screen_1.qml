@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import "../components"
-import "../"
+
 import org.linuxmce.screens 1.0
 StyledScreen {
     id:screen
@@ -32,12 +32,13 @@ StyledScreen {
 
         model:qmlRoot.scenarios
         delegate:  Item {
-            height: Style.appButtonHeight
+
+            height: appStyle.appButtonHeight
             width: parent.width
             Rectangle{
                 anchors.fill: parent
-                color:Style.appcolor_background_list
-                opacity: Style.appList_opacity
+                color:appStyle.appcolor_background_list
+                opacity: appStyle.appList_opacity
             }
 
             StyledText{
@@ -46,7 +47,7 @@ StyledScreen {
                     left:parent.left
                     verticalCenter: parent.verticalCenter
                 }
-                font.pointSize: Style.appFontSize_title//manager.isProfile ? Style.scaleY(3) : Style.scaleY(5)
+                font.pointSize: appStyle.appFontSize_title//manager.isProfile ? appStyle.scaleY(3) : appStyle.scaleY(5)
                 text:name
 
                 MouseArea{
@@ -58,7 +59,7 @@ StyledScreen {
                 height: parent.height
                 anchors{
                     left:rowLabel.right
-                    leftMargin: Style.scaleX(5)
+                    leftMargin: appStyle.scaleX(5)
                     right:parent.right
                     verticalCenter: parent.verticalCenter
                 }
@@ -75,7 +76,7 @@ StyledScreen {
                 clip:true
                 delegate:Item{
                     height: parent.height
-                    width: Style.appButtonWidth
+                    width: appStyle.appButtonWidth
                     StyledButton{
                         buttonText:title
                         width:parent.width

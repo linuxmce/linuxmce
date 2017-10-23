@@ -90,7 +90,7 @@ StyledScreen {
         }
 
         LargeStyledButton{
-            height:manager.isProfile ? Style.scaleY(15) : Style.scaleY(22)
+            height:manager.isProfile ? appStyle.scaleY(15) : appStyle.scaleY(22)
             anchors{
                 left:typeSelection.left
                 right: typeSelection.right
@@ -113,7 +113,7 @@ StyledScreen {
             width: parent.width *.85
             model:mediatypefilter
             cellWidth:width /3
-            cellHeight:manager.isProfile ? Style.scaleY(15) : Style.scaleY(22)
+            cellHeight:manager.isProfile ? appStyle.scaleY(15) : appStyle.scaleY(22)
             cacheBuffer:25
             delegate:
                 LargeStyledButton{

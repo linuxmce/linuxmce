@@ -53,7 +53,7 @@ Item {
         font.weight: Font.Light
         isBold: false
         font.pixelSize:headerFontSize
-        color:skinStyle.listItemActiveBgColor
+        color:skinstyle.listItemActiveBgColor
     }
 
 }

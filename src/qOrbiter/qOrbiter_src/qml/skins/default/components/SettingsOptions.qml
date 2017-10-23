@@ -18,7 +18,7 @@ Item{
             model:fontsHelper.fontList
             anchors.fill: parent
             delegate: Item{
-                height: Style.listViewItemHeight
+                height: appStyle.listViewItemHeight
                 width: parent.width
                 Rectangle{
                     anchors.fill: parent

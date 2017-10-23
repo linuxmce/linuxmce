@@ -7,7 +7,7 @@ Text {
     property bool isBold:true
     property bool isItalic:false
     property double fontSize:14
-    property string textColor:skinStyle.lighttext
+    property string textColor:skinstyle.lighttext
     property string shadowColor:"black"
     property bool dropshadow:false
     id:labelelement

@@ -2,8 +2,8 @@ import QtQuick 2.2
 import "../components"
 import "../."
 Item {
-    width: Style.appButtonWidth
-    height: Style.appButtonHeight
+    width: appStyle.appButtonWidth
+    height: appStyle.appButtonHeight
 
 
     Item{

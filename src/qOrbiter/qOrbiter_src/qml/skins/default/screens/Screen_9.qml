@@ -26,7 +26,7 @@ StyledScreen{
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.topMargin: 4
-            anchors.bottomMargin: Style.scaleY(10)
+            anchors.bottomMargin: appStyle.scaleY(10)
 
             ListView {
                 id: phoneBookList
@@ -44,8 +44,8 @@ StyledScreen{
                     anchors.left: parent.left
                     anchors.right: parent.right
                     buttonText: phonebookcall.level == 1 ? description + ': ' + value :  description
-                    textSize: Style.appFontSize_list
-                    height: Style.appButtonHeight / 2
+                    textSize: appStyle.appFontSize_list
+                    height: appStyle.appButtonHeight / 2
                     onActivated:   {
                         if (phonebookcall.level == 0) {
                             // Switch to phone number list
@@ -92,7 +92,7 @@ StyledScreen{
             anchors.left : parent.left
             anchors.right: parent.right
             anchors.margins: 5
-            height: Style.appButtonHeight
+            height: appStyle.appButtonHeight
             MouseArea{
                 anchors.fill: parent
             }
@@ -102,19 +102,19 @@ StyledScreen{
                 text: "Search..."
                 color: "white"
                 anchors.fill: parent.fill
-                fontSize: Style.appFontSize_list
+                fontSize: appStyle.appFontSize_list
             }
             TextInput {
                 id: text_input1
                 anchors.fill: parent
                 anchors.margins: 0
-                anchors.topMargin: Style.scaleY(5)
+                anchors.topMargin: appStyle.scaleY(5)
                 color: "white"
                 text: ""
                 cursorVisible: true
                 readOnly: false
                 horizontalAlignment: TextInput.AlignHCenter
-                font.pixelSize: Style.appFontSize_list
+                font.pixelSize: appStyle.appFontSize_list
                 onTextChanged: {
                     manager.refreshDataGrid("phoneBook", DataGrids.Phone_Book_Auto_Compl, "1|%"+text)
                 }

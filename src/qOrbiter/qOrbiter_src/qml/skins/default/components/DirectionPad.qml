@@ -6,7 +6,7 @@ import "../."
 Item{
     id:arrows
     visible:false
-    height: manager.isProfile ? Style.scaleY(27) :Style.scaleY(50)
+    height: manager.isProfile ? appStyle.scaleY(27) :appStyle.scaleY(50)
     width: height
     Rectangle{
         id:centerOk
@@ -15,7 +15,7 @@ Item{
         height: parent.height/3
         width: height
         radius: height
-        color:ok_ms.pressed? Style.appcolor_background_medium : Style.appbutton_confirm_color
+        color:ok_ms.pressed? appStyle.appcolor_background_medium : appStyle.appbutton_confirm_color
         MouseArea{
             id:ok_ms
             anchors.fill: parent

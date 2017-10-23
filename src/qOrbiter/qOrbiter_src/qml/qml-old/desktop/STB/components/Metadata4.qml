@@ -16,7 +16,7 @@ Column{
         smooth: true
         fontSize: 40
         visible:  dcenowplaying.mediatitle =="" ? false: true
-        color:skinStyle.accentcolor
+        color:skinstyle.accentcolor
     }
     StyledText { /* showing up with performers! fix */
         id: title_text
@@ -75,6 +75,6 @@ Column{
         font.bold: true
         fontSize: 32
         visible:  dcenowplaying.releasedate =="" ? false: true
-        color:skinStyle.accentColor
+        color:skinstyle.accentColor
     }
 }
