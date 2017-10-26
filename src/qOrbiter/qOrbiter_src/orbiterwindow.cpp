@@ -81,9 +81,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         winSelector->setExtraSelectors(QStringList() << "md" );
     }
 
-
-    // qDebug() << "Qt Import Paths::"<<m_appEngine->importPathList();
-    // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
     m_appEngine->rootContext()->setContextProperty("window", this);
 #ifdef NOQRC
     qrcPath="../qOrbiter_src/qml/Index.qml";
@@ -125,12 +122,11 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     } else {
 #ifdef ANDROID
 
-mainView.showMaximized();
 #elif defined(Q_OS_IOS)
-        // mainView.showFullScreen();
+
 #else
         if(fullScreen){
-            //  mainView.showFullScreen();
+
         } else {
             testW=800;
             testH=600;
@@ -138,7 +134,6 @@ mainView.showMaximized();
         }
 #endif
     }
-
 
     mainView.rootContext()->setContextProperty("appW", mainView.width());
     mainView.rootContext()->setContextProperty("appH", mainView.height());
@@ -156,7 +151,6 @@ mainView.showMaximized();
 
 #if defined (GLENABLED) || (QT5)
     fileReader = new FileReader();
-
     m_appEngine->rootContext()->setContextProperty("fileReader", fileReader);
 #endif
 
@@ -166,49 +160,14 @@ mainView.showMaximized();
 #else
     mainView.setTitle("LinuxMCE QOrbiter");
 #endif
-    //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
-#ifdef GLENABLED
-#ifndef Q_OS_ANDROID
-#ifndef QT5
-
-    //        QGLFormat format= QGLFormat::defaultFormat();
-    //        format.setAlpha(true);
-    //        glWidget = new QGLWidget(format);
-    //        glWidget->setStyleSheet("background:transparent;");
-    //        glWidget->setAutoFillBackground(false);
-    //        mainView.setViewport(glWidget);
-    //        glWidget->setAttribute(Qt::WA_TranslucentBackground, true);
-    //        glWidget->setBackgroundRole(QPalette::Base);
-    //        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#endif
-
-#endif
-#endif
-
-#ifdef RPI
-    // mainView.setSurfaceType(QSurface::OpenGLSurface);
-
-    qDebug() << "is opengl? " << mainView.openglContext();
-    qDebug() << "surface type " << mainView.surfaceType();
-    //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#endif
-    //    #if defined (QT4) && defined (ANDROID)
-    //        QGLFormat format= QGLFormat::defaultFormat();
-    //        glWidget = new QGLWidget();
-    //        glWidget->setAutoFillBackground(false);
-    //        mainView.setViewport(glWidget);
-    //        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    //    #endif
-
-    //window sizing
 }
 
 /*!
  * \brief orbiterWindow::initView This function is used to provide any special handling needed for window setup on start.
  */
 void orbiterWindow::initView(){
-    //mainView.showMaximized();
+
 
 }
 

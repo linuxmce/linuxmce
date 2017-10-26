@@ -62,6 +62,8 @@ QML_ROOT_PATH = $$ROOT_PATH/qOrbiter_src/qml/
 # Additional import path used to resolve QML modules in Qt Creator's code model
     QML_IMPORT_PATH = #$$ROOT_PATH/platforms/Android/androidComponents/
 
+DEFINES += QANDROID
+
 # Default rules for deployment.
 include(deployment.pri)
 include ($$ROOT_PATH/../QtCommonIncludes/PlutoUtils.pri)
