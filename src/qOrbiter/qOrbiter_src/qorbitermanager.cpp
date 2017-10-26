@@ -265,8 +265,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         if(m_testScreenSize==0){
             m_window->setVisibility(QWindow::FullScreen);
         } else{
-
-
             m_window->setVisibility(QWindow::Windowed);
             m_window->resize(appWidth, appHeight);
             checkOrientation(m_window->size());
