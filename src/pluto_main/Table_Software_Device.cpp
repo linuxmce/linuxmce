@@ -326,8 +326,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[3];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Status.c_str(), (unsigned long) min((size_t)1,m_Status.size()));
+char *buf = new char[7];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Status.c_str(), (unsigned long) min((size_t)3,m_Status.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
