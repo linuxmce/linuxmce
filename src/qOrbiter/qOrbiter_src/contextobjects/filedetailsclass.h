@@ -331,9 +331,6 @@ public slots:
     void setAlbum (const QString inc_album) {album = inc_album;  emit albumChanged();}
     QString getAlbum () {return album;}
 
-
-
-
     void setPerformers (const QString inc_performer) {
         m_performerList.append( new FileDetailsObject(-1, inc_performer, ATTRIBUTETYPE_Performer_CONST ) );
                 emit performersChanged();

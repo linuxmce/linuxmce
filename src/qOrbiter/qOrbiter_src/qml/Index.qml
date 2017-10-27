@@ -1,9 +1,9 @@
-import QtQuick 2.2
+import QtQuick 2.5
 import QtGraphicalEffects 1.0
 import QtMultimedia 5.0
 import QtQuick.Window 2.0
-import QtQuick.Controls 1.1
-import QtQuick.Dialogs 1.1
+import QtQuick.Controls 2.0
+import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 
 
@@ -12,12 +12,12 @@ import "skins"
 /*
   Root Item.
   */
-ApplicationWindow {
+Window {
     id:qml_root_item
     height: manager.appHeight
     width: manager.appWidth
     onWidthChanged: console.log("window size"+manager.appWidth+ "w x "+manager.appHeight+"h")
-    visible: true
+
 
     color:"transparent"
     property string appEntryQml: manager.skinEntryFile
