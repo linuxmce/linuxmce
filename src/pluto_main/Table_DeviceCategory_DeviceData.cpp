@@ -358,8 +358,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_IK_DeviceData.c_str(), (unsigned long) min((size_t)65535,m_IK_DeviceData.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_IK_DeviceData.c_str(), (unsigned long) min((size_t)196605,m_IK_DeviceData.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -411,8 +411,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)65535,m_Description.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)196605,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
