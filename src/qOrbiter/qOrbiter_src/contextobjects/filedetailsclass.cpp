@@ -39,7 +39,7 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
 
 void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QString val)
 {
-    qDebug() << " Handling  attribute " << attribute << " value:: " << val;
+   // qDebug() << " Handling  attribute " << attribute << " value:: " << val;
 
     switch (attribType) {
     case ATTRIBUTETYPE_Director_CONST:m_directorList.append(new FileDetailsObject(attribute, val, attribType));             emit directorChanged();    break;
