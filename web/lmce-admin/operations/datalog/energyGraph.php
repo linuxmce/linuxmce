@@ -49,6 +49,7 @@ $Graph->add(
 	)
 );
 $Legend->setPlotarea($Plotarea);        
+$Plotarea->setBackgroundColor('white');
 
 $deviceQuery = mysqli_query($connection, 'SELECT EK_Device, Description, IK_DeviceData FROM Datapoints, pluto_main.Device, pluto_main.Device_DeviceData 
 WHERE FK_Unit='.$unit.' AND EK_Device=PK_Device AND EK_Device=FK_Device AND FK_DeviceData=289 
