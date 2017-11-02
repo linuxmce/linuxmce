@@ -24,7 +24,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
-
+#include "IdentifierGenericCD.h"
+#include "IdentifierGenericDVD.h"
 #include "IdentifierCDMDR.h"
 #include "IdentifierDVDMDR.h"
 #include <iostream>
@@ -140,6 +141,10 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
 {    
   IdentifierBase* pIdentifier = NULL;
   int iPK_MediaType=0;
+  string sIdentifiedData;
+  const char* Data=NULL;
+  size_t iData_Size=0;
+  int iEK_Disc=0;
 
   IdentifyDisc::DiscType discType = m_pIdentifyDisc->Identify(sFilename);
 
@@ -147,13 +152,16 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
     {
     case IdentifyDisc::DiscType::CD:
       pIdentifier = new IdentifierCDMDR(sFilename, sID);
+      iPK_MediaType=MEDIATYPE_pluto_CD_CONST;
       break;
     case IdentifyDisc::DiscType::DVD:
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"DVD Identification temporarily disabled.");
-      sCMD_Result="DISABLED";
-      return;
-      // pIdentifier = new IdentifierDVDMDR(sFilename, sID);
-      //break;
+      pIdentifier = new IdentifierDVDMDR(sFilename, sID);
+      iPK_MediaType=MEDIATYPE_pluto_DVD_CONST;
+      break;
+    case IdentifyDisc::DiscType::BluRay:
+      pIdentifier = NULL;    // One does not exist yet, but we still want to set the disc type!
+      iPK_MediaType=MEDIATYPE_pluto_BD_CONST;
+      break;
     case IdentifyDisc::DiscType::UNKNOWN:
     default:
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not identify disc. Aborting");
@@ -161,30 +169,55 @@ void External_Media_Identifier::CMD_Identify_Media(int iPK_Device,string sID,str
       return;
     }
 
-  if (pIdentifier==NULL)
+  if (pIdentifier!=NULL)
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Identify_Media(): pIdentifier is NULL");
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Init()");
+      if (!pIdentifier->Init())
+	return;
+      
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Identify()");
+      if (!pIdentifier->Identify())
+	{
+	  // If we couldn't identify, but we know the disc type instantiate the appropriate
+	  // generic disc identifier.
+	  switch (discType)
+	    {
+	    case IdentifyDisc::DiscType::CD:
+	      pIdentifier = new IdentifierGenericCD(sFilename, sID);
+	      break;
+	    case IdentifyDisc::DiscType::DVD:
+	    case IdentifyDisc::DiscType::BluRay:
+	      pIdentifier = new IdentifierGenericDVD(sFilename, sID);
+	      break;
+	    case IdentifyDisc::DiscType::UNKNOWN:
+	      pIdentifier=NULL;
+	      sCMD_Result="ERROR";
+	      return;
+	    }
+
+	  if (!pIdentifier->Init())
+	    {
+	      sCMD_Result="ERROR";
+	      return;
+	    }
+
+	  if (!pIdentifier->Identify())
+	    {
+	      sCMD_Result="ERROR";
+	      return;
+	    }
+	  // Otherwise, we now have an appropriate generic disc.
+	}
+      
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->GetIdentifiedData()");
+      sIdentifiedData = pIdentifier->GetIdentifiedData(); 
+      Data = pIdentifier->GetPictureData().data();
+      if (pIdentifier->GetPictureData().size() == 0)
+	Data = NULL;
+      iData_Size = pIdentifier->GetPictureData().size();
     }
 
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Init()");
-  if (!pIdentifier->Init())
-    return;
-
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->Identify()");
-  if (!pIdentifier->Identify())
-    return;
-
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling pIdentifier->GetIdentifiedData()");
-  string sIdentifiedData = pIdentifier->GetIdentifiedData();
-  
   sCMD_Result = "OK";
-  const char *Data = pIdentifier->GetPictureData().data();
-  if (pIdentifier->GetPictureData().size() == 0)
-    Data = NULL;
-
-  int iEK_Disc=0;
-
-  size_t iData_Size = pIdentifier->GetPictureData().size();
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling CMD_Media_Identified();");
 

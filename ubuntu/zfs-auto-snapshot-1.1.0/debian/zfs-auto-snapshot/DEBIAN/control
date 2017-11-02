@@ -1,0 +1,12 @@
+Package: zfs-auto-snapshot
+Version: 1.1.0-0ubuntu1~trusty
+Architecture: all
+Maintainer: Darik Horn <dajhorn@vanadac.com>
+Installed-Size: 81
+Depends: cron, zfsutils
+Section: admin
+Priority: extra
+Homepage: http://www.zfsonlinux.org/
+Description: ZFS Automatic Snapshot Service
+ Automatically create and destroy ZFS snapshots on an hourly, daily, weekly
+ and monthly schedule.

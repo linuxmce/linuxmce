@@ -138,7 +138,7 @@ Item {
                 margins:10
             }
 
-            spacing: Style.buttonSpacing
+            spacing: appStyle.buttonSpacing
 
             LargeStyledButton{
                 buttonText: qsTr("Home")
@@ -162,8 +162,8 @@ Item {
     Item{
         id:centralScenarios
 
-        height: current_scenarios.count * Style.scaleY(13)
-        width:Style.scaleX(15)
+        height: current_scenarios.count * appStyle.scaleY(13)
+        width:appStyle.scaleX(15)
         anchors.bottom: footer.top
         anchors.bottomMargin: 5
         visible: footer.activated
@@ -172,7 +172,7 @@ Item {
             id:current_scenarios
             anchors.fill: parent
             spacing:5
-            anchors.margins: Style.buttonSpacing
+            anchors.margins: appStyle.buttonSpacing
             property int commandToExecute:-1
 
             function executeItem(itemIndex){
@@ -196,8 +196,8 @@ Item {
                 arrow:current_scenarios.currentIndex===index
                 currentSelection:arrow
                 buttonText:title
-                height:Style.scaleY(13)
-                width:Style.scaleX(15)
+                height:appStyle.scaleY(13)
+                width:appStyle.scaleX(15)
                 MouseArea{
                     anchors.fill: parent
                     onClicked: execute()

@@ -6,7 +6,7 @@ Item{
     Column{
         id:metadata
         spacing: 5
-        width: Style.listViewWidth_large
+        width: appStyle.listViewWidth_large
         height: parent.height
         anchors.right: content_item.right
         StyledText{

@@ -1,0 +1,89 @@
+#!/bin/sh
+#
+#
+
+unset prefix
+unset exec_prefix
+unset args
+
+usage()
+{
+	cat <<EOF
+Usage: xine-config [OPTIONS] [LIBRARIES]
+       DEPRECATED. Use pkg-config instead.
+Options:
+	[--prefix[=DIR]]
+	[--exec-prefix[=DIR]]
+	[--version]
+        [--libs]
+	[--acflags]
+	[--cflags]
+	[--bindir]
+	[--plugindir]
+	[--datadir]
+	[--scriptdir]
+	[--localedir]
+	[--xine-list]
+	[--objcflags]
+EOF
+	exit $1
+}
+
+if test $# -eq 0; then
+	usage 1 1>&2
+fi
+
+while test $# -gt 0; do
+  case "$1" in
+  -*=*) optarg="${1#--*=}" ;;
+  *) optarg= ;;
+  esac
+
+  case "$1" in
+    --prefix=*)
+      prefix="$optarg"
+      if [ "$exec_prefix" = '' ]; then
+        exec_prefix="$optarg"
+      fi
+      ;;
+    --exec-prefix=*)
+      exec_prefix="$optarg"
+      ;;
+    --version)
+      args="$args${args+ }--modversion"
+      ;;
+    --cflags|--libs)
+      args="$args${args+ }$1"
+      ;;
+    --prefix|--acflags|--bindir|--plugindir|--datadir|--scriptdir|--localedir|--objcflags)
+      args="$args${args+ }--variable=${1#--}"
+      ;;
+    --xine-list)
+      args="$args${args+ }--variable=xine_list"
+      ;;
+    --exec-prefix)
+      args="$args${args+ }--variable=exec_prefix"
+      ;;
+    *)
+      usage 1 1>&2
+      ;;
+  esac
+  shift
+done
+
+echo 'xine-config is DEPRECATED. Use pkg-config instead.' >&2
+
+# Sigh. When installing 32 and 64 bit libxine simultaneously,
+# both will write this script to the same location.
+# Binary package managers like yum only tolerate this when
+# both files are identical. Thus we cannot add a hardcoded
+# (at)XINE_PKGCONFIG_DIR(at) to PKG_CONFIG_PATH here safely.
+# Instead, allow system and/or user to set up correctly,
+# and print some useful error if that fails.
+# That should be good enough for a deprecated feature?
+
+pkg-config --print-errors --exists libxine >&2 || exit
+
+exec pkg-config "${prefix+--define-variable=prefix=}$prefix" \
+		"${exec_prefix+--define-variable=exec_prefix=}$exec_prefix" \
+		$args libxine

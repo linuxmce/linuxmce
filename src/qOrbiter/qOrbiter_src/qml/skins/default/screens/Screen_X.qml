@@ -4,10 +4,10 @@ import "../components"
 StyledScreen{
 
     StyledButton{
-        height: Style.appButtonHeight
-        width: Style.appButtonWidth *2
+        height: appStyle.appButtonHeight
+        width: appStyle.appButtonWidth *2
         anchors.centerIn: parent
-        textSize: Style.appFontSize_title
+        textSize: appStyle.appFontSize_title
         buttonText:"Screen Error. Click to return"        
         onActivated: manager.setCurrentScreen(1)
     }

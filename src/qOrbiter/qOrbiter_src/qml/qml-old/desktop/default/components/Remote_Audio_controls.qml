@@ -3,7 +3,7 @@ import QtQuick 1.1
 AvOptionButton {
     width: 60
     height: 200
-    color: skinStyle.advanced_bg
+    color: skinstyle.advanced_bg
 
     ButtonSq{
         height:50

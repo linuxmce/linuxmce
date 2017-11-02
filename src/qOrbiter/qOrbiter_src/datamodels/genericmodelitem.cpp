@@ -38,7 +38,6 @@ bool GenericModelItem::setData(int role, const QVariant &value)
         return false;
     }
 
-
     m_data.insert(role, value);
     emit dataChanged();
     return true;

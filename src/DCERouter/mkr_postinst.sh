@@ -32,7 +32,7 @@ mkdir -p /tftpboot/pxelinux.cfg
 
 # update atftp entry in inet.d
 update-inetd --remove tftp
-update-inetd --group BOOT --add "tftp        dgram   udp wait    nobody /usr/sbin/tcpd /usr/sbin/in.tftpd --tftpd-timeout 300 --retry-timeout 5     --mcast-port 1758 --mcast-addr 239.255.0.0-255 --maxthread 100 --verbose=5 --no-blksize /tftpboot"
+update-inetd --group BOOT --add "tftp        dgram   udp wait    nobody /usr/sbin/tcpd /usr/sbin/in.tftpd --tftpd-timeout 300 --retry-timeout 5     --mcast-port 1758 --mcast-addr 239.255.0.0-255 --maxthread 100 --verbose=5 /tftpboot"
 
 bash_flag="# Pluto - bash root prompt"
 bash_prompt="$bash_flag

@@ -7,10 +7,10 @@ Rectangle {
     width: scaleX(80)
     height: scaleY(85)
   anchors.centerIn: parent
-    color: skinStyle.highlight2
+    color: skinstyle.highlight2
     clip: false
     radius: 5
-    border.color: skinStyle.highlight1
+    border.color: skinstyle.highlight1
     border.width: 3
     //opacity: 0
     scale:0
@@ -44,7 +44,7 @@ Rectangle {
         id:titlerect
         height: childrenRect.height + 5
         width: parent.width
-        color:skinStyle.highlight1
+        color:skinstyle.highlight1
         radius:2.5
         Text {
             id: text2
@@ -109,8 +109,8 @@ Rectangle {
         height: scaleY(45)
         radius: 2.5
         clip:  true
-        color: skinStyle.darkhighlight
-        border.color: skinStyle.highlight1
+        color: skinstyle.darkhighlight
+        border.color: skinstyle.highlight1
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(.5)
 
@@ -295,7 +295,7 @@ Rectangle {
         Rectangle {
             width: container.width
             height: childrenRect.height
-            color: skinStyle.button_system_color
+            color: skinstyle.button_system_color
 
             Text {
                 text: section
@@ -332,8 +332,8 @@ Rectangle {
         spacing: scaleY(.5)
         AvOptionButton {
             id: buttonsq1
-            width: skinStyle.stdbuttonw
-            height: skinStyle.stdbuttonh
+            width: skinstyle.stdbuttonw
+            height: skinstyle.stdbuttonh
             radius: 10
 
             //anchors.leftMargin: 18
@@ -347,8 +347,8 @@ Rectangle {
 
         AvOptionButton {
             id: buttonsq2
-            width: skinStyle.stdbuttonw
-            height: skinStyle.stdbuttonh
+            width: skinstyle.stdbuttonw
+            height: skinstyle.stdbuttonh
             radius: 10
             buttontext: "Move"
             MouseArea{
@@ -359,8 +359,8 @@ Rectangle {
 
         AvOptionButton {
             id: buttonsq3
-            width: skinStyle.stdbuttonw
-            height: skinStyle.stdbuttonh
+            width: skinstyle.stdbuttonw
+            height: skinstyle.stdbuttonh
             radius: 10
             buttontext: "Close"
             x: ((parent.width/3)*2)

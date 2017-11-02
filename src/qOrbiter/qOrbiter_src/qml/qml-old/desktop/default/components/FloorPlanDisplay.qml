@@ -68,11 +68,11 @@ Item {
         objectName: "main_rect"
         height: scaleY(80)
         width:scaleX(80)
-        border.color: skinStyle.highlight1
+        border.color: skinstyle.highlight1
         border.width: scaleX(1) *.25
         radius: 5
         anchors.centerIn: parent
-        color:skinStyle.lighthighlight
+        color:skinstyle.lighthighlight
 
         Image {
             objectName: "floorplan_image"
@@ -86,7 +86,7 @@ Item {
         {
             height: childrenRect.height + 5
             width: scaleX(18)
-            color: skinStyle.lighthighlight
+            color: skinstyle.lighthighlight
             anchors.right: parent.right
             Text{
                 id:fplabel
@@ -107,8 +107,8 @@ Item {
                 delegate:Rectangle{
                     height: scaleY(9)
                     width: scaleX(16)
-                    color: skinStyle.accentcolor
-                    border.color: skinStyle.darkhighlight
+                    color: skinstyle.accentcolor
+                    border.color: skinstyle.darkhighlight
                     Text {
                         id: desc
                         text: m_description

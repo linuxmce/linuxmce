@@ -192,7 +192,7 @@ Item {
                         left: parent.left
                         bottom: parent.bottom
                     }
-                    height : Style.appButtonHeight*1.5
+                    height : appStyle.appButtonHeight*1.5
                     border.color: "white"
                     border.width: 2
                     opacity: .5

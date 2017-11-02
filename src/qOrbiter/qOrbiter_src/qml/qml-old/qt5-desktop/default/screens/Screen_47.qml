@@ -175,7 +175,7 @@ StyledScreen {
 
             Behavior on width {
                 PropertyAnimation{
-                    duration: appStyle.globalAnimationSpeed
+                    duration: appstyle.globalAnimationSpeed
                 }
             }
             Keys.onEscapePressed: {

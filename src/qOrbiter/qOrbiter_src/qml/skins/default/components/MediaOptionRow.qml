@@ -7,7 +7,7 @@ import "../."
 
 Item{
     id:option_row
-    height: Style.appNavigation_panelHeight
+    height: appStyle.appNavigation_panelHeight
     focus:true
     onActiveFocusChanged: if(activeFocus) optionContainer.forceActiveFocus()
 
@@ -62,7 +62,7 @@ Item{
                         left:selectionDisplay.right
                     }
                     delegate:  StyledButton {
-                        height: Style.appButtonHeight /2
+                        height: appStyle.appButtonHeight /2
                         width: parent.width
                         buttonRadius: status ? 5 : 0
                         buttonText: filterdlg.selectingUser? username: name
@@ -89,7 +89,7 @@ Item{
 
                 Column{
                     id:selectionDisplay
-                    width: Style.scaleX(35)
+                    width: appStyle.scaleX(35)
                     anchors{
                         left:parent.left
                         verticalCenter: parent.verticalCenter
@@ -99,38 +99,38 @@ Item{
                     StyledButton{
                         width: parent.width
                         buttonText: qsTr("Attribute")
-                        height: Style.appButtonHeight / 2
+                        height: appStyle.appButtonHeight / 2
                         onActivated: selectionView.model=attribfilter
                     }
                     StyledButton{
                         width: parent.width
-                        height: Style.appButtonHeight / 2
+                        height: appStyle.appButtonHeight / 2
                         buttonText: qsTr("Genre")
                         onActivated: selectionView.model=genrefilter
                     }
                     StyledButton{
                         width: parent.width
                         buttonText: qsTr("MediaType")
-                        height: Style.appButtonHeight / 2
+                        height: appStyle.appButtonHeight / 2
                         onActivated: selectionView.model=mediatypefilter
                     }
                     StyledButton{
                         width: parent.width
                         buttonText: qsTr("Resolution")
-                        height: Style.appButtonHeight / 2
+                        height: appStyle.appButtonHeight / 2
                         onActivated: selectionView.model=fileformatmodel
 
                     }
                     StyledButton{
                         width: parent.width
                         buttonText: qsTr("Sources")
-                        height: Style.appButtonHeight / 2
+                        height: appStyle.appButtonHeight / 2
 
                     }
                     StyledButton{
                         width: parent.width
                         buttonText: qsTr("Users")
-                        height: Style.appButtonHeight / 2
+                        height: appStyle.appButtonHeight / 2
                         onActivated:{/*filterdlg.selectingUser=true;*/ selectionView.model=userList}
                     }
                 }
@@ -142,8 +142,8 @@ Item{
                     anchors.centerIn: parent
                     Rectangle{
                         id:hdr
-                        height: Style.appNavigation_panelHeight
-                        color: Style.appcolor_background_light
+                        height: appStyle.appNavigation_panelHeight
+                        color: appStyle.appcolor_background_light
                         width: parent.width
                         anchors{
                             top:parent.top
@@ -181,8 +181,8 @@ Item{
 
                     Flow{
                         id:numberFlow
-                        height: Style.appButtonHeight*3
-                        width: Style.appButtonWidth*3
+                        height: appStyle.appButtonHeight*3
+                        width: appStyle.appButtonWidth*3
                         anchors{
                             top:hdr.bottom
                             horizontalCenter: hdr.horizontalCenter
@@ -272,15 +272,15 @@ Item{
     }
     Rectangle{
         anchors.fill: parent
-        color:  Style.appcolor_background_medium
-        opacity:option_row.active ? Style.appPanel_opacity : Style.appList_opacity
+        color:  appStyle.appcolor_background_medium
+        opacity:option_row.active ? appStyle.appPanel_opacity : appStyle.appList_opacity
     }
     StyledText{
         id:row_label
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         text:qsTr("Options", "Media Grid Options")
-        fontSize: Style.appFontSize_list
+        fontSize: appStyle.appFontSize_list
     }
 
     ScrollRow{
@@ -303,7 +303,7 @@ Item{
 
             LargeStyledButton{
                 buttonText: qsTr("Filters", "Media Filters")
-                fontSize: Style.appFontSize_list
+                fontSize: appStyle.appFontSize_list
                 arrow:false
                 anchors{
                     top:parent.top
@@ -313,8 +313,8 @@ Item{
             }
             LargeStyledButton{
                 buttonText: qsTr("Play All", "Play All Media on this Screen")
-                fontSize: Style.appFontSize_description
-                width: Style.appButtonWidth
+                fontSize: appStyle.appFontSize_description
+                width: appStyle.appButtonWidth
                 anchors{
                     top:parent.top
                     bottom:parent.bottom
@@ -323,8 +323,8 @@ Item{
             }
             LargeStyledButton{
                 buttonText: qsTr("A - Z", "Aplhabet")
-                fontSize: Style.appFontSize_description
-                width: Style.appButtonWidth
+                fontSize: appStyle.appFontSize_description
+                width: appStyle.appButtonWidth
                 anchors{
                     top:parent.top
                     bottom:parent.bottom

@@ -26,15 +26,7 @@ if [ $PROCESS = "install" ]; then
 		/usr/pluto/bin/sqlCVS $PLUTO_DB_CRED -n -D $MySqlDBName -r constants,dce,designer,document,ir,website import
 	) || exit $?
 	mysql $MySqlDBName < /usr/pluto/database/city.dump
-	
-	Q="GRANT ALL PRIVILEGES ON $MySqlDBName.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
-	mysql $MYSQL_DB_CRED -e "$Q"
-	
-	Q="GRANT ALL PRIVILEGES ON $MySqlDBName.* TO 'plutomedia'@'localhost';"
-	mysql $MYSQL_DB_CRED -e "$Q"
-	
-	Q="FLUSH PRIVILEGES;"
-	mysql $MYSQL_DB_CRED -e "$Q"
+
 fi
 if [ $PROCESS = "upgrade" ]; then
 	echo

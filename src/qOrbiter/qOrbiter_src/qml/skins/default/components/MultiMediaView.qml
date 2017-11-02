@@ -9,7 +9,7 @@ Item{
     onActiveFocusChanged: media_grid.forceActiveFocus()
     property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
     property int currentCellHeight:currentCellWidth
-    property int currentCellWidth:Style.scaleX(25)
+    property int currentCellWidth:appStyle.scaleX(25)
     
     property variant dvdPosterDimensions:{"w":755, "h":1080 }
     property variant hdPosterDimensions:{"w":955, "h":1080 }
@@ -105,7 +105,7 @@ Item{
                 //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
                 PropertyChanges {
                     target: multi_view_list
-                    currentCellHeight:manager.isProfile ? Style.scaleX(18) : Style.scaleX(14)
+                    currentCellHeight:manager.isProfile ? appStyle.scaleX(18) : appStyle.scaleX(14)
                     currentCellWidth:currentCellHeight
                 }
 
@@ -115,8 +115,8 @@ Item{
                 //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
                 PropertyChanges {
                     target: multi_view_list
-                    currentCellHeight: Style.scaleY(24)
-                    currentCellWidth:Style.scaleX(19)
+                    currentCellHeight: appStyle.scaleY(24)
+                    currentCellWidth:appStyle.scaleX(19)
                 }
                 StateChangeScript{
                     script: manager.setGridStatus(false)
@@ -127,8 +127,8 @@ Item{
                 extend:"video"
                 PropertyChanges {
                     target: multi_view_list
-                    currentCellHeight: Style.scaleY(23)
-                    currentCellWidth:Style.scaleX(17)
+                    currentCellHeight: appStyle.scaleY(23)
+                    currentCellWidth:appStyle.scaleX(17)
                 }
             },
             State {
@@ -137,8 +137,8 @@ Item{
                 extend:"video"
                 PropertyChanges {
                     target: multi_view_list
-                    currentCellHeight: Style.scaleY(24)
-                    currentCellWidth:Style.scaleX(33)
+                    currentCellHeight: appStyle.scaleY(24)
+                    currentCellWidth:appStyle.scaleX(33)
                 }
             },
             State {
@@ -148,7 +148,7 @@ Item{
                 PropertyChanges {
                     target: multi_view_list
                     currentCellHeight: currentCellWidth*hdPosterRatio
-                    currentCellWidth:Style.scaleY(25) //manager.isProfile ? Style.scaleX(10) : Style.scaleX(14.25)
+                    currentCellWidth:appStyle.scaleY(25) //manager.isProfile ? appStyle.scaleX(10) : appStyle.scaleX(14.25)
                 }
             },
             State {
@@ -164,7 +164,7 @@ Item{
                 PropertyChanges {
                     target: multi_view_list
                     currentCellHeight: currentCellWidth*hdPosterRatio
-                    currentCellWidth:Style.scaleX(20)
+                    currentCellWidth:appStyle.scaleX(20)
                 }
             },
             State {
@@ -173,8 +173,8 @@ Item{
                 extend:"tv"
                 PropertyChanges {
                     target: multi_view_list
-                    currentCellHeight: Style.scaleY(33)
-                    currentCellWidth:Style.scaleX(33)
+                    currentCellHeight: appStyle.scaleY(33)
+                    currentCellWidth:appStyle.scaleX(33)
                 }
             }
             ,
@@ -184,8 +184,8 @@ Item{
                 extend:"audio"
                 PropertyChanges {
                     target: multi_view_list
-                    currentCellHeight: Style.scaleY(33)
-                    currentCellWidth:Style.scaleX(33)
+                    currentCellHeight: appStyle.scaleY(33)
+                    currentCellWidth:appStyle.scaleX(33)
                 }
             }
         ]

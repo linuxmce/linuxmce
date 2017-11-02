@@ -143,8 +143,7 @@ m_FK_Users = 0;
 is_null[2] = false;
 m_Comment = "";
 is_null[3] = false;
-m_Date = "0000-00-00 00:00:00";
-is_null[4] = false;
+is_null[4] = true;
 is_null[5] = true;
 m_psc_id = 0;
 is_null[6] = true;
@@ -234,6 +233,9 @@ void Row_Document_Comment::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRO
 m_psc_restrict = val; is_modified=true; is_null[10]=false;}
 
 		
+bool Row_Document_Comment::Date_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[4];}
 bool Row_Document_Comment::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[5];}
@@ -251,6 +253,10 @@ bool Row_Document_Comment::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(s
 return is_null[10];}
 
 			
+void Row_Document_Comment::Date_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[4]=val;
+is_modified=true;
+}
 void Row_Document_Comment::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[5]=val;
 is_modified=true;
@@ -320,7 +326,7 @@ if (is_null[3])
 return "NULL";
 
 char *buf = new char[5000000];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comment.c_str(), (unsigned long) min((size_t)16777215,m_Comment.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comment.c_str(), (unsigned long) min((size_t)50331645,m_Comment.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

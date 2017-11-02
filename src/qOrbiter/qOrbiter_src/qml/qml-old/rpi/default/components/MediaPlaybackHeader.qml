@@ -9,8 +9,8 @@ Item {
     }
     Rectangle{
         anchors.fill: parent
-        color:appStyle.darkHighlightColor
-        opacity: appStyle.appOpacity
+        color:appstyle.darkHighlightColor
+        opacity: appstyle.appOpacity
     }
     
     Item{
@@ -31,7 +31,7 @@ Item {
             smooth: true
             fontSize: 40
 
-            color:skinStyle.accentcolor
+            color:skinstyle.accentcolor
         }
     }
     Item{

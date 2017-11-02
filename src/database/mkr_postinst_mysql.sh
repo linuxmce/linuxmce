@@ -27,7 +27,8 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 		init_connect='SET NAMES utf8; SET collation_connection = utf8_general_ci;' # Set UTF8 for connection
 		character-set-server=utf8
 		collation-server=utf8_general_ci
-		skip-character-set-client-handshake  # Tells to server to ignore client's charset for connetion
+		# We remove the skip-character-set-client-handshake, as it causes issues with MySQL 5.7 and sqlCVS
+		# skip-character-set-client-handshake  # Tells to server to ignore client's charset for connetion
 		skip-name-resolve
 		skip-external-locking
 		innodb-flush-log-at-trx-commit = 2
@@ -36,18 +37,34 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 		query_cache_size=128M
 		secure-file-priv = ""
 		EOF
-
-	Q="GRANT ALL PRIVILEGES ON pluto_main.* to 'root'@'127.0.0.1';"
-	mysql $MYSQL_DB_CRED -e "$Q"
-
-	Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';"
-	mysql $MYSQL_DB_CRED -e "$Q"
-
-	Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'localhost';"
-	mysql $MYSQL_DB_CRED -e "$Q"
-
-	Q="FLUSH PRIVILEGES;"
-	mysql $MYSQL_DB_CRED -e "$Q"
-
-	service mysql restart
+		service mysql restart
 fi
+if [ "x$MySqlUser" == "x" ] ; then
+	MySqlUser=root
+fi
+# Added user create, as mysql auth has changed. -tschak
+echo "Creating MySQL user $MySqlUser and asteriskuser"
+for NEWUSER in $MySqlUser 'asteriskuser' 'plutosecurity' 'plutotelecom' 'plutomedia' 
+do
+	# We need both 127.0.0.1 and localhost to work.
+	Q="CREATE USER '$NEWUSER'@'127.0.0.1'; CREATE USER '$NEWUSER'@'localhost';"
+	# If it fails we continue with the grants.
+	mysql $MYSQL_DB_CRED -e "$Q" || :
+done
+			
+# Added user create, part 2 -tschak
+Q="SET PASSWORD FOR '$MySqlUser'@'127.0.0.1' = PASSWORD('$MySqlPassword')"
+mysql $MYSQL_DB_CRED -e "$Q"
+
+# Even if we do not modify the my.cnf file (ie. blacklist it),
+# we still want all the grants to hapen.
+Q="GRANT ALL PRIVILEGES ON pluto_main.* to '$MySqlUser'@'127.0.0.1';GRANT ALL PRIVILEGES ON pluto_main.* to '$MySqlUser'@'localhost';"
+mysql $MYSQL_DB_CRED -e "$Q"
+
+Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'localhost';"
+mysql $MYSQL_DB_CRED -e "$Q"
+
+Q="FLUSH PRIVILEGES;"
+mysql $MYSQL_DB_CRED -e "$Q"
+
+service mysql restart

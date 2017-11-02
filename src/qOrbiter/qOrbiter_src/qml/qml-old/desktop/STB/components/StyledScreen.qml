@@ -13,7 +13,7 @@ Item {
 
 //    Rectangle{
 //        anchors.fill: parent
-//        gradient: appStyle.contentGradient
+//        gradient: appstyle.contentGradient
 //        opacity: .25
 //    }
 

@@ -19,11 +19,11 @@ Panel{
     Component{
         id:standardButtons
         Row{
-            width: children.length*Style.appButtonWidth
+            width: children.length*appStyle.appButtonWidth
             height:parent.height
             StyledButton{
                 id:resend
-                height:Style.appNavigation_panelHeight
+                height:appStyle.appNavigation_panelHeight
 
                 buttonText: qsTr("Resend AV", "Resend AV Commands")
                 onActivated: manager.currentScreen="Screen_38.qml"
@@ -31,7 +31,7 @@ Panel{
 
             StyledButton{
                 id:power_btn
-                height:Style.appNavigation_panelHeight
+                height:appStyle.appNavigation_panelHeight
                 buttonText: qsTr("Power Off", "Turn off Device")
                 onConfirm:{
                     manager.exitMediaMenu()
@@ -41,7 +41,7 @@ Panel{
 
             StyledButton{
                 id:options
-                height:Style.appNavigation_panelHeight
+                height:appStyle.appNavigation_panelHeight
                 buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
                 onActivated: {
                     if(contentItem.state==="options"){
@@ -55,7 +55,7 @@ Panel{
             StyledButton{
                 id:btns
 
-                height:Style.appNavigation_panelHeight
+                height:appStyle.appNavigation_panelHeight
                 buttonText: qsTr("Buttons", "Additional Media Buttons")
                 onActivated: {
                     if(contentItem.state=="buttongrid"){
@@ -67,7 +67,7 @@ Panel{
             }
             StyledButton{
                 id:transfer
-                height:Style.appNavigation_panelHeight
+                height:appStyle.appNavigation_panelHeight
                 buttonText: qsTr("Transfer", "Move media")
                 onActivated: qmlRoot.createPopup(transferMediaPrompt)
             }
@@ -81,14 +81,14 @@ Panel{
             width: 400
             StyledButton{
                 id:resend
-                height:Style.appNavigation_panelHeight
+                height:appStyle.appNavigation_panelHeight
                 buttonText: qsTr("Resend AV", "Resend AV Commands")
                 onActivated: manager.currentScreen="Screen_38.qml"
             }
 
             StyledButton{
                 id:options
-                height:Style.appNavigation_panelHeight
+                height:appStyle.appNavigation_panelHeight
                 buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
                 onActivated: {
                     if(contentItem.state==="options"){
@@ -101,7 +101,7 @@ Panel{
 
             StyledButton{
                 id:btns
-                height:Style.appNavigation_panelHeight
+                height:appStyle.appNavigation_panelHeight
                 buttonText: qsTr("Buttons", "Additional Media Buttons")
                 onActivated: {
                     if(contentItem.state=="buttongrid"){
@@ -120,7 +120,7 @@ Panel{
 
     //        StyledButton{
     //            id:resend
-    //            height:Style.appNavigation_panelHeight
+    //            height:appStyle.appNavigation_panelHeight
 
     //            buttonText: qsTr("Resend AV", "Resend AV Commands")
     //            onActivated: manager.currentScreen="Screen_38.qml"
@@ -128,7 +128,7 @@ Panel{
 
     //        StyledButton{
     //            id:power_btn
-    //            height:Style.appNavigation_panelHeight
+    //            height:appStyle.appNavigation_panelHeight
     //            buttonText: qsTr("Power Off", "Turn off Device")
     //            onConfirm:{
     //                manager.exitMediaMenu()
@@ -138,7 +138,7 @@ Panel{
 
     //        StyledButton{
     //            id:options
-    //            height:Style.appNavigation_panelHeight
+    //            height:appStyle.appNavigation_panelHeight
     //            buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
     //            onActivated: {
     //                if(contentItem.state==="options"){
@@ -152,7 +152,7 @@ Panel{
     //        StyledButton{
     //            id:btns
 
-    //            height:Style.appNavigation_panelHeight
+    //            height:appStyle.appNavigation_panelHeight
     //            buttonText: qsTr("Buttons", "Additional Media Buttons")
     //            onActivated: {
     //                if(contentItem.state=="buttongrid"){

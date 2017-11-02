@@ -13,8 +13,8 @@ Item{
     Rectangle{
         id:hdrFill
         anchors.fill: parent
-        color:style.headerBgColor
-        opacity: style.bgLightOpacity
+        color:appStyle.headerBgColor
+        opacity: appStyle.bgLightOpacity
     }
 
     StyledText{

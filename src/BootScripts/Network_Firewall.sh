@@ -792,10 +792,11 @@ if [[ ! -z "$RULE" ]]; then
 		sql="SELECT Protocol FROM Firewall WHERE RuleType='$CHAIN' AND SourceIP='$SOURCEIP' AND Protocol='$PROTOCOL'"
 		$(RunSQL "$sql")
 		if ! [ "$R" ]; then
-			echo "1"
+			sql="INSERT INTO Firewall (Place, Protocol, IntIf, Ruletype, SourceIP, RPolicy, Offline, Disabled, Description ) VALUES ('1', '$PROTOCOL', '$INIF', '$CHAIN', '$SOURCEIP', 'ACCEPT', '0', '0', 'Temporary firewall rule for a user');"
+            $(RunSQL "$sql")
 		else
-			sql="UPDATE Firewall SET Offline='0' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL'";
-			$(RunSQL "$sql")
+			sql="UPDATE Firewall SET Offline='0', IntIf='$INIF' WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL'"
+			R=$(RunSQL "$sql")
 		fi
 		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='$CHAIN' AND Protocol='$PROTOCOL' AND Place='$PLACE' AND Disabled='0'"
         R=$(RunSQL "$Q")
@@ -821,8 +822,8 @@ if [[ ! -z "$RULE" ]]; then
             DestPort=$(Field 9 "$Port")
             RPolicy=$(Field 10 "$Port")
             Description=$(Field 11 "$Port")
-            #echo IPTables "$IPVersion" "insert" "$PLACE" "" "$CHAIN" "$IntIf" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
-            IPTables "$IPVersion" "insert" "$PLACE" "" "$CHAIN" "$IntIf" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
+            #echo IPTables "$IPVersion" "insert" "$PLACE" "" "$CHAIN" "$INIF" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
+            IPTables "$IPVersion" "insert" "$PLACE" "" "$CHAIN" "$INIF" "$ExtIf" "$Matchname" "$Protocol" "$SrcIP" "$SrcPort1:$SrcPort2" "$DestIP" "$DestPort" "$RPolicy" "$Description"
         done		
 	else
 		$IP6TABLES -D $CHAIN $PLACE
@@ -991,7 +992,7 @@ fi
 	        Q="SELECT Matchname, IntIF, SourceIP, Ruletype FROM Firewall WHERE IntIf='$ExtIf' AND SourcePort='1900' AND RuleType='input' ORDER BY PK_Firewall"
 	        R=$(RunSQL "$Q")
 	        if ! [ "$R" ]; then
-	                Q="INSERT INTO Firewall (Place, IntIF, Protocol, SourcePort RuleType, RPolicy, Description) VALUES ('2', '$ExtIf', 'udp-ipv4', '1900', 'input', 'DROP', 'Block UPNP (udp 1900) from External Network')"
+	                Q="INSERT INTO Firewall (Place, IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('2', '$ExtIf', 'udp-ipv4', '1900', 'input', 'DROP', 'Block UPNP (udp 1900) from External Network')"
 	                $(RunSQL "$Q")
 	        fi
 			

@@ -29,7 +29,7 @@ Item{
     Rectangle{
         anchors.fill: parent
         opacity:ftr.activeFocus ? 1 : .65
-        color:appStyle.mainColor
+        color:appstyle.mainColor
         border.width: ftr.activeFocus ? 2 : 0
         border.color:  "red"
     }
@@ -84,7 +84,7 @@ Item{
             Rectangle{
                 anchors.fill: parent
                 radius:5
-                color: currentItem===index ? appStyle.lightHighlightColor : appStyle.darkHighlightColor
+                color: currentItem===index ? appstyle.lightHighlightColor : appstyle.darkHighlightColor
             }
             StyledText{
                 anchors.centerIn: parent
@@ -289,8 +289,8 @@ Item{
             to: "*"
 
             AnchorAnimation{
-                duration: appStyle.globalAnimationSpeed
-                easing.type: appStyle.globalAnimationEasing
+                duration: appstyle.globalAnimationSpeed
+                easing.type: appstyle.globalAnimationEasing
 
             }
         }

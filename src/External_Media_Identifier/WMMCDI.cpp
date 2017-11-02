@@ -22,6 +22,7 @@ WMMCDI::WMMCDI(string sPath)
 {
   m_sPath=sPath;
   m_sWMMCDIId="";
+  m_iNumtracks=0;
 }
 
 WMMCDI::~WMMCDI()
@@ -68,6 +69,7 @@ bool WMMCDI::calculate()
   cdtoc[tochdr.cdth_trk1].frame += cdtoc[tochdr.cdth_trk1].sec*75;
   close(drive);
   num_tracks = tochdr.cdth_trk1;
+  m_iNumtracks=num_tracks;
 
   i=0;
   

@@ -51,7 +51,7 @@ class FileDetailsObject : public QObject
     Q_PROPERTY(int attributeType READ attributeType WRITE setAttributeType NOTIFY attributeTypeChanged)
 
 public:
-    FileDetailsObject(int a, QString b, int c):m_attributeValue(a), m_attribute(b), m_attributeType(c) { }
+    FileDetailsObject(int attributeId, QString attribute, int attributeType):m_attributeValue(attributeId), m_attribute(attribute), m_attributeType(attributeType) { }
     FileDetailsObject(){}
 
     QString attribute() const{ return m_attribute; }
@@ -331,16 +331,19 @@ public slots:
     void setAlbum (const QString inc_album) {album = inc_album;  emit albumChanged();}
     QString getAlbum () {return album;}
 
+    void setPerformers (const QString inc_performer) {
+        m_performerList.append( new FileDetailsObject(-1, inc_performer, ATTRIBUTETYPE_Performer_CONST ) );
+                emit performersChanged();
+    }
 
-
-
-    void setPerformers (const QString inc_performer) {performers << inc_performer; emit performersChanged();}
     QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
     QStringList getPerformerList() {return performers;}
 
+    //QQmlListProperty for performers
+    FileDetailsObject * performer(int idx) {return m_performerList.at(idx);}
+    int performerCount() { return m_performerList.size();}
     QQmlListProperty <FileDetailsObject> performersList(){
-        return QQmlListProperty<FileDetailsObject>(this, m_performerList);
-    }
+        return QQmlListProperty<FileDetailsObject>(this, this, &FileDetailsClass::performerCount, &FileDetailsClass::performer);     }
 
     QQmlListProperty<FileDetailsObject> albumArtistList(){
         return QQmlListProperty<FileDetailsObject>(this, m_albumArtistList);
@@ -395,7 +398,7 @@ public slots:
     inline QString getScreenShot() {return screenshot;}
 
     inline QString getFilename() {return filename;}
-    inline void setFilename (const QString f) {filename = f; emit fileNameChanged();}
+    inline void setFilename (const QString f) {filename = QString(f).remove("!F"); emit fileNameChanged();}
 
     inline QString getPath() {return path;}
     inline void setPath (const QString f) {path = f; emit pathChanged();}
@@ -418,6 +421,10 @@ private:
     QMap<int, FileDetailsObject*>  m_singleItemMap;
 
     QString m_runningTime;
+
+    //static functions for qqmllist property
+    static int performerCount(QQmlListProperty<FileDetailsObject>* list) { return reinterpret_cast<FileDetailsClass*>(list->data)->performerCount(); }
+    static FileDetailsObject * performer(QQmlListProperty<FileDetailsObject> * list, int idx) { return reinterpret_cast<FileDetailsClass*>(list->data)->performer(idx); }
 
 };
 

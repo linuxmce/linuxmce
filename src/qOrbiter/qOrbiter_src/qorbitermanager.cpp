@@ -265,8 +265,6 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
         if(m_testScreenSize==0){
             m_window->setVisibility(QWindow::FullScreen);
         } else{
-
-
             m_window->setVisibility(QWindow::Windowed);
             m_window->resize(appWidth, appHeight);
             checkOrientation(m_window->size());
@@ -275,7 +273,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 
         checkOrientation(m_window->size());
 #else
-        m_window->setVisibility(QWindow::FullScreen);
+       // m_window->setVisibility(QWindow::FullScreen);
         appHeight = m_window->height();
         appWidth= m_window->width();
         checkOrientation(m_window->screen()->size());
@@ -2677,8 +2675,9 @@ bool qorbiterManager::createThemeStyle()
         qDebug() << "New style failed application! " << filePath;
     }
 
-    //  m_appEngine->clearComponentCache();
-    m_appEngine->rootContext()->setContextProperty("Style", m_style);
+    m_appEngine->clearComponentCache();
+
+    m_appEngine->rootContext()->setContextProperty("appStyle", m_style);
 
     qDebug() << Q_FUNC_INFO << " exit ";
     return true;
