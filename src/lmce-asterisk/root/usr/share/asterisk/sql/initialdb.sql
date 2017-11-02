@@ -154,6 +154,7 @@ DELETE FROM extensions WHERE exten='*65';
 DELETE FROM extensions WHERE context='fax';
 DELETE FROM extensions WHERE context='fax-transmit';
 DELETE FROM extensions WHERE exten='*96';
+DELETE FROM extensions WHERE exten='*100';
 
 ALTER TABLE extensions AUTO_INCREMENT=1;
 
@@ -234,6 +235,12 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('applications', '*96', 2, 'Wait', '1'),
 ('applications', '*96', 3, 'MusicOnHold', ''),
 ('applications', '*96', 4, 'Hangup', '');
+
+-- *100: Voicemailmain
+INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
+('applications', '*100', 1, 'Answer', ''),
+('applications', '*100', 2, 'Voicemailmain',''),
+('applications', '*100', 3, 'Hangup', '');
 
 --
 -- Everything went fine until here, so let's commit to db

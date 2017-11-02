@@ -4,7 +4,7 @@ import QtQuick.Controls 1.2 as QtControls
 import "../"
 Item{
     id:settingsRow
-    height: Style.scaleY(15)
+    height: appStyle.scaleY(15)
     width: parent.width
     property int cat:SettingsType.Settings_Network
     property int val:SettingsKey.Setting_Network_Router
@@ -83,8 +83,8 @@ Item{
                 right:parent.right
                 verticalCenter: parent.verticalCenter
             }
-            width: Style.scaleX(25)
-            height: Style.scaleY(5)
+            width: appStyle.scaleX(25)
+            height: appStyle.scaleY(5)
             color:"darkgrey"
             border.color: "blue"
             border.width: 2
@@ -95,7 +95,7 @@ Item{
                 }
 
                 text: String(settingValue)
-                font.pixelSize:  Style.appFontSize_list
+                font.pixelSize:  appStyle.appFontSize_list
                 color: "white"
                 onAccepted: {
                     settingsRow.valueChanged(text)
@@ -115,14 +115,14 @@ Item{
 
             verticalCenter: parent.verticalCenter
         }
-        fontSize: Style.appFontSize_list
+        fontSize: appStyle.appFontSize_list
         text:settingName
     }
     
     StyledText{
         id:settingValDisplay
         visible: !useSwitch
-        fontSize: Style.appFontSize_list
+        fontSize: appStyle.appFontSize_list
         anchors{
             right:parent.right
             verticalCenter: parent.verticalCenter

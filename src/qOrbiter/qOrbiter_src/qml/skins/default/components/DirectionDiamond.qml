@@ -4,8 +4,8 @@ import org.linuxmce.enums 1.0
 import "../."
 Item {
     id: mediaSquare
-    height: manager.isProfile ? Style.scaleY(33) : Style.scaleY(50)
-    width:manager.isProfile ? Style.scaleX(50) : Style.scaleX(33)
+    height: manager.isProfile ? appStyle.scaleY(33) : appStyle.scaleY(50)
+    width:manager.isProfile ? appStyle.scaleX(50) : appStyle.scaleX(33)
 
     anchors{
         verticalCenter: parent.verticalCenter

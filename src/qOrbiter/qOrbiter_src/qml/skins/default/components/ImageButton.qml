@@ -3,7 +3,7 @@ import "../components"
 import "../."
 Item{
     id:img_button
-    height: manager.isProfile ? Style.scaleY(8) : Style.scaleY(10)
+    height: manager.isProfile ? appStyle.scaleY(8) : appStyle.scaleY(10)
     width: height
     signal activated()
     property string upImage:""

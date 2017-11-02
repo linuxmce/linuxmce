@@ -39,7 +39,7 @@ Item{
             smooth: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.episode =="" ? false: true
-            // color:appStyle.accentcolor
+            // color:appstyle.accentcolor
         }
 
 

@@ -1,0 +1,74 @@
+zfs-auto-snapshot (1.1.0-0ubuntu1~trusty) trusty; urgency=low
+
+  [ Markus Heberling ]
+  * Use only name property for zfs list
+
+  [ Darik Horn ]
+  * Add a switch for the fast zfs list invocation.
+
+  [ Mike Swanson ]
+  * Add a manpage
+  * Update Makefile for the manual page
+
+  [ HawkOwl ]
+  * Set the snapshots to use UTC time, which makes the date/time display correctly in Windows 7 Previous Versions.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Mon, 31 Mar 2014 01:48:58 -0500
+
+zfs-auto-snapshot (1.0.8-0ubuntu2) unstable; urgency=low
+
+  * Update the debian/control file.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Sun, 31 Mar 2013 23:10:55 -0500
+
+zfs-auto-snapshot (1.0.8-0ubuntu1) unstable; urgency=low
+
+  * Update the README file to be more descriptive.
+  * Fix pool exclusions.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Sat, 21 Jan 2012 16:37:28 -0600
+
+zfs-auto-snapshot (1.0.7-0ubuntu1) unstable; urgency=low
+
+  [ Darik Horn ]
+  * Change objects to datasets in help and comments.
+  * Set keep=8 in the weekly cron job.
+
+  [ Ulrich Petri ]
+  * Fixed --prefix and --sep regexes
+
+ -- Darik Horn <dajhorn@vanadac.com>  Wed, 28 Dec 2011 13:30:02 -0600
+
+zfs-auto-snapshot (1.0.6-0ubuntu1) unstable; urgency=low
+
+  * Remove redundant lines in the cron.d file.
+  * Fix the hourly-daily transposition in the Makefile.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Mon, 28 Nov 2011 00:10:05 -0600
+
+zfs-auto-snapshot (1.0.5-0ubuntu1) unstable; urgency=low
+
+  * Split the cron file for anacron compatibilty.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Fri, 25 Nov 2011 14:28:07 -0600
+
+zfs-auto-snapshot (1.0.4-0ubuntu1) unstable; urgency=low
+
+  * Invert the --skip-scrub test.
+  * Fold the main loops into a do_snapshots function.
+  * Consistently quote literal strings.
+  * Implement --prefix parameter checking.
+  * Rebase exit codes to above 127.
+  * Implement the --event option for :auto-snap-desc.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Wed, 23 Nov 2011 10:49:14 -0600
+
+zfs-auto-snapshot (1.0.3-0ubuntu1) unstable; urgency=low
+
+  * Add -q to the getopt list of short options.
+  * Add an explicit `exit 0` to the end of the script.
+  * Add gbp.conf file for git-buildpackage.
+  * Expand the options variable in the cron part file.
+  * Initial debian packaging.
+
+ -- Darik Horn <dajhorn@vanadac.com>  Mon, 21 Nov 2011 21:52:11 -0600

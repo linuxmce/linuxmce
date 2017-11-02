@@ -39,7 +39,7 @@ FileDetailsClass::FileDetailsClass(QObject* qorbiter_ptr, QObject *parent) :
 
 void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QString val)
 {
-    qDebug() << " Handling  attribute " << attribute << " value:: " << val;
+   // qDebug() << " Handling  attribute " << attribute << " value:: " << val;
 
     switch (attribType) {
     case ATTRIBUTETYPE_Director_CONST:m_directorList.append(new FileDetailsObject(attribute, val, attribType));             emit directorChanged();    break;
@@ -56,6 +56,7 @@ void FileDetailsClass::handleNewFileAttribute(int attribType, int attribute, QSt
     case ATTRIBUTETYPE_Album_Artist_CONST:m_albumArtistList.append(new FileDetailsObject(attribute, val, attribType) );     emit albumArtistChanged(); break;
     case ATTRIBUTETYPE_Season_Number_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) );     emit seasonChanged(); break;
     case ATTRIBUTETYPE_Release_Date_CONST:m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) );     emit releaseDateChanged(); break;
+    case ATTRIBUTETYPE_Run_Time_CONST:setRunTime(val); /*m_singleItemMap.insert(attribType, new FileDetailsObject(attribute, val, attribType) );*/  ; break;
         break;
     default:
         qDebug() << " No handler for attribute " << attribute << " value:: " << val;

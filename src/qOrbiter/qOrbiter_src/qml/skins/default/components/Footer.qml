@@ -23,18 +23,18 @@ Item{
         layout.forceActiveFocus()
     }
 
-    height: Style.appNavigation_panelHeight
+    height: appStyle.appNavigation_panelHeight
     Rectangle{
         id:bg_fill
         anchors.fill: parent
-        color:Style.appcolor_background_light
-        opacity: Style.appHeader_opacity
+        color:appStyle.appcolor_background_light
+        opacity: appStyle.appHeader_opacity
     }
     Glow{
         anchors.fill:bg_fill
         radius:8
         samples:16
-        color:Style.apptext_color_active
+        color:appStyle.apptext_color_active
         source:bg_fill
         visible:footer.activated
     }
@@ -74,7 +74,7 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: Style.transition_accentTime
+                duration: appStyle.transition_accentTime
                 easing.type: Easing.OutExpo
             }
         }

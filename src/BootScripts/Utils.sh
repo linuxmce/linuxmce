@@ -713,7 +713,7 @@ FindVideoDriver() {
 	local prop_driver="fbdev"
 
 	# 1002=ATI, 1106=VIA, 10de=nVidia, 8086=Intel 1013=cirrus 80ee=VirtualBox
-	chip_man=$(echo "$vga_info" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086|\[1013|\[80ee)')
+	chip_man=$(echo "$vga_info" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086|\[1013|\[80ee|\[15ad)')
 
 	case "$chip_man" in
 		*10de)
@@ -753,7 +753,9 @@ FindVideoDriver() {
 		*1013)
 			prop_driver="cirrus" ;;
 		*80ee)
-			prop_driver="vboxvideo" ;;
+		        prop_driver="vboxvideo" ;;
+		*15ad)
+		        prop_driver="vmware" ;;
 		*)
 			prop_driver="fbdev" ;;
 	esac
@@ -768,7 +770,7 @@ DriverRank() {
 	local driver_rank="1"
 	local prop_driver=$(FindVideoDriver "$vga_info")
 	case "$prop_driver" in
-		cirrus) driver_rank="2" ;;
+		vmware) driver_rank="2" ;;
 		vboxvideo) driver_rank="3" ;;
 		i740|i128|mach64) driver_rank="4" ;;
 		radeon) driver_rank="5" ;;
@@ -919,6 +921,11 @@ InstallVideoDriver() {
 				apt-get -yf install xserver-xorg-video-cirrus"$LTS_HES"
 				VerifyExitCode "Install Cirrus Driver"
 			fi ;;
+		vmware)
+		        if ! PackageIsInstalled open-vm-tools-desktop ; then
+			        apt-get -yf install open-vm-tools-desktop
+			        VerifyExitCode "Install VMWare Drivers"
+			fi ;;
 
 		# VirtualBox
 		vboxvideo)
@@ -946,7 +953,7 @@ InstallRoutine() {
 
 	if [[ -f /etc/X11/xorg.conf ]] && [[ $(wc -l <<< "$vga_pci") -lt "2" ]]; then
 		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
-		cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|cirrus|vboxvideo|fbdev)')
+		cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|cirrus|vboxvideo|vmware|fbdev)')
 		if [[ "$prop_driver" != "$cur_driver" ]] && [[ -z $online ]]; then
 			offline_mismatch="true"
 		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then

@@ -12,7 +12,7 @@ ScrollRow{
     width: parent.width
     contentHeight: height
     contentWidth: content.width
-    height: Style.scaleY(8)
+    height: appStyle.scaleY(8)
     
     Row{
         id:content

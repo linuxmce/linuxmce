@@ -91,6 +91,11 @@
 	$GLOBALS['Raid5']=1849;					// Raid 5
 	$GLOBALS['Raid1']=1851;					// Raid 1
 	$GLOBALS['Raid0']=1854;					// Raid 0
+	$GLOBALS['ZFSPool']=2351;				// ZFS Pool (Striped)
+	$GLOBALS['ZFSMirror']=2352;				// ZFS Mirrored Pool
+	$GLOBALS['ZFSRaidZ1']=2353;				// ZFS RAID Z1
+	$GLOBALS['ZFSRaidZ2']=2354;				// ZFS RAID Z2
+	$GLOBALS['ZFSRaidZ3']=2355;				// ZFS RAID Z3
 	$GLOBALS['VDR_Plugin']=1704;				// VDR plugin
 	$GLOBALS['SlimServer_Streamer']=53;			// SlimServer Streamer
 	$GLOBALS['PhotoScreenSaver']=1825;			// Photo Screen Saver

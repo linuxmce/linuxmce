@@ -41,7 +41,7 @@ linux-rasp-pi-g++{
 }
 
 android-g++{
-    DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+    DESTDIR=$$[QT_INSTALL_PREFIX]/qml/AudioVisual
   }
 
 macx-g++{
@@ -123,7 +123,7 @@ HEADERS += \
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {
 
 android-g++{
-   QMLDIR_TARGET=../../../platforms/Android/androidComponents/AudioVisual/qmldir
+   QMLDIR_TARGET=$$DESTDIR/qmldir
 }
 
 linux-g++{

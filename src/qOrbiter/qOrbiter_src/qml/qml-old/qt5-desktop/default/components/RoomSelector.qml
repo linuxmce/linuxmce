@@ -32,10 +32,10 @@ Item {
             right:parent.right
             top:parent.top
         }
-        height: appStyle.stdHdrHeight
+        height: appstyle.stdHdrHeight
         Rectangle{
             anchors.fill: parent
-            color: appStyle.primaryLightColor
+            color: appstyle.primaryLightColor
         }
         StyledText{
             anchors.centerIn: parent
@@ -62,7 +62,7 @@ Item {
             property bool expanded:ea_list.length > 1 ? true : false
 
             GradientFiller{
-                fillColor: index === room_list.currentIndex ? appStyle.complimentColorLight : appStyle.complimentColorDark
+                fillColor: index === room_list.currentIndex ? appstyle.complimentColorLight : appstyle.complimentColorDark
             }
 
             Keys.onPressed:{
@@ -140,12 +140,12 @@ Item {
                     }
 
                     GradientFiller{
-                        fillColor: appStyle.primaryLightColor
+                        fillColor: appstyle.primaryLightColor
                     }
 
                     Rectangle{
                         anchors.fill: parent
-                        color: index === innerList.currentIndex ? appStyle.mainColor : "grey"
+                        color: index === innerList.currentIndex ? appstyle.mainColor : "grey"
                         radius: 5
                         opacity:index === innerList.currentIndex ? .65 : .50
                     }

@@ -1477,7 +1477,7 @@ function writeConf($accessFile, $variable,$oldValue,$newValue)
 	}
 	$oldFile=implode('',$oldFileArray);
 	$stringToReplace=$variable.'='.$oldValue;
-	if(preg_match($stringToReplace,$oldFile)){
+	if(preg_match("/".$stringToReplace."/",$oldFile)){
 		$newFile=str_replace($stringToReplace,$variable.'='.$newValue,$oldFile);
 	}
 	else

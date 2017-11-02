@@ -20,27 +20,27 @@ StyledScreen {
             id: pendingTasks
             label:qsTr("Current pending tasks")
             anchors.fill: parent
-            anchors.topMargin: Style.scaleY(10)
+            anchors.topMargin: appStyle.scaleY(10)
             dataGrid: DataGrids.Pending_Tasks
             dataGridLabel: "ptasks_"
             model: manager.getDataGridModel("ptasks", DataGrids.Pending_Tasks)
 
             delegate: Item {
-                width: Style.scaleX(90)
-                height: Style.scaleY(10)
+                width: appStyle.scaleX(90)
+                height: appStyle.scaleY(10)
                 Column{
                     anchors.fill: parent
                     StyledText {
                         id: tasktitle
                         text: description
                         color: "white"
-                        fontSize: Style.appFontSize_list
+                        fontSize: appStyle.appFontSize_list
                     }
                     StyledText {
                         id: taskLabel
                         text: value
                         color: "white"
-                         fontSize: Style.appFontSize_list
+                         fontSize: appStyle.appFontSize_list
                     }
                 }
 

@@ -95,12 +95,12 @@ StyledScreen{
             }
 
             headerTitle: "Security Panel"
-            property int flowButtonHeight: Style.appButtonHeight
+            property int flowButtonHeight: appStyle.appButtonHeight
             property int flowButtonWidth:flow1.width/3
 
             TextInput {
                 id: text_input1
-                height: Style.scaleY(8)
+                height: appStyle.scaleY(8)
                 anchors.top: keypadSection.top
                 anchors.topMargin: keypadSection.panelHeaderHeight+10
                 anchors.left: parent.left

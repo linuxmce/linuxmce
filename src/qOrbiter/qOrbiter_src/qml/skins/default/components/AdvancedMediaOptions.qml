@@ -38,8 +38,8 @@ Item{
 
     Rectangle{
         id:optionContainer
-        gradient:Style.bgContentGradient
-        width: Style.scaleX(15)
+        gradient:appStyle.bgContentGradient
+        width: appStyle.scaleX(15)
 
         anchors{
             top:parent.top
@@ -58,7 +58,7 @@ Item{
                     left:parent.left
                     right:parent.right
                 }
-                height:Style.scaleY(20)
+                height:appStyle.scaleY(20)
                 onActivated: slideOut.source = control
             }
         }

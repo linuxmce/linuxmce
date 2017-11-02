@@ -1,0 +1,11 @@
+Package: *
+Pin: release o=LP-PPA-zfs-native-daily
+Pin-Priority: 1001
+
+Package: *
+Pin: release o=LP-PPA-zfs-native-grub
+Pin-Priority: 1001
+
+Package: *
+Pin: release o=LP-PPA-zfs-native-stable
+Pin-Priority: 1001

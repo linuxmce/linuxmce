@@ -41,6 +41,7 @@ namespace DCE
     int m_iSerialNum;
     int m_iStreamID;
     int m_iPreviousAudioTrack;
+    int m_iChapter;
     map<int, int> m_mapDgIndexToSubtitleId;
     map<int, int> m_mapDgIndexToAudioTrackId;
     DCE::VLC_Player* m_pVLC_Player;
@@ -81,7 +82,7 @@ namespace DCE
     bool init();
     bool CreateWindow();
     bool Minimize();
-    bool PlayURL(string sMediaURL, int iStreamID, string sMediaPosition, string& sMediaInfo);
+    bool PlayURL(string sMediaURL, int iStreamID, string sMediaPosition, string& sMediaInfo, bool bIsStreaming);
     void Stop();
     float GetDuration();
     int64_t GetCurrentDuration();
@@ -95,6 +96,8 @@ namespace DCE
     void UpdateStatus();
     void Pause();
     void Restart();
+    void SyncPause();
+    void SyncRestart();
     void SetRate(float fMediaPlayBackSpeed);
     void JumpFwd(int iMult);
     void JumpBack(int iMult);
@@ -123,6 +126,8 @@ namespace DCE
     int GetCurrentAngle() { return 0; } 
     void SetAudioTrack(int iAudioTrack);
     int GetAudioTrack();
+    int GetVLCAudioTrack();
+    void SetPreviousAudioTrack(int iTrack) { m_iPreviousAudioTrack = iTrack; };
     void SetSubtitle(int iSubtitle);
     int GetSubtitle();
     string GetAllSubtitles();
@@ -141,6 +146,8 @@ namespace DCE
     void ReportPlaybackStarted();
     void EnumerateAudioDevices();
     string PreProcessMediaURL(string sMediaURL);
+    void OSD_Status(string sStatusString);
+    string OSD_Time(int64_t time);
   };
 
 }

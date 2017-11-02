@@ -63,9 +63,9 @@ StyledScreen{
                 onViewToggled: if(!extended) outerContainer.state="visual"
                 sectionProperty:"room"
                 sectionDelegate: Rectangle{
-                    height: Style.scaleX(10)
+                    height: appStyle.scaleX(10)
                     width: parent.width
-                    color:Style.appcolor_background_list
+                    color:appStyle.appcolor_background_list
                     StyledText{
                         text:roomList.getRoomName(Number(section))
                         color:"White"
@@ -77,7 +77,7 @@ StyledScreen{
                     Item{
                     Rectangle{
                         anchors.fill: parent
-                        color:Style.appcolor_navigationBackgroundColor
+                        color:appStyle.appcolor_navigationBackgroundColor
                         opacity: .45
                     }
 
@@ -98,14 +98,14 @@ StyledScreen{
                         dynData = floorplan_devices.getDeviceData(deviceno);
                     }
                     width:parent.width
-                    height: Style.listViewItemHeight
+                    height: appStyle.listViewItemHeight
                     Row{
                         anchors.fill: parent
 
                         Image {
                             id: fpDevice_image
                             source:type==="52" ? "" : "../images/floorplan/"+type+".png"
-                            sourceSize:Qt.size(Style.scaleY(6), Style.scaleY(6))
+                            sourceSize:Qt.size(appStyle.scaleY(6), appStyle.scaleY(6))
                             anchors.verticalCenter: parent.verticalCenter
                             height: 50
                             width: height
@@ -210,8 +210,8 @@ StyledScreen{
         anchors.left: undefined
         anchors.top: manager.isProfile ? undefined : parent.top
         anchors.bottom: parent.bottom
-        height: manager.isProfile ? style.buttonHeight : undefined
-        width: manager.isProfile ? parent.width : style.buttonWidth
+        height: manager.isProfile ? appStyle.buttonHeight : undefined
+        width: manager.isProfile ? parent.width : appStyle.buttonWidth
 
         Grid {
             columns: manager.isProfile ? 4 : 1
@@ -244,12 +244,12 @@ StyledScreen{
         }
         Rectangle {
             id: levelSlider
-            color: style.darkColor
+            color: appStyle.darkColor
             anchors.right: manager.isProfile ? parent.right : buttonRow.left
             anchors.top: manager.isProfile ? undefined : buttonRow.top
             anchors.bottom: manager.isProfile ? buttonRow.top :  buttonRow.bottom
             anchors.margins: 6
-            height : style.buttonHeight*6
+            height : appStyle.buttonHeight*6
             width: 40
             visible: false
 

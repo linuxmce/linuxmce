@@ -13,13 +13,13 @@ Item{
 
     Rectangle{
         anchors.fill: parent
-        color:appStyle.headerBgColor
-        opacity: appStyle.bgContentOpacity
+        color:appstyle.headerBgColor
+        opacity: appstyle.bgContentOpacity
     }
     Rectangle{
         anchors.fill: parent
-        gradient: appStyle.bgHeaderGradient
-        opacity: appStyle.bgHeavyOpacity
+        gradient: appstyle.bgHeaderGradient
+        opacity: appstyle.bgHeavyOpacity
     }
 
     Row{
@@ -97,8 +97,8 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration:appStyle.animation_quick
-                easing:appStyle.animation_easing
+                duration:appstyle.animation_quick
+                easing:appstyle.animation_easing
             }
         }
     ]

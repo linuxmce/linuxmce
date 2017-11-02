@@ -78,11 +78,11 @@ StyledScreen {
             id:file_select_btn
             anchors{
                 top:parent.top
-                topMargin:Style.scaleY(15)
+                topMargin:appStyle.scaleY(15)
                 left:typeSelection.left
                 right: typeSelection.right
             }
-            height:Style.scaleY(8)
+            height:appStyle.scaleY(8)
             buttonText: qsTr("Browse By File")
             visible: typeSelection.visible
             onActivated: {
@@ -106,7 +106,7 @@ StyledScreen {
             width: parent.width *.95
             model:mediatypefilter
             cellWidth:typeSelection.width/3
-            cellHeight:manager.isProfile ? Style.scaleY(15) : Style.scaleY(22)
+            cellHeight:manager.isProfile ? appStyle.scaleY(15) : appStyle.scaleY(22)
             cacheBuffer:50
             delegate:
                 LargeStyledButton{

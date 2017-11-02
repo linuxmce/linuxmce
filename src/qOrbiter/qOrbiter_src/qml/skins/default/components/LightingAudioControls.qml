@@ -4,8 +4,8 @@ import org.linuxmce.screens 1.0
 import "../."
 Item{
     id:lightingAudioControls
-    height:Style.scaleY(8*3.5)
-    width:(volUp.width+lightUp.width)+Style.scaleX(4)
+    height:appStyle.scaleY(8*3.5)
+    width:(volUp.width+lightUp.width)+appStyle.scaleX(4)
 
     
     Column{
@@ -27,7 +27,7 @@ Item{
             Image {
                 id: volUp
                 source: "../images/volup_up.png"
-                height: Style.scaleY(8)
+                height: appStyle.scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
                 smooth:true
@@ -40,7 +40,7 @@ Item{
             Image {
                 id: volmute
                 source: "../images/mute_up.png"
-                height: Style.scaleY(8)
+                height: appStyle.scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
                 smooth:true
@@ -55,7 +55,7 @@ Item{
             Image {
                 id: voldn
                 source: "../images/voldown_up.png"
-                height: Style.scaleY(8)
+                height: appStyle.scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
                 smooth:true
@@ -83,7 +83,7 @@ Item{
             Image {
                 id: lightUp
                 source: "../images/lightsup_up.png"
-                height: Style.scaleY(8)
+                height: appStyle.scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
                 smooth:true
@@ -108,7 +108,7 @@ Item{
             Image {
                 id: lightdn
                 source: "../images/lightsdown_up.png"
-                height: Style.scaleY(8)
+                height: appStyle.scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
                 smooth:true

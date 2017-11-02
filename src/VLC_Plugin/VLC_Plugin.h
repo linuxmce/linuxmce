@@ -25,16 +25,19 @@
 #include "../Media_Plugin/MediaHandlerBase.h"
 
 #include "VLCMediaStream.h"
+#include "AlarmManager.h"
+
+#include <algorithm>
 
 //<-dceag-decl-b->
 namespace DCE
 {
-  class VLC_Plugin : public VLC_Plugin_Command, public MediaHandlerBase
+  class VLC_Plugin : public VLC_Plugin_Command, public MediaHandlerBase, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
 	  pluto_pthread_mutex_t m_VLCMediaMutex;
-
+	  
 		// Private methods
 public:
 		// Public member variables
@@ -49,11 +52,19 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+		virtual void CreateChildren();
+		/* virtual ReceivedMessageResult ReceivedMessage(class Message *pMessage); */
 
 	protected:
 		class Orbiter_Plugin *m_pOrbiter_Plugin;
 
 	public:
+		class VLCSyncListener;
+
+		VLCSyncListener *m_pSyncSocket;
+
+		class AlarmManager *m_pAlarmManager;
+		virtual void AlarmCallback(int id, void* param);
 
 		// MediaHandlerBase implementations
 		/**
@@ -82,6 +93,11 @@ public:
 		
 		bool ConfirmSourceIsADestination(string &sMRL,VLCMediaStream *pVLCMediaStream,int PK_Device_Drive);
 		
+		// Alarm callback to send sync timecode.
+		time_t m_dwSec;
+		void SendSync();
+
+		
 //<-dceag-h-b->
 	/*
 				AUTO-GENERATED SECTION
@@ -99,9 +115,45 @@ public:
 	*/
 
 //<-dceag-h-e->
-	};
 
-//<-dceag-end-b->
+
+		class VLCSyncListener : public SocketListener
+		{
+
+		public:
+		  
+		VLCSyncListener(string sName):SocketListener(sName)
+		  {
+		  };
+
+		  virtual void ReceivedMessage(Socket *pSocket, Message* pMessage){};
+		  virtual bool ReceivedString( Socket *pSocket, string sLine, int nTimeout = - 1 )
+		  {
+		    std::cout << "Socket got: " << sLine << std::endl;
+		    return true;
+		  };
+		  
+		  void SendToAll(string sString)
+		  {
+		    for (vector<ServerSocket *>::iterator it=m_vectorServerSocket.begin(); it!=m_vectorServerSocket.end(); ++it)
+		      {
+			if ((*it)->SendString(sString))
+			  {
+			    /* LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending data to: %s - %s",(*it)->m_sHostName.c_str(), sString.c_str()); */
+			  }
+			else  // failed to send to a client.
+			  {
+			    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Could not send data to: %s - %s",(*it)->m_sHostName.c_str(), sString.c_str());
+			  }
+		      }
+		  }
+		  
+		};
+		
+		
+	};
+  
+  //<-dceag-end-b->
 }
 #endif
 //<-dceag-end-e->

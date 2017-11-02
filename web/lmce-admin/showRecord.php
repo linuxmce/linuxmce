@@ -9,7 +9,10 @@ require('include/template.class.inc.php');
 $table=$_REQUEST['table'];
 $where=stripslashes($_REQUEST['where']);
 
-$table = "`" . $table . "`"; // To circumvent problems with reserved words in table names.
+// Don't double quote
+if ( ! substr($table,0,1) == "`") {
+        $table = "`" . $table . "`"; // To circumvent problems with reserved words in tab
+}
 $cols=$dbADO->MetaColumnNames( $table );
 $fieldsNo=count($cols);
 $out='

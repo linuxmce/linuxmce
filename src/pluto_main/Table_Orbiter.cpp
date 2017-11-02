@@ -162,7 +162,8 @@ is_null[12] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[13] = false;
-is_null[14] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[14] = false;
 is_null[15] = true;
 m_psc_restrict = 0;
 
@@ -311,9 +312,6 @@ return is_null[12];}
 bool Row_Orbiter::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[13];}
-bool Row_Orbiter::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[14];}
 bool Row_Orbiter::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[15];}
@@ -371,10 +369,6 @@ void Row_Orbiter::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 is_null[13]=val;
 is_modified=true;
 }
-void Row_Orbiter::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[14]=val;
-is_modified=true;
-}
 void Row_Orbiter::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[15]=val;
 is_modified=true;
@@ -402,7 +396,7 @@ if (is_null[1])
 return "NULL";
 
 char *buf = new char[5000000];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FloorplanInfo.c_str(), (unsigned long) min((size_t)16777215,m_FloorplanInfo.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FloorplanInfo.c_str(), (unsigned long) min((size_t)50331645,m_FloorplanInfo.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -442,8 +436,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Size.c_str(), (unsigned long) min((size_t)50,m_Size.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Size.c_str(), (unsigned long) min((size_t)150,m_Size.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -469,8 +463,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RegenStatus.c_str(), (unsigned long) min((size_t)50,m_RegenStatus.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RegenStatus.c_str(), (unsigned long) min((size_t)150,m_RegenStatus.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -496,8 +490,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[8])
 return "NULL";
 
-char *buf = new char[511];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScenariosFloorplans.c_str(), (unsigned long) min((size_t)255,m_ScenariosFloorplans.size()));
+char *buf = new char[1531];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScenariosFloorplans.c_str(), (unsigned long) min((size_t)765,m_ScenariosFloorplans.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

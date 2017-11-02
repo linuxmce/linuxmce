@@ -15,7 +15,7 @@ Item {
 
     Rectangle{
         anchors.fill: parent
-        color:button.activeFocus ? skinStyle.darkHighlightColor : skinStyle.lightHighlightColor
+        color:button.activeFocus ? skinstyle.darkHighlightColor : skinstyle.lightHighlightColor
         border.width: button.activeFocus ? 2 : 0
         opacity: button.activeFocus ? .90 : .65
         radius: 5
