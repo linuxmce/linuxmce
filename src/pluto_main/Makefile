@@ -4,12 +4,16 @@ CPPFLAGS =  -I.. -I../.. -I../DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DM
 CXX = g++
 LDFLAGS = -L$(ROOT)/lib
 sources = Database_pluto_main.cpp TableRow.cpp
-#<-mkr_B_use_mysql_wrapper_b->
-CPPFLAGS += -I/usr/include/mysql
-LDFLAGS += -lmysqlclient_r
-#<-mkr_B_use_mysql_wrapper_e->
 
-#
+MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
+MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
+ifneq ($(strip $(MYSQL_FLAGS)),)
+	CPPFLAGS += $(MYSQL_FLAGS)
+	LDLIBS += $(MYSQL_LIBS)
+else
+	CPPFLAGS += -I/usr/include/mysql
+	LDLIBS += -lmysqlclient_r
+endif
 
 sources +=  \
 Table_Array.cpp \
@@ -156,6 +160,7 @@ Table_Package_Package.cpp \
 Table_Package_Source.cpp \
 Table_Package_Source_Compat.cpp \
 Table_Package_Users.cpp \
+Table_Package_Version.cpp \
 Table_PageSetup.cpp \
 Table_PaidLicense.cpp \
 Table_ParameterType.cpp \

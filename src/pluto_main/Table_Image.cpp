@@ -276,8 +276,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[0])
 return "NULL";
 
-char *buf = new char[601];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PK_Image.c_str(), (unsigned long) min((size_t)300,m_PK_Image.size()));
+char *buf = new char[201];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_PK_Image.c_str(), (unsigned long) min((size_t)100,m_PK_Image.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -497,7 +497,7 @@ values_list_comma_separated = values_list_comma_separated + pRow->PK_Image_asSQL
 		Row_Image* pRow = (Row_Image*) (*i).second;	
 		SingleStringKey key(pRow->m_PK_Image);
 
-		char tmp_PK_Image[601];
+		char tmp_PK_Image[201];
 db_wrapper_real_escape_string(database->m_pDB,tmp_PK_Image, key.pk.c_str(), (unsigned long) key.pk.size());
 
 
@@ -556,7 +556,7 @@ update_values_list = update_values_list + "`PK_Image`="+pRow->PK_Image_asSQL()+"
 		SingleStringKey key = (*i).first;
 		Row_Image* pRow = (Row_Image*) (*i).second;	
 
-		char tmp_PK_Image[601];
+		char tmp_PK_Image[201];
 db_wrapper_real_escape_string(database->m_pDB,tmp_PK_Image, key.pk.c_str(), (unsigned long) key.pk.size());
 
 
@@ -819,7 +819,7 @@ Row_Image* Table_Image::FetchRow(SingleStringKey &key)
 	PLUTO_SAFETY_LOCK_ERRORSONLY(sl,database->m_DBMutex);
 
 	//defines the string query for the value of key
-	char tmp_PK_Image[601];
+	char tmp_PK_Image[201];
 db_wrapper_real_escape_string(database->m_pDB,tmp_PK_Image, key.pk.c_str(), (unsigned long) key.pk.size());
 
 

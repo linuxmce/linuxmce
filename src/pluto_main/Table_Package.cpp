@@ -47,6 +47,7 @@ using namespace std;
 #include "Table_Package_Package.h"
 #include "Table_Package_Source.h"
 #include "Table_Package_Users.h"
+#include "Table_Package_Version.h"
 #include "Table_PageSetup.h"
 #include "Table_PaidLicense.h"
 #include "Table_QuickStartTemplate.h"
@@ -439,8 +440,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[1531];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)765,m_Description.size()));
+char *buf = new char[511];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)255,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -505,8 +506,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[601];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HomePage.c_str(), (unsigned long) min((size_t)300,m_HomePage.size()));
+char *buf = new char[201];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HomePage.c_str(), (unsigned long) min((size_t)100,m_HomePage.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -545,8 +546,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[9])
 return "NULL";
 
-char *buf = new char[1531];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL.c_str(), (unsigned long) min((size_t)765,m_HelpURL.size()));
+char *buf = new char[511];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL.c_str(), (unsigned long) min((size_t)255,m_HelpURL.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -559,8 +560,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[10])
 return "NULL";
 
-char *buf = new char[1531];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL_UsersManual.c_str(), (unsigned long) min((size_t)765,m_HelpURL_UsersManual.size()));
+char *buf = new char[511];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL_UsersManual.c_str(), (unsigned long) min((size_t)255,m_HelpURL_UsersManual.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -573,8 +574,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[11])
 return "NULL";
 
-char *buf = new char[1531];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL_ProgrammersGuide.c_str(), (unsigned long) min((size_t)765,m_HelpURL_ProgrammersGuide.size()));
+char *buf = new char[511];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_HelpURL_ProgrammersGuide.c_str(), (unsigned long) min((size_t)255,m_HelpURL_ProgrammersGuide.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -587,8 +588,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[12])
 return "NULL";
 
-char *buf = new char[393211];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)196605,m_Comments.size()));
+char *buf = new char[131071];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Comments.c_str(), (unsigned long) min((size_t)65535,m_Comments.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1561,6 +1562,13 @@ void Row_Package::Package_Users_FK_Package_getrows(vector <class Row_Package_Use
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Users *pTable = table->database->Package_Users_get();
+pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
+}
+void Row_Package::Package_Version_FK_Package_getrows(vector <class Row_Package_Version*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Version *pTable = table->database->Package_Version_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
 void Row_Package::PageSetup_FK_Package_getrows(vector <class Row_PageSetup*> *rows)
