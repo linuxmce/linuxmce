@@ -1,6 +1,9 @@
 #!/bin/sh -e
 
 case "$1" in
+  remove)
+    echo "removing"
+  ;;
   purge)
       set +e
       rm -Rf /etc/openzwave 2>/dev/null
