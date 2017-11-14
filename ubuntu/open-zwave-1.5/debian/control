@@ -3,7 +3,7 @@ Maintainer: Debian IoT Maintainers <debian-iot-maintainers@lists.alioth.debian.o
 Uploaders: Thorsten Alteholz <debian@alteholz.de>
 Section: devel
 Priority: optional
-Build-Depends: debhelper (>=10), dh-exec (>=0.2), g++ (>= 4.4), quilt, libudev-dev, libxml2-utils
+Build-Depends: debhelper, dh-exec (>=0.2), g++ (>= 4.4), quilt, libudev-dev, libxml2-utils
 Standards-Version: 4.0.1
 Homepage: http://www.openzwave.com/
 Vcs-Browser: https://anonscm.debian.org/cgit/debian-iot/openzwave.git
