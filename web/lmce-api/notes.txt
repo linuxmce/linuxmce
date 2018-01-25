@@ -1,0 +1,23 @@
+
+Requires php7.2
+14.04 users follow instructions here: https://www.digitalocean.com/community/tutorials/how-to-upgrade-to-php-7-on-ubuntu-14-04
+Comment out issues in mythweb, apache will tell you when you restart it after installing php because it will fail on an old style of setting php memory values. note the file, and comment out the errors. *i dont use mythweb, dont know impact*
+There is no local authentication currently, this will change soon
+There is no facility on the linuxmce side to update the ip when it changes yet. Either obtain a dyndns ip or be prepared for it to change.
+Current assistance needed on:
+*Linuxmce -> OssCloudConnect authentication
+*Style, customizing for browsable pages
+
+
+Implemented so far
+Lighting devices
+
+Amazon - Manual grouping is required, they dont support rooms because dumb.
+Discovery of lights
+
+Light Commands
+*On
+*Off
+*Dim
+
+Google
