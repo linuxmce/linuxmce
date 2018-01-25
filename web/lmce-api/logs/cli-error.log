@@ -1,0 +1,779 @@
+2018-01-20 08:27:31 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Device')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Device', 0)
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#11 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('Device')
+#12 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#13 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#14 {main}
+
+
+2018-01-20 08:27:50 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Device')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Device', 0)
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#11 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('device')
+#12 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#13 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#14 {main}
+
+
+2018-01-20 08:28:10 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Device')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Device', 0)
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#11 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('Device')
+#12 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#13 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#14 {main}
+
+
+2018-01-20 08:28:43 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('Device')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:29:44 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.command' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'command', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('command', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('command')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'command', 'Command')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Command')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('command')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:29:55 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.command' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'command', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('command', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('command')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'command', 'Command')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Command')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('Command')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:30:17 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.commands' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'commands', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('commands', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('commands')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'commands', 'Commands')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Commands')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('Commands')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:30:24 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.commands' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'commands', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('commands', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('commands')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'commands', 'Commands')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Commands')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('commands')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:30:35 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.room' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'room', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('room', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('room')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'room', 'Room')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Room')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('Room')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:35:15 Error: [RuntimeException] Unknown command `cake model`. Run `cake --help` to get the list of valid commands. in /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php on line 177
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(137): Cake\Console\CommandRunner->getShell(Object(Cake\Console\ConsoleIo), Object(Cake\Console\CommandCollection), 'model')
+#1 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#2 {main}
+
+
+2018-01-20 08:35:21 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devices' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devices', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devices', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devices')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'devices', 'Devices')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Devices')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('devices')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:42:17 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devices' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devices', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devices', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devices')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'devices', 'Devices')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Devices')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('devices')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:42:34 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('Device')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:42:56 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('device')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-20 08:46:48 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Device')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Device', 0)
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#11 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('device')
+#12 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#13 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#14 {main}
+
+
+2018-01-20 08:50:30 Error: [PDOException] SQLSTATE[HY000] [1049] Unknown database 'pluto.pluto_main' in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/PDODriverTrait.php on line 48
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/PDODriverTrait.php(48): PDO->__construct('mysql:host=loca...', 'root', '', Array)
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/Mysql.php(104): Cake\Database\Driver\Mysql->_connect('mysql:host=loca...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/BaseSchema.php(45): Cake\Database\Driver\Mysql->connect()
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Dialect/MysqlDialectTrait.php(63): Cake\Database\Schema\BaseSchema->__construct(Object(Cake\Database\Driver\Mysql))
+#4 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(52): Cake\Database\Driver\Mysql->schemaDialect()
+#5 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(42): Cake\Database\Schema\Collection->__construct(Object(Cake\Database\Connection))
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Connection.php(369): Cake\Database\Schema\CachedCollection->__construct(Object(Cake\Database\Connection), true)
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Connection.php(388): Cake\Database\Connection->getSchemaCollection()
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(1034): Cake\Database\Connection->schemaCollection()
+#9 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(988): Bake\Shell\Task\ModelTask->_getAllTables()
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(212): Bake\Shell\Task\ModelTask->listAll()
+#11 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#12 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#13 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#14 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Device')
+#15 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Device', 0)
+#16 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#17 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('device')
+#18 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#19 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#20 {main}
+
+
+2018-01-20 08:52:23 Error: [PDOException] SQLSTATE[HY000] [1049] Unknown database 'pluto_pluto_main' in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/PDODriverTrait.php on line 48
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/PDODriverTrait.php(48): PDO->__construct('mysql:host=loca...', 'root', '', Array)
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/Mysql.php(104): Cake\Database\Driver\Mysql->_connect('mysql:host=loca...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/BaseSchema.php(45): Cake\Database\Driver\Mysql->connect()
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Dialect/MysqlDialectTrait.php(63): Cake\Database\Schema\BaseSchema->__construct(Object(Cake\Database\Driver\Mysql))
+#4 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(52): Cake\Database\Driver\Mysql->schemaDialect()
+#5 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(42): Cake\Database\Schema\Collection->__construct(Object(Cake\Database\Connection))
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Connection.php(369): Cake\Database\Schema\CachedCollection->__construct(Object(Cake\Database\Connection), true)
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Connection.php(388): Cake\Database\Connection->getSchemaCollection()
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(1034): Cake\Database\Connection->schemaCollection()
+#9 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(988): Bake\Shell\Task\ModelTask->_getAllTables()
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(212): Bake\Shell\Task\ModelTask->listAll()
+#11 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#12 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#13 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#14 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Device')
+#15 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Device', 0)
+#16 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#17 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('device')
+#18 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#19 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#20 {main}
+
+
+2018-01-20 08:52:46 Error: [PDOException] SQLSTATE[HY000] [1049] Unknown database 'pluto' in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/PDODriverTrait.php on line 48
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/PDODriverTrait.php(48): PDO->__construct('mysql:host=loca...', 'root', '', Array)
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Driver/Mysql.php(104): Cake\Database\Driver\Mysql->_connect('mysql:host=loca...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/BaseSchema.php(45): Cake\Database\Driver\Mysql->connect()
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Dialect/MysqlDialectTrait.php(63): Cake\Database\Schema\BaseSchema->__construct(Object(Cake\Database\Driver\Mysql))
+#4 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(52): Cake\Database\Driver\Mysql->schemaDialect()
+#5 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(42): Cake\Database\Schema\Collection->__construct(Object(Cake\Database\Connection))
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Connection.php(369): Cake\Database\Schema\CachedCollection->__construct(Object(Cake\Database\Connection), true)
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Connection.php(388): Cake\Database\Connection->getSchemaCollection()
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(1034): Cake\Database\Connection->schemaCollection()
+#9 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(988): Bake\Shell\Task\ModelTask->_getAllTables()
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(212): Bake\Shell\Task\ModelTask->listAll()
+#11 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#12 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#13 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#14 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Device')
+#15 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Device', 0)
+#16 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#17 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('device')
+#18 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#19 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#20 {main}
+
+
+2018-01-20 08:53:12 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'device', 'Device')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Device')
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Device')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Device', 0)
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#11 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('device')
+#12 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#13 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#14 {main}
+
+
+2018-01-20 08:56:07 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.array' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'array', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('array', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('array')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'array', 'Array')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Array')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('Array')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 08:58:37 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.array' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'array', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('array', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('array')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'array', 'Array')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Array')
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ModelTask->main('Array')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#11 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#12 {main}
+
+
+2018-01-20 18:19:03 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Device')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-20 18:19:35 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('device')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-20 18:35:16 Error: [Error] Call to a member function bindingKey() on string in /var/www/lmce-api/src/Model/Table/DevicesTable.php on line 15
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(291): App\Model\Table\DevicesTable->initialize(Array)
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Locator/TableLocator.php(249): Cake\ORM\Table->__construct(Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Locator/TableLocator.php(216): Cake\ORM\Locator\TableLocator->_create(Array)
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/TableRegistry.php(132): Cake\ORM\Locator\TableLocator->get('Devices', Array)
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ControllerTask.php(128): Cake\ORM\TableRegistry::get('Devices', Array)
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ControllerTask.php(69): Bake\Shell\Task\ControllerTask->bake('Devices')
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ControllerTask->main('Devices')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 00:29:29 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.manufacturer' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'manufacturer', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('manufacturer', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('manufacturer')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(220): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(130): Bake\Shell\Task\ModelTask->getAssociations(Object(Cake\ORM\Table))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(113): Bake\Shell\Task\ModelTask->getTableContext(Object(Cake\ORM\Table), 'manufacturer', 'Manufacturer')
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ModelTask.php(100): Bake\Shell\Task\ModelTask->bake('Manufacturer')
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(264): Bake\Shell\Task\ModelTask->main('Manufacturer')
+#9 /var/www/lmce-api/vendor/cakephp/cakephp/src/Collection/CollectionTrait.php(51): Bake\Shell\BakeShell->Bake\Shell\{closure}('Manufacturer', 0)
+#10 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/BakeShell.php(265): Cake\Collection\Collection->each(Object(Closure))
+#11 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(493): Bake\Shell\BakeShell->all('Manufacturer')
+#12 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#13 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#14 {main}
+
+
+2018-01-21 00:30:14 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.manufacturer' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'manufacturer', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('manufacturer', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('manufacturer')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Manufacturer')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 00:30:35 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.manufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'manufacturers', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('manufacturers', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('manufacturers')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Manufacturers')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 00:31:06 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.manufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'manufacturers', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('manufacturers', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('manufacturers')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Manufacturers')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 00:32:00 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.manufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'manufacturers', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('manufacturers', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('manufacturers')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Manufacturers')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 00:32:21 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.manufacturer' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'manufacturer', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('manufacturer', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('manufacturer')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Manufacturer')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 00:33:11 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicecategory' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicecategory', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicecategory', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicecategory')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Devicecategory')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 00:33:19 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicecategories' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicecategorie...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicecategorie...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicecategorie...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Devicecategorie...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 04:36:11 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device_templates' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device_template...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device_template...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device_template...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('DeviceTemplates')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 04:45:20 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicecategories' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicecategorie...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicecategorie...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicecategorie...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Devicecategorie...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 04:46:02 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicecategories' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicecategorie...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicecategorie...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicecategorie...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Devicecategorie...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 04:46:10 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicecategories' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicecategorie...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicecategorie...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicecategorie...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('devicecategorie...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 04:46:16 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device_categories' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device_categori...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device_categori...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device_categori...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('DeviceCategorie...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 04:51:23 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.device_categories' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'device_categori...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('device_categori...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('device_categori...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('DeviceCategorie...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 19:52:49 Error: [RuntimeException] App\Model\Table\DevicesManufacturersTable association "Devices" of type "manyToOne" to "App\Model\Table\DevicesManufacturersTable" doesn't match the expected class "App\Model\Table\DevicesTable". You can't have an association of the same name with a different target "className" option anywhere in your app. in /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Association.php on line 423
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(448): Cake\ORM\Association->getTarget()
+#1 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(457): Bake\Shell\Task\TestTask->_processModel(Object(App\Model\Table\DevicesManufacturersTable))
+#2 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(457): Bake\Shell\Task\TestTask->_processModel(Object(App\Model\Table\ManufacturersTable))
+#3 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(457): Bake\Shell\Task\TestTask->_processModel(Object(App\Model\Table\DevicetemplatesTable))
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(480): Bake\Shell\Task\TestTask->_processModel(Object(App\Model\Table\ManufacturersTable))
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(427): Bake\Shell\Task\TestTask->_processController(Object(App\Controller\ManufacturersController))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(231): Bake\Shell\Task\TestTask->generateFixtureList(Object(App\Controller\ManufacturersController))
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ControllerTask.php(213): Bake\Shell\Task\TestTask->bake('Controller', 'Manufacturers')
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ControllerTask.php(163): Bake\Shell\Task\ControllerTask->bakeTest('Manufacturers')
+#9 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ControllerTask.php(69): Bake\Shell\Task\ControllerTask->bake('Manufacturers')
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ControllerTask->main('Manufacturers')
+#11 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#12 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#13 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#14 {main}
+
+
+2018-01-21 19:53:27 Error: [RuntimeException] App\Model\Table\DevicesManufacturersTable association "Devices" of type "manyToOne" to "App\Model\Table\DevicesManufacturersTable" doesn't match the expected class "App\Model\Table\DevicesTable". You can't have an association of the same name with a different target "className" option anywhere in your app. in /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Association.php on line 423
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(448): Cake\ORM\Association->getTarget()
+#1 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(457): Bake\Shell\Task\TestTask->_processModel(Object(App\Model\Table\DevicesManufacturersTable))
+#2 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(457): Bake\Shell\Task\TestTask->_processModel(Object(App\Model\Table\ManufacturersTable))
+#3 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(457): Bake\Shell\Task\TestTask->_processModel(Object(App\Model\Table\DevicetemplatesTable))
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(480): Bake\Shell\Task\TestTask->_processModel(Object(App\Model\Table\ManufacturersTable))
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(427): Bake\Shell\Task\TestTask->_processController(Object(App\Controller\ManufacturersController))
+#6 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TestTask.php(231): Bake\Shell\Task\TestTask->generateFixtureList(Object(App\Controller\ManufacturersController))
+#7 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ControllerTask.php(213): Bake\Shell\Task\TestTask->bake('Controller', 'Manufacturers')
+#8 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ControllerTask.php(163): Bake\Shell\Task\ControllerTask->bakeTest('Manufacturers')
+#9 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/ControllerTask.php(69): Bake\Shell\Task\ControllerTask->bake('Manufacturers')
+#10 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\ControllerTask->main('Manufacturers')
+#11 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#12 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#13 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#14 {main}
+
+
+2018-01-21 20:28:25 Error: [RuntimeException] App\Model\Table\ManufacturersTable association "DeviceTemplate" of type "oneToMany" to "Cake\ORM\Table" doesn't match the expected class "App\Model\Table\DevicetemplatesTable". You can't have an association of the same name with a different target "className" option anywhere in your app. in /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Association.php on line 423
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/bake/src/Utility/Model/AssociationFilter.php(73): Cake\ORM\Association->getTarget()
+#1 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(489): Bake\Utility\Model\AssociationFilter->filterAssociations(Object(App\Model\Table\ManufacturersTable))
+#2 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(307): Bake\Shell\Task\TemplateTask->_filteredAssociations(Object(App\Model\Table\ManufacturersTable))
+#3 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#4 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Manufacturers')
+#5 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#7 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#8 {main}
+
+
+2018-01-21 20:31:06 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devices_manufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devices_manufac...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devices_manufac...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devices_manufac...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('DevicesManufact...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 20:32:13 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicesmanufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicesmanufact...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicesmanufact...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicesmanufact...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Devicesmanufact...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 20:32:34 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicesmanufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicesmanufact...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicesmanufact...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicesmanufact...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Devicesmanufact...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 21:10:14 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicesmanufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicesmanufact...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicesmanufact...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicesmanufact...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Devicesmanufact...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 21:12:17 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devicesmanufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devicesmanufact...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devicesmanufact...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devicesmanufact...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('Devicesmanufact...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+
+2018-01-21 21:17:18 Error: [Cake\Database\Exception] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'pluto_main.devices_manufacturers' doesn't exist in /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php on line 131
+Stack Trace:
+#0 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/Collection.php(97): Cake\Database\Schema\Collection->_reflect('Column', 'devices_manufac...', Array, Object(Cake\Database\Schema\TableSchema))
+#1 /var/www/lmce-api/vendor/cakephp/cakephp/src/Database/Schema/CachedCollection.php(63): Cake\Database\Schema\Collection->describe('devices_manufac...', Array)
+#2 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(532): Cake\Database\Schema\CachedCollection->describe('devices_manufac...')
+#3 /var/www/lmce-api/vendor/cakephp/cakephp/src/ORM/Table.php(653): Cake\ORM\Table->getSchema()
+#4 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(294): Cake\ORM\Table->getPrimaryKey()
+#5 /var/www/lmce-api/vendor/cakephp/bake/src/Shell/Task/TemplateTask.php(148): Bake\Shell\Task\TemplateTask->_loadController()
+#6 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(507): Bake\Shell\Task\TemplateTask->main('DevicesManufact...')
+#7 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/Shell.php(500): Cake\Console\Shell->runCommand(Array, false, Array)
+#8 /var/www/lmce-api/vendor/cakephp/cakephp/src/Console/CommandRunner.php(141): Cake\Console\Shell->runCommand(Array, true)
+#9 /var/www/lmce-api/bin/cake.php(12): Cake\Console\CommandRunner->run(Array)
+#10 {main}
+
+

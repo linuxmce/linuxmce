@@ -1,0 +1,198 @@
+<?php
+namespace App\Model\Table;
+	
+use Cake\ORM\Table;
+use Cake\ORM\Query;	
+use Cake\ORM\TableRegistry;
+use Cake\Cache\Cache;
+
+class DevicesTable extends Table{
+	
+public function initialize(array $config){
+	$this->setTable('Device');
+	$this->primaryKey('PK_Device');
+	
+	
+	$this->hasOne( 'Room',
+				  [
+					  'className'=>'Rooms',
+					  'foreignKey' => 'PK_Room',
+					  'bindingKey' => 'FK_Room'
+				  ]
+	);
+	
+	$this->belongsTo('DeviceTemplate',
+				  [
+					  'className' => 'Devicetemplates',
+					  'foreignKey' => 'FK_DeviceTemplate',
+					  'bindingKey' => 'PK_DeviceTemplate'
+				  ]
+	
+	);
+	
+  $this->hasMany('DeviceData',
+				  [
+					  'className' => 'Devicedata',
+					  'foreignKey' => 'FK_DeviceData',
+					  'bindingKey' => 'FK_DeviceData',	
+					  'targetForeignKey' => 'FK_DeviceTemplate',
+					  'joinTable'=> 'DeviceTemplate_DeviceData'
+				  ]);
+	
+	 $this->hasMany('Device_DeviceData',
+				  [
+					  'className' => 'Devicedevicedata',
+					  'foreignKey' => 'FK_Device',
+					  'bindingKey' => 'PK_Device',	
+					  'targetForeignKey' => 'FK_DeviceData',
+				  ]);
+	
+	
+}
+	
+	
+function findByDeviceCategory(Query $query, array $options){
+	
+	$cat = $options['category'];
+	return $query
+			->contain(['DeviceTemplate','Room', 'DeviceData', 'Device_DeviceData'] )
+			->matching('DeviceTemplate', function ($q) use ($cat) {
+						  return $q
+							  ->contain('Manufacturer')
+							  ->where(['DeviceTemplate.FK_DeviceCategory' => $cat]);
+					 });
+}
+	
+	function getAlexaLightList(){
+				
+		$devices = TableRegistry::get('Devices');
+		$lightList = $this->find('byDeviceCategory', ['category'=> "73"]);
+		
+		$alexaObject = array();
+		
+		foreach($lightList as $light){
+			$appendArry = array(
+				'endpointId' => (string) $light->PK_Device,
+				'friendlyName' =>$light['Description'],
+				'description' => $light->device_template->Description,
+				'manufacturerName' => $light->device_template->manufacturer->Description,
+				'displayCategories' => array('LIGHT'),
+				'cookie' => array(
+					'foo'=> 'data'
+				),
+				'capabilities'=> array(					
+				[
+					'type'=>'AlexaInterface',
+					'interface' => 'Alexa.PowerController',
+					'version' => '3',
+					'properties' => array(
+					'supported'=> [array(
+					'name' => 'powerState'
+					)],						
+						'retrievable' => true						
+					)
+				],
+					[
+					'type'=>'AlexaInterface',
+					'interface' => 'Alexa.BrightnessController',
+					'version' => '3',
+					'properties' => array(
+					'supported'=> [array(
+					'name' => 'brightness'
+					)],						
+						'retrievable' => true						
+					)
+				]	
+				)
+				
+			);
+			$alexaObject[] = $appendArry;
+		}
+		
+		return $alexaObject;
+	}
+	
+		function getAlexaTvList(){
+				
+		$devices = TableRegistry::get('Devices');
+		$tvList = $this->find('byDeviceCategory', ['category'=> "8"]);
+		
+		$alexaObject = array();
+		
+		foreach($tvList as $tv){
+			$appendArry = array(
+				'endpointId' =>  (string) $tv->PK_Device,
+				'friendlyName' =>$tv['Description'],
+				'description' => $tv->device_template->Description,
+				'manufacturerName' => $tv->device_template->manufacturer->Description,
+				'displayCategories' => array('TV'),
+				'cookie' => array('foo'=>'data'),
+				'capabilities'=> array(
+					
+				[
+					'type'=>'AlexaInterface',
+					'interface' => 'Alexa.Speaker',
+					'version' => '1.0',
+					'properties' => array(
+						'supported'=> array(						
+							['name' => 'volume'],
+							['name'=> 'muted']
+					))],
+					[
+						'type'=>'AlexaInterface',
+						'interface' => 'Alexa.ChannelController',
+						'version' => '1.0',
+						'properties' => array(
+						'supported'=> [array(						
+							'name' => 'channel',
+					)]
+						)]	,
+					[
+						'type'=>'AlexaInterface',
+						'interface' => 'Alexa.PlaybackController',
+						'version' => '1.0',
+						'properties' => array(),
+						'supportedOperations' => array('Play', 'Pause', 'Stop'),
+					],		
+					[
+						'type'=>'AlexaInterface',
+						'interface'=>'Alexa.InputController',
+						'version'=>'1.0',
+						'properties'=> array(
+						'supported' => array(
+							'name'=>'input'
+						)
+						)
+					]
+				)
+				
+			);
+			$alexaObject[] = $appendArry;
+		}
+		
+		return $alexaObject;
+	}
+	
+		
+	function alexaDeviceDiscovery(){
+					
+		$lightList = $this->getAlexaLightList();
+		//$tvList = $this->getAlexaTvList();
+		$alexaDeviceList = array( array_merge($lightList));
+		
+		return $alexaDeviceList;
+	}
+	
+	function deviceDataForDevice($deviceId){
+		
+	
+			
+			
+	}
+	
+	
+}
+
+
+
+?>
