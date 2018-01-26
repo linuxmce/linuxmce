@@ -118,6 +118,37 @@ class DceCommandExecutorComponent extends Component
 		return $response;
 	}
 	
+		function executeScenario($scenario){
+		$params=array(
+		'msgid'=>370,
+		'params'=>array(
+		array('28', $scenario)
+		)
+		);
+		
+			$server = "localhost";
+		$port = 3450;
+		$timeout = 10;
+		$errno = 0;
+		$errstr = "";
+		$deviceFromID = 8;
+		$deviceToID = -1000;
+		$messageType = 1;
+		$messageID = $params['msgid']; 
+		$parameters = $params['params'];
+		
+		// commStart($server, $port, $deviceIDFrom)
+		$socket = $this->commStart($server,$port,$deviceFromID);		
+		$this->myMessageSend($socket, $deviceFromID, $deviceToID ,$messageType,$messageID,$parameters);
+		$this->commEnd($socket);
+		
+		return "OK";
+	
+	}
+	
+	
+	
+	
 	function executeFormedCommand($device, $params /*array*/){
 		$server = "localhost";
 		$port = 3450;
@@ -137,6 +168,9 @@ class DceCommandExecutorComponent extends Component
 		
 		return "OK";
 	}
+	
+
+	
 	
 	
 

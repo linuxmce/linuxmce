@@ -38,7 +38,7 @@ class RoomsController extends AppController
     public function view($id = null)
     {
         $room = $this->Rooms->get($id, [
-            'contain' => ['RoomType']
+            'contain' => ['RoomType', 'Commandgroup', 'EntertainArea']
         ]);
 
         $this->set('room', $room);
@@ -62,7 +62,8 @@ class RoomsController extends AppController
             $this->Flash->error(__('The room could not be saved. Please, try again.'));
         }
         $roomType = $this->Rooms->RoomType->find('list', ['limit' => 200]);
-        $this->set(compact('room', 'roomType'));
+        $commandgroup = $this->Rooms->Commandgroup->find('list', ['limit' => 200]);
+        $this->set(compact('room', 'roomType', 'commandgroup'));
     }
 
     /**
@@ -75,7 +76,7 @@ class RoomsController extends AppController
     public function edit($id = null)
     {
         $room = $this->Rooms->get($id, [
-            'contain' => []
+            'contain' => ['Commandgroup']
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $room = $this->Rooms->patchEntity($room, $this->request->getData());
@@ -87,7 +88,8 @@ class RoomsController extends AppController
             $this->Flash->error(__('The room could not be saved. Please, try again.'));
         }
         $roomType = $this->Rooms->RoomType->find('list', ['limit' => 200]);
-        $this->set(compact('room', 'roomType'));
+        $commandgroup = $this->Rooms->Commandgroup->find('list', ['limit' => 200]);
+        $this->set(compact('room', 'roomType', 'commandgroup'));
     }
 
     /**

@@ -16,6 +16,10 @@
         <li><?= $this->Html->link(__('List Rooms'), ['action' => 'index']) ?></li>
         <li><?= $this->Html->link(__('List Room Type'), ['controller' => 'Roomtypes', 'action' => 'index']) ?></li>
         <li><?= $this->Html->link(__('New Room Type'), ['controller' => 'Roomtypes', 'action' => 'add']) ?></li>
+        <li><?= $this->Html->link(__('List Entertain Area'), ['controller' => 'Entertainarea', 'action' => 'index']) ?></li>
+        <li><?= $this->Html->link(__('New Entertain Area'), ['controller' => 'Entertainarea', 'action' => 'add']) ?></li>
+        <li><?= $this->Html->link(__('List Commandgroup'), ['controller' => 'Commandgroup', 'action' => 'index']) ?></li>
+        <li><?= $this->Html->link(__('New Commandgroup'), ['controller' => 'Commandgroup', 'action' => 'add']) ?></li>
     </ul>
 </nav>
 <div class="rooms form large-9 medium-8 columns content">
@@ -37,6 +41,7 @@
             echo $this->Form->control('psc_frozen');
             echo $this->Form->control('psc_mod');
             echo $this->Form->control('psc_restrict');
+            echo $this->Form->control('commandgroup._ids', ['options' => $commandgroup]);
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>
