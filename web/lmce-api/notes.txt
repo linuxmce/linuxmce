@@ -1,6 +1,22 @@
 
 Requires php7.2
 14.04 users follow instructions here: https://www.digitalocean.com/community/tutorials/how-to-upgrade-to-php-7-on-ubuntu-14-04
+package list i needed to install
+sudo add-apt-repository ppa:ondrej/php
+sudo apt-get update
+sudo apt-get install php7.2
+sudo apt-get install php7.2-mysql
+sudo apt-get install php7.2-intl
+sudo apt-get install php7.2-mbstring
+sudo apt-get install apt-get install php7.2-xml
+sudo apt-get install libpcre3
+sudo apt-get install libapache2-mod-php7.2
+sudo a2dismod php5.4
+sudo a2enmod php7.2
+
+# Had to comment out php_value settings in mythweb
+
+
 Comment out issues in mythweb, apache will tell you when you restart it after installing php because it will fail on an old style of setting php memory values. note the file, and comment out the errors. *i dont use mythweb, dont know impact*
 There is no local authentication currently, this will change soon
 There is no facility on the linuxmce side to update the ip when it changes yet. Either obtain a dyndns ip or be prepared for it to change.
