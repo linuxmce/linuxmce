@@ -10,6 +10,10 @@
         <li><?= $this->Html->link(__('New Room'), ['action' => 'add']) ?></li>
         <li><?= $this->Html->link(__('List Room Type'), ['controller' => 'Roomtypes', 'action' => 'index']) ?></li>
         <li><?= $this->Html->link(__('New Room Type'), ['controller' => 'Roomtypes', 'action' => 'add']) ?></li>
+        <li><?= $this->Html->link(__('List Entertain Area'), ['controller' => 'Entertainarea', 'action' => 'index']) ?></li>
+        <li><?= $this->Html->link(__('New Entertain Area'), ['controller' => 'Entertainarea', 'action' => 'add']) ?></li>
+        <li><?= $this->Html->link(__('List Commandgroup'), ['controller' => 'Commandgroup', 'action' => 'index']) ?></li>
+        <li><?= $this->Html->link(__('New Commandgroup'), ['controller' => 'Commandgroup', 'action' => 'add']) ?></li>
     </ul>
 </nav>
 <div class="rooms index large-9 medium-8 columns content">

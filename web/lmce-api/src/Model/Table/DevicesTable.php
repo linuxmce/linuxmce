@@ -47,7 +47,6 @@ public function initialize(array $config){
 					  'targetForeignKey' => 'FK_DeviceData',
 				  ]);
 	
-	
 }
 	
 	
@@ -177,10 +176,56 @@ function findByDeviceCategory(Query $query, array $options){
 	function alexaDeviceDiscovery(){
 					
 		$lightList = $this->getAlexaLightList();
+		$mediaScenarioList = $this->getMediaScenarios();
 		//$tvList = $this->getAlexaTvList();
-		$alexaDeviceList = array( array_merge($lightList));
+		$alexaDeviceList = array( array_merge($lightList, $mediaScenarioList));
 		
 		return $alexaDeviceList;
+	}
+	
+	function getMediaScenarios(){
+		$ret = array();
+		$entertainAreas = TableRegistry::get('Entertainarea')
+			->find('all')
+			->contain(['Commandgroup']);
+			
+		
+		foreach($entertainAreas as $entertainArea){
+			
+		foreach($entertainArea->command_group as $CG){
+				
+		
+			$appendArray = array(
+			
+			'endpointId' => $CG->PK_CommandGroup,
+			'manufacturerName' => 'LinuxMCE',
+			'friendlyName' => $CG->Description." in ".$entertainArea->Description,
+			'description' => 'Linuxmce Media Scene',
+			'displayCategories' => ['ACTIVITY TRIGGER'],
+				'cookie' => array(
+					"ismedia"=>"unknown"
+				),
+				'capabilities' => [
+					array( 
+					'type'=>'AlexaInterface',
+						'interface'=>'Alexa.SceneController',
+						'version'=>"3",
+						'supportsDeactivation'=>true,
+						'proactivelyReported'=>false						
+					)
+				]
+			);
+			
+			$ret[] = $appendArray;
+			}
+			
+			
+		}
+		
+		
+		return $ret;
+			
+			
 	}
 	
 	function deviceDataForDevice($deviceId){

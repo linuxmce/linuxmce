@@ -158,7 +158,7 @@ class AlexaController extends AppController
 		$this->set('_serialize', 'reply');	
 	}
 	
-	function report(){
+	public function report(){
 		$deviceTarget = $this->request->params['?']['device'];
 		$error = "none";
 		
@@ -186,6 +186,32 @@ class AlexaController extends AppController
 		
 		$this->set(compact('reply'));
 		$this->set('_serialize', 'reply');	
+	}
+	
+	public function executescenario(){
+		
+		$scenario = $this->request->params['?']['scene'];
+		$error = "none";
+		
+		$now = Time::now();
+		$now->format('e');
+		$status ="";
+	
+		
+		if(isset($scenario)){
+			$status = $this->DceCommandExecutor->executeScenario($scenario);
+		} else {
+			$error = "no scenario set";
+		}
+		
+		$reply= array(
+		'status' => $status,
+		'timeSent'=>$now,
+		'error'=>$error
+		);	
+		
+		$this->set(compact('reply'));
+		$this->set('_serialize', 'reply');
 	}
 	
 }
