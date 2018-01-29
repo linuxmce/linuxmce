@@ -214,4 +214,68 @@ class AlexaController extends AppController
 		$this->set('_serialize', 'reply');
 	}
 	
+	public function findMovieByName(){
+		$error = "none";		
+		$now = Time::now();
+		$now->format('e');
+		$status ="";
+		
+		$movieName = $this->request->getQuery('name');
+		$roomRequest = $this->request->getQuery('room');
+		$room = $this->findRoomByName($roomRequest);
+		
+		$Linuxmcefile = TableRegistry::get('Linuxmcefile');
+		$movieReply = $Linuxmcefile->getVideoByName($movieName);
+		
+		$reply= array(
+		'status' => $status,
+		'timeSent'=>$now,
+		'error'=>$error
+		);	
+		
+		$reply['movie']=$movieReply;
+		$reply['room'] = array(
+		'room'=>$roomRequest,
+			'id'=>$room
+		);
+		
+		if($reply['movie']['count']==0){
+			$reply['status'] = 'error';
+			$reply["error"] = 'movie not found';
+		} 
+		else if ($roomRequest==-1) 
+		{			
+			$reply['status'] = 'error';
+			$reply['error'] = 'Incorrect room';
+		} else {
+		$stat = $this->playMediaInRoom($reply['movie']['movies'][0]['fileName'], $room );
+			$reply['status'] = 'OK';
+		}
+		
+		
+		
+		
+		$this->set(compact('reply'));
+		$this->set('_serialize', 'reply');
+	}
+	
+	public function findRoomByName($roomName){
+		$error = "none";		
+		$now = Time::now();
+		$now->format('e');
+		$status ="";		
+		
+		$EA = TableRegistry::get('Entertainarea');		
+	
+		$targetEa = $EA->getEntertainAreaFromName($roomName);
+		
+		return $targetEa;
+	}
+	
+	public function playMediaInRoom($media, $room){
+		
+		$status = $this->DceCommandExecutor->playMediaInRoom($room, $media);
+		return $status;
+	}
+	
 }

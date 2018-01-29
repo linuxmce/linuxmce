@@ -36,7 +36,7 @@ public function initialize(array $config){
 					  'foreignKey' => 'FK_DeviceData',
 					  'bindingKey' => 'FK_DeviceData',	
 					  'targetForeignKey' => 'FK_DeviceTemplate',
-					  'joinTable'=> 'DeviceTemplate_DeviceData'
+					  'joinTable'=> 'Devicetemplatedevicedata'
 				  ]);
 	
 	 $this->hasMany('Device_DeviceData',
@@ -46,6 +46,15 @@ public function initialize(array $config){
 					  'bindingKey' => 'PK_Device',	
 					  'targetForeignKey' => 'FK_DeviceData',
 				  ]);
+	
+			$this->belongsToMany('Command',
+				  [
+					  'className'=>'Commands',
+					  'joinTable' => 'Commandgroupcommand',
+					  'foreignKey' => 'FK_Device',
+					  'targetForeignKey' =>'FK_Command'
+				  ]
+	);
 	
 }
 	
@@ -194,8 +203,12 @@ function findByDeviceCategory(Query $query, array $options){
 			
 		foreach($entertainArea->command_group as $CG){
 				
+			
 		
-			$appendArray = array(
+			if($CG->Disabled==false){
+				
+			
+				$appendArray = array(
 			
 			'endpointId' => $CG->PK_CommandGroup,
 			'manufacturerName' => 'LinuxMCE',
@@ -214,12 +227,11 @@ function findByDeviceCategory(Query $query, array $options){
 						'proactivelyReported'=>false						
 					)
 				]
-			);
-			
+			);			
 			$ret[] = $appendArray;
 			}
 			
-			
+			}
 		}
 		
 		

@@ -16,7 +16,16 @@ public function initialize(array $config){
 					  'bindingKey' => 'PK_CommandGroup',
 					  'foreignKey' => 'PK_Room',
 					  'targetForeignKey' =>'FK_Room'
-				  ]);	
+				  ]);
+	
+		$this->belongsToMany('Command',
+				  [
+					  'className'=>'Commands',
+					  'joinTable' => 'Commandgroupcommand',
+					  'foreignKey' => 'FK_CommandGroup',
+					  'targetForeignKey' => 'FK_Command'					  
+				  ]
+	);
 
 	}	
 }

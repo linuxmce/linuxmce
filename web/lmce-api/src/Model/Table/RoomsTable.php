@@ -16,8 +16,7 @@ public function initialize(array $config){
 					  'bindingKey' => 'PK_RoomType'
 				  ]);
 	
-				$this->hasMany('EntertainArea',
-				  [									  
+				$this->hasMany('EntertainArea',				  [									  
 					  'className' => 'Entertainarea',
 					  'bindingKey' => 'PK_Room'	,
 					  'foreignKey' => 'FK_Room'
