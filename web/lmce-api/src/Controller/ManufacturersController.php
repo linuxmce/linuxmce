@@ -6,7 +6,6 @@ use App\Controller\AppController;
 /**
  * Manufacturers Controller
  *
- * @property \App\Model\Table\ManufacturersTable $Manufacturers
  *
  * @method \App\Model\Entity\Manufacturer[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
@@ -35,7 +34,7 @@ class ManufacturersController extends AppController
     public function view($id = null)
     {
         $manufacturer = $this->Manufacturers->get($id, [
-            'contain' => ['Devices', 'DeviceTemplate']
+            'contain' => []
         ]);
 
         $this->set('manufacturer', $manufacturer);

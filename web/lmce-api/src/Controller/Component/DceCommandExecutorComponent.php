@@ -170,7 +170,32 @@ class DceCommandExecutorComponent extends Component
 	}
 	
 
-	
+	function playMediaInRoom($room, $media){
+			// Just an example on how to call the messagesend function	
+		global $possyDeviceFromID;
+		$server = "dcerouter";
+		$port = 3450;
+		$timeout = 10;
+		$errno = 0;
+		$errstr = "";
+		$deviceFromID = 0;
+		$deviceToID = 10;
+		$messageType = 1;
+		$messageID = 43; # MH_Play_File
+		$parameters = array();
+
+		$parameter1ID = 13; // filename
+		$parameter1Content = '"'.$media.'"';
+		print_r($parameter1Content);
+		
+		$parameter2ID = 45; // Entertainment Area
+		$parameter2Content = $room;
+
+		// commStart($server, $port, $deviceIDFrom)
+		$socket = $this->commStart($server,$port,$deviceFromID);		
+		$this->myMessageSend($socket,$deviceFromID,$deviceToID,$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID, $parameter2Content);
+		$this->commEnd($socket);
+	}
 	
 	
 

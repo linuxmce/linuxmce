@@ -26,6 +26,18 @@ public function initialize(array $config){
 		
 }
 	
+		
+ function getEntertainAreaFromName($name){
+	$targetEa =	$this->find('all')
+			->where(['Description LIKE' => $name])
+		->toList();
+		
+	if( isset($targetEa) ){
+		return $targetEa[0]['PK_EntertainArea'];
+	}	
+	return "-1";
+}
+	
 }
 
 
