@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dwsync>
+<file name="DeviceTable.php" server="192.168.80.1//var/www/lmce-api/" local="131609461112792436" remote="131609461200000000" Dst="1" />
+<file name="DevicesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131614978063724672" remote="131614978200000000" Dst="1" />
+<file name="DeviceTemplatesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131609493302703593" remote="131609493000000000" Dst="1" />
+<file name="RoomsTable.php" server="192.168.80.1//var/www/lmce-api/" local="131614034850087439" remote="131614034400000000" Dst="1" />
+<file name="RoomTypesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131609494061717007" remote="131609493600000000" Dst="1" />
+<file name="DevicetemplatesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131610564085227784" remote="131610564000000000" Dst="1" />
+<file name="RoomtypesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131609677908225132" remote="131609677800000000" Dst="1" />
+<file name="Devicecategory.php" server="192.168.80.1//var/www/lmce-api/" local="131609823466383203" remote="131609823000000000" Dst="1" />
+<file name="Manufacturers.php" server="192.168.80.1//var/www/lmce-api/" local="131609827164194706" remote="131609841000000000" Dst="1" />
+<file name="Devicecategories.php" server="192.168.80.1//var/www/lmce-api/" local="131609823600000000" remote="131609823600000000" Dst="1" />
+<file name="DevicedataTable.php" server="192.168.80.1//var/www/lmce-api/" local="131612999836132441" remote="131612999400000000" Dst="1" />
+<file name="DeviceCategories.php" server="192.168.80.1//var/www/lmce-api/" local="131609823600000000" remote="131609823600000000" Dst="1" />
+<file name="DeviceDataTable.php" server="192.168.80.1//var/www/lmce-api/" local="131609827977121203" remote="131609827800000000" Dst="1" />
+<file name="DevicecategoriesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131609843290597083" remote="131609843400000000" Dst="1" />
+<file name="ManufacturersTable.php" server="192.168.80.1//var/www/lmce-api/" local="131610557603847070" remote="131610557400000000" Dst="1" />
+<file name="DevicesManufacturersTable.php" server="192.168.80.1//var/www/lmce-api/" local="131610402762280639" remote="131610402600000000" Dst="1" />
+<file name="DevicesmanufacturersTable.php" server="192.168.80.1//var/www/lmce-api/" local="131610402762280639" remote="131610402600000000" Dst="1" />
+<file name="Devicedevicedata.php" server="192.168.80.1//var/www/lmce-api/" local="131612979600000000" remote="131612979600000000" Dst="1" />
+<file name="DevicedevicedataTable.php" server="192.168.80.1//var/www/lmce-api/" local="131612992339243643" remote="131612992200000000" Dst="1" />
+<file name="CommandgroupTable.php" server="192.168.80.1//var/www/lmce-api/" local="131614965861436741" remote="131614965600000000" Dst="1" />
+<file name="CommandgrouproomTable.php" server="192.168.80.1//var/www/lmce-api/" local="131613990293184431" remote="131613990000000000" Dst="1" />
+<file name="CommandgroupentertainareaTable" server="192.168.80.1//var/www/lmce-api/" local="131614002000000000" remote="131614002000000000" Dst="1" />
+<file name="CommandgroupentertainareaTable.php" server="192.168.80.1//var/www/lmce-api/" local="131614038299415448" remote="131614038000000000" Dst="1" />
+<file name="EntertainareaTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616733100109935" remote="131616732600000000" Dst="1" />
+<file name="Commandgroupcommand.php" server="192.168.80.1//var/www/lmce-api/" local="131614946417894620" remote="131614946400000000" Dst="1" />
+<file name="CommandgroupcommandTable.php" server="192.168.80.1//var/www/lmce-api/" local="131614973439210165" remote="131614973400000000" Dst="1" />
+<file name="CommandsTable.php" server="192.168.80.1//var/www/lmce-api/" local="131614972168057459" remote="131614972200000000" Dst="1" />
+<file name="LinuxmcefileTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616779565227588" remote="131616779400000000" Dst="1" />
+<file name="PlutoMediaTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616552740643964" remote="131616553200000000" Dst="1" />
+<file name="LinuxmceattributesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616636788731240" remote="131616636600000000" Dst="1" />
+<file name="LinuxmceattributetypesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616585052872118" remote="131616634800000000" Dst="1" />
+<file name="LinuxmcefileattributesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616579047668640" remote="131616579000000000" Dst="1" />
+<file name="LinuxmcefileformatsTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616633194425657" remote="131616633000000000" Dst="1" />
+<file name="LinuxmcemediatypesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616589235091327" remote="131616589200000000" Dst="1" />
+<file name="LinuxmcemediasubtypesTable.php" server="192.168.80.1//var/www/lmce-api/" local="131616644206925536" remote="131616643800000000" Dst="1" />
+</dwsync>
