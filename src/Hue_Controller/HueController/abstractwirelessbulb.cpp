@@ -12,11 +12,11 @@ AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, 
     m_brightness(0),
     m_room(-1)
 {
-   qDebug() << Q_FUNC_INFO << "ctor";
+
     if(mp_controller){
-        qDebug() << Q_FUNC_INFO << "contoller IP::" << mp_controller->getIpAddress();
+        //qDebug() << Q_FUNC_INFO << "contoller IP::" << mp_controller->getIpAddress();
     } else {
-        qDebug() << Q_FUNC_INFO << "invalid controller!";
+        //qDebug() << Q_FUNC_INFO << "invalid controller!";
     }
 
 }
@@ -167,6 +167,11 @@ HueControllerHardware *AbstractWirelessBulb::getController()
 void AbstractWirelessBulb::setController(HueControllerHardware *c)
 {
     mp_controller=c;
+}
+
+void AbstractWirelessBulb::proccessStateInformation(QVariantMap d)
+{
+    Q_UNUSED(d);
 }
 int AbstractWirelessBulb::getRoom() const
 {

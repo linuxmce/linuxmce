@@ -17,6 +17,7 @@ public:
     enum BulbType{
         PHILLIPS_HUE,
         PHILLIPS_HUE_LUX,
+        PHILLIPS_HUE_WHITE,
         PHILLIPS_HUE_LIGHTSTRIPS,
         PHILLIPS_HUE_BLOOM,
         CREE_WIRELESS_LED
@@ -126,7 +127,7 @@ public slots:
      HueControllerHardware * getController();
      void setController(HueControllerHardware * c);
 
-     virtual void proccessStateInformation(QVariantMap d)=0;
+     virtual void proccessStateInformation(QVariantMap d);
      virtual void resetColor() { setColor(QColor("#90C638")); }
 
 
@@ -161,7 +162,7 @@ private:
 
     HueControllerHardware *mp_controller;
 
-     QMap<QString, int> deviceMap;
+    QMap<QString, int> deviceMap;
 
 };
 

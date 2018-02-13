@@ -43,7 +43,10 @@ SOURCES += ../Main.cpp \
     huebulb.cpp \
     ../huecommand.cpp \
     abstractwirelessbulb.cpp \
-    hueluxbulb.cpp
+    hueluxbulb.cpp \
+    huemotionsensor.cpp \
+    huedaynightsensor.cpp \
+    huetemperaturesensor.cpp
 
 HEADERS += \
     ../../DCE/DeviceData_Base.h \
@@ -64,4 +67,7 @@ HEADERS += \
     huebulb.h \
     ../huecommand.h \
     abstractwirelessbulb.h \
-    hueluxbulb.h
+    hueluxbulb.h \
+    huemotionsensor.h \
+    huedaynightsensor.h \
+    huetemperaturesensor.h
