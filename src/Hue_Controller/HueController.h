@@ -216,6 +216,8 @@ private slots:
     void updateDevice(AbstractWirelessBulb *b, int d);
     void checkLightInformation();
     void handleCheckLightInformation(QNetworkReply * reply);
+    void checkSensorInformation();
+    void handleCheckSensorInformation(QNetworkReply * reply);
 
 
 private:
@@ -239,7 +241,8 @@ private:
 
     QNetworkAccessManager * linkButtonManager;
     QNetworkAccessManager * commandManager;
-    QNetworkAccessManager * poller;
+    QNetworkAccessManager * lightRequestManager;
+    QNetworkAccessManager * sensorRequestManager;
     HueDayNightSensor * m_dayNightSensor;
 
     static const char getGroups[];          /*!< Get all groups \note get */
