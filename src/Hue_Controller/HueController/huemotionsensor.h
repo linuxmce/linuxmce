@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QVariantMap>
-
+#include "Gen_Devices/AllCommandsRequests.h"
 class HueControllerHardware;
 
 namespace DCE {
@@ -20,11 +20,19 @@ public:
     void setTemp(int temp);
 
     int id() const;
+
     void setId(int id);
+
+    int linuxmceId() const;
+    void setLinuxmceId(int linuxmceId);
+
+signals:
+    void notifyEvent(DCE::Message * m);
 
 private:
     int m_temp;
     int m_id;
+    int m_linuxmceId;
 };
 
 
@@ -53,8 +61,15 @@ public:
     bool daylight() const;
     void setDaylight(bool daylight);
 
+    int linuxmceId() const;
+    void setLinuxmceId(int linuxmceId);
+
+signals:
+    void notifyEvent(DCE::Message * m);
+
 private:
     int m_id;
+    int m_linuxmceId;
     int m_darkThreshold;
     int m_thresholdOffset;
     int m_lightLevel;
@@ -74,6 +89,9 @@ public:
 
     HueControllerHardware *controller() const;
     void setController(HueControllerHardware *controller);
+
+    bool getUseCelsius() const;
+    void setUseCelsius(bool value);
 
 signals:
     void batteryLevelChanged(int batteryLevel);
@@ -136,7 +154,12 @@ public slots:
     void setLastUpdated(const QString &lastUpdated);
 
     void setTempSensor(int id, QVariantMap obj);
+    ZLLTemp *tempsensor() {return &tempSensor; }
     void setLightSensor(int id, QVariantMap obj);
+
+    void setPresenceData(QVariantMap data);
+    void setTempData(QVariantMap data);
+    void setLightLevelData(QVariantMap data);
 
 protected:
 
@@ -163,6 +186,7 @@ protected:
     ZLLLightLevel lightSensor;
     ZLLTemp       tempSensor;
     HueControllerHardware * m_controller;
+    bool useCelsius;
 
 
 };

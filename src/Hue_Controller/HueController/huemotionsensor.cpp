@@ -5,12 +5,14 @@
 #include "QVariantMap"
 #include "Gen_Devices/AllCommandsRequests.h"
 #include "huecontrollerhardware.h"
+#include <qdebug.h>
 
 HueMotionSensor::HueMotionSensor(HueControllerHardware *p_controller, QObject *parent) :
-    QObject(parent), m_controller(p_controller)
+    QObject(parent), m_controller(p_controller), m_linuxmceId(0), useCelsius(false)
 
 {
-
+        connect(&tempSensor, SIGNAL(notifyEvent(DCE::Message*)), this, SIGNAL(notifyEvent(DCE::Message*)));
+        connect(&lightSensor, SIGNAL(notifyEvent(DCE::Message*)), this, SIGNAL(notifyEvent(DCE::Message*)));
 }
 
 QString HueMotionSensor::status() const
@@ -110,6 +112,8 @@ bool HueMotionSensor::presenceDetected() const
 
 void HueMotionSensor::setPresenceDetected(bool presenceDetected)
 {
+    if(m_presenceDetected == presenceDetected) return;
+
     m_presenceDetected = presenceDetected;
     emit presenceDetectedChanged(m_presenceDetected);
     DCE::Message * m = new DCE::Message(
@@ -203,6 +207,39 @@ void HueMotionSensor::setLightSensor(int id, QVariantMap obj)
     lightSensor.setThresholdOffset(obj.value("config").toMap().value("tholdoffset").toInt());
 }
 
+void HueMotionSensor::setPresenceData(QVariantMap data)
+{
+    setPresenceDetected(data.value("state").toMap().value("presence").toBool());
+    setBatteryLevel(data.value("config").toMap().value("battery").toInt());
+}
+
+void HueMotionSensor::setTempData(QVariantMap data)
+{
+
+    int t = data.value("state").toMap().value("temperature").toInt()*.01;
+
+    if(!useCelsius) {
+        t = (t *9.0) / 5.0+32;
+    }
+
+    tempsensor()->setTemp(t );
+}
+
+void HueMotionSensor::setLightLevelData(QVariantMap data)
+{
+
+}
+
+bool HueMotionSensor::getUseCelsius() const
+{
+    return useCelsius;
+}
+
+void HueMotionSensor::setUseCelsius(bool value)
+{
+    useCelsius = value;
+}
+
 HueControllerHardware *HueMotionSensor::controller() const
 {
     return m_controller;
@@ -241,7 +278,22 @@ int ZLLTemp::temp() const
 
 void ZLLTemp::setTemp(int temp)
 {
-    m_temp  = ( (temp*.01) * 9.0) / 5.0 + 32;
+    if(m_temp == temp) return;
+    m_temp  = temp;
+
+
+    DCE::Message * m = new DCE::Message(
+                id(),
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_Temperature_Changed_CONST,
+                1,
+                EVENTPARAMETER_Value_CONST,
+                StringUtils::itos(m_temp).c_str() );
+
+    emit notifyEvent(m);
+
 }
 
 int ZLLTemp::id() const
@@ -252,6 +304,16 @@ int ZLLTemp::id() const
 void ZLLTemp::setId(int id)
 {
     m_id = id;
+}
+
+int ZLLTemp::linuxmceId() const
+{
+    return m_linuxmceId;
+}
+
+void ZLLTemp::setLinuxmceId(int linuxmceId)
+{
+    m_linuxmceId = linuxmceId;
 }
 
 int ZLLLightLevel::id() const
@@ -312,6 +374,16 @@ bool ZLLLightLevel::daylight() const
 void ZLLLightLevel::setDaylight(bool daylight)
 {
     m_daylight = daylight;
+}
+
+int ZLLLightLevel::linuxmceId() const
+{
+    return m_linuxmceId;
+}
+
+void ZLLLightLevel::setLinuxmceId(int linuxmceId)
+{
+    m_linuxmceId = linuxmceId;
 }
 
 
