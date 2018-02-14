@@ -34,7 +34,6 @@ using namespace DCE;
 #include <QJsonDocument>
 #include <QStringList>
 #include <huecontrollerhardware.h>
-#include <huebulb.h>
 #include <pthread.h>
 #include <QtGui/QColor>
 #include <math.h>
@@ -514,9 +513,12 @@ void HueController::CreateChildren()
 
                 for (int n = 0; n < hueBulbs.size(); n++){
                     if(hueBulbs.at(n)->getController()->getIpAddress() == p.at(0)&& hueBulbs.at(n)->id()==deviceID ){
+                        QVariantMap mapping =QJsonDocument::fromBinaryData(QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_UnitNo_CONST)).toLocal8Bit()).object().toVariantMap();
+                        hueBulbs.at(n)->setColorMap(mapping.value("color").toMap());
                         hueBulbs.at(n)->setLinuxmceId(linuxmceID);
                         hueBulbs.at(n)->setBrightness(0);
                         hueBulbs.at(n)->setPowerOn(false);
+                        hueBulbs.at(n)->setDeviceTemplate(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate );
                         qDebug() << "Linked existing light with linuxmce db. " << hueBulbs.at(n)->displayName();
                     }
                 }
@@ -1389,11 +1391,16 @@ void HueController::checkLightInformation()
 void HueController::handleCheckLightInformation(QNetworkReply *reply)
 {
 
-    QVariantMap p = QJsonDocument::fromBinaryData(reply->readAll()).object().toVariantMap();
-
+    QByteArray rep = reply->readAll();
+    QVariantMap p = QJsonDocument::fromJson(rep).object().toVariantMap();
+    if(p.isEmpty()){
+        qDebug() << " Empty Reply !" ;
+    }
     foreach(AbstractWirelessBulb*b, hueBulbs){
 
         b->proccessStateInformation(p.value(QString::number(b->id())).toMap());
+
+
         // qDebug() << Q_FUNC_INFO << " light " << b->displayName();
         if(m_updateStatus){
 
@@ -1535,15 +1542,18 @@ void HueController::handleLightEvent(int whichEvent)
 
         this->m_pEvent->SendMessage(st);
     }
-
-
 }
 
 void HueController::handleMotionSensorEvent(Message *m)
-{
-    qDebug() << Q_FUNC_INFO;
+{    
     this->m_pEvent->SendMessage(m);
 }
+
+void HueController::handleLightMessage(Message *m)
+{
+     this->m_pEvent->SendMessage(m);
+}
+
 
 void HueController::getScreenSaverColor()
 {

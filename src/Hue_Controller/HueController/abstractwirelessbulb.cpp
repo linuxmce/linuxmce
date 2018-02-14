@@ -3,6 +3,10 @@
 #include "Message.h"
 #include "pluto_main/Define_EventParameter.h"
 #include "pluto_main/Define_Event.h"
+#include "Gen_Devices/AllCommandsRequests.h"
+#include "QJsonDocument"
+#include "QJsonObject"
+#include <math.h>
 
 AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, QObject *parent) :
     QObject(parent),
@@ -10,8 +14,13 @@ AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, 
     m_CurrentLevel(0.0),
     m_powerOn(false),
     m_brightness(0),
-    m_room(-1)
+    m_room(-1),
+    m_implementsColor(false),
+    m_implementsColorTemp(false)
 {
+   conversionVar = ceil(65280 / 360);
+    m_rgbColor.setRgb(0,0,0);
+    m_hslColor = m_rgbColor.toHsl();
 
     if(mp_controller){
         //qDebug() << Q_FUNC_INFO << "contoller IP::" << mp_controller->getIpAddress();
@@ -101,8 +110,7 @@ void AbstractWirelessBulb::setPowerOn(bool powerOn)
         return;
 
     if(stateChanged){
-        emit dceMessage(EVENT_Device_OnOff_CONST);
-        qDebug() << QString("%1 Light Changed, sending event").arg(displayName());
+        emit dceMessage(EVENT_Device_OnOff_CONST);       
     }
 
 
@@ -171,7 +179,107 @@ void AbstractWirelessBulb::setController(HueControllerHardware *c)
 
 void AbstractWirelessBulb::proccessStateInformation(QVariantMap d)
 {
-    Q_UNUSED(d);
+
+    QVariantMap stateInfo = d["state"].toMap();
+
+    setDisplayName(d["name"].toString());
+    setOnline(stateInfo["reachable"].toBool());
+    setPowerOn(stateInfo["on"].toBool());
+    setSoftwareVersion(d["swversion"].toString());
+    setLightModel(d["modelid"].toString());
+    setLightType(d["type"].toString());
+    setAlert(stateInfo["alert"].toString());
+    setEffect(stateInfo["effect"].toString());
+    setCurrentLevel(stateInfo["bri"].toUInt()/2.55);
+
+    switch (m_deviceTemplate) {
+    case DEVICETEMPLATE_Hue_Lightbulb_CONST :
+        setCurrentColor(stateInfo);
+        break;
+    case DEVICETEMPLATE_Hue_Light_Strips_CONST :
+        setCurrentColor(stateInfo);
+        setCurrentLevel(stateInfo["bri"].toUInt()/2.55);
+        break;
+    case DEVICETEMPLATE_Hue_Lux_Bulb_CONST :
+        setCurrentColor(stateInfo);
+        setCurrentLevel(stateInfo["bri"].toUInt()/2.55);
+        break;
+    case DEVICETEMPLATE_Connected_A19_60w_Equivalent_CONST :
+        setBrightness(stateInfo["bri"].toDouble());
+        break;
+    default:
+        break;
+    }
+}
+
+int AbstractWirelessBulb::getCurrentColorTemp() const
+{
+    return currentColorTemp;
+}
+
+void AbstractWirelessBulb::setCurrentColorTemp(int value)
+{
+    currentColorTemp = value;
+}
+
+bool AbstractWirelessBulb::getImplementsColorTemp() const
+{
+    return m_implementsColorTemp;
+}
+
+void AbstractWirelessBulb::setImplementsColorTemp(bool implementsColorTemp)
+{
+    m_implementsColorTemp = implementsColorTemp;
+}
+
+bool AbstractWirelessBulb::getImplementsColor() const
+{
+    return m_implementsColor;
+}
+
+void AbstractWirelessBulb::setImplementsColor(bool implementsColor)
+{
+    m_implementsColor = implementsColor;
+}
+
+QVariantMap AbstractWirelessBulb::getCurrentColor() const
+{
+    return currentColor;
+}
+
+void AbstractWirelessBulb::setCurrentColor(const QVariantMap &value)
+{
+
+    m_hslColor = QColor::fromHsl( int(value["hue"].toInt() / conversionVar), value["sat"].toInt(), value["bri"].toInt() );
+    m_rgbColor = m_hslColor.toRgb();
+    currentColorTemp = value["ct"].toInt();
+    QVariantMap out;
+    out.insert("red", QVariant::fromValue(m_rgbColor.red()));
+    out.insert("blue", m_rgbColor.blue());
+    out.insert("green", m_rgbColor.blue());    
+
+}
+
+long AbstractWirelessBulb::getDeviceTemplate() const
+{
+    return m_deviceTemplate;
+}
+
+void AbstractWirelessBulb::setDeviceTemplate(long deviceTemplate)
+{
+    m_deviceTemplate = deviceTemplate;
+    switch (m_deviceTemplate) {
+    case DEVICETEMPLATE_Hue_Lightbulb_CONST :
+    case DEVICETEMPLATE_Hue_Light_Strips_CONST :
+        setImplementsColor(true);
+        setImplementsColorTemp(true);
+        break;
+    case DEVICETEMPLATE_Hue_Lux_Bulb_CONST :
+       setImplementsColorTemp(true);
+        break;
+    default:
+        break;
+    }
 }
 int AbstractWirelessBulb::getRoom() const
 {
@@ -198,14 +306,20 @@ void AbstractWirelessBulb::setLightType(const QString &lightType)
     emit lightTypeChanged();
 }
 
-QVariant AbstractWirelessBulb::getColorMap() const
+QVariantMap AbstractWirelessBulb::getColorMap() const
 {
-    return m_colorMap;
+    QVariantMap ret;
+    ret.insert("defaultColor", defaultColor);
+    ret.insert("alertColor", alertColor);
+    ret.insert("currentColor", currentColor);
+    return ret;
+
 }
 
-void AbstractWirelessBulb::setColorMap(const QVariant &colorMap)
+void AbstractWirelessBulb::setColorMap(const QVariantMap &colorMap)
 {
-    m_colorMap = colorMap;
+    defaultColor = colorMap.value("defaultColor").toMap();
+    alertColor = colorMap.value("alertColor").toMap();
 }
 
 quint8 AbstractWirelessBulb::getBrightness() const
@@ -228,21 +342,6 @@ void AbstractWirelessBulb::setBrightness(const quint8 &brightness)
     emit dceMessage(EVENT_State_Changed_CONST);
 }
 
-int AbstractWirelessBulb::getBlueLevel() const
-{
-    return m_blueLevel;
-}
-
-int AbstractWirelessBulb::getGreenLevel() const
-{
-    return m_greenLevel;
-}
-
-int AbstractWirelessBulb::getRedLevel() const
-{
-    return m_redLevel;
-}
-
 QString AbstractWirelessBulb::uniqueId() const
 {
     return m_uniqueId;
@@ -256,25 +355,9 @@ void AbstractWirelessBulb::setUniqueId(const QString &uniqueId)
 
 void AbstractWirelessBulb::setRgb(int r, int g, int b)
 {
-    bool changed=false;
-    if(m_redLevel!=r) {
-        m_redLevel=r;
-        changed=true;
-    }
+    m_rgbColor = QColor::fromRgb(r,g,b);
+        emit rgbColorChanged();     
 
-    if(m_greenLevel!=g){
-        m_greenLevel = g;
-        changed=true;
-    }
-
-    if(m_blueLevel!=b){
-        m_blueLevel=b;
-        changed=true;
-    }
-
-    if(changed){
-        emit rgbColorChanged();
-    }
 }
 
 QString AbstractWirelessBulb::manufacturerName() const

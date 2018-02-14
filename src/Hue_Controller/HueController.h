@@ -24,8 +24,8 @@
 #include <QVariant>
 #include <QTimer>
 #include <QUrl>
+#include "abstractwirelessbulb.h"
 #include <huecontrollerhardware.h>
-#include <huebulb.h>
 #include <huemotionsensor.h>
 #include <huedaynightsensor.h>
 #include "../huecommand.h"
@@ -207,6 +207,7 @@ public slots:
   HueControllerHardware* getController(int index) {return hueControllers.at(index); }
  void handleLightEvent(int whichEvent);
  void handleMotionSensorEvent(DCE::Message * m);
+ void handleLightMessage(DCE::Message * m);
 
 private slots:
     bool addMessageToQueue(QUrl msg, QVariant params);
