@@ -147,8 +147,25 @@ int HueMotionSensor::batteryLevel() const
 
 void HueMotionSensor::setBatteryLevel(int batteryLevel)
 {
+    if(m_batteryLevel == batteryLevel) return;
+
     m_batteryLevel = batteryLevel;
     emit batteryLevelChanged(m_batteryLevel);
+
+    DCE::Message *status = new DCE::Message(
+                linuxmceId(),
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_Battery_Level_Changed_CONST,
+                1 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_Value_CONST,
+                QString(m_batteryLevel).toStdString().c_str()
+                );
+
+    emit notifyEvent(status);
+
+
 }
 
 QString HueMotionSensor::alert() const
@@ -227,6 +244,9 @@ void HueMotionSensor::setTempData(QVariantMap data)
 
 void HueMotionSensor::setLightLevelData(QVariantMap data)
 {
+    lightSensor.setLightLevel(data["state"].toMap().value("lightlevel").toInt());
+    lightSensor.setDark(data["state"].toMap().value("dark").toBool());
+    lightSensor.setDaylight(data["state"].toMap().value("daylight").toBool());
 
 }
 
@@ -238,6 +258,49 @@ bool HueMotionSensor::getUseCelsius() const
 void HueMotionSensor::setUseCelsius(bool value)
 {
     useCelsius = value;
+}
+
+void HueMotionSensor::initValues()
+{
+
+    DCE::Message * m = new DCE::Message(
+                tempsensor()->linuxmceId(),
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_Temperature_Changed_CONST,
+                1,
+                EVENTPARAMETER_Value_CONST,
+                StringUtils::itos(tempSensor.temp()).c_str() );
+
+    emit notifyEvent(m);
+
+    DCE::Message *status = new DCE::Message(
+                lightsensor()->linuxmceId(),
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_Brightness_Changed_CONST,
+                1 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_Value_CONST,
+                StringUtils::itos(lightsensor()->lightLevel()).c_str()
+                );
+
+    emit notifyEvent(status);
+
+    status = new DCE::Message(
+                linuxmceId(),
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_Battery_Level_Changed_CONST,
+                1 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_Value_CONST,
+                QString(m_batteryLevel).toStdString().c_str()
+                );
+
+    emit notifyEvent(status);
+
 }
 
 HueControllerHardware *HueMotionSensor::controller() const
@@ -283,7 +346,7 @@ void ZLLTemp::setTemp(int temp)
 
 
     DCE::Message * m = new DCE::Message(
-                id(),
+                linuxmceId(),
                 DEVICEID_EVENTMANAGER,
                 DCE::PRIORITY_NORMAL,
                 DCE::MESSAGETYPE_EVENT,
@@ -291,7 +354,7 @@ void ZLLTemp::setTemp(int temp)
                 1,
                 EVENTPARAMETER_Value_CONST,
                 StringUtils::itos(m_temp).c_str() );
-
+ if(linuxmceId() != 0)
     emit notifyEvent(m);
 
 }
@@ -351,9 +414,25 @@ int ZLLLightLevel::lightLevel() const
     return m_lightLevel;
 }
 
-void ZLLLightLevel::setLightLevel(long lightLevel)
+void ZLLLightLevel::setLightLevel(int lightLevel)
 {
+    if(m_lightLevel== lightLevel) return;
     m_lightLevel = lightLevel;
+    qDebug() << Q_FUNC_INFO;
+    DCE::Message *status = new DCE::Message(
+                linuxmceId(),
+                DEVICEID_EVENTMANAGER,
+                DCE::PRIORITY_NORMAL,
+                DCE::MESSAGETYPE_EVENT,
+                EVENT_Brightness_Changed_CONST,
+                1 /* number of parameter's pairs (id, value) */,
+                EVENTPARAMETER_Value_CONST,
+                StringUtils::itos(m_lightLevel).c_str()
+                );
+
+    if(linuxmceId() != 0)
+    emit notifyEvent(status);
+
 }
 
 bool ZLLLightLevel::dark() const
@@ -384,6 +463,7 @@ int ZLLLightLevel::linuxmceId() const
 void ZLLLightLevel::setLinuxmceId(int linuxmceId)
 {
     m_linuxmceId = linuxmceId;
+    qDebug() << Q_FUNC_INFO << linuxmceId;
 }
 
 
