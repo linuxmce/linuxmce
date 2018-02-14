@@ -28,6 +28,7 @@ public:
 
 signals:
     void notifyEvent(DCE::Message * m);
+    void dataEvent(DCE::PreformedCommand *cmd );
 
 private:
     int m_temp;
@@ -53,7 +54,7 @@ public:
     void setThresholdOffset(long thresholdOffset);
 
     int lightLevel() const;
-    void setLightLevel(long lightLevel);
+    void setLightLevel(int lightLevel);
 
     bool dark() const;
     void setDark(bool dark);
@@ -66,6 +67,7 @@ public:
 
 signals:
     void notifyEvent(DCE::Message * m);
+    void dataEvent(DCE::PreformedCommand *cmd );
 
 private:
     int m_id;
@@ -98,9 +100,12 @@ signals:
     void enabledChanged(bool enabled);
     void presenceDetectedChanged(bool presenceDetected);
     void notifyEvent(DCE::Message * m);
+    void dataEvent(DCE::PreformedCommand *cmd );
 
 
 public slots:
+
+    void initValues();
 
     int linuxmceId() const;
     void setLinuxmceId(int linuxmceId);
@@ -155,6 +160,7 @@ public slots:
 
     void setTempSensor(int id, QVariantMap obj);
     ZLLTemp *tempsensor() {return &tempSensor; }
+    ZLLLightLevel * lightsensor(){ return &lightSensor;}
     void setLightSensor(int id, QVariantMap obj);
 
     void setPresenceData(QVariantMap data);
