@@ -2182,6 +2182,7 @@
 #define DEVICETEMPLATE_Hue_Temperature_Sensor_CONST 2359
 #define DEVICETEMPLATE_Connected_A19_60w_Equivalent_CONST 2360
 #define DEVICETEMPLATE_Ambient_Light_Sensor_CONST 2361
+#define DEVICETEMPLATE_Hue_White_Ambiance_CONST 2362
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"
