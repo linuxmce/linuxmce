@@ -86,10 +86,11 @@ double AbstractWirelessBulb::CurrentLevel() const
 void AbstractWirelessBulb::setCurrentLevel(double CurrentLevel)
 {
 
-    if(m_CurrentLevel == CurrentLevel) return;
+   if(m_CurrentLevel == CurrentLevel) return;
 
     m_CurrentLevel = CurrentLevel;
     emit currentLevelChanged();
+    qDebug() << Q_FUNC_INFO;
     emit dceMessage(EVENT_State_Changed_CONST);
 }
 bool AbstractWirelessBulb::powerOn() const
@@ -99,21 +100,15 @@ bool AbstractWirelessBulb::powerOn() const
 
 void AbstractWirelessBulb::setPowerOn(bool powerOn)
 {
-
-    bool stateChanged=false;
-    if(m_powerOn != powerOn) stateChanged=true;
+    if(m_powerOn == powerOn) return;
 
     m_powerOn = powerOn;
     emit powerOnChanged();
 
     if(linuxmceId()==0)
-        return;
-
-    if(stateChanged){
-        emit dceMessage(EVENT_Device_OnOff_CONST);       
-    }
-
-
+        return;    
+    qDebug() << Q_FUNC_INFO;
+        emit dceMessage(EVENT_Device_OnOff_CONST);
 }
 int AbstractWirelessBulb::bulbType() const
 {
@@ -198,11 +193,11 @@ void AbstractWirelessBulb::proccessStateInformation(QVariantMap d)
         break;
     case DEVICETEMPLATE_Hue_Light_Strips_CONST :
         setCurrentColor(stateInfo);
-        setCurrentLevel(stateInfo["bri"].toUInt()/2.55);
+
         break;
     case DEVICETEMPLATE_Hue_Lux_Bulb_CONST :
         setCurrentColor(stateInfo);
-        setCurrentLevel(stateInfo["bri"].toUInt()/2.55);
+
         break;
     case DEVICETEMPLATE_Connected_A19_60w_Equivalent_CONST :
         setBrightness(stateInfo["bri"].toDouble());
@@ -340,6 +335,7 @@ void AbstractWirelessBulb::setBrightness(const quint8 &brightness)
 
     emit dceMessage(EVENT_Brightness_Changed_CONST);
     emit dceMessage(EVENT_State_Changed_CONST);
+    qDebug() << Q_FUNC_INFO;
 }
 
 QString AbstractWirelessBulb::uniqueId() const
