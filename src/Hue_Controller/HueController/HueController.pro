@@ -15,7 +15,7 @@ INCLUDEPATH += /usr/include/qjson/ \
     ../../ \
     ../../DCE/
 
-LIBS += -lqjson
+
 DESTDIR=../../bin
 
 include (../../QtCommonIncludes/PlutoUtils.pri)

@@ -1395,6 +1395,7 @@ void HueController::handleCheckLightInformation(QNetworkReply *reply)
     QVariantMap p = QJsonDocument::fromJson(rep).object().toVariantMap();
     if(p.isEmpty()){
         qDebug() << " Empty Reply !" ;
+        return;
     }
     foreach(AbstractWirelessBulb*b, hueBulbs){
 
@@ -1500,7 +1501,7 @@ void HueController::handleLightEvent(int whichEvent)
 
     if(whichEvent==EVENT_Device_OnOff_CONST ){
         if(b->linuxmceId()==0)return;
-        // qDebug() << Q_FUNC_INFO;
+        qDebug() << Q_FUNC_INFO;
 
         DCE::Message *m = new DCE::Message (
                     b->linuxmceId(),
