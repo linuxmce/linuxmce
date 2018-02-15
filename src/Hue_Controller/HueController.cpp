@@ -513,7 +513,9 @@ void HueController::CreateChildren()
 
                 for (int n = 0; n < hueBulbs.size(); n++){
                     if(hueBulbs.at(n)->getController()->getIpAddress() == p.at(0)&& hueBulbs.at(n)->id()==deviceID ){
-                        QVariantMap mapping =QJsonDocument::fromBinaryData(QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_UnitNo_CONST)).toLocal8Bit()).object().toVariantMap();
+
+                        QVariantMap mapping =QJsonDocument::fromJson( QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Mapping_CONST).c_str()).toLocal8Bit()).object().toVariantMap();
+                        qDebug() << mapping;
                         hueBulbs.at(n)->setColorMap(mapping.value("color").toMap());
                         hueBulbs.at(n)->setLinuxmceId(linuxmceID);
                         hueBulbs.at(n)->setBrightness(0);
@@ -1194,8 +1196,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
     QByteArray rep = rt->readAll();
 
 
-    QJsonObject obj =QJsonDocument::fromJson(rep).object();
-    qDebug() << obj;
+    QJsonObject obj =QJsonDocument::fromJson(rep).object();  
     QVariantMap p = obj.toVariantMap();
 
     if(p.isEmpty())
@@ -1228,6 +1229,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
     {
         AbstractWirelessBulb *b = new AbstractWirelessBulb(hueControllers.at(index));
         connect(b, SIGNAL(dceMessage(int)), this, SLOT(handleLightEvent(int)), Qt::QueuedConnection);
+        connect(b, SIGNAL(dataEvent(DCE::PreformedCommand)), this, SLOT(handleLightMessage(DCE::PreformedCommand)));
         // << " :: " << i.value();
         QVariantMap light = i.value().toMap();
         QVariantMap state = light["state"].toMap();
@@ -1550,9 +1552,13 @@ void HueController::handleMotionSensorEvent(Message *m)
     this->m_pEvent->SendMessage(m);
 }
 
-void HueController::handleLightMessage(Message *m)
+void HueController::handleLightMessage(DCE::PreformedCommand m)
 {
-     this->m_pEvent->SendMessage(m);
+    string resp;
+   if(SendCommand(m, &resp)){
+       qDebug() << Q_FUNC_INFO << resp.c_str();
+   }
+
 }
 
 

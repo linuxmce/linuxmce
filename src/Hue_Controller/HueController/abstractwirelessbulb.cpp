@@ -4,6 +4,7 @@
 #include "pluto_main/Define_EventParameter.h"
 #include "pluto_main/Define_Event.h"
 #include "Gen_Devices/AllCommandsRequests.h"
+#include "pluto_main/Define_DeviceData.h"
 #include "QJsonDocument"
 #include "QJsonObject"
 #include <math.h>
@@ -90,7 +91,7 @@ void AbstractWirelessBulb::setCurrentLevel(double CurrentLevel)
 
     m_CurrentLevel = CurrentLevel;
     emit currentLevelChanged();
-    qDebug() << Q_FUNC_INFO;
+
     emit dceMessage(EVENT_State_Changed_CONST);
 }
 bool AbstractWirelessBulb::powerOn() const
@@ -107,7 +108,7 @@ void AbstractWirelessBulb::setPowerOn(bool powerOn)
 
     if(linuxmceId()==0)
         return;    
-    qDebug() << Q_FUNC_INFO;
+
         emit dceMessage(EVENT_Device_OnOff_CONST);
 }
 int AbstractWirelessBulb::bulbType() const
@@ -190,14 +191,14 @@ void AbstractWirelessBulb::proccessStateInformation(QVariantMap d)
     switch (m_deviceTemplate) {
     case DEVICETEMPLATE_Hue_Lightbulb_CONST :
         setCurrentColor(stateInfo);
+        setCurrentColorTemp(stateInfo["ct"].toInt());
         break;
     case DEVICETEMPLATE_Hue_Light_Strips_CONST :
         setCurrentColor(stateInfo);
-
+        setCurrentColorTemp(stateInfo["ct"].toInt());
         break;
     case DEVICETEMPLATE_Hue_Lux_Bulb_CONST :
-        setCurrentColor(stateInfo);
-
+        setBrightness(stateInfo["bri"].toDouble());
         break;
     case DEVICETEMPLATE_Connected_A19_60w_Equivalent_CONST :
         setBrightness(stateInfo["bri"].toDouble());
@@ -214,6 +215,8 @@ int AbstractWirelessBulb::getCurrentColorTemp() const
 
 void AbstractWirelessBulb::setCurrentColorTemp(int value)
 {
+    if(currentColorTemp == value) return;
+
     currentColorTemp = value;
 }
 
@@ -245,14 +248,46 @@ QVariantMap AbstractWirelessBulb::getCurrentColor() const
 void AbstractWirelessBulb::setCurrentColor(const QVariantMap &value)
 {
 
-    m_hslColor = QColor::fromHsl( int(value["hue"].toInt() / conversionVar), value["sat"].toInt(), value["bri"].toInt() );
-    m_rgbColor = m_hslColor.toRgb();
-    currentColorTemp = value["ct"].toInt();
-    QVariantMap out;
-    out.insert("red", QVariant::fromValue(m_rgbColor.red()));
-    out.insert("blue", m_rgbColor.blue());
-    out.insert("green", m_rgbColor.blue());    
+    QColor incomingColor = QColor::fromHsl( int(value["hue"].toInt() / conversionVar), value["sat"].toInt(), value["bri"].toInt() );
 
+    if(m_hslColor == incomingColor) return;
+
+    m_hslColor = incomingColor;
+    m_rgbColor = m_hslColor.toRgb();
+
+    QVariantMap rgb;
+    rgb.insert("red", m_rgbColor.red());
+    rgb.insert("blue", m_rgbColor.blue());
+    rgb.insert("green", m_rgbColor.blue());
+
+    QVariantMap hsl;
+    hsl.insert("h", m_hslColor.hslHue());
+    hsl.insert("s", m_hslColor.hslSaturation());
+    hsl.insert("l", m_hslColor.lightness());
+
+    currentColor["rgb"]=rgb;
+    currentColor["hsl"]=hsl;
+
+    QVariantMap colorBlock;
+    colorBlock["defaultColor"]= defaultColor;
+    colorBlock["alarmColor"] = alertColor;
+    colorBlock["currentColor"] = currentColor;
+
+    QJsonObject out;
+    out.insert("color", QJsonValue::fromVariant(colorBlock));
+    QJsonDocument doc;
+    doc.setObject(out);
+
+
+
+    DCE::CMD_Set_Device_Data cmd(
+                this->linuxmceId(),
+                4,
+                this->linuxmceId(),
+                QString::fromUtf8(doc.toJson()).toStdString().c_str(),
+                DEVICEDATA_Mapping_CONST );
+
+    emit dataEvent(cmd);
 }
 
 long AbstractWirelessBulb::getDeviceTemplate() const
@@ -314,7 +349,7 @@ QVariantMap AbstractWirelessBulb::getColorMap() const
 void AbstractWirelessBulb::setColorMap(const QVariantMap &colorMap)
 {
     defaultColor = colorMap.value("defaultColor").toMap();
-    alertColor = colorMap.value("alertColor").toMap();
+    alertColor = colorMap.value("alarmColor").toMap();
 }
 
 quint8 AbstractWirelessBulb::getBrightness() const
@@ -331,11 +366,11 @@ void AbstractWirelessBulb::setBrightness(const quint8 &brightness)
     m_brightness = brightness;
     emit brightnessChanged();
 
-    if(linuxmceId()==0); return;
+    if(linuxmceId()==0) return;
 
     emit dceMessage(EVENT_Brightness_Changed_CONST);
     emit dceMessage(EVENT_State_Changed_CONST);
-    qDebug() << Q_FUNC_INFO;
+
 }
 
 QString AbstractWirelessBulb::uniqueId() const
