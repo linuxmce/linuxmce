@@ -4,6 +4,7 @@
 #include "pluto_main/Define_Event.h"
 #include "QVariantMap"
 #include "Gen_Devices/AllCommandsRequests.h"
+#include "pluto_main/Define_DeviceData.h"
 #include "huecontrollerhardware.h"
 #include <qdebug.h>
 

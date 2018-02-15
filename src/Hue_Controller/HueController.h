@@ -207,7 +207,7 @@ public slots:
   HueControllerHardware* getController(int index) {return hueControllers.at(index); }
  void handleLightEvent(int whichEvent);
  void handleMotionSensorEvent(DCE::Message * m);
- void handleLightMessage(DCE::Message * m);
+ void handleLightMessage(DCE::PreformedCommand m);
 
 private slots:
     bool addMessageToQueue(QUrl msg, QVariant params);

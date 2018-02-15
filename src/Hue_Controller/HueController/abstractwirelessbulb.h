@@ -138,7 +138,7 @@ signals:
     void lightTypeChanged();
     void roomChanged();
     void dceMessage(int t);
-    void dataEvent(DCE::PreformedCommand *cmd );
+    void dataEvent(DCE::PreformedCommand cmd );
 
 public slots:
      HueControllerHardware * getController();
