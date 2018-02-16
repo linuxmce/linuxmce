@@ -4,10 +4,10 @@ import "../../../../skins-common/lib/handlers"
 Item {
     id:audio_remote
     width: manager.appWidth
-    height:appStyle.toolbarButtonHeight
+    height:appstyle.toolbarButtonHeight
     Rectangle{
         anchors.fill: parent
-        color: appStyle.toolbarBgColor
+        color: appstyle.toolbarBgColor
         opacity: .25
     }
 

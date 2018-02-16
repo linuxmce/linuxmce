@@ -28,13 +28,13 @@ Item{
 
     Rectangle{
         id:hdr_bg
-        color:Style.appcolor_background_medium
+        color:appStyle.appcolor_background_medium
         anchors{
             top:parent.top
             left:parent.left
             right:parent.right
         }
-        height: Style.appNavigation_panelHeight
+        height: appStyle.appNavigation_panelHeight
     }
 
     StyledText{
@@ -42,7 +42,7 @@ Item{
         width:parent.width
         anchors.centerIn: hdr_bg
         text:genericPopup.title
-        fontSize: Style.appFontSize_title
+        fontSize: appStyle.appFontSize_title
     }
 
     Loader{

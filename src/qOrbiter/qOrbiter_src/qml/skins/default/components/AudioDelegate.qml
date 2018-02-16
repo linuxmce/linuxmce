@@ -15,7 +15,7 @@ Item{
         anchors.fill: parent
         anchors.margins: 5
         opacity: path !=="" ? .70 : .85
-        color:trap.pressed ? Style.appcolor_background_medium : "black"
+        color:trap.pressed ? appStyle.appcolor_background_medium : "black"
         border.color: "white"
         border.width: active ? 2 : 0
     }
@@ -50,7 +50,7 @@ Item{
             bottom:bgExtent.bottom
         }
         wrapMode: Text.Wrap
-        fontSize: Style.appFontSize_description
+        fontSize: appStyle.appFontSize_description
         visible:true //path==="" ? true : false      
         color: "White"
         height: titleBlock.lineCount * 50

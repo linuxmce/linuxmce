@@ -1007,10 +1007,10 @@ public slots:
     void setLocation(const int& , const int& ) ;
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
-    void setAppH(int h) { if(appHeight==h)return;  appHeight = h; emit appHeightChanged(); setOrientation(appHeight > appWidth); }
+    void setAppH(int h) { if(appHeight==h)return; if(h==0) return;  appHeight = h; emit appHeightChanged(); setOrientation(appHeight > appWidth); }
     int getAppH() { return appHeight; }
 
-    void setAppW(int w) {if(appWidth==w)return;  appWidth = w; emit appWidthChanged();}
+    void setAppW(int w) {if(appWidth==w)return; if(w==0) return; appWidth = w; emit appWidthChanged();}
     int getAppW(){ return appWidth;   }
 
     /*Network State property functions*/

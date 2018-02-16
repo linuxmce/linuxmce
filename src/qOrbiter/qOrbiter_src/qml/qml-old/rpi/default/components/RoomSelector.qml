@@ -85,7 +85,7 @@ Item {
                     width: scaleX(18)
                     Rectangle{
                         anchors.fill: parent
-                        color: index === innerList.currentIndex ? skinStyle.mainColor : "grey"
+                        color: index === innerList.currentIndex ? skinstyle.mainColor : "grey"
                         radius: 5
                         opacity:index === innerList.currentIndex ? .65 : .50
                     }

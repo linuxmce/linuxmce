@@ -3,7 +3,7 @@ import "../components"
 import "../."
 Rectangle {
     id:cmdEntry
-    height: Style.appButtonHeight
+    height: appStyle.appButtonHeight
     width: cmdView.width
     color: "black"
     border.color: "white"

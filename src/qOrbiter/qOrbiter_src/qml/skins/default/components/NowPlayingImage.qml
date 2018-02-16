@@ -97,7 +97,7 @@ Item{
             PropertyChanges {
                 target: imgContainer
                 height:hdPosterRatio*width
-                width: manager.isProfile ? Style.scaleX(33) : Style.scaleX(30)
+                width: manager.isProfile ? appStyle.scaleX(33) : appStyle.scaleX(30)
             }
         },
         State {
@@ -105,23 +105,23 @@ Item{
             when:manager.i_current_mediaType == MediaTypes.LMCE_StoredAudio
             PropertyChanges {
                 target: imgContainer
-                height:Style.remote_albumHeight
-                width: Style.remote_albumWidth                
+                height:appStyle.remote_albumHeight
+                width: appStyle.remote_albumWidth                
             }
         },
         State{
             name:"posterImage"
             PropertyChanges{
                 target: imgContainer
-                height:Style.remote_posterHeight
-                width: Style.remote_posterWidth
+                height:appStyle.remote_posterHeight
+                width: appStyle.remote_posterWidth
             }
         },
         State{
             name:"audio-default"
             PropertyChanges{
                 target: imgContainer
-                height: manager.isProfile ? Style.scaleX(35) : Style.scaleX(25)
+                height: manager.isProfile ? appStyle.scaleX(35) : appStyle.scaleX(25)
                 width:imgContainer.height
             }
 

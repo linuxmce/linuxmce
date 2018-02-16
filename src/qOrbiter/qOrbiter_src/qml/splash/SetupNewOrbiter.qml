@@ -29,8 +29,8 @@ Item {
     VisualItemModel{
         id:setup_screens
         SetupScreen{
-            width:Style.scaleX(90)
-            height: Style.scaleY(75)
+            width:style.scaleX(90)
+            height: style.scaleY(75)
             title:qsTr("Select Room")
             listmodel: rooms
             trackedProperty: roomSelection
@@ -41,8 +41,8 @@ Item {
             }
         }
         SetupScreen{
-            width:Style.scaleX(90)
-            height: Style.scaleY(85)
+            width:style.scaleX(90)
+            height: style.scaleY(85)
             title:qsTr("Select User")
             listmodel: users
             trackedProperty: userSelection
@@ -53,8 +53,8 @@ Item {
             }
         }
         SetupScreen{
-            width:Style.scaleX(90)
-            height: Style.scaleY(85)
+            width:style.scaleX(90)
+            height: style.scaleY(85)
             title:qsTr("Select Language")
             listmodel: langMdl
             trackedProperty: langSelection
@@ -66,8 +66,8 @@ Item {
 
         }
         SetupScreen{
-            width:Style.scaleX(90)
-            height: Style.scaleY(85)
+            width:style.scaleX(90)
+            height: style.scaleY(85)
             title:qsTr("Select Language")
             listmodel: langMdl
             trackedProperty: langSelection
@@ -176,8 +176,8 @@ Item {
         width: parent.width *.90
         anchors.centerIn: parent
 
-        Behavior on opacity { PropertyAnimation{ duration: Style.transition_animationTime } }
-        Behavior on scale{ PropertyAnimation{ duration:Style.transition_animationTime } }
+        Behavior on opacity { PropertyAnimation{ duration: style.transition_animationTime } }
+        Behavior on scale{ PropertyAnimation{ duration:style.transition_animationTime } }
         opacity:0
         scale:0
 
@@ -191,7 +191,7 @@ Item {
             id:hdr
             width: parent.width
             height: parent.height*.12
-            spacing: Style.scaleX(1)
+            spacing: style.scaleX(1)
             Text {
                 id: welcome
                 text: qsTr("Setup as a  New QOrbiter.")
@@ -235,7 +235,7 @@ Item {
             model:setup_screens
             orientation: ListView.Horizontal
             snapMode: ListView.SnapOneItem
-            spacing: Style.scaleX(2)
+            spacing: style.scaleX(2)
             clip:true
 
             anchors{

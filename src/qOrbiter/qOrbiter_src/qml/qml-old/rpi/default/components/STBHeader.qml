@@ -11,7 +11,7 @@ Item{
     property bool isActive: activeFocus
     Rectangle{
         anchors.fill: parent
-        color:appStyle.mainColor
+        color:appstyle.mainColor
         border.width: hdr.activeFocus ? 2 : 0
         focus:false
         border.color:"red"
@@ -66,8 +66,8 @@ Item{
             to: "*"
 
             AnchorAnimation{
-                duration: appStyle.globalAnimationSpeed
-                easing.type: appStyle.globalAnimationEasing
+                duration: appstyle.globalAnimationSpeed
+                easing.type: appstyle.globalAnimationEasing
 
             }
         }

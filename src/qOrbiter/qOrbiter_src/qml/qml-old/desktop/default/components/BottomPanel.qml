@@ -7,7 +7,7 @@ import "../js/ComponentLoader.js" as MyJs
 Item {
     id:advanced_panel
     width: manager.appWidth - scaleX(1)
-    height: skinStyle.widebuttonh + scaleY(4)  
+    height: skinstyle.widebuttonh + scaleY(4)  
 
 
     Image {
@@ -26,8 +26,8 @@ Item {
         clip: false
 
         AdvancedButton {
-            width: skinStyle.widebuttonw
-            height: skinStyle.widebuttonh
+            width: skinstyle.widebuttonw
+            height: skinstyle.widebuttonh
             id: buttonsq1
             buttontext: "Advanced"
             radius: 5
@@ -40,8 +40,8 @@ Item {
 
         AdvancedButton {
             id: buttonsq2           
-            width: skinStyle.widebuttonw
-            height: skinStyle.widebuttonh
+            width: skinstyle.widebuttonw
+            height: skinstyle.widebuttonh
             buttontext: "Power"
             radius: 5
             MouseArea{
@@ -52,8 +52,8 @@ Item {
 
         AdvancedButton {
             id: buttonsq3            
-            width: skinStyle.widebuttonw
-            height: skinStyle.widebuttonh
+            width: skinstyle.widebuttonw
+            height: skinstyle.widebuttonh
             buttontext: "Sleeping Menu"
             radius: 5
 
@@ -69,8 +69,8 @@ Item {
 
         AdvancedButton{
             id:roombutton
-            width: skinStyle.widebuttonw
-            height: skinStyle.widebuttonh
+            width: skinstyle.widebuttonw
+            height: skinstyle.widebuttonh
             buttontext: roomList.currentRoom+"\n"+roomList.currentEA
             MouseArea{
                 anchors.fill: parent
@@ -82,8 +82,8 @@ Item {
 
         AdvancedButton{
             id:exit
-            width: skinStyle.widebuttonw
-            height: skinStyle.widebuttonh
+            width: skinstyle.widebuttonw
+            height: skinstyle.widebuttonh
             buttontext: "Exit Orbiter"
             MouseArea{
                 anchors.fill: exit

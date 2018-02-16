@@ -20,7 +20,7 @@ StyledScreen{
 
             Column{
                 anchors.centerIn: parent
-                height: Style.scaleY(20)
+                height: appStyle.scaleY(20)
                 width: parent.width
                 id:msg
                 StyledText{

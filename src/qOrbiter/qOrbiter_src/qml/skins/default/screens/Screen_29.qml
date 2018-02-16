@@ -26,7 +26,7 @@ StyledScreen {
                 width: parent.width
                 delegate: Item{
                     width: parent.width
-                    height: Style.listViewItemHeight
+                    height: appStyle.listViewItemHeight
                     Rectangle{
                         anchors.fill: parent
                         color: /*handler.pressed ? "yellow" :*/ status ? "green" : "red"
@@ -43,19 +43,19 @@ StyledScreen {
                             id: alarmname
                             text:name
                             color:"white"
-                            fontSize:Style.appFontSize_list
+                            fontSize:appStyle.appFontSize_list
                         }
                         StyledText {
                             id: alarmtimeLabel
                             text:qsTr("Alarm Set For: ") + alarmtime
                             color:"white"
-                            fontSize:Style.appFontSize_list
+                            fontSize:appStyle.appFontSize_list
                         }
                         StyledText {
                             id: daysactive
                             text: qsTr("Active on: ")+ active
                             color:"white"
-                            fontSize:Style.appFontSize_list
+                            fontSize:appStyle.appFontSize_list
                         }
                     }
 
@@ -63,9 +63,9 @@ StyledScreen {
                         id: activeStatus
                         text: status ? qsTr("Enabled") : "Disabled"
                         color:"white"
-                        fontSize: Style.appFontSize_title
+                        fontSize: appStyle.appFontSize_title
                         anchors.right: parent.right
-                        anchors.rightMargin: Style.scaleX(2)
+                        anchors.rightMargin: appStyle.scaleX(2)
                         anchors.top: parent.top
                     }
 
@@ -73,7 +73,7 @@ StyledScreen {
                         id: countdown
                         text: qsTr("Time Left:\n ") +remaining
                         color:"white"
-                        fontSize:Style.appFontSize_list
+                        fontSize:appStyle.appFontSize_list
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 10

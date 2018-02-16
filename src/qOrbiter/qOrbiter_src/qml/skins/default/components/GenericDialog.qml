@@ -2,8 +2,8 @@ import QtQuick 2.2
 import "../"
 Item {
     id:dlg
-    width: Style.scaleX(65)
-    height: Style.scaleY(65)
+    width: appStyle.scaleX(65)
+    height: appStyle.scaleY(65)
     property string title:"Ipsum"
     property Component dialogContent:undefined
     focus:true
@@ -12,8 +12,8 @@ Item {
 
     Item{
         anchors.centerIn: parent
-        width: Style.dialog_large_width
-        height: Style.dialog_large_height
+        width: appStyle.dialog_large_width
+        height: appStyle.dialog_large_height
         Rectangle{
             id:hdr
             anchors{
@@ -21,12 +21,12 @@ Item {
                 left: parent.left
                 right: parent.right
             }
-            height: Style.scaleY(8)
-            color: Style.appcolor_background_medium
+            height: appStyle.scaleY(8)
+            color: appStyle.appcolor_background_medium
         }
         StyledText{
             anchors.centerIn: hdr
-           fontSize: Style.fontSize_listTitle
+           fontSize: appStyle.fontSize_listTitle
             text:dlg.title
         }
 
@@ -38,7 +38,7 @@ Item {
                 right:parent.right
                 bottom:parent.bottom
             }
-            color:Style.appcolor_background_list
+            color:appStyle.appcolor_background_list
         }
         Loader{
             id:contentLoader

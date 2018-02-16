@@ -29,7 +29,7 @@ StyledScreen {
                     text:qsTr("Please choose device to control. Only active devices are shown.")
                     anchors.centerIn: parent
                     visible:avcodes_root.state==="ready"
-                    fontSize:Style.appFontSize_title
+                    fontSize:appStyle.appFontSize_title
 
                 }
             }
@@ -43,11 +43,11 @@ StyledScreen {
                     right:parent.horizontalCenter
                     bottom:parent.bottom
                     top:avcodes_hdr.bottom
-                    margins: Style.scaleY(2)
+                    margins: appStyle.scaleY(2)
                 }
 
               delegate: StyledButton{
-               height: Style.listViewItemHeight
+               height: appStyle.listViewItemHeight
                phil: status ? "green" : "blue"
                width: parent.width
                buttonText: qsTr("Device: %1 ").arg(name)
@@ -70,12 +70,12 @@ StyledScreen {
                     right:parent.right
                     bottom:parent.bottom
                     top:avcodes_hdr.bottom
-                    margins: Style.scaleY(2)
+                    margins: appStyle.scaleY(2)
                 }
                 model:deviceCommands
                 label: qsTr("Commands")
                 delegate: StyledButton{
-                    height: Style.listViewItemHeight
+                    height: appStyle.listViewItemHeight
                     buttonText: name
                     width: parent.width
                     onActivated: {
@@ -91,7 +91,7 @@ StyledScreen {
                     name: "ready"
                     PropertyChanges {
                         target: avcodes_hdr
-                        height:Style.scaleY(8)
+                        height:appStyle.scaleY(8)
 
                     }
                     PropertyChanges {

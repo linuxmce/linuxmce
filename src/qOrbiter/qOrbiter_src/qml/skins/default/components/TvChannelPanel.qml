@@ -11,7 +11,7 @@ GenericListModel{
     dataGrid:DataGrids.EPG_All_Shows
     dataGridLabel:"channels"
     delegate: Item{
-        height: Style.listViewItemHeight /2
+        height: appStyle.listViewItemHeight /2
         anchors{
             left:parent.left
             right:parent.right
@@ -27,14 +27,14 @@ GenericListModel{
 
         //            Rectangle{
         //                anchors.fill: parent
-        //                gradient:style.buttonGradient
+        //                gradient:appStyle.buttonGradient
         //            }
 
         Rectangle{
             id:fil
             anchors.fill: parent
-            color:ms.pressed ? Style.appbutton_confirm_color: "black"
-            opacity:Style.appList_opacity
+            color:ms.pressed ? appStyle.appbutton_confirm_color: "black"
+            opacity:appStyle.appList_opacity
 
         }
 
@@ -42,14 +42,14 @@ GenericListModel{
             text:name + "\n"+program
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: Style.fontSize_listItem
+            font.pixelSize: appStyle.fontSize_listItem
             width: parent.width
         }
         StyledText{
             text:channel
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: Style.fontSize_medium
+            font.pixelSize: appStyle.fontSize_medium
 
             // opacity: value == dcenowplaying.m_iplaylistPosition ? 1 :.25
         }
@@ -60,7 +60,7 @@ GenericListModel{
             onClicked: {manager.gridChangeChannel(channel, channelid)}
         }
     }
-    width: Style.scaleX(35)
+    width: appStyle.scaleX(35)
     
     //    Connections{
     //        target: dcenowplaying

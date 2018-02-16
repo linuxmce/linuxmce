@@ -9,8 +9,8 @@ Item {
 
     Rectangle{
         anchors.fill: parent
-        border.color: appStyle.button_system_text_color
-        color:appStyle.toolbarBgColor
+        border.color: appstyle.button_system_text_color
+        color:appstyle.toolbarBgColor
         border.width: 2
     }
 
@@ -24,12 +24,12 @@ Item {
         }
 
         height: parent.height*.20
-        gradient: appStyle.buttonGradient
+        gradient: appstyle.buttonGradient
         StyledText {
             id: exit_label
             text: qsTr("Close")
             anchors.centerIn: parent
-            color:appStyle.highlight2
+            color:appstyle.highlight2
         }
         MouseArea{
             anchors.fill: parent

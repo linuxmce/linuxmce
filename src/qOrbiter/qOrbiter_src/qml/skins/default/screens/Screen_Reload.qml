@@ -15,7 +15,7 @@ StyledScreen {
             anchors.centerIn: parent
             text:"The LinuxMCE Core is reloading. Please be patient and it will retart in a moment"
             width: parent.width
-            fontSize: Style.appFontSize_title
+            fontSize: appStyle.appFontSize_title
         }
     }
 

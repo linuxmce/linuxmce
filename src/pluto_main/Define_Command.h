@@ -1043,6 +1043,7 @@
 #define COMMAND_Cancel_Egg_Timer_CONST 1157
 #define COMMAND_Swap_Media_CONST 1158
 #define COMMAND_Assign_Access_Token_CONST 1159
+#define COMMAND_Set_Color_Temp_CONST 1160
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

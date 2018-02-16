@@ -3,8 +3,8 @@ import org.linuxmce.enums 1.0
 import "../."
 Item{
     id:styled_button
-    height: Style.appButtonHeight
-    width:Style.appButtonWidth
+    height: appStyle.appButtonHeight
+    width:appStyle.appButtonWidth
 
     Component.onCompleted: {
         if(useHandler ){
@@ -15,8 +15,8 @@ Item{
     }
     smooth: true
 
-    property string phil: fly_trap.pressed ? Style.appbutton_confirm_color: Style.appcolor_background_list
-    property int textSize:Style.fontSize_listItem
+    property string phil: fly_trap.pressed ? appStyle.appbutton_confirm_color: appStyle.appcolor_background_list
+    property int textSize:appStyle.fontSize_listItem
     property alias fontSize:button_label.fontSize
     property alias buttonText:button_label.text
     property alias txtObj:button_label
@@ -51,7 +51,7 @@ Item{
         opacity:useHandler ? dceHandler.item.pressed ? 1 : .35 :  fly_trap.pressed ? 1 : .35
         Behavior on color {
             ColorAnimation {
-                duration: Style.transition_animationTime
+                duration: appStyle.transition_animationTime
             }
         }
 
@@ -73,7 +73,7 @@ Item{
         font.weight: Font.Light
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment:Text.AlignHCenter
-        color:Style.apptext_color_active
+        color:appStyle.apptext_color_active
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
@@ -95,8 +95,8 @@ Item{
             name: "fixed"
             PropertyChanges {
                 target: styled_button
-                height:Style.scaleY(12)
-                width:Style.scaleX(18)
+                height:appStyle.scaleY(12)
+                width:appStyle.scaleX(18)
             }
 
             PropertyChanges{
@@ -108,9 +108,9 @@ Item{
             name: "scenario"
             PropertyChanges {
                 target: styled_button
-                height:Style.scaleY(12)
-                width:Style.scaleX(18)
-                textSize:Style.fontSize_listItem
+                height:appStyle.scaleY(12)
+                width:appStyle.scaleX(18)
+                textSize:appStyle.fontSize_listItem
             }
             PropertyChanges{
                 target: button_label
@@ -122,8 +122,8 @@ Item{
             name: "numberpad"
             PropertyChanges {
                 target: styled_button
-                height:Style.appButtonNumberPadHeight
-                width: Style.appButtonNumberPadWidth
+                height:appStyle.appButtonNumberPadHeight
+                width: appStyle.appButtonNumberPadWidth
             }
 
             PropertyChanges{
@@ -135,8 +135,8 @@ Item{
             name: "numberpad-small"
             PropertyChanges {
                 target: styled_button
-                height:Style.appButtonNumberPadSmallHeight
-                width: Style.appButtonNumberPadSmallWidth
+                height:appStyle.appButtonNumberPadSmallHeight
+                width: appStyle.appButtonNumberPadSmallWidth
             }
 
             PropertyChanges{
@@ -148,8 +148,8 @@ Item{
             name: "large-fixed"
             PropertyChanges {
                 target: styled_button
-                height:Style.appButtonLargeHeight
-                width:Style.appButtonLargeWidth
+                height:appStyle.appButtonLargeHeight
+                width:appStyle.appButtonLargeWidth
             }
 
             PropertyChanges{
@@ -166,7 +166,7 @@ Item{
                 target: styled_button
                 width:height
                 buttonRadius:height
-                height:Style.scaleY(9)
+                height:appStyle.scaleY(9)
             }
 
             PropertyChanges{
@@ -181,8 +181,8 @@ Item{
             name: "remote"
             PropertyChanges {
                 target: styled_button
-                height:manager.isProfile ? Style.scaleY(8) : Style.scaleY(10)
-                width:manager.isProfile ? Style.scaleX(20) : Style.scaleX(10)
+                height:manager.isProfile ? appStyle.scaleY(8) : appStyle.scaleY(10)
+                width:manager.isProfile ? appStyle.scaleX(20) : appStyle.scaleX(10)
 
             }
         }

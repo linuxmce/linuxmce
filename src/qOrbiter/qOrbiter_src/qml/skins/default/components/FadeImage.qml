@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.5
 import QtGraphicalEffects 1.0
 
 import "."
@@ -12,6 +12,7 @@ Image{
     signal readyToShow()
     signal badImageError()
     fillMode: Image.PreserveAspectCrop
+    autoTransform:true
 
     smooth: true
 

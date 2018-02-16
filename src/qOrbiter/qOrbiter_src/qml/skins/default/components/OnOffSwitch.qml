@@ -1,8 +1,8 @@
 import QtQuick 2.2
 import "../."
 Item {
-    width: Style.scaleX(30)
-    height: Style.scaleY(12)
+    width: appStyle.scaleX(30)
+    height: appStyle.scaleY(12)
     anchors.centerIn: parent
 
     Rectangle{
@@ -17,10 +17,10 @@ Item {
         id:options
         height: parent.height
         width: parent.width
-        spacing: Style.scaleX(2)
+        spacing: appStyle.scaleX(2)
         Item{
-            height:Style.scaleY(6)
-            width:Style.scaleX(10)
+            height:appStyle.scaleY(6)
+            width:appStyle.scaleX(10)
 
             Rectangle{
                 anchors.fill: parent
@@ -49,8 +49,8 @@ Item {
             }
         }
         Item{
-            height:Style.scaleY(6)
-            width:Style.scaleX(10)
+            height:appStyle.scaleY(6)
+            width:appStyle.scaleX(10)
 
             Rectangle{
                 anchors.fill: parent

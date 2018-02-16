@@ -5,8 +5,8 @@ import QtGraphicalEffects 1.0
 import "../."
 Item{
     id:playlistPanel
-    height: Style.scaleY(75)
-    width: visible ? Style.listViewWidth_medium :0
+    height: appStyle.scaleY(75)
+    width: visible ? appStyle.listViewWidth_medium :0
     clip:true
     //  visible:showingPlaylist
 
@@ -27,7 +27,7 @@ Item{
         dataGridLabel:"Playlist"
        // model:manager.getDataGridModel("Playlist", 18)
         delegate: Item{
-            height:Style.scaleY(10)
+            height:appStyle.scaleY(10)
             anchors{
                 left:parent.left
                 right:parent.right
@@ -38,22 +38,22 @@ Item{
             Rectangle{
                 id:fil
                 anchors.fill: parent
-                color:ms.pressed ? Style.buttonPressedColor: "black"
-                opacity:Style.appList_opacity
+                color:ms.pressed ? appStyle.buttonPressedColor: "black"
+                opacity:appStyle.appList_opacity
                 
             }
             StyledText{
                 text:description
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: Style.fontSize_listItem
+                font.pixelSize: appStyle.fontSize_listItem
                 width: parent.width
             }
             StyledText{
                 text:value
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: Style.fontSize_listItem
+                font.pixelSize: appStyle.fontSize_listItem
                 opacity: value == dcenowplaying.m_iplaylistPosition ? 1 :.25
             }
             

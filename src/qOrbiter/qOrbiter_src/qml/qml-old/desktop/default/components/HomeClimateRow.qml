@@ -22,7 +22,7 @@ color:"transparent"
                 anchors.topMargin: scaleY(2)
                 height: scaleY(13)
                 width: scaleX(8)
-                radius: skinStyle.but_smooth
+                radius: skinstyle.but_smooth
                 color:"transparent"
 
                 MouseArea{
@@ -50,14 +50,14 @@ color:"transparent"
                 id:climateRow
                 height: scaleY(16)
                 width: scaleX(85)
-                contentHeight: skinStyle.buttonH
-                contentWidth: ((skinStyle.buttonW + 5) * (climateScenarios.count + 1)) - 5
+                contentHeight: skinstyle.buttonH
+                contentWidth: ((skinstyle.buttonW + 5) * (climateScenarios.count + 1)) - 5
                 clip: true
                 flickableDirection: "HorizontalFlick"
 
                 ListView{
                     id: climateScenarios
-                    height: scaleY(skinStyle.buttonH)
+                    height: scaleY(skinstyle.buttonH)
                     width: stage.width
                     model: currentRoomClimate
                     spacing: 5

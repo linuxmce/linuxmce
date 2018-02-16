@@ -38,8 +38,8 @@ StyledScreen{
     Rectangle{
 
         id:securitycamrect
-        height: Style.scaleY(75)
-        width: Style.scaleX(75)
+        height: appStyle.scaleY(75)
+        width: appStyle.scaleX(75)
         border.color: "black"
         border.width: 2
         anchors.centerIn: parent
@@ -53,8 +53,8 @@ StyledScreen{
         }
 
         Row{
-            height: Style.scaleY(10)
-            width: Style.scaleX(15)
+            height: appStyle.scaleY(10)
+            width: appStyle.scaleX(15)
             anchors.top: securityimage.bottom
             anchors.bottom: securitycamrect.bottom
             StyledButton {

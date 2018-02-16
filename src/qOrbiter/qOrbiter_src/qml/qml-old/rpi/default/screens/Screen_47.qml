@@ -114,13 +114,13 @@ Item {
 
         Behavior on width {
             PropertyAnimation{
-                duration: skinStyle.globalAnimationSpeed
+                duration: skinstyle.globalAnimationSpeed
             }
         }
 
         Behavior on scale{
             PropertyAnimation{
-                duration: skinStyle.globalAnimationSpeed
+                duration: skinstyle.globalAnimationSpeed
             }
         }
     }
@@ -144,7 +144,7 @@ Item {
 
         Behavior on width {
             PropertyAnimation{
-                duration: skinStyle.globalAnimationSpeed
+                duration: skinstyle.globalAnimationSpeed
             }
         }
         Keys.onEscapePressed: {
@@ -282,7 +282,7 @@ Item {
 
                 Rectangle{
                     anchors.fill: parent
-                    color: filterView.currentIndex === index  ? skinStyle.lightHighlightColor : skinStyle.mainColor
+                    color: filterView.currentIndex === index  ? skinstyle.lightHighlightColor : skinstyle.mainColor
                     opacity:.85
                 }
                 StyledText{

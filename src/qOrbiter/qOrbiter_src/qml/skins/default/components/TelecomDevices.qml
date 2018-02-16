@@ -9,7 +9,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Style.appcolor_background_list
+        color: appStyle.appcolor_background_list
         opacity: .65
     }
 
@@ -39,7 +39,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: specialDevice.top
-        cellWidth: Style.appButtonWidth
+        cellWidth: appStyle.appButtonWidth
         model: manager.getDataGridModel("phoneDevices", DataGrids.Devices_Of_Category, '89,90,91,92')
         delegate: StyledButton {
             label: description

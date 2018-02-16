@@ -418,6 +418,7 @@ void MediaManagerBase::pluginNotifyEnd(bool withError)
 
 void MediaManagerBase::playbackInfoUpdated(QString mediaTitle, QString mediaSubTitle, QString name, int screen)
 {
+    if(mediaPlayer)
     mediaPlayer->updateMetadata(mediaTitle, mediaSubTitle, name, screen);
 }
 

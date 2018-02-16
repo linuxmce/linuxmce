@@ -3,10 +3,9 @@
 omxdbusplayerinterface::omxdbusplayerinterface()
 {
     qDebug() << Q_FUNC_INFO;
-
+#ifdef RPI
     setUsingExternalMediaPlayer(true);
     connect(this, &omxdbusplayerinterface::readyForConnections, this, &omxdbusplayerinterface::setConnections);
-#ifdef RPI
     m_omxProxy = new OmxInterface(this);
 #endif
 

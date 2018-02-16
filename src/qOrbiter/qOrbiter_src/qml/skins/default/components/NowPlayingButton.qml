@@ -10,10 +10,10 @@ Item{
         right:parent.right
     }
     clip:true
-    height: dcenowplaying.b_mediaPlaying ?  Style.appNavigation_panelHeight : 0
+    height: dcenowplaying.b_mediaPlaying ?  appStyle.appNavigation_panelHeight : 0
     Rectangle{
         anchors.fill: parent
-        color:Style.appbutton_cancel_color
+        color:appStyle.appbutton_cancel_color
     }
 
     StyledText{

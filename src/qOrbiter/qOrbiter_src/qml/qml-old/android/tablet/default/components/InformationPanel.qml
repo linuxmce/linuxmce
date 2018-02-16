@@ -302,8 +302,8 @@ Item{
             PropertyAnimation{
                 target:info_panel
                 properties:"height"
-                duration:skinStyle.animation_medium
-                easing.type: skinStyle.animation_easing
+                duration:skinstyle.animation_medium
+                easing.type: skinstyle.animation_easing
             }
         },
         Transition {
@@ -312,8 +312,8 @@ Item{
             PropertyAnimation{
                 target:info_panel
                 properties:"height"
-                duration:skinStyle.animation_medium
-                easing.type: skinStyle.animation_easing
+                duration:skinstyle.animation_medium
+                easing.type: skinstyle.animation_easing
             }
 
 

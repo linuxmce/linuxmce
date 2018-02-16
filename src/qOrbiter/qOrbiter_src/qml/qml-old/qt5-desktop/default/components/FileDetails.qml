@@ -14,7 +14,7 @@ Item {
         id:fd_hdr
         height:scaleY(15)
         width: scaleX(75)
-        color:appStyle.mainColor
+        color:appstyle.mainColor
         opacity: .65
     }
     StyledText {
