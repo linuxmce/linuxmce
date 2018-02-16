@@ -87,6 +87,21 @@ class DceCommandExecutorComponent extends Component
 		$response = $this->executeFormedCommand($device, $params);
 		return $response;
 	}
+        
+        function sendColorCommand($data){
+            $params=array(
+                'msgid' => 1115,
+                'params' => array(
+                    array('76', $data['brightness']*100),
+                    array('266', $data['hue']),
+                    array('287', $data['saturation']*100)
+                )
+            );
+            
+            $response = $this->executeFormedCommand($data['device'], $params);
+            return $response;
+            
+        }
 	
 	function sendLightOffCommand($device){
 		$params = array(
