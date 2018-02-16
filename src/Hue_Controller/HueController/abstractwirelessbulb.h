@@ -185,7 +185,6 @@ private:
     QVariantMap alertColor;
     QVariantMap defaultColor;
 
-
     HueControllerHardware *mp_controller;
 
     QMap<QString, int> deviceMap;
