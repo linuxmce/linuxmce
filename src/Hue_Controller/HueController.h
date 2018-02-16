@@ -255,6 +255,11 @@ private:
     static const char renameLight[];        /*!< Rename the light \note put */
     static const char setLightState[];      /*!< Set properties on the light */
 
+    QStringList m_extendedColorLightModels;
+    QStringList m_colorLightModels;
+    QStringList m_colorTemperatureModels;
+    QStringList m_dimmableModels;
+
 };
 
 //<-dceag-end-b->
