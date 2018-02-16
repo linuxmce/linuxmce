@@ -1,3 +1,9 @@
+openzwave (1.3.1224-lmce3) unstable; urgency=low
+
+  * adding remove as choices for postrm, fixes package removal
+
+ -- phenigma <developers@linuxmce.org>  Thu, 26 Feb 2015 18:27:30 +0100
+
 openzwave (1.3.1224-lmce2) unstable; urgency=low
 
   * adding upgrade and failed-upgrade as choices for postrm

@@ -14,8 +14,8 @@ Rectangle {
     property alias buttonbordercolor: buttonBase.border
     property alias buttonopacity: buttonimage.opacity
 
-    height: skinStyle.stdbuttonh
-    width: skinStyle.stdbuttonw
+    height: skinstyle.stdbuttonh
+    width: skinstyle.stdbuttonw
 
     radius: 1
     Image {

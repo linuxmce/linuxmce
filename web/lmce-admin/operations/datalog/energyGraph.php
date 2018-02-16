@@ -10,13 +10,14 @@ $connection=mysqli_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: co
 mysqli_select_db($connection, $mysqldb) or die("ERROR: could not select database!");     
 
 
-$days = mysqli_real_escape_string($_GET['days']);
+$days = $_REQUEST['days'];
 if (empty($days)) {
 	$days=7;
 }
 $startTime=strtotime('-'.$days.' day');
 $endTime=strtotime('now');
 $unit=5;
+$cumulatedEnergyUnit = 10;
 if ($days==1){
 	$interval=3600;
 }
@@ -27,7 +28,7 @@ else {
 
 
 // create the graph
-$Graph =& Image_Graph::factory('graph', array(1000, 300)); 
+$Graph =& Image_Graph::factory('graph', array(1000, 400)); 
 // add a TrueType font
 $Font =& $Graph->addNew('font', '/usr/share/fonts/truetype/msttcorefonts/verdana.ttf'); 
 // set the font size to 11 pixels
@@ -49,19 +50,23 @@ $Graph->add(
 	)
 );
 $Legend->setPlotarea($Plotarea);        
+$Plotarea->setBackgroundColor('white');
 
-$deviceQuery = mysqli_query($connection, 'SELECT EK_Device, Description, IK_DeviceData FROM Datapoints, pluto_main.Device, pluto_main.Device_DeviceData 
-WHERE FK_Unit='.$unit.' AND EK_Device=PK_Device AND EK_Device=FK_Device AND FK_DeviceData=289 
+// Get data for status and static power-based devices
+$deviceQuery = mysqli_query($connection, 'SELECT EK_Device, FK_DeviceTemplate, Description, IK_DeviceData, FK_Unit FROM Datapoints, pluto_main.Device, pluto_main.Device_DeviceData 
+WHERE FK_Unit='.$unit.' AND FK_DeviceData=289 AND EK_Device=PK_Device AND EK_Device=FK_Device 
 GROUP BY EK_Device ORDER BY FK_Room');
 
 $i=0;
 while ($device=mysqli_fetch_array($deviceQuery)){
-	
-	$query = mysqli_query($connection, 'SELECT Datapoint, timestamp FROM Datapoints 
-	WHERE EK_Device = '.$device['EK_Device'].' AND timestamp > DATE_SUB(NOW(), INTERVAL '.$days.' DAY) ORDER BY timestamp' );
-	$num=mysqli_num_rows($query);
+
 	// create the dataset
 	$Dataset[$i]=& Image_Graph::factory('dataset'); 
+	$statment = mysqli_prepare($connection, 'SELECT Datapoint, timestamp FROM Datapoints 
+	WHERE EK_Device = ? AND timestamp > DATE_SUB(NOW(), INTERVAL ? DAY) ORDER BY timestamp');
+	mysqli_stmt_bind_param($statement, "ii", $device['EK_Device'], $days);
+	$query = mysqli_stmt_execute($statment); //mysqli_query($connection, ');
+	$num=mysqli_num_rows($query);
 	// set names for datasets (for legend)
 
 	for ($plotTime = ($startTime+$interval), $prevTimestampMod=$startTime, $t=0; $plotTime <= $endTime ; $plotTime=($plotTime+$interval), ++$t){
@@ -121,11 +126,56 @@ while ($device=mysqli_fetch_array($deviceQuery)){
 		}
 		$energy = $energy+($ONtime*$device['IK_DeviceData']/3600000);
 		$Dataset[$i]->addPoint(date('d-H',$plotTime),$energy);
+		if (!$usedPerInterval[$plotTime])
+		   $usedPerInterval[$plotTime] = $energy;
+		else
+		   $usedPerInterval[$plotTime] += $energy;
 	}
 	$Dataset[$i]->setName($device['Description']); 
 	++$i;
 }
+
+// Get any total energy values from possible "Standard energy meter" devices
+$deviceQuery = mysqli_query($connection, 'SELECT EK_Device, FK_DeviceTemplate, Description, IK_DeviceData, FK_Unit FROM Datapoints, pluto_main.Device, pluto_main.Device_DeviceData 
+WHERE FK_Unit='.$cumulatedEnergyUnit.' AND FK_DeviceTemplate = 2268 
+AND EK_Device=PK_Device AND EK_Device=FK_Device 
+GROUP BY EK_Device ORDER BY FK_Room');
+
+while ($device=mysqli_fetch_array($deviceQuery)){
+    $Dataset[$i]=& Image_Graph::factory('dataset'); 
+    for ($plotTime = ($startTime+$interval), $prevTimestampMod=$startTime, $t=0; $plotTime <= $endTime ; $plotTime=($plotTime+$interval), ++$t){
+	for ($plotTime = ($startTime+$interval); $plotTime <= $endTime; $plotTime = ($plotTime+$interval)){
+            // Get first and last datapoint in the time period and substract them to get the difference
+	    $intervalStop = date("Y-m-d H:i:s", $plotTime);
+	    $intervalStart = date("Y-m-d H:i:s", ($plotTime - $interval));
+	    $sql = 'SELECT Datapoint, timestamp FROM Datapoints 
+WHERE EK_Device = '.$device['EK_Device'].' AND timestamp <= "'.$intervalStop.'" AND timestamp >= "'.$intervalStart.'" 
+ORDER BY timestamp LIMIT 1';
+      	    $query = mysqli_query($connection, $sql);
+      	    $firstValue = mysqli_fetch_array($query);
+	    $query = mysqli_query($connection, 'SELECT Datapoint, timestamp FROM Datapoints 
+WHERE EK_Device = '.$device['EK_Device'].' AND timestamp <= "'.$intervalStop.'" AND timestamp >= "'.$intervalStart.'" 
+ORDER BY timestamp DESC LIMIT 1' );
+      	    $lastValue = mysqli_fetch_array($query);
+	    $energy = $lastValue['Datapoint'] - $firstValue['Datapoint'];
+	    error_log("Value: ".$firstValue['Datapoint'].":".$lastValue['timestamp']." - ".$lastValue['Datapoint'].":".$firstValue['timestamp']);
+	    $totalEnergy = $energy - $usedPerInterval[$plotTime];
+	    $Dataset[$i]->addPoint(date('d-H', $plotTime), $totalEnergy);
+	}
+    }
+    $Dataset[$i]->setName("Total usage"); 
+    $i++;
+}
+
 $Plot =& $Plotarea->addNew('bar', array($Dataset,'stacked' ));
+
+// Vertical axis name/unit
+$AxisY =& $Plotarea->getAxis(IMAGE_GRAPH_AXIS_Y);
+$AxisY->setTitle("kWh", "vertical");
+
+// Add grid
+$Grid =& Image_Graph::factory('line_grid');
+$Plotarea->add($Grid);
 
 // set a line color
 $Plot->setLineColor('gray');

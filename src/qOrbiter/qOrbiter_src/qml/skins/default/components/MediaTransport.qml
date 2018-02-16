@@ -12,7 +12,7 @@ Item{
         width: parent.width
         height: parent.height
         radius: height
-        color: Style.appbutton_color
+        color: appStyle.appbutton_color
     }
 
     Rectangle{
@@ -20,13 +20,13 @@ Item{
         width: 0+ dragHandle.x + dragHandle.width
         height: bg.height
         radius: height
-        color: Style.appbutton_cancel_color
+        color: appStyle.appbutton_cancel_color
     }
 
     Item{
         id:drag_indicator
         height: width
-        width: Style.scaleX(8)
+        width: appStyle.scaleX(8)
         opacity: 0
         //  headerTitle: "Seeking to"
         // useHeader: false
@@ -41,10 +41,10 @@ Item{
             id: drag_label
             text: roomList.currentEaTimecode.dragString
             anchors.centerIn: parent
-            font.pixelSize: Style.scaleY(4)
+            font.pixelSize: appStyle.scaleY(4)
         }
         anchors.bottom: dragHandle.top
-        anchors.topMargin: Style.scaleY(1)
+        anchors.topMargin: appStyle.scaleY(1)
 
     }
 

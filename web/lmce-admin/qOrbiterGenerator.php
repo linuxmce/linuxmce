@@ -779,7 +779,7 @@ function getCommandParameters($commandNumber) {
 
 	$paramArray = array();
 	$paramArray["device"] = array("device" => $_GET["idx"]);
-	$res = mysqli_query($conn, mysqli_real_escape_string($sql)) or die(mysqli_error($conn));
+	$res = mysqli_query($conn, mysqli_real_escape_string($conn, $sql)) or die(mysqli_error($conn));
 	$p1Array = array();
 	while ($row = mysqli_fetch_array($res)) {
 

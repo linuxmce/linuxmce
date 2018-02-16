@@ -12,10 +12,10 @@ Item{
         left:parent.left
         right:parent.right
     }
-    height: Style.appNavigation_panelHeight
+    height: appStyle.appNavigation_panelHeight
     Rectangle{
         anchors.fill: parent
-        color:Style.appcolor_background_medium
+        color:appStyle.appcolor_background_medium
         opacity: headerOpacity
     }
     StyledText{

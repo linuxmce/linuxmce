@@ -41,7 +41,7 @@ Item{
             smooth: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.episode =="" ? false: true
-            // color:appStyle.accentcolor
+            // color:appstyle.accentcolor
         }
         StyledText {
             id: starring
@@ -86,7 +86,7 @@ Item{
             smooth: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.releasedate =="" ? false: true
-            // color:appStyle.accentColor
+            // color:appstyle.accentColor
         }
 
         StyledText {

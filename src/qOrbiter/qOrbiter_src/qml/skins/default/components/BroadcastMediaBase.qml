@@ -10,18 +10,18 @@ Panel{
         Component{
             id:broadcastBtns
             Row{
-                width: children.length*Style.appButtonWidth
+                width: children.length*appStyle.appButtonWidth
                 height:parent.height
                 StyledButton{
                     id:resend
-                     height:Style.appNavigation_panelHeight
+                     height:appStyle.appNavigation_panelHeight
                     buttonText: qsTr("Resend AV", "Resend AV Commands")
                     onActivated: manager.currentScreen="Screen_38.qml"
                 }
 
                 StyledButton{
                     id:power_btn
-                    height:Style.appNavigation_panelHeight
+                    height:appStyle.appNavigation_panelHeight
                     buttonText: qsTr("Power Off", "Turn off Device")
                     onConfirm:{
                         manager.exitMediaMenu()
@@ -31,7 +31,7 @@ Panel{
 
                 StyledButton{
                     id:options
-                    height:Style.appNavigation_panelHeight
+                    height:appStyle.appNavigation_panelHeight
                     buttonText: contentItem.state==="options" ? "Remote" : qsTr("Options")
                     onActivated: {
                         if(contentItem.state==="options"){
@@ -45,7 +45,7 @@ Panel{
                 StyledButton{
                     id:btns
 
-                    height:Style.appNavigation_panelHeight
+                    height:appStyle.appNavigation_panelHeight
                     buttonText: qsTr("Buttons", "Additional Tv Buttons")
                     onActivated: {
                         if(contentItem.state=="buttongrid"){
@@ -142,22 +142,22 @@ Panel{
 
         Image {
             id: dvdImage
-            width: Style.scaleX(65)
-            height:Style.scaleY(65)
+            width: appStyle.scaleX(65)
+            height:appStyle.scaleY(65)
             fillMode: Image.PreserveAspectFit
             source: ""
             visible:false
             anchors{
                 top:parent.top
                 left: parent.left
-                margins: Style.scaleX(2)
+                margins: appStyle.scaleX(2)
             }
         }
 
 
         ControlDiamond{
             id:arrows
-            height:manager.isProfile ? Style.scaleY(35) :Style.scaleY(50)
+            height:manager.isProfile ? appStyle.scaleY(35) :appStyle.scaleY(50)
             anchors{
                 verticalCenter:numbers.verticalCenter
                 horizontalCenter: numbers.horizontalCenter
@@ -220,7 +220,7 @@ Panel{
                 left:parent.left
                 bottom:parent.bottom
             }
-            width: Style.listViewWidth_medium
+            width: appStyle.listViewWidth_medium
         }
 
         states: [
@@ -346,16 +346,16 @@ Panel{
         //            from: "*"
         //            to: "*"
         //            AnchorAnimation{
-        //                duration:Style.appButtonLargeHeightnimation_medium
-        //                easing.type: skinStyle.animation_easing
+        //                duration:appStyle.appButtonLargeHeightnimation_medium
+        //                easing.type: skinappStyle.animation_easing
         //            }
         //        },
         //        Transition {
         //            from: "*"
         //            to: "options"
         //            PropertyAnimation{
-        //                duration:skinStyle.animation_medium
-        //                easing.type: skinStyle.animation_easing
+        //                duration:skinappStyle.animation_medium
+        //                easing.type: skinappStyle.animation_easing
         //            }
 
         //        }

@@ -7,7 +7,7 @@ Panel {
     Item {
         id: remote1
        anchors.fill: parent
-        property int rowHeight:Style.scaleY(12)
+        property int rowHeight:appStyle.scaleY(12)
 
         Column {
             id:leftCol
@@ -52,7 +52,7 @@ Panel {
         DirectionPad{
             id:mainDiamond
             visible: true
-            height: Style.scaleY(12)*3
+            height: appStyle.scaleY(12)*3
             width:  height
             anchors{
                 top:parent.top
@@ -62,7 +62,7 @@ Panel {
 
         Column { // Info, Up, Menu, Ch+
             id:rightCol
-            spacing: manager.isProfile ? Style.scaleX(1) : Style.scaleY(1)
+            spacing: manager.isProfile ? appStyle.scaleX(1) : appStyle.scaleY(1)
             height: childrenRect.height
             width: childrenRect.width
             anchors{
@@ -90,7 +90,7 @@ Panel {
         Row { // Exit, Down, Guide, VolUp
             id:dvrRow
             width: childrenRect.width
-            height: Style.appButtonHeight
+            height: appStyle.appButtonHeight
             anchors{
                 bottom:transports.top
                 horizontalCenter: parent.horizontalCenter
@@ -147,7 +147,7 @@ Panel {
             id:transports// SkipBack, Rewind, FastForward, SkipFwd
 
             width: childrenRect.width
-            height: Style.appButtonHeight
+            height: appStyle.appButtonHeight
             anchors{
                 horizontalCenter: parent.horizontalCenter
                 bottom:colorButtons.top
@@ -156,7 +156,7 @@ Panel {
                 id: btStop
                 state:"round"
                 buttonText: ""
-                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? appStyle.scaleY(10) : appStyle.scaleY(12)
                 // This is the Live TV remote, so we use the "Stop" CMD (AV control), and not the "Stop Media" CMD (DCE players)
                 onActivated: manager.stop_AV()
                 Image {
@@ -170,7 +170,7 @@ Panel {
             StyledButton {
                 id: btRewind
                 state:"round"
-                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? appStyle.scaleY(10) : appStyle.scaleY(12)
                 buttonText: ""
                 Image {
                     id: rwImg
@@ -191,21 +191,21 @@ Panel {
                     width: height
                     anchors.centerIn: parent
                 }
-                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? appStyle.scaleY(10) : appStyle.scaleY(12)
                 buttonText: ""
                 onActivated: manager.pauseMedia()
             }
             StyledButton {
                 id: btPlay
                 state:"round"
-                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? appStyle.scaleY(10) : appStyle.scaleY(12)
                 buttonText: "Play"
                 onActivated: manager.playResume()
             }
             StyledButton {
                 id: btFFwd
                 state:"round"
-                height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                height: manager.isProfile ? appStyle.scaleY(10) : appStyle.scaleY(12)
                 buttonText: ""
                 Image {
                     id: ffimg
@@ -221,8 +221,8 @@ Panel {
 
         Row { // Red, Green, Yellow, Blue
             id:colorButtons
-            spacing: manager.isProfile ? Style.scaleX(1) : Style.scaleY(1)
-            height: Style.appButtonHeight
+            spacing: manager.isProfile ? appStyle.scaleX(1) : appStyle.scaleY(1)
+            height: appStyle.appButtonHeight
             width: childrenRect.width
             anchors{
                 bottom:parent.bottom

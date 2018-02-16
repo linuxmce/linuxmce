@@ -20,14 +20,14 @@
 #include "Gen_Devices/HueControllerBase.h"
 //<-dceag-d-e->
 #include <QObject>
-#include <qjson/serializer.h>
-#include <qjson/parser.h>
 #include <QNetworkAccessManager>
 #include <QVariant>
 #include <QTimer>
 #include <QUrl>
+#include "abstractwirelessbulb.h"
 #include <huecontrollerhardware.h>
-#include <huebulb.h>
+#include <huemotionsensor.h>
+#include <huedaynightsensor.h>
 #include "../huecommand.h"
 
 //<-dceag-decl-b->
@@ -41,7 +41,9 @@ class HueController : public HueController_Command
 public:
     // Public member variables
     QList<HueControllerHardware*> hueControllers;
-    QList<HueBulb*> hueBulbs;
+    QList<AbstractWirelessBulb*> hueBulbs;
+    QList<HueMotionSensor*> hueMotionSensors;
+
 
 
     //<-dceag-const-b->
@@ -59,7 +61,7 @@ public:
 
 
     void initBridgeConnection();
-    bool findControllers();
+
 
     void getScreenSaverColor();
     bool setupController(int controllerIndex);
@@ -202,8 +204,10 @@ public slots:
 
     void processDataStore(const QByteArray data);
 
-    HueControllerHardware* getController(int index) {return hueControllers.at(index); }
- void handleDeviceEvent(int whichEvent);
+  HueControllerHardware* getController(int index) {return hueControllers.at(index); }
+ void handleLightEvent(int whichEvent);
+ void handleMotionSensorEvent(DCE::Message * m);
+ void handleLightMessage(DCE::PreformedCommand m);
 
 private slots:
     bool addMessageToQueue(QUrl msg, QVariant params);
@@ -212,12 +216,13 @@ private slots:
     bool downloadControllerConfig(QUrl deviceIp);
     void updateDevice(AbstractWirelessBulb *b, int d);
     void checkLightInformation();
+    void handleCheckLightInformation(QNetworkReply * reply);
+    void checkSensorInformation();
+    void handleCheckSensorInformation(QNetworkReply * reply);
 
 
 private:
-    QNetworkAccessManager * linkButtonManager;
-    QNetworkAccessManager * commandManager;
-    QNetworkAccessManager * poller;
+
 
     bool m_updateStatus;
     bool mb_isNew;
@@ -228,9 +233,18 @@ private:
     QString authUser;
 
     QTimer *mp_linkButtonTimer;
-    QTimer *mp_pollTimer;
-    QTimer *mp_cmdTimer;
+    QTimer *mp_lightRefreshTimer;
+    QTimer *mp_sensorRefreshTimer;
+    QTimer *mp_queueCommandTimer;
     QList<HueCommand*> cmdQueue;
+
+    QHash <QString, HueMotionSensor* > motionSensorHash;
+
+    QNetworkAccessManager * linkButtonManager;
+    QNetworkAccessManager * commandManager;
+    QNetworkAccessManager * lightRequestManager;
+    QNetworkAccessManager * sensorRequestManager;
+    HueDayNightSensor * m_dayNightSensor;
 
     static const char getGroups[];          /*!< Get all groups \note get */
 
@@ -240,6 +254,11 @@ private:
     static const char getLightInfo[];       /*!< Light information and stat \note get */
     static const char renameLight[];        /*!< Rename the light \note put */
     static const char setLightState[];      /*!< Set properties on the light */
+
+    QStringList m_extendedColorLightModels;
+    QStringList m_colorLightModels;
+    QStringList m_colorTemperatureModels;
+    QStringList m_dimmableModels;
 
 };
 

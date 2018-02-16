@@ -103,7 +103,7 @@ Item {
             Row{
                 id:row
                 spacing:5
-                width: children.length*Style.appButtonWidth
+                width: children.length*appStyle.appButtonWidth
                 height:footer.height
 
                 StyledButton{

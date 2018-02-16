@@ -15,7 +15,7 @@ INCLUDEPATH += /usr/include/qjson/ \
     ../../ \
     ../../DCE/
 
-LIBS += -lqjson
+
 DESTDIR=../../bin
 
 include (../../QtCommonIncludes/PlutoUtils.pri)
@@ -40,10 +40,10 @@ SOURCES += ../Main.cpp \
     ../../Gen_Devices/HueControllerBase.cpp \
     ../HueController.cpp \
     huecontrollerhardware.cpp \
-    huebulb.cpp \
     ../huecommand.cpp \
     abstractwirelessbulb.cpp \
-    hueluxbulb.cpp
+    huemotionsensor.cpp \
+    huedaynightsensor.cpp
 
 HEADERS += \
     ../../DCE/DeviceData_Base.h \
@@ -61,7 +61,7 @@ HEADERS += \
     ../../Gen_Devices/HueControllerBase.h \
     ../HueController.h \
     huecontrollerhardware.h \
-    huebulb.h \
     ../huecommand.h \
     abstractwirelessbulb.h \
-    hueluxbulb.h
+    huemotionsensor.h \
+    huedaynightsensor.h

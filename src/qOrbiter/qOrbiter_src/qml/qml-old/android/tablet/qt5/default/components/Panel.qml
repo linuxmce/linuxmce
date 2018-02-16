@@ -53,7 +53,7 @@ Item {
         font.weight: Font.DemiBold
         isBold: true
         font.pixelSize:scaleY(parent.height*.010)
-        color:skinStyle.listItemActiveBgColor
+        color:skinstyle.listItemActiveBgColor
     }
 
 }

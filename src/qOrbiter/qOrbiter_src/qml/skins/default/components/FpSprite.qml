@@ -33,8 +33,8 @@ Item {
     property string deviceType: ""
     property string imgUrl: ""
     property bool selected:false
-    property int itemH:Style.scaleY(5)
-    property int itemW: Style.scaleY(5)
+    property int itemH:appStyle.scaleY(5)
+    property int itemW: appStyle.scaleY(5)
     property double iconScale: 1.5
 
     Connections{
@@ -70,7 +70,7 @@ Item {
     Image {
         id: fpDevice_image
         source:deviceType==="52" ? "" : "../images/floorplan/"+deviceType+".png"
-        sourceSize:Qt.size(Style.scaleY(6), Style.scaleY(6))
+        sourceSize:Qt.size(appStyle.scaleY(6), appStyle.scaleY(6))
         anchors.centerIn: parent
         anchors.fill: parent
         cache: false       
@@ -126,7 +126,7 @@ Item {
 //        anchors.horizontalCenter: fpDevice_image.horizontalCenter
 //        text:deviceName  +"\n"+deviceState + "::"+deviceLevel
 //        anchors.top: fpDevice_image.bottom
-//        font.pixelSize: Style.fontSize_small
+//        font.pixelSize: appStyle.fontSize_small
 //        visible: true
 //        color:"black"
 //    }
@@ -161,7 +161,7 @@ Item {
             text: getDeviceText() // need to display different text based on what floorplan (and device)
             visible: deviceLevel!==0
             anchors.top: fpDevice_image.bottom
-            font.pixelSize: Style.fontSize_small
+            font.pixelSize: appStyle.fontSize_small
             anchors.centerIn: sprite
 
             color:"black"

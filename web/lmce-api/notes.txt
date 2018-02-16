@@ -1,0 +1,16 @@
+sudo add-apt-repository ppa:ondrej/php
+sudo apt-get update
+sudo apt-get install php7.2
+sudo apt-get install php7.2-mysql
+sudo apt-get install php7.2-intl
+sudo apt-get install php7.2-mbstring
+sudo apt-get install install php7.2-xml
+sudo apt-get install libpcre3
+sudo apt-get install libapache2-mod-php7.2
+
+sudo a2dismod php5.4
+sudo a2enmod php7.2
+
+
+
+# Had to comment out php_value settings in mythweb

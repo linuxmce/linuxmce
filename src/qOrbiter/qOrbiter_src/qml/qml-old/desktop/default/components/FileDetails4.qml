@@ -8,10 +8,10 @@ Rectangle {
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
-    color: skinStyle.highlight2
+    color: skinstyle.highlight2
     clip: true
     radius: 5
-    border.color: skinStyle.highlight1
+    border.color: skinstyle.highlight1
     border.width: 3
     MouseArea{
         anchors.fill: filedetailrect
@@ -34,7 +34,7 @@ Rectangle {
         id:titlerect
         height: childrenRect.height + 5
         width: parent.width
-        color:skinStyle.highlight1
+        color:skinstyle.highlight1
         radius:2.5
         StyledText {
             id: text2
@@ -199,8 +199,8 @@ Rectangle {
         spacing: scaleY(.5)
         AvOptionButton {
             id: buttonsq1
-            width: skinStyle.stdbuttonw
-            height: skinStyle.stdbuttonh
+            width: skinstyle.stdbuttonw
+            height: skinstyle.stdbuttonh
             radius: 10
 
             //anchors.leftMargin: 18
@@ -214,16 +214,16 @@ Rectangle {
 
         AvOptionButton {
             id: buttonsq2
-            width: skinStyle.stdbuttonw
-            height: skinStyle.stdbuttonh
+            width: skinstyle.stdbuttonw
+            height: skinstyle.stdbuttonh
             radius: 10
             buttontext: "Move"
         }
 
         AvOptionButton {
             id: buttonsq3
-            width: skinStyle.stdbuttonw
-            height: skinStyle.stdbuttonh
+            width: skinstyle.stdbuttonw
+            height: skinstyle.stdbuttonh
             radius: 10
             buttontext: "Close"
             x: ((parent.width/3)*2)

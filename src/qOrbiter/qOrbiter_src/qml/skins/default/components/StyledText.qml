@@ -6,9 +6,9 @@ Text {
     property int textHeight
     property int textWidth  
     property bool isItalic:false
-    property double fontSize:Style.appFontSize_description
-    property double largeFontSize:Style.appFontSize_title
-    property double cellFontSize: Style.appFontSize_list
+    property double fontSize:appStyle.appFontSize_description
+    property double largeFontSize:appStyle.appFontSize_title
+    property double cellFontSize: appStyle.appFontSize_list
     horizontalAlignment: Text.AlignHCenter
     onVisibleChanged: {
         if(!visible)height=0.1
@@ -19,6 +19,6 @@ Text {
     text: textLabel   
     font.pointSize: fontSize+settings.fontSizeMod
     verticalAlignment:Text.AlignVCenter   
-    color:Style.apptext_color_active
+    color:appStyle.apptext_color_active
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere 
 }

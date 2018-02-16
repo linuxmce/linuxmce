@@ -26,13 +26,13 @@ Item {
             right:parent.right
         }
 
-        height: Style.scaleY(12)
+        height: appStyle.scaleY(12)
 
         Rectangle{
             id:headerBg
             anchors.fill: parent
-            color:Style.appcolor_navigationBackgroundColor
-            opacity: Style.appPanel_opacity
+            color:appStyle.appcolor_navigationBackgroundColor
+            opacity: appStyle.appPanel_opacity
         }
 
         StyledText{

@@ -103,7 +103,7 @@ Item{
                 anchors.fill: parent
                 radius:5
                 opacity: .75
-                color: currentItem===index ? appStyle.listItemActiveBgColor : appStyle.listItemBgColor
+                color: currentItem===index ? appstyle.listItemActiveBgColor : appstyle.listItemBgColor
             }
 
             StyledText{
@@ -112,12 +112,12 @@ Item{
                 font.pixelSize:headerText
                 font.bold: true
                 font.capitalization: Font.SmallCaps
-                color:appStyle.lighttext
+                color:appstyle.lighttext
             }
 
             Rectangle{
                 anchors.fill: parent
-                gradient: appStyle.buttonGradient
+                gradient: appstyle.buttonGradient
                 radius:5
                 opacity: .65
             }
@@ -173,14 +173,14 @@ Item{
 
 
                     GradientFiller{
-                        fillColor: submodel.currentIndex === index ? "black" : appStyle.button_system_color
+                        fillColor: submodel.currentIndex === index ? "black" : appstyle.button_system_color
                         opacity: submodel.currentIndex === index ? .75 : .55
                         grpRadius: 5
                     }
 
                     StyledText {
                         id:label
-                        color:appStyle.lighttext
+                        color:appstyle.lighttext
                         text: title
                         font.bold: submodel.currentIndex === index
                         width:parent.width
@@ -359,8 +359,8 @@ Item{
             to: "*"
 
             AnchorAnimation{
-                duration: appStyle.globalAnimationSpeed
-                easing.type: appStyle.globalAnimationEasing
+                duration: appstyle.globalAnimationSpeed
+                easing.type: appstyle.globalAnimationEasing
 
             }
         }
