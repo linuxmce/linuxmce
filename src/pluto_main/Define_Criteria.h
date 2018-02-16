@@ -5,6 +5,7 @@
 #define CRITERIA_Watching_Media_CONST 2
 #define CRITERIA_Stop_Watching_CONST 3
 
+
 #define CRITERIA_TABLE "Criteria"
 #define CRITERIA_PK_CRITERIA_FIELD "PK_Criteria"
 #define CRITERIA_PK_CRITERIA_TABLE_FIELD "Criteria.PK_Criteria"
