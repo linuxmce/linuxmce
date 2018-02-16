@@ -384,6 +384,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
     int conversion_var = ceil(65280 / 360);
 
     QString setLevelVal;
+
     if(command.length() > 5 && cmd ==184){
         // qDebug()<<"CMD_SET_LEVEL::"<< setLevelVal;
         setLevelVal = command.at(5);
@@ -458,6 +459,16 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         params.insert("on", true);
         params.insert("effect",command.at(5).toLower());
         if(addMessageToQueue(target, params)) {sCMD_Result = "SET MODE OK"; }
+
+        break;
+    case 1160:
+        setLevelVal = command.at(5);
+        setLevelVal.remove("\"");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        params.insert("ct",setLevelVal.toInt()*.10);
+        qDebug() << setLevelVal.toInt()*.10;
+        if(addMessageToQueue(target, params)) {sCMD_Result = "SET CT OK"; }
 
         break;
 
@@ -887,41 +898,6 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
             qDebug() <<  hueMotionSensors.at(n)->name() << " has no linuxmce id. it should be added.";
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s has no LinuxMCE Device number, it should be added.", hueMotionSensors.at(n)->name().toStdString().c_str());
 
-            for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
-            {
-                DeviceData_Impl *existingSensor = m_pData->m_vectDeviceData_Impl_Children.at(i);
-
-                if (existingSensor->m_dwPK_DeviceTemplate == DEVICETEMPLATE_SML001_CONST &&   added.indexOf(existingSensor->m_dwPK_Device)==-1 ){
-
-                    qDebug () << "Setting ID for existing Sensor with unknown configuration with " << hueMotionSensors.at(n)->name();
-                    CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4, existingSensor->m_dwPK_Device,StringUtils::itos(hueMotionSensors.at(n)->hueId()),DEVICEDATA_UnitNo_CONST);
-                    string pResonseA = "";
-                    if(SendCommand(setUnit, &pResonseA)){
-                        qDebug() << "Set internal id";
-                    }
-                    QString chanaddress = hueMotionSensors.at(n)->controller()->getIpAddress()+":"+QString::number(hueMotionSensors.at(n)->hueId());
-                    qDebug()<< chanaddress;
-                    CMD_Set_Device_Data setController(this->m_dwPK_Device,
-                                                      4,
-                                                      existingSensor->m_dwPK_Device,
-                                                      chanaddress.toStdString(),
-                                                      DEVICEDATA_PortChannel_Number_CONST
-                                                      );
-                    if(SendCommand(setController)){
-                        qDebug() << "Set port / channel";
-                    }
-
-                    CMD_Set_Device_Data setName(m_dwPK_Device, 4, existingSensor->m_dwPK_Device, hueMotionSensors.at(n)->name().toStdString(), DEVICEDATA_Name_CONST);
-                    if(SendCommand(setName)){
-                        qDebug()<<"Set Device Name";
-                    }
-                    added.append(existingSensor->m_dwPK_Device);
-                }
-                else{
-                    qDebug() << hueMotionSensors.at(n)->linuxmceId();
-                }
-                // qDebug() << "There are no more bulbs in the linuxmce system, but the controller has more." <<hueBulbs.at(n)->lightName << "is being added them now. ";
-            }
 
             if(hueMotionSensors.at(n)->linuxmceId()==0){
                 qDebug() << " sensor Not found in system, need to add "<< hueMotionSensors.at(n)->name();
