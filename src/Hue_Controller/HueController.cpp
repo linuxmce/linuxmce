@@ -403,6 +403,14 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         //  qDebug() << Q_FUNC_INFO <<"CMD_SET_COLOR+RGB::"<<redLevel<<"::" <<greenLevel << "::"<< blueLevel;
     }
 
+    if(cmd==1115){
+        int h, s, l;
+        h = round(command.at(7).toDouble());
+        s = round(command.at(9).toDouble()) ;
+        l = round(command.at(5).toDouble());
+        q.setHsl( command.at(7).toInt(), s, l  );
+    }
+
     switch (cmd) {
     case 193:
         target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
@@ -463,13 +471,26 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         break;
     case 1160:
         setLevelVal = command.at(5);
+
         setLevelVal.remove("\"");
         target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
         params.insert("ct",setLevelVal.toInt()*.10);
         qDebug() << setLevelVal.toInt()*.10;
         if(addMessageToQueue(target, params)) {sCMD_Result = "SET CT OK"; }
+        break;
+    case 1115:
+    qDebug() << command;
 
+        setLevelVal = command.at(7);
+        setLevelVal.remove("\"");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        params.insert("bri",q.lightness());
+        params.insert("hue", q.hslHue()*conversion_var  );
+        params.insert("sat",q.hslSaturation() );
+        qDebug() << params;
+        if(addMessageToQueue(target, params)) {sCMD_Result = "SET HUE OK"; }
         break;
 
     default:
@@ -543,7 +564,7 @@ void HueController::CreateChildren()
                     if(hueBulbs.at(n)->getController()->getIpAddress() == p.at(0)&& hueBulbs.at(n)->id()==deviceID ){
 
                         QVariantMap mapping =QJsonDocument::fromJson( QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Mapping_CONST).c_str()).toLocal8Bit()).object().toVariantMap();
-                        qDebug() << mapping;
+
                         hueBulbs.at(n)->setColorMap(mapping.value("color").toMap());
                         hueBulbs.at(n)->setLinuxmceId(linuxmceID);
                         hueBulbs.at(n)->setBrightness(0);
