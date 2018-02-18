@@ -89,18 +89,47 @@ class DceCommandExecutorComponent extends Component
 	}
         
         function sendColorCommand($data){
+                       
             $params=array(
                 'msgid' => 1115,
                 'params' => array(
-                    array('76', $data['brightness']*100),
-                    array('266', $data['hue']),
-                    array('287', $data['saturation']*100)
+                    array('76',  $data['color']['color']['brightness']*255),
+                    array('286', $data['color']['color']['hue']),
+                    array('287', $data['color']['color']['saturation']*255)
                 )
             );
             
             $response = $this->executeFormedCommand($data['device'], $params);
-            return $response;
+           
+            if($response=="OK"){
+                  return array( 
+                "h"=>$data['color']['color']['hue'],
+                "s"=>$data['color']['color']['saturation'],
+                "b"=>$data['color']['color']['brightness']
+            );
+            } else {
+                return array( 
+                "h"=>0,
+                "s"=>0,
+                "b"=>0
+            );
+            }    
+        }
+        
+        function sendColorTempCommand($data){
             
+            $colorTempValue =  $data['colorTemp']['colorTemperatureInKelvin'];
+            $finalColorTempVal = ( ($colorTempValue - 1000) / (10000 - 1000) ) * (6500 - 2000) + 2000 ;
+             $params=array(
+                'msgid' => 1160,
+                'params' => array(
+                    array('48', $finalColorTempVal)
+                )
+            );
+            
+            $this->executeFormedCommand($data['device'], $params);           
+             return  $data['colorTemp']['colorTemperatureInKelvin'];
+          
         }
 	
 	function sendLightOffCommand($device){
