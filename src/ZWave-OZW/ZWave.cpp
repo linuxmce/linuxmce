@@ -207,7 +207,53 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				break;
 				;;
 			}
-			case COMMAND_Set_Temperature_CONST:
+		case COMMAND_Set_Color_RGB_CONST:
+		{
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Assuming node has a Color value");
+			OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Color");
+			if (valueID != NULL)
+			{
+				int red = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Red_Level_CONST].c_str());
+				int green = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Green_Level_CONST].c_str());
+				int blue = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Blue_Level_CONST].c_str());
+				if (red > 255)
+					red = 255;
+				if (red < 0)
+					red = 0;
+				if (green > 255)
+					green = 255;
+				if (green < 0)
+					green = 0;
+				if (blue > 255)
+					blue = 255;
+				if (blue < 0)
+					blue = 0;
+				int white = 255;
+                                // Need to set white values to 0 to turn on RGB
+				if (red > 0 || green > 0 || blue > 0)
+					white = 0;
+				char buffer [11];
+				buffer[10] = 0;
+				sprintf(&buffer[0], "%02X", (unsigned char)red);
+				sprintf(&buffer[2], "%02X", (unsigned char)green);
+				sprintf(&buffer[4], "%02X", (unsigned char)blue);
+				sprintf(&buffer[6], "%02X", (unsigned char)white);
+				sprintf(&buffer[8], "%02X", (unsigned char)white);
+				string color = "#";
+				color += buffer;
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Color: %s", color.c_str());
+				if (OpenZWave::Manager::Get()->SetValue(*valueID, color)) {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Color successful");
+				} else {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Color FAILED!");
+				}
+			} else {
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"No 'Color' label available on node");
+			}
+			break;
+			;;
+		}
+		case COMMAND_Set_Temperature_CONST:
 			{
 				temp = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
 				string unit = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_Units_CONST);
