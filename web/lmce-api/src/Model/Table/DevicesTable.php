@@ -307,14 +307,14 @@ function findByDeviceCategory(Query $query, array $options){
 					$reply['color'] = array(
 						"hsb"=>[
 							"h"=>$hsl["h"],
-							"s"=>$hsl["s"],
-							"b"=>$hsl["l"]
+							"s"=>$hsl["s"]*.001,
+							"b"=>$hsl["l"]*.001
 						]						
 					);
 				} else if( in_array($device->device_template->PK_DeviceTemplate, $this->tunableDeviceTemplates) ){
                                     $hueCurrentColor = json_decode($device->device__device_data[5]->IK_DeviceData, true);
                                     $colorTemp = $hueCurrentColor["color"]["currentColorTemp"];
-					$reply['colorTemperatureInKelvin'] = $colorTemp;
+					$reply['colorTemperatureInKelvin'] = $colorTemp*10;
 				}				
 			}                        
 	return $reply;	

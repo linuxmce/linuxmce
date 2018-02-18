@@ -105,8 +105,7 @@ class AlexaController extends AppController
 	
 	function brightnessCommand(){
 		//$this->request->allowMethod(['POST', 'post']);
-		$DeviceList = TableRegistry::get('Devices');
-			
+		$DeviceList = TableRegistry::get('Devices');			
 			
 		$deviceTarget = $this->request->params['?']['device'];
 		$mode = $this->request->params['?']['mode'];
@@ -159,16 +158,22 @@ class AlexaController extends AppController
 	}
         
         public function colorCommand(){
-            $requestData = $this->request->getData('body');
-            
-            $rep = $this->DceCommandExecutor->sendColorCommand(json_decode($requestData));
-            	
+              $this->request->allowMethod('POST');
+              $requestData = $this->request->data("body");
+              $rep = "error";
+              
+              if(isset($requestData["colorTemp"]) ){
+                  $rep = $this->DceCommandExecutor->sendColorTempCommand($requestData);  
+              } else if(isset($requestData["color"]) ){
+                 $rep = $this->DceCommandExecutor->sendColorCommand($requestData);  
+              }            	
 		$now = Time::now();
 		$now->format('e');	  
 		$reply = array(
-		'status' => $rep,
+		'status' => "OK",
 		'timeSent'=>$now,
-		'error'=>"none"
+		'error'=>"none",
+                'colordata'=>$rep
 		);
             $this->set(compact('reply'));
 	    $this->set('_serialize', 'reply');
