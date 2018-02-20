@@ -378,7 +378,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
     if(targetIpAddress.isEmpty() || ID == -1){
         //        qDebug() << "Invalid command for ID "<<ID << " linuxmce id " << device;
         //        qDebug() << "target ip"<<targetIpAddress;
-        sCMD_Result="Failed";
+        sCMD_Result="Failed Cannot locate bulb";
         return;
     }
     int conversion_var = ceil(65280 / 360);
