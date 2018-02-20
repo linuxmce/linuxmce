@@ -11,6 +11,10 @@ class DevicesTable extends Table{
 public function initialize(array $config){
 	$this->setTable('Device');
 	$this->primaryKey('PK_Device');
+        $this->colorDeviceTemplates= array(2319,2257); 
+        $this->tunableDeviceTemplates = array(2362,2257);
+        $this->dimmableDeviceTemplates = array(2318);
+        $this->excludedDevices = array(2358, 2359, 2361);
 	
 	
 	$this->hasOne( 'Room',
@@ -62,6 +66,8 @@ public function initialize(array $config){
 function findByDeviceCategory(Query $query, array $options){
 	
 	$cat = $options['category'];
+	
+
 	return $query
 			->contain(['DeviceTemplate','Room', 'DeviceData', 'Device_DeviceData'] )
 			->matching('DeviceTemplate', function ($q) use ($cat) {
@@ -75,10 +81,16 @@ function findByDeviceCategory(Query $query, array $options){
 				
 		$devices = TableRegistry::get('Devices');
 		$lightList = $this->find('byDeviceCategory', ['category'=> "73"]);
+              
 		
 		$alexaObject = array();
 		
 		foreach($lightList as $light){
+                    
+                    if(in_array($light->device_template->PK_DeviceTemplate, $this->excludedDevices)){
+                        break;
+                    }
+                    
 			$appendArry = array(
 				'endpointId' => (string) $light->PK_Device,
 				'friendlyName' =>$light['Description'],
@@ -111,9 +123,40 @@ function findByDeviceCategory(Query $query, array $options){
 						'retrievable' => true						
 					)
 				]	
-				)
-				
+				)				
 			);
+			
+			if( in_array($light->device_template->PK_DeviceTemplate, $this->colorDeviceTemplates ) ){
+				$appendArry['capabilities'][]= [
+					'type'=>'AlexaInterface',
+					'interface' => 'Alexa.ColorController',
+					'version' => '3',
+					'properties' => array(
+					'supported'=> [array(
+					'name' => 'color'
+					)],						
+						'retrievable' => true						
+					)
+				];
+			} 
+                        
+                        if ( in_array($light->device_template->PK_DeviceTemplate, $this->tunableDeviceTemplates )  ){
+                            
+				$appendArry['capabilities'][]= [
+					'type'=>'AlexaInterface',
+					'interface' => 'Alexa.ColorTemperatureController',
+					'version' => '3',
+					'properties' => array(
+					'supported'=> [array(
+					'name' => 'colorTemperatureInKelvin'
+					)],						
+						'retrievable' => true						
+					)
+				];
+			} 
+                        
+                    
+				
 			$alexaObject[] = $appendArry;
 		}
 		
@@ -241,11 +284,41 @@ function findByDeviceCategory(Query $query, array $options){
 	}
 	
 	function deviceDataForDevice($deviceId){
-		
-	
 			
 			
 	}
+        
+        function handleDeviceReport($deviceTarget){
+            $DeviceList = TableRegistry::get('Devices');		
+            $device = $DeviceList->get($deviceTarget, ['contain'=>['DeviceTemplate', 'Device_DeviceData'] ] );
+            $reply = array();
+            $reply['error']="none";
+            
+			if($device->device_template->FK_DeviceCategory==73){
+				
+				$lightState = explode("/", $device->State);				
+				$reply['bri'] = $lightState[1];
+				$reply['lightState'] = $lightState[0];
+				
+				if( in_array($device->device_template->PK_DeviceTemplate, $this->colorDeviceTemplates)  ){
+                                    $hueCurrentColor = json_decode($device->device__device_data[5]->IK_DeviceData, true);
+                                    $hsl = $hueCurrentColor["color"]["currentColor"]["hsl"];
+                                   
+					$reply['color'] = array(
+						"hsb"=>[
+							"h"=>$hsl["h"],
+							"s"=>$hsl["s"]*.001,
+							"b"=>$hsl["l"]*.001
+						]						
+					);
+				} else if( in_array($device->device_template->PK_DeviceTemplate, $this->tunableDeviceTemplates) ){
+                                    $hueCurrentColor = json_decode($device->device__device_data[5]->IK_DeviceData, true);
+                                    $colorTemp = $hueCurrentColor["color"]["currentColorTemp"];
+					$reply['colorTemperatureInKelvin'] = $colorTemp*10;
+				}				
+			}                        
+	return $reply;	
+        }
 	
 	
 }
