@@ -71,6 +71,26 @@ HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEv
 
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "HueController, Device %d is alive!", this->m_dwPK_Device);
 
+    //DEVICETEMPLATE_Hue_Lightbulb_CONST or DEVICETEMPLATE_Hue_Light_Strips_CONST
+    m_extendedColorLightModels = QStringList() << "LCT001"<< "LCT007"<< "LCT010"<< "LCT014"<< "LCT015"
+                                               << "LCT016"<< "LCT002" << "LCT003"<< "LCT011" << "LLM001"
+                                               << "LLC020" << "LST002" << "LCT012" ;
+
+    //DEVICETEMPLATE_Hue_Lightbulb_CONST or DEVICETEMPLATE_Hue_Light_Strips_CONST
+    m_colorLightModels =        QStringList()  << "LST001" << "LLC010" << "LLC011" << "LLC012" << "LLC006"
+                                               << "LLC005" << "LLC007" << "LLC014" << "LLC013" ;
+    //DEVICETEMPLATE_Hue_White_Ambiance_CONST
+    m_colorTemperatureModels =  QStringList()  << "LTW011" << "LLM010" <<  "LLM011" << "LLM012" << "LTW001"
+                                               << "LTW004" << "LTW010" << "LTW015" << "LTW013" << "LTW014"
+                                               << "LTW012" << "LTP001" << "LTP002" << "LTP003" << "LTP004"
+                                               << "LTP005" << "LTD003" << "LTT001" <<  "LDT001" ;
+
+    //DEVICETEMPLATE_Hue_Lux_Bulb_CONST
+    m_dimmableModels =          QStringList()  << "LWB004" << "LWB006" << "LWB007" << "LWB010" << "LWB014"
+                                               << "LDF002" << "LDF001" << "LDD002" << "LDD001" << "MWM001";
+
+
+
     QObject::connect(this, SIGNAL(initiateConfigDownload(QUrl)), this, SLOT(downloadControllerConfig(QUrl)));
 
     QObject::connect(mp_lightRefreshTimer, SIGNAL(timeout()), this, SLOT(checkLightInformation()));
@@ -161,11 +181,8 @@ bool HueController::checkLinkButton(){
 
 bool HueController::setupController(int controllerIndex){
 
-
-
     QString installationTag = QString::number(m_pData->m_dwPK_Installation);
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Setting up Hue Hub with LinuxMCE-%s ", installationTag.toStdString().c_str());
-
 
     QUrl setupUrl = "http://"+targetIpAddress+"/api/";
     QVariantMap setupParams;
@@ -181,7 +198,6 @@ bool HueController::setupController(int controllerIndex){
     respWait.exec();
 
     QByteArray setupResponse = setupReply->readAll();
-
     setupResponse.remove(0,1);
     setupResponse.remove(setupResponse.length()-1, 1);
 
@@ -368,6 +384,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
     int conversion_var = ceil(65280 / 360);
 
     QString setLevelVal;
+
     if(command.length() > 5 && cmd ==184){
         // qDebug()<<"CMD_SET_LEVEL::"<< setLevelVal;
         setLevelVal = command.at(5);
@@ -384,6 +401,14 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         q.setRgb(redLevel,greenLevel,blueLevel);
         bulb->setRgb(redLevel, greenLevel, blueLevel);
         //  qDebug() << Q_FUNC_INFO <<"CMD_SET_COLOR+RGB::"<<redLevel<<"::" <<greenLevel << "::"<< blueLevel;
+    }
+
+    if(cmd==1115){
+        int h, s, l;
+        h = round(command.at(7).toDouble());
+        s = round(command.at(9).toDouble()) ;
+        l = round(command.at(5).toDouble());
+        q.setHsl( command.at(7).toInt(), s, l  );
     }
 
     switch (cmd) {
@@ -444,6 +469,29 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         if(addMessageToQueue(target, params)) {sCMD_Result = "SET MODE OK"; }
 
         break;
+    case 1160:
+        setLevelVal = command.at(5);
+
+        setLevelVal.remove("\"");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        params.insert("ct",setLevelVal.toInt()*.10);
+        qDebug() << setLevelVal.toInt()*.10;
+        if(addMessageToQueue(target, params)) {sCMD_Result = "SET CT OK"; }
+        break;
+    case 1115:
+    qDebug() << command;
+
+        setLevelVal = command.at(7);
+        setLevelVal.remove("\"");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        params.insert("bri",q.lightness());
+        params.insert("hue", q.hslHue()*conversion_var  );
+        params.insert("sat",q.hslSaturation() );
+        qDebug() << params;
+        if(addMessageToQueue(target, params)) {sCMD_Result = "SET HUE OK"; }
+        break;
 
     default:
         sCMD_Result = "NOT IMPLEMENTED";
@@ -502,8 +550,9 @@ void HueController::CreateChildren()
             pCommand->m_bGeneric=true;
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom handler for.  This is normal for IR.", pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
             int linuxmceID = pDeviceData_Impl_Child->m_dwPK_Device;
-            int deviceID = QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_UnitNo_CONST)).toInt();
+
             QStringList p = QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST)).split(":");
+            int deviceID = p.last().toInt();
 
             if(deviceID < 1 || linuxmceID < 1){
                 qDebug() << "Child device "<< linuxmceID << " is misconfigured. please reload configuration.";
@@ -515,7 +564,7 @@ void HueController::CreateChildren()
                     if(hueBulbs.at(n)->getController()->getIpAddress() == p.at(0)&& hueBulbs.at(n)->id()==deviceID ){
 
                         QVariantMap mapping =QJsonDocument::fromJson( QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Mapping_CONST).c_str()).toLocal8Bit()).object().toVariantMap();
-                        qDebug() << mapping;
+
                         hueBulbs.at(n)->setColorMap(mapping.value("color").toMap());
                         hueBulbs.at(n)->setLinuxmceId(linuxmceID);
                         hueBulbs.at(n)->setBrightness(0);
@@ -741,7 +790,9 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
             {
                 DeviceData_Impl *existingBulb = m_pData->m_vectDeviceData_Impl_Children.at(i);
 
-                if (existingBulb->mapParameters_Find(DEVICEDATA_UnitNo_CONST)=="" && added.indexOf(existingBulb->m_dwPK_Device)==-1 ){
+
+
+                if (existingBulb->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST)=="" && added.indexOf(existingBulb->m_dwPK_Device)==-1 ){
 
                     qDebug () << "Setting ID for existing light with unknown configuration with " << hueBulbs.at(n)->displayName();
                     CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4, existingBulb->m_dwPK_Device,StringUtils::itos(hueBulbs.at(n)->id()),DEVICEDATA_UnitNo_CONST);
@@ -780,24 +831,25 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
                 string cResponse="";
                 QString modelNo = hueBulbs.at(n)->lightModel();
                 int dtNumber = -1;
-                if( modelNo == "LCT001"|| modelNo == "LCT007" ){
-                    dtNumber = DEVICETEMPLATE_Hue_Lightbulb_CONST;
-                } else if( modelNo ==  "LCT010"||modelNo =="LCT014"||modelNo =="LCT015"||modelNo =="LCT016"  ){
-                    dtNumber = DEVICETEMPLATE_Hue_Lightbulb_CONST;
-                } else if (modelNo == "LST001"  ){
-                    dtNumber = DEVICETEMPLATE_Hue_Light_Strips_CONST;
-                } else if (modelNo == "LWB004"||modelNo =="LWB006"||modelNo =="LWB007" ){
-                    dtNumber = DEVICETEMPLATE_Hue_Lux_Bulb_CONST; // should be hue white dt
-                } else if (modelNo ==  "LWB010"||modelNo =="LWB014" ){
-                    dtNumber = DEVICETEMPLATE_Hue_Lux_Bulb_CONST; // should be hue white lamp dt
-                } else if (modelNo == "LTW001"||modelNo =="LTW004"||modelNo =="LTW010"||modelNo =="LTW015" ){
+
+                if( m_extendedColorLightModels.contains(modelNo)  ){
+                    if( modelNo == "LST002" ||  modelNo == "LST002"  ){
+                        dtNumber = DEVICETEMPLATE_Hue_Light_Strips_CONST;
+                    } else {
+                        dtNumber = DEVICETEMPLATE_Hue_Extended_Color_Bulb_CONST;
+                    }
+                } else if(m_colorLightModels.contains(modelNo)){
+                    if( modelNo == "LST002" ||  modelNo == "LST002"  ){
+                        dtNumber = DEVICETEMPLATE_Hue_Light_Strips_CONST;
+                    } else {
+                        dtNumber = DEVICETEMPLATE_Hue_Color_Light_Bulb_CONST;
+                    }
+                } else if(m_colorTemperatureModels.contains(modelNo)){
+                    dtNumber = DEVICETEMPLATE_Hue_White_Ambiance_CONST;
+                } else if(m_dimmableModels.contains(modelNo)){
                     dtNumber = DEVICETEMPLATE_Hue_Lux_Bulb_CONST;
-                } else if (modelNo.contains("Connected A-19 60w")){
-                    dtNumber = DEVICETEMPLATE_Connected_A19_60w_Equivalent_CONST;
-                }  else if (modelNo == "Connected A-19 60w Equivalent" || modelNo == ""){
-                    dtNumber = DEVICETEMPLATE_Connected_A19_60w_Equivalent_CONST;
                 } else {
-                    qDebug() << "Did not match model no: " << modelNo;
+                    qDebug() << "Did not match model no: " << modelNo << " using generic on / off ";
                     dtNumber = DEVICETEMPLATE_Connected_A19_60w_Equivalent_CONST;
                 }
 
@@ -825,11 +877,6 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
 
                     AbstractWirelessBulb *b = hueBulbs.at(n);
 
-                    CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4,newDevice,StringUtils::itos(b->id()),DEVICEDATA_UnitNo_CONST);
-                    string pResonseA = "";
-                    if(SendCommand(setUnit, &pResonseA)){
-                        qDebug() << "Set internal id";
-                    }
                     QString chanaddress = hueBulbs.at(n)->getController()->getIpAddress()+":"+QString::number(b->id());
                     qDebug()<< chanaddress;
                     CMD_Set_Device_Data setController(this->m_dwPK_Device, 4, newDevice,chanaddress.toStdString(),DEVICEDATA_PortChannel_Number_CONST);
@@ -842,9 +889,19 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
                         qDebug()<<"Set Device Name";
                     }
 
-                    CMD_Set_Device_Data setId(m_dwPK_Device, 4, newDevice, b->uniqueId().toStdString(), DEVICEDATA_Serial_Number_CONST);
-                    if(SendCommand(setId)){
+                    CMD_Set_Device_Data serialNumber(m_dwPK_Device, 4, newDevice, b->uniqueId().toStdString(), DEVICEDATA_Serial_Number_CONST);
+                    if(SendCommand(serialNumber)){
                         qDebug()<<"Set uniqueId " << b->uniqueId();
+                    }
+
+                    CMD_Set_Device_Data lighttype(m_dwPK_Device, 4, newDevice, b->manufacturerName().toStdString(), DEVICEDATA_Type_CONST);
+                    if(SendCommand(lighttype)){
+                        qDebug()<<"set manufacturer " << b->manufacturerName();
+                    }
+
+                    CMD_Set_Device_Data model(m_dwPK_Device, 4, newDevice, b->lightModel().toStdString(), DEVICEDATA_Model_CONST);
+                    if(SendCommand(model)){
+                        qDebug()<<"Set light model " << b->lightModel();
                     }
 
                     added.append(newDevice);
@@ -862,41 +919,6 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
             qDebug() <<  hueMotionSensors.at(n)->name() << " has no linuxmce id. it should be added.";
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s has no LinuxMCE Device number, it should be added.", hueMotionSensors.at(n)->name().toStdString().c_str());
 
-            for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
-            {
-                DeviceData_Impl *existingSensor = m_pData->m_vectDeviceData_Impl_Children.at(i);
-
-                if (existingSensor->m_dwPK_DeviceTemplate == DEVICETEMPLATE_SML001_CONST &&   added.indexOf(existingSensor->m_dwPK_Device)==-1 ){
-
-                    qDebug () << "Setting ID for existing Sensor with unknown configuration with " << hueMotionSensors.at(n)->name();
-                    CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4, existingSensor->m_dwPK_Device,StringUtils::itos(hueMotionSensors.at(n)->hueId()),DEVICEDATA_UnitNo_CONST);
-                    string pResonseA = "";
-                    if(SendCommand(setUnit, &pResonseA)){
-                        qDebug() << "Set internal id";
-                    }
-                    QString chanaddress = hueMotionSensors.at(n)->controller()->getIpAddress()+":"+QString::number(hueMotionSensors.at(n)->hueId());
-                    qDebug()<< chanaddress;
-                    CMD_Set_Device_Data setController(this->m_dwPK_Device,
-                                                      4,
-                                                      existingSensor->m_dwPK_Device,
-                                                      chanaddress.toStdString(),
-                                                      DEVICEDATA_PortChannel_Number_CONST
-                                                      );
-                    if(SendCommand(setController)){
-                        qDebug() << "Set port / channel";
-                    }
-
-                    CMD_Set_Device_Data setName(m_dwPK_Device, 4, existingSensor->m_dwPK_Device, hueMotionSensors.at(n)->name().toStdString(), DEVICEDATA_Name_CONST);
-                    if(SendCommand(setName)){
-                        qDebug()<<"Set Device Name";
-                    }
-                    added.append(existingSensor->m_dwPK_Device);
-                }
-                else{
-                    qDebug() << hueMotionSensors.at(n)->linuxmceId();
-                }
-                // qDebug() << "There are no more bulbs in the linuxmce system, but the controller has more." <<hueBulbs.at(n)->lightName << "is being added them now. ";
-            }
 
             if(hueMotionSensors.at(n)->linuxmceId()==0){
                 qDebug() << " sensor Not found in system, need to add "<< hueMotionSensors.at(n)->name();
@@ -1196,7 +1218,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
     QByteArray rep = rt->readAll();
 
 
-    QJsonObject obj =QJsonDocument::fromJson(rep).object();  
+    QJsonObject obj =QJsonDocument::fromJson(rep).object();
     QVariantMap p = obj.toVariantMap();
 
     if(p.isEmpty())
@@ -1251,7 +1273,9 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
             DeviceData_Impl *existingBulb = m_pData->m_vectDeviceData_Impl_Children.at(l);
             //qDebug() << "Existing light UnitNo :: " << existingBulb->mapParameters_Find(DEVICEDATA_UnitNo_CONST).c_str();
 
-            if(existingBulb->mapParameters_Find(DEVICEDATA_UnitNo_CONST).c_str() == QString::number(b->id())){
+             QStringList p = QString::fromStdString(existingBulb->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST)).split(":");
+
+            if(p.last().toInt() == b->id()){
                 qDebug() << "Matched existing light" << b->displayName();
                 b->setLinuxmceId(existingBulb->m_dwPK_Device);
                 b->setRoom(existingBulb->m_dwPK_Room);
@@ -1276,9 +1300,9 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
             qDebug() << Q_FUNC_INFO << sensor["name"];
             HueMotionSensor * s = motionSensorHash.value(matchId);
 
-            if(s==0){
+            if(s==0  ){
                 s = new HueMotionSensor( hueControllers.at(index));
-                s->setLinuxmceId(0);
+
 
                 s->setHueId(i.key().toInt());
                 motionSensorHash.insert(matchId, s);
@@ -1287,10 +1311,12 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
                     DeviceData_Impl *existingSensors= m_pData->m_vectDeviceData_Impl_Children.at(l);
 
                     if(existingSensors->m_dwPK_DeviceTemplate == DEVICETEMPLATE_SML001_CONST){
-                        qDebug() << "Existing Top level Sensor UnitNo :: " << existingSensors->mapParameters_Find(DEVICEDATA_UnitNo_CONST).c_str();
 
+                         QStringList p = QString::fromStdString(existingSensors->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST)).split(":");
+                         int unit = p.last().toInt();
+                         qDebug() << "Existing Top level Sensor UnitNo :: " << unit << " for " << s->hueId();
 
-                        if(existingSensors->mapParameters_Find(DEVICEDATA_UnitNo_CONST).c_str() == QString::number(s->hueId()).toStdString()){
+                        if(unit == s->hueId()) {
                             qDebug() << "Matched existing sensor" << s->name();
                             s->setLinuxmceId(existingSensors->m_dwPK_Device);
 
@@ -1315,10 +1341,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
 
             if(sensorType == "ZLLTemperature"){
                 s->setTempSensor(i.key().toInt(), sensor);
-
             } else if(sensorType == "ZLLPresence"){
-                //top level part of sensor
-
                 s->setHueId(i.key().toInt());
                 s->setName(sensor["name"].toString());
                 s->setModelId(sensor["modelid"].toString());
@@ -1328,8 +1351,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
                 s->setPresenceDetected(sensor.value("state").toMap().value("presence").toBool());
                 s->setBatteryLevel(sensor.value("config").toMap().value("battery").toInt());
                 s->setUniqueId(sensor["uniqueid"].toString());
-
-
+                s->setLinuxmceId(0);
             } else if (sensorType == "ZLLLightLevel"){
                 s->setLightSensor(i.key().toInt(), sensor);
             }
@@ -1555,9 +1577,9 @@ void HueController::handleMotionSensorEvent(Message *m)
 void HueController::handleLightMessage(DCE::PreformedCommand m)
 {
     string resp;
-   if(SendCommand(m, &resp)){
-       qDebug() << Q_FUNC_INFO << resp.c_str();
-   }
+    if(SendCommand(m, &resp)){
+        qDebug() << Q_FUNC_INFO << resp.c_str();
+    }
 
 }
 

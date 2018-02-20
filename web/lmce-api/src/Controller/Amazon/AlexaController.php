@@ -105,8 +105,7 @@ class AlexaController extends AppController
 	
 	function brightnessCommand(){
 		//$this->request->allowMethod(['POST', 'post']);
-		$DeviceList = TableRegistry::get('Devices');
-			
+		$DeviceList = TableRegistry::get('Devices');			
 			
 		$deviceTarget = $this->request->params['?']['device'];
 		$mode = $this->request->params['?']['mode'];
@@ -145,7 +144,7 @@ class AlexaController extends AppController
 		'error'=>$error
 		);	
 			
-		$device = $DeviceList->get($deviceTarget, ['contain'=>['DeviceTemplate', 'Device_DeviceData'] ] );
+		$device = $DeviceList->get($deviceTarget, ['contain'=>['DevdiscovericeTemplate', 'Device_DeviceData'] ] );
 		
 			if($device->device_template->FK_DeviceCategory==73){
 			
@@ -157,32 +156,38 @@ class AlexaController extends AppController
 		$this->set(compact('reply'));
 		$this->set('_serialize', 'reply');	
 	}
-	
-	public function report(){
-		$deviceTarget = $this->request->params['?']['device'];
-		$error = "none";
-		
+        
+        public function colorCommand(){
+              $this->request->allowMethod('POST');
+              $requestData = $this->request->data("body");
+              $rep = "error";
+              
+              if(isset($requestData["colorTemp"]) ){
+                  $rep = $this->DceCommandExecutor->sendColorTempCommand($requestData);  
+              } else if(isset($requestData["color"]) ){
+                 $rep = $this->DceCommandExecutor->sendColorCommand($requestData);  
+              }            	
 		$now = Time::now();
-		$now->format('e');
-		
-		$reply= array(
+		$now->format('e');	  
+		$reply = array(
 		'status' => "OK",
 		'timeSent'=>$now,
-		'error'=>$error
-		);	
-		if(isset($deviceTarget)){
-				$DeviceList = TableRegistry::get('Devices');		
-			
-			$device = $DeviceList->get($deviceTarget, ['contain'=>['DeviceTemplate', 'Device_DeviceData'] ] );
-			if($device->device_template->FK_DeviceCategory==73){
-			
-				$lightState = explode("/", $device->State);				
-				$reply['bri'] = $lightState[1];
-				$reply['lightState'] = $lightState[0];
-			}
-		} else {
-			$error = "invalid device";
-		}
+		'error'=>"none",
+                'colordata'=>$rep
+		);
+            $this->set(compact('reply'));
+	    $this->set('_serialize', 'reply');
+        }
+	
+	public function report(){
+                $deviceTarget = $this->request->params['?']['device'];
+                $DeviceList = TableRegistry::get('Devices');
+		$reply = $DeviceList->handleDeviceReport($deviceTarget);
+               
+		$now = Time::now();
+		$now->format('e');		
+		
+		$reply['timeSent'] = $now;
 		
 		$this->set(compact('reply'));
 		$this->set('_serialize', 'reply');	
@@ -215,10 +220,7 @@ class AlexaController extends AppController
 	}
 	
 	public function findMovieByName(){
-		$error = "none";		
-		$now = Time::now();
-		$now->format('e');
-		$status ="";
+		
 		
 		$movieName = $this->request->getQuery('name');
 		$roomRequest = $this->request->getQuery('room');
@@ -227,11 +229,7 @@ class AlexaController extends AppController
 		$Linuxmcefile = TableRegistry::get('Linuxmcefile');
 		$movieReply = $Linuxmcefile->getVideoByName($movieName);
 		
-		$reply= array(
-		'status' => $status,
-		'timeSent'=>$now,
-		'error'=>$error
-		);	
+		$reply=  $this->buildResponseTemplate();
 		
 		$reply['movie']=$movieReply;
 		$reply['room'] = array(
@@ -242,8 +240,8 @@ class AlexaController extends AppController
 		if($reply['movie']['count']==0){
 			$reply['status'] = 'error';
 			$reply["error"] = 'movie not found';
-		} 
-		else if ($roomRequest==-1) 
+		}
+		else if ($room==-1) 
 		{			
 			$reply['status'] = 'error';
 			$reply['error'] = 'Incorrect room';
@@ -252,23 +250,13 @@ class AlexaController extends AppController
 			$reply['status'] = 'OK';
 		}
 		
-		
-		
-		
 		$this->set(compact('reply'));
 		$this->set('_serialize', 'reply');
 	}
 	
-	public function findRoomByName($roomName){
-		$error = "none";		
-		$now = Time::now();
-		$now->format('e');
-		$status ="";		
-		
+	public function findRoomByName($roomName){		
 		$EA = TableRegistry::get('Entertainarea');		
-	
-		$targetEa = $EA->getEntertainAreaFromName($roomName);
-		
+		$targetEa = $EA->getEntertainAreaFromName($roomName);		
 		return $targetEa;
 	}
 	
@@ -277,5 +265,52 @@ class AlexaController extends AppController
 		$status = $this->DceCommandExecutor->playMediaInRoom($room, $media);
 		return $status;
 	}
+	
+	public function stopMediaInRoom(){
+		$reply = $this->buildResponseTemplate();
+		$room = $this->request->getQuery('room');
+		$targetEa = $this->findRoomByName($room);
+		if($targetEa==-1){
+			$reply['status'] = 'error';
+			$reply['error'] = 'Incorrect room';
+		} else {			
+			$reply['status'] = $this->DceCommandExecutor->stopMediaInRoom($targetEa);
+			
+		}
+		
+		$this->set(compact('reply'));
+		$this->set('_serialize', 'reply');
+	}
+	
+		public function pauseMediaInRoom(){
+		
+		$room = $this->request->getQuery('room');
+		$targetEa = $EA->getEntertainAreaFromName($room);
+		if($targetEa==-1){
+			$reply['status'] = 'error';
+			$reply['error'] = 'Incorrect room';
+		} else {			
+			//$status = $this->DceCommandExecutor->pauseMediaInRoom($targetEa);
+		}
+		
+		$this->set(compact('reply'));
+		$this->set('_serialize', 'reply');
+	}
+	
+	
+	
+	function buildResponseTemplate(){
+		$now = Time::now();
+		$now->format('e');
+		
+		$replyTemplate = array(
+			'error' => 'none',
+			'status' => 'OK',
+			'timeSent' => $now
+		);
+		
+		return $replyTemplate;
+	}
+	
 	
 }
