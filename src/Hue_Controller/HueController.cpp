@@ -378,6 +378,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
     if(targetIpAddress.isEmpty() || ID == -1){
         //        qDebug() << "Invalid command for ID "<<ID << " linuxmce id " << device;
         //        qDebug() << "target ip"<<targetIpAddress;
+        qDebug() << bulb->linuxmceId();
         sCMD_Result="Failed Cannot locate bulb";
         return;
     }
@@ -556,12 +557,12 @@ void HueController::CreateChildren()
 
             if(deviceID < 1 || linuxmceID < 1){
                 qDebug() << "Child device "<< linuxmceID << " is misconfigured. please reload configuration.";
-            }
-            else{
-
+            }  else {
 
                 for (int n = 0; n < hueBulbs.size(); n++){
-                    if(hueBulbs.at(n)->getController()->getIpAddress() == p.at(0)&& hueBulbs.at(n)->id()==deviceID ){
+                    if( hueBulbs.at(n)->getController()->getIpAddress() == p.at(0)
+                     && hueBulbs.at(n)->id()==deviceID
+                     && pDeviceData_Impl_Child->m_dwPK_DeviceTemplate != DEVICETEMPLATE_SML001_CONST){
 
                         QVariantMap mapping =QJsonDocument::fromJson( QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_Mapping_CONST).c_str()).toLocal8Bit()).object().toVariantMap();
 
@@ -571,14 +572,16 @@ void HueController::CreateChildren()
                         hueBulbs.at(n)->setPowerOn(false);
                         hueBulbs.at(n)->setDeviceTemplate(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate );
                         qDebug() << "Linked existing light with linuxmce db. " << hueBulbs.at(n)->displayName();
+
                     }
                 }
 
                 for (int n = 0; n < hueMotionSensors.size(); n++){
+
                     if( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == DEVICETEMPLATE_SML001_CONST
                             && hueMotionSensors.at(n)->controller()->getIpAddress() == p.at(0)
                             && hueMotionSensors.at(n)->hueId()== deviceID){
-
+                        qDebug() << hueMotionSensors.at(n)->name();
 
                         qDebug() << "Linked existing sensor with linuxmce db. " << hueMotionSensors.at(n)->name();
                         hueMotionSensors.at(n)->setLinuxmceId(linuxmceID);
