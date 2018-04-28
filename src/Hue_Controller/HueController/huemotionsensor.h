@@ -13,7 +13,9 @@ class Message;
 class ZLLTemp: public QObject{
     Q_OBJECT
 public:
-    ZLLTemp(){}
+    ZLLTemp():
+        m_temp(-1), m_id(-1), m_linuxmceId(-1)
+    {}
     ~ZLLTemp(){}
 
     int temp() const;
