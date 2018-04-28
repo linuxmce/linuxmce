@@ -581,7 +581,6 @@ void HueController::CreateChildren()
                     if( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == DEVICETEMPLATE_SML001_CONST
                             && hueMotionSensors.at(n)->controller()->getIpAddress() == p.at(0)
                             && hueMotionSensors.at(n)->hueId()== deviceID){
-                        qDebug() << hueMotionSensors.at(n)->name();
 
                         qDebug() << "Linked existing sensor with linuxmce db. " << hueMotionSensors.at(n)->name();
                         hueMotionSensors.at(n)->setLinuxmceId(linuxmceID);
@@ -783,8 +782,8 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
     QList<int>added;
 
     for(int n=0; n < hueBulbs.size(); n++ ){
-        qDebug()<< "Current Light: \t" << hueBulbs.at(n)->displayName();
-        qDebug()<< "Current Light LMCE id \t" << hueBulbs.at(n)->linuxmceId();
+       // qDebug()<< "Current Light: \t" << hueBulbs.at(n)->displayName() <<" Current Light LMCE id \t" << hueBulbs.at(n)->linuxmceId();
+
         if(hueBulbs.at(n)->linuxmceId()==0){
             qDebug() <<  hueBulbs.at(n)->displayName() << " has no linuxmce id. it should be added.";
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s has no LinuxMCE Device number, it should be added.", hueBulbs.at(n)->displayName().toStdString().c_str());
@@ -797,11 +796,11 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
 
                 if (existingBulb->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST)=="" && added.indexOf(existingBulb->m_dwPK_Device)==-1 ){
 
-                    qDebug () << "Setting ID for existing light with unknown configuration with " << hueBulbs.at(n)->displayName();
+//                    qDebug () << "Setting ID for existing light with unknown configuration with " << hueBulbs.at(n)->displayName();
                     CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4, existingBulb->m_dwPK_Device,StringUtils::itos(hueBulbs.at(n)->id()),DEVICEDATA_UnitNo_CONST);
                     string pResonseA = "";
                     if(SendCommand(setUnit, &pResonseA)){
-                        qDebug() << "Set internal id";
+                   //     qDebug() << "Set internal id";
                     }
                     QString chanaddress = hueBulbs.at(n)->getController()->getIpAddress()+":"+QString::number(hueBulbs.at(n)->id());
                     qDebug()<< chanaddress;
@@ -919,6 +918,17 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
         qDebug()<< "Current Sensor: \t" << hueMotionSensors.at(n)->name();
         qDebug()<< "Current Sensor LMCE id \t" << hueMotionSensors.at(n)->linuxmceId();
         if(hueMotionSensors.at(n)->linuxmceId()==0){
+
+             QString matchId= hueMotionSensors.at(n)->uniqueId().mid(0,20);
+
+             HueMotionSensor * sense = motionSensorHash.value(matchId);
+            if(sense!=NULL){
+                qDebug() << " sensor exists in db already but failed to set linuxmce id";
+                qDebug() << sense->type();
+              return;
+            }
+
+
             qDebug() <<  hueMotionSensors.at(n)->name() << " has no linuxmce id. it should be added.";
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s has no LinuxMCE Device number, it should be added.", hueMotionSensors.at(n)->name().toStdString().c_str());
 
@@ -1299,27 +1309,31 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
 
         if(sensor["modelid"].toString()== "PHDL00"){
             //daylight sensor
-        } else if ( sensor["modelid"]=="SML001" ) {
-            qDebug() << Q_FUNC_INFO << sensor["name"];
+        } else if ( sensor["modelid"]=="SML001" && sensor["type"]=="ZLLPresence" ) {
+            qDebug() << Q_FUNC_INFO << "Checking for sensor ::" << sensor["name"];
             HueMotionSensor * s = motionSensorHash.value(matchId);
 
-            if(s==0  ){
+            if(s==NULL ){
                 s = new HueMotionSensor( hueControllers.at(index));
+                s->setName(sensor["name"].toString());
+                qDebug() << " Sensor not set " << s->name();
 
-
-                s->setHueId(i.key().toInt());
+                s->setHueId( i.key().toInt() );
                 motionSensorHash.insert(matchId, s);
 
                 for( int l=0; l < (int)m_pData->m_vectDeviceData_Impl_Children.size(); l++ ){
                     DeviceData_Impl *existingSensors= m_pData->m_vectDeviceData_Impl_Children.at(l);
 
+
                     if(existingSensors->m_dwPK_DeviceTemplate == DEVICETEMPLATE_SML001_CONST){
+
 
                          QStringList p = QString::fromStdString(existingSensors->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST)).split(":");
                          int unit = p.last().toInt();
-                         qDebug() << "Existing Top level Sensor UnitNo :: " << unit << " for " << s->hueId();
+                            qDebug() << "Existing Top level Sensor UnitNo device data :: " << unit << " for " << s->name() << "::"<< s->hueId();
 
                         if(unit == s->hueId()) {
+                            s->setName("Multi-Sensor");
                             qDebug() << "Matched existing sensor" << s->name();
                             s->setLinuxmceId(existingSensors->m_dwPK_Device);
 
@@ -1333,8 +1347,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
                             if(lsensor){
                                 s->lightsensor()->setLinuxmceId(lsensor->m_dwPK_Device);
                                 qDebug() << "Matched existing light sensor" << s->name();
-                            }
-
+                            }                        
                         }
                     }
 
@@ -1573,7 +1586,7 @@ void HueController::handleLightEvent(int whichEvent)
 }
 
 void HueController::handleMotionSensorEvent(Message *m)
-{    
+{   qDebug() << Q_FUNC_INFO;
     this->m_pEvent->SendMessage(m);
 }
 

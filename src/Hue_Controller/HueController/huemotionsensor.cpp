@@ -271,7 +271,7 @@ void HueMotionSensor::initValues()
                 DCE::MESSAGETYPE_EVENT,
                 EVENT_Temperature_Changed_CONST,
                 1,
-                EVENTPARAMETER_Value_CONST,
+                EVENTPARAMETER_Value_CONST,               
                 StringUtils::itos(tempSensor.temp()).c_str() );
 
     emit notifyEvent(m);
