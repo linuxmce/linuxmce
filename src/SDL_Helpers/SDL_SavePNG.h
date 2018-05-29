@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include "SDL.h"
+#include <zlib.h>
 
 #include <string>
 using namespace std;
