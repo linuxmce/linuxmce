@@ -28,6 +28,7 @@ using namespace std;
 #include "../VIPShared/MenuData.h"
 #include "../VIPShared/MenuItemInfo.h"
 #include "../VIPShared/PhoneConfig.h"
+#include <zlib.h>
 //-----------------------------------------------------------------------------------------------------
 class BDCommandProcessor;
 class DataGridRenderer_Bluetooth;

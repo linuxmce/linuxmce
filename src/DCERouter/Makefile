@@ -1,7 +1,7 @@
 SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 
 ROOT = ..
-CXXFLAGS += -Wall -ggdb3 -DxAUDIDEMO -fmessage-length=0
+CXXFLAGS += -Wall -ggdb3 -DxAUDIDEMO -fmessage-length=0 -std=c++11
 CPPFLAGS += -I$(ROOT)/ -I$(ROOT)/DCE -D_REENTRANT -D_GNU_SOURCE $(SNR_CPPFLAGS) -DUSE_LZO_DATAGRID -I/usr/include/libxml2/
 LDFLAGS += -L$(ROOT)/lib -lxml2
 
@@ -73,10 +73,10 @@ install:
 	cp LessDCERouter.sh $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/pluto/bin
 	cp DCERouter $(DESTDIR)/usr/pluto/bin
-	cp Orbiter_Win32.dat $(DESTDIR)/usr/pluto/bin || :
-	cp Orbiter_CeNet4_XScale.dat $(DESTDIR)/usr/pluto/bin || :
-	cp Symbian Series 60 mobile.vmc $(DESTDIR)/usr/pluto/bin || :
-	cp Windows Mobile Smartphone.vmc $(DESTDIR)/usr/pluto/bin || :
-	cp Orbiter_CeNet4_x86.dat $(DESTDIR)/usr/pluto/bin || :
+	cp Orbiter_Win32.dat $(DESTDIR)/usr/pluto/bin || touch $(DESTDIR)/usr/pluto/bin/Orbiter_Win32.dat
+	cp Orbiter_CeNet4_XScale.dat $(DESTDIR)/usr/pluto/bin || touch $(DESTDIR)/usr/pluto/bin/Orbiter_Ce_Net4_XScale.dat
+	cp Symbian Series 60 mobile.vmc $(DESTDIR)/usr/pluto/bin || touch "$(DESTDIR)/usr/pluto/bin/Symbian Series 60 mobile.vmc"
+	cp Windows Mobile Smartphone.vmc $(DESTDIR)/usr/pluto/bin || touch "$(DESTDIR)/usr/pluto/bin/Windows Mobile Smartphone.vmc"
+	cp Orbiter_CeNet4_x86.dat $(DESTDIR)/usr/pluto/bin || touch $(DESTDIR)/usr/pluto/bin/Orbiter_CeNet4_x86.dat
 	cp discovery.py $(DESTDIR)/usr/pluto/bin
-	cp startup-script.sh $(DESTDIR)/usr/pluto/bin
+	cp startup-script.sh $(DESTDIR)/usr/pluto/bin || touch $(DESTDIR)/usr/pluto/bin/startup-script.sh

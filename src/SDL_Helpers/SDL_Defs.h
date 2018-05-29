@@ -17,7 +17,7 @@
 #define SDL_DEFS_H
 
 #include <SDL.h>
-
+#include <zlib.h>
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	const Uint32 rmask = 0xff000000;
 	const Uint32 gmask = 0x00ff0000;
