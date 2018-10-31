@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QJsonObject>
+#include <QStringList>
 
 class FilenameParser : public QObject
 {
