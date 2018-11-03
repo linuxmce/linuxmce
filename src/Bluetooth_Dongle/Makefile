@@ -9,7 +9,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lpng16 -lz
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lpng12 -lz
 
 MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
 MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
