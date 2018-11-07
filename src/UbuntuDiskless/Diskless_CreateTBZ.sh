@@ -28,7 +28,7 @@ HOST_RELEASE=$(lsb_release -c -s)
 HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
 
 #Assign latest installed kernel and not running kernel
-HOST_KVER=$(find /lib/modules/* -maxdepth 0 -type d |sort -r |head -1)
+HOST_KVER=$(find /lib/modules/* -maxdepth 0 -type d |sort -rV |head -1)
 
 #host file locations
 ARCHIVE_DIR='/usr/pluto/install'
