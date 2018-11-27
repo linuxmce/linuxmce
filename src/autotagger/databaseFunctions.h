@@ -12,7 +12,9 @@
 #ifndef DATABASEFUNCTIONS_H
 #define DATABASEFUNCTIONS_H
 #include <autotagger.h>
-#include <QSqlDatabase>
+#include <mysql/mysql.h>
+#include <QMYSQLDriver>
+#include <qsql_mysql.h>
 
 
 class databaseFunctions: public QObject
