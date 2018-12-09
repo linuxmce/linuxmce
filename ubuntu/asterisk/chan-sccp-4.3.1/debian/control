@@ -1,0 +1,26 @@
+Source: chan-sccp
+Priority: extra
+Maintainer: Diederik de Groot <ddegroot@users.sf.net>
+Build-Depends: asterisk, asterisk-dev, dh-make, debhelper, binutils, coreutils, libacl1, libasound2, libc6, libattr1, libc6, libc6-dev, libncurses5, libselinux1, linux-libc-dev, zlib1g
+Standards-Version: 4.3.0
+Section: libs
+Homepage: https://github.com/chan-sccp/chan-sccp/
+
+Package: chan-sccp
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Replaces: chan-sccp-b
+Description: chan-sccp is a branch from the original chan-sccp
+ implementation of Skinny Client Control Protocol (SCCP) for the Asterisk
+ soft-PBX. It is mainly focused on extending the functionality provided by
+ chan_skinny. 
+
+Package: chan-sccp-dbg
+Priority: extra
+Section: libdevel
+Architecture: any
+Depends: chan-sccp (=${binary:Version})
+Replaces: chan-sccp-b
+Description: chan-sccp debug symbols
+
