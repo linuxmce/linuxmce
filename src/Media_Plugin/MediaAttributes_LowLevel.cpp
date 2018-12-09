@@ -795,7 +795,7 @@ int MediaAttributes_LowLevel::Parse_Misc_Media_ID(int PK_MediaType,listMediaAttr
 
 				if( PK_AttributeType==ATTRIBUTETYPE_Album_CONST )
 				{
-					mapAlbum[ make_pair<int,int> (Track,Section) ] = sName;
+					mapAlbum[ make_pair (Track,Section) ] = sName;
 					continue;
 				}
 
@@ -807,7 +807,7 @@ int MediaAttributes_LowLevel::Parse_Misc_Media_ID(int PK_MediaType,listMediaAttr
 				}
 
 				if( PK_AttributeType==ATTRIBUTETYPE_Performer_CONST )
-					mapPerformer[ make_pair<int,int> (Track,Section) ] = pRow_Attribute->PK_Attribute_get();
+					mapPerformer[ make_pair (Track,Section) ] = pRow_Attribute->PK_Attribute_get();
 
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MediaAttributes_LowLevel::Parse_Misc_Media_ID added attribute %p %d %s",
 					pRow_Attribute, (pRow_Attribute ? pRow_Attribute->PK_Attribute_get() : 0), sName.c_str());

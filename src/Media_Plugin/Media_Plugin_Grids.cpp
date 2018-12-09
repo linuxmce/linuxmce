@@ -146,7 +146,7 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 	cout << "XXX After MediaListGrid Initialize" << endl;
 	bool bIdentifiesFile = true;
 	if( PK_AttributeType_Sort>0 )
-		if( m_mapMediaType_AttributeType_Identifier.find( make_pair<int,int> ( PK_MediaType,PK_AttributeType_Sort ) )==m_mapMediaType_AttributeType_Identifier.end() )
+		if( m_mapMediaType_AttributeType_Identifier.find( make_pair ( PK_MediaType,PK_AttributeType_Sort ) )==m_mapMediaType_AttributeType_Identifier.end() )
 			bIdentifiesFile = false;  // This combination doesn't identify an individual file to play (like a song), it identifies a group of attributes (like an album or performer)
 
 	if( PK_MediaType==MEDIATYPE_misc_Playlist_CONST )
@@ -1119,7 +1119,7 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 				pDataGrid->SetData(0, currentPos++,new DataGridCell(sCell,sValue));
 				if( (int)sTitle==pMediaStream->m_iDequeMediaTitle_Pos && (int)sSection==pMediaStream->m_iDequeMediaSection_Pos )
 					*sValue_To_Assign=sValue;
-				mapSections[ make_pair<int,int> (sSection,sTitle) ] = true;
+				mapSections[ make_pair (sSection,sTitle) ] = true;
 			}
 		}
 	}
@@ -1153,7 +1153,7 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 			}
 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Returning data: (%d) -> %s section %d", itFiles - pMediaStream->m_dequeMediaFile.begin(), ((*itFiles)->m_sFilename).c_str(),iSection);
-			mapSections[ make_pair<int,int> (iSection,0) ] = true;
+			mapSections[ make_pair (iSection,0) ] = true;
 		}
 		*sValue_To_Assign=StringUtils::itos(pMediaStream->m_iDequeMediaFile_Pos);
 	}
@@ -1166,7 +1166,7 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 	{
 		for(map< pair<int,int>,string >::iterator it = pMediaStream->m_mapSections.begin(); it!=pMediaStream->m_mapSections.end(); ++it)
 		{
-			itSections = mapSections.find( make_pair<int,int> ( it->first.first, it->first.second ) );
+			itSections = mapSections.find( make_pair ( it->first.first, it->first.second ) );
 			if( itSections==mapSections.end() )
 			{
 				if( pMediaStream->m_bContainsTitlesOrSections ) // There's a title

@@ -219,11 +219,7 @@ g_PlutoProfiler->Stop("send command");
 						}
 						else
 						{
-#ifdef WIN32
 							m_pOrbiter->Renderer()->BackgroundImageLoad(pPath, this, m_pOrbiter->m_dwIDataGridRequestCounter, make_pair (GridCurRow, GridCurCol), pCell, pDataGridTable->CovertColRowType(it->first), !bCache);
-#else
-							m_pOrbiter->Renderer()->BackgroundImageLoad(pPath, this, m_pOrbiter->m_dwIDataGridRequestCounter, make_pair<int, int>(GridCurRow, GridCurCol), pCell, pDataGridTable->CovertColRowType(it->first), !bCache);
-#endif // WIN32
 						}
 					}
 				}
@@ -299,11 +295,7 @@ DataGridTable *DesignObj_DataGrid::DataGridTable_Get(int CurRow,int CurCol)
 
 	if( m_CachedCurRow!=CurRow || m_CachedCurCol!=CurCol )
 	{
-#ifdef WIN32
 		map< pair<int, int>, DataGridTable *>::iterator it = m_mapDataGridTable_Cache.find(make_pair (CurRow, CurCol));
-#else
-		map< pair<int,int>, DataGridTable *>::iterator it=m_mapDataGridTable_Cache.find( make_pair<int,int> (CurRow,CurCol) );
-#endif
 		if( it==m_mapDataGridTable_Cache.end() )
 			return NULL;
 		else
@@ -315,11 +307,7 @@ DataGridTable *DesignObj_DataGrid::DataGridTable_Get(int CurRow,int CurCol)
 void DesignObj_DataGrid::DataGridTable_Set(DataGridTable *pDataGridTable,int CurRow,int CurCol)
 {
 	PLUTO_SAFETY_LOCK( vm, m_pOrbiter->m_DatagridMutex );
-#ifdef WIN32
 	map< pair<int, int>, DataGridTable *>::iterator it = m_mapDataGridTable_Cache.find(make_pair (CurRow, CurCol));
-#else
-	map< pair<int,int>, DataGridTable *>::iterator it=m_mapDataGridTable_Cache.find( make_pair<int,int> (CurRow,CurCol) );
-#endif
 	if( it!=m_mapDataGridTable_Cache.end() )
 	{
 		if( it->second && it->second!=pDataGridTable ) // The grids have been changed
@@ -327,11 +315,7 @@ void DesignObj_DataGrid::DataGridTable_Set(DataGridTable *pDataGridTable,int Cur
 		else
 			return; // Nothing to do
 	}
-#ifdef WIN32
 	m_mapDataGridTable_Cache[make_pair (CurRow, CurCol)] = pDataGridTable;
-#else
-	m_mapDataGridTable_Cache[ make_pair<int,int> (CurRow,CurCol) ] = pDataGridTable;
-#endif
 	if( CurRow==m_GridCurRow && CurCol==m_GridCurCol )
 		m_pDataGridTable_Current = pDataGridTable;
 }
@@ -368,41 +352,25 @@ void DesignObj_DataGrid::CacheGrid()
 	{
 		m_PagesCached.first=DIRECTION_Down_CONST;
 		m_PagesCached.second=0;
-#ifdef WIN32
 		m_CurrentLocation = make_pair (m_GridCurRow, m_GridCurCol);
-#else
-		m_CurrentLocation = make_pair<int,int> (m_GridCurRow,m_GridCurCol);
-#endif
 	}
 	else if( m_PagesCached.first==DIRECTION_Down_CONST && m_PagesCached.second>=m_mapNumberOfPagesToCache[DIRECTION_Down_CONST] )
 	{
 		m_PagesCached.first=DIRECTION_Right_CONST;
 		m_PagesCached.second=0;
-#ifdef WIN32
 		m_CurrentLocation = make_pair (m_GridCurRow, m_GridCurCol);
-#else
-		m_CurrentLocation = make_pair<int,int> (m_GridCurRow,m_GridCurCol);
-#endif
 	}
 	else if( m_PagesCached.first==DIRECTION_Right_CONST && m_PagesCached.second>=m_mapNumberOfPagesToCache[DIRECTION_Right_CONST] )
 	{
 		m_PagesCached.first=DIRECTION_Up_CONST;
 		m_PagesCached.second=0;
-#ifdef WIN32
 		m_CurrentLocation = make_pair (m_GridCurRow, m_GridCurCol);
-#else
-		m_CurrentLocation = make_pair<int,int> (m_GridCurRow,m_GridCurCol);
-#endif
 	}
 	else if( m_PagesCached.first==DIRECTION_Up_CONST && m_PagesCached.second>=m_mapNumberOfPagesToCache[DIRECTION_Up_CONST] )
 	{
 		m_PagesCached.first=DIRECTION_Left_CONST;
 		m_PagesCached.second=0;
-#ifdef WIN32
 		m_CurrentLocation = make_pair (m_GridCurRow, m_GridCurCol);
-#else
-		m_CurrentLocation = make_pair<int,int> (m_GridCurRow,m_GridCurCol);
-#endif
 	}
 	else if( m_PagesCached.first==DIRECTION_Left_CONST && m_PagesCached.second>=m_mapNumberOfPagesToCache[DIRECTION_Left_CONST] )
 		return;  // We've finished caching in all directions

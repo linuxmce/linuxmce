@@ -115,11 +115,7 @@ void IRReceiverBase::GetConfig(DeviceData_Impl *pData)
 							m_mapKeyMapping[StringUtils::ToUpper(sToken)] = pMapKeysToMessages;
 						}
 
-#ifdef WIN32
 						(*pMapKeysToMessages)[make_pair (cRemoteLayout, cScreenType)] = pMessage;
-#else
-						(*pMapKeysToMessages)[ make_pair<char,char> (cRemoteLayout,cScreenType) ] = pMessage;
-#endif
 					}
 					if( posSlash<=pos )
 						break; // We already parsed the last one
@@ -180,35 +176,19 @@ void IRReceiverBase::ReceivedCode(int PK_Device_Remote,const char *pCode,const c
 	{
 		MapKeysToMessages *pMapKeysToMessages = it->second;
 		MapKeysToMessages::iterator itMessage;
-		
-#ifdef WIN32
+
 		itMessage = pMapKeysToMessages->find(make_pair (cRemoteLayout, m_cCurrentScreen));
-#else
-		itMessage = pMapKeysToMessages->find(make_pair<char,char> (cRemoteLayout,m_cCurrentScreen) );
-#endif
 		if (itMessage == pMapKeysToMessages->end())
 		{
-#ifdef WIN32
 			itMessage = pMapKeysToMessages->find(make_pair (cRemoteLayout, 0));
-#else
-			itMessage = pMapKeysToMessages->find(make_pair<char, char>(cRemoteLayout, 0));
-#endif
 		}
 		if (itMessage == pMapKeysToMessages->end())
 		{
-#ifdef WIN32
 			itMessage = pMapKeysToMessages->find(make_pair (0, m_cCurrentScreen));
-#else
-			itMessage = pMapKeysToMessages->find(make_pair<char, char>(0, m_cCurrentScreen));
-#endif
 		}
 		if (itMessage == pMapKeysToMessages->end())
 		{
-#ifdef WIN32
 			itMessage = pMapKeysToMessages->find(make_pair (0, 0));
-#else
-			itMessage = pMapKeysToMessages->find(make_pair<char, char>(0, 0));
-#endif
 		}
 
 		if( itMessage!=pMapKeysToMessages->end() )

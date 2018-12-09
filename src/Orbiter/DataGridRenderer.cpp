@@ -120,11 +120,7 @@ DataGridRenderer::DataGridRenderer(DesignObj_Orbiter *pOwner): ObjectRenderer(pO
 				if( bContainsCells && DGRow!=pDataGridTable->m_iUpRow && DGRow!=pDataGridTable->m_iDownRow)
 				{
 					map< pair<int,int>, DesignObj_Orbiter *>::iterator it = 
-#ifdef WIN32
 						m_pObj_Owner_DataGrid->m_mapChildDgObjects.find(make_pair (j, i));
-#else
-						m_pObj_Owner_DataGrid->m_mapChildDgObjects.find(make_pair<int,int> (j, i));
-#endif
 
 					if(	it!=m_pObj_Owner_DataGrid->m_mapChildDgObjects.end())
 					{
@@ -189,11 +185,7 @@ DataGridRenderer::DataGridRenderer(DesignObj_Orbiter *pOwner): ObjectRenderer(pO
 		return;
 	}
 
-#ifdef WIN32
 	map< pair<int, int>, DesignObj_Orbiter *>::iterator it = m_pObj_Owner_DataGrid->m_mapChildDgObjects.find(make_pair (Column, Row));
-#else
-	map< pair<int,int>, DesignObj_Orbiter *>::iterator it=m_pObj_Owner_DataGrid->m_mapChildDgObjects.find( make_pair<int,int> (Column,Row) );
-#endif
 	if(	it!=m_pObj_Owner_DataGrid->m_mapChildDgObjects.end() )
 	{
 		DesignObj_Orbiter *pObj = it->second;

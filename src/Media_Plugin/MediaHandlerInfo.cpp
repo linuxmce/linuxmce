@@ -126,7 +126,7 @@ MediaHandlerInfo::MediaHandlerInfo( class MediaHandlerBase *pMediaHandlerBase, c
             if( !pList_MediaHandlerInfo )
             {
                 pList_MediaHandlerInfo = new List_MediaHandlerInfo( );
-                pEntertainArea->m_mapMediaHandlerInfo_MediaType[make_pair<int,int> (m_PK_MediaType,pMediaDevice->m_iPK_MediaProvider) ] = pList_MediaHandlerInfo;
+                pEntertainArea->m_mapMediaHandlerInfo_MediaType[make_pair (m_PK_MediaType,pMediaDevice->m_iPK_MediaProvider) ] = pList_MediaHandlerInfo;
             }
             pList_MediaHandlerInfo->push_back( this );
 

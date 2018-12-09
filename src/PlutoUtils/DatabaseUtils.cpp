@@ -114,12 +114,7 @@ void DatabaseUtils::GetUnusedPortsOnAllPCs(DBHelper *pDBHelper,vector< pair<int,
 			GetUnusedPortsOnPC(pDBHelper,PK_Device,vectPorts);
 			for (size_t s = 0;s < vectPorts.size();++s)
 			{
-#ifdef WIN32
-				// this is c++11
 				vectAllPorts.push_back(make_pair (PK_Device, vectPorts[s]));
-#else
-				vectAllPorts.push_back(make_pair<int, string>(PK_Device, vectPorts[s]));
-#endif // WIN32
 			}
 		}
 	}
@@ -219,11 +214,7 @@ void DatabaseUtils::GetAllDevicesInTree(DBHelper *pDBHelper,int PK_Device,map<in
 		DB_ROW row;
 		if ((result.r = pDBHelper->db_wrapper_query_result(sSQL)) && (row = db_wrapper_fetch_row(result.r)) && row[0])
 		{
-#ifdef WIN32
 			mapDeviceTree[PK_Device] = make_pair (atoi(row[0]), Generation);
-#else
-			mapDeviceTree[PK_Device] = make_pair<int, int>(atoi(row[0]), Generation);
-#endif
 		}
 	}
 	if( bCheckParent )

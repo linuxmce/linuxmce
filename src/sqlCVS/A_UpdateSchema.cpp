@@ -74,7 +74,7 @@ void A_UpdateSchema::ProcessAction(class RA_Request *pRequest,class RA_Processor
 		<< "VALUES (" << m_iSchemaVersion << ",'" << StringUtils::SQLEscape(m_sUpdateString) << "');";
 	if( pRepository->m_pDatabase->threaded_mysql_query( sSql.str() )<0 )
 	{
-		cout << "SQL failed: " << sSql << endl;
+		cout << "SQL failed: " << sSql.str() << endl;
 		cerr << "The database is now corrupted, and the schema is out of sync" << endl
 			<< "because the schema update failed!" << endl;
 		throw "Schema update failed";

@@ -1221,7 +1221,7 @@ loop_to_keep_looking_for_objs_to_include:
 							continue;  // Only matters for non-zero locations
 
 						if( m_htGeneratedScreens.find( StringUtils::itos( oco->m_pRow_DesignObj->PK_DesignObj_get() ) + "." + StringUtils::itos( li->iLocation ) )==m_htGeneratedScreens.end() )
-							alNewDesignObjLocationsToGenerate.push_back( make_pair<Row_DesignObj *,int> (oco->m_pRow_DesignObj, li->iLocation) );
+							alNewDesignObjLocationsToGenerate.push_back( make_pair (oco->m_pRow_DesignObj, li->iLocation) );
 					}
 				}
 				if( oco->m_bUsingCache )

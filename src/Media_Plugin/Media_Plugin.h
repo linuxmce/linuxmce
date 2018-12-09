@@ -336,14 +336,14 @@ protected:
 
 			// The first 2 maps will see if the user directly specified a remote control to use for the given remote
 			map< pair<int,pair<int,int> >, class RemoteControlSet *>::iterator it1;
-			pair<int,pair<int,int> > p1 = make_pair< int,pair<int,int> > (
+			pair<int,pair<int,int> > p1 = make_pair (
 				PK_Orbiter,
-				make_pair< int,int > ( iPK_DeviceTemplate, PK_MediaType ) );
+				make_pair ( iPK_DeviceTemplate, PK_MediaType ) );
 			if( (it1=m_mapOrbiter_DeviceTemplate_MediaType_RemoteControl[UIVersion-1].find(p1))!=m_mapOrbiter_DeviceTemplate_MediaType_RemoteControl[UIVersion-1].end() )
 				return it1->second;
 
 			map< pair<int,int>, class RemoteControlSet *>::iterator it2;
-			pair<int,int> p2 = make_pair< int,int > (
+			pair<int,int> p2 = make_pair (
 				PK_Orbiter,
 				PK_MediaType );
 			if( (it2=m_mapOrbiter_MediaType_RemoteControl[UIVersion-1].find(p2))!=m_mapOrbiter_MediaType_RemoteControl[UIVersion-1].end() )
@@ -352,7 +352,7 @@ protected:
 
 		// Next if a remote is specified for this particular type of media device
 		map< pair<int,int>, class RemoteControlSet *>::iterator it3;
-		pair<int,int> p3 = make_pair< int,int > (
+		pair<int,int> p3 = make_pair (
 			iPK_DeviceTemplate,
 			PK_MediaType );
 

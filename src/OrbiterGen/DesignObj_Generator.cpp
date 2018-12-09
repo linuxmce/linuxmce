@@ -2599,7 +2599,7 @@ void DesignObj_Generator::AddDataGridObjects()
 				pDesignObj_Generator->m_bCanBeHidden=pDesignObj_Generator->m_bHideByDefault=true;
 			if( pDesignObj_Generator->m_pRow_DesignObjVariation ) // Be sure it's a valid object
 			{
-				m_mapChildDgObjects[ make_pair<int,int> (iCol,0) ] = pDesignObj_Generator;  // m_mapChildDgObjects is col/row to object
+				m_mapChildDgObjects[ make_pair (iCol,0) ] = pDesignObj_Generator;  // m_mapChildDgObjects is col/row to object
 				// Reduce this grid by the size of the up/down
 				m_alChildDesignObjs.push_back(pDesignObj_Generator);
 			}
@@ -2621,7 +2621,7 @@ void DesignObj_Generator::AddDataGridObjects()
 				pDesignObj_Generator->m_bCanBeHidden=pDesignObj_Generator->m_bHideByDefault=true;
 			if( pDesignObj_Generator->m_pRow_DesignObjVariation ) // Be sure it's a valid object
 			{
-				m_mapChildDgObjects[ make_pair<int,int> (0,iRow) ] = pDesignObj_Generator;  // m_mapChildDgObjects is col/row to object
+				m_mapChildDgObjects[ make_pair (0,iRow) ] = pDesignObj_Generator;  // m_mapChildDgObjects is col/row to object
 				// Reduce this grid by the size of the up/down
 				m_alChildDesignObjs.push_back(pDesignObj_Generator);
 			}
@@ -2640,7 +2640,7 @@ void DesignObj_Generator::AddDataGridObjects()
 				pDesignObj_Generator->m_bCanBeHidden=pDesignObj_Generator->m_bHideByDefault=true;
 				if( pDesignObj_Generator->m_pRow_DesignObjVariation ) // Be sure it's a valid object
 				{
-					m_mapChildDgObjects[ make_pair<int,int> (iCol,iRow) ] = pDesignObj_Generator;  // m_mapChildDgObjects is col/row to object
+					m_mapChildDgObjects[ make_pair (iCol,iRow) ] = pDesignObj_Generator;  // m_mapChildDgObjects is col/row to object
 					// Reduce this grid by the size of the up/down
 					m_alChildDesignObjs.push_back(pDesignObj_Generator);
 				}
