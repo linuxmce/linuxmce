@@ -1708,7 +1708,7 @@ void Orbiter_Plugin::CMD_Orbiter_Registered(string sOnOff,int iPK_Users,string s
 					continue;
 
 				int iRemoteID = atoi(pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
-				pOrbiterFileBrowser_Collection->m_mapRemoteControls[ sSerialNumber ] = make_pair<int,int> (pDeviceData_Router->m_dwPK_Device,iRemoteID);
+				pOrbiterFileBrowser_Collection->m_mapRemoteControls[ sSerialNumber ] = make_pair (pDeviceData_Router->m_dwPK_Device,iRemoteID);
 			}
 		}
 

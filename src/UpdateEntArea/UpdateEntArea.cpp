@@ -194,7 +194,7 @@ void UpdateEntArea::UpdateOrbiterShortcuts()
 					continue; // Shouldn't happen
 
 				if( bAutomatic==false )
-					mapOrbiterShortcuts[ make_pair<bool,char> (false,sCharacter[0]) ] = sMessage;
+					mapOrbiterShortcuts[ make_pair (false,sCharacter[0]) ] = sMessage;
 			}
 		}
 
@@ -203,10 +203,10 @@ void UpdateEntArea::UpdateOrbiterShortcuts()
 		{
 			for(map<char,string>::iterator it=pMapShortcuts->begin();it!=pMapShortcuts->end();++it)
 			{
-				if( mapOrbiterShortcuts.find( make_pair<bool,char> (false,it->first) )==mapOrbiterShortcuts.end() )
+				if( mapOrbiterShortcuts.find( make_pair (false,it->first) )==mapOrbiterShortcuts.end() )
 				{
 					// The user doesn't already have his own manual shortcut.  Use this automatic one
-					mapOrbiterShortcuts[ make_pair<bool,char> (true,it->first) ] = it->second;
+					mapOrbiterShortcuts[ make_pair (true,it->first) ] = it->second;
 				}
 			}
 		}

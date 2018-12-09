@@ -68,7 +68,7 @@ IRBase::handleStart(Command_Impl *pCommand_Impl) {
 	irDevice.SerializeRead(iSize, pData); // De-serialize the data
 	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "IR Code count: %d", mapClass.size());
-	m_mapDevice_IRRepeat[devid] = make_pair<int,int> (irDevice.m_iRepeatIR,irDevice.m_iRepeatVolume);
+	m_mapDevice_IRRepeat[devid] = make_pair (irDevice.m_iRepeatIR,irDevice.m_iRepeatVolume);
 			
 	for(map<int,string>::iterator it = irDevice.m_mapCodes.begin(); it != irDevice.m_mapCodes.end(); it++ ) {
 		long cmdid = (*it).first;

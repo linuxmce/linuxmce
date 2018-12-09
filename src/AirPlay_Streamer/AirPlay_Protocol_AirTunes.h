@@ -37,7 +37,6 @@ namespace DCE
 
       void ServerThread();
 
-      char* m_argv[];
       char* m_cPortStr;
       char* m_cMacAddress;
 
@@ -83,6 +82,7 @@ namespace DCE
 	AirTunesPipe *pipe;
       };
 
+      char* m_argv[];
     };
 
 }

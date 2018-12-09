@@ -1733,8 +1733,8 @@ void Database::ListBatchContents()
 						row3=mysql_fetch_row( result_set3.r );
 						if( !row3 )
 						{
-							cout << "Cannot find record in hmask table: " << sSQL3 << endl;
-							cerr << "Cannot find record in hmask table: " << sSQL3 << endl;
+							cout << "Cannot find record in hmask table: " << sSQL3.str() << endl;
+							cerr << "Cannot find record in hmask table: " << sSQL3.str() << endl;
 							throw "Database error";
 						}
 					}

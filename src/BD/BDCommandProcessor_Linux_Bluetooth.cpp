@@ -257,7 +257,7 @@ char *BDCommandProcessor_Linux_Bluetooth::ReceiveData(int size)
 			{
 				LoggerWrapper::GetInstance()->Write(LV_WARNING,"ReceiveData (BD connection): have to quit!");
 				m_bRunning = false;
-				return false;
+				return 0; // false;
 			}
 
 			FD_ZERO(&wrfds);

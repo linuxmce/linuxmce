@@ -1653,17 +1653,17 @@ void MythTV_PlugIn::CMD_Schedule_Recording(string sType,string sOptions,string s
 	if( sType=="1" )
 	{
 		m_mapScheduledRecordings[mythRecording.key()] =
-			make_pair<char,int> ('O',iID);
+			make_pair ('O',iID);
 	}
 	else if( sType=="3")
 	{
 		m_mapScheduledRecordings[mythRecording.key()] =
-			make_pair<char,int> ('C',iID);
+			make_pair ('C',iID);
 	}
 	else
 	{
 		m_mapScheduledRecordings[mythRecording.key()] = 
-			make_pair<char,int>(sType[0],iID);
+			make_pair (sType[0],iID);
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MythTV_PlugIn::CMD_Schedule_Recording key " UINT64_PRINTF " %d=%s m_mapScheduledRecordings size %d", 
@@ -3612,12 +3612,12 @@ void MythTV_PlugIn::UpdateUpcomingRecordings()
 		if (sRecType == "1")
                 {
 			m_mapScheduledRecordings[mythRecording.key()] = 
-				make_pair<char,int> ('O',atoi(sRecordID.c_str()));
+				make_pair ('O',atoi(sRecordID.c_str()));
 		}
                 else if (sRecType == "3")
                 {
 			m_mapScheduledRecordings[mythRecording.key()] = 
-				make_pair<char,int> ('C',atoi(sRecordID.c_str()));;
+				make_pair ('C',atoi(sRecordID.c_str()));;
 		}
 
 		LoggerWrapper::GetInstance()->Write(

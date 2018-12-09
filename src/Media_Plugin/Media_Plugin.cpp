@@ -968,7 +968,7 @@ bool Media_Plugin::GetConfig()
 	vector<Row_MediaType_AttributeType *> vectMediaType_AttributeType;
 	m_pDatabase_pluto_media->MediaType_AttributeType_get()->GetRows("Identifier=1",&vectMediaType_AttributeType);
 	for(vector<Row_MediaType_AttributeType *>::iterator it=vectMediaType_AttributeType.begin();it!=vectMediaType_AttributeType.end();++it)
-        m_mapMediaType_AttributeType_Identifier[ make_pair<int,int> ((*it)->EK_MediaType_get(),(*it)->FK_AttributeType_get()) ] = true;
+        m_mapMediaType_AttributeType_Identifier[ make_pair ((*it)->EK_MediaType_get(),(*it)->FK_AttributeType_get()) ] = true;
 
     m_pMediaAttributes = new MediaAttributes( m_pRouter->sDBHost_get( ), m_pRouter->sDBUser_get( ), m_pRouter->sDBPassword_get( ), "pluto_media", m_pRouter->iDBPort_get( ), m_pRouter->iPK_Installation_get() );
 
@@ -1739,7 +1739,7 @@ bool Media_Plugin::PlaybackStarted( class Socket *pSocket,class Message *pMessag
 		int iChapter = atoi(StringUtils::Tokenize(sSection,"\t",pos2).c_str());
 		int iTitle = atoi(StringUtils::Tokenize(sSection,"\t",pos2).c_str());
 
-		pMediaStream->m_mapSections[ make_pair<int,int> (iChapter-1,iTitle-1) ] = sDescription;
+		pMediaStream->m_mapSections[ make_pair (iChapter-1,iTitle-1) ] = sDescription;
 	}
 
 	HandleAVAdjustments(pMediaStream,sAudio,sVideo);
@@ -3147,7 +3147,7 @@ void Media_Plugin::CMD_MH_Stop_Media(int iPK_Device,int iPK_MediaType,int iPK_De
 void Media_Plugin::StreamEnded(MediaStream *pMediaStream,bool bSendOff,bool bDeleteStream,MediaStream *pMediaStream_Replacement,vector<EntertainArea *> *p_vectEntertainArea,bool bNoAutoResume,bool bTurnOnOSD,bool bFireEvent)
 {
 LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"debug_stream_end Media_Plugin::StreamEnded ID %d/%p delete %d auto resume %d resume: %c",
-pMediaStream->m_iStreamID_get(),pMediaStream, (int) bDeleteStream, (int) bNoAutoResume,m_mapPromptResume[make_pair<int,int> (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]);
+pMediaStream->m_iStreamID_get(),pMediaStream, (int) bDeleteStream, (int) bNoAutoResume,m_mapPromptResume[make_pair (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]);
 
 
 	if ( pMediaStream == NULL )
@@ -3162,7 +3162,7 @@ pMediaStream->m_iStreamID_get(),pMediaStream, (int) bDeleteStream, (int) bNoAuto
 	PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 
 #ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::StreamEnded ID %d delete %d auto resume %d resume: %c",pMediaStream->m_iStreamID_get(),(int) bDeleteStream, (int) bNoAutoResume,m_mapPromptResume[make_pair<int,int> (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::StreamEnded ID %d delete %d auto resume %d resume: %c",pMediaStream->m_iStreamID_get(),(int) bDeleteStream, (int) bNoAutoResume,m_mapPromptResume[make_pair (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]);
 #endif
 
 	if( bNoAutoResume )
@@ -3189,7 +3189,7 @@ pMediaStream->m_iStreamID_get(),pMediaStream, (int) bDeleteStream, (int) bNoAuto
 			m_pDatabase_pluto_media->threaded_db_wrapper_query("DELETE FROM Bookmark WHERE " + sWhere);
 	}
 	// Unless this user has specified he doesn't ever want to resume this type of media, we should prompt him
-	else if( m_mapPromptResume[make_pair<int,int> (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]!='N' )
+	else if( m_mapPromptResume[make_pair (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]!='N' )
 	{
 		if( pMediaStream->m_dwPK_Disc )
 			SaveLastDiscPosition(pMediaStream);
@@ -5386,7 +5386,7 @@ void Media_Plugin::GetMediaHandlersForEA(int iPK_MediaType,int iPK_MediaProvider
 	if( mapMediaHandlerInfo.size()==1 && mapEntertainArea_NoHandlers.size()==0 && (vectEntertainArea.size()==1 || mapMediaHandlerInfo.begin()->first->m_bMultipleDestinations) )
 	{
 		// It's easy, save ourselves the trouble of searching we've got 1 handler and it can take care of it
-		vectEA_to_MediaHandler.push_back( make_pair< MediaHandlerInfo *,vector<EntertainArea *> >(mapMediaHandlerInfo.begin()->first,mapMediaHandlerInfo.begin()->second) );
+		vectEA_to_MediaHandler.push_back( make_pair (mapMediaHandlerInfo.begin()->first,mapMediaHandlerInfo.begin()->second) );
         	LoggerWrapper::GetInstance()->Write( LV_DEBUG, "We exit out of GetMediaHandlersForEA as we have a media handler");
 		return;
 	}
@@ -5398,7 +5398,7 @@ void Media_Plugin::GetMediaHandlersForEA(int iPK_MediaType,int iPK_MediaProvider
 		MediaDevice *pMediaDevice = m_mapMediaDevice_Find(iPK_Device);
 		if( pMediaDevice && pMediaDevice->m_pDevice_CaptureCard )
 		{
-			vectEA_to_MediaHandler.push_back( make_pair< MediaHandlerInfo *,vector<EntertainArea *> >(mapMediaHandlerInfo.begin()->first,mapMediaHandlerInfo.begin()->second) );
+			vectEA_to_MediaHandler.push_back( make_pair (mapMediaHandlerInfo.begin()->first,mapMediaHandlerInfo.begin()->second) );
 			return;
 		}
 	}
@@ -5425,7 +5425,7 @@ void Media_Plugin::GetMediaHandlersForEA(int iPK_MediaType,int iPK_MediaProvider
 						MediaHandlerInfo *pMediaHandlerInfo = *itMHI;
 						if( pMediaHandlerInfo->m_PK_MediaType==iPK_MediaType && pMediaHandlerInfo->ControlsDevice(pMediaDevice_FeedsIn->m_pDeviceData_Router->m_dwPK_Device) )
 						{
-							mapEntertainmentArea_OutputZone[ pEntertainArea->m_iPK_EntertainArea ] = make_pair<MediaDevice *,MediaDevice *> (pMediaDevice_FeedsIn,pMediaDevice);
+							mapEntertainmentArea_OutputZone[ pEntertainArea->m_iPK_EntertainArea ] = make_pair (pMediaDevice_FeedsIn,pMediaDevice);
 							mapMediaHandlerInfo[pMediaHandlerInfo].push_back(pEntertainArea);
 							break;
 						}
@@ -5480,7 +5480,7 @@ void Media_Plugin::GetMediaHandlersForEA(int iPK_MediaType,int iPK_MediaProvider
 				{
 					if( bAlreadyUsed || bNeedToStartWithEmpty ) // Start with a new empty vector if we already used it and can't handle multiple EA's
 					{
-						vectEA_to_MediaHandler.push_back( make_pair< MediaHandlerInfo *,vector<EntertainArea *> >(
+						vectEA_to_MediaHandler.push_back( make_pair (
 							pMediaHandlerInfo,vEmpty) );
 						bNeedToStartWithEmpty=false;
 					}
@@ -5922,7 +5922,7 @@ void Media_Plugin::PopulateRemoteControlMaps()
 		if( !pRow_DeviceTemplate_MediaType_DesignObj->FK_Skin_isNull() )
 			continue;  // This applies to a particular skin.  Come back and check these against the orbiters below
 		m_mapDeviceTemplate_MediaType_RemoteControl[pRow_DeviceTemplate_MediaType_DesignObj->UIVersion_get()-1][
-			make_pair<int,int> ( pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
+			make_pair ( pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
 				pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_MediaType_get() )
 			]
 			= new RemoteControlSet(pRow_DeviceTemplate_MediaType_DesignObj);
@@ -5958,8 +5958,8 @@ void Media_Plugin::PopulateRemoteControlMaps()
 				continue;  // No skin to overwrite for this orbiter
 
 			m_mapOrbiter_DeviceTemplate_MediaType_RemoteControl[pRow_DeviceTemplate_MediaType_DesignObj->UIVersion_get()-1][
-				make_pair< int, pair<int,int> > ( pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device,
-					make_pair< int, int > (
+				make_pair ( pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device,
+					make_pair (
 						pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
 						pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_MediaType_get() ) )
 				]
@@ -5973,7 +5973,7 @@ void Media_Plugin::PopulateRemoteControlMaps()
 				continue;  // No skin to overwrite for this orbiter
 int k=2;
 			m_mapOrbiter_MediaType_RemoteControl[pRow_MediaType_DesignObj->UIVersion_get()-1][
-				make_pair<int,int> (pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device,
+				make_pair (pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device,
 					pRow_MediaType_DesignObj->FK_MediaType_get() )
 				]
 				= new RemoteControlSet(pRow_MediaType_DesignObj);
@@ -5997,7 +5997,7 @@ int k=2;
 			}
 			else
 				m_mapDeviceTemplate_MediaType_RemoteControl[UIVersion-1][
-					make_pair<int,int> ( pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
+					make_pair ( pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
 						pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_MediaType_get() )
 					]
 					= new RemoteControlSet(pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow());
@@ -6011,15 +6011,15 @@ int k=2;
 			{
 				if( !pRow_RemoteControl->FK_MediaType_DesignObj_isNull() ) // Be sure they're not both null
 					m_mapOrbiter_MediaType_RemoteControl[UIVersion-1][
-						make_pair<int,int> (pRow_RemoteControl->FK_Orbiter_get(),
+						make_pair (pRow_RemoteControl->FK_Orbiter_get(),
 							pRow_RemoteControl->FK_MediaType_DesignObj_getrow()->FK_MediaType_get() )
 						]
 						= new RemoteControlSet(pRow_RemoteControl->FK_MediaType_DesignObj_getrow());
 			}
 			else
 				m_mapOrbiter_DeviceTemplate_MediaType_RemoteControl[UIVersion-1][
-					make_pair< int, pair<int,int> > ( pRow_RemoteControl->FK_Orbiter_get(),
-						make_pair< int, int > (
+					make_pair ( pRow_RemoteControl->FK_Orbiter_get(),
+						make_pair (
 							pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
 							pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_MediaType_get() ) )
 					]
@@ -6361,7 +6361,7 @@ void Media_Plugin::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,st
 void Media_Plugin::CMD_Set_Auto_Resume_Options(string sValue_To_Assign,int iPK_Users,int iPK_MediaType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c417-e->
 {
-	m_mapPromptResume[ make_pair<int,int> (iPK_Users,iPK_MediaType) ] = (sValue_To_Assign.size() ? sValue_To_Assign[0] : 'P');
+	m_mapPromptResume[ make_pair (iPK_Users,iPK_MediaType) ] = (sValue_To_Assign.size() ? sValue_To_Assign[0] : 'P');
 	SaveMediaResumePreferences();
 }
 
@@ -6461,7 +6461,7 @@ void Media_Plugin::RestoreMediaResumePreferences()
 				if( pos_equal==string::npos )
 					return;
 				int PK_MediaType = atoi(sToken.c_str());
-				m_mapPromptResume[ make_pair<int,int> (PK_Users,PK_MediaType) ] = sToken[pos_equal+1];
+				m_mapPromptResume[ make_pair (PK_Users,PK_MediaType) ] = sToken[pos_equal+1];
 			}
 		}
 	}
@@ -6554,9 +6554,9 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 		}
 	}
 
-	if( sPosition.size()==0 || m_mapPromptResume[make_pair<int,int> (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]=='N' )
+	if( sPosition.size()==0 || m_mapPromptResume[make_pair (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]=='N' )
 		return 0; // Nothing to resume anyway, we only restored so far the queue if this was a playlist
-	if( m_mapPromptResume[make_pair<int,int> (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]=='A' )
+	if( m_mapPromptResume[make_pair (pMediaStream->m_iPK_Users,pMediaStream->m_iPK_MediaType)]=='A' )
 	{
 		if( pMediaFile )
 			pMediaFile->m_sStartPosition = sPosition;

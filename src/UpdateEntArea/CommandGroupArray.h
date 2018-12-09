@@ -80,7 +80,7 @@ public:
 	bool m_bAutoDelete;
 	int m_PK_Array,m_iPK_Installation;
 	map< pair<int, pair<int,int> >,CommandGroup *> m_mapCommandGroup;
-	CommandGroup *m_mapCommandGroup_Find(int PK_Template,int Parm1, int Parm2) { pair<int,int> p12 = make_pair<int,int> (Parm1,Parm2); map< pair<int, pair<int,int> >,CommandGroup *>::iterator it = m_mapCommandGroup.find( make_pair<int, pair<int,int> > ( PK_Template, p12 ) ); return it==m_mapCommandGroup.end() ? NULL : (*it).second; }
+	CommandGroup *m_mapCommandGroup_Find(int PK_Template,int Parm1, int Parm2) { pair<int,int> p12 = make_pair (Parm1,Parm2); map< pair<int, pair<int,int> >,CommandGroup *>::iterator it = m_mapCommandGroup.find( make_pair ( PK_Template, p12 ) ); return it==m_mapCommandGroup.end() ? NULL : (*it).second; }
 
 	CommandGroupArray(Row_EntertainArea *pRow_EntertainArea,int PK_Array,bool bAutoDelete=true)
 	{

@@ -460,8 +460,8 @@ int k=2;
 						string FieldName = row[0];
 						class Table *pTable = m_pDatabase->GetTableFromForeignKeyString( this, FieldName );
 						Field *pField_PrimaryKey = pTable->m_mapField_Find( "PK_" + pTable->Name_get( ) );
-						pField->m_listField_IReferTo_Indirectly.push_back( make_pair<string,Field *> (FieldName,pField_PrimaryKey) );
-						pField_PrimaryKey->m_listField_ReferringToMe_Indirectly.push_back(  make_pair<string,Field *> (FieldName,pField) );
+						pField->m_listField_IReferTo_Indirectly.push_back( make_pair (FieldName,pField_PrimaryKey) );
+						pField_PrimaryKey->m_listField_ReferringToMe_Indirectly.push_back(  make_pair (FieldName,pField) );
 					}
 				}
 			}
@@ -1100,7 +1100,8 @@ int k=2;
 
 			// If we have a mask file, only check in the changes in that file
 			if( g_GlobalConfig.m_mapMaskedChanges.size() &&
-					g_GlobalConfig.m_mapMaskedChanges.find( make_pair<string,string> (m_pRepository->Name_get()+":"+m_sName,pChangedRow->GetWhereClause()) )
+//					g_GlobalConfig.m_mapMaskedChanges.find( make_pair<string,string> (m_pRepository->Name_get()+":"+m_sName,pChangedRow->GetWhereClause()) )
+					g_GlobalConfig.m_mapMaskedChanges.find( make_pair (m_pRepository->Name_get()+":"+m_sName,pChangedRow->GetWhereClause()) )
 					== g_GlobalConfig.m_mapMaskedChanges.end() )
 				continue;
 

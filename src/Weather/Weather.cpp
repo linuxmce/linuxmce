@@ -34,7 +34,7 @@ using namespace DCE;
 #include <pthread.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
-#include <curl/curlbuild.h>
+// #include <curl/curlbuild.h>
 #include <stdexcept>      // std::out_of_range
 
 void * msgThread(void * Arg);
@@ -525,7 +525,7 @@ string Weather::download(const string & url){
 	curl_global_init (CURL_GLOBAL_ALL);
 	m_pCurl = curl_easy_init ();
 	if (!m_pCurl)
-		return false;
+		return string("");
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Weather: at download after lock");
 	curl_easy_setopt(m_pCurl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(m_pCurl, CURLOPT_FOLLOWLOCATION, 1L); //Follow redirect
