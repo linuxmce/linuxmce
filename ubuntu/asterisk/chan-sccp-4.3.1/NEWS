@@ -1,0 +1,267 @@
+Version: v4.3.1_DEV
+=====================
+ - Added 'force_dtmf' to realtime/database example files
+
+Version: v4.3.0_DEV
+=====================
+ - Reworked configure/make system:
+   - Create Makefile.am per subdirectory
+   - Handle each subdir as a sub-library
+   - Combine the sub-libraries into the final resulting:
+     chan_sccp.so during the final linking step
+   - Use simple path for file inclusion
+   - Clear sepearions between modules (There are still a couple of
+     asterisk in the libsccp module, which should be cleaned up)
+   - Reduced re-compilation when little has changed
+   - Speed up during compilation
+   - Slightly reduced size of the resulting binary
+   - Future Potential to run for example the libsccp module
+     standalone (if the current dependencies can be cleaned up)
+   - Since Automake 1.4 we got warnings because of crossing
+     directory boundaries during automake. This is fixed by splitting
+     the makefiles
+   - The sub-library Makefile.am file are simple and easy to
+     maintain. The focus only on theor own directory
+ - CallFlow: 
+   - Revised handling shared line during incoming call
+   - Revised sccp_socket / session handling during read of potentially unknown messages
+   - Revised callinfo functionalty
+   - Atomic Functions using trylock/spinlock instead of lock, to prevent deadlock
+ - Static Analysis
+   - subsequent fixes
+     - nullpointer checks
+     - dead code removal 
+     - More boundschecking
+   - deny use of strcat, sprintf, atoi and other unsafe functions
+ - Add Visual Parkinglot Feature Button support
+ - Improved/Fixed Cisco/69xx support
+ Fixes:
+  - Channel remaining after hangup
+  - Timeout / Hangup Scheduler issues 
+  - Session Cancellation
+  - Pickup/GPickup and entries in phonebook
+  - Fixed direcrtp (more work needed)
+  - letohl / bswap fix
+
+Version: v4.2.3_STABLE
+=====================
+New Features in V4.2.3
+ - Warning about use of ancient gcc compiler
+ - New desktop/background images
+ - New AMI Function:SCCPShowRefcount
+ - Support for newer/future version of automake
+ - Small size reduction of chan_sccp.so
+
+Bug Fixes
+ - Channel being left behind after hangup
+ - Scheduled Hangup / Schedule Digit Timeout
+ - Potential Deadlock Fallback Atomic Functions
+ - MWI loosing track of new voicemails under certain circumstances
+ - using gnu version of libiconv fixed
+ - gen_sccp_enum improved / gnu awk extension dependency removed
+ - set socket option should happen before binding to the socket
+ - channel monitor/record handling fixed
+ - Code cleanup / fixed memory leaks / fixed potential null pointer dereferences
+ - Some smaller patches (Check ChangeLog for details)
+  -Some minor BSD Compilation issues
+
+Version: v4.3_STABLE
+=====================
+New Features in V4.3
+ - Modularized / Specialize sourcecode
+ - Reduced include dependencies
+ - Split the project in multiple sub-libraries
+ - replaced sccp_callinfo_function() with iCallInfo.Function()
+
+Bug Fixes
+ - Fixed Hangup and Timeout Scheduling
+ - Fixed refcount bug causing hanging channels
+
+Version: v4.2_STABLE
+=====================
+New Features in V4.2
+ - Enums processed using awk generation script
+ - Multi channel Direct RTP (Partial)
+ - Enums processed using meta programming (Renewed macro implementation)
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+ - Added Support for Asterisk-12
+ - Added Support for Asterisk-13
+ - Support for IPv4 and IPv6
+ - Updated/Changed DTMF Handling to always take rfc2833
+ - Multi Channel Direct RTP (ie: SIP-SCCP direct media)
+ - Enums processed using meta programming (Renewed macro implementation)
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+ - Added support for earlyrtp=immediate
+ - Added Scheduled Hangup (So that you can hear the hangupcause)
+ - Reworked digittimeout
+ - Improved sccp.conf / buttonconfig button change detection on sccp reload
+ - Allow HASH() dialplan function when using SCCPDEVICE(), SCCPLINE() and SCCPCHANNEL()
+ - Added Audio Quality Statistics in CHANNEL() and SCCPDEVICE() / SCCPCHANNEL)()
+ - Updated hangup / queue_hangup handling
+ - Support for UTF-8 config file (allowing accented characters in labels and description on older phones)
+
+Bug Fixes
+ - Fixed Some asterisk-12 / asterisk-13 issues
+ - Fixed buttontemplate instance issue
+ - Fixed RTP Handling
+ - Replaced Asterisk Scheduled Macro Use
+ - Numerous smaller / bigger fixes (Check ChangeLog for details)
+
+Version: 4.2.0_RC3
+==================
+New Features in V4.2
+ - Same as RC2
+ - Enums processed using awk generation script
+
+Bug Fixes
+ - Fixed Some asterisk-12 / asterisk-13 issues
+ - Fixed buttontemplate instance issue
+ - Serveral smaller / bigger fixes (Check ChangeLog for details)
+
+Version: 4.2.0_RC2
+==================
+New Features in V4.2
+ - Added Support for Asterisk-12
+ - Added Support for Asterisk-13
+ - Support for IPv4 and IPv6
+ - Updated/Changed DTMF Handling to always take rfc2833
+ - Multi Channel Direct RTP (ie: SIP-SCCP direct media)
+ - Enums processed using meta programming (Renewed macro implementation)
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+ - Added support for earlyrtp=immediate
+ - Added Scheduled Hangup (So that you can hear the hangupcause)
+ - Reworked digittimeout
+ - Improved sccp.conf / buttonconfig button change detection on sccp reload
+ - Allow HASH() dialplan function when using SCCPDEVICE(), SCCPLINE() and SCCPCHANNEL()
+ - Added Audio Quality Statistics in CHANNEL() and SCCPDEVICE() / SCCPCHANNEL)()
+ - Updated hangup / queue_hangup handling
+ - Support for UTF-8 config file (allowing accented characters in labels and description on older phones)
+
+Bug Fixes
+ - Serveral smaller / bigger fixes (Check ChangeLog for details)
+ - Fixed RTP Handling
+ - Replaced Asterisk Scheduled Macro Use
+
+Version: 4.2.0_RC1
+==================
+New Features in V4.2
+ - Added Support for Asterisk-12
+ - Support for IPv4 and IPv6
+ - Changed DTMF Handling to always take rfc2833
+ - Multi channel Direct RTP (Partial)
+ - Enums processed using meta programming (Renewed macro implementation)
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+
+Bug Fixes
+ - Numerous smaller / bigger fixes (Check ChangeLog for details)
+
+Version: 4.2.0_DEV
+==================
+New Features in V4.2
+ - Direct RTP
+ - Enums processed using meta programming
+ - Support for named callgroup / pickupgroups when using >asterisk-11
+
+Bug Fixes
+ - 
+
+Version: V4.1_STABLE
+==================
+New features with V4.1:
+ - Compatible with multitute of asterisk versions from asterisk-1.6.2 up to asterisk-11, using one code base
+ - New sccp.conf handling system, using a flexible TABLE as the basis for all config parsing
+ - Integrated Conference implementation / Conference List
+ - Connected Line Update -> More accurate callerid information
+ - Call List State Update (Showing hint status in PhoneBook Entries)
+ - New and Improved AMI/Manager Functions
+ - Removed most of the old locking implementation in favor of reference counting
+
+Bug Fixes:
+ - Updated audio/video/codec handling
+ - Reworked hint handling / callinfo on hinted speeddial
+ - auto select line
+ - Audio issues during transfer
+ - Updated for asterisk devstate api change
+ - sccp reload issues
+ - socket / poll issues
+ - permit/deny issues / global ip reject
+ - realtime line updates
+ - module unload taking a lot of time
+ - refcount issues
+ - asterisk module dependency / load order
+ - park call crash / group pickup with active call
+ - voicemail message not cleared
+ - linkedid not set correctly
+ - passthrupartyid without a valid channel
+ - monitor feature
+ - memory leaks
+ - sccp_dump_packet
+ - 1 second audio delay
+ - ami/manager output formatting
+
+Version: 4.1.0_RC1
+==================
+ - Updated audio/video/codec handling
+ - Reworked hint handling
+ - Updated refcount system
+ - Updated for asterisk devstate api change
+ - Compatible with multitute of asterisk versions from 1.6 up to trunk, using one code base
+ - new Conference implementation
+ - New sccp.conf handling system, using a flexible TABLE as the basis for all config parsing
+
+Version: 4.1.0_DEV
+==================
+ - Updated audio/video/codec handling
+ - Reworked hint handling
+ - Updated refcount system
+ - Updated for asterisk devstate api change
+ - Compatible with multitute of asterisk versions from 1.6 up to trunk, using one code base
+ - new Conference implementation
+ - New sccp.conf handling system, using a flexible TABLE as the basis for all config parsing
+
+Version: 3.0_RC3
+===================
+Added Functionality:
+ - Dialplan Function SCCPDEVICE, SCCPLINE and SCCPCHANNEL
+ - DevState Feature Button (--enable-devstate)
+ - some parameters in configure have change from --with to --enable/disable.
+   A couple of parameters which used to be disabled are now enabled by
+   default. Please Check them !!
+ - Dynamic Speeddials (and dynamic speeddials with call info) for newer SCCP Phones
+ - Early Beginnings of Video Support
+
+Fixed/Improved:
+ - bug fixes for device re-registering
+ - bug fixes for hints
+ - bug fixes for channel indications (DTMF / Inband Messages during Progress)
+ - configure script, os detection
+ - lots of small bugs reported by users
+ - documentation updates
+
+Version: 3.0_RC2
+================
+Added Functionality:
+ - sccp reload
+ - dynamic speeddial with and without callerid
+
+Fixed/Improved:
+ - transfer + callerid
+ - improved callerid passing during call forward
+
+Version: 3.0_RC1
+================
+Added Functionality: 
+ - HotLine
+ - Shared Lines
+ - Dynamic speed dials
+ - New configuration file handling using templating 
+
+Fixed/Improved: 
+ - Realtime database support
+ - Debug indications
+ - Direct transfer
+ - Group pickup
+ - Call parking
+
+
+Version: 4.3.0_TRUNK
