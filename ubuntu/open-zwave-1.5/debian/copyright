@@ -1,4 +1,4 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: open-zwave
 Upstream-Contact: Mal Lansell <openzwave@lansell.org>
 Source: https://github.com/OpenZWave/open-zwave
