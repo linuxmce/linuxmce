@@ -11,6 +11,9 @@ LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 MORECPPFLAGS=$(CFLAGS)
 MORELDFLAGS:=-Wl,-z,now
 
+#export CC=gcc-8
+#export CXX=g++-8
+
 ifndef DESTDIR
 DESTDIR=$(CURDIR)/debian/tmp/
 endif
@@ -49,6 +52,3 @@ override_dh_auto_install:
 
 update_debian_version:
 	sed -i '1 s/(.*)/($(shell git describe --long --tags --dirty | sed s/-/./g | sed s/^v// ))/' debian/changelog
-
-get-orig-source:
-	uscan --force-download --debug --repack
