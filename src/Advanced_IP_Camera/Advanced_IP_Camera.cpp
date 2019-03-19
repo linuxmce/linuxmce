@@ -233,9 +233,10 @@ void Advanced_IP_Camera::SetupCurl(string sUrl, string sUser, string sPasswd)
     curl_easy_setopt(m_pCurl, CURLOPT_URL, sUrl.c_str());
 
     curl_easy_setopt(m_pCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    LoggerWrapper::GetInstance ()->Write (LV_STATUS, "HttpGet: sUser: %s", sUser.c_str());
     if (!sUser.empty())
     {
-        curl_easy_setopt(m_pCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_easy_setopt(m_pCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
         curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, sUser.c_str());
         if (!sPasswd.empty()) {
             curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, sPasswd.c_str());
@@ -295,19 +296,12 @@ bool Advanced_IP_Camera::HttpGet(string sUrl, string sUser, string sPasswd, char
     CallbackData data;
 
     PLUTO_SAFETY_LOCK (gm, m_CurlMutex);
+    curl_easy_reset(m_pCurl);
     LoggerWrapper::GetInstance ()->Write (LV_STATUS, "HttpGet: sUrl: %s", sUrl.c_str ());
-    curl_easy_setopt(m_pCurl, CURLOPT_URL, sUrl.c_str());
-
+    SetupCurl(sUrl,sUser, sPasswd);
         /* send all data to this function  */
     curl_easy_setopt(m_pCurl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(m_pCurl, CURLOPT_WRITEDATA, (void *)&data);
-    curl_easy_setopt(m_pCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    if (!sUser.empty())
-    {
-        curl_easy_setopt(m_pCurl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_easy_setopt(m_pCurl, CURLOPT_USERNAME, sUser.c_str());
-	curl_easy_setopt(m_pCurl, CURLOPT_PASSWORD, sPasswd.c_str());
-    }
 
     CURLcode res = curl_easy_perform(m_pCurl);
 
