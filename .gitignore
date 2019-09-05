@@ -27,3 +27,4 @@ moc_*.cpp
 *.user
 *.manifest
 .directory
+src/version.h
