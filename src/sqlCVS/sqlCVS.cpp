@@ -770,7 +770,7 @@ bool ParseMaskFile(Database &database)
 		if( (pos=sWhere.find("psc_id="))!=string::npos )
 			psc_id = atoi( sWhere.substr(pos+7).c_str() );
 
-		g_GlobalConfig.m_mapMaskedChanges[ make_pair<string,string> (sRepository+":"+sTable,sWhere) ] =
+		g_GlobalConfig.m_mapMaskedChanges[ make_pair (sRepository+":"+sTable,sWhere) ] =
 			new MaskedChange(pTable,pRepository,eToc,psc_id);
 	}
 

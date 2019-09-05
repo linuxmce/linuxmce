@@ -166,7 +166,7 @@ bool USB_Game_Pad::GetConfig()
 			while(pos<vectCodes[s].size())
 			  {
 			    string sCode = StringUtils::Tokenize(vectCodes[s]," ",pos);
-			    m_mapCodesToButtons[sCode] = make_pair<string,int> (sButton,PK_DeviceRemote);
+			    m_mapCodesToButtons[sCode] = make_pair (sButton,PK_DeviceRemote);
 			    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Code: %s will fire button %s",sCode.c_str(),sButton.c_str());
 			  }
 		      }
@@ -178,20 +178,20 @@ bool USB_Game_Pad::GetConfig()
 	    // Local mode, hard code values to lookup.
 	    // Button 1 = OK
 	    // Buttons 2-10 = Mode buttons to blindly set video modes.
-	    m_mapCodesToButtons["USB-GAMEPAD-UP"] = make_pair<string,int>("up",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-DOWN"] = make_pair<string,int>("down",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-LEFT"] = make_pair<string,int>("left",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-RIGHT"] = make_pair<string,int>("right",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B1"] = make_pair<string,int>("ok",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B2"] = make_pair<string,int>("1",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B3"] = make_pair<string,int>("q",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B4"] = make_pair<string,int>("a",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B5"] = make_pair<string,int>("2",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B6"] = make_pair<string,int>("w",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B7"] = make_pair<string,int>("3",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B8"] = make_pair<string,int>("4",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B9"] = make_pair<string,int>("-",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B10"] = make_pair<string,int>("+",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-UP"] = make_pair("up",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-DOWN"] = make_pair("down",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-LEFT"] = make_pair("left",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-RIGHT"] = make_pair("right",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B1"] = make_pair("ok",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B2"] = make_pair("1",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B3"] = make_pair("q",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B4"] = make_pair("a",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B5"] = make_pair("2",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B6"] = make_pair("w",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B7"] = make_pair("3",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B8"] = make_pair("4",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B9"] = make_pair("-",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B10"] = make_pair("+",0);
 	  }
 	
 	// Create the input thread.

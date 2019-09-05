@@ -49,12 +49,12 @@ std::string OpenWM::get_cid(const string & data){
 
     if(!parsingSuccessful){
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OWM::get_cid: Failed to parse configuration");
-        return false;
+        return string("");
 
     }
     if(root.get("cod",500).asInt()==404){
     	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OWM::get_cid:Error: %s",root.get("message","??").asCString());
-    	return false;
+    	return string("");
     }
     const int id=root.get("id",0).asInt();
 	ostringstream s;

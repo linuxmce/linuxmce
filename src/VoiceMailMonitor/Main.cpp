@@ -49,7 +49,7 @@ typedef list<string> listOfStrings;
 bool fexists(const char *filename)
 {
   ifstream ifile(filename);
-  return ifile;
+  return (bool)ifile;
 }
 
 void Convert(const string & sWavFile)

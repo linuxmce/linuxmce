@@ -306,7 +306,7 @@ bool Lighting_Plugin::GetVideoFrame( class Socket *pSocket, class Message *pMess
 	
 		if( sState.empty()==false )
 		{
-			m_mapLightsToRestore[ pDevice_Light->m_dwPK_Device ] = make_pair<time_t,string> ( time(NULL)+m_iCameraTimeout, sState );
+			m_mapLightsToRestore[ pDevice_Light->m_dwPK_Device ] = make_pair ( time(NULL)+m_iCameraTimeout, sState );
 			m_mapLightsToRestoreEvents[ pDevice_Light->m_dwPK_Device ] = true;
 		}
 		DCE::CMD_On CMD_On(m_dwPK_Device,pDevice_Light->m_dwPK_Device,0,"");

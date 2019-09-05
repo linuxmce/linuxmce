@@ -106,7 +106,7 @@ namespace DCE
 
 		List_MediaHandlerInfo *m_mapMediaHandlerInfo_MediaType_Find(int PK_MediaType,int PK_MediaProvider)
 		{
-			map< pair<int,int>,List_MediaHandlerInfo *>::iterator it = m_mapMediaHandlerInfo_MediaType.find( make_pair<int,int> (PK_MediaType,PK_MediaProvider) );
+			map< pair<int,int>,List_MediaHandlerInfo *>::iterator it = m_mapMediaHandlerInfo_MediaType.find( make_pair (PK_MediaType,PK_MediaProvider) );
 			return it==m_mapMediaHandlerInfo_MediaType.end() ? NULL : (*it).second;
 		}
 

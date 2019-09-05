@@ -2805,7 +2805,7 @@ bool Telecom_Plugin::VoiceMailChanged(class Socket *pSocket,class Message *pMess
 	}
 
 	PLUTO_SAFETY_LOCK_ERRORSONLY(vm, m_TelecomMutex);
-	m_mapVoiceMailStatus[userid] = std::make_pair<string, string> (value_param, text_param);
+	m_mapVoiceMailStatus[userid] = std::make_pair (value_param, text_param);
 	vm.Release();
 
 	for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)

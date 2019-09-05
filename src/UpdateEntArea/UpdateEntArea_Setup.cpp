@@ -339,7 +339,7 @@ void UpdateEntArea::GetMediaAndRooms()
 				}
 			}
 		}
-		m_mapRoom_Media[pRow_Room->PK_Room_get()] = make_pair<LevelOfMedia, bool> (levelOfMedia,pRow_Room->ManuallyConfigureEA_get()==1);
+		m_mapRoom_Media[pRow_Room->PK_Room_get()] = make_pair (levelOfMedia,pRow_Room->ManuallyConfigureEA_get()==1);
 	}
 }
 
@@ -701,7 +701,7 @@ void UpdateEntArea::GetDevicesTypesAndRoomTypes(int PK_DeviceCategory,map<int,pa
 	DB_ROW row;
 	if( (result_set.r=m_pDatabase_pluto_main->db_wrapper_query_result(sSQL)) )
 		while ((row = db_wrapper_fetch_row(result_set.r)))
-			(*p_map_Device_Type_RoomType)[ atoi(row[0]) ] = make_pair<int,int> (row[1] ? atoi(row[1]) : 0,row[2] ? atoi(row[2]) : 0);
+			(*p_map_Device_Type_RoomType)[ atoi(row[0]) ] = make_pair (row[1] ? atoi(row[1]) : 0,row[2] ? atoi(row[2]) : 0);
 }
 
 
