@@ -435,13 +435,13 @@ void CommandGroupArray::DeleteUnusedCommandGroups(Row_Room *pRow_Room)
 CommandGroup::CommandGroup(CommandGroupArray *pCommandGroupArray,Row_CommandGroup *pRow_CommandGroup)
 {
 	m_bIsModified=false;
-	pair<int,int> p12 = make_pair<int,int> (pRow_CommandGroup->TemplateParm1_get(),pRow_CommandGroup->TemplateParm2_get()); 
+	pair<int,int> p12 = make_pair (pRow_CommandGroup->TemplateParm1_get(),pRow_CommandGroup->TemplateParm2_get()); 
 	
 	m_pCommandGroupArray=pCommandGroupArray;
 	m_pRow_CommandGroup=pRow_CommandGroup;
 	m_pDatabase_pluto_main=m_pRow_CommandGroup->Table_CommandGroup_get()->Database_pluto_main_get();
 	m_pCommandGroupArray->m_mapCommandGroup[
-		make_pair<int, pair<int,int> > ( pRow_CommandGroup->FK_Template_get(), p12 )
+		make_pair ( pRow_CommandGroup->FK_Template_get(), p12 )
 	] = this;
 }
 

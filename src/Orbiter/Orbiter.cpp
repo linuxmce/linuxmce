@@ -775,11 +775,7 @@ bool Orbiter::GetConfig()
 						m_mapScanCodeToIgnoreOnYield[ScanCode]=true;
 
 					string sCode;
-#ifdef WIN32
 					m_mapScanCodeToRemoteButton[make_pair (ScanCode, Action)] = StringUtils::ToUpper(it2->substr(0, pos));
-#else
-					m_mapScanCodeToRemoteButton[ make_pair<int,char> (ScanCode,Action) ] = StringUtils::ToUpper(it2->substr(0,pos));
-#endif // WIN32
 
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Added scan code %d -> %s Action: %d", 
 						atoi( it2->substr(pos + 1).c_str()), StringUtils::ToUpper(it2->substr(0,pos)).c_str(),(int) Action);
@@ -805,11 +801,7 @@ bool Orbiter::GetConfig()
 					int EventType2 = atoi( it2->substr(posEq+1).c_str() );
 					int EventID2 = atoi( it2->substr(posComma2+1).c_str() );
 
-#ifdef WIN32
 					m_mapEventToSubstitute[make_pair (EventType1, EventID1)] = make_pair (EventType2, EventID2);
-#else
-					m_mapEventToSubstitute[ make_pair<int,int> (EventType1,EventID1) ] = make_pair<int,int> (EventType2,EventID2);
-#endif
 
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Added replacement %d,%d = %d,%d",EventType1,EventID1,EventType2,EventID2);
 				}
@@ -2838,11 +2830,7 @@ void Orbiter::QueueEventForProcessing( void *eventData )
 	{
 	        iButton = spEvent->data.region.m_iButton;
 	}
-#ifdef WIN32
 	map< pair<int, int>, pair<int, int> >::iterator it = m_mapEventToSubstitute.find(make_pair (spEvent->type, iButton));
-#else
-	map< pair<int,int>,pair<int,int> >::iterator it = m_mapEventToSubstitute.find( make_pair<int,int> (spEvent->type,iButton) );
-#endif
 	if( it!=m_mapEventToSubstitute.end() )
 	{
 		spEvent->type = (DCE::Orbiter::Event::EventType) it->second.first;
@@ -2896,20 +2884,12 @@ void Orbiter::QueueEventForProcessing( void *eventData )
 
 			if (tMilisecondsPassed > KEY_DOWN_DURATION)
 			{
-#ifdef WIN32
 				it = m_mapScanCodeToRemoteButton.find(make_pair (spEvent->data.button.m_iKeycode, 'H'));
-#else				
-				it = m_mapScanCodeToRemoteButton.find(make_pair<int, char>(spEvent->data.button.m_iKeycode, 'H'));
-#endif
 			}
 
 			if (it == m_mapScanCodeToRemoteButton.end())  // Either we didn't hold the button or there is no hold specific event
 			{
-#ifdef WIN32
 				it = m_mapScanCodeToRemoteButton.find(make_pair (spEvent->data.button.m_iKeycode, 'U'));
-#else				
-				it = m_mapScanCodeToRemoteButton.find(make_pair<int, char>(spEvent->data.button.m_iKeycode, 'U'));
-#endif
 			}
 
 			m_tButtonDown.tv_sec=0;
@@ -2919,13 +2899,8 @@ void Orbiter::QueueEventForProcessing( void *eventData )
 			// the down, and the framework something else for the up
 			if( it == m_mapScanCodeToRemoteButton.end() ) 
 			{
-#ifdef WIN32
 				if (m_mapScanCodeToRemoteButton.find(make_pair (spEvent->data.button.m_iKeycode, 'D')) != m_mapScanCodeToRemoteButton.end() ||
 					m_mapScanCodeToRemoteButton.find(make_pair (spEvent->data.button.m_iKeycode, 'R')) != m_mapScanCodeToRemoteButton.end())
-#else
-				if( m_mapScanCodeToRemoteButton.find( make_pair<int,char> (spEvent->data.button.m_iKeycode, 'D'))!=m_mapScanCodeToRemoteButton.end() ||
-					m_mapScanCodeToRemoteButton.find( make_pair<int,char> (spEvent->data.button.m_iKeycode, 'R'))!=m_mapScanCodeToRemoteButton.end() )
-#endif
 				{
 #ifdef DEBUG
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Orbiter::QueueEventForProcessing ignoring keycode %d up because there's a DOWN",spEvent->data.button.m_iKeycode);
@@ -2940,17 +2915,9 @@ void Orbiter::QueueEventForProcessing( void *eventData )
 #ifdef DEBUG
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Orbiter::QueueEventForProcessing m_tButtonDown %d.%d",(int) m_tButtonDown.tv_sec,(int) m_tButtonDown.tv_nsec);
 #endif
-#ifdef WIN32
 			it = m_mapScanCodeToRemoteButton.find(make_pair (spEvent->data.button.m_iKeycode, 'D'));
-#else
-			it = m_mapScanCodeToRemoteButton.find( make_pair<int,char> (spEvent->data.button.m_iKeycode, 'D') );
-#endif
 
-#ifdef WIN32
 			map< pair<int, char>, string>::iterator itRepeat = m_mapScanCodeToRemoteButton.find(make_pair (spEvent->data.button.m_iKeycode, 'R'));
-#else
-			map< pair<int,char>, string>::iterator itRepeat = m_mapScanCodeToRemoteButton.find( make_pair<int,char> (spEvent->data.button.m_iKeycode, 'R'));
-#endif
 			if( itRepeat!=m_mapScanCodeToRemoteButton.end() )
 			{
 				sRepeatKey = itRepeat->second;  // This is the key to repeat
@@ -2961,11 +2928,7 @@ void Orbiter::QueueEventForProcessing( void *eventData )
 					it = itRepeat;
 			}
 			if( it==m_mapScanCodeToRemoteButton.end() && 
-#ifdef WIN32
 				m_mapScanCodeToRemoteButton.find(make_pair (spEvent->data.button.m_iKeycode, 'U')) != m_mapScanCodeToRemoteButton.end())
-#else
-				m_mapScanCodeToRemoteButton.find( make_pair<int,char> (spEvent->data.button.m_iKeycode, 'U') )!=m_mapScanCodeToRemoteButton.end() )
-#endif
 			{
 #ifdef DEBUG
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Orbiter::QueueEventForProcessing ignoring keycode %d down because there's an UP",spEvent->data.button.m_iKeycode);
@@ -9408,11 +9371,7 @@ void Orbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool b
 	{
 		if (bQueue)
 		{
-#ifdef WIN32
 			m_listPendingGotoScreens.push_back(make_pair (iInterruption, new Message(pMessage)));
-#else
-			m_listPendingGotoScreens.push_back(make_pair<int, Message *>(iInterruption, new Message(pMessage)));
-#endif
 		}
 		return;
 	}

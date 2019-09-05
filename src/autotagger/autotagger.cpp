@@ -113,7 +113,7 @@ if (!i_tvFilter_4.cap(0).isNull())
 
 
 
-    if ((i_tvFilter.numCaptures () == i_movieFilter.numCaptures ()))
+    if ((i_tvFilter.captureCount () == i_movieFilter.captureCount ()))
        {
 
 	QString dblchk =  i_tvFilter.capturedTexts ().join ("");
