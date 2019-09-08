@@ -103,8 +103,8 @@ static string XMLEntities(const char *input)
 
 //-----------------------------------------------------------------------------------------------------
 Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerAddress)
-: Orbiter(DeviceID, PK_DeviceTemplate, ServerAddress, "", false, 0, 
-    0, false), SocketListener("Proxy_Orbiter"), m_ActionMutex("action"), m_ResourcesMutex("resources")
+: Orbiter(DeviceID, PK_DeviceTemplate, ServerAddress, (string)"", false, 0, 
+    0, NULL, false), SocketListener("Proxy_Orbiter"), m_ActionMutex("action"), m_ResourcesMutex("resources")
 {
 	m_iImageCounter = 1;
 	m_iLastImageSent = -1;
