@@ -41,6 +41,8 @@ ICECCallbacks g_callbacks;
  * Globals for libCEC - find a better way to do this.
  */
 
+
+#if CEC_LIB_VERSION_MAJOR < 4
 int CecLogMessage(void *cbParam, const cec_log_message message)
 {
   switch (message.level)
@@ -62,17 +64,53 @@ int CecLogMessage(void *cbParam, const cec_log_message message)
     }
   return 0;
 }
+#else
+void CecLogMessage(void *cbParam, const cec_log_message* message)
+{
+  switch (message->level)
+    {
+    case CEC_LOG_ERROR:
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"libCEC - ERR: %s",message->message);
+      break;
+    case CEC_LOG_WARNING:
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"libCEC - WRN: %s",message->message);
+      break;
+    case CEC_LOG_NOTICE:
+    case CEC_LOG_TRAFFIC:
+    case CEC_LOG_DEBUG:
+      LoggerWrapper::GetInstance()->Write(LV_DEBUG,"libCEC - DBG: %s",message->message);
+      break;
+    default:
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECLogMessage: CALLBACK! Unhandled!" );
+      break;
+    }
+}
+#endif
 
+
+#if CEC_LIB_VERSION_MAJOR < 4
 int CecKeyPress(void *cbParam, const cec_keypress key)
 {
   CEC_Adaptor *pCEC_Adaptor=(CEC_Adaptor *)cbParam;
   char cKey[5];
   snprintf(cKey,5,"0x%x",key.keycode);
   string sKey=cKey;
+  int iKeyDuration=key.duration;
+  int iKeyCode=key.keycode;
+#else
+void CecKeyPress(void *cbParam, const cec_keypress* key)
+{
+  CEC_Adaptor *pCEC_Adaptor=(CEC_Adaptor *)cbParam;
+  char cKey[5];
+  snprintf(cKey,5,"0x%x",key->keycode);
+  string sKey=cKey;
+  int iKeyDuration=key->duration;
+  int iKeyCode=key->keycode;
+#endif
 
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Keypress - Duration %d - Keycode 0x%x",key.duration,key.keycode);
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Keypress - Duration %d - Keycode 0x%x",iKeyDuration,iKeyCode);
 
-  if (key.duration > 0) // Ignore key downs
+  if (iKeyDuration > 0) // Ignore key downs
     {
       map < string,pair<string,int> >::iterator it=pCEC_Adaptor->m_mapCodesToButtons.find(sKey);
       if ( it==pCEC_Adaptor->m_mapCodesToButtons.end() )
@@ -87,15 +125,17 @@ int CecKeyPress(void *cbParam, const cec_keypress key)
 	    {
 	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending key to AV Wizard");
 	      pCEC_Adaptor->ForceKeystroke(it->second.first,pCEC_Adaptor->m_sAVWHost,pCEC_Adaptor->m_iAVWPort);
-	      return 0;
 	    }
 
 	}
     }
-
+#if CEC_LIB_VERSION_MAJOR < 4
   return 0;
+#endif
 }
 
+
+#if CEC_LIB_VERSION_MAJOR < 4
 int CecCommand(void *cbParam, const cec_command command)
 {
   CEC_Adaptor *pCEC_Adaptor=(CEC_Adaptor *)cbParam;
@@ -157,18 +197,89 @@ int CecCommand(void *cbParam, const cec_command command)
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Unhandled!" );
       break;
   }
-
-
-
   return 0;
 }
+#else
+void CecCommand(void *cbParam, const cec_command* command)
+{
+  CEC_Adaptor *pCEC_Adaptor=(CEC_Adaptor *)cbParam;
+  // TODO need to monitor commands from other cec devices to know id/la/pa/state
 
+  cec_opcode op_code = command->GetResponseOpcode(command->opcode);
+  string sop_code = pCEC_Adaptor->m_pParser->ToString(op_code);
+
+  char sParms[1000];
+  bool done = false;
+
+  for ( int i = 0; !done; i++ ) {
+    sParms[i] = command->parameters[i];
+    done = (command->parameters[i] == 0);
+  }
+
+  switch ( op_code )
+  {
+    case CEC_OPCODE_GIVE_OSD_NAME:
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From: %i, To: %i, set=%i, Opcode: %i/%s, Parm1=%i, sParms: '%s'", 
+	(int) command->initiator, (int) command->destination, command->opcode_set, (int) op_code, sop_code.c_str(), command->parameters[0], sParms );
+
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From         : %i", (int) command->initiator );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! To           : %i", (int) command->destination );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Give OSD Name: %i", command->parameters[0] );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! sParms       : %s", sParms );
+      break;
+    case CEC_OPCODE_SET_OSD_NAME:
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From: %i, To: %i, set=%i, Opcode: %i/%s, Parm1=%i, sParms: '%s'", 
+	(int) command->initiator, (int) command->destination, command->opcode_set, (int) op_code, sop_code.c_str(), command->parameters[0], sParms );
+
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From         : %i", (int) command->initiator );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! To           : %i", (int) command->destination );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Set OSD Name : %i", command->parameters[0] );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! sParms       : %s", sParms );
+      break;
+    case CEC_OPCODE_ACTIVE_SOURCE:
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From: %i, To: %i, set=%i, Opcode: %i/%s, Parm1=%i, sParms: '%s'", 
+	(int) command->initiator, (int) command->destination, command->opcode_set, (int) op_code, sop_code.c_str(), command->parameters[0], sParms );
+
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From         : %i", (int) command->initiator );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! To           : %i", (int) command->destination );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Active Source: %i", command->parameters[0] );
+      break;
+    case CEC_OPCODE_DEVICE_VENDOR_ID:
+      {
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From: %i, To: %i, set=%i, Opcode: %i/%s, Parm1=%i, sParms: '%s'", 
+	(int) command->initiator, (int) command->destination, command->opcode_set, (int) op_code, sop_code.c_str(), command->parameters[0], sParms );
+
+      cec_vendor_id VendorId=(cec_vendor_id) command->parameters[0];
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! VendorID     : %i/%s", (int) VendorId,  pCEC_Adaptor->m_pParser->ToString(VendorId) );
+      break;
+      }
+    case CEC_OPCODE_NONE:
+//      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Poll. parameters[0]: %i", command->parameters[0] );
+//      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Poll. sParms       : %s", sParms );
+      break;
+    default:
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Unhandled!" );
+      break;
+  }
+}
+#endif
+
+
+#if CEC_LIB_VERSION_MAJOR < 4
 int CecConfigurationChanged(void *cbParam, const libcec_configuration config)
 {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECConfigurationChanged: CALLBACK! Unhandled!");
       return 0;
 }
+#else
+void CecConfigurationChanged(void *cbParam, const libcec_configuration* config)
+{
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"CECConfigurationChanged: CALLBACK! Unhandled!");
+}
+#endif
 
+
+#if CEC_LIB_VERSION_MAJOR < 4
 int CecAlert(void *cbParam, const libcec_alert type, const libcec_parameter param)
 {
   switch (type)
@@ -188,6 +299,26 @@ int CecAlert(void *cbParam, const libcec_alert type, const libcec_parameter para
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CEC_ALERT!");
   return 0;
 }
+#else
+void CecAlert(void *cbParam, const libcec_alert type, const libcec_parameter param)
+{
+  switch (type)
+  {
+  case CEC_ALERT_CONNECTION_LOST:
+/*    if (!CReconnect::Get().IsRunning())
+    {
+      PrintToStdOut("Connection lost - trying to reconnect\n");
+      CReconnect::Get().CreateThread(false);
+    }
+*/
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CEC_ALERT_CONNECTION_LOST!");
+    break;
+  default:
+    break;
+  }
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CEC_ALERT!");
+}
+#endif
 
 
 int CecMenuStateChanged(void *cbParam, const cec_menu_state state)
@@ -292,7 +423,7 @@ bool CEC_Adaptor::GetConfig()
 			while(pos<vectCodes[s].size())
 			  {
 			    string sCode = StringUtils::Tokenize(vectCodes[s]," ",pos);
-			    m_mapCodesToButtons[sCode] = make_pair<string,int> (sButton,PK_DeviceRemote);
+			    m_mapCodesToButtons[sCode] = make_pair(sButton,PK_DeviceRemote);
 			    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Code: %s will fire button %s",sCode.c_str(),sButton.c_str());
 			  }
 		      }
@@ -409,6 +540,7 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	snprintf(g_config.strDeviceName, 13, "LinuxMCE");
 	g_config.clientVersion = _LIBCEC_VERSION_CURRENT;
 	g_config.bActivateSource = 0;
+#if CEC_LIB_VERSION_MAJOR < 4
 	g_callbacks.CBCecLogMessage = &CecLogMessage;
 	g_callbacks.CBCecKeyPress = &CecKeyPress;
 	g_callbacks.CBCecCommand = &CecCommand;
@@ -416,6 +548,15 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	g_callbacks.CBCecAlert = &CecAlert;
 	g_callbacks.CBCecMenuStateChanged = &CecMenuStateChanged;
 	g_callbacks.CBCecSourceActivated = &CecSourceActivated;
+#else
+	g_callbacks.logMessage = &CecLogMessage;
+	g_callbacks.keyPress = &CecKeyPress;
+	g_callbacks.commandReceived = &CecCommand;
+	g_callbacks.configurationChanged = &CecConfigurationChanged;
+	g_callbacks.alert = &CecAlert;
+	g_callbacks.menuStateChanged = &CecMenuStateChanged;
+	g_callbacks.sourceActivated = &CecSourceActivated;
+#endif
 	g_config.callbacks = &g_callbacks;
 	g_config.callbackParam = this;
 
@@ -443,8 +584,13 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING,"No COM Port specified. Trying autodetect.  Please set a port in the Interfaces section of Web Admin, or re-detect device.");
 
+#if CEC_LIB_VERSION_MAJOR < 4
 		cec_adapter devices[10];
 		uint8_t iDevicesFound = m_pParser->FindAdapters(devices, 10, NULL);
+#else
+		cec_adapter_descriptor devices[10];
+		uint8_t iDevicesFound = m_pParser->DetectAdapters(devices, 10, NULL, true);
+#endif
 		if (iDevicesFound <= 0)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No devices found with autodetect");
@@ -453,8 +599,13 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 		}
 		else
 		{
+#if CEC_LIB_VERSION_MAJOR < 4
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device path: %s, port: %s",devices[0].path,devices[0].comm);
 			m_sPort = devices[0].comm;
+#else
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device path: %s, port: %s",devices[0].strComPath,devices[0].strComName);
+			m_sPort = devices[0].strComName;
+#endif
 		}
 	}
 
@@ -498,11 +649,8 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 			device.bActive = m_pParser->IsActiveSource((cec_logical_address)iPtr);
 			device.iCecVersion = m_pParser->GetDeviceCecVersion((cec_logical_address)iPtr);
 			device.power = m_pParser->GetDevicePowerStatus((cec_logical_address)iPtr);
-			device.osdName = m_pParser->GetDeviceOSDName((cec_logical_address)iPtr);
-
-//			device.lang = CECDEVICE_UNKNOWN;
-			m_pParser->GetDeviceMenuLanguage((cec_logical_address)iPtr, &device.lang);
-
+//			device.osdName = m_pParser->GetDeviceOSDName((cec_logical_address)iPtr);
+//			device.lang = m_pParser->GetDeviceMenuLanguage((cec_logical_address)iPtr);
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Active CEC Logical Address: %s, at Physical Address: %X, by Vendor: %s",m_pParser->ToString( (cec_logical_address) iPtr ), device.iPhysicalAddress, m_pParser->ToString( (cec_vendor_id) device.iVendorId ) );
 
 

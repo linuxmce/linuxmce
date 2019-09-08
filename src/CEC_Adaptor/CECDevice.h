@@ -26,10 +26,13 @@ namespace DCE {
 		bool     bActive;
 		cec_version iCecVersion;
 		cec_power_status power;
-		cec_osd_name osdName;
+		string osdName;
 		string sAddr;
+#if CEC_LIB_VERSION_MAJOR < 4
 		cec_menu_language lang;
-
+#else
+		string lang;
+#endif
 		int     iPK_Device;
 
 	// FIXME: use CONSTs to fill these with proper data.
