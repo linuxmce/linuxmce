@@ -1,0 +1,4 @@
+# NOTE: when you add a module to this list,
+# NOTE: please be sure to update and rebuild linux-image-diskless too
+# NOTE: reference: ubuntu/linux-image-dummy/makepackage.sh
+#smsc95xx
