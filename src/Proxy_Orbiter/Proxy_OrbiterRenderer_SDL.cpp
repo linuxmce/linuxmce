@@ -33,6 +33,7 @@ using namespace DCE;
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 #include "png.h"
+#include "zlib.h"
 //-----------------------------------------------------------------------------------------------------
 void SaveImageToFile(struct SDL_Surface *pScreenImage, string FileName);
 //-----------------------------------------------------------------------------------------------------
