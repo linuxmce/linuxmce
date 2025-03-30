@@ -28,3 +28,6 @@ moc_*.cpp
 *.manifest
 .directory
 src/version.h
+builder.custom.conf
+builder.key
+builder.key.pub
