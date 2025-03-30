@@ -21,7 +21,7 @@ mkdir -p $Moon_RootLocation/{boot,lib/modules}
 # Copy kernel image and sysmap
 if [ ! -f /boot/vmlinuz-${Moon_KernelVersion} ]; then
 	echo Need to install linux-image-${Moon_KernelVersion}
-	apt-get install linux-image-${Moon_KernelVersion}
+	DEBIAN_FRONTEND=noninteractive apt-get -y install linux-image-${Moon_KernelVersion}
 fi
 cp /boot/vmlinuz-${Moon_KernelVersion} ${Moon_RootLocation}/boot
 cp /boot/System.map-${Moon_KernelVersion} ${Moon_RootLocation}/boot/
