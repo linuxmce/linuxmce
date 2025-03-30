@@ -12,7 +12,7 @@ DB::~DB()
 bool DB::connect(string sHost, string sUser, string sPass, string sDatabase)
 {
 	mysql_init(&m_mysqlInit);
-	my_bool reconnect = true;
+	bool reconnect = true;
 	mysql_options(&m_mysqlInit, MYSQL_OPT_RECONNECT, &reconnect);
 	if ( m_pConnection = mysql_real_connect(&m_mysqlInit,sHost.c_str(),sUser.c_str(),sPass.c_str(),sDatabase.c_str(),0,0,0) ) {
 		m_bConnected = true;

@@ -155,7 +155,7 @@ void TBezierWindow::Paint()
 bool TBezierWindow::SetBackgroundImage(OpenGLGraphic* Background)
 {
 	// if wants to be set an invalid texture, the function will return false
-	if(Background<0)
+	if(0 != Background)
 		return false;
 		
 	// set up the texture as texture background

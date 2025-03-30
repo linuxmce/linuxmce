@@ -28,6 +28,9 @@ using namespace std;
 #include <exiv2/iptc.hpp>
 #include <exiv2/convert.hpp>
 
+// Necessary on 2204
+#include <exiv2/error.hpp>
+
 namespace UpdateMediaVars
 {
 	extern string sUPnPMountPoint;

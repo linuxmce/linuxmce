@@ -56,7 +56,7 @@ FIXME: refactor for udev to support local jukeboxes again.
 #include <fcntl.h>
 
 #ifndef WIN32
-#include <stropts.h>
+//#include <stropts.h>
 #include <sys/wait.h>
 extern "C"
 {

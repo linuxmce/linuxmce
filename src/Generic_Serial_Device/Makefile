@@ -31,15 +31,15 @@ sources = Main.cpp Generic_Serial_Device.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS += -I$(ROOT)/MessageTranslation
 LDFLAGS +=
-XTRALDLIBS = -lruby1.8 -lSerial -lrt -lMessageTranslation
+XTRALDLIBS = $(shell pkg-config --libs ruby 2>/dev/null) -lSerial -lrt -lMessageTranslation
 
 ifneq (,$(findstring amd64, $(arch))) 
-        CPPFLAGS += -I/usr/lib/ruby/1.8/x86_64-linux
+        CPPFLAGS += $(shell pkg-config --cflags ruby 2>/dev/null)
 else
 	ifneq (,$(findstring armhf, $(arch)))
-	        CPPFLAGS += -I/usr/lib/ruby/1.8/arm-linux-eabihf
+	        CPPFLAGS += $(shell pkg-config --cflags ruby 2>/dev/null)
 	else
-	        CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux -I/usr/lib/ruby/1.8/i686-linux -I/usr/lib/ruby/1.8/x86_64-linux/
+	        CPPFLAGS += $(shell pkg-config --cflags ruby 2>/dev/null)
 	endif
 endif
 
