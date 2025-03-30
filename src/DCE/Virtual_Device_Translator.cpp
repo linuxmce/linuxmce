@@ -39,7 +39,7 @@ bool Virtual_Device_Translator::GetConfig(DeviceData_Base *pDeviceData_Base)
 	for(Map_DeviceData_Base::iterator it=m_pDeviceData_Base->m_AllDevices.m_mapDeviceData_Base.begin();it!=m_pDeviceData_Base->m_AllDevices.m_mapDeviceData_Base.end();++it)
 	{
 		DeviceData_Base *pDeviceData_Base = (*it).second;
-		switch(pDeviceData_Base->m_dwPK_DeviceCategory)
+		switch( (long int) pDeviceData_Base->m_dwPK_DeviceCategory)
 		{
 		case DEVICECATEGORY_DCE_Router_CONST:
 			m_dwPK_Device_Router = pDeviceData_Base->m_dwPK_Device;

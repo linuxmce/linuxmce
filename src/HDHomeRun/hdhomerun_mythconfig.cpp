@@ -625,7 +625,7 @@ static int myth_scan(const char *pID, const char *pTuner)
 
 static int MySqlConnect(char *ip,char *user,char *password,char *database)
 {
-	my_bool reconnect = true;
+	bool reconnect = true;
 	if( !g_pMySQL )
 		g_pMySQL = mysql_init(NULL);
 

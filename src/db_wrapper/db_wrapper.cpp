@@ -508,7 +508,7 @@ void db_wrapper_thread_end()
 #include "db_wrapper.h"
 DB_LINK* db_wrapper_init(DB_LINK *db_link)
 {
-	my_bool reconnect = true;
+	bool reconnect = true;
 	DB_LINK *result = mysql_init(db_link);
 	if( result )
 	{

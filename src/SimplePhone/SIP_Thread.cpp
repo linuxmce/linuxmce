@@ -34,7 +34,8 @@ static void call_state_changed(LinphoneCore *linphoneCore, LinphoneCall *call, L
 static void call_received(LinphoneCore *linphoneCore, const char *from);
 static void bye_received(LinphoneCore *linphoneCore, const char *from);
 #endif
-static void auth_requested(LinphoneCore *linphoneCore, const char *realm, const char *username);
+//static void auth_requested(LinphoneCore *linphoneCore, const char *realm, const char *username);
+static void authentication_requested(LinphoneCore *linphoneCore, const char *realm, const char *username, const char *domain);
 static void display_something(LinphoneCore * linphoneCore, LINPHONE_CONST char *something);
 static void display_url(LinphoneCore * linphoneCore, LINPHONE_CONST char *something, LINPHONE_CONST char *url);
 static void display_warning (LinphoneCore * linphoneCore, LINPHONE_CONST char *something);
@@ -123,14 +124,15 @@ static void LS_UnregisterWithAsterisk()
 /** Initialize LinphoneCoreVTable variable */
 static void LS_InitVTable()
 {
-	LS_LinphoneCoreVTable.show = (ShowInterfaceCb) stub;
+//	LS_LinphoneCoreVTable.show = (ShowInterfaceCb) stub;
 #ifdef LINPHONE_3_6
 	LS_LinphoneCoreVTable.call_state_changed = call_state_changed;
 #else
 	LS_LinphoneCoreVTable.inv_recv = call_received;
 	LS_LinphoneCoreVTable.bye_recv = bye_received;
 #endif
-	LS_LinphoneCoreVTable.auth_info_requested = auth_requested;
+//	LS_LinphoneCoreVTable.auth_info_requested = auth_requested;
+	LS_LinphoneCoreVTable.authentication_requested = authentication_requested;
 	LS_LinphoneCoreVTable.display_status = (DisplayStatusCb) display_something;
 	LS_LinphoneCoreVTable.display_message = (DisplayMessageCb) display_something;
 	LS_LinphoneCoreVTable.display_warning = (DisplayMessageCb) display_warning;
@@ -299,6 +301,8 @@ static void bye_received(LinphoneCore *linphoneCore, const char *from)
 	LS_DropCall_nolock(); // lock is already taken in LS_Main_Loop
 }
 #endif
+
+// DEPRECATED version
 static void auth_requested(LinphoneCore *linphoneCore, const char *realm, const char *username)
 {
 	func_enter("callback: auth_requested");
@@ -313,10 +317,32 @@ static void auth_requested(LinphoneCore *linphoneCore, const char *realm, const 
 	LS_Auth_Username = username;
 	LS_Auth_Realm = realm;
 	LS_Auth_Received = 1;
-	
-	LS_pLinphoneAuthInfo = linphone_auth_info_new(username, NULL, LS_pSimplePhone->GetPassword().c_str(), NULL, realm);
+
+	// phenigma - 2022-05-07 - linphone10 updates required
+	LS_pLinphoneAuthInfo = linphone_auth_info_new(username, NULL, LS_pSimplePhone->GetPassword().c_str(), NULL, realm, NULL); // , domain);
 	func_exit("callback: auth_requested");
 }
+// NEW VERSION
+static void authentication_requested(LinphoneCore *linphoneCore, const char *realm, const char *username, const char *domain)
+{
+	func_enter("callback: authentication_requested");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone: Authorisation requested, realm: '%s', username '%s', domain '%s'", realm, username, domain);
+	if (LS_pLinphoneAuthInfo != NULL)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone: Authorisation requested one too many times");
+		func_exit("callback: authentication_requested");
+		return;
+	}
+	
+	LS_Auth_Username = username;
+	LS_Auth_Realm = realm;
+	LS_Auth_Received = 1;
+
+	// phenigma - 2022-05-07 - linphone10 updates required
+	LS_pLinphoneAuthInfo = linphone_auth_info_new(username, NULL, LS_pSimplePhone->GetPassword().c_str(), NULL, realm, NULL); // , domain);
+	func_exit("callback: authentication_requested");
+}
+
 static void display_something(LinphoneCore * linphoneCore, LINPHONE_CONST char *something)
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone: lib message: '%s'", something);

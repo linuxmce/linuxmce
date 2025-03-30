@@ -138,7 +138,7 @@ public:
 // 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "MysqlHelper connecting to: %s, Port: %d, Database: %s", m_sMySQLHost.c_str(), m_iMySQLPort, m_sMySQLDBName.c_str());
 // 		else
 // 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "MysqlHelper reconnecting to failed Host: %s, Port: %d, Database: %s", m_sMySQLHost.c_str(), m_iMySQLPort, m_sMySQLDBName.c_str());
-		my_bool reconnect=1;
+		bool reconnect=1;
 		mysql_options(m_pMySQL, MYSQL_OPT_RECONNECT,&reconnect);
 		if (mysql_real_connect(m_pMySQL, m_sMySQLHost.c_str(), m_sMySQLUser.c_str(), m_sMySQLPass.c_str(), m_sMySQLDBName.c_str(), m_iMySQLPort, NULL, 0) == NULL)
 		{

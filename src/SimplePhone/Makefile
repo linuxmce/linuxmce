@@ -6,10 +6,10 @@ SNR_LDFLAGS ?=
 
 ROOT = ..
 CXX = g++
-CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
+CXXFLAGS = -Wall -fPIC -ggdb3 -I/usr/include/linphone
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS) -I/usr/include/linphone
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -llinphone
 
 MYSQL_FLAGS := $(shell pkg-config --cflags mysqlclient 2>/dev/null)
 MYSQL_LIBS := $(shell pkg-config --libs mysqlclient 2>/dev/null)
@@ -23,16 +23,16 @@ endif
 
 MYNAME = SimplePhone
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1759mplateID
+MYDEVTEMPLATEID = 1759
 
 Gen_Dev_Files = $(GENDEV)/SimplePhoneBase.cpp
 sources = Main.cpp SimplePhone.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS += $(shell pkg-config --cflags glib-2.0 linphone)
-CPPFLAGS += $(shell pkg-config --cflags glib-2.0 linphone) -DHAVE_CONFIG_H -DLINPHONE_CONST=$(LINPHONE_CONST)
-LDFLAGS += $(shell pkg-config --libs-only-L glib-2.0 linphone)
-XTRALDLIBS = $(shell pkg-config --libs-only-l glib-2.0 linphone)
+CXXFLAGS += $(shell pkg-config --cflags glib-2.0)
+CPPFLAGS += $(shell pkg-config --cflags glib-2.0) -DHAVE_CONFIG_H -DLINPHONE_CONST=$(LINPHONE_CONST)
+LDFLAGS += $(shell pkg-config --libs-only-L glib-2.0)
+XTRALDLIBS = $(shell pkg-config --libs-only-l glib-2.0)
 
 Gen_Dev_Files +=
 sources += SIP_Thread.cpp

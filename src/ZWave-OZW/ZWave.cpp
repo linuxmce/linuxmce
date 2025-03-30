@@ -1292,7 +1292,7 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 
 			OpenZWave::ValueID value = *valIt;
 			string label = OpenZWave::Manager::Get()->GetValueLabel(value);
-			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, index=%d, label=%s, type=%s", value.GetInstance(), value.GetCommandClassId(), value.GetIndex(), label.c_str(), OpenZWave::Value::GetTypeNameFromEnum(value.GetType()));
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, index=%d, label=%s, type=%s", value.GetInstance(), value.GetCommandClassId(), value.GetIndex(), label.c_str(), OpenZWave::Internal::VC::Value::GetTypeNameFromEnum(value.GetType()));
 
 			unsigned int mapToDevice = 0;
 			bool needSeparateDevice = false;
@@ -1914,7 +1914,7 @@ void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_
 					s += " \"units\": \"" + OpenZWave::Manager::Get()->GetValueUnits(value) + "\",";
 					s += " \"min\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMin(value)) + ",";
 					s += " \"max\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMax(value)) + ",";
-					string genreText = string(OpenZWave::Value::GetGenreNameFromEnum(value.GetGenre()));
+					string genreText = string(OpenZWave::Internal::VC::Value::GetGenreNameFromEnum(value.GetGenre()));
 					s += " \"genre\": \"" + genreText + "\",";
 					s += " \"pk_device\": " + StringUtils::itos(pLmceDevice->m_dwPK_Device) + ",";
 					string polled = OpenZWave::Manager::Get()->isPolled(value) ? "true" : "false";

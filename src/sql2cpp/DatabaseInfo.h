@@ -54,7 +54,7 @@ public:
 	DatabaseInfo( string db_host, string db_user, string db_pass, string db_name, int db_port )
 	{
 		// Establishing database connection			  	
-		my_bool reconnect = true;
+		bool reconnect = true;
 		m_pDB = mysql_init(NULL);
 		mysql_options(m_pDB, MYSQL_OPT_RECONNECT, &reconnect);
 		if ( mysql_real_connect( m_pDB, db_host.c_str(), db_user.c_str(), db_pass.c_str(), db_name.c_str(), db_port, NULL, 0 ) == NULL )

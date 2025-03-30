@@ -20,14 +20,14 @@
  *
  **************************************************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef UDI_HELPER_H
 #define UDI_HELPER_H
 
 #include <glib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 const char *udi_helper_compute_udi (struct udev_device *d);
 const char *udi_helper_compute_parent_udi (struct udev_device *d);
@@ -95,9 +95,9 @@ void blockdev_refresh_mount_state (HalDevice *d);
 void blockdev_process_mdstat (void);
 */
 
-#endif /* UDI_HELPER_H */
-
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* UDI_HELPER_H */
 
