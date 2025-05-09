@@ -1,6 +1,6 @@
 [submodule "external/logitechmediaserver-deb"]
 	path = external/logitechmediaserver-deb
-	url = https://github.com/phenigma/logitechmediaserver-deb.git
+	url = https://github.com/linuxmce/logitechmediaserver-deb.git
 	branch = public/7.9
 [submodule "assets"]
 	path = assets
