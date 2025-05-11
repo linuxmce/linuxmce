@@ -5,3 +5,4 @@
 [submodule "assets"]
 	path = assets
 	url = https://github.com/linuxmce/assets.git
+	branch = master
