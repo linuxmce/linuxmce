@@ -1554,6 +1554,13 @@ string Makefile = "none:\n"
 	{
 		system("DEBFULLNAME='LinuxMCE Developers' dh_make -y -c gpl -s -n -e 'developers@linuxmce.org'");
 	}
+
+	// New dh_make (noble/bookworm) templates place ${shlibs:Depends} and ${misc:Depends} on independent lines.
+	// This results in multiple ${shlibs:Depends} and ${misc:Depends} in the file.
+	// Fix this here, before substituting our Depends list (below)
+	// This could be done with a template (dh_make --template) but would be more complicated.
+	cout << "sed -i -z 's/Depends:\\n \${shlibs:Depends},\\n \${misc:Depends},/Depends: ${shlibs:Depends}, ${misc:Depends}/' debian/control" << endl;
+	system("sed -i -z 's/Depends:\\n \${shlibs:Depends},\\n \${misc:Depends},/Depends: ${shlibs:Depends}, ${misc:Depends}/' debian/control");
 #endif
 
 	list<FileInfo *>::iterator iFileInfo;
@@ -1819,6 +1826,13 @@ string Makefile = "none:\n"
 		system("DEBFULLNAME='LinuxMCE Developers' dh_make -y -c gpl -s -n -e 'developers@linuxmce.org'");
 	}
 //	mkdir("DEBIAN", 0666);
+
+	// New dh_make (noble/bookworm) templates place ${shlibs:Depends} and ${misc:Depends} on independent lines.
+	// This results in multiple ${shlibs:Depends} and ${misc:Depends} in the file.
+	// Fix this here, before substituting our Depends list (below)
+	// This could be done with a template (dh_make --template) but would be more complicated.
+	cout << "sed -i -z 's/Depends:\\n \${shlibs:Depends},\\n \${misc:Depends},/Depends: ${shlibs:Depends}, ${misc:Depends}/' debian/control" << endl;
+	system("sed -i -z 's/Depends:\\n \${shlibs:Depends},\\n \${misc:Depends},/Depends: ${shlibs:Depends}, ${misc:Depends}/' debian/control");
 #endif
 
 	list<FileInfo *>::iterator iFileInfo;
