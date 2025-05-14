@@ -28,11 +28,10 @@ MYDEVTEMPLATEID = 2246mplateID
 Gen_Dev_Files = $(GENDEV)/AirPlay_StreamerBase.cpp
 sources = Main.cpp AirPlay_Streamer.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
-
 CXXFLAGS += $(shell pkg-config --cflags avahi-client) $(shell pkg-config --cflags glib-2.0)
 CPPFLAGS +=
 LDFLAGS += $(shell pkg-config --libs avahi-client) $(shell pkg-config --libs glib-2.0)
-XTRALDLIBS = -lshairport -lao -lplist -lvlc -lX11 -lXmu
+XTRALDLIBS = -lshairport -lao -lvlc -lX11 -lXmu
 
 Gen_Dev_Files +=
 sources += AirPlay_Protocol_Factory.cpp \
@@ -44,6 +43,27 @@ sources += AirPlay_Protocol_Factory.cpp \
 		AirPlay_Videolan.cpp \
 		../utilities/linux/window_manager/WMController/WMController.cpp \
 		../utilities/linux/window_manager/wmctrl/wmctrl.cpp
+
+# Detect which plist library is available (libplist-2.0 preferred)
+PLIST_LIB := $(shell sh -c ' \
+  if pkg-config --exists libplist-2.0; then \
+    echo libplist-2.0; \
+  elif pkg-config --exists libplist; then \
+    echo libplist; \
+  else \
+    echo none; \
+  fi \
+')
+
+ifeq ($(PLIST_LIB),none)
+  $(error No suitable plist library found (libplist-2.0 or libplist))
+endif
+
+PLIST_CFLAGS := $(shell pkg-config --cflags $(PLIST_LIB))
+PLIST_LIBS   := $(shell pkg-config --libs $(PLIST_LIB))
+
+CXXFLAGS += $(PLIST_CFLAGS)
+XTRALDLIBS += $(PLIST_LIBS)
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
