@@ -22,7 +22,7 @@ INCLUDEPATH += /usr/include/qjson/ \
     ../../DCE/
 
 #additional libs - yes im still using qjson
-LIBS+=-lqjson
+#LIBS+=-lqjson
 
 #Destination, for dce build env
 DESTDIR=../../bin
