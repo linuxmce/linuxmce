@@ -20,14 +20,34 @@ if [ $PROCESS = "install" ]; then
 	Q="GRANT ALL PRIVILEGES ON pluto_media.* TO 'plutomedia'@'127.0.0.1';"
 	RunSQL "$Q"
 
-	Q="GRANT ALL PRIVILEGES ON pluto_media.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
-	RunSQL "$Q"
+	## mysql 8.2+ doesn't permit create user and grant within the same query.
+	# So we alter user, which will create if it doesn't exist
+	# And then we grant privs.
+        Q="ALTER USER '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
+        mysql $MYSQL_DB_CRED -e "$Q"
 
+        Q="GRANT ALL PRIVILEGES ON pluto_media.* TO '$MySqlUser'@'127.0.0.1';"
+        mysql $MYSQL_DB_CRED -e "$Q"
+
+	## Old version
+	#	Q="GRANT ALL PRIVILEGES ON pluto_media.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
+	#	RunSQL "$Q"
+
+	## mysql 8.2+ doesn't permit create user and grant within the same query.
+	# So we alter user, which will create if it doesn't exist
+	# And then we grant privs.
 	Q="GRANT ALL PRIVILEGES ON pluto_media.* TO 'plutomedia'@'localhost';"
 	RunSQL "$Q"
 
-	Q="GRANT ALL PRIVILEGES ON pluto_media.* TO '$MySqlUser'@'localhost' IDENTIFIED BY '$MySqlPassword';"
-	RunSQL "$Q"
+        Q="ALTER USER '$MySqlUser'@'localhost' IDENTIFIED BY '$MySqlPassword';"
+        mysql $MYSQL_DB_CRED -e "$Q"
+
+        Q="GRANT ALL PRIVILEGES ON pluto_security.* TO '$MySqlUser'@'localhost';"
+        mysql $MYSQL_DB_CRED -e "$Q"
+
+	## Old version
+	#	Q="GRANT ALL PRIVILEGES ON pluto_media.* TO '$MySqlUser'@'localhost' IDENTIFIED BY '$MySqlPassword';"
+	#	RunSQL "$Q"
 
 	Q="FLUSH PRIVILEGES;"
 	RunSQL "$Q"
