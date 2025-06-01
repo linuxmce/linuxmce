@@ -977,7 +977,11 @@ void Repository::ImportTable(string sTableName,SerializeableStrings &str,size_t 
 				sSQL << " default ''";
 			}
 		}
-		sSQL << " " << sExtra;
+		// DEFAULT_GENERATED was dropped in mysql 8.2+
+		if (sExtra.find("DEFAULT_GENERATED") == std::string::npos) {
+		    sSQL << " " << sExtra;
+		}
+//		sSQL << " " << sExtra;
 	}
 	if( sPrimaryKey.length( ) )
 		sSQL << ", PRIMARY KEY( " << sPrimaryKey << " )";
