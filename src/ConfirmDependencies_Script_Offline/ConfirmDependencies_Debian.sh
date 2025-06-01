@@ -5,6 +5,9 @@
 if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then
 	. /usr/pluto/bin/Config_Ops.sh
 fi
+if [[ -f /usr/pluto/bin/Utils.sh ]]; then
+	. /usr/pluto/bin/Utils.sh
+fi
 if [[ -f /usr/pluto/bin/SQL_Ops.sh ]]; then
 	. /usr/pluto/bin/SQL_Ops.sh
 else
