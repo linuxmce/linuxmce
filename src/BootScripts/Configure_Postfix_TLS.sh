@@ -9,7 +9,7 @@ set state [lindex $argv 4]
 set org [lindex $argv 5]
 set dn [lindex $argv 6]
 
-spawn openssl genrsa -des3 -out key.pem 1024
+spawn openssl genrsa -des3 -out key.pem 2048
 expect -re "Enter pass phrase for key.pem:"
 send "$password\n"
 expect -re "Verifying - Enter pass phrase for key.pem:"
