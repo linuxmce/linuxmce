@@ -17,16 +17,22 @@ DomainName=$(RunSQL "$D")
 default=LinuxMCE.conf
 defaultssl=LinuxMCE-ssl.conf
 
+
+# This one-liner will grab the most recent php versions apache2/php.ini file rather than re-writing if statements constantly
 PHP_CONFIG_FILE=
-if [[ -e /etc/php/7.0/apache2/php.ini ]] ; then
-	PHP_CONFIG_FILE=/etc/php/7.0/apache2/php.ini
-else
-	if [[ -e /etc/php5/apache2/php.ini ]] ;then
-		PHP_CONFIG_FILE=/etc/php5/apache2/php.ini
-	else
-		PHP_CONFIG_FILE=/etc/php4/apache2/php.ini
-	fi
-fi
+PHP_CONFIG_FILE=$(find /etc/php* -name "php.ini" -path "*/apache2/*" 2>/dev/null | sort -V | tail -1)
+#PHP_CONFIG_FILE=
+#if [[ -e /etc/php/8.3/apache2/php.ini ]] ; then
+#	PHP_CONFIG_FILE=/etc/php/8.3/apache2/php.ini
+#elif [[ -e /etc/php/7.0/apache2/php.ini ]] ; then
+#	PHP_CONFIG_FILE=/etc/php/7.0/apache2/php.ini
+#else
+#	if [[ -e /etc/php5/apache2/php.ini ]] ;then
+#		PHP_CONFIG_FILE=/etc/php5/apache2/php.ini
+#	else
+#		PHP_CONFIG_FILE=/etc/php4/apache2/php.ini
+#	fi
+#fi
 
 # clean out old pluto-admin links
 rm -f /var/www/pluto-admin/floorplans
@@ -40,14 +46,14 @@ rm -rf /var/www/pluto-admin/cached
 
 mkdir -p /home/pluto/floorplans
 chmod -R 777 /home/pluto/floorplans
-chown -R www-data.www-data /home/pluto/floorplans
+chown -R www-data:www-data /home/pluto/floorplans
 rm -f /var/www/lmce-admin/floorplans 2>/dev/null
 [[ -e /usr/pluto/orbiter/floorplans ]] || ln -sn /home/pluto/floorplans /usr/pluto/orbiter/floorplans
 [[ -e /var/www/lmce-admin/floorplans ]] || ln -sn /usr/pluto/orbiter/floorplans/ /var/www/lmce-admin/
 
 mkdir -p /usr/pluto/orbiter/users
 chmod -R 777 /usr/pluto/orbiter/users
-chown -R www-data.www-data /usr/pluto/orbiter/users
+chown -R www-data:www-data /usr/pluto/orbiter/users
 rm -f /var/www/lmce-admin/users
 ln -s /usr/pluto/orbiter/users/ /var/www/lmce-admin/
 
@@ -86,10 +92,10 @@ chmod 777 /etc/pluto-callerid.conf
 
 mkdir -p /var/log/pluto
 touch /var/log/pluto/webExecLog.log
-chown www-data.www-data /var/log/pluto/webExecLog.log
+chown www-data:www-data /var/log/pluto/webExecLog.log
 
 mkdir -p /home/coverartscan
-chown www-data.www-data /home/coverartscan
+chown www-data:www-data /home/coverartscan
 ln -snf /home/coverartscan /var/www/lmce-admin/coverartscan || :
 rm -f /var/www/pluto-admin/coverartscan
 
@@ -271,7 +277,7 @@ if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
 fi
 
 [[ -f /etc/wap.conf ]] || : >/etc/wap.conf
-chown www-data.root /etc/wap.conf
+chown www-data:root /etc/wap.conf
 chmod 664 /etc/wap.conf
 
 if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
@@ -312,7 +318,7 @@ CN                     = LinuxMCE
 EOF
 
 #create cert encryption key
-openssl genrsa -des3 -passout pass:password -out server.key.enc 1024 
+openssl genrsa -des3 -passout pass:password -out server.key.enc 2048
 openssl rsa -in server.key.enc -passin pass:password -out server.key
 
 #create cert request
