@@ -33,8 +33,9 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 		skip-external-locking
 		innodb-flush-log-at-trx-commit = 2
 		bind-address=0.0.0.0
-		query_cache_limit=16M
-		query_cache_size=128M
+		## no longer supported by mysql
+		#query_cache_limit=16M
+		#query_cache_size=128M
 		secure-file-priv = ""
 		EOF
 		service mysql restart
@@ -47,13 +48,17 @@ echo "Creating MySQL user $MySqlUser and asteriskuser"
 for NEWUSER in $MySqlUser 'asteriskuser' 'plutosecurity' 'plutotelecom' 'plutomedia' 
 do
 	# We need both 127.0.0.1 and localhost to work.
-	Q="CREATE USER '$NEWUSER'@'127.0.0.1'; CREATE USER '$NEWUSER'@'localhost';"
+	## mysql 8.2+ fails if the user already exists.
+	#Q="CREATE USER '$NEWUSER'@'127.0.0.1'; CREATE USER '$NEWUSER'@'localhost';"
+	Q="CREATE USER IF NOT EXISTS '$NEWUSER'@'127.0.0.1'; CREATE USER IF NOT EXISTS '$NEWUSER'@'localhost';"
 	# If it fails we continue with the grants.
 	mysql $MYSQL_DB_CRED -e "$Q" || :
 done
 			
 # Added user create, part 2 -tschak
-Q="SET PASSWORD FOR '$MySqlUser'@'127.0.0.1' = PASSWORD('$MySqlPassword')"
+## mysql 8.2+ doesn't permit PASSWORD()
+#Q="SET PASSWORD FOR '$MySqlUser'@'127.0.0.1' = PASSWORD('$MySqlPassword')"
+Q="SET PASSWORD FOR '$MySqlUser'@'127.0.0.1' = '$MySqlPassword'"
 mysql $MYSQL_DB_CRED -e "$Q"
 
 # Even if we do not modify the my.cnf file (ie. blacklist it),
