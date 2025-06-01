@@ -13,16 +13,20 @@ echo "UPDATE user SET Create_view_priv = 'Y', Show_view_priv = 'Y', \
 	FLUSH PRIVILEGES; \
 	" | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
 
+# TODO: FIXME: This should be done in the lmce-admin postinst with other changes to the php.ini file there.
+# This one-liner will grab the most recent php versions apache2/php.ini file rather than re-writing if statements constantly
 PHP_CONFIG_FILE=
-if [[ -e /etc/php/7.0/apache2/php.ini ]] ; then
-	PHP_CONFIG_FILE=/etc/php/7.0/apache2/php.ini
-else
-	if [[ -e /etc/php5/apache2/php.ini ]] ;then
-		PHP_CONFIG_FILE=/etc/php5/apache2/php.ini
-	else
-		PHP_CONFIG_FILE=/etc/php4/apache2/php.ini
-	fi
-fi
+PHP_CONFIG_FILE=$(find /etc/php* -name "php.ini" -path "*/apache2/*" 2>/dev/null | sort -V | tail -1)
+#PHP_CONFIG_FILE=
+#if [[ -e /etc/php/7.0/apache2/php.ini ]] ; then
+#	PHP_CONFIG_FILE=/etc/php/7.0/apache2/php.ini
+#else
+#	if [[ -e /etc/php5/apache2/php.ini ]] ;then
+#		PHP_CONFIG_FILE=/etc/php5/apache2/php.ini
+#	else
+#		PHP_CONFIG_FILE=/etc/php4/apache2/php.ini
+#	fi
+#fi
 
 # Raise max char limit on php.ini
 if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
