@@ -16,9 +16,20 @@ if [ $PROCESS = "install" ]; then
 	Q="GRANT ALL PRIVILEGES ON pluto_telecom.* TO 'plutotelecom'@'127.0.0.1';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 	
-	Q="GRANT ALL PRIVILEGES ON pluto_telecom.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
-	mysql $MYSQL_DB_CRED -e "$Q"
-	
+	## mysql 8.2+ doesn't permit create user and grant within the same query.
+	# So we alter user, which will create if it doesn't exist
+	# And then we grant privs.
+        Q="ALTER USER '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
+        mysql $MYSQL_DB_CRED -e "$Q"
+
+        Q="GRANT ALL PRIVILEGES ON pluto_telecom.* TO '$MySqlUser'@'127.0.0.1';"
+        mysql $MYSQL_DB_CRED -e "$Q"
+
+	## Original version
+	#Q="GRANT ALL PRIVILEGES ON pluto_security.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
+	#mysql $MYSQL_DB_CRED -e "$Q"
+
+
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
 fi
