@@ -3,6 +3,7 @@
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/install/install-core.sh
+. /usr/pluto/install/install-common.sh
 
 ###. /usr/pluto/install/install-core.sh ; Config_MySQL_Server
 # grant debian-sys-main privs in mysql
