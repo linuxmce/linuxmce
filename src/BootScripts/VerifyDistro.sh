@@ -13,6 +13,8 @@ GetCurrentDistro() {
 		xenial) CurDistro="23" ;;
 		wheezy) CurDistro="19" ;;
 		jessie) CurDistro="22" ;;
+		bionic) CurDistro="25" ;;
+		noble) CurDistro="27" ;;
 		stretch) : ;;
 		buster) : ;;
 	esac
