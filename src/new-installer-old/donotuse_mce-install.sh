@@ -285,7 +285,7 @@ Pre-InstallNeededPackages () {
 
 	#Install dpkg-dev and debconf-utils for pre-seed information
 	#Install makedev due to mdadm issue later in the install process - logged bug https://bugs.launchpad.net/ubuntu/+source/mdadm/+bug/850213 with ubuntu
-	apt-get -y -q install dpkg-dev debconf-utils makedev
+	apt-get -y -q install dpkg-dev debconf-utils makedev net-tools
 	VerifyExitCode "dpkg-dev and debconf-utils"
 
 	# Disable compcache
@@ -307,25 +307,27 @@ ConfigSources () {
 	# Make sure sources.conf has EOL at EOF
 	echo >>/etc/apt/sources.conf
 
-	AddRepoToSourcesTop "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
-	AddRepoToSources "http://deb.linuxmce.org/ubuntu/ ${DISTRO} ${COMPOS}"
+##FIXME this is being added as "[trusted=yes]/ file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
+#	AddRepoToSourcesTop "[trusted=yes] file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
+##FIXME: Disabled for now as this repo does not exist
+#	AddRepoToSources "[trusted=yes] http://deb.linuxmce.org/ubuntu/ ${DISTRO} ${COMPOS}"
 
 #	# Check where our distro is hosted and assign the proper variable
 #	DISTRO_HOST=
 #	#Silently gather and assign appropriate repo based on the distribution
-#	[[ -z "$DISTRO_HOST" ]] && wget -q http://archive.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=archive
-#	[[ -z "$DISTRO_HOST" ]] && wget -q http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=old-releases
+#	[[ -z "$DISTRO_HOST" ]] && wget -q http://archive.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-${HOST_ARCH}/Packages.gz && DISTRO_HOST=archive
+#	[[ -z "$DISTRO_HOST" ]] && wget -q http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-${HOST_ARCH}/Packages.gz && DISTRO_HOST=old-releases
 
-	if [[ $(wget -q http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz) ]]; then
+	if [[ $(wget -q http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-${HOST_ARCH}/Packages.gz) ]]; then
 		DISTRO_HOST=old-releases
 		AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO} main restricted universe multiverse"
 		AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO}-security main restricted universe multiverse"
 	fi
 #	AddRepoToSources "http://archive.canonical.com/ubuntu ${DISTRO} partner"
 
-	if AddRepoToSources "http://download.videolan.org/pub/debian/stable/ /"; then
-		AddGpgKeyToKeyring "http://download.videolan.org/pub/debian/videolan-apt.asc"
-	fi
+#	if AddRepoToSources "http://download.videolan.org/pub/debian/stable/ /"; then
+#		AddGpgKeyToKeyring "http://download.videolan.org/pub/debian/videolan-apt.asc"
+#	fi
 
 	# Setup pluto's apt.conf
 	cat <<-EOF >/etc/apt/apt.conf.d/30pluto
@@ -340,8 +342,8 @@ ConfigSources () {
 
 	#ensure the local repo is the first in sources.list
 	#Because Ubiquity doesn't seem to allow us to control the order in sources.list
-	sed -e "/deb-cache/d" -i /etc/apt/sources.list
-	sed -e "1ideb file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}" -i /etc/apt/sources.list
+#	sed -e "/deb-cache/d" -i /etc/apt/sources.list
+#	sed -e "1ideb [trusted=yes] file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}" -i /etc/apt/sources.list
 
 	apt-get -qq update
 	VerifyExitCode "apt-get update"
@@ -502,6 +504,15 @@ Setup_Pluto_Conf () {
 		"trusty")
 			PK_DISTRO=21
 			;;
+		"xenial")
+			PK_DISTRO=23
+			;;
+		"bionic")
+			PK_DISTRO=24
+			;;
+		"noble")
+			PK_DISTRO=27
+			;;
 	esac
 
 
@@ -570,7 +581,7 @@ Install_DCERouter () {
 
 	#Install the router and media
 	StatsMessage "Installing LinuxMCE Base DCE Router Software"
-	apt-get -y -q --force-yes -f install lmce-core video-wizard-videos pluto-sample-media
+	apt-get -y -q --force-yes -f install lmce-core video-wizard-videos lmce-sample-media
 	VerifyExitCode "Initial media and dcerouter install"
 }
 
@@ -754,7 +765,7 @@ VideoDriverSetup () {
 }
 
 addAdditionalTTYStart () {
-	if [[ "$DISTRO" = "lucid" ]] || [[ "$DISTRO" = "precise" ]] || [[ "$DISTRO" == "trusty" ]]; then
+	if [[ "$DISTRO" = "lucid" ]] || [[ "$DISTRO" = "precise" ]] || [[ "$DISTRO" == "trusty" ]] || [[ "$DISTRO" == "bionic" ]] || [[ "$DISTRO"=="noble" ]]; then
 		sed -i 's/23/235/' /etc/init/tty2.conf
 		sed -i 's/23/235/' /etc/init/tty3.conf
 		sed -i 's/23/235/' /etc/init/tty4.conf
@@ -867,7 +878,8 @@ CreateFirstBoot () {
 		        # Mark remote assistance as diabled
 		        ConfDel remote
 
-		        arch=\$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
+			arch=\$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+		        #arch=\$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
 
 		        Queries=(
 		                "UPDATE Device_DeviceData
