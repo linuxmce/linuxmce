@@ -263,11 +263,24 @@ start() {
 		StartService "Starting DHCP Server" "service isc-dhcp-server start" "&"
 		StartService "Starting DNS Server" "service bind9 start" "&"
 
-		if [[ "$PK_Distro" == "$DD_DISTRO_Ubuntu_Xenial_CONST" ]] ; then
-			while ! systemctl is-active mysql ; do
-				sleep 1
-			done
+###!!!
+		# Wait for the mysql server to become active
+		echo "Waiting for MySQL to become available..."
+		for i in {1..30}; do
+		    if mysqladmin --socket=/var/run/mysqld/mysqld.sock ping --silent; then
+		        echo "MySQL is ready!"
+		        break
+		    fi
+		    echo "Still waiting for MySQL..."
+		    sleep 2
+		done
+
+		if ! mysqladmin --socket=/var/run/mysqld/mysqld.sock ping --silent; then
+		    echo "MySQL failed to start in time"
+		    err=1
+		    return $err
 		fi
+
 		StartService "Verify Device and Child PK_Distro values" "/usr/pluto/bin/VerifyDistro.sh" "&"
 		StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh" "&"
 		StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
@@ -356,7 +369,7 @@ start() {
 		fi
 		cd $VIDEO_DIR
 		if ! pidof vdr ; then
-			# If we are running on the cure, we need to restart VDR after mounting the relevant devices
+			# If we are running on the core, we need to restart VDR after mounting the relevant devices
 			if [[ "$AutostartCore" -eq "1" ]] ; then
 				service vdr restart
 			fi
