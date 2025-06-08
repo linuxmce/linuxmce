@@ -35,7 +35,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -
 
 #Install required packages
 #apt update
-DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install iproute2 ifupdown net-tools ntpdate
+DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install iproute2 ifupdown net-tools ntpdate bind9
 
 # Remove net-tools to prevent old command usage
 # Cannot do this yet, we use a combination of net-tools and iproute2
