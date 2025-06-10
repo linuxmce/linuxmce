@@ -224,7 +224,7 @@ QString LocationModel::getRoomName(int r)
     foreach(LocationItem* item, m_list) {
         if(item->roomVal() == r) return item->data(item->NameRole).toString();
     }
-    return false;
+    return "";
 }
 
 bool LocationModel::removeRow(int row, const QModelIndex &parent)
