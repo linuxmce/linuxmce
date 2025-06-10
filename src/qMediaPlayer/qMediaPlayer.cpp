@@ -380,11 +380,11 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     setInternalMediaUrl(QString::fromStdString(sMediaURL));
     setStartPosition(QString::fromStdString(sMediaPosition));
 
-    qWarning() << "Need to implement command #37 - Play Media" << endl;
-    qWarning() << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-    qWarning() << "Parm #41 - StreamID=" << iStreamID << endl;
-    qWarning() << "Parm #42 - MediaPosition=" << QString::fromStdString(sMediaPosition) << endl;
-    qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str() << endl;
+    qWarning() << "Need to implement command #37 - Play Media";
+    qWarning() << "Parm #29 - PK_MediaType=" << iPK_MediaType;
+    qWarning() << "Parm #41 - StreamID=" << iStreamID;
+    qWarning() << "Parm #42 - MediaPosition=" << QString::fromStdString(sMediaPosition);
+    qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str();
 
 
     QString p1 = QString::fromStdString(sMediaPosition);
@@ -1154,12 +1154,12 @@ void qMediaPlayer::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message
 void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage)
 //<-dceag-c249-e->
 {
-    qWarning() << "Need to implement command #249 - Start Streaming" << endl;
-    qWarning() << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-    qWarning() << "Parm #41 - StreamID=" << iStreamID << endl;
-    qWarning() << "Parm #42 - MediaPosition=" << sMediaPosition.c_str() << endl;
-    qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str() << endl;
-    qWarning() << "Parm #105 - StreamingTargets=" << sStreamingTargets.c_str() << endl;
+    qWarning() << "Need to implement command #249 - Start Streaming";
+    qWarning() << "Parm #29 - PK_MediaType=" << iPK_MediaType;
+    qWarning() << "Parm #41 - StreamID=" << iStreamID;
+    qWarning() << "Parm #42 - MediaPosition=" << sMediaPosition.c_str();
+    qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str();
+    qWarning() << "Parm #105 - StreamingTargets=" << sStreamingTargets.c_str();
 
     QStringList spl= QString::fromStdString(sStreamingTargets).split(",");
     QStringList::const_iterator it;
