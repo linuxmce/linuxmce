@@ -61,13 +61,36 @@ done
 Q="SET PASSWORD FOR '$MySqlUser'@'127.0.0.1' = '$MySqlPassword'"
 mysql $MYSQL_DB_CRED -e "$Q"
 
+# errors on noble -phenigma
+# not happy about this but it should restore the old functionality for
+# xenial / mysql-5.7 - linuxmce issues #2721 #2762 -gavlee
+# noble - update user doesn't work for this anymore -phenigma
+#Q="update user set authentication_string=password('$MySqlPassword'), plugin='mysql_native_password' where user='$MySqlUser';"
+Q="ALTER USER '$MySqlUser' IDENTIFIED WITH mysql_native_password BY '$MySqlPassword';"
+mysql $MYSQL_DB_CRED -e "$Q" || :
+
+# the pluto_main database does not exist at this point on a new install.
+# add an empty database so the rest of the script and installed packages
+# do not error out because the database doesn't exist. -gavlee
+Q="CREATE DATABASE IF NOT EXISTS $MySqlDBName;"
+mysql $MYSQL_DB_CRED -e "$Q"
+
 # Even if we do not modify the my.cnf file (ie. blacklist it),
 # we still want all the grants to hapen.
-Q="GRANT ALL PRIVILEGES ON pluto_main.* to '$MySqlUser'@'127.0.0.1';GRANT ALL PRIVILEGES ON pluto_main.* to '$MySqlUser'@'localhost';"
+Q="GRANT ALL PRIVILEGES ON $MySqlDBName.* to '$MySqlUser'@'127.0.0.1';GRANT ALL PRIVILEGES ON $MySqlDBName.* to '$MySqlUser'@'localhost';"
 mysql $MYSQL_DB_CRED -e "$Q"
 
 Q="GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'127.0.0.1';GRANT FILE, SHOW DATABASES ON *.* TO 'asteriskuser'@'localhost';"
 mysql $MYSQL_DB_CRED -e "$Q"
+
+# errors on noble - phenigma
+# try to restore asterisk functionality for xenial / mysql-5.7
+# as access is denied for asterisk, /etc/asterisk/res_mysql.conf
+# contains this info. the hardcoding is not nice but try this for now.
+# linuxmce issue #2788 -gavlee
+# noble - update user doesn't work for this anymore, already set to caching_sha2_password -phenigma
+#Q="update user set authentication_string=password('lmce'), plugin='mysql_native_password' where user='asteriskuser';"
+#mysql $MYSQL_DB_CRED -e "$Q"
 
 Q="FLUSH PRIVILEGES;"
 mysql $MYSQL_DB_CRED -e "$Q"
