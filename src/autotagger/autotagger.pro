@@ -8,7 +8,7 @@ QT       += core network xml sql
 
 INCLUDEPATH = /usr/include/mysql/ /usr/include/qjson/
 
-LIBS += -lqjson
+LIBS += 
 
 TARGET = ../bin/linuxmceTag
 #target.path = /usr/pluto/bin

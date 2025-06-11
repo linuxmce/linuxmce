@@ -12,7 +12,10 @@
 #include <autotagger.h>
 #include <film.h>
 #include <QVariant>
-#include <qjson/parser.h>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
 
 
 film::film(QObject *parent){
@@ -57,11 +60,17 @@ void film::getConfiguration(){
 void film::setConfiguration(QNetworkReply *r){
     cout << "Response Recieved" << endl;
     QByteArray mBytes = r->readAll();
-    QJson::Parser ps;
-    configData = ps.parse(mBytes).toMap();
-
-    imageBaseUrl = configData["images"].toMap()["base_url"].toString();
-
+    
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(mBytes, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "JSON parse error:" << parseError.errorString();
+        return;
+    }
+    
+    QJsonObject configData = doc.object();
+    QJsonObject imagesObj = configData["images"].toObject();
+    imageBaseUrl = imagesObj["base_url"].toString();
 }
 
 void film::setIdent(QString &n)                                         //this function sets the movie year(if possible) and title.
@@ -153,17 +162,23 @@ void film::searchReply(QNetworkReply *)                                         
         qWarning() << "No title found.";
         return;
     }
-    QJson::Parser pr;
-    QVariantMap p = pr.parse(iBytes).toMap();
+    
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(iBytes, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "JSON parse error:" << parseError.errorString();
+        return;
+    }
+    
+    QJsonObject rootObj = doc.object();
+    QJsonArray resultsArray = rootObj["results"].toArray();
 
-
-    QVariantList top = p["results"].toList(); 
-
-    if(top.isEmpty()){
+    if(resultsArray.isEmpty()){
         qWarning() << "No title found.";
         return;
     }
-    QVariantMap topChoice = top.at(0).toMap();
+    
+    QJsonObject topChoice = resultsArray[0].toObject();
 
     QDomDocument searchResult("films");
     searchResult.setContent(iBytes);
@@ -175,7 +190,7 @@ void film::searchReply(QNetworkReply *)                                         
     //QDomElement title = topChoice["original_title"]; // root.firstChildElement("movies").firstChildElement("movie").firstChildElement("name");
 
     mTitle = topChoice["original_title"].toString();
-    movieID = topChoice["id"].toString();// root.firstChildElement("movies").firstChild().firstChildElement("id").toElement().text();
+    movieID = QString::number(topChoice["id"].toInt());// root.firstChildElement("movies").firstChild().firstChildElement("id").toElement().text();
     cout << qPrintable(mTitle) << "--" << "id: " << qPrintable(movieID) << endl;
 
     releaseYear=topChoice["release_date"].toString();// root.firstChildElement("movies").firstChild().firstChildElement("released").toElement().text();
@@ -191,7 +206,6 @@ bool film::dlData()                                                             
 
     QEventLoop movieWait;
     QByteArray dlData;
-    QJson::Parser dp;
 
     dlUrl = castUrlPath.replace("MOVIE_ID", movieID);
     QNetworkRequest sRequest(dlUrl);
@@ -202,23 +216,29 @@ bool film::dlData()                                                             
     cout << "Waiting for Extra Data from::" << dlUrl.toStdString() << endl;
     movieWait.exec();
 
-    QVariantMap Cast;
     dlData = lReply->readAll();
-    Cast = dp.parse(dlData).toMap();
+    
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(dlData, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "JSON parse error:" << parseError.errorString();
+        return false;
+    }
+    
+    QJsonObject castObj = doc.object();
     //parse cast here;
 
-    QVariantList castList = Cast["cast"].toList();
+    QJsonArray castArray = castObj["cast"].toArray();
 
-    foreach(QVariant v, castList){
-
-        QVariantMap inner =v.toMap();
-        actor.append(inner["name"].toString()+"|");
+    for (const QJsonValue &value : castArray) {
+        QJsonObject castMember = value.toObject();
+        actor.append(castMember["name"].toString() + "|");
     }
 
-    QVariantList crewList = Cast["crew"].toList();
-    foreach(QVariant l, crewList){
-        QVariantMap cInner = l.toMap();
-        QString dept = cInner["department"].toString();
+    QJsonArray crewArray = castObj["crew"].toArray();
+    for (const QJsonValue &value : crewArray) {
+        QJsonObject crewMember = value.toObject();
+        QString dept = crewMember["department"].toString();
         if(dept=="Producer"){
 
         }else if(dept=="Sound"){
@@ -230,8 +250,8 @@ bool film::dlData()                                                             
         }else if(dept=="Casting"){
 
         }else if(dept=="Directing"){
-            if(cInner["job"]=="Director"){
-                director.append(cInner["name"].toString()+"|");
+            if(crewMember["job"]=="Director"){
+                director.append(crewMember["name"].toString()+"|");
             }
 
         }else if(dept == "Writing"){
@@ -258,8 +278,14 @@ void film::dataReply(QNetworkReply *)                                           
     cout << "Response Recieved" << endl;
     QByteArray mBytes = sReply->readAll();
 
-    QJson::Parser ps;
-    QVariantMap movieInfo = ps.parse(mBytes).toMap();
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(mBytes, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "JSON parse error:" << parseError.errorString();
+        return;
+    }
+    
+    QJsonObject movieInfo = doc.object();
 
     backdropPath =imageBaseUrl+"original"+movieInfo["backdrop_path"].toString();
     posterPath =imageBaseUrl+"original"+movieInfo["poster_path"].toString();
@@ -268,18 +294,18 @@ void film::dataReply(QNetworkReply *)                                           
     mIMDB=movieInfo["imdb_id"].toString();
     synopsis = movieInfo["overview"].toString();
     releaseYear = movieInfo["release_date"].toString();
-    QVariantList genres = movieInfo["genres"].toList();
-    QVariantList studiosList = movieInfo["production_companies"].toList();
+    QJsonArray genres = movieInfo["genres"].toArray();
+    QJsonArray studiosList = movieInfo["production_companies"].toArray();
 
     genre="";
-   foreach(QVariant gr, genres){
-       QVariantMap innerGr = gr.toMap();
-       genre.append(innerGr["name"].toString()+"|");
+    for (const QJsonValue &value : genres) {
+        QJsonObject genreObj = value.toObject();
+        genre.append(genreObj["name"].toString() + "|");
     }
 
-   foreach(QVariant prd, studiosList){
-       QVariantMap innerPrd = prd.toMap();
-       studio.append(innerPrd["name"].toString()+"|");
+    for (const QJsonValue &value : studiosList) {
+        QJsonObject studioObj = value.toObject();
+        studio.append(studioObj["name"].toString() + "|");
     }
 
 
