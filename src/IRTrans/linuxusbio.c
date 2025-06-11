@@ -26,7 +26,7 @@ int OpenUSBPort (void)
 {
 }
 
-int	ReadUSBString (byte pnt[],int len,word timeout)
+int	ReadUSBString (ir_byte pnt[],int len,word timeout)
 {
 }
 
@@ -34,7 +34,7 @@ void FlushUSB (void)
 {
 }
 
-void WriteUSBString (byte pnt[],int len)
+void WriteUSBString (ir_byte pnt[],int len)
 {
 }
 

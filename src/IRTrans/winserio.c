@@ -48,7 +48,7 @@ void msSleep (long time)
 	Sleep (time);
 }
 
-int WriteSerialStringEx (DEVICEINFO *dev,byte pnt[],int len)
+int WriteSerialStringEx (DEVICEINFO *dev,ir_byte pnt[],int len)
 {
 	DWORD bytes;
 	OVERLAPPED ov;
@@ -69,7 +69,7 @@ int GetSerialAvailableEx (DEVICEINFO *dev)
 	return (0);
 }
 
-int ReadSerialStringEx (DEVICEINFO *dev,byte pnt[],int len,word timeout)
+int ReadSerialStringEx (DEVICEINFO *dev,ir_byte pnt[],int len,word timeout)
 {
 	int res,i = 0;
 	DWORD bytes = 0,dummy;
@@ -172,7 +172,7 @@ int OpenSerialPort(char Pname[])
 }
 
 
-void WriteSerialString (byte pnt[],int len)
+void WriteSerialString (ir_byte pnt[],int len)
 {
 
 	DWORD bytes;
@@ -188,7 +188,7 @@ void WriteSerialString (byte pnt[],int len)
 }
 
 
-int ReadSerialString (byte pnt[],int len,word timeout)
+int ReadSerialString (ir_byte pnt[],int len,word timeout)
 {
 
 	DWORD bytes;

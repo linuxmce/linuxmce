@@ -61,7 +61,7 @@ typedef int WSAEVENT;
 
 extern int hCom;
 
-SOCKET local_socket;
+//SOCKET local_socket;
 
 #define LIRCD                   "/dev/lircd"
 #define PERMISSIONS             0666

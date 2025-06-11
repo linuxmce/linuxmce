@@ -65,12 +65,12 @@ BOOL WINAPI ShutdownHandler (DWORD type);
 #define RESEND_WAIT_USB		10
 
 
-byte byteorder;
+ir_byte byteorder;
 extern STATUS_BUFFER remote_statusex[MAX_IR_DEVICES];
-extern byte new_lcd_flag;
-extern byte display_bus;
+extern ir_byte new_lcd_flag;
+extern ir_byte display_bus;
 
-byte DispConvTable[TABLE_CNT][256];
+ir_byte DispConvTable[TABLE_CNT][256];
 
 #define FN_IR		1
 #define	FN_SBUS		2
@@ -86,10 +86,10 @@ byte DispConvTable[TABLE_CNT][256];
 #define FN_DUALRCV	2048
 
 
-int SetTransceiverModusEx (byte bus,byte mode,word send_mask,byte addr,char *hotcode,int hotlen,byte extended_mode,byte extended_mode2)
+int SetTransceiverModusEx (ir_byte bus,ir_byte mode,word send_mask,ir_byte addr,char *hotcode,int hotlen,ir_byte extended_mode,ir_byte extended_mode2)
 {
 	MODE_BUFFER md;
-	byte res;
+	ir_byte res;
 	md.sbus_command = HOST_SETMODE;
 	md.sbus_address = 0;
 	if (addr <= 15)  md.sbus_address |= addr;
@@ -113,10 +113,10 @@ int SetTransceiverModusEx (byte bus,byte mode,word send_mask,byte addr,char *hot
 	return (0);
 }
 
-int TransferFlashdataEx (byte bus,word data[],int adr,int len,byte active,long iradr)
+int TransferFlashdataEx (ir_byte bus,word data[],int adr,int len,ir_byte active,long iradr)
 {
 	IRDATA md;
-	byte res;
+	ir_byte res;
 	int sl;
 	unsigned long cap;
 
@@ -161,10 +161,10 @@ int TransferFlashdataEx (byte bus,word data[],int adr,int len,byte active,long i
 	return (0);
 }
 
-int ReadFlashdataEx (byte bus,int adr,int len)
+int ReadFlashdataEx (ir_byte bus,int adr,int len)
 {
 	IRDATA md;
-	byte res;
+	ir_byte res;
 
 
 	if ((IRDevices[bus].fw_capabilities  & FN_EEPROM) == 0) {
@@ -185,10 +185,10 @@ int ReadFlashdataEx (byte bus,int adr,int len)
 	return (0);
 }
 
-int SetTransceiverIDEx (byte bus,byte id)
+int SetTransceiverIDEx (ir_byte bus,ir_byte id)
 {
 	IRDATA md;
-	byte res;
+	ir_byte res;
 
 
 	if ((IRDevices[bus].fw_capabilities & FN_SOFTID) == 0) {
@@ -210,10 +210,10 @@ int SetTransceiverIDEx (byte bus,byte id)
 }
 
 
-int ResetTransceiverEx (byte bus)
+int ResetTransceiverEx (ir_byte bus)
 {
 	IRDATA md;
-	byte res;
+	ir_byte res;
 
 
 	md.command = SBUS_RESET;
@@ -226,7 +226,7 @@ int ResetTransceiverEx (byte bus)
 }
 
 
-int GetBusInfoEx (STATUS_BUFFER *sb,byte bus)
+int GetBusInfoEx (STATUS_BUFFER *sb,ir_byte bus)
 {
 	int i,res;
 	IRDATA ir;
@@ -240,7 +240,7 @@ int GetBusInfoEx (STATUS_BUFFER *sb,byte bus)
 			if (res) return (res);
 		}
 		for (i=0;i<device_cnt;i++) {
-			GetBusInfoDetail (sb + i,(byte)i);
+			GetBusInfoDetail (sb + i,(ir_byte)i);
 			if (res) return (res);
 		}
 	}
@@ -255,14 +255,14 @@ int GetBusInfoEx (STATUS_BUFFER *sb,byte bus)
 }
 
 
-int GetBusInfoDetail (STATUS_BUFFER *sb,byte bus)
+int GetBusInfoDetail (STATUS_BUFFER *sb,ir_byte bus)
 {
 	int i,res;
 	STATUS_BUFFER_1 sb1;
 	STATUS_BUFFER_2 sb2;
 	STATUS_BUFFER_3 sb3;
 
-	res = ReadIRStringEx (IRDevices+bus,(byte *)sb,sizeof (STATUS_BUFFER),10000);
+	res = ReadIRStringEx (IRDevices+bus,(ir_byte *)sb,sizeof (STATUS_BUFFER),10000);
 
 	if (res == sizeof (STATUS_BUFFER_1)) {
 		memcpy (&sb1,sb,sizeof (STATUS_BUFFER_1));
@@ -314,7 +314,7 @@ int GetBusInfoDetail (STATUS_BUFFER *sb,byte bus)
 }
 
 
-int ResendIREx (byte bus,IRDATA *ir_data)
+int ResendIREx (ir_byte bus,IRDATA *ir_data)
 {
 	int res,i;
 
@@ -414,7 +414,7 @@ int SendIR (long cmd_num,long address)
 
 int DoSendIR (IRDATA *ir_data,long rpt_len,int bus)
 {
-	byte ocarrier;
+	ir_byte ocarrier;
 	int res,i;
 	unsigned long end_time;
 
@@ -490,19 +490,19 @@ int DoSendIR (IRDATA *ir_data,long rpt_len,int bus)
 }
 
 
-byte Convert2OldCarrier (byte carrier)
+ir_byte Convert2OldCarrier (ir_byte carrier)
 {
 	word oc;
 	if (carrier == 255 || carrier < 128) return (carrier);
 	oc = (carrier & 127) << 2;
 	if (oc > 255) oc = 255;
-	return ((byte)oc);
+	return ((ir_byte)oc);
 }
 
 
 int SendIRDataEx (IRDATA *ir_data,long address)
 {
-	byte ocarrier;
+	ir_byte ocarrier;
 	int bus = 0,res,i;
 	if (address & 0x10000) {
 		ir_data->target_mask = (word)address & 0xffff;
@@ -537,7 +537,7 @@ int SendIRDataEx (IRDATA *ir_data,long address)
 }
 
 
-void LCDTimeCommand (byte mode)
+void LCDTimeCommand (ir_byte mode)
 {
 	int i;
 	IRRAW irw;
@@ -582,13 +582,13 @@ void LCDTimeCommand (byte mode)
 
 void LCDBrightness (int val)
 {
-	byte data[10];
+	ir_byte data[10];
 	
 	*data = val;
 	AdvancedLCD (LCD_DATA | LCD_BRIGHTNESS,data,1);
 }
 
-int AdvancedLCD (byte mode,byte data[],int len)
+int AdvancedLCD (ir_byte mode,ir_byte data[],int len)
 {
 	int res,i;
 	IRRAW irr;
@@ -640,7 +640,7 @@ int SendLCD (IRRAW *ir_data,long address)
 int LearnNextIREx (IRDATA *ir_data,word addr,word timeout,word ir_timeout)
 {
 	int res;
-	byte len,bus;
+	ir_byte len,bus;
 
 	IRDATA buffer;
 	do {
@@ -694,16 +694,16 @@ void ConvertToIRTRANS4 (IRDATA3 *ird)
 
 void CancelLearnEx (DEVICEINFO *dev)
 {
-	byte res = 1;
+	ir_byte res = 1;
 	char st[10];
-	WriteIRStringEx (dev,(byte *)&res,1);
+	WriteIRStringEx (dev,(ir_byte *)&res,1);
 	res = ReadIRStringEx (dev,st,1,500);
 }
 
 int LearnIREx (IRDATA *ir_data,word addr,word timeout,word ir_timeout)
 {
 	int res;
-	byte len,bus;
+	ir_byte len,bus;
 
 	do {
 		ir_data -> address = 0;
@@ -743,7 +743,7 @@ int LearnIREx (IRDATA *ir_data,word addr,word timeout,word ir_timeout)
 int LearnRepeatIREx (IRDATA *ir_data,word addr,word timeout,word ir_timeout)
 {
 	int res;
-	byte len,bus;
+	ir_byte len,bus;
 
 	do {
 		ir_data -> address = 0;
@@ -781,7 +781,7 @@ int LearnRepeatIREx (IRDATA *ir_data,word addr,word timeout,word ir_timeout)
 int LearnRawIREx (IRRAW *ir_data,word addr,word timeout,word ir_timeout)
 {
 	int res;
-	byte len,bus;
+	ir_byte len,bus;
 
 	do {
 		ir_data -> address = 0;
@@ -815,7 +815,7 @@ int LearnRawIREx (IRRAW *ir_data,word addr,word timeout,word ir_timeout)
 int LearnRawIRRepeatEx (IRRAW *ir_data,word addr,word timeout,word ir_timeout)
 {
 	int res;
-	byte len,bus;
+	ir_byte len,bus;
 
 	do {
 		ir_data -> address = 0;
@@ -1007,7 +1007,7 @@ int GetAvailableDataEx (DEVICEINFO *dev)
 
 #endif
 
-int ReadInstantReceive (DEVICEINFO *dev,byte pnt[],int len)
+int ReadInstantReceive (DEVICEINFO *dev,ir_byte pnt[],int len)
 {
 	word to,cnt = 0;
 
@@ -1034,7 +1034,7 @@ int ReadInstantReceive (DEVICEINFO *dev,byte pnt[],int len)
 }
 
 
-int	get_devices (char sel[],byte testflag)  // Errflag = Continue bei USB Error
+int	get_devices (char sel[],ir_byte testflag)  // Errflag = Continue bei USB Error
 {
 	int res,i,p,q,autoflag = 0;
 	char st[1024],msg[1024];
@@ -1180,7 +1180,7 @@ void sort_ir_devices (char selstring[])
 
 }
 
-int get_detail_deviceinfo (char serno[],char devnode[],byte if_type)
+int get_detail_deviceinfo (char serno[],char devnode[],ir_byte if_type)
 {
 	int res;
 	DEVICEINFO *dev;
@@ -1336,9 +1336,9 @@ void FlushIoEx (DEVICEINFO *dev)
 void Hexdump_File (IRDATA *ird)
 {
 	int i;
-	byte *pnt;
+	ir_byte *pnt;
 
-	pnt = (byte *)ird;
+	pnt = (ir_byte *)ird;
 	for (i=0;i < ird->len;i++) {
 		fprintf (hexfp,"0x%02x ",pnt[i]);
 		if (((i+1)%16) == 0) fprintf (hexfp,"\n");
@@ -1352,10 +1352,10 @@ void Hexdump_IO (IRDATA *ird)
 {
 	int i;
 	char st[2048],nm[100];
-	byte *pnt;
+	ir_byte *pnt;
 
 	strcpy (st,"IODUMP: ");
-	pnt = (byte *)ird;
+	pnt = (ir_byte *)ird;
 	for (i=0;i < ird->len;i++) {
 		sprintf (nm,"0x%x  ",pnt[i]);
 		strcat (st,nm);
@@ -1368,10 +1368,10 @@ void Hexdump_IO (IRDATA *ird)
 
 int WriteTransceiverEx (DEVICEINFO *dev,IRDATA *src)
 {
-	byte res = 0,i,pos;
+	ir_byte res = 0,i,pos;
 	int count = 0,max;
 	IRDATA send;
-	byte buffer[1024];
+	ir_byte buffer[1024];
 
 	if (dev->version[0] == 0 && src->command != HOST_VERSION) return (ERR_WRONGBUS);
 
@@ -1393,7 +1393,7 @@ int WriteTransceiverEx (DEVICEINFO *dev,IRDATA *src)
 		if (mode_flag & HEXDUMP) Hexdump_IO (&send);
 		if (hexflag) Hexdump_File (&send);
 
-		res = WriteIRStringEx (dev,(byte *)&send,send.len);
+		res = WriteIRStringEx (dev,(ir_byte *)&send,send.len);
 
 		if (res) return (ERR_TIMEOUT);
 		res = ReadIRStringEx (dev,buffer,1,500);
@@ -1497,11 +1497,11 @@ void swap_irdata (IRDATA *src,IRDATA *tar)
 
 void swap_word (word *pnt)
 {
-	byte *a,v;
+	ir_byte *a,v;
 
 	if (!byteorder) return;
 
-	a = (byte *)pnt;
+	a = (ir_byte *)pnt;
 	v = a[0];
 	a[0] = a[1];
 	a[1] = v;
@@ -1510,11 +1510,11 @@ void swap_word (word *pnt)
 
 void swap_long (int32_t *pnt)
 {
-	byte *a,v;
+	ir_byte *a,v;
 
 	if (!byteorder) return;
 
-	a = (byte *)pnt;
+	a = (ir_byte *)pnt;
 	v = a[0];
 	a[0] = a[3];
 	a[3] = v;
@@ -1525,11 +1525,11 @@ void swap_long (int32_t *pnt)
 }
 
 
-byte get_checksumme (IRDATA *ir)
+ir_byte get_checksumme (IRDATA *ir)
 {
 	int i = 2;
-	byte cs = 0;
-	while (i < ir->len) cs += ((byte *)ir)[i++];
+	ir_byte cs = 0;
+	while (i < ir->len) cs += ((ir_byte *)ir)[i++];
 	return (cs);
 }
 
@@ -1546,7 +1546,7 @@ int GetByteorder ()
 }
 
 
-int WriteIRStringEx (DEVICEINFO *dev,byte pnt[],int len)
+int WriteIRStringEx (DEVICEINFO *dev,ir_byte pnt[],int len)
 {
 #ifdef WIN32
 	if (dev->io.if_type == IF_USB) {
@@ -1562,7 +1562,7 @@ int WriteIRStringEx (DEVICEINFO *dev,byte pnt[],int len)
 #endif
 }
 
-int	ReadIRStringEx (DEVICEINFO *dev,byte pnt[],int len,word timeout)
+int	ReadIRStringEx (DEVICEINFO *dev,ir_byte pnt[],int len,word timeout)
 {
 #ifdef WIN32
 	if (dev->io.if_type == IF_USB) return (ReadUSBStringEx (dev,pnt,len,timeout));
@@ -1574,7 +1574,7 @@ int	ReadIRStringEx (DEVICEINFO *dev,byte pnt[],int len,word timeout)
 #endif
 }
 
-void ConvertLCDCharset (byte *pnt)
+void ConvertLCDCharset (ir_byte *pnt)
 {
 	int i;
 	for (i=0;i < 200;i++) pnt[i] = DispConvTable[0][pnt[i]];
@@ -1682,7 +1682,7 @@ void InitConversionTables ()
 	DispConvTable[num][0x9f] = 0x9f;
 }
 
-void SetSpecialChars (byte dat[])
+void SetSpecialChars (ir_byte dat[])
 {
 	int i;
 
@@ -1756,10 +1756,10 @@ void SetSpecialChars (byte dat[])
 }
 
 
-int SetTransceiverModus (byte mode,word send_mask,byte addr,char *hotcode,int hotlen,byte extended_mode,byte extended_mode2,byte usb_mode)
+int SetTransceiverModus (ir_byte mode,word send_mask,ir_byte addr,char *hotcode,int hotlen,ir_byte extended_mode,ir_byte extended_mode2,ir_byte usb_mode)
 {
 	MODE_BUFFER md;
-	byte res;
+	ir_byte res;
 	md.sbus_command = HOST_SETMODE;
 	md.sbus_address = 0;
 	if (addr <= 15)  md.sbus_address |= addr;
@@ -1785,7 +1785,7 @@ int SetTransceiverModus (byte mode,word send_mask,byte addr,char *hotcode,int ho
 }
 
 
-int GetTransceiverVersion (char version [],unsigned int *cap,unsigned long *serno,byte usbmode)
+int GetTransceiverVersion (char version [],unsigned int *cap,unsigned long *serno,ir_byte usbmode)
 {
 	int res;
 	IRDATA ir;
@@ -1831,9 +1831,9 @@ int GetTransceiverVersion (char version [],unsigned int *cap,unsigned long *sern
 
 
 
-int WriteTransceiver (IRDATA *src,byte usb_mode)
+int WriteTransceiver (IRDATA *src,ir_byte usb_mode)
 {
-	byte res = 0;
+	ir_byte res = 0;
 	char st[100];
 	int count = 0;
 	IRDATA send;
@@ -1846,7 +1846,7 @@ int WriteTransceiver (IRDATA *src,byte usb_mode)
 		else FlushCom ();
 		if (mode_flag & HEXDUMP) Hexdump_IO (&send);
 		if (hexflag) Hexdump_File (&send);
-		WriteIRString ((byte *)&send,send.len,usb_mode);
+		WriteIRString ((ir_byte *)&send,send.len,usb_mode);
 		res = ReadIRString (st,1,500,usb_mode);
 		count++;
 		if (res != 1 || *st != 'O') {
@@ -1866,7 +1866,7 @@ int WriteTransceiver (IRDATA *src,byte usb_mode)
 }
 
 
-void WriteIRString (byte pnt[],int len,byte usb_mode)
+void WriteIRString (ir_byte pnt[],int len,ir_byte usb_mode)
 {
 #ifdef WIN32
 	if (usb_mode) WriteUSBString (pnt,len);
@@ -1878,7 +1878,7 @@ void WriteIRString (byte pnt[],int len,byte usb_mode)
 #endif
 }
 
-int	ReadIRString (byte pnt[],int len,word timeout,byte usb_mode)
+int	ReadIRString (ir_byte pnt[],int len,word timeout,ir_byte usb_mode)
 {
 #ifdef WIN32
 	if (usb_mode) return (ReadUSBString (pnt,len,timeout));

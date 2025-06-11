@@ -73,10 +73,10 @@ extern FILE *logfp;
 extern char irserver_version[20];
 extern char irtrans_version[100];
 //extern unsigned long serno;
-extern byte last_adress,resend_flag;
+extern ir_byte last_adress,resend_flag;
 extern unsigned short capabilities;
-extern byte time_len;
-extern byte raw_repeat;
+extern ir_byte time_len;
+extern ir_byte raw_repeat;
 
 #ifdef WIN32
 

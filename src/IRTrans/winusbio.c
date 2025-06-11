@@ -44,7 +44,7 @@ int OpenUSBPort (void)
 }
 
 
-int WriteUSBString (byte pnt[],int len)
+int WriteUSBString (ir_byte pnt[],int len)
 {
 	DWORD num;
 	enum FT_STATUS stat;
@@ -56,7 +56,7 @@ int WriteUSBString (byte pnt[],int len)
 }
 
 
-int	ReadUSBString (byte pnt[],int len,word timeout)
+int	ReadUSBString (ir_byte pnt[],int len,word timeout)
 {
 	DWORD num;
 	enum FT_STATUS stat;
@@ -84,7 +84,7 @@ int GetUSBAvailableEx (DEVICEINFO *dev)
 }
 
 
-int	ReadUSBStringEx (DEVICEINFO *dev,byte pnt[],int len,word timeout)
+int	ReadUSBStringEx (DEVICEINFO *dev,ir_byte pnt[],int len,word timeout)
 {
 	DWORD num;
 	enum FT_STATUS stat;
@@ -110,7 +110,7 @@ void FlushUSBEx (FT_HANDLE hndl)
 	F_Purge (hndl,FT_PURGE_RX | FT_PURGE_TX);
 }
 
-void WriteUSBStringEx (DEVICEINFO *dev,byte pnt[],int len)
+void WriteUSBStringEx (DEVICEINFO *dev,ir_byte pnt[],int len)
 {
 	DWORD num;
 	enum FT_STATUS stat;

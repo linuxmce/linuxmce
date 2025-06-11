@@ -37,7 +37,7 @@ char	*DBReadString (char ln[],FILE *fp,long *fpos);
 char	*DBFindSection (FILE *fp,char section[],char data[],char end[],long *fpos);
 void	StoreIRTiming (IRTIMING *irp,char data[]);
 void	ConvertLcase (char *pnt,int len);
-int		GetFunctionCode (byte type,char *com);
+int		GetFunctionCode (ir_byte type,char *com);
 int		GetKeyCode (char *com);
 
 
@@ -56,7 +56,7 @@ int		CompareTiming (IRDATA *ird,IRTIMING *irt);
 int		ASCIIFindTiming (FILE *fp,IRDATA *ird);
 void	GetRemoteAddressMask (int num);
 
-int		DBFindCommandName (byte command[],char remote[],char name[],byte address,long *remote_num,long *command_num,word *command_num_rel,int start);
+int		DBFindCommandName (ir_byte command[],char remote[],char name[],ir_byte address,long *remote_num,long *command_num,word *command_num_rel,int start);
 int		DBFindRemoteCommand (char remote[],char command[],long *cmd_num,long *rem_num);
 int		DBFindRemoteCommandEx(char remote[],char command[],IRDATA *ir);
 int		DBGetIRCode (long cmd_num,IRDATA *ir,long idx,long *mac_len,long *mac_pause,long *rpt_len);

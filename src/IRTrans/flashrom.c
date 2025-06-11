@@ -49,7 +49,7 @@ extern int hCom;
 #include "flash.h"
 
 
-void set_entry (char entry[],int pos,FLASH_CONTENT *content,byte type,byte remote,byte group,byte shift,byte setup,word sourcemask,word acc_timeout,word acc_repeat,char *version);
+void set_entry (char entry[],int pos,FLASH_CONTENT *content,ir_byte type,ir_byte remote,ir_byte group,ir_byte shift,ir_byte setup,word sourcemask,word acc_timeout,word acc_repeat,char *version);
 void ReadTraReceive (char tp[]);
 void ReadTraConfig ();
 
@@ -202,7 +202,7 @@ void ReadTraReceive (char tp[])
 	if (!strcmp (tp,"[RCVCOMMAND]")) trans[trans_num].type = F_COMMAND;
 	if (!strcmp (tp,"[VOLUMEMACRO]")) trans[trans_num].type = F_VOLUMEMACRO;
 	if (!strcmp (tp,"[VOLUMEMACROD]")) trans[trans_num].type = F_VOLUMEMACROD;
-	if (!strncmp (tp,"[MACRO ",7)) trans[trans_num].type = F_MACRO + (byte)strtoul (tp + 7,0,0);
+	if (!strncmp (tp,"[MACRO ",7)) trans[trans_num].type = F_MACRO + (ir_byte)strtoul (tp + 7,0,0);
 	if (!strcmp (tp,"[SEND]")) trans[trans_num].type = F_SEND;
 	if (!strcmp (tp,"[CONFIG]")) trans[trans_num].type = F_CONFIG;
 	if (!strcmp (tp,"[REMOTE]")) trans[trans_num].type = F_REMOTE;
@@ -221,20 +221,20 @@ void ReadTraReceive (char tp[])
 			memset (trans[trans_num].command ,' ',20);
 			memcpy (trans[trans_num].command ,st + 9,strlen (st + 9));
 		}
-		if (!strncmp (st,"[SETTINGS]",10)) trans[trans_num].setup = (byte)strtoul (st + 10,0,0);
+		if (!strncmp (st,"[SETTINGS]",10)) trans[trans_num].setup = (ir_byte)strtoul (st + 10,0,0);
 		if (!strncmp (st,"[SOURCEMASK]",12)) trans[trans_num].source_mask = strtoul (st + 12,0,0);
 		if (!strncmp (st,"[TARGETMASK]",12)) trans[trans_num].target_mask = strtoul (st + 12,0,0);
-		if (!strncmp (st,"[REMOTE_NUM]",12)) trans[trans_num].remote_num = (byte)strtoul (st + 12,0,0);
-		if (!strncmp (st,"[GROUP_NUM]",11)) trans[trans_num].group_num = (byte)strtoul (st + 11,0,0);
-		if (!strncmp (st,"[SHIFT_NUM]",11)) trans[trans_num].multi_num = (byte)strtoul (st + 11,0,0);
-		if (!strncmp (st,"[ACC_TIMEOUT]",13)) trans[trans_num].accelerator_timeout = (byte)strtoul (st + 13,0,0);
-		if (!strncmp (st,"[ACC_SETUP]",11)) trans[trans_num].accelerator_repeat = (byte)strtoul (st + 11,0,0);
+		if (!strncmp (st,"[REMOTE_NUM]",12)) trans[trans_num].remote_num = (ir_byte)strtoul (st + 12,0,0);
+		if (!strncmp (st,"[GROUP_NUM]",11)) trans[trans_num].group_num = (ir_byte)strtoul (st + 11,0,0);
+		if (!strncmp (st,"[SHIFT_NUM]",11)) trans[trans_num].multi_num = (ir_byte)strtoul (st + 11,0,0);
+		if (!strncmp (st,"[ACC_TIMEOUT]",13)) trans[trans_num].accelerator_timeout = (ir_byte)strtoul (st + 13,0,0);
+		if (!strncmp (st,"[ACC_SETUP]",11)) trans[trans_num].accelerator_repeat = (ir_byte)strtoul (st + 11,0,0);
 		if (!strncmp (st,"[TIMEOUT]",9)) trans[trans_num].wait_timeout = (word)strtoul (st + 9,0,0);
 	}
 	trans_num++;
 }
 
-int SetFlashdataEx (byte bus,long iradr)
+int SetFlashdataEx (ir_byte bus,long iradr)
 {
 	int adr,i,j,flashwordsize;
 	word val;
@@ -363,7 +363,7 @@ void set_commanddata (int pos,IRDATA *irpnt)
 }
 
 
-void set_entry (char entry[],int pos,FLASH_CONTENT *content,byte type,byte remote,byte group,byte shift,byte setup,word sourcemask,word acc_timeout,word acc_repeat,char *version)
+void set_entry (char entry[],int pos,FLASH_CONTENT *content,ir_byte type,ir_byte remote,ir_byte group,ir_byte shift,ir_byte setup,word sourcemask,word acc_timeout,word acc_repeat,char *version)
 {
 	HASH_ENTRY *hash_table;
 	FLASH_ENTRY_1 *fentry;
@@ -372,7 +372,7 @@ void set_entry (char entry[],int pos,FLASH_CONTENT *content,byte type,byte remot
 
 	if (!pos) content->data_pnt = CONTENT_LEN + content->dir_cnt * (sizeof (HASH_ENTRY) / 2);
 
-	hash_table[pos].hashcode = get_hashcode (entry,(byte)strlen (entry));
+	hash_table[pos].hashcode = get_hashcode (entry,(ir_byte)strlen (entry));
 	hash_table[pos].adr = content->data_pnt;
 
 	fentry = (FLASH_ENTRY_1 *)(flash_data + content->data_pnt);
@@ -382,8 +382,8 @@ void set_entry (char entry[],int pos,FLASH_CONTENT *content,byte type,byte remot
 	else fentry->group = 0;
 	fentry->remote = remote;
 	fentry->source_mask = sourcemask;
-	fentry->accelerator_timeout = (byte)acc_timeout;
-	fentry->accelerator_repeat = (byte)acc_repeat;
+	fentry->accelerator_timeout = (ir_byte)acc_timeout;
+	fentry->accelerator_repeat = (ir_byte)acc_repeat;
 	fentry->trans_setup = setup;
 	fentry->len = strlen (entry);
 
@@ -401,7 +401,7 @@ void set_entry (char entry[],int pos,FLASH_CONTENT *content,byte type,byte remot
 
 
 
-void read_flashdata (byte *pnt,word adr,word cnt)
+void read_flashdata (ir_byte *pnt,word adr,word cnt)
 {
 	set_flashadr (adr);
 	read_nextflashdata (pnt,cnt);
@@ -414,7 +414,7 @@ void set_flashadr (word adr)
 	last_adr = adr;	
 }
 
-void read_nextflashdata (byte *pnt,word cnt)
+void read_nextflashdata (ir_byte *pnt,word cnt)
 {
 	memcpy (pnt,flash_data + last_adr,cnt);
 	last_adr += cnt / 2;
@@ -422,9 +422,9 @@ void read_nextflashdata (byte *pnt,word cnt)
 
 
 
-word get_hashcode (byte data[],byte len)
+word get_hashcode (ir_byte data[],ir_byte len)
 {
-	byte i;
+	ir_byte i;
 	word h = 0;
 
 	for (i=0;i < len;i++) h += (data[i] & 7) << ((i * 2) & 15);

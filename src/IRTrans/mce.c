@@ -43,7 +43,7 @@ extern long app_cnt;
 
 void	SendMediaCenterAction (int app,int com);
 void	IRTransSendInput (int key,int flags);
-void	SendKey (APP *app,APPCOMMAND *appcom,byte flag);
+void	SendKey (APP *app,APPCOMMAND *appcom,ir_byte flag);
 void	ConvertLcase (char *pnt,int len);
 void	SendMediacenterEvent (int eventcode);
 void	SendAppcommand (APP *app,APPCOMMAND *appcom);
@@ -98,15 +98,15 @@ void SendAppcommand (APP *app,APPCOMMAND *appcom)
 	PostMessage (win,WM_APPCOMMAND,(WPARAM)1,(LPARAM)(appcom->function[0] << 16));
 }
 
-void SendKey (APP *app,APPCOMMAND *appcom,byte flag)
+void SendKey (APP *app,APPCOMMAND *appcom,ir_byte flag)
 {
 	HWND win;
 	DWORD thr;
-	byte mf = 0;
+	ir_byte mf = 0;
 	struct _timeb tb;
 	unsigned long tv;
 
-	static byte cindex;
+	static ir_byte cindex;
 	static APPCOMMAND *lastcom;
 	static unsigned long lasttime;
 
@@ -291,7 +291,7 @@ int GetKeyCode (char *com)
 	else return (*com);
 }
 
-int GetFunctionCode (byte type,char *com)
+int GetFunctionCode (ir_byte type,char *com)
 {
 	if (type == TYPE_APPCOM) {
 		if (!strcmp (com,"appcommand_media_play")) return APPCOMMAND_MEDIA_PLAY;

@@ -626,7 +626,7 @@ int NetworkCommand (int netcommand,char remote[],char command[],word timeout,int
 		strcpy (lcd.framebuffer,remote);
 		lcd.hgt = 4;
 		lcd.wid = 40;
-		lcd.lcdcommand = (byte)timeout;
+		lcd.lcdcommand = (ir_byte)timeout;
 	}
 	else if (netcommand == COMMAND_SETSWITCH) {
 		com->remote[0] = remote[0];

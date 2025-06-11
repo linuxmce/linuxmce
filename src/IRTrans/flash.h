@@ -81,16 +81,16 @@ typedef struct {
 	word magic;
 	word checksum;
 
-	byte trans_setup[REMOTE_CNT];
-	byte align;
+	ir_byte trans_setup[REMOTE_CNT];
+	ir_byte align;
 	word target_mask[REMOTE_CNT];
 	word source_mask[REMOTE_CNT];
 	unsigned long group_flags[REMOTE_CNT];
 } FLASH_CONTENT;
 
 extern FLASH_CONTENT f_content;
-extern byte enable_translator;
-extern byte pre_key;
+extern ir_byte enable_translator;
+extern ir_byte pre_key;
 extern unsigned long prekey_timeout;
 
 
@@ -98,30 +98,30 @@ extern unsigned long prekey_timeout;
 
 
 typedef struct {
-	byte type;
-	byte len;
-	byte remote;
-	byte group;
+	ir_byte type;
+	ir_byte len;
+	ir_byte remote;
+	ir_byte group;
 	word flash_adr;
 	word source_mask;
-	byte accelerator_timeout;
-	byte accelerator_repeat;
-	byte trans_setup;
-	byte pre_key;
-	byte data[1];
+	ir_byte accelerator_timeout;
+	ir_byte accelerator_repeat;
+	ir_byte trans_setup;
+	ir_byte pre_key;
+	ir_byte data[1];
 } FLASH_ENTRY;
 
 typedef struct {
-	byte type;
-	byte len;
-	byte remote;
-	byte group;
+	ir_byte type;
+	ir_byte len;
+	ir_byte remote;
+	ir_byte group;
 	word flash_adr;
 	word source_mask;
-	byte accelerator_timeout;
-	byte accelerator_repeat;
-	byte trans_setup;
-	byte cdata[1];
+	ir_byte accelerator_timeout;
+	ir_byte accelerator_repeat;
+	ir_byte trans_setup;
+	ir_byte cdata[1];
 } FLASH_ENTRY_1;
 
 typedef struct {
@@ -133,16 +133,16 @@ typedef struct {
 void flash_init (void);
 void flash_ioinit (void);
 void read_flash_directory (void);
-byte flash_exec (byte adr,byte data[],byte len);
+ir_byte flash_exec (ir_byte adr,ir_byte data[],ir_byte len);
 void load_flashcommand (word adr,IRDATA *ird);
-void send_flashcommand (FLASH_ENTRY *fentry,byte num);
-word find_flashentry (byte data[],byte len,word hpnt,FLASH_ENTRY *fentry);
-byte compare_code (byte data[],byte len,word adr,FLASH_ENTRY *fentry);
-word get_hashcode (byte data[],byte len);
-void read_flashdata (byte *pnt,word adr,word cnt);
-void write_flashdata (byte *pnt,word adr,word cnt);
+void send_flashcommand (FLASH_ENTRY *fentry,ir_byte num);
+word find_flashentry (ir_byte data[],ir_byte len,word hpnt,FLASH_ENTRY *fentry);
+ir_byte compare_code (ir_byte data[],ir_byte len,word adr,FLASH_ENTRY *fentry);
+word get_hashcode (ir_byte data[],ir_byte len);
+void read_flashdata (ir_byte *pnt,word adr,word cnt);
+void write_flashdata (ir_byte *pnt,word adr,word cnt);
 void set_flashadr (word adr);
-void read_nextflashdata (byte *pnt,word cnt);
+void read_nextflashdata (ir_byte *pnt,word cnt);
 void signal_error (void);
 void set_commanddata (int pos,IRDATA *irpnt);
-void switch_relay (byte val);
+void switch_relay (ir_byte val);

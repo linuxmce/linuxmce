@@ -652,28 +652,28 @@ void FreeDatabaseMemory (void)
 	memset (app_pnt,0,sizeof (app_pnt));
 }
 
-int cmpRawData (byte *rcv,byte *mem,int len);
-int getRawValue (byte *pnt,int pos,word *val);
+int cmpRawData (ir_byte *rcv,ir_byte *mem,int len);
+int getRawValue (ir_byte *pnt,int pos,word *val);
 
 
 
-int DBFindCommandName (byte command[],char remote[],char name[],byte address,long *remote_num,long *command_num,word *command_num_rel,int start)
+int DBFindCommandName (ir_byte command[],char remote[],char name[],ir_byte address,long *remote_num,long *command_num,word *command_num_rel,int start)
 {
 	int len,i;
-	byte *pnt;
+	ir_byte *pnt;
 	word mask;
-	byte mode;
+	ir_byte mode;
 
 	static char last_name[50];
-	static byte last_address;
+	static ir_byte last_address;
 	mask = 1 << (address & 15);
 	mode = (address & 0xf0) >> 2;
 	len = strlen (command);
 	i = start;
 	*command_num = *remote_num = 0;
 	if ((mode & RAW_DATA) || *command < '0') {								// RAW Vergleich
-		if (mode & RAW_DATA) pnt = (byte *)command;
-		else pnt = (byte *)command + 1;
+		if (mode & RAW_DATA) pnt = (ir_byte *)command;
+		else pnt = (ir_byte *)command + 1;
 		while (i < cmd_cnt) {
 
 			if (cmd_pnt[i].mode & RAW_DATA && (rem_pnt[cmd_pnt[i].remote].source_mask & mask)) {
@@ -749,7 +749,7 @@ int DBFindCommandName (byte command[],char remote[],char name[],byte address,lon
 }
 
 
-int cmpRawData (byte *rcv,byte *mem,int len)
+int cmpRawData (ir_byte *rcv,ir_byte *mem,int len)
 {
 	int pos = 0;
 	word recvdata,memdata;
@@ -765,7 +765,7 @@ int cmpRawData (byte *rcv,byte *mem,int len)
 }
 
 
-int getRawValue (byte *pnt,int pos,word *val)
+int getRawValue (ir_byte *pnt,int pos,word *val)
 {
 	*val = 0;
 	if (!pnt[pos]) {
@@ -841,11 +841,11 @@ int DBGetIRCode (long cmd_num,IRDATA *ir,long idx,long *mac_len,long *mac_pause,
 			if (cmd_pnt[ncmd].timing > 500) rd->transmit_freq = 255;
 			else rd->transmit_freq = (cmd_pnt[ncmd].timing / 4) | 128;
 		}
-		else rd->transmit_freq = (byte)cmd_pnt[ncmd].timing;
+		else rd->transmit_freq = (ir_byte)cmd_pnt[ncmd].timing;
 /*		}
 		else {
 			if (cmd_pnt[ncmd].timing > 253) rd->transmit_freq = 255;
-			else rd->transmit_freq = (byte)cmd_pnt[ncmd].timing;
+			else rd->transmit_freq = (ir_byte)cmd_pnt[ncmd].timing;
 		}
 */
 		rd->ir_length = cmd_pnt[ncmd].ir_length;
@@ -907,7 +907,7 @@ int DBFindRemoteCommandEx(char remote[],char command[],IRDATA *ir)
 			if (cmd_pnt[ncmd].timing > 500) rd->transmit_freq = 255;
 			else rd->transmit_freq = (cmd_pnt[ncmd].timing / 4) | 128;
 		}
-		else rd->transmit_freq = (byte)cmd_pnt[ncmd].timing;
+		else rd->transmit_freq = (ir_byte)cmd_pnt[ncmd].timing;
 
 		rd->ir_length = cmd_pnt[ncmd].ir_length;
 		memcpy (rd->data,cmd_pnt[ncmd].data,CODE_LENRAW);
@@ -1738,7 +1738,7 @@ int DBStoreRemote (FILE *fp,char newremote[])
 	rewind (fp);
 
 	data = DBFindSection (fp,"RCV-LEN",tra,"[TIMING]",NULL);
-	if (data) rem_pnt[rem_cnt].rcv_len = (byte)atoi (data);
+	if (data) rem_pnt[rem_cnt].rcv_len = (ir_byte)atoi (data);
 	else rem_pnt[rem_cnt].rcv_len = 0;
 
 	rewind (fp);

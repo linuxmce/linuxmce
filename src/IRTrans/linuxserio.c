@@ -54,7 +54,7 @@ void msSleep (long time)
 
 
 
-int WriteSerialStringEx (DEVICEINFO *dev,byte pnt[],int len)
+int WriteSerialStringEx (DEVICEINFO *dev,ir_byte pnt[],int len)
 {
 	int res,stat;
 
@@ -77,7 +77,7 @@ int WriteSerialStringEx (DEVICEINFO *dev,byte pnt[],int len)
 }
 
 
-int ReadSerialStringEx (DEVICEINFO *dev,byte pnt[],int len,word timeout)
+int ReadSerialStringEx (DEVICEINFO *dev,ir_byte pnt[],int len,word timeout)
 {
 	int bytes = 0;
 	int total = 0;
@@ -109,13 +109,13 @@ void FlushCom ()
 }
 
 
-int ReadSerialString (byte pnt[],int len,word timeout)
+int ReadSerialString (ir_byte pnt[],int len,word timeout)
 {
 	return (0);
 }
 
 
-void WriteSerialString (byte pnt[],int len)
+void WriteSerialString (ir_byte pnt[],int len)
 {
 }
 

@@ -45,7 +45,7 @@ typedef int WSAEVENT;
 #define closesocket		close
 extern int hCom;
 
-SOCKET local_socket;
+//SOCKET local_socket;
 
 #define LIRCD			"/dev/lircd"
 #define PERMISSIONS		0666
@@ -401,7 +401,7 @@ void GetDevicesPage (char *mem,char *lang,char *parm)
 {
 	int res,cnt,i,id,setres = 0;
 	word tm;
-	byte md;
+	ir_byte md;
 	char err[1000];
 	char nm[100];
 	char value[1000];
@@ -468,7 +468,7 @@ void GetDevicesPage (char *mem,char *lang,char *parm)
 				else {
 					StoreSwitch ((word)id,0,remote,command,1);
 					WriteSwitches ();
-					res = SetTransceiverModusEx (0,md,tm,(byte)id,value,res,0xf,4);							// !! Bus
+					res = SetTransceiverModusEx (0,md,tm,(ir_byte)id,value,res,0xf,4);							// !! Bus
 					if (res) {
 						strcpy (err,"Could not set status");
 						if (!strcmp (lang,"DE")) strcpy (err,"Status konnte nicht gesetzt werden.");

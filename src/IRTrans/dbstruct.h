@@ -29,7 +29,7 @@ typedef struct {
 
 typedef struct {
 	char name[80];
-	byte addr;
+	ir_byte addr;
 } ROOMS;
 
 typedef struct {
@@ -42,21 +42,21 @@ typedef struct {
 	long command_start;
 	long command_end;
 	long toggle_pos;
-	byte transmitter;
-	byte rcv_len;
+	ir_byte transmitter;
+	ir_byte rcv_len;
 } IRREMOTE;
 
 
 typedef struct {
 	long remote;
-	byte ir_length;
-	byte transmit_freq;
-	byte mode;
+	ir_byte ir_length;
+	ir_byte transmit_freq;
+	ir_byte mode;
 	word pause_len[TIME_LEN];
 	word pulse_len[TIME_LEN];
-	byte time_cnt;
-	byte ir_repeat;
-	byte repeat_pause;
+	ir_byte time_cnt;
+	ir_byte ir_repeat;
+	ir_byte repeat_pause;
 
 } IRTIMING;
 
@@ -65,11 +65,11 @@ typedef struct {
 	long remote;
 	long timing;
 	long command_length;
-	byte toggle_seq;
-	byte toggle_pos;
-	byte mode;
-	byte ir_length;
-	byte data[CODE_LENRAW];
+	ir_byte toggle_seq;
+	ir_byte toggle_pos;
+	ir_byte mode;
+	ir_byte ir_length;
+	ir_byte data[CODE_LENRAW];
 } IRCOMMAND;
 
 typedef struct {
@@ -83,10 +83,10 @@ typedef struct {
 	long remote;
 	long timing;
 	long command_length;
-	byte toggle_seq;
-	byte toggle_pos;
-	byte mode;
-	byte ir_length;
+	ir_byte toggle_seq;
+	ir_byte toggle_pos;
+	ir_byte mode;
+	ir_byte ir_length;
 	long macro_num;
 	long macro_len;
 } IRMACRO;
@@ -101,7 +101,7 @@ typedef struct {
 
 typedef struct {
 	long comnum;
-	byte type[8];
+	ir_byte type[8];
 	int function[8];
 } APPCOMMAND;
 
@@ -111,10 +111,10 @@ typedef struct {
 	char appname[100];
 	char remote[80];
 	long remnum;
-	byte type;
-	byte com_cnt;
-	byte active;
-	byte align;
+	ir_byte type;
+	ir_byte com_cnt;
+	ir_byte active;
+	ir_byte align;
 	APPCOMMAND com[50];
 } APP;
 

@@ -31,7 +31,7 @@ Gen_Dev_Files = $(GENDEV)/IRTransBase.cpp
 sources = Main.cpp IRTrans.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS +=
+CXXFLAGS += -no-pie
 CPPFLAGS += -DIRTRANS_AS_LIB -DLINUX
 LDFLAGS +=
 XTRALDLIBS = -lIRBase -lSerial -lMessageTranslation

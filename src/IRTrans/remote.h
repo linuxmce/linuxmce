@@ -27,7 +27,7 @@ typedef int int32_t;
 #endif
 
 
-typedef uint8_t byte;
+typedef uint8_t ir_byte;
 typedef uint16_t word;
 
 
@@ -60,75 +60,75 @@ typedef uint16_t word;
 
 
 typedef struct {
-	byte len;
-	byte checksumme;
-	byte command;
+	ir_byte len;
+	ir_byte checksumme;
+	ir_byte command;
 
-	byte address;
+	ir_byte address;
 	word target_mask;
 
-	byte ir_length;
-	byte transmit_freq;
-	byte mode;
+	ir_byte ir_length;
+	ir_byte transmit_freq;
+	ir_byte mode;
 
 	short pause_len[TIME_LEN];
 	short pulse_len[TIME_LEN];
-	byte time_cnt;
-	byte ir_repeat;
-	byte repeat_pause;
+	ir_byte time_cnt;
+	ir_byte ir_repeat;
+	ir_byte repeat_pause;
 
-	byte data[CODE_LEN];
+	ir_byte data[CODE_LEN];
 } IRDATA;
 
 typedef struct {
-	byte len;
-	byte checksumme;
-	byte command;
+	ir_byte len;
+	ir_byte checksumme;
+	ir_byte command;
 
-	byte address;
+	ir_byte address;
 	word target_mask;
 
-	byte ir_length;
-	byte transmit_freq;
-	byte mode;
+	ir_byte ir_length;
+	ir_byte transmit_freq;
+	ir_byte mode;
 
 	word pause_len[6];
 	word pulse_len[6];
-	byte time_cnt;
-	byte ir_repeat;
-	byte repeat_pause;
+	ir_byte time_cnt;
+	ir_byte ir_repeat;
+	ir_byte repeat_pause;
 
-	byte data[CODE_LEN];
+	ir_byte data[CODE_LEN];
 } IRDATA3;
 
 typedef struct {
-	byte len;
-	byte checksumme;
-	byte command;
+	ir_byte len;
+	ir_byte checksumme;
+	ir_byte command;
 
-	byte address;
+	ir_byte address;
 	word target_mask;
 
-	byte ir_length;
-	byte transmit_freq;
-	byte mode;
+	ir_byte ir_length;
+	ir_byte transmit_freq;
+	ir_byte mode;
 
-	byte data[CODE_LENRAW];
+	ir_byte data[CODE_LENRAW];
 } IRRAW;
 
 typedef struct {
-	byte len;
-	byte checksumme;
-	byte command;
+	ir_byte len;
+	ir_byte checksumme;
+	ir_byte command;
 
-	byte address;
+	ir_byte address;
 	word target_mask;
 
-	byte ir_length;
-	byte transmit_freq;
-	byte mode;
+	ir_byte ir_length;
+	ir_byte transmit_freq;
+	ir_byte mode;
 
-	byte data[MAXLCDLEN];
+	ir_byte data[MAXLCDLEN];
 } IRRAWLCD;
 
 
@@ -283,80 +283,80 @@ typedef struct {
 
 
 typedef struct {
-	byte sbus_len;
-	byte sbus_checksumme;
-	byte sbus_command;
-	byte sbus_address;
-	byte mode;
+	ir_byte sbus_len;
+	ir_byte sbus_checksumme;
+	ir_byte sbus_command;
+	ir_byte sbus_address;
+	ir_byte mode;
 	word target_mask;
-	byte hotcode_len;
-	byte hotcode[CODE_LENRAW];
+	ir_byte hotcode_len;
+	ir_byte hotcode[CODE_LENRAW];
 } MODE_BUFFER;
 
 
 typedef struct {
-	byte sbus_len;
-	byte sbus_checksumme;
-	byte sbus_command;
-	byte sbus_address;
-	byte device_mode;
+	ir_byte sbus_len;
+	ir_byte sbus_checksumme;
+	ir_byte sbus_command;
+	ir_byte sbus_address;
+	ir_byte device_mode;
 	word send_mask;
-	byte version[10];
-	byte extended_mode;
+	ir_byte version[10];
+	ir_byte extended_mode;
 	unsigned long capabilities;
-	byte extended_mode2;
+	ir_byte extended_mode2;
 } STATUS_LINE;
 
 typedef struct {
-	byte sbus_len;
-	byte sbus_checksumme;
-	byte sbus_command;
-	byte sbus_address;
-	byte device_mode;
+	ir_byte sbus_len;
+	ir_byte sbus_checksumme;
+	ir_byte sbus_command;
+	ir_byte sbus_address;
+	ir_byte device_mode;
 	word send_mask;
-	byte version[10];
-	byte extended_mode;
+	ir_byte version[10];
+	ir_byte extended_mode;
 	word capabilities;
 } STATUS_LINE_3;
 
 typedef struct {
-	byte sbus_len;
-	byte sbus_checksumme;
-	byte sbus_command;
-	byte sbus_address;
-	byte device_mode;
+	ir_byte sbus_len;
+	ir_byte sbus_checksumme;
+	ir_byte sbus_command;
+	ir_byte sbus_address;
+	ir_byte device_mode;
 	word send_mask;
-	byte version[10];
-	byte extended_mode;
+	ir_byte version[10];
+	ir_byte extended_mode;
 } STATUS_LINE_2;
 
 typedef struct {
-	byte sbus_len;
-	byte sbus_checksumme;
-	byte sbus_command;
-	byte sbus_address;
-	byte device_mode;
+	ir_byte sbus_len;
+	ir_byte sbus_checksumme;
+	ir_byte sbus_command;
+	ir_byte sbus_address;
+	ir_byte device_mode;
 	word send_mask;
-	byte version[10];
+	ir_byte version[10];
 } STATUS_LINE_1;
 
 typedef struct {
-	byte my_adress;
+	ir_byte my_adress;
 	STATUS_LINE stat[16];
 } STATUS_BUFFER;
 
 typedef struct {
-	byte my_adress;
+	ir_byte my_adress;
 	STATUS_LINE_1 stat[16];
 } STATUS_BUFFER_1;
 
 typedef struct {
-	byte my_adress;
+	ir_byte my_adress;
 	STATUS_LINE_2 stat[16];
 } STATUS_BUFFER_2;
 
 typedef struct {
-	byte my_adress;
+	ir_byte my_adress;
 	STATUS_LINE_3 stat[16];
 } STATUS_BUFFER_3;
 

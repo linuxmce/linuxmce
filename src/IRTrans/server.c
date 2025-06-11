@@ -95,7 +95,7 @@ void	PutDeviceStatusEx (NETWORKMODEEX *mode);
 int		CheckIdx (char ip[],int idx,NETWORKSTATUS *stat);
 int		GetNetworkClient (SOCKET sockfd);
 int		ReadIRDatabase (void);
-int		ExecuteReceivedCommand (byte command[],int len,int bus);
+int		ExecuteReceivedCommand (ir_byte command[],int len,int bus);
 SOCKET	register_remote_client (SOCKET fd,int mode);
 void	clear_existing_socket (SOCKET fd);
 void	process_lirc_command (SOCKET fd);
@@ -105,8 +105,8 @@ void	lirc_send_success (SOCKET fd,char msg[]);
 void	lirc_send_error (SOCKET fd,char msg[],char err[]);
 void	CloseIRSocket (int client);
 void	ResultStoreTiming (IRDATA *ird,NETWORKTIMING *stat);
-int		GetHotcode (char rem[],char com[],byte data[]);
-void	ReformatHotcode (byte data[],int len);
+int		GetHotcode (char rem[],char com[],ir_byte data[]);
+void	ReformatHotcode (ir_byte data[],int len);
 void	display_usage (void);
 void	compress_lcdbuffer (LCDCOMMAND *lcd,char *buf,int bus);
 int		count_difference (LCDCOMMAND *lcd);
@@ -133,8 +133,8 @@ void	compress_char (char ln[],char src,char tar);
 
 #ifdef WIN32
 
-int build_event_table (HANDLE events[],byte event_type[],byte event_num[],OVERLAPPED OvCom[],int *ser_event);
-int get_selected_event (int eventnum,HANDLE events[],byte event_type[],byte event_num[],SOCKET *sockfd);
+int build_event_table (HANDLE events[],ir_byte event_type[],ir_byte event_num[],OVERLAPPED OvCom[],int *ser_event);
+int get_selected_event (int eventnum,HANDLE events[],ir_byte event_type[],ir_byte event_num[],SOCKET *sockfd);
 
 WSAEVENT SockEvent;
 WSAEVENT LircEvent;
@@ -144,13 +144,13 @@ WSAEVENT xAPEvent;
 
 #endif
 
-byte IRDataBaseRead;
-byte lcd_init = 1;
+ir_byte IRDataBaseRead;
+ir_byte lcd_init = 1;
 STATUS_BUFFER remote_statusex[MAX_IR_DEVICES];
-byte status_changed = 1;
+ir_byte status_changed = 1;
 unsigned int status_cache_timeout = 86400;
 unsigned long last_status_read;
-byte last_adress,resend_flag;
+ir_byte last_adress,resend_flag;
 SOCKET server_socket;
 SOCKET lirc_socket;
 SOCKET udp_socket;
@@ -166,7 +166,7 @@ unsigned long seq_client = 10;
 unsigned long seq_call;
 unsigned long netmask[32];
 unsigned long netip[32];
-byte netcount = 0;
+ir_byte netcount = 0;
 
 NETWORKCLIENT sockinfo[CLIENT_COUNT];
 
@@ -182,13 +182,13 @@ unsigned long mode_flag = 0;
 char logfile[256];
 char hexfile[256];
 FILE *hexfp;
-byte hexflag;
+ir_byte hexflag;
 char irserver_version[20];
 char irtrans_version[100];
 FILE *logfp;
-byte time_len;
-byte new_lcd_flag;
-byte display_bus;
+ir_byte time_len;
+ir_byte new_lcd_flag;
+ir_byte display_bus;
 
 
 
@@ -564,7 +564,7 @@ byte display_bus;
 	}
 
 	if (device_id != -1) {  // Bus !!!
-		res = SetTransceiverIDEx (0,(byte)device_id);
+		res = SetTransceiverIDEx (0,(ir_byte)device_id);
 #ifdef IRTRANS_AS_LIB
 		return res;
 #else
@@ -682,7 +682,7 @@ int RunServer ()
 	int res,wait,evnt,i,j;
 	SOCKET sockfd;
 	DWORD cnt;
-	byte rdcom[1000],dummy;
+	ir_byte rdcom[1000],dummy;
 	unsigned long lasttimesync = 0;
 
 
@@ -691,7 +691,7 @@ int RunServer ()
 	int maxfd,ionum;
 	int socktype;
 	struct timeval tv;
-	byte usbflag;
+	ir_byte usbflag;
 #endif
 
 #ifdef WIN32
@@ -700,8 +700,8 @@ int RunServer ()
 	int ser_event;
 	HANDLE events[CLIENT_COUNT + MAX_IR_DEVICES + 4];
 	OVERLAPPED OvCom[MAX_IR_DEVICES];
-	byte event_type[CLIENT_COUNT + MAX_IR_DEVICES + 4];
-	byte event_num[CLIENT_COUNT + MAX_IR_DEVICES + 4];
+	ir_byte event_type[CLIENT_COUNT + MAX_IR_DEVICES + 4];
+	ir_byte event_num[CLIENT_COUNT + MAX_IR_DEVICES + 4];
 #endif
 
 #ifndef IRTRANS_AS_LIB
@@ -876,7 +876,7 @@ int RunServer ()
 
 #ifdef WIN32
 
-int build_event_table (HANDLE events[],byte event_type[],byte event_num[],OVERLAPPED OvCom[],int *ser_event)
+int build_event_table (HANDLE events[],ir_byte event_type[],ir_byte event_num[],OVERLAPPED OvCom[],int *ser_event)
 {
 	int i,num = 0;
 
@@ -930,7 +930,7 @@ int build_event_table (HANDLE events[],byte event_type[],byte event_num[],OVERLA
 	return (num);
 }
 
-int get_selected_event (int eventnum,HANDLE events[],byte event_type[],byte event_num[],SOCKET *sockfd)
+int get_selected_event (int eventnum,HANDLE events[],ir_byte event_type[],ir_byte event_num[],SOCKET *sockfd)
 {
 
 	int fds = 0,i = 0;
@@ -1379,7 +1379,7 @@ void lirc_send_error (SOCKET fd,char msg[],char err[])
 
 // Erkannte IR Codes an Clients schicken
 
-int ExecuteReceivedCommand (byte command[],int len,int bus)
+int ExecuteReceivedCommand (ir_byte command[],int len,int bus)
 {
 	int res,i = 0;
 	int start_pos = 0;
@@ -1835,14 +1835,14 @@ void ExecuteNetCommand (SOCKET sockfd)
 void DoExecuteNetCommand (int client,NETWORKCOMMAND *com,STATUSBUFFER *stat)
 {
 	int res,i;
-	byte bus;
+	ir_byte bus;
 	long cmd_num;
 	IRDATA ird;
 	IRRAW *irw;
 	FILE *fp;
 	HANDLE hfile;
 	char st[255],err[255];
-	byte dat[255];
+	ir_byte dat[255];
 	NETWORKSTATUS *ns;
 	LCDCOMMAND *lcd;
 	TRANSLATECOMMAND *tr;
@@ -1851,7 +1851,7 @@ void DoExecuteNetCommand (int client,NETWORKCOMMAND *com,STATUSBUFFER *stat)
 	FUNCTIONBUFFEREX *fbex;
 	NETWORKLCDSTAT *lcdb;
 	unsigned long end_time;
-	static byte suspend;
+	static ir_byte suspend;
 
 
 	memset (stat,0,sizeof (STATUSBUFFER));
@@ -1955,7 +1955,7 @@ void DoExecuteNetCommand (int client,NETWORKCOMMAND *com,STATUSBUFFER *stat)
 		if (res) PutNetworkStatus (res,NULL,stat);
 		break;
 	case COMMAND_FLASHTRANS:
-		res = SetFlashdataEx ((byte)((com->adress) >> 8),(com->adress & 0xf));
+		res = SetFlashdataEx ((ir_byte)((com->adress) >> 8),(com->adress & 0xf));
 		if (res) PutNetworkStatus (res,NULL,stat);
 		break;
 	case COMMAND_FUNCTIONS:
@@ -2206,7 +2206,7 @@ void DoExecuteNetCommand (int client,NETWORKCOMMAND *com,STATUSBUFFER *stat)
 						ird.target_mask = (word)com->adress & 0xffff;
 					}
 					if (com->adress & 0x60000) ird.address = (com->adress >> 17) & 0x3;
-					bus = (byte)((com->adress >> 20) & MAX_IR_DEVICES - 1);
+					bus = (ir_byte)((com->adress >> 20) & MAX_IR_DEVICES - 1);
 					if (com->adress & 0x40000000) bus = 255;
 					ResendIREx (bus,&ird);
 					resend_flag = 2;
@@ -2226,7 +2226,7 @@ void DoExecuteNetCommand (int client,NETWORKCOMMAND *com,STATUSBUFFER *stat)
 				ird.target_mask = (word)com->adress & 0xffff;
 			}
 			if (com->adress & 0x60000) ird.address = (com->adress >> 17) & 0x3;
-			bus = (byte)((com->adress >> 20) & MAX_IR_DEVICES - 1);
+			bus = (ir_byte)((com->adress >> 20) & MAX_IR_DEVICES - 1);
 			if (com->adress & 0x40000000) bus = 255;
 			ResendIREx (bus,&ird);
 		}
@@ -2421,7 +2421,7 @@ void DoExecuteNetCommand (int client,NETWORKCOMMAND *com,STATUSBUFFER *stat)
 
 	case COMMAND_RESET:
 		lcd_init = 1;
-		res = ResetTransceiverEx ((byte)((com->adress >> 8) & (MAX_IR_DEVICES-1)));
+		res = ResetTransceiverEx ((ir_byte)((com->adress >> 8) & (MAX_IR_DEVICES-1)));
 		if (res) PutNetworkStatus (res,NULL,stat);
 		break;
 	case COMMAND_SETSTAT:
@@ -2435,7 +2435,7 @@ void DoExecuteNetCommand (int client,NETWORKCOMMAND *com,STATUSBUFFER *stat)
 		else {
 			StoreSwitch ((word)com->timeout,0,com->remote,com->command,1);
 			WriteSwitches ();
-			res = SetTransceiverModusEx ((byte)(com->timeout >> 8),com->mode,(word)com->adress,(byte)(com->timeout & 0xff),st,res,(byte)((com->adress >> 16) & 0xff),com->trasmit_freq);
+			res = SetTransceiverModusEx ((ir_byte)(com->timeout >> 8),com->mode,(word)com->adress,(ir_byte)(com->timeout & 0xff),st,res,(ir_byte)((com->adress >> 16) & 0xff),com->trasmit_freq);
 			if (res) PutNetworkStatus (res,NULL,stat);
 			msSleep (250);
 			status_changed = 1;
@@ -2502,10 +2502,10 @@ void compress_lcdbuffer (LCDCOMMAND *lcd,char *buf,int bus)
 	int x,y;
 
 
-	byte LINEFEED = 0x1f;
-	byte C_SPACE = 16;
-	byte C_BLOCK = 17;
-	byte C_DATA = 18;
+	ir_byte LINEFEED = 0x1f;
+	ir_byte C_SPACE = 16;
+	ir_byte C_BLOCK = 17;
+	ir_byte C_DATA = 18;
 
 	if (bus == 255) bus = 0;
 
@@ -2514,9 +2514,9 @@ void compress_lcdbuffer (LCDCOMMAND *lcd,char *buf,int bus)
 		C_SPACE = 11;
 		C_BLOCK = 12;
 		C_DATA = 13;
-		ConvertLCDCharset ((byte *)(lcd->framebuffer));
+		ConvertLCDCharset ((ir_byte *)(lcd->framebuffer));
 	}
-	else if (IRDevices[bus].version[0] == 'D') ConvertLCDCharset ((byte *)(lcd->framebuffer));
+	else if (IRDevices[bus].version[0] == 'D') ConvertLCDCharset ((ir_byte *)(lcd->framebuffer));
 
 	lf[0] = LINEFEED;
 	lf[1] = 0;
@@ -2592,7 +2592,7 @@ void compress_char (char ln[],char src,char tar)
 }
 
 
-int GetHotcode (char rem[],char com[],byte data[])
+int GetHotcode (char rem[],char com[],ir_byte data[])
 {
 	IRDATA ir;
 	int i = 0;
@@ -2614,7 +2614,7 @@ int GetHotcode (char rem[],char com[],byte data[])
 }
 
 
-void ReformatHotcode (byte data[],int len)
+void ReformatHotcode (ir_byte data[],int len)
 {
 	int i = 0;
 	word wert;
